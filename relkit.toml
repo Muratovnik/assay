@@ -1,7 +1,10 @@
 [exposure]
 # Scratch, evidence and personal client settings never belong in the library.
+# Probe paths inside each directory rather than the directory itself: a
+# directory-only rule matches nothing until the directory exists, and in a fresh
+# clone it does not.
 required_ignores = [
-  ".cache",
+  ".cache/scanners",
   ".claude/settings.local.json",
   ".private/manifest.json",
   "tmp/scratch",
