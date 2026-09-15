@@ -1,0 +1,5 @@
+# text_check.py uses only the Python 3.11+ standard library.
+# There is nothing to install: this file exists to state that contract, not to
+# be fed to a package manager. If a future script here needs a dependency, it is
+# declared on its own line below and installed only into an environment the user
+# prepared for it.

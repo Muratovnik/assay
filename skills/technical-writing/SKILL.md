@@ -84,6 +84,9 @@ only where the reader loses something concrete.
 - A substantial document where a fresh reader would expose a missing step, and
   delegation is already authorized:
   [reader testing](references/reader-testing.md).
+- A `copyedit` or `rewrite` of an existing document, or a request to check that
+  the protected regions of a document survived an edit:
+  [preservation](references/preservation.md).
 
 Load only the branches whose decisions matter here. A one-line correction needs
 none of them.
