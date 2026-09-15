@@ -304,10 +304,12 @@ def preserve(before_path: Path, after_path: Path, mode: str) -> dict:
                              f'was compared after normalising to lf'})
     statuses = {check['status'] for check in checks}
     exit_code = 0
-    if 'fail' in statuses:
-        exit_code = 1
     if 'unverified' in statuses:
         exit_code = 2
+    if 'fail' in statuses:
+        # A refuted region is a known result and outranks evidence that is merely
+        # missing; the unverified checks stay in the report either way.
+        exit_code = 1
     checks.sort(key=lambda check: (STATUS_ORDER.index(check['status']), check['kind']))
     return {'mode': mode, 'checks': checks, 'exit_code': exit_code}
 
@@ -322,6 +324,11 @@ def render(report: dict) -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        # A document may quote any script; the report must not depend on the
+        # console code page, which on Windows cannot encode CJK punctuation.
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='backslashreplace')
     parser = argparse.ArgumentParser(prog='text_check.py', description=__doc__)
     subcommands = parser.add_subparsers(dest='command', required=True)
     check = subcommands.add_parser('preserve', help='compare protected regions of two documents')
@@ -337,7 +344,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     except InvalidInput as error:
         parser.exit(2, f'text-check: {error}\n')
     if args.allow_unverified and report['exit_code'] == 2:
-        report['exit_code'] = 1 if any(c['status'] == 'fail' for c in report['checks']) else 0
+        report['exit_code'] = 0
     print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else render(report))
     return report['exit_code']
 

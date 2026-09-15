@@ -1,6 +1,7 @@
 """Tests for the read-only preservation check in the technical-writing skill."""
 import hashlib
 import json
+import os
 import runpy
 import subprocess
 import sys
@@ -81,8 +82,12 @@ class PreservationTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
 
-    def run_check(self, before, after, mode='copyedit', *extra):
-        """Write the pair as bytes and run the command exactly as a caller would."""
+    def run_check(self, before, after, mode='copyedit', *extra, environment=None):
+        """Write the pair as bytes and run the command exactly as a caller would.
+
+        Output is decoded as UTF-8 here rather than through `text=True`, which
+        would use the console code page and lose every non-Latin report.
+        """
         paths = []
         for name, content in [('before.md', before), ('after.md', after)]:
             path = self.root / name
@@ -91,7 +96,9 @@ class PreservationTests(unittest.TestCase):
         done = subprocess.run(
             [sys.executable, '-B', str(SCRIPT), 'preserve', '--before', str(paths[0]),
              '--after', str(paths[1]), '--mode', mode, '--json', *extra],
-            capture_output=True, text=True, encoding='utf-8')
+            capture_output=True, env=environment)
+        done.stdout = done.stdout.decode('utf-8')
+        done.stderr = done.stderr.decode('utf-8')
         report = json.loads(done.stdout) if done.stdout.strip() else None
         return done, report
 
@@ -184,9 +191,9 @@ class PreservationTests(unittest.TestCase):
         missing = subprocess.run(
             [sys.executable, '-B', str(SCRIPT), 'preserve', '--before', str(self.root / 'none.md'),
              '--after', str(self.root / 'none.md'), '--mode', 'copyedit'],
-            capture_output=True, text=True)
+            capture_output=True)
         self.assertEqual(missing.returncode, 2)
-        self.assertEqual(missing.stdout, '')
+        self.assertEqual(missing.stdout, b'')
 
     def test_chinese_document_with_unchanged_latin_commands_passes(self):
         done, report = self.run_check(CHINESE, CHINESE.replace(
@@ -201,6 +208,25 @@ class PreservationTests(unittest.TestCase):
             with self.subTest(before=before):
                 done, _ = self.run_check(CHINESE, CHINESE.replace(before, after))
                 self.assertEqual(done.returncode, 1)
+
+    def test_report_is_utf8_under_a_console_code_page_that_cannot_encode_it(self):
+        """A single-byte console must not turn a finding into a crash."""
+        environment = dict(os.environ, PYTHONIOENCODING='cp1251')
+        done, report = self.run_check(
+            CHINESE, CHINESE.replace('`widgetctl sync --dry-run`', '`widgetctl sync --dry-run，`'),
+            'copyedit', environment=environment)
+        self.assertEqual(done.returncode, 1, done.stderr)
+        self.assertNotIn('Traceback', done.stderr)
+        self.assertEqual(report['exit_code'], 1)
+        self.assertIn('，', json.dumps(report, ensure_ascii=False))
+
+    def test_a_refuted_region_outranks_an_unverified_construct(self):
+        before = '# Notes\n\n<Callout>Read this.</Callout>\n\nRun `widgetctl sync --dry-run`.\n'
+        after = before.replace('--dry-run`', '--dryrun`')
+        done, report = self.run_check(before, after)
+        self.assertEqual(done.returncode, 1, done.stderr)
+        self.assertEqual(self.status(report, 'inline_code'), 'fail')
+        self.assertEqual(self.status(report, 'unverified_construct'), 'unverified')
 
     def test_full_width_punctuation_in_chinese_prose_is_not_a_defect(self):
         half = CHINESE.replace('不会写入服务器。', '不会写入服务器.')

@@ -19,8 +19,9 @@ python <skill-directory>/scripts/text_check.py preserve --before <old file> --af
 report, `--allow-unverified` to keep an unclassifiable construct from deciding
 the exit code. It uses only the standard library, reads the two files, and
 writes nothing: no command inside the document is executed, no model is called
-and no network connection is opened. The caller must be allowed to read both
-files.
+and no network connection is opened. Output is UTF-8 regardless of the console
+code page, so a report quoting Chinese or Cyrillic text is readable and
+redirectable on any terminal. The caller must be allowed to read both files.
 
 ## What each mode protects
 
@@ -55,15 +56,17 @@ that edit deliberately rather than expecting the check to bless it.
 | --- | --- |
 | `0` | Every protected region was preserved, and nothing was left unverified. |
 | `1` | At least one protected region changed. |
-| `2` | Nothing could be checked, or the input was invalid. |
+| `2` | Nothing was refuted and nothing could be concluded, or the input was invalid. |
 
 An empty file, an unreadable file and input that is not valid UTF-8 all exit `2`
 with a message and no report: they are not results. A document in which no
 protected region exists also exits `2`, because a check that inspected nothing
 must not read as success.
 
-When a run has both a failure and an unverified construct the exit code is `2`,
-not `1` — read the checks rather than the code alone. `--allow-unverified` only
+When a run has both a failure and an unverified construct the exit code is `1`:
+a refuted region is a known result and outranks evidence that is merely
+missing. `2` is reserved for a run that refuted nothing and could not finish.
+Read the checks rather than the code alone. `--allow-unverified` only
 changes the code: the `unverified` status stays in the report, and a change
 inside the construct it covers is still not being checked. Do not use the flag
 to turn a document the scanner cannot read into a green result.
