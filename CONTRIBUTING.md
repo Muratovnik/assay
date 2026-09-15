@@ -73,6 +73,11 @@ and lowercase; `!` marks a breaking change.
 Say what changed and why it was worth changing. A commit message that only
 restates the diff costs a reader the same time it saved you.
 
+`CHANGELOG.md` follows the Angular preset of Conventional Commits: `feat` and
+`fix` subjects become its entries, an optional scope becomes the bold prefix, and
+a `BREAKING CHANGE` footer becomes its own section. Your subject is the entry, so
+write it for someone reading the release rather than the diff.
+
 **Do not credit an AI tool as an author, co-author, reviewer or generator** in a
 commit, pull request, release note or tracked file. Use your own identity.
 

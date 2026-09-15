@@ -1,31 +1,53 @@
-# Assay
+# assay
 
-**Evidence-grounded methods for coding agents.** Eight skills and two agent
-profiles for Claude Code, Codex, Cursor and Gemini CLI, kept in one source and
-installed into whichever native location your client reads.
+Reusable methods for coding agents: eight skills and two agent profiles for
+Claude Code, Codex, Cursor and Gemini CLI.
+
+**English** · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
+
+[![checks](https://img.shields.io/github/actions/workflow/status/Muratovnik/assay/check.yml?branch=main&label=checks)](https://github.com/Muratovnik/assay/actions/workflows/check.yml)
+[![release](https://img.shields.io/github/v/release/Muratovnik/assay)](https://github.com/Muratovnik/assay/releases)
+[![license](https://img.shields.io/github/license/Muratovnik/assay)](LICENSE)
+
+```text
+/plugin marketplace add Muratovnik/assay
+/plugin install assay@assay
+```
 
 An assay is a test of what something is actually made of. These methods share a
 bias: say what was checked, say what it establishes, and say what it does not.
 
+> [!NOTE]
+> A skill instructs an agent, and some skills here ship scripts that agent can
+> run. Read what you install, from this repository or any other.
+
 ## Install
 
-| Client | Command |
-| --- | --- |
-| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` |
-| Codex | `codex plugin marketplace add Muratovnik/assay`, then install from `/plugins` |
-| Any of 75+ agents | `npx skills add Muratovnik/assay` |
-| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
-| Cursor | Customize → From GitHub Repository → `Muratovnik/assay` |
+| Client | Command | Verified |
+| --- | --- | --- |
+| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` | yes |
+| Any supported agent | `npx skills add Muratovnik/assay` | yes |
+| Codex | `codex plugin marketplace add Muratovnik/assay`, then install from `/plugins` | documented |
+| Cursor | `npx skills add Muratovnik/assay -a cursor` | documented |
+| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` | documented |
 
-Restart or start a new session afterwards; clients read their skill roots at
-startup. Full per-client detail, including uninstall and upgrade, is in
-[the install guide](docs/install.md).
+**Verified** means the route was exercised against this published repository and
+the installed files compared byte for byte. **Documented** means it follows the
+client's own documentation and has not been run here. Start a new session
+afterwards: clients read their skill roots at startup.
+
+The skills CLI covers Claude Code, Codex, Cursor, OpenCode "and 75 more" by its
+own count. For Codex its global install writes to `~/.codex/skills/`, which
+current Codex documentation does not list as a skill root; install into the
+project instead, or use the installer below.
+
+Per-client detail, uninstall and upgrade are in [the install guide](docs/install.md).
 
 <details>
-<summary>Symlink installer, and how to get the agent profiles</summary>
+<summary><b>Symlink installer</b> — the agent profiles, and edits that take effect immediately</summary>
 
 The plugin routes install skills. The two agent profiles, and a setup where your
-edits to a checkout take effect immediately, come from the repository's own
+edits to a checkout are live without reinstalling, come from the repository's own
 installer:
 
 ```text
@@ -36,18 +58,22 @@ python tools/assay.py plan
 python tools/assay.py install-links
 ```
 
-`plan` is read-only and prints every target it would create and every rollback
-target. `install-links` then links `~/.agents/skills/<name>` to this checkout and
-renders the profile adapters. On Windows, creating a directory symlink needs that
-permission (Developer Mode or an elevated token); the installer fails closed
-rather than falling back to a shell.
+`plan` writes nothing. It prints every target it would create and the exact
+rollback target for each. `install-links` then links `~/.agents/skills/<name>` to
+this checkout and renders the profile adapters, preflighting the whole plan first:
+a real directory, a foreign link or a modified adapter stops the run before
+anything is written.
+
+On Windows, creating a directory symlink needs that permission, normally
+Developer Mode or an elevated terminal. The installer fails closed rather than
+falling back to a shell.
 
 </details>
 
 ## What's inside
 
-Skills activate on their own when a task matches their description. Each links to
-its own instructions.
+A skill activates on its own when a task matches its description. Each row links
+to the instructions the agent will actually read.
 
 | Skill | Use it when | Skip it when |
 | --- | --- | --- |
@@ -60,57 +86,58 @@ its own instructions.
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
 
-Two agent profiles ship as capability boundaries rather than personas:
-`evidence-reviewer` reviews a frozen packet with a read-only oracle and returns a
-verdict, and `official-docs-researcher` answers one bounded question from primary
-documentation. Neither pins a model.
+Two agent profiles ship as capability boundaries rather than personas.
+`evidence-reviewer` reviews a frozen packet through a read-only oracle and
+returns a verdict; `official-docs-researcher` answers one bounded question from
+primary documentation. Neither pins a model.
 
 Detail lives one level down. A `SKILL.md` stays short and routes to `references/`
 only when a task needs that depth, so an unused method costs little context.
 
 ## Requirements
 
-Python 3.11 or newer for the repository tools, and the pinned YAML parser in
-`requirements-tools.txt` if you run the source gates. The skills themselves are
-Markdown and need nothing installed.
+The skills are Markdown and need nothing installed. Python 3.11 or newer and the
+pinned YAML parser in `requirements-tools.txt` are for the repository's own tools
+and gates.
 
 `route-subagents` can optionally consult benchmark evidence when choosing a model,
-through a local MCP server in `skills/route-subagents/scripts/`. It is opt-in, it
-is registered by you, and the skill works without it.
+through a local MCP server in `skills/route-subagents/scripts/`. It is opt-in, you
+register it yourself, and the skill works without it.
 
 ## Trust and safety
 
-**Skills instruct an agent, and some of them ship scripts that agent can run.**
-Read what you install, from this repository or any other. The scripts here take
-explicit paths and never install anything into your environment on their own, but
-that is a claim you should verify rather than take.
+The scripts here take explicit paths and never install anything into your
+environment on their own, but that is a claim worth verifying rather than taking.
 
-Nothing here phones home. There is no telemetry, no account and no network call
-except the optional benchmark server you would have to register yourself.
+Nothing phones home. There is no telemetry, no account and no network call except
+the optional benchmark server you would have to register yourself.
 
-Report a vulnerability privately: see [SECURITY.md](SECURITY.md).
+These methods read repositories, documentation and, in the research method, web
+pages. That content is data, not instruction, and the methods say so — but no
+instruction is a guarantee. Review what an agent proposes after it has read
+something you do not control. Report a vulnerability privately through
+[SECURITY.md](SECURITY.md).
 
 ## How this is validated
 
-`python tools/check.py --all` runs every gate on Linux and Windows for every
-change: source structure, the unit suite, a compatibility fixture, the generated
-inventory, the evaluation data, the rendered client manifests and the audit packet
-suite. The publication audit runs alongside them.
+`python tools/check.py --all` runs every gate: source structure, the unit suite, a
+compatibility fixture, the generated inventory, the evaluation data, the rendered
+client manifests and the audit packet suite. Continuous integration runs the same
+command on Linux and Windows, plus the publication audit and the Claude plugin
+manifest validator.
 
-No model is run in CI, and no skill here carries a score. What the `evals/`
-directories do and do not establish is spelled out in
+No model runs in continuous integration and no skill here carries a score. What
+the `evals/` directories do and do not establish is spelled out in
 [what the evaluations establish](docs/evaluation.md).
 
 ## Contributing
 
 Issues and pull requests are welcome; replies are best-effort. The authoring
-contract, including what the validator does not check, is in
+contract, including an explicit list of what the gates do not check, is in
 [AGENTS.md](AGENTS.md); the workflow is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-[How assay is put together](docs/architecture.md) describes the inventory,
+[How assay is put together](docs/architecture.md) describes the inventory, the
 discovery topology and the guarded install lifecycle.
-
-Русская версия: [README.ru.md](README.ru.md).
 
 ## License
 

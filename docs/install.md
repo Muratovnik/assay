@@ -3,6 +3,16 @@
 Five ways in, depending on which client you use and whether you want the agent
 profiles as well as the skills. All of them install the same source.
 
+**English** · [Русский](ru/install.md) · [简体中文](zh-CN/install.md)
+
+## What is verified and what is not
+
+The Claude Code route and the skills CLI route were exercised against the
+published repository, and the installed files were compared byte for byte. The
+Codex, Cursor and Gemini CLI routes follow those clients' own documentation and
+have not been run here. The distinction is kept on purpose: a library that asks
+others to separate verified from documented owes the same of itself.
+
 ## Claude Code
 
 ```text
@@ -58,9 +68,13 @@ roots, so the symlink installer works there too.
 
 ## Cursor
 
-Cursor imports a skill repository through **Customize → From GitHub Repository**;
-point it at `Muratovnik/assay`. Cursor also reads `~/.agents/skills` and
-`.agents/skills` directly, so the symlink installer is an alternative.
+```text
+npx skills add Muratovnik/assay -a cursor
+```
+
+Cursor keeps personal skills in `~/.cursor/skills/`, and the skills CLI knows that
+path. Cursor's own repository import lives in the Dashboard under team
+marketplaces and is meant for a team administrator rather than a single install.
 
 ## The symlink installer
 

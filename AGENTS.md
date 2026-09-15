@@ -84,7 +84,9 @@ handoff. Preserve any pre-existing staged work.
 
 Commit subjects use the Conventional Commit types `build`, `chore`, `ci`, `docs`,
 `feat`, `fix`, `perf`, `refactor`, `revert`, `style` and `test`, with an optional
-lowercase scope and `!` for a breaking change. Do not credit an AI tool as an
+lowercase scope and `!` for a breaking change. `CHANGELOG.md` is generated from
+those subjects under the Angular preset, so a vague subject becomes a vague
+changelog entry that nobody can fix later without rewriting history. Do not credit an AI tool as an
 author, co-author, reviewer or generator anywhere in a commit, pull request,
 release note or tracked file.
 
