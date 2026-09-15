@@ -17,7 +17,8 @@ from typing import Any
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
-PAIRED_SKILLS = ("route-subagents", "code-maintenance", "evidence-research", "test-writing", "test-audit")
+PAIRED_SKILLS = ("route-subagents", "code-maintenance", "evidence-research", "test-writing", "test-audit",
+                 "technical-writing")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
 COLLECTIONS = ("cases", "discovery_cases", "triggers")
 

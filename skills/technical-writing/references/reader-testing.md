@@ -1,0 +1,58 @@
+# Reader testing
+
+An author cannot un-know the product. A fresh reader is the cheapest way to find
+the step that exists only in the author's head — the unset variable, the
+directory nobody changed into, the account that had to be created first.
+
+## When it applies
+
+One bounded pass, for a substantial document whose readers cannot ask the author
+— an onboarding guide, a public README, a runbook, an install document. Not for
+a typo fix, a flag rename, a one-section edit or a routine review. If you cannot
+name the decision the result will change, skip it.
+
+## Authorization
+
+Reader testing means delegating to a separate reader, so it happens only when
+the user has already authorized delegation, and it is routed through the
+`route-subagents` method, which owns packet scope, isolation, model choice and
+turn limits. This skill grants no delegation of its own: no agent is started
+because a document is long, because a pass would be interesting, or because
+parallel readers would be faster. Without that authorization, do the equivalent
+by hand — reread the document against the checklist below and report what a
+newcomer could not answer — and say that no independent reader was used.
+
+## The protocol
+
+1. Freeze the document under test. The reader receives that text and nothing
+   else: no repository, no chat history, no prior draft, no author commentary.
+2. Give the reader the goal a real reader would arrive with, phrased as
+   questions: "What do you run first?", "What do you need before starting?",
+   "How do you know it worked?", "What version does this describe?".
+3. **The reader answers only from the document.** Every answer carries the
+   quoted fragment it comes from. When the document does not answer, the reader
+   writes "not in the document" — never a reconstruction from general knowledge,
+   and never a guess with a hedge.
+4. One pass. Collect the answers, do not argue with the reader and do not send
+   a revised draft back for approval; a second reading by a reader who has
+   already seen the document measures nothing.
+
+## Reading the result
+
+A "not in the document" on a load-bearing question is a `warning`, or an `error`
+when it blocks the reader's task — a missing prerequisite, an unstated working
+directory, an unnamed version. A quoted answer that is correct but hard to find
+is a structure finding, not a wording one. A quotation that supports a wrong
+answer means the passage is ambiguous: fix the passage, not the reader.
+
+Do not treat disagreement as a mandate to rewrite. Fix the gap the reader hit,
+keep the rest, and note any finding you consciously declined.
+
+## What it does not establish
+
+Reader testing checks whether a document is followable. It does not check
+whether the product behaves as described: a reader who can quote the install
+command has not installed anything. Technical verification stays with the
+project's own means — its tests, its build, an authorized run in a prepared
+environment. Passing one of the two never substitutes for the other, and a
+report that blurs them overstates both.
