@@ -94,9 +94,10 @@ none of them.
 ## Report the result
 
 Give every check a status: `pass`, `fail`, `unverified` (it could not run — the
-tool was absent, the environment was unavailable, the claim was unreachable) or
-`not-applicable`. A skipped check stays visible, and an absent tool never reads
-as `pass`.
+tool was absent, the environment was unavailable, the claim was unreachable),
+`warning` (it ran, and recorded a non-blocking observation such as line endings
+that changed) or `not-applicable`. A skipped check stays visible, and an absent
+tool never reads as `pass`.
 
 Classify each finding as `error`, `warning` or `suggestion`, and give it a rule,
 a location, the observed fragment, the concrete consequence for the reader, the

@@ -156,8 +156,11 @@ class PreservationTests(unittest.TestCase):
         self.assertIn('crlf before, lf after', json.dumps(report, ensure_ascii=False))
 
     def test_fenced_block_nested_in_a_list_item(self):
-        done, _ = self.run_check(NESTED, NESTED.replace('## 2.', '## 2.'))
+        edited = NESTED.replace('Run the sync.', 'Start the sync.')
+        self.assertNotEqual(edited, NESTED, 'the prose edit must actually change the fixture')
+        done, report = self.run_check(NESTED, edited)
         self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual(self.status(report, 'fenced_code'), 'pass')
         done, report = self.run_check(NESTED, NESTED.replace('./cat', './catalogue'))
         self.assertEqual(done.returncode, 1)
         self.assertEqual(self.status(report, 'fenced_code'), 'fail')
@@ -175,9 +178,29 @@ class PreservationTests(unittest.TestCase):
         self.assertEqual(self.status(report, 'unverified_construct'), 'unverified')
 
     def test_a_document_with_no_protected_region_is_not_reported_as_checked(self):
-        done, report = self.run_check('# Title\n\nOne sentence.\n', '# Title\n\nOne clause.\n')
+        pair = ('# Title\n\nOne sentence.\n', '# Title\n\nOne clause.\n')
+        done, report = self.run_check(*pair)
         self.assertEqual(done.returncode, 2, done.stderr)
         self.assertEqual(self.status(report, 'coverage'), 'unverified')
+        forced, report = self.run_check(*pair, 'copyedit', '--allow-unverified')
+        self.assertEqual(forced.returncode, 2, 'the flag must not green a document nothing read')
+        self.assertEqual(self.status(report, 'coverage'), 'unverified')
+
+    def test_a_destination_this_scanner_cannot_read_is_never_reported_as_absent(self):
+        before = '# T\n\nRun `widgetctl sync`. See [r](logs/sync(1).md).\n'
+        after = before.replace('logs/sync(1).md', 'logs/report(1).md')
+        for label, pair in [('changed', (before, after)), ('unchanged', (before, before))]:
+            with self.subTest(destination=label):
+                done, report = self.run_check(*pair)
+                self.assertEqual(done.returncode, 2, done.stderr)
+                self.assertEqual(self.status(report, 'unverified_construct'), 'unverified')
+                detail = next(check['detail'] for check in report['checks']
+                              if check['kind'] == 'link_destination')
+                self.assertNotIn('no region of this kind', detail)
+        plain = '# T\n\nRun `widgetctl sync`. See [r](logs/sync.md).\n'
+        done, report = self.run_check(plain, plain.replace('logs/sync.md', 'logs/report.md'))
+        self.assertEqual(done.returncode, 1, done.stderr)
+        self.assertEqual(self.status(report, 'link_destination'), 'fail')
 
     def test_empty_and_non_utf8_inputs_are_invalid(self):
         empty, report = self.run_check('   \n', BASE)

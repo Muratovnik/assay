@@ -92,9 +92,17 @@ this check and can still be wrong:
   `unverified`, never `pass`.
 
 Known false positives: a prose fragment that looks like a tag, such as a
-generic type written inline, is reported as an unclassifiable construct. A link
-destination containing brackets or spaces may not be extracted. Both err toward
-`unverified`, which is the intended direction.
+generic type written inline, is reported as an unclassifiable construct. A
+destination containing brackets, spaces or balanced parentheses is not
+extracted; the link marker is reported `unverified` instead, so an unread
+destination never counts as an absent one.
+
+One false positive goes the other way. A single unpaired backtick in prose
+pairs with the opening backtick of the next code span, so the span the scanner
+compares is not the one you see, and an edit to unrelated prose between them is
+reported as `inline_code` `fail`. Close or escape the stray backtick in the
+source; the document was ambiguous, and the check is reading it the way a
+Markdown renderer does.
 
 The claim this check supports is narrow: "the protected regions of the document
 are unchanged". Everything else still needs reading, and a run of the command

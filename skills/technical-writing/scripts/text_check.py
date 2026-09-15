@@ -24,6 +24,7 @@ LINK = re.compile(
     r'(?:[ \t]+(?:"[^"\n]*"|\'[^\'\n]*\'|\([^()\n]*\)))?[ \t]*\)')
 DEFINITION = re.compile(r'^[ \t]{0,3}\[(?:[^\]\\]|\\.)+\]:[ \t]*(\S+)', re.MULTILINE)
 AUTOLINK = re.compile(r'<(?:[A-Za-z][A-Za-z0-9+.\-]*:[^<>\s]*|[^<>\s@]+@[^<>\s]+)>')
+LEFTOVER_LINK = re.compile(r'\](?:\(|:[ \t])')
 INLINE_TAG = re.compile(r'<[/!?A-Za-z][^<>\n]*>')
 ALERT = re.compile(r'^\[!.+?\]')
 DIRECTIVE = re.compile(r'^(?::::|\{[{%])')
@@ -59,9 +60,14 @@ class Document:
     table_row: list[Region] = field(default_factory=list)
     blockquote: list[Region] = field(default_factory=list)
     unverified: list[Region] = field(default_factory=list)
+    unread_link: list[Region] = field(default_factory=list)
 
     def regions(self, kind: str) -> list[Region]:
         return getattr(self, kind)
+
+    def unclassified(self) -> list[Region]:
+        """Every construct this scanner declined to judge, in source order."""
+        return sorted(self.unverified + self.unread_link, key=lambda region: region.line)
 
     def inspected(self, kinds: Sequence[str]) -> int:
         return sum(len(self.regions(kind)) for kind in kinds)
@@ -210,8 +216,15 @@ def scan(text: str, endings: str, mode: str) -> Document:
     for match in AUTOLINK.finditer(prose):
         document.link_destination.append(Region(match.group(), line_at(match.start())))
         spans.append(match.span())
-    for match in INLINE_TAG.finditer(_mask(prose, spans)):
+    remaining = _mask(prose, spans)
+    for match in INLINE_TAG.finditer(remaining):
         document.unverified.append(Region(match.group(), line_at(match.start())))
+    for match in LEFTOVER_LINK.finditer(remaining):
+        # A destination form this scanner does not parse, such as balanced
+        # parentheses inside it. Unread is not the same as absent.
+        line = line_at(match.start())
+        fragment = text[match.start():match.start() + 40].split('\n')[0]
+        document.unread_link.append(Region(fragment, line))
     document.link_destination.sort(key=lambda region: region.line)
     document.unverified.sort(key=lambda region: region.line)
     return document
@@ -283,7 +296,14 @@ def preserve(before_path: Path, after_path: Path, mode: str) -> dict:
         if kind not in kinds:
             checks.append({'kind': kind, 'status': 'not-applicable', 'line': None,
                            'detail': 'not protected in rewrite mode'})
-    unverified = before.unverified + after.unverified
+    unread = before.unread_link + after.unread_link
+    if unread:
+        for check in checks:
+            if check['kind'] == 'link_destination' and check['status'] == 'not-applicable':
+                check['detail'] = (f'{len(unread)} link marker(s) were found but no destination '
+                                   f'could be read; see unverified_construct')
+                check['line'] = unread[0].line
+    unverified = before.unclassified() + after.unclassified()
     if unverified:
         checks.append({'kind': 'unverified_construct', 'status': 'unverified',
                        'line': unverified[0].line,
@@ -337,13 +357,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     check.add_argument('--mode', choices=sorted(PROTECTED), required=True)
     check.add_argument('--json', action='store_true', help='machine-readable report on stdout')
     check.add_argument('--allow-unverified', action='store_true',
-                       help='report unclassifiable constructs without making the run exit 2')
+                       help='report unclassifiable constructs without making the run exit 2; '
+                            'a document with no protected region at all still exits 2')
     args = parser.parse_args(argv)
     try:
         report = preserve(args.before, args.after, args.mode)
     except InvalidInput as error:
         parser.exit(2, f'text-check: {error}\n')
-    if args.allow_unverified and report['exit_code'] == 2:
+    uninspected = any(check['kind'] == 'coverage' and check['status'] == 'unverified'
+                      for check in report['checks'])
+    if args.allow_unverified and report['exit_code'] == 2 and not uninspected:
+        # The flag forgives a construct the scanner could not classify. It never
+        # forgives a document in which nothing was inspected at all.
         report['exit_code'] = 0
     print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else render(report))
     return report['exit_code']
