@@ -14,9 +14,11 @@ name the decision the result will change, skip it.
 ## Authorization
 
 Reader testing means delegating to a separate reader, so it happens only when
-the user has already authorized delegation, and it is routed through the
-`route-subagents` method, which owns packet scope, isolation, model choice and
-turn limits. This skill grants no delegation of its own: no agent is started
+the user has already authorized delegation, and it follows whatever delegation
+method the user's setup provides. Where the separate `route-subagents` skill is
+installed, that skill owns packet scope, isolation, model choice and turn
+limits; a single-skill install of this method does not ship it, and this file
+does not depend on it. This skill grants no delegation of its own: no agent is started
 because a document is long, because a pass would be interesting, or because
 parallel readers would be faster. Without that authorization, do the equivalent
 by hand — reread the document against the checklist below and report what a

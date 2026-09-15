@@ -4,10 +4,12 @@ Pick the type from the reader's situation, then apply that type's checklist and
 no other. The common failure is demanding a quickstart from an explanation or a
 narrative from a reference table.
 
-**Qualification status.** README and how-to are the two types this method has
-been exercised on. The remaining checklists below are conditional material:
-useful, and not yet backed by their own control cases. Use them as a
-completeness prompt, and say so if a reader asks what has been validated.
+**Qualification status.** No type has been exercised against a model yet.
+README and how-to are the types this method was written for first and carry
+most of its evaluation cases; the remaining checklists are conditional
+material, backed by an authored control case only where the evaluation data
+names one (reference, runbook, translation) and by none otherwise. Use them as
+a completeness prompt, and say so if a reader asks what has been validated.
 
 For the distinction between the four classic types and the reader need behind
 each, [Diataxis](https://diataxis.fr/) is the primary source. Take the
