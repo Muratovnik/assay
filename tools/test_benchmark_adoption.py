@@ -70,8 +70,12 @@ class CLIRequestTests(unittest.TestCase):
 def is_running(pid):
     if os.name != "nt":
         stat = Path(f"/proc/{pid}/stat")
-        if stat.exists():
+        try:
             return stat.read_text().split()[2] != "Z"
+        except FileNotFoundError:
+            # Reaped between the lookup and the read: the entry can vanish
+            # mid-call, so its absence is an answer rather than an error.
+            pass
         try:
             os.kill(pid, 0)
             return True

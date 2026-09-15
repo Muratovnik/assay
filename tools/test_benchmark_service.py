@@ -252,9 +252,16 @@ class ProcessTests(unittest.TestCase):
                 ProcessScope(2).run([sys.executable, "-S", "-c", code, str(pidfile)])
             self.assertLess(time.monotonic() - start, 6)
             pid = int(pidfile.read_text())
-            stat = Path(f"/proc/{pid}/stat")
-            if stat.exists():
-                self.assertEqual(stat.read_text().split()[2], "Z")
+            # The descendant sleeps far longer than this test runs, so it cannot
+            # have exited on its own: a zombie and a reaped entry both mean the
+            # group was killed. Reading can lose the race, and that is the same
+            # answer rather than a failure.
+            try:
+                state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+            except FileNotFoundError:
+                state = None
+            if state is not None:
+                self.assertEqual(state, "Z")
 
 
 if __name__ == "__main__":
