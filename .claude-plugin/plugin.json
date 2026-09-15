@@ -1,0 +1,25 @@
+{
+  "name": "assay",
+  "description": "Evidence-grounded methods for coding agents.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Nikolai Muratov",
+    "url": "https://github.com/Muratovnik"
+  },
+  "homepage": "https://github.com/Muratovnik/assay",
+  "repository": "https://github.com/Muratovnik/assay",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "audit",
+    "code-review",
+    "delegation",
+    "research",
+    "testing"
+  ],
+  "skills": "./skills/",
+  "agents": [
+    "./adapters/claude/agents/evidence-reviewer.md",
+    "./adapters/claude/agents/official-docs-researcher.md"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "cases": [
+    {
+      "id": "W01",
+      "prompt": "Добавь регрессионные тесты по CONTRACT.md. Менять можно только test_wallet.py; production-код не исправляй. Используй unittest, запусти тесты и объясни результат.",
+      "files": {
+        "CONTRACT.md": "A transfer is accepted when 0 < amount <= balance. Amounts and balance are nonnegative integer cents. The request only authorizes tests.\n",
+        "wallet.py": "def allowed(balance, amount):\n    return 0 < amount < balance\n"
+      }
+    },
+    {
+      "id": "W02",
+      "prompt": "Добавь тесты совместимости публичного API, не меняя api.py. Можно создать test_api.py и запускать unittest.",
+      "files": {
+        "CONTRACT.md": "Clients import api.Record and call Record(value).read(). Record is a promised public class and read returns the supplied value. Private helpers may change.\n",
+        "api.py": "class Record:\n    def __init__(self, value):\n        self._value = value\n\n    def read(self):\n        return self._value\n"
+      }
+    },
+    {
+      "id": "W03",
+      "prompt": "Добавь тесты сохранения через публичные методы Store в test_store.py. Исходник менять нельзя; используй временную папку и unittest.",
+      "files": {
+        "CONTRACT.md": "Store.put writes a text value which a new Store(path).get must read after reopening. No promise is made about private helpers or number of writes.\n",
+        "store.py": "from pathlib import Path\n\nclass Store:\n    def __init__(self, path):\n        self.path = Path(path)\n\n    def put(self, value):\n        self.path.write_text(value, encoding='utf-8')\n\n    def get(self):\n        return self.path.read_text(encoding='utf-8')\n"
+      }
+    },
+    {
+      "id": "W04",
+      "prompt": "Улучши тесты совместимости формата по CONTRACT.md. Можно менять только test_codec.py; codec.py оставь как есть. Запусти unittest и не скрывай обнаруженные расхождения.",
+      "files": {
+        "CONTRACT.md": "Wire format is the ASCII decimal representation of a nonnegative integer: encode(7) is b'7'; decode(b'7') is 7. Round trips alone are not the external interface.\n",
+        "codec.py": "def encode(value):\n    return str(value + 1).encode('ascii')\n\ndef decode(data):\n    return int(data.decode('ascii')) - 1\n",
+        "test_codec.py": "import unittest\nfrom codec import encode, decode\n\nclass CodecTests(unittest.TestCase):\n    def test_roundtrip(self):\n        for value in [0, 1, 7, 100]:\n            self.assertEqual(value, decode(encode(value)))\n"
+      }
+    },
+    {
+      "id": "W05",
+      "prompt": "Предложи точечное изменение тестов для согласованной смены подписи Save на Apply. Только рекомендации по приведённым фактам; никаких запусков или правок.",
+      "context": "Owner approved the visible label change, including accessible name. Existing click/save/cancel tests pass on the previous version. A focused reviewed snapshot expects Save. There is no requested behavior change, new framework or independent audit."
+    },
+    {
+      "id": "W06",
+      "prompt": "Добавь characterization-тесты в test_legacy.py без изменения legacy.py. Поведение пустого списка пока не согласовано; не принимай продуктового решения. Можно использовать unittest.",
+      "files": {
+        "CONTEXT.md": "Existing consumers may rely on the return value for an empty list. No owner decision says whether it should be None, zero or an error. Capture current behavior separately from requirements.\n",
+        "legacy.py": "def first_or_default(items):\n    return items[0] if items else None\n"
+      }
+    },
+    {
+      "id": "W07",
+      "prompt": "Добавь тесты Sender в test_sender.py. Не отправляй реальные сообщения, не добавляй зависимости и не меняй sender.py. Можно запускать unittest.",
+      "files": {
+        "CONTRACT.md": "Sender uses the supplied transport. A denied request must not send anything. An allowed request sends the supplied message exactly once and returns the transport result. Real external transport calls are forbidden during tests.\n",
+        "sender.py": "class Sender:\n    def __init__(self, transport):\n        self.transport = transport\n\n    def submit(self, allowed, message):\n        if not allowed:\n            return False\n        return self.transport.send(message)\n"
+      }
+    },
+    {
+      "id": "W08",
+      "prompt": "Напиши тесты в test_math_api.py по публичному контракту. Production-код не менять, зависимости не устанавливать; можно запускать unittest.",
+      "files": {
+        "CONTRACT.md": "add(a, b) returns mathematical integer addition. Python arbitrary-precision integer semantics apply; no overflow or coercion contract.\n",
+        "math_api.py": "def add(a, b):\n    return a + b\n"
+      }
+    }
+  ],
+  "triggers": [
+    {"id": "WT01", "prompt": "Добавь тест, воспроизводящий ошибку округления, и исправь её в разрешённом модуле."},
+    {"id": "WT02", "prompt": "Перепиши хрупкие тесты компонента по публичному контракту."},
+    {"id": "WT03", "prompt": "Только запусти существующий набор тестов и сообщи результат."},
+    {"id": "WT04", "prompt": "Проведи read-only аудит качества тестового набора, ничего не исправляй."},
+    {"id": "WT05", "prompt": "Объясни разницу между unit и integration tests."},
+    {"id": "WT06", "prompt": "Переименуй раздел документации; тесты и приложение не меняй."}
+  ]
+}

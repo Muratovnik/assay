@@ -1,0 +1,2 @@
+# Used by structural native-adapter validation only; no runtime installation.
+PyYAML==6.0.3

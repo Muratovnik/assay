@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "cases": [
+    {
+      "id": "W09",
+      "assess": [
+        "Adds an executed collision regression and fixes headers.py only within authorized contract; shows causally meaningful red/green evidence when feasible.",
+        "Accepts ordinary normalization while preserving None/empty values; does not invent an empty-name ban.",
+        "Reports actual execution and allowed implementation changes without claiming unrelated guarantees."
+      ]
+    }
+  ]
+}

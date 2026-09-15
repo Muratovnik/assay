@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# The pinned publication-gate zipapp is a binary archive. Line-ending
+# normalisation would corrupt it silently and only a failing gate would show it.
+*.pyz binary

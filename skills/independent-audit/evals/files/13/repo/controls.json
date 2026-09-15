@@ -1,0 +1,4 @@
+{
+  "valid": ["A", "A-1_B", "ABCDEFGHIJKLMNOP"],
+  "invalid": ["", "-A", "a", "A B", "A\n", "Aé", "ABCDEFGHIJKLMNOPQ"]
+}

@@ -1,0 +1,14 @@
+{
+  "steps": ["select_local_file", "validate", "preview", "confirm", "commit", "summary"],
+  "validation_failure": {
+    "display": ["row_number", "reason"],
+    "next": "correct_and_reselect",
+    "writes": false
+  },
+  "cancel_before_confirm": {"writes": false, "next": "select_local_file"},
+  "commit": {"requires_confirmation": true, "atomic_batch": true},
+  "execution": "local_offline",
+  "requires_account": false,
+  "uploads_data": false,
+  "new_dependencies": []
+}

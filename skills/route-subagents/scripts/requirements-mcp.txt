@@ -1,0 +1,2 @@
+# Official MCP Python SDK; no external routing service or API key.
+mcp==2.2.0

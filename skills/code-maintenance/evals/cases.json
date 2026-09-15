@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-maintenance",
+  "cases": [
+    {
+      "id": "C01",
+      "prompt": "Оцени два варианта рефакторинга только по приложенным фактам. Правок и запусков не нужно.",
+      "context": "A Vue card coordinates editing, selection and an async preview with separate lifetimes. Candidate A moves its 240 lines of scoped CSS to card.css; script and all operation ownership remain identical. Candidate B keeps a 420-line table component with one coherent keyboard/focus interaction and no independent operation owner. There is no project line cap. The request is clearer responsibility, not fewer lines."
+    },
+    {
+      "id": "C02",
+      "prompt": "Проверь, что стоит упростить в двух Python-обёртках. Только рекомендации, без правок.",
+      "files": {
+        "CONTRACT.md": "first(values) is private with one caller and no policy or compatibility purpose. The public emit(message) adapter is imported by plugins; it preserves a historical string interface while the transport accepts bytes.\n",
+        "helpers.py": "def first(values):\n    return values[0]\n\ndef emit(message):\n    return transport.send(message.encode('utf-8'))\n"
+      }
+    },
+    {
+      "id": "C03",
+      "prompt": "Предложи исправление изоляции тестов по фрагментам, сохранив смысл сценариев. Ничего не запускай и не меняй.",
+      "files": {
+        "fixture.ts": "const shared = { items: [] as string[] };\nexport const makeFixture = () => shared;\nexport const reset = () => vi.clearAllMocks();\n",
+        "cases.ts": "// Independent tests, each after reset():\n// A: const f = makeFixture(); f.items.push('x'); expect(f.items).toEqual(['x']);\n// B: const f = makeFixture(); expect(f.items).toEqual([]);\n// Separate valid scenario: const local = { items: [] }; local.items.push('y');\n"
+      }
+    },
+    {
+      "id": "C04",
+      "prompt": "Дай read-only заключение о гарантии линтера. Используй supplied evidence, не устанавливай пакеты и не заявляй о запуске CI.",
+      "context": "Owner requires no-eval to be enforced for src/a.js. Two independent candidate print-config results: A has plugins=['security'] and rules={'no-eval':[0]}; B has rules={'no-eval':[2]}. In an authorized probe using B for src/a.js, eval('1') fails specifically with no-eval and Number('1') passes. No CI run evidence is supplied."
+    },
+    {
+      "id": "C05",
+      "prompt": "Проверь отчёт о переносе тестов по указанным фактам; исправлять проект нельзя.",
+      "context": "Specs moved from src/*.spec.ts to tests/*.spec.ts. Owner requires test execution and type checking of all specs. Runner collects old 12 and new 12 test IDs unchanged. Invoked tsconfig.json includes only src/**/*.ts, there are no project references or imports from src to tests. CI invokes only tsc -p tsconfig.json plus the runner. An alternative owner-approved config includes both src and tests. Colocation is not required."
+    },
+    {
+      "id": "C06",
+      "prompt": "Оцени необходимость обновления или замены только по данным. Не делай сетевых запросов и не устанавливай ничего.",
+      "context": "Package registry time.modified=2026-09-01; time['2.0.0']=2024-02-01; dist-tags.latest='2.0.0'. Current product uses 2.0.0. It meets the needed API and supported runtime; no incompatibility or advisory evidence is supplied. Existing update workflow already covers this package, but no recent run receipt is supplied. A report calls 2.0.0 a September 2026 release and says a missing update process requires a replacement."
+    },
+    {
+      "id": "C07",
+      "prompt": "Дай scoped review поведения и соглашений; ничего не исправляй.",
+      "context": "The owner adopted uppercase stable constants and ordinary arrow callbacks for newly changed TS code yesterday. Current diff introduces const maxItems=10 and function accept(n) { return n < maxItems }; required behavior is accepting n <= 10. A pre-existing untouched generator function* stream() is also present. Prior tasks did not have this convention."
+    },
+    {
+      "id": "C08",
+      "prompt": "Предложи точечное улучшение Vue-состояния по фактам, без запуска или изменения проекта.",
+      "context": "An OrderCard keeps rows in a ref, a writable total updated by add/remove only, and updateQuantity mutates rows without updating total. Consumers render the total of current quantities. Another component keeps an explicit editable draft separate from saved rows and reconciles only on save/cancel by contract. A proposed extraction passes all refs and setters to a giant useCardEverything composable."
+    },
+    {
+      "id": "C09",
+      "prompt": "Оцени предложенное изменение Vue по данному evidence packet. Только выводы, без сетевых запросов и правок.",
+      "context": "An SFC has a normal script for a named export and script setup for per-instance logic. The supplied Vue primary-doc excerpt explicitly permits named exports in a normal script alongside script setup, with restrictions on mixing component options. No prohibited mix is present. A local lint diagnostic is used to claim Vue forbids two scripts and requires moving the export to a global shared store. The export has one local consumer and no shared-state requirement."
+    },
+    {
+      "id": "C10",
+      "prompt": "Оцени достаточность UI-проверок только по фактам; правки и запуск запрещены.",
+      "context": "Owner supports 1024 CSS-pixel width and requires Save operable without horizontal scrolling. A screenshot at 1280x800 and a DOM existence assertion pass. No 1024-width geometry/interaction evidence exists. A separate arithmetic test happens to run at 1280x800; its integer result is independent of viewport. Another UI test uses a documented public data-testid; an alternative uses a generated CSS hash with no contract."
+    },
+    {
+      "id": "C11",
+      "prompt": "Use code-maintenance to assess this proposed primitive change from the supplied facts. Recommend the scoped implementation; do not edit or run anything.",
+      "context": "The user asks to stop owning standard tab keyboard mechanics. AppTabs imports KitIcon but implements arrow/Home/End handlers, focus() and tabindex itself. The installed kit exports Tabs with the required controlled API and keyboard model; compatibility evidence covers current consumers. AppDialog instead delegates focus trap and dismissal to the kit and only provides product slots and tokens. AppInput styles a native input. No whole-interface rewrite is requested."
+    },
+    {
+      "id": "C12",
+      "prompt": "Use code-maintenance to assess whether this library adaptation should stay. No commands or edits.",
+      "context": "The installed popup primitive handles focus and dismissal but its animation writes inline styles forbidden by the product CSP. A current-version reproduction confirms this; its supported disable-animation option works. The facade disables that animation and supplies packaged CSS while delegating focus/dismissal. The decision names the constraint and a future upstream fix as the recheck condition. Another proposal restores a custom focus trap merely because animation failed."
+    },
+    {
+      "id": "C13",
+      "prompt": "Use independent-audit to audit completion of the migration against this packet. Read-only; report the scoped verdict and evidence limits.",
+      "context": "Original request authorizes migration of controls A, B and C to existing library mechanics. A is migrated and verified against the real library. B still owns the same standard algorithm; C is untouched. The author reports complete because the dependency is installed and A passes. No scope reduction, checkpoint or external blocker exists. Their report says B/C are a possible next wave but supplies no remaining acceptance or owner. Do not infer a runtime failure in A."
+    },
+    {
+      "id": "C14",
+      "prompt": "Use independent-audit to review a pilot and its evidence from this packet. Read-only; distinguish both variants.",
+      "context": "The user explicitly requests only a Button and Drawer pilot; all other controls are excluded. Their integrations and required journeys have complete real-library evidence and the pilot is honestly reported complete. An alternative receipt contains only local UButton/Drawer behavioral stubs that reimplement disabled and focus behavior; no real integration evidence exists in that variant. Both repositories retain native inputs and unmigrated tabs outside scope."
+    }
+  ],
+  "discovery_cases": [
+    {"id": "D01", "prompt": "Добавь фильтр в Vue-таблицу, сохрани корректность выбранных строк при обновлении списка."},
+    {"id": "D02", "prompt": "Упрости разросшийся Python-модуль, сохранив публичный API."},
+    {"id": "D03", "prompt": "Проведи read-only аудит структуры и действующих проверок кода."},
+    {"id": "D04", "prompt": "Исправь опечатку в README."},
+    {"id": "D05", "prompt": "Запусти существующие тесты и сообщи результат, ничего не меняй."},
+    {"id": "D06", "prompt": "Исследуй поддержку браузеров у двух пакетов перед выбором зависимости."}
+  ]
+}

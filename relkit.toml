@@ -1,0 +1,16 @@
+[exposure]
+# Scratch, evidence and personal client settings never belong in the library.
+required_ignores = [
+  ".cache",
+  ".claude/settings.local.json",
+  ".private/manifest.json",
+  "tmp/scratch",
+]
+allowed_identities = [
+  "Nikolai Muratov <el.muratovnik@gmail.com>",
+  "Muratovnik <68428072+Muratovnik@users.noreply.github.com>",
+]
+forbid_ai_attribution = true
+forbid_internal_planning = true
+forbid_machine_observations = true
+betterleaks_config = ".betterleaks.toml"

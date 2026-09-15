@@ -1,0 +1,111 @@
+# How assay is put together
+
+Each skill is a directory under `skills/`, each agent profile a JSON file under
+`profiles/`, and `catalog.toml` is the complete inventory. Nothing is duplicated
+per client: the installer links or renders the one source into whichever native
+location a client reads.
+
+## Inventory
+
+<!-- assay:catalog:start -->
+
+<!-- Generated from catalog.toml by tools/catalog_docs.py; do not edit this block. -->
+| Asset | Activation | Codex target | Claude target |
+| --- | --- | --- | --- |
+| `skill/route-subagents` | automatic | `~/.agents/skills/route-subagents` | `~/.claude/skills/route-subagents` |
+| `skill/operations-ui-delivery` | automatic | `~/.agents/skills/operations-ui-delivery` | `~/.claude/skills/operations-ui-delivery` |
+| `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
+| `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
+| `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
+| `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
+| `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
+| `skill/code-maintenance` | automatic | `~/.agents/skills/code-maintenance` | `~/.claude/skills/code-maintenance` |
+| `profile/evidence-reviewer` | explicit | `~/.codex/agents/evidence-reviewer.toml` | `~/.claude/agents/evidence-reviewer.md` |
+| `profile/official-docs-researcher` | explicit | `~/.codex/agents/official-docs-researcher.toml` | `~/.claude/agents/official-docs-researcher.md` |
+
+<!-- assay:catalog:end -->
+
+`catalog.toml` carries ownership, activation and exact destinations. It carries no
+model, effort, runtime state, package manifest or machine path. `VERSION` labels
+the source contract; the installer and the client manifests read it rather than
+repeating it.
+
+## Discovery topology
+
+A skill is installed once and reached twice. The native skill root holds the link
+to the catalogued source, and Claude links through that same native entry rather
+than to a second copy:
+
+```text
+~/.agents/skills/<name> -> <checkout>/skills/<name>
+~/.claude/skills/<name> -> ~/.agents/skills/<name>
+```
+
+There is no `~/.codex/skills` projection. Codex reads `.agents/skills` in the
+project and `~/.agents/skills` for the user, and its `.system` directory belongs
+to the client. Agent profiles need different file formats per client, so they are
+rendered rather than linked; their destinations are in the inventory above.
+
+An automatic skill activating is not permission to delegate or to mutate anything.
+Delegation is one level deep: the primary agent spawns every worker, and a worker
+never creates another agent. `route-subagents` owns that policy once, and the
+other skills do not restate it.
+
+Profiles are capability boundaries, not roles with a model attached. The Codex
+adapter asks for a read-only sandbox and the Claude adapter uses plan mode with a
+capability-derived tool list. Only the evidence reviewer receives `Bash`, because
+its declared oracle has to be executable, and its instructions still forbid
+mutating commands. An adapter's requested sandbox is configuration: verify the
+effective session policy rather than assuming a parent process left it intact.
+
+## Guarded lifecycle
+
+`python tools/assay.py plan` is read-only. For every catalogued target it reports
+the expected link destination or adapter hash, the current state and the exact
+rollback target. `install-links` preflights the whole plan and accepts only a
+missing target or an exact existing projection; a real directory, a foreign link,
+a modified adapter or a reparse-point parent stops the entire run before the first
+write.
+
+Creation is idempotent. If a write fails, only entries created by that invocation
+are removed, and only after their identity is rechecked. `uninstall-links`
+preflights the same way and removes only exact links or adapter bytes: a missing
+target is harmless, and drift is preserved and reported rather than overwritten.
+
+Windows uses the native directory-symlink API and fails closed when the process
+lacks that permission. There is no shell fallback in which a path could be
+reinterpreted as syntax.
+
+The lifecycle has no archive, package hash, install-state database, mutation lock
+or journal. Its authority is the current catalog and source revision, which is why
+an adapter installed by an older revision must be removed with that revision
+before a newer one installs its own.
+
+## Upgrade and rollback
+
+An upgrade uses two revisions: run `uninstall-links` from the revision that created
+the current adapters, then `install-links` from the new one. Before a live install
+or removal, capture the affected source bytes and the observed target vector
+outside the managed roots, including any existing drift, and keep that snapshot
+until both clients have been exercised.
+
+Rollback restores the exact recorded targets from that snapshot. It never mixes an
+old source with a new registration, and it preserves unrelated drift instead of
+flattening it to make a preflight pass. A state file living beside the installation
+is not a backup of it.
+
+## Gates
+
+```text
+python -B tools/check.py
+python -B -m unittest discover -s tools -p "test_*.py"
+python -B tools/compatibility_fixture.py
+python -B tools/catalog_docs.py --check
+python -B tools/eval_assets.py check
+python -B -m unittest discover -s skills/independent-audit/evals -p test_prepare_case.py
+```
+
+These prove source structure, plan determinism, guarded install and uninstall
+semantics, and adapter capabilities. They cannot prove that a client discovered a
+skill or that a sandbox was effective; that needs a run in a fresh client, and the
+evaluation notes say what such a run does and does not establish.

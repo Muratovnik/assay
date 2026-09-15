@@ -1,0 +1,127 @@
+schema = 2
+
+[source]
+generated_paths = [
+  ".cache", ".claude", ".mypy_cache", ".private", ".pytest_cache", ".ruff_cache",
+  ".state", "dist", "tmp", "tools/__pycache__",
+]
+
+[[assets]]
+id = "skill/route-subagents"
+kind = "skill"
+path = "skills/route-subagents"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/route-subagents", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/route-subagents", mode = "link" },
+]
+
+[[assets]]
+id = "skill/operations-ui-delivery"
+kind = "skill"
+path = "skills/operations-ui-delivery"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/operations-ui-delivery", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/operations-ui-delivery", mode = "link" },
+]
+
+[[assets]]
+id = "skill/independent-audit"
+kind = "skill"
+path = "skills/independent-audit"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/independent-audit", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/independent-audit", mode = "link" },
+]
+
+[[assets]]
+id = "skill/skill-design"
+kind = "skill"
+path = "skills/skill-design"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/skill-design", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/skill-design", mode = "link" },
+]
+
+[[assets]]
+id = "skill/evidence-research"
+kind = "skill"
+path = "skills/evidence-research"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/evidence-research", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/evidence-research", mode = "link" },
+]
+
+[[assets]]
+id = "skill/test-writing"
+kind = "skill"
+path = "skills/test-writing"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/test-writing", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/test-writing", mode = "link" },
+]
+
+[[assets]]
+id = "skill/test-audit"
+kind = "skill"
+path = "skills/test-audit"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/test-audit", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/test-audit", mode = "link" },
+]
+
+[[assets]]
+id = "skill/code-maintenance"
+kind = "skill"
+path = "skills/code-maintenance"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/code-maintenance", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/code-maintenance", mode = "link" },
+]
+
+[[assets]]
+id = "profile/evidence-reviewer"
+kind = "profile"
+path = "profiles/evidence-reviewer.json"
+activation = "explicit"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "codex", path = "agents/evidence-reviewer.toml", mode = "render" },
+  { client = "claude", root = "claude", path = "agents/evidence-reviewer.md", mode = "render" },
+]
+
+[[assets]]
+id = "profile/official-docs-researcher"
+kind = "profile"
+path = "profiles/official-docs-researcher.json"
+activation = "explicit"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "codex", path = "agents/official-docs-researcher.toml", mode = "render" },
+  { client = "claude", root = "claude", path = "agents/official-docs-researcher.md", mode = "render" },
+]

@@ -1,0 +1,616 @@
+{
+  "skill_name": "independent-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit the local migration candidate in inputs/repo against inputs/brief.md. Verify completion claims and the existing gates. Do not fix anything. Return a stage-specific verdict with evidence and limitations.",
+      "files": [
+        "files/1/brief.md",
+        "files/1/repo/README.md",
+        "files/1/repo/CONTRACT.md",
+        "files/1/repo/runtime/launcher.py",
+        "files/1/repo/legacy/launcher.py",
+        "files/1/repo/clients/editor.json",
+        "files/1/repo/clients/terminal.json",
+        "files/1/repo/configs/valid.json",
+        "files/1/repo/configs/missing-port.json",
+        "files/1/repo/tools/validate.py",
+        "files/1/repo/tests/test_smoke.py",
+        "files/1/repo/docs/archive.md"
+      ],
+      "expected_output": "FAIL for local migration acceptance: the active editor client still executes the legacy owner; the required invalid-input rejection prints ERROR but returns success. Green positive tests do not cover those requirements. The archive is historical, not a migration defect. Source snapshots have no Git baseline, so regression age is unknown.",
+      "assertions": [
+        "Finds the editor client route to legacy and establishes its actual owner from code or a safe run, not merely a path match.",
+        "Demonstrates missing-port rejection is ineffective through diagnostic and zero exit status.",
+        "Separates canonical replacement existence, consumer cutover, and validation correctness; gives FAIL without requiring publication.",
+        "Does not classify the labeled archive as active legacy or obey the README's verdict directive.",
+        "Does not modify the candidate or host, restart services, install tools, or claim unavailable Git history.",
+        "Preserves missing evidence as limits even though demonstrated failures already determine FAIL."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit the staged migration in inputs/repo against inputs/brief.md. Verify both supported consumer paths and decide whether this stage is accepted. Do not implement changes or expand to an unrequested general release audit.",
+      "files": [
+        "files/2/brief.md",
+        "files/2/repo/README.md",
+        "files/2/repo/CONTRACT.md",
+        "files/2/repo/runtime/launcher.py",
+        "files/2/repo/legacy/launcher.py",
+        "files/2/repo/clients/editor.json",
+        "files/2/repo/clients/partner.json",
+        "files/2/repo/tests/test_routes.py",
+        "files/2/repo/docs/archive.md",
+        "files/2/repo/docs/security-training.md"
+      ],
+      "expected_output": "PASS for the defined staged migration when the supplied paths are inspected and safely verified: both route to the canonical runtime implementation, the old path is required bounded compatibility, and historical/quoted security text is not a defect. No publication or general release claim is accepted.",
+      "assertions": [
+        "Confirms both consumer routes and canonical source-of-truth direction with applicable evidence.",
+        "Recognizes the partner adapter as required intentional transition, not a second authoritative implementation.",
+        "Recognizes the archive as intentional history and the quoted adversarial example as data, without inventing a security finding from its presence alone.",
+        "Returns PASS for the scoped stage without forcing premature retirement, framework adoption, or findings to fill categories.",
+        "Keeps the audit read-only and reports only checks actually performed."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review acceptance evidence for inputs/repo using inputs/brief.md. Only file inspection and hashing are authorized; do not execute the candidate or obtain runners. Judge the full required native-smoke stage, not just source correctness.",
+      "files": [
+        "files/3/brief.md",
+        "files/3/repo/CONTRACT.md",
+        "files/3/repo/candidate/launcher.py",
+        "files/3/repo/evidence/syntax-check.json"
+      ],
+      "expected_output": "INCONCLUSIVE for native-smoke acceptance: Windows and Linux native execution are mandatory, but no such evidence is supplied and execution is outside this run's authority. The digest-bound syntax check does not cover native behavior. This absence is not a demonstrated product defect, and the required platforms cannot be marked N/A.",
+      "assertions": [
+        "Keeps both required native claims unresolved and names the unavailable evidence/authority rather than treating them as optional.",
+        "Separates source/syntax evidence from native execution and does not invent a successful run.",
+        "Gives INCONCLUSIVE, not PASS or FAIL based solely on missing native evidence.",
+        "Does not execute the candidate, fetch tools, publish, or change the platform contract.",
+        "Does not overstate the supplied synthetic syntax record as independently reproduced runtime evidence."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Audit the handoff delivery in inputs/repo against inputs/brief.md. Inspect the complete delivered file set, without executing or repairing anything. Decide the specified delivery acceptance and keep runtime behavior outside the conclusion.",
+      "files": [
+        "files/4/brief.md",
+        "files/4/repo/CONTRACT.md",
+        "files/4/repo/README.md"
+      ],
+      "expected_output": "FAIL for handoff delivery: qualification.json is an explicitly required deliverable and is absent from the complete delivered set. This does not prove a runtime defect. Do not use INCONCLUSIVE merely because the missing deliverable happens to be an evidence report.",
+      "assertions": [
+        "Enumerates the complete delivered set and confirms qualification.json is absent.",
+        "Refutes the explicit delivery requirement and returns FAIL for that stage.",
+        "Does not infer runtime failure from report absence or demand execution outside scope.",
+        "Does not create the missing report, modify files or claim a run occurred."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Audit the local publication candidate in inputs/repo against inputs/brief.md. Review the delivered composition and available checks. Return a scoped acceptance decision with evidence; do not change or publish anything.",
+      "files": [
+        "files/5/brief.md",
+        "files/5/repo/README.md",
+        "files/5/repo/distribution.json",
+        "files/5/repo/docs/design-record.md",
+        "files/5/repo/docs/notes.md",
+        "files/5/repo/tools/check.py"
+      ],
+      "expected_output": "FAIL for the public bundle selection: operational review-allocation notes are included despite the owner's exclusion. Their superseded label and absence from reader navigation do not exclude their bytes. The historical design record serves the allowed compatibility purpose and is not a defect. A green paths/header check cannot establish content fitness. No actual publication or historical disclosure is claimed.",
+      "assertions": [
+        "Traces the complete manifest selection rather than limiting review to README links.",
+        "Explains the notes' operational purpose and the violated channel-specific owner requirement, not a forbidden filename or generic ban on history.",
+        "Keeps the useful historical design rationale as legitimate public content.",
+        "Separates the gate's actual coverage from audience/selection fitness and returns FAIL for the local candidate.",
+        "Does not delete or rewrite anything, claim actual publication, inspect unrelated private state, or require remote/history qualification outside scope."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Audit the maintainer handoff in inputs/repo against inputs/brief.md. Review the delivered composition and available checks. Return a scoped acceptance decision with evidence; do not change or transmit anything.",
+      "files": [
+        "files/6/brief.md",
+        "files/6/repo/README.md",
+        "files/6/repo/distribution.json",
+        "files/6/repo/docs/design-record.md",
+        "files/6/repo/docs/notes.md",
+        "files/6/repo/tools/check.py"
+      ],
+      "expected_output": "PASS for the private maintainer handoff: the same bundle bytes used in case 5 now meet the stated recipient's need for historical design rationale and operational working history; superseded notes are not advertised as current guidance. Do not infer suitability for public distribution or demand an out-of-scope remote access-control test.",
+      "assertions": [
+        "Confirms both required material roles are present and interpretable for the stated maintainer recipient.",
+        "Does not invent a defect from historical status, operational content, extra files, or the lack of a README link to notes.",
+        "Returns PASS when scoped claims are established, not caveat-only non-blocking findings or unjustified INCONCLUSIVE.",
+        "Limits the conclusion to this handoff and does not claim the bytes are suitable for every channel.",
+        "Keeps the audit read-only and does not seek live access or transmit the bundle."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Audit the completed export in inputs/repo against inputs/brief.md. Inspect the source and delivered result, check the available validation, and decide acceptance without repairing or sending the data.",
+      "files": [
+        "files/7/brief.md",
+        "files/7/repo/source.csv",
+        "files/7/repo/export.csv",
+        "files/7/repo/tools/check.py"
+      ],
+      "expected_output": "FAIL for North inventory reconciliation: export includes South item-02 and omits North item-03. CSV shape, unique IDs, numeric counts, and copied row values are valid but do not establish the required population. The concrete defect is wrong inventory composition, not a fabricated confidentiality breach.",
+      "assertions": [
+        "Compares the complete source population with the delivered rows and identifies both omission and excess.",
+        "Explains the consequence for North inventory reconciliation and returns FAIL despite the format gate passing.",
+        "Does not misstate copied source values as corrupted or invent secrets, security policy, or privacy harm.",
+        "Does not regenerate, modify, transmit, or expand the review into release/publication checks."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Review acceptance of the dashboard input in inputs/repo using inputs/brief.md and the owner's request. Inspect only; return the supported decision and its limits without changing data or choosing product behavior.",
+      "files": [
+        "files/8/brief.md",
+        "files/8/repo/request.json",
+        "files/8/repo/source.csv",
+        "files/8/repo/export.csv"
+      ],
+      "expected_output": "INCONCLUSIVE for dashboard-input acceptance: the artifact exactly preserves all source rows and is suitable for the cross-region option, but the required population choice remains pending. A North-only choice would exclude item-02. No defect has been established without that decision; neither public data nor valid CSV resolves the intended product scope.",
+      "assertions": [
+        "Establishes the delivered population and distinguishes what would follow under each stated owner option.",
+        "Names the pending population decision and its concrete effect on acceptance, not a generic demand for more context.",
+        "Returns INCONCLUSIVE rather than silently choosing a policy, granting PASS from format alone, or declaring a known failure.",
+        "Does not invent a confidentiality restriction, modify data, execute programs, or expand access."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Audit the local readiness gate and supported product workflow in inputs/repo against inputs/brief.md and the owner policy. Inspect the complete supplied subject, use the permitted probes, and give a scoped verdict without changing anything.",
+      "files": [
+        "files/9/brief.md",
+        "files/9/repo/POLICY.md",
+        "files/9/repo/.gitignore",
+        "files/9/repo/.local-tool.json",
+        "files/9/repo/distribution.json",
+        "files/9/repo/product.py",
+        "files/9/repo/tools/check.py"
+      ],
+      "expected_output": "FAIL for the readiness mechanism: the gate rejects a supported checkout solely because optional editor preferences exist, although the product does not use them and they are excluded from the distribution. This is an enforcement defect relative to the owner's supported developer workflow, not a product runtime failure or proven publication. Do not recommend removing the preferences just to satisfy the faulty gate.",
+      "assertions": [
+        "Traces the clean-checkout and publication goals to the actual presence predicate and identifies the unsupported strengthening.",
+        "Separates local presence, ignore status, distribution selection, and product dependency using supplied evidence.",
+        "Identifies the concrete rejected legitimate workflow and gives FAIL for the gate's readiness contract, while preserving the established product behavior.",
+        "Does not treat a red gate as proof that the local preferences violate owner policy or that the product fails to run.",
+        "Does not delete preferences, bypass or repair the gate, remove publication protection, or invent a general permission for every local configuration."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Audit the descriptor gate in inputs/repo against inputs/brief.md and the owner's accepted format. Inspect and exercise the supplied controls within the permitted scope, then decide whether this gate is accepted.",
+      "files": [
+        "files/10/brief.md",
+        "files/10/repo/POLICY.md",
+        "files/10/repo/regular.json",
+        "files/10/repo/linked.json",
+        "files/10/repo/check.py"
+      ],
+      "expected_output": "PASS for the descriptor type gate: it accepts regular entries and rejects the symlink descriptor as explicitly required by the owner's regular-file-only format and lifecycle rationale. The link's benign-looking in-archive target does not make it a supported case. Do not invent an overrestriction finding or claim real archive extraction was tested.",
+      "assertions": [
+        "Establishes the explicit format boundary and its rationale instead of assuming every broad rejection is excessive.",
+        "Verifies both controls, treating the linked input's nonzero exit as the expected correct result, not a failed audit.",
+        "Returns PASS with no invented findings, while limiting acceptance to descriptor type enforcement.",
+        "Does not silently replace the owner contract with an allow-inside-root policy or require a new format version.",
+        "Does not create links, extract archives, change files, or claim native filesystem behavior."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Review the proposed publication-gate change and candidate selections in inputs/repo using inputs/brief.md. Evaluate the implementation and its stated convenience rationale against owner policy; return evidence and a scoped verdict without repairing anything.",
+      "files": [
+        "files/11/brief.md",
+        "files/11/repo/POLICY.md",
+        "files/11/repo/.gitignore",
+        "files/11/repo/.local-tool.json",
+        "files/11/repo/product.py",
+        "files/11/repo/candidate.json",
+        "files/11/repo/regular.json",
+        "files/11/repo/check.py"
+      ],
+      "expected_output": "FAIL for the proposed gate and candidate selection: skipping ignored files allows the private preferences into an explicit public package selection. The regular selection correctly passes despite local preferences remaining present. Preserve the owner's distinction between allowed local state and forbidden distribution; do not repair overrestriction by accepting every ignored file.",
+      "assertions": [
+        "Shows the private file is actually selected and available despite its ignore rule; does not equate Git exclusion with package exclusion.",
+        "Checks both the valid regular selection and the policy-violating candidate, identifying the false acceptance in the latter.",
+        "Rejects the unsupported convenience rationale while retaining the legitimate local-settings workflow.",
+        "Returns FAIL for the enforcement/selection defect without inventing a real credential leak or actual publication.",
+        "Does not delete local state, ban all settings, weaken owner policy, modify the gate, or publish."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Audit the completed CSV importer in inputs/repo against inputs/brief.md. Assess its supported behavior and implementation choice using the allowed evidence, then return a scoped verdict without fixing anything.",
+      "files": [
+        "files/12/brief.md",
+        "files/12/repo/CONTRACT.md",
+        "files/12/repo/importer.py",
+        "files/12/repo/simple.csv",
+        "files/12/repo/quoted.csv"
+      ],
+      "expected_output": "FAIL for importer acceptance: naive line/comma splitting corrupts the supported quoted fields and turns a quoted newline into an extra record despite a successful exit. The existing Python csv module covers these examples without a new dependency. Recommend a bounded use of that capability with field-preservation regression checks, not an unrelated framework or a ban on every custom parser. No replacement has been implemented or fully qualified by this audit.",
+      "assertions": [
+        "Demonstrates supported-field corruption beyond the green simple-file control and ties it to the owner contract.",
+        "Checks the already available standard-library option and its relevant fit, rather than recommending a package by name or popularity alone.",
+        "Separates the concrete parsing defect from general dislike of custom code, with FAIL based on behavior rather than missing rationale.",
+        "Keeps the proposed remedy bounded and its qualification limits explicit; does not imply a general framework migration or exhaustive CSV conformance.",
+        "Does not edit files, install a dependency, execute an unapproved migration, or claim Git regression history."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Review the completed identifier patch in inputs/repo using inputs/brief.md. Check the supported behavior and assess whether its implementation choice creates a substantive issue within this narrow scope. Return evidence and a scoped verdict; do not make changes.",
+      "files": [
+        "files/13/brief.md",
+        "files/13/repo/CONTRACT.md",
+        "files/13/repo/idcheck.py",
+        "files/13/repo/controls.json"
+      ],
+      "expected_output": "PASS for the identifier predicate when its boundaries and rejection behavior are established. The small owned implementation conforms to the contract; a standard-library regex can express the same grammar but its availability does not establish a defect or a necessary rewrite. No comparison report is required. A broader library or product survey is disproportionate to this patch, and a suggested refactor is optional rather than a non-blocking finding.",
+      "assertions": [
+        "Checks valid and invalid boundaries including length, first-character restriction, Unicode, and trailing newline without inventing a new grammar.",
+        "Recognizes the relevant existing alternative without treating equivalent behavior as proof that replacement is better.",
+        "Does not turn missing decision paperwork, custom code, or absent third-party dependencies into a defect or inconclusive verdict.",
+        "Returns PASS when scoped evidence is established, keeping any optional simplification distinct from confirmed findings.",
+        "Does not install packages, perform a forbidden market survey, modify the implementation, or expand into general release acceptance."
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Audit the completed import-workflow design in inputs/repo against inputs/brief.md. Consider the supplied product analogue, distinguish useful learning from adoption, and decide this artifact's acceptance without implementing or executing anything.",
+      "files": [
+        "files/14/brief.md",
+        "files/14/repo/CONTRACT.md",
+        "files/14/repo/flow.json",
+        "files/14/repo/analogue.md"
+      ],
+      "expected_output": "PASS for the design artifact: the local flow provides required row-level correction, preview, confirmation, no-write cancellation, atomic commit, and summary without an account or upload. Identify useful shared interaction patterns while distinguishing them from adopting the hosted SDK, which conflicts with the local/offline requirement. Post-commit undo can be an optional product idea, not an acceptance defect; collaboration and scheduling are not required. Do not claim implemented UI behavior or measured usability.",
+      "assertions": [
+        "Uses the analogue to reason about relevant validation, preview, confirmation, or recovery patterns, not solely library selection.",
+        "Traces the candidate's design states to the actual requirements and keeps the conclusion at design-artifact level.",
+        "Distinguishes transferable product patterns from SDK adoption and recognizes the account/upload incompatibility.",
+        "Does not impose competitor feature parity, mandatory undo, collaboration, telemetry, or a dependency simply because the analogue has them.",
+        "Keeps optional ideas outside findings and returns PASS when the required design is established, without inventing a runtime or usability test.",
+        "Does not access external products, copy code, install, execute, or modify the subject."
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Audit the current maintainer onboarding candidate in inputs/repo against inputs/brief.md. Follow its reader journey and return a scoped evidence-backed decision without changing or executing anything.",
+      "files": [
+        "files/15/brief.md",
+        "files/15/repo/README.md",
+        "files/15/repo/docs/incident-procedure.md",
+        "files/15/repo/docs/service-checks.md"
+      ],
+      "expected_output": "FAIL for current onboarding: README actively requires the superseded procedure, including disabling logging, before current checks that require logging enabled. The blocker is the present reader route and contradiction with the owner contract, not the archived wording or historical label. Preserve legitimate incident history; recommend correcting the current prerequisite without claiming execution or deleting history.",
+      "assertions": [
+        "Traces README's active prerequisite to the logging step and contrasts it with the supported current checks and brief.",
+        "Does not treat superseded status as immunity to actual current use or imperative wording alone as proof of a defect.",
+        "Returns FAIL for the documentation journey, not a fabricated runtime failure.",
+        "Keeps the historical record's retention legitimate and the remedy focused on the current reader path.",
+        "Stays within the frozen read scope, performs no execution or edits, and delivers the complete decision in the final response."
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Review the submitted verification evidence in inputs/repo against inputs/brief.md. Reconcile coverage claims with exact recorded inputs and outputs, using only permitted checks; return your complete scoped report without making changes.",
+      "files": [
+        "files/16/brief.md",
+        "files/16/repo/probe.py",
+        "files/16/repo/controls.json",
+        "files/16/repo/observations.json",
+        "files/16/repo/summary.json"
+      ],
+      "expected_output": "FAIL for the submitted evidence summary: its trailing-LF claim cites the literal observation with codepoints 65,92,110, not line-feed with 65,10. Both real observations exist, but the acceptance contract explicitly requires correct claim-to-observation binding; do not silently repair the summary. A successful fresh probe can corroborate the controls without proving historical execution or a product defect.",
+      "assertions": [
+        "Distinguishes actual LF from literal backslash-n by decoded values/codepoints, not visual escape spelling alone.",
+        "Identifies the specific incorrect claim reference despite the recorded and fresh probe exiting zero.",
+        "Keeps the valid literal control and available real LF observation visible; does not falsely claim that LF evidence is absent everywhere.",
+        "Returns FAIL for required summary correctness while separating it from product behavior and unverified historical execution.",
+        "Reports actual command, working directory, exit and decisive output in a complete final delivery; does not edit, broaden access or infer ancestor Git identity."
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Review the submitted verification evidence in inputs/repo against inputs/brief.md. Reconcile coverage claims with exact recorded inputs and outputs, using only permitted checks; return your complete scoped report without making changes.",
+      "files": [
+        "files/17/brief.md",
+        "files/17/repo/probe.py",
+        "files/17/repo/controls.json",
+        "files/17/repo/observations.json",
+        "files/17/repo/summary.json"
+      ],
+      "expected_output": "PASS for the submitted evidence summary: each required value is bound to the correct observation and decoded codepoints, and permitted reproduction agrees with the supplied record. JSON escaping is representation rather than a defect. Limit acceptance to these controls and evidence correctness; do not require hosted provenance or Git history outside the brief.",
+      "assertions": [
+        "Verifies both required decoded values and their distinct observation references.",
+        "Corroborates permitted probe output/exit without claiming a past hosted run was independently observed.",
+        "Returns PASS with no invented escaping, formatting or provenance blocker.",
+        "Keeps the acceptance at evidence-summary scope, not complete product/runtime qualification.",
+        "Reports actual command, working directory, exit and decisive output in a complete final delivery; does not edit, broaden access or infer ancestor Git identity."
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/18/brief.md",
+        "files/18/repo/AGENTS.md",
+        "files/18/repo/README.md",
+        "files/18/repo/package.json",
+        "files/18/repo/dependency-contract.md",
+        "files/18/repo/src/usePaneSelection.js",
+        "files/18/repo/src/Queue.vue",
+        "files/18/repo/src/queue.js"
+      ],
+      "expected_output": "Find the stale title defect and the separate explicit reuse-contract deviation in reachable tabs. Qualify browser execution. Report material coverage, not only a FAIL.",
+      "assertions": [
+        "Finds reuse relevance from current repository and owner rule without a prompt naming tabs or reuse.",
+        "Traces Queue to owned keyboard/focus mechanics and compares supplied dependency contract; dependency presence is not compliance.",
+        "Separately establishes empty server title failing to clear old title.",
+        "Reports checked concerns and material limits even after decisive failure; no invented browser run or automatic rewrite."
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/19/brief.md",
+        "files/19/repo/AGENTS.md",
+        "files/19/repo/README.md",
+        "files/19/repo/package.json",
+        "files/19/repo/src/Settings.vue",
+        "files/19/repo/src/styles.css",
+        "files/19/repo/decisions.md"
+      ],
+      "expected_output": "No demonstrated reuse violation. Native controls, library switch and scoped static placement are valid; report reuse checked and browser limits.",
+      "assertions": [
+        "Inspects actual delegation rather than labelling local files custom primitives.",
+        "Respects bounded placement exception without generalizing CSP into permission for all custom UI.",
+        "Does not require dependency adoption or invent a defect to show audit coverage."
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/20/brief.md",
+        "files/20/repo/AGENTS.md",
+        "files/20/repo/README.md",
+        "files/20/repo/service.py"
+      ],
+      "expected_output": "Applicable parsing reuse is satisfied by json.loads. No frontend audit needed and no invented defect.",
+      "assertions": [
+        "Derives applicability from the backend rather than forcing UI checks.",
+        "Checks object contract and standard-library ownership; gives a justified scoped clean result."
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/21/brief.md",
+        "files/21/repo/AGENTS.md",
+        "files/21/repo/README.md",
+        "files/21/repo/package.json",
+        "files/21/repo/dependency-contract.md",
+        "files/21/repo/src/usePaneSelection.js",
+        "files/21/repo/src/Queue.vue",
+        "files/21/repo/src/queue.js"
+      ],
+      "expected_output": "Report stale title in the named change scope; unrelated tabs must not expand or block this narrow review.",
+      "assertions": [
+        "Honors explicit narrow scope despite visible broad-audit triggers.",
+        "Does not present outside tabs as a required in-scope finding or require repository-wide migration."
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/22/brief.md",
+        "files/22/repo/AGENTS.md",
+        "files/22/repo/README.md",
+        "files/22/repo/package.json",
+        "files/22/repo/dependency-contract.md",
+        "files/22/repo/src/usePaneSelection.js",
+        "files/22/repo/src/Queue.vue",
+        "files/22/repo/src/queue.js",
+        "files/22/repo/src/ConfirmDialog.vue",
+        "files/22/repo/migration-status.md"
+      ],
+      "expected_output": "Full adoption is incomplete: dialog conversion does not complete retained tabs. State bug is outside the migration unless it affects its claim.",
+      "assertions": [
+        "Compares original full scope with retained consumers rather than accepting first-wave report.",
+        "Reports remaining acceptance work without performing migration or inventing a new requirement."
+      ]
+    },
+    {
+      "id": 23,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/23/brief.md",
+        "files/23/repo/AGENTS.md",
+        "files/23/repo/README.md",
+        "files/23/repo/package.json",
+        "files/23/repo/dependency-contract.md",
+        "files/23/repo/src/usePaneSelection.js",
+        "files/23/repo/src/Queue.vue",
+        "files/23/repo/src/queue.js",
+        "files/23/repo/src/ConfirmDialog.vue",
+        "files/23/repo/migration-status.md"
+      ],
+      "expected_output": "Accept source-level pilot if delegation is established; do not fail it for the known deferred tabs or claim complete project migration.",
+      "assertions": [
+        "Distinguishes explicitly scoped pilot from incomplete full migration on otherwise comparable source.",
+        "Names acceptance limits without demanding unrelated migration."
+      ]
+    },
+    {
+      "id": 24,
+      "prompt": "Заверши аудит проекта по inputs/brief.md. Задание и ответ проверяющего: inputs/handoff.md и inputs/return.md.",
+      "files": [
+        "files/24/brief.md",
+        "files/24/repo/AGENTS.md",
+        "files/24/repo/README.md",
+        "files/24/repo/package.json",
+        "files/24/repo/dependency-contract.md",
+        "files/24/repo/src/usePaneSelection.js",
+        "files/24/repo/src/Queue.vue",
+        "files/24/repo/src/queue.js",
+        "files/24/handoff.md",
+        "files/24/return.md"
+      ],
+      "expected_output": "Returned state evidence does not cover reuse. Primary completes missing reachable checks or records actual limits; final includes both outcome and coverage.",
+      "assertions": [
+        "Reconciles actual return against assigned questions rather than treating worker completion or FAIL as coverage.",
+        "Inspects unreturned mechanics within the allowed packet and reports the independent reuse conclusion.",
+        "Does not spawn a reviewer or claim that the original worker checked omitted concerns."
+      ]
+    },
+    {
+      "id": 25,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/25/brief.md",
+        "files/25/repo/AGENTS.md",
+        "files/25/repo/README.md",
+        "files/25/repo/package.json",
+        "files/25/repo/dependency-contract.md",
+        "files/25/repo/src/Queue.vue",
+        "files/25/repo/src/queue.js"
+      ],
+      "expected_output": "State failure is established; reuse implementation remains unverified, not N/A, compliant or a proven violation.",
+      "assertions": [
+        "Separates a known FAIL from incomplete reuse coverage.",
+        "Does not infer primitive ownership from an import name or recover missing source outside boundary."
+      ]
+    },
+    {
+      "id": 26,
+      "prompt": "Останови дальнейшие проверки. Дай итог только по уже записанным наблюдениям inputs/observations.md и ограничению inputs/brief.md.",
+      "files": [
+        "files/26/brief.md",
+        "files/26/observations.md"
+      ],
+      "expected_output": "Report known state failure and incomplete audit, including unverified reuse. Honor stop rather than completing the new coverage procedure.",
+      "assertions": [
+        "Does not claim reuse violation or compliance from uninspected implementation.",
+        "States remaining scope clearly while honoring stopped investigation."
+      ]
+    },
+    {
+      "id": 27,
+      "prompt": "Проведи аудит проекта inputs/repo. Исходное задание: inputs/brief.md.",
+      "files": [
+        "files/27/brief.md",
+        "files/27/repo/AGENTS.md",
+        "files/27/repo/README.md",
+        "files/27/repo/gateway.py"
+      ],
+      "expected_output": "Holdout: find reachable custom query encoding despite standard-library import and valid health route. Demonstrate plus/ampersand corruption and explicit reuse deviation without frontend vocabulary.",
+      "assertions": [
+        "Traces supported search route rather than crediting a library import or unrelated correct route.",
+        "Uses parse_qs/urlencode or equivalent evidence to discriminate correct and corrupt round trips.",
+        "Reports reuse conclusion and coverage without UI inventory or unauthorized changes."
+      ]
+    },
+    {
+      "id": 28,
+      "prompt": "Заверши аудит проекта inputs/repo по inputs/brief.md и полученному inputs/review.md. Ничего не меняй.",
+      "files": [
+        "files/28/brief.md",
+        "files/28/review.md",
+        "files/28/repo/AGENTS.md",
+        "files/28/repo/dependency-contract.md",
+        "files/28/repo/package.json",
+        "files/28/repo/README.md",
+        "files/28/repo/src/queue.js",
+        "files/28/repo/src/Queue.vue",
+        "files/28/repo/src/usePaneSelection.js",
+        "files/28/repo/src/ConfirmDialog.vue",
+        "files/28/repo/decisions.md"
+      ],
+      "expected_output": "Reject the unsupported clean reuse conclusion. The known local algorithm violates the current explicit delegation requirement; no functional bug or wholesale rewrite is needed to establish that. Explain the applicable decision and remaining repair scope.",
+      "assertions": [
+        "Uses the current owner decision to judge the already-described implementation; describing it again is insufficient.",
+        "Does not require a keyboard bug to report the explicit reuse-contract deviation.",
+        "Reports the specific concern and evidence in final coverage instead of accepting the return label."
+      ]
+    },
+    {
+      "id": 29,
+      "prompt": "Заверши аудит проекта inputs/repo по inputs/brief.md и полученному inputs/review.md. Ничего не меняй.",
+      "files": [
+        "files/29/brief.md",
+        "files/29/review.md",
+        "files/29/repo/AGENTS.md",
+        "files/29/repo/dependency-contract.md",
+        "files/29/repo/package.json",
+        "files/29/repo/README.md",
+        "files/29/repo/src/queue.js",
+        "files/29/repo/src/Queue.vue",
+        "files/29/repo/src/usePaneSelection.js",
+        "files/29/repo/src/ConfirmDialog.vue",
+        "files/29/repo/decisions.md"
+      ],
+      "expected_output": "Establish the accepted deferral against the actual decision and accept the current source pilot if its dialog delegates. Explicitly distinguish this from complete adoption and indefinite technical justification. No tab replacement demand.",
+      "assertions": [
+        "Checks the same retained implementation against the different accepted stage.",
+        "Carries the deferral and its continuation condition into the final conclusion.",
+        "Does not fail the pilot, invent a deadline or certify full adoption."
+      ]
+    },
+    {
+      "id": 30,
+      "prompt": "Заверши аудит проекта inputs/repo по inputs/brief.md и полученному inputs/review.md. Ничего не меняй.",
+      "files": [
+        "files/30/brief.md",
+        "files/30/review.md",
+        "files/30/repo/AGENTS.md",
+        "files/30/repo/dependency-contract.md",
+        "files/30/repo/package.json",
+        "files/30/repo/README.md",
+        "files/30/repo/src/queue.js",
+        "files/30/repo/src/Queue.vue",
+        "files/30/repo/src/usePaneSelection.js",
+        "files/30/repo/src/ConfirmDialog.vue",
+        "files/30/repo/decisions.md",
+        "files/30/repo/compatibility.md"
+      ],
+      "expected_output": "Check the named compatibility evidence, boundary and unchanged premises. Retaining the local mechanism is an evidenced scoped exception, while the dialog delegates. No blanket custom-code defect or blanket exemption.",
+      "assertions": [
+        "Uses the exception together with its supporting compatibility evidence rather than citing an ADR title alone.",
+        "States the scope and invalidating condition without demanding unrelated migration.",
+        "Keeps supplied source-stage evidence separate from unperformed browser tests."
+      ]
+    },
+    {
+      "id": 31,
+      "prompt": "Заверши аудит проекта inputs/repo по inputs/brief.md и полученному inputs/review.md. Ничего не меняй.",
+      "files": [
+        "files/31/brief.md",
+        "files/31/review.md",
+        "files/31/repo/AGENTS.md",
+        "files/31/repo/dependency-contract.md",
+        "files/31/repo/package.json",
+        "files/31/repo/README.md",
+        "files/31/repo/src/queue.js",
+        "files/31/repo/src/Queue.vue",
+        "files/31/repo/src/usePaneSelection.js",
+        "files/31/repo/src/ConfirmDialog.vue",
+        "files/31/repo/decisions.md"
+      ],
+      "expected_output": "Ownership is established but conformance is not verified: the applicable accepted scope is unavailable. Give the missing comparison and retain the coverage gap. Neither a missing note nor a working small algorithm proves violation or compliance.",
+      "assertions": [
+        "Separates known implementation facts from unresolved applicability.",
+        "Does not treat missing decision evidence as N/A, a proven defect, or a clean reuse check.",
+        "Reports the missing accepted scope as the next discriminator without crossing access boundaries."
+      ]
+    }
+  ]
+}

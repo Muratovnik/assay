@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-audit",
+  "frozen_before_execution": "2026-09-03",
+  "cases": [
+    {
+      "id": "A09",
+      "prompt": "Проведи read-only аудит проверки архитектурного ограничения по CONTRACT.md. Ничего не меняй. Можно запустить unittest без bytecode; отличай нарушение архитектуры от проблемы её проверки.",
+      "files": {
+        "CONTRACT.md": "storage.py must not import requests or httpx. This is an approved architecture restriction, not an incidental implementation preference. Comments and string values may mention those names. This restriction is the complete audit scope.\n",
+        "storage.py": "\"\"\"For remote access, callers may consult the httpx documentation.\"\"\"\n\ndef store(value):\n    return value\n",
+        "test_architecture.py": "from pathlib import Path\nimport unittest\n\nclass ArchitectureTests(unittest.TestCase):\n    def test_no_http_dependency(self):\n        source = Path(__file__).with_name('storage.py').read_text(encoding='utf-8')\n        for name in ('requests', 'httpx'):\n            self.assertNotIn(name, source)\n"
+      }
+    }
+  ]
+}

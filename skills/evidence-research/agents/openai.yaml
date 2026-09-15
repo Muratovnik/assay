@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence Research"
+  short_description: "Research questions and verify supporting evidence"
+  default_prompt: "Use $evidence-research to investigate this question, check the evidence and explain the conclusion and its limits."

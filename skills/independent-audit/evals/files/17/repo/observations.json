@@ -1,0 +1,9 @@
+{
+  "command": ["python", "-B", "probe.py", "controls.json"],
+  "cwd": ".",
+  "exit_code": 0,
+  "stdout_json": [
+    {"id": "literal", "value": "A\\n", "codepoints": [65, 92, 110]},
+    {"id": "line-feed", "value": "A\n", "codepoints": [65, 10]}
+  ]
+}

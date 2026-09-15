@@ -1,0 +1,4 @@
+interface:
+  display_name: "Route subagents"
+  short_description: "Route already-authorized subagent packets"
+  default_prompt: "Use $route-subagents to route this already-authorized delegation into bounded client-native packets without nested spawning."

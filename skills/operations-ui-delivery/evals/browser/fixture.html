@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Operational UI regression fixture</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 20px; font: 16px system-ui; }
+  button, input { padding: 8px; }
+  [hidden] { display: none !important; }
+  #collection { height: 1000px; }
+  #workspace { display: flex; width: 100%; }
+  #form-space { flex: 1; min-width: 0; container-type: inline-size; }
+  #fields { display: flex; gap: 8px; }
+  #fields input { width: 240px; }
+  #neighbor { width: 460px; flex-shrink: 0; }
+  #overlay { position: fixed; inset: 0; background: white; }
+  @container (max-width: 400px) {
+    body:not(.bad-container) #fields { flex-direction: column; }
+    body:not(.bad-container) #fields input { max-width: 100%; }
+  }
+</style>
+<main id="main"></main>
+<script>
+  const { scenario, variant = 'good' } = window.fixture;
+  const main = document.querySelector('#main');
+  const $ = (id) => document.getElementById(id);
+  window.writes = 0;
+  if (scenario === 'cancel') {
+    main.innerHTML = '<button id="add">Add connection</button><section id="card" tabindex="-1">Connection A</section><form id="editor" hidden><label>Name <input id="name"></label><button id="cancel" type="button">Cancel</button><button>Save</button></form>';
+    if (variant === 'inline') $('card').textContent = 'Connections list';
+    if (variant === 'clear-only') $('cancel').textContent = 'Clear';
+    if (variant.startsWith('empty')) { $('card').hidden = true; $('editor').hidden = false; $('cancel').hidden = true; $('add').hidden = variant === 'empty-hidden'; $('add').disabled = true; }
+    $('add').onclick = () => { $('editor').hidden = false; $('card').hidden = variant !== 'inline'; $('name').focus(); };
+    $('cancel').onclick = () => {
+      $('name').value = '';
+      if (variant === 'clear-only') return;
+      $('editor').hidden = true;
+      $('card').hidden = variant === 'lost-object';
+      (variant === 'inline' ? $('add') : $('card')).focus();
+    };
+    $('editor').onsubmit = (event) => { event.preventDefault(); window.writes++; };
+  } else if (scenario === 'add') {
+    main.innerHTML = '<button id="add">Add draft</button><div id="feedback" role="status" hidden>Draft added <button id="open">Open draft</button></div><div id="collection">Existing records</div><label id="editor" hidden>Name <input id="name"></label>';
+    $('open').onclick = () => { $('editor').scrollIntoView(); $('name').focus(); };
+    $('add').onclick = () => { $('editor').hidden = false;
+      if (variant === 'good') $('open').onclick();
+      if (variant === 'feedback') $('feedback').hidden = false;
+    };
+  } else if (scenario === 'panel') {
+    main.innerHTML = '<button id="open">Open panel</button><button id="save">Save document</button><section id="panel" hidden>Supporting detail</section><div id="overlay" hidden>Blocking layer</div><dialog id="confirm"><p>Required confirmation</p><button id="back">Back</button></dialog>';
+    $('open').onclick = () => { $('panel').hidden = false; $('overlay').hidden = variant !== 'blocked';
+      if (variant === 'modal') $('confirm').showModal(); };
+    $('back').onclick = () => $('confirm').close();
+    $('save').onclick = () => { window.writes++; };
+  } else if (scenario === 'async') {
+    main.innerHTML = '<button id="a">Open A</button><button id="b">Open B</button><p id="identity"></p><p id="result"></p>';
+    let current;
+    const open = async (id) => { current = id; $('identity').textContent = id; $('result').textContent = 'Loading';
+      const value = await new Promise((resolve) => { (window.pending ??= {})[id] = resolve; });
+      if (variant === 'late-response' || current === id) $('result').textContent = value.label;
+      window.lastCompleted = id;
+    };
+    $('a').onclick = () => open('A'); $('b').onclick = () => open('B');
+  } else if (scenario === 'container') {
+    if (variant === 'bad') document.body.className = 'bad-container';
+    main.innerHTML = '<button id="toggle">Toggle detail</button><div id="workspace"><div id="form-space"><form id="fields"><label>Name <input id="name"></label><button id="save">Save document</button></form></div><aside id="neighbor" hidden>Details</aside></div>';
+    $('toggle').onclick = () => { $('neighbor').hidden = !$('neighbor').hidden; };
+    $('fields').onsubmit = (event) => { event.preventDefault(); window.writes++; };
+  } else if (scenario === 'accessibility') {
+    main.innerHTML = '<button id="open">Open editor</button><section id="editor" hidden><h1>Editor</h1><button id="icon">+</button></section>';
+    $('open').onclick = () => { $('editor').hidden = false; };
+    $('icon').textContent = '';
+    if (variant === 'good') $('icon').setAttribute('aria-label', 'Add item');
+  } else { throw new Error('Unknown fixture scenario'); }
+</script>
+</html>

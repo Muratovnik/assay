@@ -1,0 +1,41 @@
+name: Routing integrations
+
+on:
+  pull_request:
+    paths:
+      - "skills/route-subagents/**"
+      - "tools/test_benchmark*.py"
+      - ".github/workflows/routing-integrations.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integrations:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Create isolated integration environment
+        shell: bash
+        run: |
+          python -m venv .cache/routing-env
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo "$PWD/.cache/routing-env/Scripts" >> "$GITHUB_PATH"
+          else
+            echo "$PWD/.cache/routing-env/bin" >> "$GITHUB_PATH"
+          fi
+      - run: python -m pip install -r skills/route-subagents/scripts/requirements-mcp.txt -r skills/route-subagents/scripts/requirements-browser.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Require real SDK and Chromium tests
+        env:
+          REQUIRE_ROUTING_INTEGRATIONS: "1"
+        run: python -B -m unittest discover -s tools -p "test_benchmark*.py"

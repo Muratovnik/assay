@@ -1,0 +1,7 @@
+interface:
+  display_name: "Operations UI delivery"
+  short_description: "Deliver coherent operational interfaces"
+  default_prompt: "Use $operations-ui-delivery to improve and verify this operational workflow systemically."
+
+policy:
+  allow_implicit_invocation: true

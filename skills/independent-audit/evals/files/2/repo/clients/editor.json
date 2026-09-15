@@ -1,0 +1,1 @@
+{"name": "editor", "command": ["python", "runtime/launcher.py"]}

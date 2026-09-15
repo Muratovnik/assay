@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Writing"
+  short_description: "Tests for justified behavior, without brittle coupling"
+  default_prompt: "Use $test-writing to add or improve tests against the task's contract, and say which real defects they would have caught."

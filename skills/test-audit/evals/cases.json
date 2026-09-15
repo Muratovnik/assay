@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-audit",
+  "cases": [
+    {
+      "id": "A01",
+      "prompt": "Проведи read-only аудит защиты граничных условий в этих тестах. Можно запустить unittest без записи bytecode. Ничего не исправляй.",
+      "files": {
+        "CONTRACT.md": "Transfer accepts 0 < amount <= balance, with nonnegative integer cents. Audit this guarantee only.\n",
+        "wallet.py": "def allowed(balance, amount):\n    return 0 < amount < balance\n",
+        "test_wallet.py": "import unittest\nfrom wallet import allowed\n\nclass WalletTests(unittest.TestCase):\n    def test_equal_balance_rejected(self):\n        self.assertFalse(allowed(100, 100))\n\n    def test_small_transfer(self):\n        self.assertTrue(allowed(100, 50))\n"
+      }
+    },
+    {
+      "id": "A02",
+      "prompt": "Проверь качество тестов именно заявленного API-контракта. Это read-only аудит; можно выполнить unittest с отключённым bytecode.",
+      "files": {
+        "CONTRACT.md": "Public module api exports class Record. Record(7).read() returns 7. This narrow compatibility guarantee is the complete audit scope. Private representation is unspecified.\n",
+        "api.py": "class Record:\n    def __init__(self, value):\n        self.value = value\n\n    def read(self):\n        return self.value\n",
+        "test_api.py": "import unittest\nimport api\n\nclass ApiTests(unittest.TestCase):\n    def test_public_contract(self):\n        self.assertIsInstance(api.Record, type)\n        self.assertEqual(api.Record(7).read(), 7)\n"
+      }
+    },
+    {
+      "id": "A03",
+      "prompt": "Оцени этот тест как smoke отсутствия исключения для указанного входа. Это весь объём аудита; не оценивай полноту математических гарантий. Ничего не изменяй.",
+      "files": {
+        "CONTRACT.md": "The smoke gate checks only that health(1) completes without an exception. It makes no claim about return values, persistence, other inputs or product readiness.\n",
+        "health.py": "def health(value):\n    return value\n",
+        "test_health.py": "import unittest\nfrom health import health\n\nclass HealthTests(unittest.TestCase):\n    def test_no_crash(self):\n        health(1)\n"
+      }
+    },
+    {
+      "id": "A04",
+      "prompt": "Оцени качество набора и возможность безопасной проверки по этим фактам. Ничего не запускай и не исправляй.",
+      "context": "Test discovery imports a setup module which connects to the workstation's live database and clears its records. No disposable database or execution authorization exists. The suite reports a prior green run but no matching source identity. The requested claim is current runtime test reliability."
+    },
+    {
+      "id": "A05",
+      "prompt": "Проверь, подтверждает ли этот тест сортировку всех значений 0..20. Аудит read-only; unittest без bytecode разрешён.",
+      "files": {
+        "CONTRACT.md": "sort_values returns every input integer in ascending order, preserving multiplicity. Test inputs must exercise the domain 0..20.\n",
+        "sorting.py": "def sort_values(values):\n    return list(values)\n",
+        "test_sorting.py": "import unittest\nfrom sorting import sort_values\n\nclass SortTests(unittest.TestCase):\n    def test_domain(self):\n        for value in [x for x in range(21) if x > 30]:\n            self.assertEqual(sort_values([value, 0]), [0, value])\n"
+      }
+    },
+    {
+      "id": "A06",
+      "prompt": "Оцени, доказано ли качество оракула по двум запускам. Только анализ предоставленных записей; не устанавливай зависимости и не запускай код.",
+      "context": "Both old and new revision commands exit 1 during test collection with ModuleNotFoundError: optional_driver. Zero test bodies execute. No independently verified contract or compatibility information was provided. The report claims: failing on both versions proves these assertions are false alarms."
+    },
+    {
+      "id": "A07",
+      "prompt": "Оцени хрупкость теста по контракту и двум предоставленным реализациям. Только анализ, без правок или заявлений о браузерном запуске.",
+      "context": "The UI contract requires the details panel to be invisible when collapsed. Its CSS class is private. Existing test asserts that panel has class hidden. The old rendered state has class hidden and computed display:none; the replacement uses class collapsed with computed display:none and identical accessibility/interaction state. No consumer depends on either class name."
+    },
+    {
+      "id": "A08",
+      "prompt": "Оцени утверждение о недостатке этих тестов. Только read-only анализ предоставленных фактов, без установки инструмента мутаций.",
+      "context": "The public contract returns abs(x) for each integer x. Tests assert exact values for negative, zero and positive cases. A mutation changes x >= 0 to x > 0 in return x if x >= 0 else -x. It survives. A proposed review calls this a critical test defect and requires rewriting production until mutation score is 100%. No other missing requirement is identified."
+    },
+    {
+      "id": "A10",
+      "prompt": "Проведи read-only аудит заявленной защиты массового разрешения конфликтов. Ничего не запускай и не исправляй.",
+      "context": "Контракт продукта допускает сотни пересечений и требует, чтобы оператор мог понять приоритеты и разрешить их без выбора каждого по одному. E2E создаёт три списка, получает два конфликта, проверяет точный count=2 и успешно нажимает Resolve у обоих. Отчёт утверждает, что UX массовых конфликтов полностью защищён."
+    },
+    {
+      "id": "A11",
+      "prompt": "Нужен ли более крупный fixture для доказательства этого контракта? Только read-only анализ предоставленных фактов.",
+      "context": "Утверждённый контракт допускает максимум три правила и два конфликта. Для каждого конфликта пользователь обязан отдельно выбрать победителя. Тест создаёт три правила, проверяет два конфликта, оба приоритета и сохранённый результат. Предлагается считать тест дефектным, пока он не создаст сотни записей."
+    },
+    {
+      "id": "A12",
+      "prompt": "Проведи read-only аудит UI-оракула для drawer. Ничего не меняй и не утверждай, что видел экран.",
+      "context": "Жалоба: drawer слишком узкий для формы, а Loading и Empty одновременно конкурируют за внимание. Тест проверяет drawer.width <= viewport.width, отсутствие horizontal overflow и то, что тексты Loading и Empty каждый когда-то видимы. Он не проверяет минимальную полезную ширину, одновременность или приоритет состояний. Отчёт объявляет обе жалобы закрытыми."
+    },
+    {
+      "id": "A13",
+      "prompt": "Оцени адекватность этих проверок в рамках точного контракта. Только анализ.",
+      "context": "Контракт drawer требует лишь не выходить за viewport при ширине 320px; содержимое состоит из одного короткого переключателя. Loading должен сменяться Empty и никогда не отображаться с ним одновременно. Тест проверяет width <= viewport.width, отсутствие overflow и после одного ответа утверждает visible Empty plus absent Loading. Предлагается добавить субъективный minimum width и сотни строк, которых продукт не поддерживает."
+    }
+  ],
+  "triggers": [
+    {"id": "AT01", "prompt": "Проверь, не закрепляют ли существующие тесты неправильное поведение."},
+    {"id": "AT02", "prompt": "Проведи аудит хрупкости и качества assertions в этом наборе."},
+    {"id": "AT03", "prompt": "Добавь регрессионный тест и исправь ошибку в разрешённых файлах."},
+    {"id": "AT04", "prompt": "Запусти CI-команду тестов и сообщи exit code."},
+    {"id": "AT05", "prompt": "Проверь лицензионную готовность архива к публикации; тесты вне объёма."},
+    {"id": "AT06", "prompt": "Почему тесты иногда бывают хрупкими? Объясни без проверки репозитория."}
+  ]
+}

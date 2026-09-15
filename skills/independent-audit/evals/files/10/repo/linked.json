@@ -1,0 +1,1 @@
+{"entries": [{"name": "manual.txt", "type": "file"}, {"name": "help.txt", "type": "symlink", "target": "manual.txt"}]}

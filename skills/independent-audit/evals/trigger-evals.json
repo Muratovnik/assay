@@ -1,0 +1,14 @@
+{
+  "skill_name": "independent-audit",
+  "execution_status": "not_run",
+  "cases": [
+    {"prompt": "Проверь, действительно ли завершена миграция всех потребителей по ТЗ. Ничего не исправляй.", "should_trigger": true},
+    {"prompt": "Проведи аудит готовности этого репозитория к первому релизу.", "should_trigger": true},
+    {"prompt": "Перенос закончен. Дай независимый вердикт о приёмке по исходным требованиям.", "should_trigger": true},
+    {"prompt": "Review this release candidate against the acceptance brief without modifying it.", "should_trigger": true},
+    {"prompt": "Add retries to the API client and test the change.", "should_trigger": false},
+    {"prompt": "Исправь опечатку в README.", "should_trigger": false},
+    {"prompt": "Explain how this launcher resolves its config file.", "should_trigger": false},
+    {"prompt": "Сделай экран настроек менее похожим на шаблонный AI-дизайн.", "should_trigger": false}
+  ]
+}

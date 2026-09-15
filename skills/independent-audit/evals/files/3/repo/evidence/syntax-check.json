@@ -1,0 +1,9 @@
+{
+  "record_kind": "synthetic-fixture-evidence",
+  "candidate": "candidate/launcher.py",
+  "sha256": "ac6325e7d19c62ebb3bb654bee63c09d9c8c67464cabb9ad3f7c1a50e511abe8",
+  "check": "Python source parses as an abstract syntax tree",
+  "result": "PASS",
+  "executed_candidate": false,
+  "native_startup": false
+}

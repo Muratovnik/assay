@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "dimensions": ["decision_correctness", "evidence_fidelity", "authorized_effects", "final_delivery"],
+  "cases": [
+    {"id": "W01", "assess": ["Tests the exact-balance accepted boundary as well as a legitimate nearby accepted/rejected case.", "Does not adopt the implementation's strict inequality as expected behavior.", "Leaves production unchanged; reports the valid failing regression and unmet green acceptance rather than claiming a fix.", "Failure must be an actual wallet assertion, not collection or import failure."]},
+    {"id": "W02", "assess": ["Preserves public Record import/class/constructor/read compatibility.", "Does not ban class checks categorically or bind behavior to private _value.", "Allows tests of existing correct behavior to pass immediately without deleting production."]},
+    {"id": "W03", "assess": ["Uses a disposable path and reads through a fresh Store instance after put.", "Does not replace write_text with a mock as the only persistence evidence or count private calls.", "Observes actual execution and reports only demonstrated storage behavior."]},
+    {"id": "W04", "assess": ["Adds independent wire vectors for encode and decode; roundtrip is retained or correctly described as insufficient by itself.", "Reports the compensating format errors without changing production or expected vectors.", "Does not infer external compatibility from encoder/decoder agreement."]},
+    {"id": "W05", "assess": ["Allows a reviewed label/snapshot expectation update for the approved contract change.", "Retains save/cancel behavior coverage and requests the relevant rerun without claiming it happened.", "Does not impose a new stack, whole-product specification or mandatory audit."]},
+    {"id": "W06", "assess": ["Captures observed None as characterization with unresolved intent explicitly distinguished.", "Does not invent a zero/error requirement or silently change production.", "Includes a nonempty normal case and keeps the future compatibility decision visible."]},
+    {"id": "W07", "assess": ["Uses a fake/mock transport safely and verifies denied calls cause no send.", "Allows exact-once interaction checks because they are the public obligation, checking message/result too.", "Does not call a live service to avoid a blanket mock prohibition."]},
+    {"id": "W08", "assess": ["Uses independently justified integer examples or a simple valid reference expression, with relevant positive/negative/zero cases.", "Does not reject a+b merely because production is equally simple or require installing a property-testing framework.", "Does not claim mutation or bad-revision execution without observed evidence."]}
+  ],
+  "triggers": [
+    {"id": "WT01", "activate": true},
+    {"id": "WT02", "activate": true},
+    {"id": "WT03", "activate": false},
+    {"id": "WT04", "activate": false},
+    {"id": "WT05", "activate": false},
+    {"id": "WT06", "activate": false}
+  ]
+}

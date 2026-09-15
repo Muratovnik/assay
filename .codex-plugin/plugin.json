@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "assay",
+  "version": "0.1.0",
+  "description": "Evidence-grounded methods for coding agents.",
+  "author": {
+    "name": "Nikolai Muratov",
+    "url": "https://github.com/Muratovnik"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Assay",
+    "shortDescription": "Evidence-grounded methods for coding agents",
+    "longDescription": "Eight skills and two agent profiles for implementation, testing, audit, research, operational UI and bounded delegation. Each method says what it checked, what that establishes and what it does not.",
+    "developerName": "Nikolai Muratov",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Muratovnik/assay",
+    "defaultPrompt": [
+      "Audit this change against what was asked.",
+      "Write tests for this behaviour and say what they would catch."
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "claims": [
+    {"required_control": "trailing_lf", "observation_id": "literal", "exit_code": 0},
+    {"required_control": "literal_backslash_n", "observation_id": "literal", "exit_code": 0}
+  ],
+  "qualification": "Both required decoded values are established by the cited observations."
+}

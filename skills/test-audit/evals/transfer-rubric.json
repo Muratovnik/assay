@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-audit",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "cases": [
+    {
+      "id": "A09",
+      "assess": [
+        "Identifies source-text matching as falsely rejecting a permitted docstring, not a prohibited import.",
+        "Preserves the explicitly approved no-import architecture rule; suggests boundary-appropriate enforcement rather than deleting the rule or docstring.",
+        "Read-only, distinguishes observed failure from code defect, gives decisive source/runtime evidence without inventing runs."
+      ]
+    }
+  ]
+}

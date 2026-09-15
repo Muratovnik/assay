@@ -1,0 +1,37 @@
+name: UI evidence examples
+
+on:
+  pull_request:
+    paths:
+      - skills/operations-ui-delivery/**
+      - tools/test_ui_context.py
+      - .github/workflows/ui-evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1; same as source checks
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - run: python -m unittest tools/test_ui_context.py
+      - name: Run evaluator-only browser examples outside the source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          harness="$RUNNER_TEMP/operations-ui-evidence"
+          mkdir -p "$harness/skills"
+          cp -R skills/operations-ui-delivery "$harness/skills/"
+          npm install --prefix "$harness" --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
+            playwright@1.63.0 @axe-core/playwright@4.13.0 axe-core@4.13.0
+          "$harness/node_modules/.bin/playwright" install --with-deps chromium
+          node --test "$harness"/skills/operations-ui-delivery/evals/browser/*.test.mjs

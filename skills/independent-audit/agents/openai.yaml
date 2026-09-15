@@ -1,0 +1,4 @@
+interface:
+  display_name: "Independent Audit"
+  short_description: "Audit a change, migration or repository against its brief"
+  default_prompt: "Use $independent-audit to check this result against what was asked; gather independent evidence and give a verdict without fixing anything."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Audit"
+  short_description: "Check what tests mean, catch and fail to catch"
+  default_prompt: "Use $test-audit to review these tests: whether the expectations are justified, which real defects they would catch, and where they are brittle. Change nothing."

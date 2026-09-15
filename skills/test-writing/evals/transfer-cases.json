@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "frozen_before_execution": "2026-09-03",
+  "cases": [
+    {
+      "id": "W09",
+      "prompt": "Добавь регрессионные тесты нормализации заголовков и исправь нарушение CONTRACT.md. Разрешено менять headers.py и создать test_headers.py. Используй unittest; не меняй контракт и не добавляй зависимости.",
+      "files": {
+        "CONTRACT.md": "normalize_headers accepts a mapping of string keys to arbitrary values. It strips surrounding whitespace from each key and lowercases it. It preserves values, including None and empty strings. If distinct input keys collide after normalization, it raises ValueError instead of choosing a winner. No rule about empty normalized names is specified. Both implementation repair and regression tests are authorized.\n",
+        "headers.py": "def normalize_headers(headers):\n    return {key.strip().lower(): value for key, value in headers.items()}\n"
+      }
+    }
+  ]
+}
