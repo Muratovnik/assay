@@ -113,8 +113,9 @@ An apology is fine when the substance stands next to it.
 - **Genuine parallel structure.** Uniformly built items in a list or a reference
   section reflect uniform material, and demanding variety damages them.
 - **The spacing convention.** A space between Chinese text and Latin letters or
-  digits — 从 11 分钟缩短到 4 分钟, `APP_TRACE_DIR` 用于指定目录 — is set and
-  preserved, and no space is added next to full-width punctuation.
+  digits — 从 11 分钟缩短到 4 分钟, `APP_TRACE_DIR` 用于指定目录 — follows
+  whichever convention the text already uses, and that convention is preserved.
+  No space is added next to full-width punctuation.
 - **Half-width digits and identifiers.** 30 天, `--trace-level`, `basic`.
   Identifiers are never translated, re-cased or converted to full-width forms,
   and neither are numbers.

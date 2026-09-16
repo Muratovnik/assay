@@ -1,6 +1,6 @@
 ---
 name: text-writing
-description: Write, edit or review ordinary prose — messages, letters, articles, explanations, portfolio and product copy — so that the facts, the conditions and the author's voice survive the edit; skip product documentation (README, how-to, tutorial, reference, runbook, ADR, release notes), code changes, agent instruction files such as AGENTS.md and SKILL.md, and test runs.
+description: Write, edit or review ordinary prose — messages, letters, articles, explanations of a topic, portfolio and product copy — so that the facts, the conditions and the author's voice survive the edit; skip product documentation (README, how-to, tutorial, reference, runbook, ADR, release notes), code changes, agent instruction files such as AGENTS.md, CLAUDE.md and SKILL.md, and test runs.
 license: MIT
 ---
 
