@@ -47,7 +47,7 @@ npx skills add Muratovnik/assay
 ```
 
 加上 `-a claude-code` 或 `-a codex` 可指定单一客户端，`-g` 表示全局安装而非项目
-安装，`--skill <名称>` 则只取其中一个方法而不是全部八个。
+安装，`--skill <名称>` 则只取其中一个方法，而不是整个库。
 
 有一点值得注意：对 Codex 而言，该 CLI 的全局安装会写入 `~/.codex/skills/`，而当前
 Codex 文档并未把这个路径列为技能根目录。如果安装后 Codex 看不到这些技能，请改为

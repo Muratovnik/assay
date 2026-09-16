@@ -1,7 +1,7 @@
 # assay
 
-Reusable methods for coding agents: eight skills and two agent profiles for
-Claude Code, Codex, Cursor and Gemini CLI.
+Reusable methods for coding agents: skills and agent profiles for Claude Code,
+Codex, Cursor and Gemini CLI.
 
 **English** · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
 

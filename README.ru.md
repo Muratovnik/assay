@@ -1,7 +1,7 @@
 # assay
 
-Переиспользуемые методы для кодовых агентов: восемь навыков и два профиля
-агентов для Claude Code, Codex, Cursor и Gemini CLI.
+Переиспользуемые методы для кодовых агентов: навыки и профили агентов для
+Claude Code, Codex, Cursor и Gemini CLI.
 
 [English](README.md) · **Русский** · [简体中文](README.zh-CN.md)
 

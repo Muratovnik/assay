@@ -1,7 +1,7 @@
 # assay
 
-面向编码智能体的可复用方法：八项技能与两个智能体配置，适用于 Claude Code、Codex、
-Cursor 与 Gemini CLI。
+面向编码智能体的可复用方法：技能与智能体配置，适用于 Claude Code、Codex、Cursor
+与 Gemini CLI。
 
 [English](README.md) · [Русский](README.ru.md) · **简体中文**
 

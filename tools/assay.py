@@ -753,7 +753,7 @@ def check(root: Path = ROOT) -> list[str]:
 
 SUMMARY = "Evidence-grounded methods for coding agents"
 LONG_SUMMARY = (
-    "Eight skills and two agent profiles for implementation, testing, audit, "
+    "Skills and agent profiles for implementation, testing, audit, "
     "research, operational UI and bounded delegation. Each method says what it "
     "checked, what that establishes and what it does not."
 )

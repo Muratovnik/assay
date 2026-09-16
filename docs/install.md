@@ -49,8 +49,8 @@ npx skills add Muratovnik/assay
 ```
 
 Add `-a claude-code` or `-a codex` to target one client, `-g` for a global rather
-than project install, and `--skill <name>` to take one method instead of all
-eight.
+than project install, and `--skill <name>` to take one method rather than the
+whole library.
 
 One caveat worth knowing: for Codex the CLI's global install writes to
 `~/.codex/skills/`, which current Codex documentation does not list as a skill
