@@ -30,7 +30,8 @@ The reader's task is visible in the first screen. Steps run in the order they
 must run, with nothing assumed that the reader does not already have. Terms stay
 stable: one name per concept for the whole document, and the product's own name
 for anything the product names. Every section exists for a reader question; a
-section that exists for symmetry is removed rather than filled.
+section that exists only for symmetry can be removed when restructuring is
+authorized; a wording-only review reports the issue rather than changing scope.
 
 Prefer the positive orientation the reader needs over a bare fact dump: an
 introductory sentence that tells someone whether to keep reading earns its place
@@ -51,11 +52,12 @@ they carry a justified point. Repetitive structure is correct in a reference
 page. A list of three real items is a list of three real items. Before flagging
 a phrase, name what the reader loses; if you cannot, leave it. See
 [voice and tone](https://developers.google.com/style/tone) for a positive
-target: clear, respectful, specific, and never "simply".
+target: clear, respectful and specific, without dismissing a difficult step
+as trivial. This is not a ban on every use of the word "simply".
 
 **Do not rewrite good text to produce a visible diff.** When a document is
-already correct and usable, the correct output is "no changes needed" plus, at
-most, a short list of optional suggestions. The size of a diff is not evidence
+already correct and usable, a brief no-change conclusion is enough for review;
+do not invent optional suggestions to fill a report. The size of a diff is not evidence
 of work, and an unnecessary rewrite costs review time and invites new errors.
 
 **Never strip attribution or safety furniture** in the name of removing
@@ -71,3 +73,26 @@ gaps as `error` or `warning` depending on whether the reader can still complete
 the task. Report group 3 as `suggestion`, unless a passage is so padded that the
 instruction is genuinely hard to find. Never let a group 3 preference overturn a
 group 1 fact — the shortest correct sentence beats the most elegant wrong one.
+
+## Restraint before applying a change
+
+Name the concrete benefit in the opened task: remove an actual ambiguity,
+incorrect grammar, padding or a specified style violation. Another valid word
+order is not enough. Leave a good passage in place rather than creating a diff
+or inventing a grammatical explanation. A requested rewrite can legitimately
+change phrasing, and a real ambiguity still needs repair.
+
+A review of somebody else's revision is not a contest between two editors.
+Accept equivalent wording under a preservation contract even when you would
+have written it differently. Optional stylistic preferences do not turn a
+correct edit into an error.
+
+Use all supplied task facts, but no facts from a style sample. A tense correction
+supported by the task is different from an invented update. Missing corroboration
+is a verification limit, not proof that an existing statement is false. Keep
+material uncertainty visible without producing a service log for every sentence.
+
+For draft/edit deliver one final text. For review deliver specific findings or
+a brief no-issue conclusion. Do not narrate the skill, references or every passed
+check. Keep safety and attribution notices; do not repair a URL, contact or
+identifier silently as a stylistic change.

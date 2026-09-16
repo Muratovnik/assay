@@ -1,89 +1,63 @@
 # README and the first working step
 
-A README answers one question before any other: what does the reader get, and
-how do they get it. Everything else in the file is arrangement.
+Start with what the intended reader obtains: a package, CLI, library, hosted
+service or reusable assets. A monorepo is a source layout, not a delivery route.
+Apply this procedure to installation/quickstart work or a whole README, not to
+an unrelated local wording review.
 
-## Decide what the product is
+## Select a supported route
 
-Name the delivered thing before writing a line:
+1. Identify the audience: product user, contributor, operator or someone running
+   an unreleased checkout. Infer from the request and sources; ask only if the
+   distinction changes the instructions.
+2. Establish which delivery routes are available. A manifest supplies the package
+   and entry-point declarations. Release/registry evidence establishes publication
+   within its scope. Repository code can support a checkout route.
+3. Choose the primary route for that reader. Preserve working alternatives when
+   relevant; do not call an alternative broken without evidence.
+4. Verify prerequisites, command names, working directory and the first observable
+   result to the extent the task permits.
 
-- a **package** installed from a registry;
-- a **CLI** the reader runs after installing it;
-- a **library** imported into their own code;
-- a **hosted application or service** they sign into or call;
-- a **set of assets** — skills, templates, configurations — copied or linked
-  into a client.
+Keep published installation and checkout execution distinct. A successful
+checkout does not prove the published wheel works; an available wheel does not
+prove the checkout is broken. `python -m` may coexist with a console script.
+Editable installation can be correct for development or an unreleased project.
 
-A repository layout is not an answer. A monorepo README may explain where the
-sources live, but the reader still needs to know which artifact is theirs and
-where it comes from. If the repository publishes several things, say which one
-this README is about and link the others.
-
-## Take install commands from the manifest and the published route
-
-Read the packaging manifest and the publication configuration, then write the
-command they imply: the package name, the registry, the supported versions and
-the entry point as declared, not as remembered from an older README. A command
-that no manifest supports is invented, and it will fail for the first reader who
-trusts it.
-
-Keep two things apart, explicitly:
-
-- **Running from a checkout.** Clone, install dependencies, run the entry point
-  from the working tree. This proves the code runs; it proves nothing about the
-  published artifact.
-- **Installing the published package.** The registry command, the version the
-  reader will actually receive, and what lands on their machine.
-
-A successful local run is not evidence for the install section. If the published
-route has not been exercised, say so in the document's own terms — "documented,
-not yet verified against the published package" — rather than presenting it as
-tested.
-
-**A planned publication is never written as available.** A pre-release README may
-describe the intended package name and route, in the future tense and marked as
-planned. It may not show an install command as if it worked today. The same
-applies to a platform that is merely intended to work: an untested operating
-system is listed as untested or not listed.
+If the user is consuming a released package and publication is supported, lead
+with that route instead of repairing a contributor-only setup. If publication
+is unknown, do not fabricate it or force a registry command. A planned image or
+package stays planned. Do not present a route as personally tested when only
+source or release documentation was inspected.
 
 ## Quickstart
 
-The quickstart takes a reader from nothing to one real result:
+Give the needed starting conditions, ordered commands and an observable result.
+A runtime requirement in the manifest is useful when it was not already stated
+in the reader's starting environment. Use the actual name of the installed
+command, which may differ from the distribution name.
 
-- **Prerequisites** — runtime version, account, credentials, platform, and
-  anything else that must exist before the first command. Missing prerequisites
-  are the most common reason a quickstart fails for everyone but its author.
-- **The commands**, in order, with the working directory made clear.
-- **The expected result** — the output, the file, the URL, the exit status —
-  so the reader can tell success from a silent failure.
-- **The first thing that usually goes wrong**, when there is a known one.
+Credentials and user-controlled paths may be placeholders when explained. Keep
+them labelled and do not invent real credentials or reachable accounts. Treat
+explicitly anonymized contacts as fixture values rather than publication bugs;
+a real unresolved production placeholder still deserves attention.
 
-Placeholders are fine when they are explained. `WIDGET_API_KEY=<your key>` with
-a sentence on where the key comes from and what it may access is better than an
-example that pretends no account is needed. Never paste a real credential, and
-never invent a plausible-looking one.
+Use separate platform paths when they differ. Do not force one package-manager
+command when the product requires alternatives. Separate supported, documented
+and actually exercised claims; no blanket downgrade of documented support solely
+because this editor did not test every platform.
 
-Several install paths are fine when reality has several: different commands for
-Windows and Linux, a package manager and a container image, a plugin route and a
-manual copy. Give each one its own verified command and say which is primary.
-When two paths are genuinely equivalent, one is enough — the goal is a reader who
-succeeds, not a matrix.
+## Include only useful sections
 
-## What a README does not owe anyone
+There is no required line count, heading list, badge row or section quota. Keep
+orientation, useful limitations and the first working step visible. Move long
+reference or contributor material only when doing so helps the chosen reader,
+and retain links to it. Do not delete relevant warnings to shorten the README.
 
-There is no required line count, section count or fixed heading list. No badge is
-mandatory. A short project with one install path and one command has a short
-README, and splitting it into four near-empty sections to look complete makes it
-worse. Add a section when a reader question demands it: limitations that affect
-the decision to adopt, supported versions, licence, where to report a problem,
-where the deeper documentation lives.
+A feature-list review need not invent a Quickstart. An installation edit need
+not rewrite the overview. If the request is a whole-document publication audit,
+check the load-bearing path and readiness explicitly rather than merely filling
+headings. Resolve local links from their actual source path, not a packet alias.
 
-Move contributor material, design rationale and long reference tables into their
-own documents when they crowd out the first working step, and keep the links
-working. Confirmed limitations belong near the top, not in a FAQ at the bottom:
-a reader deciding whether to use the product needs them before installing.
-
-Before finishing, reread the file as someone who has never seen the project, and
-check the claims that a newcomer cannot verify: the product name, the install
-command, the version, the platform list and the status of anything described as
-supported.
+Return usable Markdown. An actual README file is not enclosed in a code fence.
+When showing its literal source in a reply, choose an outer fence longer than
+any matching fence in the content.

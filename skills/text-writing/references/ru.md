@@ -109,7 +109,7 @@ This belongs to the meaning group, and it outranks every stylistic point above.
 
 > Дефект: «может потребовать перезапуска» → «потребует перезапуска».
 
-> Допустимо: «может потребовать перезапуска» → «иногда требует перезапуска».
+> Допустимо: «может потребовать перезапуска» → «перезапуск может понадобиться».
 
 ## What is not a rule here
 
@@ -128,3 +128,18 @@ This belongs to the meaning group, and it outranks every stylistic point above.
   interface.
 - **A zero-defect count.** A text scrubbed until no heuristic fires is not
   thereby accurate or useful.
+
+## Valid word order does not need repair
+
+> Допустимо: «Архивы по понедельникам проверяет дежурный — вручную запускать
+> проверку не нужно».
+
+The subject after the object is normal here. Do not move it merely to imitate
+English subject–verb–object order, and do not describe an ordinary phrase as a
+subordinate clause without grammatical grounds.
+
+> Требует уточнения: «После разговора с менеджером редактор изменил его план».
+
+If the material does not identify whose plan changed, ask or retain the
+uncertainty instead of choosing an owner. If it does identify the owner, name
+that person or role. Restraint is not a ban on disambiguation.

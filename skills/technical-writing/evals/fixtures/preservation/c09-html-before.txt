@@ -1,0 +1,9 @@
+# Notes
+
+<div class="callout">
+  Run <code>widgetctl sync --dry-run</code> first.
+</div>
+
+<Callout type="warning">The old spelling exits 2.</Callout>
+
+Plain paragraph that may be copyedited.

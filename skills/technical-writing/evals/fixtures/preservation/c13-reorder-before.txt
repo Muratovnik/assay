@@ -1,0 +1,11 @@
+# Preview a sync
+
+Run `widgetctl sync --dry-run` to list the files.
+
+```bash
+widgetctl sync --dry-run --timeout 30
+```
+
+## Troubleshooting
+
+See the [report](logs/sync.md).

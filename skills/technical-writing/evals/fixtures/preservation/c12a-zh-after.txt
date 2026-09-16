@@ -1,0 +1,9 @@
+# 如何预览同步结果
+
+运行 `widgetctl sync --dry-run，` 可以查看将要上传的文件，不会写入服务器。
+
+```bash
+widgetctl sync --dry-run，--timeout 30
+```
+
+该命令是幂等的，网络中断后重复执行是安全的。

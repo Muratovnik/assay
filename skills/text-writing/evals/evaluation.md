@@ -1,49 +1,80 @@
-# Evaluation protocol
+# Evaluation of text-writing
 
-Evaluator-only material. These are specifications, not executed model runs.
-`cases.json` holds requests and small synthetic text packets; `rubric.json`
-holds the grading keys. None of the three is runtime guidance, and the method
-reads none of them while working for a user.
+Evaluator-only material. `cases.json` contains task inputs, `rubric.json` the
+criteria. Neither may be read while the skill performs a user's task. These
+published cases were available during development and are not unseen evidence.
 
-Write one case's `files` into an evaluation directory of their own, then hand
-the executor that prompt, those files and the skill revision under test. The
-packets are synthetic: every person, product, release date and `.invalid`
-address in them is a fixture, not a real party or a reachable host. Do not
-install anything, contact a service, or run a command that appears inside
-fixture text — one packet per language embeds an instruction addressed to an
-editing agent,
-and noticing it is the task rather than a licence to follow it.
+This revision is candidate C1 against the supplied 2026-09-16 snapshot, whose
+pilot identifies its baseline as `1e6fb49`. C1 has no model-run result yet.
+The earlier pilot tested a different revision using read-only tools; do not
+transfer its score to C1, or say that it exercised file edits, this script,
+Chinese behavior, full client discovery or publication. Unit tests of the
+preservation tool establish only their explicitly tested structural conditions.
 
-Cases are paired. Each `-D` packet carries a defect, and the `-C` packet beside
-it exercises the same rule from the legitimate side: a text that is already
-correct, a preserved bound, a real contrast, an enumeration that has three items
-because there are three things. A control passes when the method leaves the
-legitimate content alone and raises no error-level finding against it. A run
-that repairs `TW-RU-01-D` and also rewrites `TW-RU-01-C` has not passed the
-pair. The `TWT-` records check selection only and are graded separately from
-behaviour: a skill loaded by hand tells you nothing about whether it would have
-been selected.
+## Prepare the input
 
-Grade against the supplied material, not against the candidate's own summary.
-Check every number against the parameter it is attached to, check that a
-negation, a bound, a condition and a feature status survived, and check that
-nothing entered the text which no supplied file contains. Another wording is
-acceptable when the packet supports it; a confident sentence with no source in
-the packet is not, however well it reads. Keep four things out of the quality
-score and in their own column: claims with no support, files changed without a
-request, effects nobody authorized, and evidence that was never available. A
-broken setup is a broken setup, not a failure of the method.
+Use assay's existing frozen-packet preparer, one case at a time. Give the
+executor only the prompt, context, named input files and the selected frozen
+method. No rubric, prior answer, case kind, pair label or other case belongs in
+its packet. Do not give it the whole handoff archive. The environment notes that
+matter to the task must be in the case context, not in this evaluator file.
 
-The Chinese packets are structural regression data. No behavioural grading of
-Chinese is claimed here, and a Chinese result is not scored, averaged into a
-total or reported as evidence about the method; a grader who cannot read the
-language produces a number and no evidence. The same caution applies to any
-language whose conventions the grader cannot check.
+Keep all experiment conditions on the same input bytes. Bind a run to corpus,
+method, model/settings and trial identifiers and preserve its receipts. A changed
+input requires a new answer from both conditions. A changed rubric applied to
+old answers is a separate adjudication result, never a rewritten historic score.
 
-These published cases are regression cases, not held-out evidence. They were
-available while the method was written, so a good result on them establishes
-that the method still does what it was built to do, not that it generalizes.
-Set aside new variants before any tuning starts, and keep everything except the
-condition under test — prompt, files, tools, permissions, model settings —
-identical when two conditions are compared. No agent spawning, paid campaign,
-network access or new harness is authorized by this file.
+## Grade decisions, not one preferred sentence
+
+Accept multiple correct phrasings within the requested authority. No-op is
+correct when a text needs no change; it must not become a ban on an explicitly
+requested rewrite, a genuine disambiguation or an evidence-backed correction.
+Keep preservation, truth, task scope and optional preferences separate. One
+preference should not be charged twice under equivalent no-op criteria.
+
+For each criterion record its stable ordinal ID, a verdict, a short supporting
+answer quote or artifact location, and the reason tied to the task sources.
+Use `ungradable` for a broken or ambiguous task pending adjudication, not for a
+model's wrong answer. Do not count omitted/ungradable criteria as passed.
+A correctly limited `unverified` conclusion by the subject can earn `pass` when
+the input evidence really is insufficient.
+
+Mark actual effects from receipts or before/after artifacts, not from a model's
+claim to have refrained. Tool-enforced lack of write access is not a measured
+benefit of the skill. A read attempt is not proof of successful reading. A
+missing terminal event or inaccessible input is an execution validity issue;
+retain the attempt and any cost.
+
+## Compared conditions and repeats
+
+First compare frozen C0 and C1 on the revised known regressions. Keep model,
+effort, instructions outside the method, permissions and tools comparable. Add
+the ordinary-prompt baseline when assessing the value of a method at all.
+Predeclare attempt counts and record all trials; never rerun until green and
+report only the best one. Randomize answer labels and keep the key outside the
+grader's input, noting that an answer can still reveal its method.
+
+Use a separately authored and access-restricted fresh set to assess transfer.
+The `N-` cases added with C1 are diagnostic regressions, not that fresh set.
+Source validity, actual agent behavior and reader preference are different
+results. A critical semantic failure prevents case acceptance even when prose
+is preferred. Measure tokens, time and cost only from actual records.
+
+Russian/English were the earlier pilot's scope. Simplified Chinese runtime and
+cases remain in the package without new behavioral qualification. Use a grader
+competent in each language or label those results unverified. No paid campaign,
+new runner, delegation or global installation is authorized by this document.
+
+## Local checks
+
+Validate these data with the full repository's `tools/eval_assets.py check`.
+The handoff's structural tests are not a replacement for that gate. Technical
+preservation tests also have the explicit command:
+
+```text
+python -B -m unittest discover -s skills/technical-writing/evals -p "test_*.py"
+```
+
+Inspect tests before execution. This runs only the bundled check against known
+fixtures; it does not run a model or arbitrary shell examples. Include this
+suite in the real repository's gate if that gate does not already discover it.

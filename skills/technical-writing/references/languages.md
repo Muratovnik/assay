@@ -39,9 +39,10 @@ Defective:
 Legitimate, and not to be flagged:
 
 > Установите пакет: `pip install widgetctl`. Команда ставит CLI и его
-> зависимости — на это нужно около минуты.
+> зависимости — отдельная установка зависимостей не нужна.
 
-The second example keeps the em dash, keeps the Latin command untouched and
+These are illustrative claims, usable only when the product sources support
+them; examples do not supply facts about the user's product. The second example keeps the em dash, keeps the Latin command untouched and
 repeats the term «команда» rather than hunting for a synonym. Normative Russian
 punctuation, including the em dash and the dash in an elliptical sentence, is
 correct; a rule borrowed from an English style guide that bans dashes does not
@@ -116,3 +117,15 @@ paragraph split is not a defect: translations legitimately differ in style, and
 rewriting a fluent translation to mirror English syntax makes it worse. When the
 original changes, list which translated sections the change touches; a
 translation silently left behind is the common failure, and it looks fine.
+
+## Editing the delivered form
+
+Do not rearrange fluent Russian into English word order, or call a legitimate
+construction a grammar error just to explain a diff. Correct genuine ambiguity
+using the supplied facts, not a guessed actor. The task's context can justify a
+tense correction; a style sample cannot supply a new event.
+
+Translations may need localized prose and equivalent number/date typography.
+Preserve the value, unit, applicability and binding to a parameter, and keep
+technical identifiers exact. An explicitly requested byte-for-byte constraint
+remains binding. Do not force source-language sentence order on fluent prose.

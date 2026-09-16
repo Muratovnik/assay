@@ -19,9 +19,9 @@ python <skill-directory>/scripts/text_check.py preserve --before <old file> --af
 report, `--allow-unverified` to keep an unclassifiable construct from deciding
 the exit code. It uses only the standard library, reads the two files, and
 writes nothing: no command inside the document is executed, no model is called
-and no network connection is opened. Output is UTF-8 regardless of the console
-code page, so a report quoting Chinese or Cyrillic text is readable and
-redirectable on any terminal. The caller must be allowed to read both files.
+and no network connection is opened. The script emits UTF-8; configure the receiving terminal or consumer to
+decode it as UTF-8 for Chinese and Cyrillic output. The caller must be allowed to read both files and execute this named check.
+A review request alone does not authorize execution.
 
 ## What each mode protects
 
@@ -34,8 +34,9 @@ someone else's words.
 `rewrite` compares fenced blocks, inline code spans, link destinations and the
 frontmatter as a multiset: the same blocks must all still be there, in any
 order, under any heading. Table rows and blockquotes are not protected, because
-restructuring them is the point of a rewrite — but a command inside a table cell
-is still compared, as an inline code span.
+restructuring them is the point of a rewrite — but an inline-code command inside a simple table cell
+is still compared when the scanner recognizes it. Do not assume this covers
+complex table/HTML syntax.
 
 Table protection is deliberately coarse: the whole row is compared, so editing
 the prose in a description cell is reported as a change. That is the safe
@@ -54,7 +55,7 @@ that edit deliberately rather than expecting the check to bless it.
 
 | Exit code | Meaning |
 | --- | --- |
-| `0` | Every protected region was preserved, and nothing was left unverified. |
+| `0` | No preservation failure; by default nothing was left unverified. With `--allow-unverified`, inspect the retained statuses. |
 | `1` | At least one protected region changed. |
 | `2` | Nothing was refuted and nothing could be concluded, or the input was invalid. |
 
@@ -73,8 +74,8 @@ to turn a document the scanner cannot read into a green result.
 
 ## What this cannot establish
 
-Structural preservation is not semantic equivalence. All of the following pass
-this check and can still be wrong:
+Structural preservation is not semantic equivalence. The following errors can survive a
+structurally passing result:
 
 - A correct code block moved under the wrong heading. Both modes compare the
   blocks, not the section they belong to.
@@ -86,10 +87,11 @@ this check and can still be wrong:
   "proposed" to "available".
 - Prose in a table cell or an alert blockquote in `rewrite` mode, and any prose
   anywhere in either mode.
-- A code block written as an indented four-space block instead of a fence. Only
-  fenced blocks are recognised.
-- Anything inside an HTML block or an MDX-like tag. Those are reported
-  `unverified`, never `pass`.
+- A change inside an indented four-space code block in a document that also
+  contains some recognized protected content. Only fenced blocks are protected.
+
+HTML blocks and MDX-like tags are a different limitation: the script reports
+`unverified`; they are not examples of full coverage with a clean strict result.
 
 Known false positives: a prose fragment that looks like a tag, such as a
 generic type written inline, is reported as an unclassifiable construct. A
@@ -97,12 +99,11 @@ destination containing brackets, spaces or balanced parentheses is not
 extracted; the link marker is reported `unverified` instead, so an unread
 destination never counts as an absent one.
 
-One false positive goes the other way. A single unpaired backtick in prose
+Another scanner limitation concerns an unpaired backtick. A single unpaired backtick in prose
 pairs with the opening backtick of the next code span, so the span the scanner
 compares is not the one you see, and an edit to unrelated prose between them is
-reported as `inline_code` `fail`. Close or escape the stray backtick in the
-source; the document was ambiguous, and the check is reading it the way a
-Markdown renderer does.
+reported as `inline_code` `fail`. Inspect the source and intended rendering. This observation does not establish
+compatibility with every Markdown renderer or authorize changing the source.
 
 The claim this check supports is narrow: "the protected regions of the document
 are unchanged". Everything else still needs reading, and a run of the command
@@ -118,8 +119,8 @@ statuses. Nothing here installs anything.
   evidence of quality; a line-length rule in particular proves nothing.
 - **lychee** resolves links. It answers whether a destination exists, never
   whether the destination is still the right one: a link silently retargeted
-  from one existing file to another passes cleanly. Only a before/after
-  comparison catches that.
+  from one existing file to another passes cleanly. A before/after
+  comparison detects the changed target directly; semantic review is still needed.
 - **Vale** applies a glossary and narrow style rules. Run it advisory first and
   raise a rule to blocking only after it has been shown not to fire on
   known-good text. See [Vale](https://vale.sh/) for its rule formats.
@@ -129,9 +130,35 @@ A tool that is not installed, a run that timed out, and an HTTP 403 are all
 broken. Report the missing check rather than dropping it: a skipped check that
 disappears from the report turns into an implied success.
 
-Language scope matters as much as tool availability. Line-length limits, word
-counts and `\b` word boundaries are properties of space-separated writing and do
-not transfer to Chinese, where they either match nothing or flag every line.
-Disable such rules for Chinese content or scope them by language, and confirm
+Language scope matters as much as tool availability. Do not assume an English word-based heuristic
+or its thresholds transfers to Chinese. Tokenization and boundary behavior need
+a language-specific check. Disable inapplicable rules or scope them by language, and confirm
 that a style checker supports the language at all by running it on a known-good
 control file in that language before any rule is allowed to block.
+
+## Interpret the result in the right context
+
+A protected value changed during copyedit is a preservation failure even if
+both values would be valid configurations. Cite the before/after difference;
+do not claim the example is an implementation default without another source.
+Equivalent unprotected wording can be accepted while reverting a changed code
+block or link. A style preference is a separate, optional judgment.
+
+Link identity and link resolution are different checks. Resolve a relative
+path against the actual source document directory or the documented site base,
+not against the directory containing an evaluation alias. For example,
+`../reference/options.md` from `docs/how-to/setup.md` normalizes to
+`docs/reference/options.md`; `reference/options.md` does not. If the source path
+or renderer base is unknown, do not claim a destination was verified. This
+script compares link strings; it does not check destination existence, anchors
+or renderer-specific routing.
+
+The script does not validate the final reply's Markdown wrapper. An actual
+Markdown file must not have an extra fence around the entire document. If its
+literal source is shown in a reply, use an outer fence longer than any matching
+fence in that content. Inspect the delivered artifact, not just quoted commands.
+
+`--allow-unverified` is not part of an acceptance shortcut. Keep default strict
+handling for an automated gate; an explicitly accepted unsupported construct
+still remains unverified in the report. A clean structural result never proves
+that qualifiers, defaults or command-to-section relationships stayed correct.

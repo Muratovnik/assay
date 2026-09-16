@@ -34,6 +34,7 @@ LITERAL_MACHINE_PATH = re.compile(
 GENERATED_DEFAULTS = {".git", "__pycache__"}
 # A pinned publication-gate zipapp is tracked bytes, not source text.
 BINARY_SUFFIXES = frozenset({".pyz"})
+UNTEXT_DECLARATION = "* -text"
 PROFILE_KEYS = {"schema_version", "name", "description", "capabilities", "instructions"}
 FORBIDDEN_PROFILE_KEYS = {
     "effort",
@@ -669,6 +670,34 @@ def openai_adapter_problems(path: Path, asset: Asset, root: Path) -> list[str]:
     return problems
 
 
+def still_text(directory: Path) -> set[str] | None:
+    """Names a byte-exact directory keeps under the ordinary text rules.
+
+    A test fixture that carries CRLF or broken encoding on purpose cannot also
+    be UTF-8 with LF, and renaming it to look binary would only hide what it
+    is. Git already has the word for this: a directory whose `.gitattributes`
+    says `* -text` declares its bytes are not text. Honour that declaration,
+    and keep linting the names that same file marks `text` again, so the
+    exemption covers the payload and never the prose beside it.
+
+    Returns None when the directory makes no such declaration.
+    """
+    attributes = directory / ".gitattributes"
+    if not attributes.is_file():
+        return None
+    exempt, kept = False, {".gitattributes"}
+    for line in attributes.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        pattern, *tokens = line.split()
+        if pattern == "*" and "-text" in tokens:
+            exempt = True
+        elif "text" in tokens and "/" not in pattern and "*" not in pattern:
+            kept.add(pattern)
+    return kept if exempt else None
+
+
 def check(root: Path = ROOT) -> list[str]:
     problems: list[str] = []
     try:
@@ -685,9 +714,15 @@ def check(root: Path = ROOT) -> list[str]:
     for required in BASE_FILES:
         if required not in known:
             problems.append(f"{required}: required source file is missing")
+    declarations: dict[Path, set[str] | None] = {}
     for path in files:
         relative = path.relative_to(root).as_posix()
         if path.suffix.lower() in BINARY_SUFFIXES:
+            continue
+        if path.parent not in declarations:
+            declarations[path.parent] = still_text(path.parent)
+        kept = declarations[path.parent]
+        if kept is not None and path.name not in kept:
             continue
         data = path.read_bytes()
         try:

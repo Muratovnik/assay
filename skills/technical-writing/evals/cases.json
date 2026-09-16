@@ -10,7 +10,8 @@
         "after.md": "## Синхронизация\n\nЗапустите `widgetctl sync --dryrun`, чтобы увидеть список файлов. Отчёт появится в [журнале](logs/report.md).\n\nТаймаут по умолчанию — не менее 30 секунд.\n",
         "cli-help.txt": "widgetctl sync [--dry-run] [--timeout SECONDS]\n  --dry-run    list the files that would be uploaded, upload nothing\n  --timeout    abort the run after SECONDS (default 30, also the maximum)\n",
         "tree.txt": "docs/logs/sync.md\ndocs/index.md\n"
-      }
+      },
+      "context": " before.md and after.md are aliases of docs/index.md. tree.txt contains repository-relative paths; use ordinary Markdown relative link resolution."
     },
     {
       "id": "TW02",
@@ -20,7 +21,8 @@
         "after.md": "## Синхронизация\n\nКоманда загружает локальные файлы на сервер. Запустите `widgetctl sync --dry-run`, чтобы увидеть список файлов — загрузка при этом не начнётся. Отчёт появится в [журнале](logs/sync.md).\n\nТаймаут по умолчанию — не более 30 секунд.\n",
         "cli-help.txt": "widgetctl sync [--dry-run] [--timeout SECONDS]\n  --dry-run    list the files that would be uploaded, upload nothing\n  --timeout    abort the run after SECONDS (default 30, also the maximum)\n",
         "tree.txt": "docs/logs/sync.md\ndocs/index.md\n"
-      }
+      },
+      "context": " before.md and after.md are aliases of docs/index.md. tree.txt contains repository-relative paths; use ordinary Markdown relative link resolution."
     },
     {
       "id": "TW03",
@@ -28,7 +30,8 @@
       "files": {
         "README.md": "# widgetctl\n\nThe fastest way to keep two catalogues in sync.\n\n## Install\n\n```\npip install widgetctl\n```\n\nThen run `widgetctl sync` from any directory.\n",
         "pyproject.toml": "[project]\nname = \"widget-tools\"\nversion = \"0.1.0\"\nrequires-python = \">=3.11\"\n\n[project.scripts]\nwidgetctl = \"widget_tools.cli:main\"\n",
-        "release.yml": "# Publication workflow. Disabled until the first tag is cut.\n# on:\n#   push:\n#     tags: [\"v*\"]\njobs: {}\n"
+        "release.yml": "# Publication workflow. Disabled until the first tag is cut.\n# on:\n#   push:\n#     tags: [\"v*\"]\njobs: {}\n",
+        "publication-status.txt": "Owner release record: widget-tools is not published in any registry yet, including manual releases. The intended distribution name is widget-tools. Do not execute installation commands.\n"
       }
     },
     {
@@ -156,6 +159,137 @@
       "files": {
         "install.md": "# Install the catalogue plugin\n\nInstall the CLI globally:\n\n```\nnpm install -g widgetctl\n```\n\nThe plugin ships 8 checks. Run `widgetctl verify --all` to list them.\n\nThe npm route is verified. The container route is documented only and has not been exercised.\n",
         "install.zh-CN.md": "# 安装目录插件\n\n运行 `widgetctl verify --all` 可以列出插件内置的 8 项检查。安装 CLI 时请加上全局参数：\n\n```\nnpm install -g widgetctl\n```\n\nnpm 安装方式已经过验证；容器方式目前只有文档说明，尚未实际执行过。\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-10-C",
+      "prompt": "Check whether `harbor workers status` in this runbook is supported by the supplied sources. Read only.",
+      "context": "help.txt is an excerpt covering restart only. No other source is supplied.",
+      "files": {
+        "runbook.md": "Inspect workers with `harbor workers status`.\n",
+        "help.txt": "harbor workers restart\n  Restart stuck workers.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-10-D",
+      "prompt": "Check whether `harbor workers status` in this runbook is supported by the supplied sources. Read only.",
+      "context": "parser.txt lists every command implemented in this version, with no aliases or plugins.",
+      "files": {
+        "runbook.md": "Inspect workers with `harbor workers status`.\n",
+        "parser.txt": "Complete command set: harbor workers inspect; harbor workers restart. inspect prints worker status without changing state.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-11-C",
+      "prompt": "Review only the version applicability of the procedure; do not edit the file.",
+      "context": "This page is served under /docs/2.4/; the site header already displays version 2.4. The attached help is for 2.4.",
+      "files": {
+        "guide.md": "Run `harbor inspect`.\n",
+        "help.txt": "harbor 2.4: inspect is supported.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-11-D",
+      "prompt": "Review only the version applicability of the procedure; do not edit the file.",
+      "context": "The target version is unknown. The only supplied compatibility matrix is complete for the two releases.",
+      "files": {
+        "guide.md": "Run `harbor inspect`.\n",
+        "compatibility.txt": "2.3: only harbor show. 2.4: harbor inspect replaces show.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-12-C",
+      "prompt": "Review the install route for contributors using the checkout. Return findings only.",
+      "context": "Synthetic source/owner record. No network or command execution is authorized.",
+      "files": {
+        "README.md": "Use Python 3.11+. From the checkout: `pip install -e .`, then `python -m harbor_cli inspect`.\n",
+        "pyproject.toml": "[project]\nname = \"harbor-tools\"\nversion = \"0.4.0\"\nrequires-python = \">=3.11\"\n[project.scripts]\nharbor = \"harbor_cli:main\"\n",
+        "release-status.txt": "Not published. The owner confirms editable install plus python -m harbor_cli inspect works from this checkout; harbor inspect is an equivalent console entry point.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-12-D",
+      "prompt": "Review the install route for a new user of the released package. Propose only the necessary correction.",
+      "context": "Python 3.11 is already installed. The owner supplies publication and smoke evidence.",
+      "files": {
+        "README.md": "Use Python 3.11+. From the checkout: `pip install -e .`, then `python -m harbor_cli inspect`.\n",
+        "pyproject.toml": "[project]\nname = \"harbor-tools\"\nversion = \"0.4.0\"\nrequires-python = \">=3.11\"\n[project.scripts]\nharbor = \"harbor_cli:main\"\n",
+        "release-status.txt": "harbor-tools 0.4.0 is published. The owner smoke-tested pip install harbor-tools and harbor inspect in a clean Python 3.11 environment. The checkout route remains supported for contributors.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-13-C",
+      "prompt": "Check the stated default in reference.md against the files. Read only.",
+      "context": "Only an example configuration is supplied; there is no implementation or default contract.",
+      "files": {
+        "reference.md": "The default polling interval is 12 seconds.\n",
+        "config.example.toml": "poll_seconds = 8\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-13-D",
+      "prompt": "Check the stated default in reference.md against the files. Read only.",
+      "context": "loader.py is the current implementation; missing poll_seconds takes the fallback in that file.",
+      "files": {
+        "reference.md": "The default polling interval is 12 seconds.\n",
+        "config.example.toml": "poll_seconds = 8\n",
+        "loader.py": "def poll_seconds(config):\n    return config.get(\"poll_seconds\", 20)\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-14-C",
+      "prompt": "Before publication, review this operations note. Do not change files or run commands.",
+      "context": "The owner-provided command contract covers the entire procedure.",
+      "files": {
+        "note.md": "Run `harbor queue inspect`. It prints depth and exits without modifying the queue.\n",
+        "contract.txt": "queue inspect: read-only, no credentials beyond the already assigned viewer role, prints depth. This note is a diagnostic step only, not an incident-recovery runbook.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-14-D",
+      "prompt": "Before publication, review this operations note. Do not change files or run commands.",
+      "context": "This procedure is intended for an operator addressing an incident.",
+      "files": {
+        "note.md": "Run `harbor queue discard --all` if the queue is slow.\n",
+        "contract.txt": "queue discard --all: permanently deletes queued jobs; no undo exists. Owner policy requires incident-lead approval and an export of job identifiers before deletion.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-15-C",
+      "prompt": "Check the relative link in this page against the supplied tree. Read only.",
+      "context": "page.md is an alias of docs/guides/login.md; paths in tree.txt are repository-relative and complete for this test, with no site routing overrides.",
+      "files": {
+        "page.md": "See the [token reference](../reference/tokens.md).\n",
+        "tree.txt": "docs/guides/login.md\ndocs/reference/tokens.md\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-15-D",
+      "prompt": "Check the relative link in this page against the supplied tree. Read only.",
+      "context": "page.md is an alias of docs/guides/login.md; paths in tree.txt are repository-relative and complete for this test, with no site routing overrides.",
+      "files": {
+        "page.md": "See the [token reference](reference/tokens.md).\n",
+        "tree.txt": "docs/guides/login.md\ndocs/reference/tokens.md\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-16-C",
+      "prompt": "Check the runtime prerequisite in this quickstart and propose a change only if needed.",
+      "context": "The onboarding page immediately above this fragment already requires and verifies Python 3.12. Do not duplicate it here. Source facts are synthetic; do not execute commands.",
+      "files": {
+        "README.md": "Install with `pip install harbor-tools`, then run `harbor inspect`.\n",
+        "pyproject.toml": "[project]\nname=\"harbor-tools\"\nrequires-python=\">=3.12\"\n",
+        "release.txt": "The owner confirms the package is published and these commands are the supported user route.\n"
+      }
+    },
+    {
+      "id": "N-TD-EN-16-D",
+      "prompt": "Check the runtime prerequisite in this quickstart and propose a change only if needed.",
+      "context": "This is the complete quickstart given to a reader with no runtime prerequisite stated elsewhere. Source facts are synthetic; do not execute commands.",
+      "files": {
+        "README.md": "Install with `pip install harbor-tools`, then run `harbor inspect`.\n",
+        "pyproject.toml": "[project]\nname=\"harbor-tools\"\nrequires-python=\">=3.12\"\n",
+        "release.txt": "The owner confirms the package is published and these commands are the supported user route.\n"
       }
     }
   ],

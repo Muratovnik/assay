@@ -153,6 +153,33 @@ def write_claude_explicit_override(
 
 
 class AgentAssetsTests(unittest.TestCase):
+    def test_byte_exact_declaration_covers_payload_and_nothing_else(self) -> None:
+        """A `* -text` directory exempts its payload, never the prose beside it.
+
+        The exemption exists for fixtures that carry CRLF or broken encoding on
+        purpose. It must not become a way to smuggle a stray CR into a document
+        that merely shares their directory, and it must not reach a directory
+        that never declared itself.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".gitattributes").write_text(
+                "* -text\n.gitattributes text eol=lf\nREADME.md text eol=lf\n",
+                encoding="utf-8",
+            )
+            kept = aa.still_text(root)
+            self.assertEqual({".gitattributes", "README.md"}, kept)
+
+            plain = root / "plain"
+            plain.mkdir()
+            self.assertIsNone(aa.still_text(plain))
+
+            (root / ".gitattributes").write_text("*.bin -text\n", encoding="utf-8")
+            self.assertIsNone(
+                aa.still_text(root),
+                "a declaration that is not `* -text` exempts nothing",
+            )
+
     def test_repository_check_and_inventory_are_exact(self) -> None:
         self.assertEqual([], aa.check(aa.ROOT))
         catalog = aa.load_catalog(aa.ROOT)

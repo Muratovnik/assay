@@ -62,7 +62,7 @@ zero suspicious phrases is not thereby accurate, useful or the author's.
 
 **Do not rewrite good text to produce a visible diff.** When a text already says
 the right thing in a usable way, the correct answer is that no change is needed,
-plus at most a short list of optional suggestions. A large diff is not evidence
+without a compulsory list of optional suggestions. A large diff is not evidence
 of work; it costs the author a review and invites new errors.
 
 **Do not manufacture a personality.** No forced jokes, no invented enthusiasm,
@@ -84,3 +84,26 @@ group 2 gap is an `error` when the reader cannot do what the text asks of them,
 and a `warning` when they can, with effort. A group 3 observation is a
 `suggestion`, unless a passage is so padded that the request inside it is genuinely
 hard to find. A group 3 preference never overturns a group 1 fact.
+
+## Restraint before applying a change
+
+Name the concrete benefit in the opened task: remove an actual ambiguity,
+incorrect grammar, padding or a specified style violation. Another valid word
+order is not enough. Leave a good passage in place rather than creating a diff
+or inventing a grammatical explanation. A requested rewrite can legitimately
+change phrasing, and a real ambiguity still needs repair.
+
+A review of somebody else's revision is not a contest between two editors.
+Accept equivalent wording under a preservation contract even when you would
+have written it differently. Optional stylistic preferences do not turn a
+correct edit into an error.
+
+Use all supplied task facts, but no facts from a style sample. A tense correction
+supported by the task is different from an invented update. Missing corroboration
+is a verification limit, not proof that an existing statement is false. Keep
+material uncertainty visible without producing a service log for every sentence.
+
+For draft/edit deliver one final text. For review deliver specific findings or
+a brief no-issue conclusion. Do not narrate the skill, references or every passed
+check. Keep safety and attribution notices; do not repair a URL, contact or
+identifier silently as a stylistic change.

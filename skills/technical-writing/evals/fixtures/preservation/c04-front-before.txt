@@ -1,0 +1,18 @@
+---
+title: Sync guide
+version: 2.4
+---
+
+# Preview a sync
+
+Run `widgetctl sync --dry-run` to list the files. See the [report](logs/sync.md).
+
+```bash
+widgetctl sync --dry-run --timeout 30
+```
+
+| Parameter | Default | Note |
+| --- | --- | --- |
+| `--timeout` | 30 | Aborts the run after the given seconds. |
+
+> A plain quotation from the operator handbook.

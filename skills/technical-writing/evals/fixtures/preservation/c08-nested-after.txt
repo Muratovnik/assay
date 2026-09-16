@@ -1,0 +1,9 @@
+# Steps
+
+1. Prepare the catalogue.
+
+   ```bash
+   widgetctl catalogue init --path ./catalogue
+   ```
+
+2. Run the sync.

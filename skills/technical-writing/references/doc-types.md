@@ -4,12 +4,12 @@ Pick the type from the reader's situation, then apply that type's checklist and
 no other. The common failure is demanding a quickstart from an explanation or a
 narrative from a reference table.
 
-**Qualification status.** No type has been exercised against a model yet.
-README and how-to are the types this method was written for first and carry
-most of its evaluation cases; the remaining checklists are conditional
-material, backed by an authored control case only where the evaluation data
-names one (reference, runbook, translation) and by none otherwise. Use them as
-a completeness prompt, and say so if a reader asks what has been validated.
+A checklist supplies conditional questions, not required headings. Apply it to
+what the request actually opens. Information can already be in a prerequisite,
+linked reference or parent page. A local review does not inherit every item
+from a full publication audit. Do not invent edge cases or procedures to fill
+an empty slot. Evaluation status belongs in evaluator documentation, not a
+claim that these checklists have been proven for every task.
 
 For the distinction between the four classic types and the reader need behind
 each, [Diataxis](https://diataxis.fr/) is the primary source. Take the
@@ -40,7 +40,8 @@ The reader is learning and may not know what success looks like.
 - A small, real result at the end.
 - Cleanup, when the tutorial created anything.
 
-Never mix in the how-to's alternatives; a learner who must choose is stuck.
+Prefer one guided path for a tutorial. Include a necessary platform branch
+when the learner cannot complete the task without it; do not hide a real choice.
 
 ## Reference
 
@@ -80,13 +81,17 @@ The reader is on call, under time pressure, possibly at night.
 - **Rollback** — how to undo each risky step, and the point of no return.
 - **Escalation** — who to wake, with what information, and when to stop trying.
 
-A runbook missing rollback or escalation is incomplete even if every step is
-correct; those two sections are what make it safe to follow at 03:00.
+Require recovery, stopping conditions and escalation where the operation's risk
+makes them necessary. They need not be separate headings. For an irreversible
+step, state the point of no return and the supported fallback; never invent an
+undo command. A read-only diagnostic note may legitimately need no rollback.
+Report a directly visible destructive step without necessary safeguards even
+in a narrow review, but do not require every runbook to match one template.
 
 ## ADR and RFC
 
 - Context and the constraints that bound the decision.
-- Real alternatives, including the one that was almost chosen.
+- Real alternatives, where they were actually considered; do not invent a runner-up.
 - The decision — or the proposal, if it is a proposal.
 - Consequences, including the ones the team dislikes.
 - Status, exactly as it stands.
@@ -99,8 +104,8 @@ sections is likewise out of bounds: they are a record, not draft text.
 
 ## Release notes and changelog
 
-- Written from the actual diff between the two releases, not from the commit
-  log and not from the plan.
+- Written from the actual diff between the two releases, using the commit
+  log and release record as supporting context, never treating the plan as shipped code.
 - User-facing changes only: what someone using the product will notice.
   Internal refactors appear only when they change behaviour, performance or
   support.
@@ -110,4 +115,5 @@ sections is likewise out of bounds: they are a record, not draft text.
 - Versions and dates that match the release metadata.
 
 When a generated changelog is the project's contract, do not hand-edit it;
-improve the commit subjects that feed it.
+use the approved correction workflow for its inputs. Do not rewrite published
+commit history merely to improve phrasing.
