@@ -1,0 +1,4 @@
+interface:
+  display_name: "Text Writing"
+  short_description: "Write, edit or review ordinary prose without inventing facts"
+  default_prompt: "Use $text-writing to draft, edit or review this text, keeping the author's voice and every fact the supplied material supports."

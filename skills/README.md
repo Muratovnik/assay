@@ -17,6 +17,7 @@ unused method costs little context.
 | [test-audit](test-audit/SKILL.md) | automatic | Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. |
 | [code-maintenance](code-maintenance/SKILL.md) | automatic | Implement or refactor code with clear responsibilities, controlled state and effective quality checks. |
 | [technical-writing](technical-writing/SKILL.md) | automatic | Write, edit or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC, release notes and documentation translations — so that commands, versions and stated behaviour match the product; skip ordinary messages, letters and articles, code changes, AGENTS.md/CLAUDE.md/SKILL.md edits and test runs. |
+| [text-writing](text-writing/SKILL.md) | automatic | Write, edit or review ordinary prose — messages, letters, articles, explanations, portfolio and product copy — so that the facts, the conditions and the author's voice survive the edit; skip product documentation (README, how-to, tutorial, reference, runbook, ADR, release notes), code changes, agent instruction files such as AGENTS.md and SKILL.md, and test runs. |
 
 The full description, including when the method should **not** run, is in
 each skill's frontmatter. Conditional depth lives in its `references/`, and
