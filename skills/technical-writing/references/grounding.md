@@ -42,9 +42,23 @@ package by another route. A console entry point alone does not invalidate
 
 Use requirements from the applicable source and the actual starting environment.
 Add a missing runtime requirement when the reader needs it before the first step.
-Do not duplicate a prerequisite already given in the setup page or task context.
+A condition guaranteed to the intended reader may be inherited from a setup page.
+A fact supplied only to the editor or test environment is not thereby available
+to a standalone document's future reader; put a needed condition in the deliverable.
 Version scope can be inherited from a versioned site or checkout; require an
 explicit page label only where ambiguity affects the reader.
+
+## Attribution and conditions
+
+When describing verification, distinguish "the test source expects" from "this
+run produced". No literal disclaimer is required in every corrected paragraph;
+just do not imply an execution that did not occur. A code example is not a default.
+
+Preserve quantifiers and the direction of policy conditions. Permission only when
+an earlier action failed does not require the next action after every failure.
+Do not change a check after the last action into a check after each action.
+Ambiguous phrasing can be clarified from sources without declaring contradictory
+product behavior. If sources really disagree within the same scope, identify that.
 
 ## Commands and records
 

@@ -31,8 +31,11 @@ For each statement ask where it comes from and what would show it is wrong:
   wording they agreed to.
 
 When the material has none of these, write the sentence without the claim. Do
-not soften an unsupported claim into an insinuation: "helps teams cut triage
-time" and "cuts triage time by 40%" both need the same evidence.
+not soften an unsupported claim into an insinuation. Describe a supported
+mechanism as a mechanism; call a possible benefit possible when it follows from
+that mechanism. A measured reduction needs the actual measurement. "Can avoid a
+manual routing step" and "cuts triage time by 40%" make different claims and need
+different evidence. Neither may be invented.
 
 ## Never import numbers or promises the material lacks
 
@@ -65,3 +68,12 @@ Bad news written as copy reads as evasion. State what happened, what it means
 for the reader, what is being done and by when, and stop. Compensation,
 gratitude for patience and a promise to do better are only written when the
 author has actually decided them.
+
+## Compose a case, not an inventory
+
+For portfolio writing, select a real problem, the author's contribution and the
+reason for a design decision. Keep scope and project status visible. Mention
+research methods only when they explain a choice; do not list every tool used.
+If outcome data is absent, describe the delivered design and the evidence that
+informed it rather than inventing impact. A short card may need only the problem
+and the type of solution; a case page has room for the reasoning.

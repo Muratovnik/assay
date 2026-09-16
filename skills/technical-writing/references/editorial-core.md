@@ -1,98 +1,73 @@
-# Editorial core
+# Editorial judgment
 
-The requirements every document shares, whatever its type or language. They are
-ordered: satisfying a later group never justifies breaking an earlier one.
+Use this reference when a wording or preservation decision is difficult. Writing
+quality includes content selection, explanation, structure and voice; it is not
+the absence of a blacklist of expressions.
 
-## 1. Meaning and trust
+## Meaning before style
 
-Nothing enters a document that a source does not support. No invented numbers,
-benchmarks, quotations, customer names, personal experience, roadmap dates or
-promises of a result. If a needed fact is missing, ask for it, or write the
-sentence without it and mark the gap; a plausible number is worse than an
-acknowledged hole, because the reader cannot see it is missing.
+Preserve supported facts and their relationships: who did what, negations,
+units, bounds, uncertainty, conditions, commitments and release status. A change
+from a necessary condition to a sufficient one changes the instruction. An upper
+bound, approximate value and measured result are not interchangeable. Meaningful
+paraphrase is allowed unless the task, quotation or identifier requires exact text.
 
-Carry these through every edit unchanged unless a source says otherwise:
+For a standalone document, carry over context its future reader needs. Do not
+copy every editor note into the document, and do not assume the reader sees the
+brief. Material explicitly guaranteed to that audience can be inherited.
 
-- negations and the scope they cover;
-- conditions, preconditions and the order steps depend on;
-- units, ranges and the parameter a number belongs to ("at most 5 retries" is
-  not "at most 5 seconds", and neither is "about 5");
-- bounds — "no more than" is not "no less than";
-- hedges the source made deliberately ("in the tested configuration");
-- feature status — planned, experimental, deprecated, removed, available.
+An omission may improve focus when outside the assignment. Do not remove a caveat
+that changes the remaining claim. Under a local copyedit, report an out-of-scope
+factual correction rather than silently applying it.
 
-A tidier sentence that loses one of these is a defect, not an improvement. When
-you shorten, shorten the words and keep the qualifier.
+## Improve the reading, not the resemblance to a template
 
-## 2. Usefulness
+An opening should orient the intended reader. A paragraph should develop a point
+or a useful transition. An example should explain a distinction or decision rather
+than decorate the page. The ending may summarize, request action or complete an
+explanation; it must earn that role rather than restate every heading solemnly.
 
-The reader's task is visible in the first screen. Steps run in the order they
-must run, with nothing assumed that the reader does not already have. Terms stay
-stable: one name per concept for the whole document, and the product's own name
-for anything the product names. Every section exists for a reader question; a
-section that exists only for symmetry can be removed when restructuring is
-authorized; a wording-only review reports the issue rather than changing scope.
+Cut generic importance claims, inflated praise, invented third items and staged
+openers when they delay the point. Keep real contrasts, recurring reference
+structure, ordinary punctuation and repeated terms that preserve identity.
+No individual word identifies an author as a model. Do not pursue zero flags.
 
-Prefer the positive orientation the reader needs over a bare fact dump: an
-introductory sentence that tells someone whether to keep reading earns its place
-even though it carries no new parameter. The rule is that each part has a job,
-not that each sentence introduces a fact.
+## Choose the appropriate amount of editing
 
-## 3. Editing
+A copyedit repairs a local defect or meets the agreed style. A rewrite can improve
+organization, emphasis and voice even where every original sentence is grammatical.
+No-op protects already good work; it does not forbid an explicitly requested new
+approach. Explain a change only with a real benefit, not an invented grammar rule.
 
-Remove empty run-ups ("In today's fast-moving world"), unearned superlatives,
-mechanical summaries that repeat the section above, and the artificial
-symmetry of three items where the material has two. Do not compensate by
-manufacturing personality: no forced jokes, no invented enthusiasm, no
-confessions, no "I carefully checked" where nothing was checked.
+Ambiguity permits multiple readings; contradiction requires incompatible claims
+about the same scope. Separate stages, actors or operating modes may explain
+an apparent mismatch. If a simple clarification is enough, do not demand an
+investigation. If an important fact remains unresolved, preserve that limit.
 
-**Anti-slop means a mismatch with the reader's task, not a banned word list.**
-"Key", "robust", "seamless" and the "not X, but Y" shape are all legitimate when
-they carry a justified point. Repetitive structure is correct in a reference
-page. A list of three real items is a list of three real items. Before flagging
-a phrase, name what the reader loses; if you cannot, leave it. See
-[voice and tone](https://developers.google.com/style/tone) for a positive
-target: clear, respectful and specific, without dismissing a difficult step
-as trivial. This is not a ban on every use of the word "simply".
+Missing corroboration is not proof of falsity. A test source states an expectation;
+a captured execution establishes the result of that run. Describe what was actually
+read or done when reporting verification. Do not put a boilerplate audit disclaimer
+in every deliverable merely because no runtime check was requested.
 
-**Do not rewrite good text to produce a visible diff.** When a document is
-already correct and usable, a brief no-change conclusion is enough for review;
-do not invent optional suggestions to fill a report. The size of a diff is not evidence
-of work, and an unnecessary rewrite costs review time and invites new errors.
+## Keep the author's voice and the document's function
 
-**Never strip attribution or safety furniture** in the name of removing
-machine-written traces: licence notices, copyright lines, third-party
-acknowledgements, "generated by … do not edit" markers, security warnings and
-deprecation notices all stay. Changing URLs, tracking parameters or contact
-addresses is a separate, explicitly requested action, not a style edit.
+Do not add fake first-person experience, forced candor, automatic enthusiasm,
+intentional errors or abrupt fragments to make prose appear human. Courtesy,
+humor and personal stance can stay when genuine to the source and suitable for
+the request. Style samples supply manner, not new facts or commitments.
 
-## Applying the three groups in review
+Preserve required licence, attribution, generation and safety notices. Changes
+to addresses, link targets and identifiers require the relevant scope; they are
+not silent style fixes. A serious visible risk can be flagged without reopening
+an unrelated whole-document audit.
 
-Report group 1 violations as `error`: the reader will act wrongly. Report group 2
-gaps as `error` or `warning` depending on whether the reader can still complete
-the task. Report group 3 as `suggestion`, unless a passage is so padded that the
-instruction is genuinely hard to find. Never let a group 3 preference overturn a
-group 1 fact — the shortest correct sentence beats the most elegant wrong one.
+## Report only what is useful
 
-## Restraint before applying a change
+For drafting and editing, deliver the finished artifact. For review, identify
+actual discrepancies, material uncertainties and optional preferences separately.
+Severity follows consequences, not a disliked phrase. A requested audit may need
+an evidence table; a routine message does not. With no material issue, stop.
 
-Name the concrete benefit in the opened task: remove an actual ambiguity,
-incorrect grammar, padding or a specified style violation. Another valid word
-order is not enough. Leave a good passage in place rather than creating a diff
-or inventing a grammatical explanation. A requested rewrite can legitimately
-change phrasing, and a real ambiguity still needs repair.
-
-A review of somebody else's revision is not a contest between two editors.
-Accept equivalent wording under a preservation contract even when you would
-have written it differently. Optional stylistic preferences do not turn a
-correct edit into an error.
-
-Use all supplied task facts, but no facts from a style sample. A tense correction
-supported by the task is different from an invented update. Missing corroboration
-is a verification limit, not proof that an existing statement is false. Keep
-material uncertainty visible without producing a service log for every sentence.
-
-For draft/edit deliver one final text. For review deliver specific findings or
-a brief no-issue conclusion. Do not narrate the skill, references or every passed
-check. Keep safety and attribution notices; do not repair a URL, contact or
-identifier silently as a stylistic change.
+Inspect the delivered text, not only the explanation beside it. A fact preserved
+in the report but lost from the document is not preserved for its reader. A
+structural checker cannot establish semantic equivalence or writing quality.

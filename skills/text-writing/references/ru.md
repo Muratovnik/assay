@@ -1,5 +1,22 @@
 # Russian prose
 
+## Compose for a Russian reader
+
+Start with the subject or action relevant to this reader; Russian word order can
+put known information first and the new point later. Do not force an English
+subject–verb–object template. Keep a reason next to the request it explains and
+use natural connective words when their relationship would otherwise be unclear.
+
+A brief professional message can be courteous without an apology paragraph.
+«Пришлите, пожалуйста, согласованный вариант до среды» is a normal request, not
+an AI tell. Do not strip all courtesy or turn an explanation into commands merely
+to make it shorter. In a portfolio case, describe what the author did and why;
+a prototype and an observed business result must remain different claims.
+
+When a paragraph feels artificial, reconsider its point and sequence before
+swapping words. Keep normative punctuation and repeated technical terms. The
+pattern pairs below help diagnose a problem, not impose a single Russian voice.
+
 The defects below were written for Russian, not translated from an English
 list. Each one names what the reader loses, shows a defective fragment, and
 shows a nearby fragment that looks similar and must be left alone.

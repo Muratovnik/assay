@@ -1,7 +1,7 @@
 # Document types and their completeness
 
-Pick the type from the reader's situation, then apply that type's checklist and
-no other. The common failure is demanding a quickstart from an explanation or a
+Pick the type from the reader's situation; use the relevant questions to design
+the reading path. For composition use [document design](document-design.md). The common failure is demanding a quickstart from an explanation or a
 narrative from a reference table.
 
 A checklist supplies conditional questions, not required headings. Apply it to

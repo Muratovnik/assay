@@ -65,7 +65,7 @@ person's voice.
 - Tone: plain and direct. No enthusiasm the situation does not contain.
 - Informality: no emoji, no exclamation marks. Contractions are fine in English.
 - Vocabulary: says "сборка", not "билд"; "проблема", not "челлендж".
-- Formatting: two to four sentences per paragraph; a bulleted list only when
-  there are at least three items; ends a request with a direct question.
+- Formatting: two to four sentences per paragraph; a list when the content benefits from
+  being scanned separately; ends a request with a direct question.
 - Allowed samples: `samples/status-note.md`, `samples/decline.md`.
 ```

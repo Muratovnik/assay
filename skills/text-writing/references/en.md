@@ -1,5 +1,17 @@
 # English prose
 
+## Compose for the actual reader
+
+Make the purpose visible, then develop the point with the evidence or example
+it needs. Connect sentences when a logical link is missing; avoid both abrupt
+fragments and elaborate tour-guide framing. Match formality and contractions
+to the requested channel, not an imagined universal human style.
+
+A concrete example can explain a distinction better than a series of abstract
+benefits. Keep it hypothetical when it is not an observation. A requested personal
+voice can retain warmth and opinions already present without inventing experience.
+The pattern pairs below diagnose local problems, not the whole quality of a text.
+
 Defects observed in English writing, with their own examples. This profile is
 not the source of the Russian or Chinese ones: each language has its own
 defects and its own legitimate neighbours.

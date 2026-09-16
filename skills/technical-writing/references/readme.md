@@ -1,63 +1,58 @@
-# README and the first working step
+# README: suitability and a first result
 
-Start with what the intended reader obtains: a package, CLI, library, hosted
-service or reusable assets. A monorepo is a source layout, not a delivery route.
-Apply this procedure to installation/quickstart work or a whole README, not to
-an unrelated local wording review.
+Use for a new README, a full rewrite or installation/quickstart work. A local
+Features correction does not require redesigning the page.
 
-## Select a supported route
+## Choose the product and audience
 
-1. Identify the audience: product user, contributor, operator or someone running
-   an unreleased checkout. Infer from the request and sources; ask only if the
-   distinction changes the instructions.
-2. Establish which delivery routes are available. A manifest supplies the package
-   and entry-point declarations. Release/registry evidence establishes publication
-   within its scope. Repository code can support a checkout route.
-3. Choose the primary route for that reader. Preserve working alternatives when
-   relevant; do not call an alternative broken without evidence.
-4. Verify prerequisites, command names, working directory and the first observable
-   result to the extent the task permits.
+What does a reader obtain: package, CLI, library, hosted service or reusable
+assets? A monorepo is a source layout, not the answer. Identify the usual consumer
+and the supported route they can use. A contributor setup can be primary when
+the intended reader is a contributor or the project is not published.
 
-Keep published installation and checkout execution distinct. A successful
-checkout does not prove the published wheel works; an available wheel does not
-prove the checkout is broken. `python -m` may coexist with a console script.
-Editable installation can be correct for development or an unreleased project.
+A manifest supplies names and entry points, not publication or every working
+invocation. Release evidence supports availability within its stated scope.
+Choose a supported route rather than guessing a registry install. A console
+script and `python -m` can coexist; editable installation is not inherently wrong.
 
-If the user is consuming a released package and publication is supported, lead
-with that route instead of repairing a contributor-only setup. If publication
-is unknown, do not fabricate it or force a registry command. A planned image or
-package stays planned. Do not present a route as personally tested when only
-source or release documentation was inspected.
+## Build the page for someone arriving without the brief
 
-## Quickstart
+Explain what the product does in terms the audience recognizes and where it fits.
+Name a limitation early when it changes their decision. Prefer a supported concrete
+use over claims of flexibility, speed or reliability with no basis.
 
-Give the needed starting conditions, ordered commands and an observable result.
-A runtime requirement in the manifest is useful when it was not already stated
-in the reader's starting environment. Use the actual name of the installed
-command, which may differ from the distribution name.
+Then offer a complete first result. Select relevant material; do not turn every
+source note into a section. Installation, first use and a useful reference link
+can form a compact path. A hosted service may start with access rather than install.
+Contributor details can be linked when they interrupt that path. Keep information
+that both users and contributors actually need.
 
-Credentials and user-controlled paths may be placeholders when explained. Keep
-them labelled and do not invent real credentials or reachable accounts. Treat
-explicitly anonymized contacts as fixture values rather than publication bugs;
-a real unresolved production placeholder still deserves attention.
+A new reader must receive needed conditions in the README or clearly linked setup.
+A file present on the editor's machine is not an inherited reader prerequisite.
+Conversely, a page within an established onboarding path need not teach everything
+again. Use the stated publication context, not a universal completeness template.
 
-Use separate platform paths when they differ. Do not force one package-manager
-command when the product requires alternatives. Separate supported, documented
-and actually exercised claims; no blanket downgrade of documented support solely
-because this editor did not test every platform.
+## Make quickstart executable and interpretable
 
-## Include only useful sections
+Use the actual distribution and command names. State necessary runtime, files,
+working directory and access before use. Give commands in order and the supported
+observable result. Explain placeholders; never invent usable secrets or accounts.
+Use separate platform paths where the product requires them, without duplicating
+equivalent commands for every package manager by habit.
 
-There is no required line count, heading list, badge row or section quota. Keep
-orientation, useful limitations and the first working step visible. Move long
-reference or contributor material only when doing so helps the chosen reader,
-and retain links to it. Do not delete relevant warnings to shorten the README.
+A documented command is not a personal test receipt. A checkout test does not prove
+a released artifact. Keep verification claims scoped, but do not insert a defensive
+"not personally tested" label into every code block when the brief asks for prose.
+Record a material publication gap separately or visibly qualify the affected path.
 
-A feature-list review need not invent a Quickstart. An installation edit need
-not rewrite the overview. If the request is a whole-document publication audit,
-check the load-bearing path and readiness explicitly rather than merely filling
-headings. Resolve local links from their actual source path, not a packet alias.
+## Keep editing scope and finished form
 
-Return usable Markdown. An actual README file is not enclosed in a code fence.
-When showing its literal source in a reply, choose an outer fence longer than
-any matching fence in the content.
+There is no mandatory heading set, line count, badge row or number of sections.
+A current Features list may omit planned work or distinguish it clearly, unless
+the task requires retaining all items. A useful final pointer can remain; a generic
+future-looking pitch adds nothing.
+
+Resolve relative links from the actual source path. Deliver a Markdown file without
+an enclosing fence. When the user needs its literal source in chat, preserve nested
+fences with a sufficiently long outer fence. Inspect that artifact, not only the
+commands quoted in the explanation.
