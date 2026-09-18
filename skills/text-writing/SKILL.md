@@ -73,7 +73,10 @@ neutral prose with fake intimacy, jokes, confessions or a sequence of fragments.
 Keep facts, names, quotations, units, bounds, negations, conditions, uncertainty
 and commitments. Preserve quantifiers and the direction of a condition:
 permission subject to a condition is not an instruction to act whenever it holds.
-Do not import achievements, metrics, emotions or experiences from a style sample.
+Keep what a number counts and which actions or alternatives share a deadline;
+do not attach a general requirement to only one option. Do not turn missing
+information into an invented motive such as confidentiality. Do not import
+achievements, metrics, emotions or experiences from a style sample.
 An explicitly hypothetical illustration is possible; it is not a reported event.
 
 Missing support does not prove an existing statement false. Use supplied context

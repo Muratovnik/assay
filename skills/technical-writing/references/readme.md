@@ -1,58 +1,92 @@
-# README: suitability and a first result
+# README module
 
-Use for a new README, a full rewrite or installation/quickstart work. A local
-Features correction does not require redesigning the page.
+Use for creating a README, a full rewrite, or applying an agreed README style.
+For a local correction, consult only the affected part and keep the existing
+layout. This module is an entry within `technical-writing`; it creates no new
+agent, slash command, catalog entry or mandatory delegation.
 
-## Choose the product and audience
+## Establish what the reader is getting
 
-What does a reader obtain: package, CLI, library, hosted service or reusable
-assets? A monorepo is a source layout, not the answer. Identify the usual consumer
-and the supported route they can use. A contributor setup can be primary when
-the intended reader is a contributor or the project is not published.
+Identify audience, product, version scope and render target from the task and
+project sources. A public package, a hosted app, an internal tool and a folder's
+maintainer notes need different first steps. A monorepo is a layout, not an
+installation method. Read relevant manifests, entry points/help, existing docs,
+release evidence, licence, workflows and available visual assets. Do not scan the
+whole repository when the needed facts are already bounded.
 
-A manifest supplies names and entry points, not publication or every working
-invocation. Release evidence supports availability within its stated scope.
-Choose a supported route rather than guessing a registry install. A console
-script and `python -m` can coexist; editable installation is not inherently wrong.
+Choose an available user route, not the route easiest to infer from a manifest.
+A declared console entry point does not disprove another invocation. A manifest
+alone does not establish registry publication. State the actual prerequisites,
+working directory, files or access before the first action. Do not make a reader
+inherit conditions known only to the editor's environment.
 
-## Build the page for someone arriving without the brief
+## Select a presentation contract
 
-Explain what the product does in terms the audience recognizes and where it fits.
-Name a limitation early when it changes their decision. Prefer a supported concrete
-use over claims of flexibility, speed or reliability with no basis.
+Read [the README profile](readme-profile.md) for a new README or a full layout
+change. Use an explicitly supplied house style first. Otherwise retain an
+established project standard. For a new page without one, the bundled profile
+is a proposed working default, not a previously approved user preference.
+Draft with it rather than blocking on cosmetic questions; get approval before
+standardizing other repositories. Keep that approval note out of the README.
 
-Then offer a complete first result. Select relevant material; do not turn every
-source note into a section. Installation, first use and a useful reference link
-can form a compact path. A hosted service may start with access rather than install.
-Contributor details can be linked when they interrupt that path. Keep information
-that both users and contributors actually need.
+After a profile is chosen, its applicable requirements are requirements: do not
+remove an agreed hero, badge row or section order just because minimalism is
+preferred by the model. Equally, formatting never authorizes a false claim, a
+fabricated asset or an unsafe instruction. Report conflicts or missing required
+material to the author rather than silently changing the standard.
 
-A new reader must receive needed conditions in the README or clearly linked setup.
-A file present on the editor's machine is not an inherited reader prerequisite.
-Conversely, a page within an established onboarding path need not teach everything
-again. Use the stated publication context, not a universal completeness template.
+Choose one skeleton:
 
-## Make quickstart executable and interpretable
+- [Public product](../assets/readme-public.template.md) for a public tool,
+  package, application or reusable library.
+- [Internal or maintainer document](../assets/readme-internal.template.md) for
+  team setup, an internal tool or a repository/folder intended for maintainers.
 
-Use the actual distribution and command names. State necessary runtime, files,
-working directory and access before use. Give commands in order and the supported
-observable result. Explain placeholders; never invent usable secrets or accounts.
-Use separate platform paths where the product requires them, without duplicating
-equivalent commands for every package manager by habit.
+The templates contain authoring slots, not finished prose. Populate applicable
+parts, remove instructions and unused slots, and translate headings consistently.
+No unfilled template marker belongs in the delivered page. Explicitly explained
+user parameters such as a token variable remain legitimate.
 
-A documented command is not a personal test receipt. A checkout test does not prove
-a released artifact. Keep verification claims scoped, but do not insert a defensive
-"not personally tested" label into every code block when the brief asks for prose.
-Record a material publication gap separately or visibly qualify the affected path.
+## Compose the page
 
-## Keep editing scope and finished form
+Start with the job the product helps the reader do and a distinguishing supported
+constraint or mechanism. Do not lead with the repository inventory or an inflated
+claim. Give concrete uses instead of several restatements of the tagline.
 
-There is no mandatory heading set, line count, badge row or number of sections.
-A current Features list may omit planned work or distinguish it clearly, unless
-the task requires retaining all items. A useful final pointer can remain; a generic
-future-looking pitch adds nothing.
+Offer a recognizable result: a relevant existing screenshot with an explanation,
+a working demonstration link, or a complete example with a supported expected
+outcome. If no screenshot exists, a text example is the defined fallback, not an
+excuse to invent a UI. The same example can serve both demonstration and first
+use; do not repeat it under two headings to fill the template.
 
-Resolve relative links from the actual source path. Deliver a Markdown file without
-an enclosing fence. When the user needs its literal source in chat, preserve nested
-fences with a sufficiently long outer fence. Inspect that artifact, not only the
-commands quoted in the explanation.
+Choose a primary installation or access path for this audience. Link alternatives
+when that is enough; include genuinely different platform steps when necessary.
+A complete quickstart has a starting state, ordered actions and an observable
+result. Explain placeholders. Label illustrative output as an example when it is
+not an execution receipt. A documented supported command needs no repetitive
+personal disclaimer, but do not assert a successful test that did not happen.
+
+Keep product information, reference detail and contributor tasks distinct. Link
+actual existing documents instead of manufacturing a docs tree. Important limits
+belong before the decision or action they affect, even if the standard footer
+also collects less urgent limits. Planned work can be omitted from current
+Features or clearly separated; never present it as available.
+
+## Presentation and completion
+
+Use [presentation details](readme-presentation.md) when adding badges, images,
+HTML, diagrams, a table of contents or community modules. For a text-only README
+with no such elements, the profile and selected skeleton are enough.
+
+Verify the document from its actual repository path and on its intended renderer
+when permitted. The first command should not be separated from necessary setup
+by collapsible content or a wall of decorative material. Link captions should say
+what the reader will find; an icon or badge must not be the only statement of a
+critical limitation. Verify renamed heading anchors and inbound links within the
+opened scope. Do not fabricate a full inbound-link audit.
+
+Deliver one README file without a surrounding code fence or a method report.
+For literal source in chat, use a fence longer than those inside. Put any needed
+asset request, unresolved claim or narrow verification note in a separate handoff.
+Keep factual correctness, house-style compliance and the owner's editorial
+preference separate when reporting an audit; no combined score is necessary.

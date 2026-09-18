@@ -58,7 +58,11 @@ Preserve quantifiers and the direction of policy conditions. Permission only whe
 an earlier action failed does not require the next action after every failure.
 Do not change a check after the last action into a check after each action.
 Ambiguous phrasing can be clarified from sources without declaring contradictory
-product behavior. If sources really disagree within the same scope, identify that.
+product behavior. Keep the scope of shared deadlines and the object being counted.
+State a backup's destination separately from the source objects when attachment
+would be ambiguous. A refused operation or nonzero exit alone does not establish
+that nothing was written or that the next observation will see identical state.
+If sources really disagree within the same scope, identify that.
 
 ## Commands and records
 

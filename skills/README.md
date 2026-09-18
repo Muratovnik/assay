@@ -16,7 +16,7 @@ unused method costs little context.
 | [test-writing](test-writing/SKILL.md) | automatic | Write or repair automated tests for justified behavior and meaningful regression protection. |
 | [test-audit](test-audit/SKILL.md) | automatic | Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. |
 | [code-maintenance](code-maintenance/SKILL.md) | automatic | Implement or refactor code with clear responsibilities, controlled state and effective quality checks. |
-| [technical-writing](technical-writing/SKILL.md) | automatic | Write or reshape product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from the product's sources, or review an existing document. |
+| [technical-writing](technical-writing/SKILL.md) | automatic | Write, reshape, translate or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from its sources. |
 | [text-writing](text-writing/SKILL.md) | automatic | Write or reshape ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — or review an existing text. |
 
 The full description, including when the method should **not** run, is in

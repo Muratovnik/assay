@@ -11,6 +11,10 @@ units, bounds, uncertainty, conditions, commitments and release status. A change
 from a necessary condition to a sufficient one changes the instruction. An upper
 bound, approximate value and measured result are not interchangeable. Meaningful
 paraphrase is allowed unless the task, quotation or identifier requires exact text.
+Keep the counted object, the action a deadline belongs to and the scope of an
+exception. The storage location of a backup is not the location of its source
+objects. A missing name gives no evidence of a confidentiality promise. Check
+these relationships, not just whether the same numbers and nouns survived.
 
 For a standalone document, carry over context its future reader needs. Do not
 copy every editor note into the document, and do not assume the reader sees the

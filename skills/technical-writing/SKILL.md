@@ -1,6 +1,6 @@
 ---
 name: technical-writing
-description: Write or reshape product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from the product's sources, or review an existing document. Skip ordinary messages and articles, code changes, commit records, agent instructions and standalone test runs.
+description: Write, reshape, translate or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from its sources. Use the README module for repository presentation and an agreed house style. Skip ordinary messages and articles, code changes, commit records, agent instructions and standalone test runs.
 license: MIT
 ---
 
@@ -47,10 +47,16 @@ For a new document or substantial rewrite:
    to the intended reader can be inherited. Avoid both missing steps and a
    tutorial on things this reader already knows.
 
-Apply these decisions directly on small tasks. For structure and explanatory
-depth use [document design](references/document-design.md); for installation and
-quickstart use [README](references/readme.md). No prescribed section count or
-mandatory planning, interview or reader-agent phase is required.
+For a new README, a full README rewrite or an explicit presentation-standard
+request, read the [README module](references/readme.md) before drafting. It selects
+an applicable structure and house style; it is part of this skill, not another
+agent or installed skill. For a local README correction, preserve the opened scope
+and consult only the affected module guidance; do not restyle the whole page.
+
+For other substantial documents use [document design](references/document-design.md)
+when the organization needs work. Apply the decisions directly on small tasks.
+A chosen house style can require formatting; it is not a universal measure of
+writing quality. No extra planning file or reader-agent phase is mandatory.
 
 ## Keep judgment calibrated
 
@@ -71,7 +77,10 @@ winner. Attribute reading a test as reading its expected behavior, not running i
 Preserve quantifiers, negations, numeric bounds and the direction of conditions.
 Permission only when a condition holds is not an obligation whenever it holds.
 Equivalent paraphrases are allowed; exactness belongs to protected content and
-explicit verbatim requirements. Do not tighten a policy to make it sound clearer.
+explicit verbatim requirements. Preserve what a number counts and which action,
+actor or branch a deadline qualifies. Distinguish where a copy is stored from
+where the copied objects are located. Do not tighten a policy or add a guarantee
+about unchanged state merely to make an instruction sound clearer.
 
 ## Use only the needed references
 
@@ -96,7 +105,10 @@ from the actual document path, and the rendered form when tools are authorized.
 A Markdown file needs no outer fence; literal source in a reply needs a longer
 outer fence than matching fences inside. An authorized preservation check protects
 only the regions it reports; it does not prove meaning, link existence or successful
-installation. Report required but unperformed checks without claiming success.
+installation. A styled README may contain HTML the preservation checker cannot
+classify: keep that limit visible and use the project's permitted render checks,
+not an unverified-to-pass shortcut. Keep author-facing verification notes outside
+the published document unless the reader needs the limitation to act safely.
 
 ## Boundaries
 
