@@ -1,16 +1,22 @@
 # README profile: project-standard
 
-This is an editable proposed preset, not a universal standard or evidence of
-prior owner approval. It is scoped to README documents. Other technical pages
-use their task-specific structure. `profiles/*.json` in assay are agent capability
-profiles; do not use that directory for editorial preferences.
+Adopted on 2026-09-19 by this repository's owner for their public projects,
+after reviewing two finished READMEs drafted with it. It is scoped to README
+documents. Other technical pages use their task-specific structure.
+`profiles/*.json` in assay are agent capability profiles; do not use that
+directory for editorial preferences.
+
+Adoption covers the owner's public repositories. It is not a universal
+standard, and it says nothing about another owner's projects or about an
+internal document that has not chosen it.
 
 ## Selection and scope
 
 An explicit task-specific style overrides this preset; an adopted project style
-is retained unless the task asks to replace it. A new README with no style can use
-this preset as a draft. Approval and later changes belong to the owner, outside
-the finished README. Do not auto-save preferences from model-generated drafts.
+is retained unless the task asks to replace it. Within the adopted scope this
+preset is the project style for a README with none of its own. Elsewhere it is
+a draft to work from. Later changes belong to the owner, outside the finished
+README. Do not auto-save preferences from model-generated drafts.
 
 Once selected, apply the rules below. A missing required fact or asset is a
 reported gap, not a licence to fabricate it. An applicable verified element must

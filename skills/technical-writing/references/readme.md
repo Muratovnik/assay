@@ -25,9 +25,10 @@ inherit conditions known only to the editor's environment.
 Read [the README profile](readme-profile.md) for a new README or a full layout
 change. Use an explicitly supplied house style first. Otherwise retain an
 established project standard. For a new page without one, the bundled profile
-is a proposed working default, not a previously approved user preference.
-Draft with it rather than blocking on cosmetic questions; get approval before
-standardizing other repositories. Keep that approval note out of the README.
+applies within the scope its own adoption note states, and is a working draft
+outside it. Draft with it rather than blocking on cosmetic questions; a project
+outside that scope needs its own approval before the preset becomes its
+standard. Keep the approval note out of the README.
 
 After a profile is chosen, its applicable requirements are requirements: do not
 remove an agreed hero, badge row or section order just because minimalism is
