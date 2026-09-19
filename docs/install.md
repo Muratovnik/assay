@@ -23,7 +23,7 @@ claude plugin install assay@assay
 The slash equivalents are `/plugin marketplace add Muratovnik/assay` and
 `/plugin install assay@assay`. Add `--scope project` to install for one
 repository instead of your user account, and pin a release by adding a tag to the
-marketplace: `Muratovnik/assay@v0.1.0`.
+marketplace: `Muratovnik/assay@v0.2.0`.
 
 Start a new session afterwards. Skills appear under their own names, and the two
 agent profiles arrive with the plugin.

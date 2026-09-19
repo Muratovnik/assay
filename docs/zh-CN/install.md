@@ -24,7 +24,7 @@ claude plugin install assay@assay
 对应的斜杠命令是 `/plugin marketplace add Muratovnik/assay` 与
 `/plugin install assay@assay`。加上 `--scope project` 可只为某一个仓库安装，而
 不是为整个账号；在市场名称后附加标签即可固定到某个发布版本，例如
-`Muratovnik/assay@v0.1.0`。
+`Muratovnik/assay@v0.2.0`。
 
 安装后请新开一个会话。技能会以各自的名称出现，两个智能体配置也随插件一同到位。
 
