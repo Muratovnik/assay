@@ -17,3 +17,29 @@ forbid_ai_attribution = true
 forbid_internal_planning = true
 forbid_machine_observations = true
 betterleaks_config = ".betterleaks.toml"
+
+[changelog]
+# The published notes are the entry a person wrote and committed, read from
+# CHANGELOG.md rather than regenerated at publication. Strict accepts the
+# headings this file already uses and refuses a duplicate or empty entry.
+profile = "strict"
+
+[release]
+# A skill library is installed from the repository at a tag: the plugin routes,
+# the skills CLI and the symlink installer all read the source tree. There is
+# nothing to build, so the release publishes the annotated tag, the changelog
+# entry and GitHub's own source archives, exactly as 0.1.0 did.
+publisher = "github"
+repository = "Muratovnik/assay"
+branch = "main"
+version_file = "VERSION"
+version_pattern = '^([0-9]+\.[0-9]+\.[0-9]+)$'
+assets = []
+checks = [["{python}", "-B", "tools/check.py", "--all"]]
+# With no artifact to download, the smoke is the one thing a consumer does with
+# this source: resolve every catalogued target into an install plan. It runs
+# against an isolated home and writes nothing.
+smoke = [["{python}", "-B", "tools/assay.py", "plan", "--home", "{temp}"]]
+smoke_platforms = ["linux", "win32"]
+require_guard = true
+owner_audit = true
