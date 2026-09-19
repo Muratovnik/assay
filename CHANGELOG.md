@@ -6,7 +6,7 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
-## 0.2.0 (2026-09-19)
+## [0.2.0](https://github.com/Muratovnik/assay/compare/v0.1.0...v0.2.0) (2026-09-19)
 
 Two writing methods join the library, and the documentation set now exists in
 English, Russian and Simplified Chinese: the README, the install guide, the
@@ -32,7 +32,7 @@ explanation, the contributing guide and the security policy.
 * **ci:** the exposure probe looks inside the ignored directories instead of naming them, which a fresh clone does not have ([15b0851](https://github.com/Muratovnik/assay/commit/15b085134caa0926dfcdbf846b7b55e9f33fe04d))
 * **tests:** a reaped process entry is treated as a finished process ([8b93609](https://github.com/Muratovnik/assay/commit/8b936096c96ddda6419e6d97318f7c3a62f5d6a5))
 
-## 0.1.0 (2026-09-15)
+## [0.1.0](https://github.com/Muratovnik/assay/releases/tag/v0.1.0) (2026-09-15)
 
 First public release. The library existed privately before this, and those
 revisions are not listed: their numbering and evidence belonged to a workspace
