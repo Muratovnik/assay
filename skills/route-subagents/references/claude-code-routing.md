@@ -8,6 +8,14 @@ control is unavailable, report the limitation instead of claiming it was set.
 Do not persist dated aliases or model rankings or change global configuration
 to route one child.
 
+For a [native economy advisor](routing-advisor.md), use the active Claude model
+inventory and a supported native Agent route for the returned handoff. Do not
+launch another provider's CLI to obtain its economical model. Send only the
+bounded snapshot, request the explicit supported effort and return the object
+to `complete_routing`. If the client cannot express the route, report that
+limitation and use the eligible caller baseline or keep the task local. A prompt
+forbidding tools or delegation is not proof of an enforced permission boundary.
+
 Choose a built-in or semantic role by purpose and effective permissions.
 Explore can fit codebase lookup, but its role name does not identify its model;
 current releases inherit it subject to provider-specific limits. Verify the

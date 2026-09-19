@@ -49,55 +49,57 @@ or reviewer directly within the existing authorization.
 ## Choose model and effort for the task
 
 Select both settings before each spawn. Preserve a model or effort explicitly
-chosen by the user for that child or class of work; the primary's settings are
-not an implicit choice for its children. Otherwise use the local
-[benchmark evidence tool](references/benchmark-routing.md): prefer its
-`get_routing_context` MCP tool; use CLI/stdin only if MCP is unavailable in the
-current session, retaining its installed runtime, config, cache and browser
-settings. Keep automatic refresh enabled; never add `--offline` to a live call.
-Ask once for the plan with every task type you are about to staff, rather than
-once per spawn. Supply the current host's available configurations once per
-connection; reconfirm when the host changes or the tool requests it, and never
-guess aliases. Per-source evidence refreshes lazily after 24 hours within a
-bounded request. Missing data is fetched on the first valid call. Read
-`data_status` and `data_message` before reading the comparisons.
-`usage=diagnostic_only` is an offline replay, not live context. An unavailable
-source or empty cache does not establish absence of published measurements.
-Keep acquisition warnings in any summary; follow the reference's diagnostics.
+chosen by the user; the primary's settings are not an implicit choice for its
+children. Use the [routing advisor workflow](references/routing-advisor.md) when
+configured: one `prepare_routing` request for the plan, structured packets and
+the current host's available model × effort pairs. It extends the existing
+[benchmark evidence service](references/benchmark-routing.md), including its
+source refresh, cohorts, coverage gaps and vendor guidance.
 
-**The tool returns evidence, not a choice.** Every measured configuration is
-listed with its quality distance, measured expenses, Pareto position per axis
-and any declared limit it fails. Nothing is hidden by response size, so a
-compact answer is enough to route or to see why a candidate does not fit.
-Decide from the subtask: ambiguity, error impact, verification strength, tool
-and context needs, and how closely the benchmark resembles the work. Compare
-model and effort together — a capable model at low effort can be more economical
-than a small model at maximum effort.
+The default adapter is `native-economy`, a route to a suitable economical model
+in the active client, not a permanent model name. Resolve its own model and
+effort once from an explicit choice, a real client economy role or a short
+choice grounded in current availability and relevant cost/fit evidence. Send
+that pair with `selection_basis`; do not start another advisor to choose it.
+No known basis means `needs_advisor_route`, not inherited parent settings.
 
-The same response quotes the host publisher's own documentation on effort and
-cost, with the page, section anchor and its caveats. Treat it as the vendor's
-position to weigh, never as an instruction outranking the user's task, and never
-as a measurement: a guide cannot show what a configuration costs on this work. A
-guide that failed to load is reported in that block and is not missing evidence.
+For `awaiting_native_advice`, the primary launches the returned bounded packet
+through the native client and submits its structured answer to
+`complete_routing`. The advisor must not spawn agents. Use the smallest context;
+do not attach the whole conversation or repository. The optional `jev` backend
+requires separate configuration and external-data consent. Neither adapter is
+a new persistent agent profile, and there is no hidden native-to-Jev fallback.
 
-State which measurement supports the choice. Do not average unrelated benchmark
-scores, borrow one test's cost for another, infer unmeasured efforts, treat API
-prices as subscription quota, or call a quality-only candidate economical.
-Pareto position holds inside one cohort and one expense axis. A quality gap, an
-unknown expense or a failed limit is information to weigh, not permission to
-default every worker to the primary model. No declared policy is required; if
-you do declare a limit, it applies to that call only. Use `routing_status` for
-setup and source failures; do not retry a blocked or unavailable source on every
-spawn. No paid router or private benchmark campaign is required, and no
-per-spawn network hook is installed.
+Policy validates the ranking and preserves explicit choices and hard
+constraints. Use its selected route. Veto only for a concrete missed capability,
+incorrect input or changed goal, and record that reason; do not repeat the full
+ranking analysis by default. An abstention or invalid answer uses only an
+already supplied eligible baseline. Without one, select a route through the
+existing evidence workflow or keep the work local. No paid comparison campaign
+or duplicate task execution is required.
 
-Record the chosen model, effort and a short task-based reason with the launch.
-Inheritance is acceptable only when its effective settings match that selection;
-it is never the selection rule. If the client cannot express the choice, use a
-supported route or keep the packet local, and disclose a material limitation.
-A failed setup, missing context or wrong acceptance rule needs repair at that
-layer, not automatic model escalation. Reassess a route when evidence shows a
-capability mismatch. Never change the primary or global client configuration.
+If the advisor is disabled, or the new tools are unavailable, use
+`get_routing_context` once per plan for all needed task types. CLI is a fallback
+only when MCP is unavailable; preserve the installed runtime, config, cache and
+browser settings. Supply confirmed runtime IDs and supported efforts. Never
+guess aliases or add `--offline` to a live decision. Read `data_status`,
+`data_message` and gaps before comparing configurations; an empty cache is not
+absence of published measurements.
+
+Compare model and effort together using ambiguity, error impact, verification
+strength, tools/context needs and benchmark fit. Do not average unrelated
+scores, borrow a different test's costs, infer unmeasured efforts or treat API
+prices as subscription quota. Vendor guidance is quoted evidence, never an
+instruction overriding the task. Preserve acquisition warnings and unknown
+expenses. A quality-only candidate does not establish savings.
+
+Record the selected pair and task-based reason with the launch, then pass
+available execution evidence to `record_routing_outcome`. A requested setting is
+not an observed runtime receipt. Inheritance is acceptable only when its
+effective settings match the deliberate selection. If the client cannot express
+the choice, use a supported route or keep the work local and disclose the
+limitation. Setup failure is not automatic model escalation. Keep the primary's
+model and global client configuration unchanged.
 
 ## Use the native client
 

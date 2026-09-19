@@ -58,6 +58,61 @@ def build_server(service):
             raise ToolError(str(exc)) from exc
 
     @server.tool()
+    async def prepare_routing(
+        packets: list[dict[str, Any]],
+        available: list[dict[str, Any]] | None = None,
+        constraints: dict[str, Any] | None = None,
+        advisor_route: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Prepare bounded model × effort advice using this connection's evidence.
+
+        Supply structured packets only: packet_id, task_types, features and any
+        explicit user route, optional baseline or requirements. Never include
+        prompts, code, credentials, paths or raw tool outputs. Read the routing
+        advisor reference for the feature/requirement schema. Native economy
+        needs a confirmed advisor_route model, effort and selection_basis. It
+        returns awaiting_native_advice with a bounded handoff for the root to
+        launch through its native client. This server never spawns an agent or
+        changes the root model. Jev runs only when separately enabled with
+        external-data consent. Explicit/single choices bypass model advice.
+        Offline results are diagnostic only. A recommendation is not a launch
+        receipt, and self-reported confidence is not success probability.
+        """
+        try:
+            return await service.prepare_routing(packets, available=available,
+                                                  constraints=constraints, advisor_route=advisor_route)
+        except EvidenceError as exc:
+            raise ToolError(str(exc)) from exc
+
+    @server.tool()
+    async def complete_routing(decision_id: str, advisor_result: dict[str, Any]) -> dict[str, Any]:
+        """Validate native advice against the prepared, unexpired snapshot.
+
+        Supply the exact structured result from the handoff. Repeating an
+        identical completion is safe; conflicting answers cannot overwrite a
+        finished decision. Unknown/restarted/expired IDs cannot launch work.
+        Policy preserves an explicit choice and uses only an eligible caller
+        baseline on failure; it never silently escalates to another model.
+        """
+        try:
+            return service.complete_routing(decision_id, advisor_result)
+        except EvidenceError as exc:
+            raise ToolError(str(exc)) from exc
+
+    @server.tool()
+    async def record_routing_outcome(decision_id: str, execution: dict[str, Any]) -> dict[str, Any]:
+        """Record a launch/outcome with provenance, separately from the selected route.
+
+        Requested model/effort are not evidence of the observed runtime. Keep
+        missing runtime, usage or acceptance evidence unknown. No task text,
+        paths, raw outputs or credentials belong in an execution receipt.
+        """
+        try:
+            return service.record_routing_outcome(decision_id, execution)
+        except EvidenceError as exc:
+            raise ToolError(str(exc)) from exc
+
+    @server.tool()
     async def routing_status() -> dict[str, Any]:
         """Inspect local installation, inventory and evidence age; performs no network requests."""
         return service.status()

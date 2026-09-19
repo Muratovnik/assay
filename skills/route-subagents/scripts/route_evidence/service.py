@@ -93,9 +93,12 @@ def load_config(path: Path | None):
     if path is None:
         return {}
     config = read_document(path)
-    if not isinstance(config, dict) or config.get("schema_version") != 1:
-        raise EvidenceError("configuration requires schema_version=1")
-    if set(config) - {"schema_version", "client", "preferences", "inventory"}:
+    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2):
+        raise EvidenceError("configuration requires schema_version=1 or 2")
+    allowed = {"schema_version", "client", "preferences", "inventory"}
+    if config["schema_version"] == 2:
+        allowed.update({"advisor", "policy", "telemetry"})
+    if set(config) - allowed:
         raise EvidenceError("unknown configuration field")
     preferences = config.get("preferences", {})
     if not isinstance(preferences, dict) or set(preferences) - PREFERENCES:
@@ -110,6 +113,9 @@ def load_config(path: Path | None):
                       **preferences})
     if inventory:
         epoch(inventory["observed_at"])
+    if config["schema_version"] == 2:
+        from .advisor_config import settings
+        config.update(settings(config))
     return config
 
 
@@ -137,7 +143,7 @@ inventory once per connection, or a dated local inventory is configured. Neither
 an unqualified family alias nor the server's own guesses resolve model versions.
 """
     def __init__(self, cache: Cache, *, client="unconfigured", preferences=None, inventory=None,
-                 timeout=30, browser=False, offline=False, force=False, clock=time.time):
+                 timeout=30, browser=False, offline=False, force=False, clock=time.time, advisor_config=None):
         number(timeout, "timeout_seconds", upper=300)
         if timeout <= 0:
             raise EvidenceError("timeout_seconds must be positive")
@@ -146,6 +152,25 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         self.preferences = copy.deepcopy(preferences or {})
         self._inventory = copy.deepcopy(inventory)
         self._lock = threading.Lock()
+        self._advisor_config = copy.deepcopy(advisor_config or {})
+        self._advisor_workflow = None
+
+    @property
+    def advisor_workflow(self):
+        from .advisor_service import AdvisorWorkflow
+        if self._advisor_workflow is None:
+            self._advisor_workflow = AdvisorWorkflow(self, self._advisor_config)
+        return self._advisor_workflow
+
+    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False):
+        return await self.advisor_workflow.prepare_routing(
+            packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable)
+
+    def complete_routing(self, decision_id, advisor_result, *, envelope=None):
+        return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope)
+
+    def record_routing_outcome(self, decision_id, execution):
+        return self.advisor_workflow.record_routing_outcome(decision_id, execution)
 
     def prepare(self, task_types, *, available=None, constraints=None):
         if not isinstance(task_types, list) or not task_types:
@@ -185,6 +210,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         with self._lock:
             inv = copy.deepcopy(self._inventory)
         return {"client": self.client, "preferences": copy.deepcopy(self.preferences),
+                "advisor": self.advisor_workflow.status(),
                 "refresh_mode": "offline" if self.offline else "automatic",
                 "guides": brief({"sources": guides})["sources"],
                 "inventory": {"configured": inv is not None, "observed_at": inv["observed_at"] if inv else None,

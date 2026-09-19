@@ -90,7 +90,7 @@ installation; the host's working directory need not be the repository.
 A local JSON config may store preferences, without storing a model matrix:
 
 ```json
-{"schema_version":1,"client":"codex","preferences":{"objective":"cost_usd","quality_loss_pp":3,"allow_stale":true}}
+{"schema_version":1,"client":"codex","preferences":{"quality_loss_pp":3,"allow_stale":true}}
 ```
 
 The value 3 is an example, not a benchmark-derived default. Use separate client
@@ -98,6 +98,11 @@ configs for Codex and Claude. A conflicting `--client` override is rejected.
 Optionally add `inventory: {available: [...], observed_at: "...Z"}` with the
 actual confirmation time. Otherwise the agent supplies it on the first call.
 Neither config nor inventory belongs in tracked source.
+
+Version 1 keeps evidence-only behavior. The opt-in
+[routing advisor](routing-advisor.md) adds native economy and Jev adapters through
+the same service and source cache. Its separate snapshot/policy does not change
+the comparisons returned by `get_routing_context`.
 
 Codex registration template (replace capitalized arguments with real paths):
 

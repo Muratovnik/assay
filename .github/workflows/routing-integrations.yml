@@ -5,6 +5,7 @@ on:
     paths:
       - "skills/route-subagents/**"
       - "tools/test_benchmark*.py"
+      - "tools/test_routing*.py"
       - ".github/workflows/routing-integrations.yml"
   workflow_dispatch:
 
@@ -33,9 +34,11 @@ jobs:
           else
             echo "$PWD/.cache/routing-env/bin" >> "$GITHUB_PATH"
           fi
-      - run: python -m pip install -r skills/route-subagents/scripts/requirements-mcp.txt -r skills/route-subagents/scripts/requirements-browser.txt
+      - run: python -m pip install -r skills/route-subagents/scripts/requirements-mcp.txt -r skills/route-subagents/scripts/requirements-browser.txt -r skills/route-subagents/scripts/requirements-advisors.txt
       - run: python -m playwright install --with-deps chromium
       - name: Require real SDK and Chromium tests
         env:
           REQUIRE_ROUTING_INTEGRATIONS: "1"
         run: python -B -m unittest discover -s tools -p "test_benchmark*.py"
+      - name: Validate advisor contracts with the optional SDK and fake HTTP
+        run: python -B -m unittest discover -s tools -p "test_routing*.py"

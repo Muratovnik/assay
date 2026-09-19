@@ -227,7 +227,8 @@ build_server(service).run(transport="stdio")
             async with asyncio.timeout(30):
                 async with Client(params) as client:
                     tools = await client.list_tools()
-                    self.assertEqual({t.name for t in tools.tools}, {"get_routing_context", "routing_status"})
+                    self.assertEqual({t.name for t in tools.tools}, {"get_routing_context", "routing_status",
+                        "prepare_routing", "complete_routing", "record_routing_outcome"})
                     status = await client.call_tool("routing_status", {})
                     self.assertFalse(status.is_error)
                     self.assertFalse(status.structured_content["inventory"]["configured"])
@@ -250,6 +251,61 @@ build_server(service).run(transport="stdio")
                     self.assertTrue(invalid.is_error)
                     after = await client.call_tool("routing_status", {})
                     self.assertEqual(after.structured_content["inventory"]["models"], 2)
+                    diagnostic = await client.call_tool("prepare_routing", {"packets": [
+                        {"packet_id": "local-check", "task_types": ["implementation"], "features": {}}]})
+                    self.assertFalse(diagnostic.is_error)
+                    self.assertEqual(diagnostic.structured_content["usage"], "diagnostic_only")
+                    self.assertNotIn("handoff", diagnostic.structured_content)
+                    unknown = await client.call_tool("complete_routing", {"decision_id": "absent", "advisor_result": {}})
+                    self.assertEqual(unknown.structured_content["status"], "expired")
+                    receipt = await client.call_tool("record_routing_outcome", {"decision_id": "absent", "execution": {}})
+                    self.assertFalse(receipt.structured_content["recorded"])
+
+    async def test_native_advisor_protocol_roundtrip_without_inference(self):
+        from mcp import Client, StdioServerParameters
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bootstrap = root / "advisor_server.py"
+            bootstrap.write_text('''import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from route_evidence.cache import Cache
+from route_evidence.routing import build_context
+from route_evidence.service import RoutingService
+from benchmark_mcp import build_server
+service = RoutingService(Cache(Path(sys.argv[2]) / "cache"), client="codex",
+    advisor_config={"schema_version": 2, "telemetry": {"mode": "metadata"}})
+async def context(request):
+    return {**build_context(request, []), "sources": [], "data_status": "unavailable", "usage": "routing"}
+service.context = context
+build_server(service).run(transport="stdio")
+''', encoding="utf-8")
+            params = StdioServerParameters(command=sys.executable,
+                args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
+            async with asyncio.timeout(30):
+                async with Client(params) as client:
+                    prepared = await client.call_tool("prepare_routing", {
+                        "packets": [{"packet_id": "local-check", "task_types": ["implementation"], "features": {}}],
+                        "available": request()["available"],
+                        "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
+                            "source": "caller", "reason_code": "bounded_ranking"}}})
+                    self.assertFalse(prepared.is_error)
+                    value = prepared.structured_content
+                    self.assertEqual(value["status"], "awaiting_native_advice")
+                    # A deterministic fixture fulfills the wire contract. No
+                    # native model is started and no model quality is measured.
+                    answer = value["handoff"]["result_contract"]
+                    arguments = {"decision_id": value["decision_id"], "advisor_result": answer}
+                    completed = await client.call_tool("complete_routing", arguments)
+                    self.assertFalse(completed.is_error)
+                    self.assertEqual(completed.structured_content["status"], "decided")
+                    self.assertNotEqual(completed.structured_content.get("telemetry_status"), "write_failed")
+                    repeated = await client.call_tool("complete_routing", arguments)
+                    self.assertEqual(completed.structured_content, repeated.structured_content)
+                    recorded = await client.call_tool("record_routing_outcome", {
+                        "decision_id": value["decision_id"], "execution": {"status": "unknown"}})
+                    self.assertFalse(recorded.is_error)
+                    self.assertEqual(recorded.structured_content["execution"]["observed"], {})
 
 
 if __name__ == "__main__":

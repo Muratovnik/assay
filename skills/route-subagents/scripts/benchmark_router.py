@@ -35,7 +35,8 @@ def make_service(args):
     return RoutingService(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
                           client=args.client or config.get("client", "unconfigured"),
                           preferences=config.get("preferences"), inventory=config.get("inventory"),
-                          timeout=args.timeout_seconds, browser=args.browser, offline=args.offline, force=args.force)
+                          timeout=args.timeout_seconds, browser=args.browser, offline=args.offline, force=args.force,
+                          advisor_config=config)
 
 
 def request_document(path):
@@ -61,15 +62,56 @@ def main(argv=None):
     ip.add_argument("--observed-at", required=True)
     dp = subs.add_parser("doctor")
     dp.add_argument("--check-browser", action="store_true", help="actually launch Chromium on about:blank")
+    for name in ("prepare", "complete", "record"):
+        ap = subs.add_parser(name)
+        ap.add_argument("--request", required=True, help="JSON object file, or - for stdin")
+    hp = subs.add_parser("history-import")
+    hp.add_argument("--file", type=Path, action="append", required=True,
+                    help="explicit Codex/Claude JSONL path; repeat for multiple logs (read-only)")
+    rp = subs.add_parser("replay")
+    rp.add_argument("--record", type=Path, required=True, help="retained advisor record; never invokes a model")
+    rp.add_argument("--policy", type=Path, help="optional pure-policy overrides")
+    mp = subs.add_parser("migrate-config")
+    mp.add_argument("--source", type=Path, required=True)
+    mp.add_argument("--output", type=Path, required=True, help="new file only; never replaces the source")
+    mp.add_argument("--enable-advisor", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "smoke" and (args.offline or not args.force):
             raise EvidenceError("smoke requires --force and online mode")
+        if args.command == "migrate-config":
+            from route_evidence.advisor_config import migrate_config
+            result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor)
+            print(json.dumps(result, indent=2))
+            return 0
         service = make_service(args)
         code = 0
         if args.command == "ingest":
             value = ingest(service.cache, read_document(args.file), args.observed_at)
             result = {"sources": [value]}
+        elif args.command in ("prepare", "complete", "record"):
+            document = request_document(args.request)
+            allowed = {
+                "prepare": {"packets", "available", "constraints", "advisor_route"},
+                "complete": {"decision_id", "advisor_result", "envelope"},
+                "record": {"decision_id", "execution"},
+            }[args.command]
+            if not isinstance(document, dict) or set(document) - allowed:
+                raise EvidenceError("invalid advisor operation fields")
+            required = {"prepare": {"packets"}, "complete": {"decision_id", "advisor_result"},
+                        "record": {"decision_id", "execution"}}[args.command]
+            if required - set(document):
+                raise EvidenceError("missing advisor operation fields")
+            if args.command == "prepare":
+                result = asyncio.run(service.prepare_routing(**document, portable=True))
+            elif args.command == "complete":
+                result = service.complete_routing(**document)
+            else:
+                result = service.record_routing_outcome(**document)
+        elif args.command in ("history-import", "replay"):
+            from route_evidence.history import import_history, replay
+            result = (import_history(args.file) if args.command == "history-import" else
+                      replay(read_document(args.record), policy=read_document(args.policy) if args.policy else None))
         elif args.command == "context":
             if args.offline:
                 print("DIAGNOSTIC ONLY: --offline disables source refresh. "

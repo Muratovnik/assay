@@ -68,6 +68,23 @@ its declared oracle has to be executable, and its instructions still forbid
 mutating commands. An adapter's requested sandbox is configuration: verify the
 effective session policy rather than assuming a parent process left it intact.
 
+## Routing advice
+
+The routing advisor is a bundled part of `route-subagents`, served by its
+existing benchmark MCP/CLI application. It reuses acquisition and cohort evidence,
+builds a bounded immutable snapshot, asks the selected adapter for a ranking,
+then applies deterministic policy. Native economy resolves a current economical
+client model; Jev is an optional, explicitly consented hosted backend. Profiles
+and the catalog carry neither a permanent economy model nor runtime settings.
+
+Assay owns contracts, policy, local metadata and diagnostic replay. The client
+owns authorization, spawning, cancellation and actual quota accounting. Prepared
+state and an exact decision cache are bounded in memory; optional JSON telemetry
+has its own cache namespace and retention. No new daemon, spawn hook, learned
+router or mandatory model evaluation campaign is introduced. The
+[advisor reference](../skills/route-subagents/references/routing-advisor.md)
+defines failure, configuration migration and rollback behavior.
+
 ## Guarded lifecycle
 
 `python tools/assay.py plan` is read-only. For every catalogued target it reports

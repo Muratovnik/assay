@@ -1,5 +1,12 @@
 # 安装 assay
 
+`route-subagents` 支持可选的路由建议：默认 `native-economy` 使用当前客户端中
+合适的低成本模型；Jev 需要单独启用并同意向外部服务传输结构化数据。
+v1 配置保留原有基准证据流程，v2 迁移创建新文件。原生模式不需要 Jev SDK 或密钥，
+技能链接安装也不会更改 MCP 注册。配置、重新连接、历史记录和回滚见
+[RoutingAdvisor 指南](../../skills/route-subagents/references/routing-advisor.md)。
+本地契约测试不能证明模型质量或配额节省。
+
 选择哪条安装路径，取决于你使用的客户端，以及你是否需要在技能之外再获得智能体
 配置。它们安装的都是同一份源。
 

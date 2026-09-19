@@ -1,5 +1,11 @@
 # assay 的组成方式
 
+路由建议器是现有 `route-subagents` MCP/CLI 的组成部分。它复用原有基准数据，
+构建有大小限制的快照，经 `native-economy` 或单独启用的 Jev 获取排序后应用策略。
+目录和智能体配置不绑定固定的低成本模型。客户端负责权限、启动及实际配额；
+Assay 负责契约、本地元数据和诊断重放，不引入新守护进程或强制付费评测。
+详见 [RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)。
+
 [English](../architecture.md) · [Русский](../ru/architecture.md) · **简体中文**
 
 英文版本为准。命令输出、规则名称与配置键不作翻译。

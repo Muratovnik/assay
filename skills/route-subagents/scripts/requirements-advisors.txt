@@ -1,0 +1,4 @@
+# Optional official MIT Python SDK for the hosted TypeSafe System One API.
+# Distribution: typesafe-sdk; import: typesafe_sdk; Python >=3.10.
+# Native routing does not import this dependency.
+typesafe-sdk==0.6.0

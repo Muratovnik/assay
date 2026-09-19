@@ -109,6 +109,20 @@ adapter or a reparse-point parent stops the run before anything is written.
 Developer Mode or an elevated terminal. The installer fails closed if it is
 missing; it will not fall back to a shell command.
 
+## Optional routing advisor
+
+`route-subagents` can use `native-economy` through the active client's available
+models, or the separately enabled hosted Jev adapter. Both extend the existing
+benchmark MCP server; installing skill links does not register or enable them.
+Config v1 remains evidence-only. The explicit v2 migration writes a new file and
+keeps the original for rollback. Native-only operation needs no Jev SDK or key.
+
+See the [routing advisor setup and workflow](../skills/route-subagents/references/routing-advisor.md)
+for configuration, optional pinned SDK installation, external-data consent,
+bounded handoff, metadata retention and offline replay. Reconnect the client
+after changing its server configuration. Static tests do not establish native
+model behavior, actual provider access or quota savings.
+
 ## Uninstalling
 
 ```text
