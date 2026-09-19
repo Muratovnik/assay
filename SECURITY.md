@@ -1,5 +1,7 @@
 # Security
 
+**English** · [Русский](SECURITY.ru.md) · [简体中文](SECURITY.zh-CN.md)
+
 ## What you are installing
 
 A skill is a set of instructions an agent will follow, and some skills here ship

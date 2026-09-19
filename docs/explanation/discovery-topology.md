@@ -1,5 +1,7 @@
 # Why one catalogued source reaches several clients
 
+**English** · [Русский](../ru/explanation/discovery-topology.md) · [简体中文](../zh-CN/explanation/discovery-topology.md)
+
 Assay keeps one canonical copy of each skill and each agent profile and gets it
 to several agent clients that each read a different directory and, for
 profiles, a different file format. This page explains the reasoning behind
@@ -37,13 +39,20 @@ skill directory. The second does not point at a second copy of the skill; it
 points at that same native entry. Claude reaches the skill through the shared
 native root rather than through its own independent projection.
 
-The repository records this arrangement without recording the reasoning
-behind it, so what follows is what it does, not why it was chosen. Every
-supported client reads a skill as a plain directory, so one link serves all of
-them, and there is no second copy that could go stale. The cost is a
-dependency: if the native entry under `~/.agents/skills` is missing or wrong,
-Claude's link resolves to nothing, even though nothing about Claude's own
-directory looks broken.
+The reason is that `~/.agents/skills` is not one client's private directory.
+It is the shared convention several agents already read: Codex takes it as the
+user-account skill root, and Gemini CLI treats it and the project's
+`.agents/skills` as aliases of its own roots. The canonical entry therefore
+belongs there rather than in any single client's folder, and Claude's root
+joins that entry instead of opening a second, independent projection of the
+same directory.
+
+What that buys is one place to verify and one place to repair. Every supported
+client reads a skill as a plain directory, so one link serves all of them, and
+there is no second copy that could go stale. The cost is a dependency: if the
+native entry under `~/.agents/skills` is missing or wrong, Claude's link
+resolves to nothing, even though nothing about Claude's own directory looks
+broken.
 
 ## Why there is no `~/.codex/skills` projection
 

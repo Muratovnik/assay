@@ -26,12 +26,8 @@ links to the instructions the agent will actually read.
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | Operational UI needs designing, repairing or critiquing | The work is backend only |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
-
-Two more skills are in the repository — `technical-writing` (write, reshape,
-translate or review product documentation from its sources) and `text-writing`
-(write or reshape ordinary prose for a particular reader, or review an existing
-text). Both arrived after `v0.1.0` and are **not** part of that release, so an
-install pinned to the tag does not carry them.
+| [technical-writing](skills/technical-writing/SKILL.md) | Product documentation needs writing, reshaping, translating or reviewing from its sources | The text is an ordinary message or article, or the change is code |
+| [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
 
 Two agent profiles ship as capability boundaries rather than personas.
 `evidence-reviewer` reviews a frozen packet through a read-only oracle and
@@ -48,10 +44,10 @@ The skills themselves are Markdown; a client just needs to load them. Python
 3.11 or newer, plus the pinned dependency in `requirements-tools.txt`, is only
 needed for the symlink installer and this repository's own tools below.
 
-| Client | Command | Verified |
+| Client | Command | Route status |
 | --- | --- | --- |
-| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` | yes |
-| Any supported agent | `npx skills add Muratovnik/assay` | yes |
+| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` | verified |
+| Any supported agent | `npx skills add Muratovnik/assay` | verified |
 | Codex | `codex plugin marketplace add Muratovnik/assay`, then install from `/plugins` | documented |
 | Cursor | `npx skills add Muratovnik/assay -a cursor` | documented |
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` | documented |

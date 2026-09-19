@@ -1,5 +1,7 @@
 # Contributing
 
+**English** · [Русский](CONTRIBUTING.ru.md) · [简体中文](CONTRIBUTING.zh-CN.md)
+
 Thanks for looking. This is a set of methods one person maintains and published
 because they might be useful to your agent too. Issues and pull requests are
 welcome; replies are best-effort, not same-day.
@@ -38,7 +40,9 @@ the first failure. `make check` is the same command, and it creates the scratch
 directory the audit-packet suite needs, so there is nothing to set up first.
 
 To run one gate on its own, the list lives in `tools/check.py`. Continuous
-integration runs `check --all` on Linux and Windows, plus the publication audit.
+integration runs `check --all` on Linux and Windows, then the publication audit
+with its history check, and on Linux it also validates the Claude plugin
+manifests with `claude plugin validate .`.
 
 What the gates do **not** check is written down in [AGENTS.md](AGENTS.md); read
 that before trusting a green run.

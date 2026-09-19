@@ -1,5 +1,7 @@
 # Upgrading a linked install
 
+**English** · [Русский](../ru/how-to/upgrade-linked-install.md) · [简体中文](../zh-CN/how-to/upgrade-linked-install.md)
+
 This page is for you if you installed assay in a checkout with the symlink
 installer — `python tools/assay.py install-links` — and now want to move that
 same installation to a newer revision of the checkout. It assumes you can use

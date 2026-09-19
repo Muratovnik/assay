@@ -27,11 +27,8 @@
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | 需要设计、修复或评审运维界面 | 工作仅涉及后端 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
 | [skill-design](skills/skill-design/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
-
-仓库中还有两个技能：`technical-writing`（依据来源撰写、重构、翻译或评审产品
-文档）与 `text-writing`（为特定读者撰写或重构普通文本，或评审既有文本）。二者
-都是在 `v0.1.0` 之后加入的，**不属于**该发布版本，因此固定到该标签的安装不会
-包含它们。
+| [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
+| [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
 
 两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 通过只读的取证
 手段审查冻结的材料包并给出结论；`official-docs-researcher` 依据一手文档回答一个
@@ -47,7 +44,7 @@
 `requirements-tools.txt` 中固定的依赖，仅用于下文的符号链接安装器和仓库自身的
 工具。
 
-| 客户端 | 命令 | 是否实测 |
+| 客户端 | 命令 | 路径状态 |
 | --- | --- | --- |
 | Claude Code | `/plugin marketplace add Muratovnik/assay`，然后 `/plugin install assay@assay` | 已实测 |
 | 任意受支持的智能体 | `npx skills add Muratovnik/assay` | 已实测 |
@@ -103,10 +100,10 @@ python tools/assay.py install-links
 ## 文档
 
 - [安装 assay](docs/zh-CN/install.md) —— 各客户端细节、卸载与升级。
-- [升级符号链接安装](docs/how-to/upgrade-linked-install.md) —— 如何把符号链接安装迁移到新版本，以及出问题时如何回退（英文）。
-- [assay 的组成方式](docs/architecture.md) —— 清单、发现拓扑与受保护的安装生命周期（英文）。
-- [为什么一份源能到达多个客户端](docs/explanation/discovery-topology.md) —— 技能为何用链接、配置为何用渲染，以及各自的代价（英文）。
-- [评测能证明什么](docs/evaluation.md) —— 每个技能的 `evals/` 目录能够以及不能够证明什么（英文）。
+- [升级符号链接安装](docs/zh-CN/how-to/upgrade-linked-install.md) —— 如何把符号链接安装迁移到新版本，以及出问题时如何回退。
+- [assay 的组成方式](docs/zh-CN/architecture.md) —— 清单、发现拓扑与受保护的安装生命周期。
+- [为什么一份源能到达多个客户端](docs/zh-CN/explanation/discovery-topology.md) —— 技能为何用链接、配置为何用渲染，以及各自的代价。
+- [评测能证明什么](docs/zh-CN/evaluation.md) —— 每个技能的 `evals/` 目录能够以及不能够证明什么。
 - [技能索引](skills/README.md) —— 自动生成的技能列表，含启用方式与一句话用途（英文）。
 
 ## 限制
@@ -119,14 +116,16 @@ python tools/assay.py install-links
   数据而非指令，方法本身也如此声明，但任何声明都不构成保证。当智能体读取过你
   无法控制的内容后，请复核它提出的方案。
 - 持续集成中不运行任何模型，本仓库的技能也不带任何评分；确切范围见
-  [docs/evaluation.md](docs/evaluation.md)（英文）。
-- 安全问题请通过 [SECURITY.md](SECURITY.md) 私下报告，而不要公开提交 issue。
+  [docs/zh-CN/evaluation.md](docs/zh-CN/evaluation.md)。
+- 安全问题请通过 [SECURITY.zh-CN.md](SECURITY.zh-CN.md) 私下报告，而不要公开
+  提交 issue。
 
 ## 参与贡献
 
-欢迎提交 issue 与 pull request，回复以尽力而为为准。编写约定，包括明确列出校验
-不会检查哪些方面，见 [AGENTS.md](AGENTS.md)；工作流程见
-[CONTRIBUTING.md](CONTRIBUTING.md)。两份文档均为英文。
+欢迎提交 issue 与 pull request，回复以尽力而为为准。工作流程见
+[CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。编写约定，包括明确列出校验不会
+检查哪些方面，见 [AGENTS.md](AGENTS.md)：那是给在本仓库工作的智能体的指令，以
+英文维护。
 
 ## 许可证
 

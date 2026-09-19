@@ -1,5 +1,7 @@
 # How assay is put together
 
+**English** · [Русский](ru/architecture.md) · [简体中文](zh-CN/architecture.md)
+
 Each skill is a directory under `skills/`, each agent profile a JSON file under
 `profiles/`, and `catalog.toml` is the complete inventory. Nothing is duplicated
 per client: the installer links or renders the one source into whichever native
@@ -50,8 +52,9 @@ rendered rather than linked; their destinations are in the inventory above.
 
 This section says what the layout is.
 [Why one source reaches several clients](explanation/discovery-topology.md)
-says what each of those choices costs, and where the repository records the
-arrangement without its reasoning.
+says why it is arranged that way — `~/.agents/skills` is the root several
+clients already read, not one client's private directory — and what each choice
+costs.
 
 An automatic skill activating is not permission to delegate or to mutate anything.
 Delegation is one level deep: the primary agent spawns every worker, and a worker

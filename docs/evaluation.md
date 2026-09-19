@@ -1,5 +1,7 @@
 # What the evaluations establish
 
+**English** · [Русский](ru/evaluation.md) · [简体中文](zh-CN/evaluation.md)
+
 Every skill ships an `evals/` directory. It is worth being precise about what
 those files prove, because the honest answer is narrower than "the skill works".
 

@@ -133,4 +133,4 @@ python tools/assay.py install-links
 那份外部快照才是回滚依据；安装目录旁边的状态文件不是。
 
 同一次升级的逐步操作，包括事先要保存什么、出问题后如何回退，见
-[Upgrading a linked install](../how-to/upgrade-linked-install.md)（英文）。
+[升级符号链接安装](how-to/upgrade-linked-install.md)。

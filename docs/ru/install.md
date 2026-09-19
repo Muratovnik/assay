@@ -148,5 +148,4 @@ python tools/assay.py install-links
 файл состояния рядом с установкой им не является.
 
 То же обновление по шагам, вместе с тем, что сохранить заранее и как откатиться,
-разобрано в [Upgrading a linked install](../how-to/upgrade-linked-install.md)
-(на английском).
+разобрано в [Обновлении symlink-установки](how-to/upgrade-linked-install.md).
