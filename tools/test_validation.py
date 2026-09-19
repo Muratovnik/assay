@@ -228,6 +228,35 @@ class CatalogDocumentTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 docs.updated(rendered + docs.BEGIN, aa.load_catalog(root))
 
+    def test_every_marked_document_is_checked_and_the_english_one_is_required(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            english = root / docs.DOCUMENT
+            english.parent.mkdir(parents=True)
+            marked = docs.BEGIN + "\nold\n" + docs.END + "\n"
+            english.write_text(marked, encoding="utf-8")
+            english.write_text(docs.updated(marked, aa.load_catalog(root)), encoding="utf-8")
+            self.assertTrue(docs.check(root))
+
+            translated = root / "docs/ru/architecture.md"
+            translated.parent.mkdir(parents=True)
+            translated.write_text("Опись.\n" + marked, encoding="utf-8")
+            self.assertIn(translated, docs.documents(root))
+            self.assertFalse(docs.check(root), "a stale translation must fail the gate")
+
+            translated.write_text(docs.updated(translated.read_text(encoding="utf-8"),
+                                               aa.load_catalog(root)), encoding="utf-8")
+            self.assertTrue(docs.check(root))
+
+            unmarked = root / "docs/ru/install.md"
+            unmarked.write_text("Установка без описи.\n", encoding="utf-8")
+            self.assertNotIn(unmarked, docs.documents(root))
+
+            english.write_text("no markers here\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                docs.documents(root)
+
 
 class EvaluationDataTests(unittest.TestCase):
     def test_verifier_cli_leaves_source_unchanged_with_bytecode_enabled(self) -> None:
