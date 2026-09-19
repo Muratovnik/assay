@@ -104,10 +104,9 @@ fact of being installed.
 None of the gates described in the architecture note prove that a client
 actually discovered an installed skill, or that a requested sandbox was
 actually honoured by a session — only a captured run in a fresh client can
-speak to either of those. Nothing here was exercised on a live client while
-this page was written: the layout above describes the source and the
-rendering contract as they stand in the checkout, not an observed
-installation.
+speak to either of those. Everything above is read from the repository: it
+describes the source and the rendering contract, not an installation anyone
+observed working.
 
 ## Boundaries
 

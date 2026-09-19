@@ -48,6 +48,11 @@ project and `~/.agents/skills` for the user, and its `.system` directory belongs
 to the client. Agent profiles need different file formats per client, so they are
 rendered rather than linked; their destinations are in the inventory above.
 
+This section says what the layout is.
+[Why one source reaches several clients](explanation/discovery-topology.md)
+says what each of those choices costs, and where the repository records the
+arrangement without its reasoning.
+
 An automatic skill activating is not permission to delegate or to mutate anything.
 Delegation is one level deep: the primary agent spawns every worker, and a worker
 never creates another agent. `route-subagents` owns that policy once, and the
@@ -96,16 +101,21 @@ old source with a new registration, and it preserves unrelated drift instead of
 flattening it to make a preflight pass. A state file living beside the installation
 is not a backup of it.
 
+[Upgrading a linked install](how-to/upgrade-linked-install.md) is that sequence
+as a procedure, with the snapshot step first and the restore step last.
+
 ## Gates
 
 ```text
-python -B tools/check.py
-python -B -m unittest discover -s tools -p "test_*.py"
-python -B tools/compatibility_fixture.py
-python -B tools/catalog_docs.py --check
-python -B tools/eval_assets.py check
-python -B -m unittest discover -s skills/independent-audit/evals -p test_prepare_case.py
+python -B tools/check.py --all
 ```
+
+That one command runs every gate and reports each rather than stopping at the
+first failure: the source check, the `tools/` unit suite, the compatibility
+fixture, the generated catalog document, the evaluation data, the rendered
+client files, the audit-packet suite and the preservation fixtures. `make check`
+is the same command, and it creates the scratch directory the audit-packet suite
+needs. To run one gate alone, the list lives in `tools/check.py`.
 
 These prove source structure, plan determinism, guarded install and uninstall
 semantics, and adapter capabilities. They cannot prove that a client discovered a

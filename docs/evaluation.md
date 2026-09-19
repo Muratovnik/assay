@@ -12,6 +12,13 @@ must not contain. Some skills add a `trigger-cases.json` for the separate
 question of whether the skill should activate at all, and `evaluation.md`
 describes how a run is set up.
 
+Two directories are shaped differently, and it is worth knowing which one you
+are looking at. `independent-audit` keeps its cases in its own fixture layout
+rather than the paired JSON files. `skill-design` has no machine-readable cases
+at all: its `research-and-transfer.md` is an evaluator-only specification of
+what to supply and what to look for, and the gate checks only that the document
+is there.
+
 They are evaluation data, not runtime instructions. A skill's own text says so:
 while performing a user's task, the skill must not read its own cases or rubrics.
 Reading the grading key is how a method starts scoring well without getting
@@ -24,13 +31,18 @@ an id, every rubric entry points at a case that exists, every referenced input
 path resolves, and no case smuggles a grading field into the input side. It does
 not execute a fixture and it does not run a model.
 
-The audit packet suite (`skills/independent-audit/evals/test_prepare_case.py`)
-does execute: it builds frozen input-only packets and verifies that preparation
-excludes rubrics, other cases and previous answers, and that a packet's manifest
-digest matches what was actually written.
+Two suites do execute, and neither runs a model. The audit packet suite
+(`skills/independent-audit/evals/test_prepare_case.py`) builds frozen input-only
+packets and verifies that preparation excludes rubrics, other cases and previous
+answers, and that a packet's manifest digest matches what was actually written.
+The preservation suite (`skills/technical-writing/evals/test_text_check.py`) runs
+that skill's shipped `text_check.py` against fixture pairs and holds it to its
+documented contract: which regions each mode compares, which exit code each
+outcome produces, and that the check leaves both input files untouched.
 
-So the gates establish that the evaluation material is internally consistent and
-that packet preparation is honest. They establish nothing about answer quality.
+So the gates establish that the evaluation material is internally consistent,
+that packet preparation is honest, and that one shipped script behaves as its
+own documentation says. They establish nothing about answer quality.
 
 ## What is deliberately not proven
 

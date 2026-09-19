@@ -1,6 +1,6 @@
 # Installing assay
 
-Five ways in, depending on which client you use and whether you want the agent
+Which route you take depends on your client, and on whether you want the agent
 profiles as well as the skills. All of them install the same source.
 
 **English** · [Русский](ru/install.md) · [简体中文](zh-CN/install.md)
@@ -141,3 +141,6 @@ would have to remove them by hand.
 Before either step, keep a copy of the existing adapter bytes and link
 destinations somewhere outside the managed roots. That external snapshot is the
 rollback path; a state file beside the installation is not one.
+
+[Upgrading a linked install](how-to/upgrade-linked-install.md) walks through the
+same upgrade step by step, including what to save first and how to undo it.

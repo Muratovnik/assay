@@ -27,11 +27,11 @@ links to the instructions the agent will actually read.
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
 
-Two more skills exist in this checkout — `technical-writing` (write, reshape,
+Two more skills are in the repository — `technical-writing` (write, reshape,
 translate or review product documentation from its sources) and `text-writing`
 (write or reshape ordinary prose for a particular reader, or review an existing
-text). They are **not** part of the `v0.1.0` release: the install commands
-below do not deliver them yet.
+text). Both arrived after `v0.1.0` and are **not** part of that release, so an
+install pinned to the tag does not carry them.
 
 Two agent profiles ship as capability boundaries rather than personas.
 `evidence-reviewer` reviews a frozen packet through a read-only oracle and
@@ -112,7 +112,9 @@ falling back to a shell.
 ## Documentation
 
 - [Installing assay](docs/install.md) — per-client detail, uninstalling and upgrading.
+- [Upgrading a linked install](docs/how-to/upgrade-linked-install.md) — moving a symlink install to a newer revision, and the way back if it goes wrong.
 - [How assay is put together](docs/architecture.md) — the inventory, the discovery topology and the guarded install lifecycle.
+- [Why one source reaches several clients](docs/explanation/discovery-topology.md) — why a skill is linked and a profile rendered, and what each choice costs.
 - [What the evaluations establish](docs/evaluation.md) — what each skill's `evals/` directory proves and does not prove.
 - [Skills index](skills/README.md) — the generated list of skills with activation and a one-line purpose.
 
