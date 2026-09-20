@@ -7,7 +7,7 @@ including attempts, retries, verification and coordination. A cheap first
 answer alone is not evidence of economy. Worker model names remain inventory
 inputs; no historical model is mapped to a newer family member.
 
-## Enable only where evidence justifies it
+## Enable with a relevant public corpus
 
 Add to a **v2** client configuration, retaining its other settings:
 
@@ -31,8 +31,12 @@ installation, model invocation or background collection occurs.
 Lexical search needs only the existing Python runtime. It uses Unicode words
 and cosine similarity, not translation. The threshold and minimum sample count
 are resource/coverage bounds, not calibrated probability or confidence levels.
-With no comparable histories, keep this diagnostic or disabled. Enabling it is
-not evidence that it saves subscription quota.
+A relevant public corpus is useful without local chain history: it shows which
+historical models handled similar tasks and at what measured response cost.
+Enable that advisory context after import and a bounded lookup check. Local
+history progressively adds current workflow cost estimates; it is not an
+activation prerequisite. Enabling public context does not establish measured
+subscription savings or justify transferring old scores to new models.
 
 Rollback: set `task_evidence.enabled` to false and reconnect. Previous requests,
 benchmark cache and history remain usable. Corpus removal, if needed, is limited
@@ -145,9 +149,25 @@ require explicit normalization before import. Missing scores and costs are
 null. Atomic indexed storage includes a content fingerprint. Identical imports
 are idempotent; corruption returns unavailable rather than an empty success.
 
-Historical pool coverage/all-pass/all-fail patterns are separate from current
-candidate estimates. Unknown effort cannot match a current model × effort pair.
+Historical pool coverage/all-pass/all-fail patterns and per-model observations
+are separate from current candidate estimates. `public_coverage` includes a
+compact table (`columns`, `rows`, `cost_units`) of sample counts, known scores,
+mean source scores, mean observed costs and missing/partial coverage. At most
+16 historical routes per cohort are included in stable identity order, with
+`omitted_routes` reported explicitly. Source metrics, scope and unit basis stay
+separate. These rows remain visible when no historical model matches inventory.
+Current `public` and `local` estimates include observed groups only;
+`unknown_current_candidates` declares missing candidate IDs for each layer, or
+`"all"` when every eligible current candidate is unmeasured. This avoids spending
+the shared context budget repeating empty groups for a large model × effort pool.
+Unknown effort cannot match a current model × effort pair.
 Public response cost cannot prove the cost of an agent's complete work chain.
+
+For an English code corpus in lexical mode, supply a concise English description
+of the already known subtask. The coordinator can phrase it directly; no extra
+translation model call is needed. A Russian-only lexical query is not translated
+by the service. Similarities and historical outcomes are context for the existing
+advisor, never an automatic assignment or fixed mapping to a newer model.
 
 ## Record complete chains through the existing history
 

@@ -137,6 +137,7 @@ def _external_state(snapshot: dict[str, Any]) -> dict[str, Any]:
         for packet in task.get("packets", []):
             packet.pop("local", None)
             packet.pop("comparison", None)
+            packet.get("unknown_current_candidates", {}).pop("local", None)
     packets = []
     for packet in snapshot["packets"]:
         packets.append({

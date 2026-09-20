@@ -99,6 +99,10 @@ baseline. Include retries, verification and coordination; unknown cost or
 alternative outcomes cannot justify cheaper routing. Keep descriptions local,
 reuse existing observations and stay within the evidence budget. No extra model
 run is authorized to calibrate this choice.
+Pass short `task_queries` by packet ID (or `task_query` in evidence-only mode)
+from the known work. Public historical observations provide useful context even
+without local history or exact current-model matches; keep their measurements
+distinct from predictions about the available routes.
 
 Record the selected pair and task-based reason with the launch, then pass
 available execution evidence to `record_routing_outcome`. A requested setting is

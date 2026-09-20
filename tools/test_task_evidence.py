@@ -136,6 +136,37 @@ class RetrievalTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.store = TaskEvidence(self.root, {"enabled": True})
 
+    def test_historical_models_supply_evidence_without_current_route_matches(self):
+        doc = corpus()
+        doc["records"][0]["observations"] = [
+            {**observation("older-model", 2, score=1, scope="response"), "effort": None},
+            {**observation("other-old-model", 7, score=0, scope="response"), "effort": None}]
+        self.store.install(doc)
+        reply = self.store.summarize([PACKET], CANDIDATES, {"fix": "cache invalidation"})
+        packet = reply["packets"][0]
+        self.assertEqual(packet["public"], [])
+        self.assertEqual(packet["unknown_current_candidates"]["public"], "all")
+        group = packet["public_coverage"][0]
+        self.assertEqual(group["cost_scope"], "response")
+        table = [dict(zip(group["columns"], row)) for row in group["rows"]]
+        self.assertEqual([r["model"] for r in table], ["older-model", "other-old-model"])
+        self.assertEqual(table[0]["mean_score"], 1)
+        self.assertEqual(table[1]["mean_score"], 0)
+        self.assertEqual(table[0]["mean_costs"], [2])
+        self.assertIsNone(table[0]["effort"])
+        self.assertIsNone(packet["comparison"]["recommended"])
+
+    def test_full_current_inventory_does_not_crowd_out_public_evidence(self):
+        doc = corpus()
+        doc["records"][0]["observations"] = [
+            {**observation(f"historical-{i}", i+1, scope="response"), "effort": None} for i in range(13)]
+        self.store.install(doc)
+        current = [{"model": f"current-{i}", "effort": "low", "candidate_id": candidate_id(f"current-{i}", "low")} for i in range(64)]
+        reply = self.store.summarize([PACKET], current, {"fix": "cache invalidation"})
+        self.assertEqual(reply["status"], "available")
+        self.assertEqual(len(reply["packets"][0]["public_coverage"][0]["rows"]), 13)
+        self.assertEqual(reply["packets"][0]["unknown_current_candidates"], {"public":"all", "local":"all"})
+
     def test_idempotent_import_no_match_and_identity(self):
         first = self.store.install(corpus())
         self.assertEqual(first, self.store.install(corpus()))
@@ -223,6 +254,7 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
         ext = _external_state(snap)["evidence"]["task_similarity_evidence"]["packets"][0]
         self.assertNotIn("local", ext)
         self.assertNotIn("comparison", ext)
+        self.assertNotIn("local", ext["unknown_current_candidates"])
         # Finish through the existing policy fallback to create an ordinary receipt.
         workflow = self.service.advisor_workflow
         workflow._finish(workflow._states[reply["decision_id"]], reason="advisor_disabled")
@@ -236,7 +268,7 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(EvidenceError, "opt-in"):
             self.service.record_routing_outcome(reply["decision_id"], {**receipt, "task_description": "private"})
         self.now += 31 * 86400
-        self.assertEqual(workflow.task_evidence.summarize([PACKET], CANDIDATES)["packets"][0]["local"][0]["status"], "unknown")
+        self.assertEqual(workflow.task_evidence.summarize([PACKET], CANDIDATES)["packets"][0]["unknown_current_candidates"]["local"], "all")
 
     async def test_evidence_only_and_old_workflow_when_disabled(self):
         response = await self.service.get_routing_context(["implementation"], available=AVAILABLE, task_query="cache invalidation")

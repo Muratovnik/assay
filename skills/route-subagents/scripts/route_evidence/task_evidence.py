@@ -114,21 +114,37 @@ def cosine(left, right):
 def public_coverage(rows):
     """Historical pool patterns remain useful without mapping old models to new ones."""
     from collections import defaultdict
+    from statistics import mean
     groups = defaultdict(list)
     for row in rows:
-        groups[(row["comparison_basis"], row["metric"])].append(row)
+        groups[(row["comparison_basis"], row["metric"], row["cost_scope"],
+                tuple(sorted(row["unit_basis"].items())))].append(row)
     out = []
-    for (basis, metric), group in sorted(groups.items()):
+    for (basis, metric, scope, unit_basis), group in sorted(groups.items()):
         tasks = defaultdict(list)
         for row in group:
             tasks[row["task_id"]].append(row)
         pool = {(r["model"], r["effort"]) for r in group}
         complete = [v for v in tasks.values() if len(v) == len(pool) and all(r["score"] is not None for r in v)]
-        out.append({"comparison_basis": basis, "metric": metric, "tasks": len(tasks),
+        units = sorted(set().union(*(r["costs"] for r in group)))
+        historical = []
+        for model, effort in sorted(pool, key=lambda p: (p[0], p[1] or ""))[:16]:
+            observed = [r for r in group if (r["model"], r["effort"]) == (model, effort)]
+            scores = [r["score"] for r in observed if r["score"] is not None]
+            costs = [[r["costs"][u] for r in observed if r["complete"] and r["costs"].get(u) is not None] for u in units]
+            historical.append([model, effort, len(observed), len(scores),
+                round(mean(scores), 8) if scores else None,
+                [round(mean(c), 8) if c else None for c in costs], [len(c) for c in costs],
+                sum(not r["complete"] for r in observed)])
+        out.append({"comparison_basis": basis, "metric": metric, "cost_scope": scope,
+            "unit_basis": dict(unit_basis), "tasks": len(tasks),
             "historical_routes": len(pool), "complete_pool_tasks": len(complete),
             "all_fail_tasks": sum(all(r["score"] == 0 for r in v) for v in complete),
             "all_pass_tasks": sum(all(r["score"] == 1 for r in v) for v in complete),
             "unknown_effort_observations": sum(r["effort"] is None for r in group),
+            "columns": ["model", "effort", "observations", "known_scores", "mean_score",
+                        "mean_costs", "known_costs", "partial_cost_observations"],
+            "cost_units": units, "rows": historical, "omitted_routes": max(0, len(pool)-16),
             "applicability": "historical_pool_not_current_candidate_probability"})
     return out
 
@@ -328,7 +344,7 @@ class TaskEvidence:
             if obj["overhead"] is not None:
                 number(obj["overhead"], "overhead")
         base = {"schema_version": 1, "mode": self.config["mode"], "packets": [],
-                "cost_units_are_not_interchangeable": True, "retrieval_version": 1,
+                "cost_units_are_not_interchangeable": True, "retrieval_version": 2,
                 "settings_hash": digest(self.config)}
         if not self.config["enabled"]:
             return {**base, "status": "disabled"}
@@ -371,12 +387,19 @@ class TaskEvidence:
                 baseline_id = next((c["candidate_id"] for c in eligible if baseline and
                     (c["model"], c["effort"]) == (baseline["model"], baseline["effort"])), None)
                 obj = objectives.get(packet["packet_id"], {"unit": None, "overhead": None})
+                current = {"public": estimates(public, eligible, minimum=minimum),
+                           "local": estimates(local, eligible, minimum=minimum)}
+                unknown = {}
+                for layer, values in current.items():
+                    missing = [v["candidate_id"] for v in values if v["status"] == "unknown"]
+                    unknown[layer] = "all" if len(missing) == len(values) else missing
+                    current[layer] = [v for v in values if v["status"] != "unknown"]
                 # Local and public estimates are never pooled into one score.
                 entry = {"packet_id": packet["packet_id"], "status": "available" if local or public else "no_match",
                     "neighbors": len(neighbors), "examples": [digest(r["task_id"])[:16] for _, r in neighbors[:3]],
                     "public_coverage": public_coverage(public),
-                    "public": estimates(public, eligible, minimum=minimum),
-                    "local": estimates(local, eligible, minimum=minimum),
+                    "public": current["public"], "local": current["local"],
+                    "unknown_current_candidates": unknown,
                     "comparison": compare(local, eligible, baseline_id, obj["unit"], obj["overhead"],
                                           minimum=minimum, unit_basis=obj.get("unit_basis")),
                     "limitations": ["similarity_is_not_success_probability", "historical_models_not_mapped",
