@@ -6,6 +6,10 @@ deterministic policy to its answer. The native client still owns permissions,
 launch, interruption and quota. Neither MCP nor CLI launches an agent, changes
 the primary model or enforces a per-child token allowance.
 
+The optional [task evidence extension](task-evidence.md) adds local query retrieval
+and historical full-chain cost/quality estimates. It is disabled by default;
+missing evidence preserves this workflow and never implies subscription savings.
+
 ## Enable for one client
 
 Config v1 remains evidence-only. Create a separate v2 file, preserving the old

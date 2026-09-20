@@ -11,7 +11,7 @@ from ..advice_contracts import validate_result, validate_routing_snapshot
 from ..core import EvidenceError, encoded, loads
 
 BACKEND = "native-economy"
-PROMPT_VERSION = "native-routing-v1"
+PROMPT_VERSION = "native-routing-v2"
 MAX_SNAPSHOT_BYTES = 24 * 1024
 _BASIS_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}\Z")
 
@@ -105,7 +105,12 @@ def _render_prompt(snapshot: dict[str, Any], model: str, level: str) -> tuple[st
         "only when the evidence supports adequate task quality and the required capabilities. "
         "Never average scores across cohorts, sources, harnesses, subsets, or revisions. Never "
         "treat API price, tokens, steps, or duration as subscription quota usage. "
-        "Return one JSON object and no prose. "
+        "Task similarity evidence, when present, reports historical cost and quality separately. "
+        "Prefer the lowest expected full-chain expense consistent with required quality, including "
+        "retries, verification and coordination. Response-only costs are not chain costs. Unknown "
+        "cost or quality does not justify downgrading; preserve the baseline or abstain. Paired "
+        "comparisons are observational, not guarantees. Never convert units or map historical models "
+        "to current ones. Return one JSON object and no prose. "
         "Reorder each contract ranking from best to worst without adding, dropping, or repeating IDs. "
         "Do not invent numeric probabilities or confidence. If the evidence is insufficient, "
         "set abstained=true, ranking=[], and give bounded reason_codes. The exact response "

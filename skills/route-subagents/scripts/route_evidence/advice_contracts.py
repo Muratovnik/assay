@@ -420,6 +420,9 @@ def _validate_candidates(value: Any) -> list[dict]:
 
 
 def _validate_compact_evidence(evidence: dict, candidates: list[dict]) -> None:
+    if "task_similarity_evidence" in evidence:
+        from .task_evidence import validate_summary
+        validate_summary(evidence["task_similarity_evidence"])
     if evidence.get("projection_version") != 1:
         raise EvidenceError("snapshot evidence requires projection_version=1")
     if evidence.get("encoding") != COMPACT_EVIDENCE_ENCODING:

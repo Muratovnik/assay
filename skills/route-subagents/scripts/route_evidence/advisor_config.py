@@ -77,7 +77,11 @@ def settings(config=None):
         raise EvidenceError("unknown telemetry mode")
     if type(telemetry["retention_days"]) is not int or not 1 <= telemetry["retention_days"] <= 365:
         raise EvidenceError("retention_days must be between 1 and 365")
-    return {"advisor": advisor, "policy": policy, "telemetry": telemetry}
+    result = {"advisor": advisor, "policy": policy, "telemetry": telemetry}
+    if "task_evidence" in config:
+        from .task_evidence import settings as task_settings
+        result["task_evidence"] = task_settings(config["task_evidence"])
+    return result
 
 
 def migrate_config(source: Path, destination: Path, *, enable_advisor=False):

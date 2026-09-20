@@ -6,6 +6,7 @@ import copy
 import importlib.metadata
 import re
 import threading
+import time
 import uuid
 from collections import OrderedDict
 
@@ -25,6 +26,10 @@ class AdvisorWorkflow:
         self.policy = self.settings["policy"]
         self.clock = service.clock
         self.history = HistoryStore(service.cache.root, clock=self.clock, **self.settings["telemetry"])
+        from .task_evidence import TaskEvidence
+        self.task_evidence = TaskEvidence(service.cache.root, (config or {}).get("task_evidence"),
+                                          history=self.history, clock=self.clock)
+        self.history.retain_descriptions = self.task_evidence.config["retain_descriptions"]
         self._states = OrderedDict()
         self._cache = OrderedDict()
         self._lock = threading.RLock()
@@ -45,7 +50,9 @@ class AdvisorWorkflow:
                 "optional_sdk_version": sdk, "telemetry": copy.deepcopy(self.settings["telemetry"]),
                 "pending": pending, "max_pending": self.advisor["max_pending"],
                 "usage": "diagnostic_only" if self.service.offline else "routing",
-                "launches_agents": False}
+                "launches_agents": False,
+                "task_evidence": {k: self.task_evidence.config[k] for k in
+                                  ("enabled", "mode", "deadline_seconds", "retain_descriptions")}}
 
     def _expire(self):
         now = self.clock()
@@ -77,12 +84,15 @@ class AdvisorWorkflow:
                     "usage": "diagnostic_only" if self.service.offline else "routing",
                     "decisions": decisions, "expires_at": snapshot["expires_at"],
                     "advisor_result": result, "launch_verified": False}
+        if "task_evidence_status" in state:
+            response["task_evidence_status"] = state["task_evidence_status"]
         if self.service.offline:
             response["status"] = "diagnostic_only"
         state.update(state=response["status"], response=response, result_hash=digest(result), result=copy.deepcopy(result))
         if not self.service.offline:
             try:
-                self.history.write_decision(state["id"], snapshot, result, decisions)
+                self.history.write_decision(state["id"], snapshot, result, decisions,
+                                            retrieval_seconds=state.get("retrieval_seconds"))
             except (EvidenceError, OSError):
                 response["telemetry_status"] = "write_failed"
         if cache and result is not None and state.get("cache_key"):
@@ -92,8 +102,11 @@ class AdvisorWorkflow:
                 self._cache.popitem(last=False)
         return copy.deepcopy(response)
 
-    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False):
+    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
+                              task_queries=None, cost_objectives=None):
         packets = validate_packets(packets)
+        from .task_evidence import validate_queries
+        task_queries = validate_queries(task_queries, [p["packet_id"] for p in packets])
         task_types = list(dict.fromkeys(t for packet in packets for t in packet["task_types"]))
         request = self.service.prepare(task_types, available=available, constraints=constraints)
         if "status" in request:
@@ -123,6 +136,14 @@ class AdvisorWorkflow:
             try:
                 snapshot = build_snapshot(context, packets, policy=self.policy, client=self.service.client,
                                           created_at=timestamp(now), expires_at=timestamp(max(now, state["expires"])))
+                if self.task_evidence.config["enabled"]:
+                    from .task_evidence import attach_summary
+                    retrieval_started = time.monotonic()
+                    summary = await self.task_evidence.async_summarize(snapshot["packets"], snapshot["candidates"], task_queries, cost_objectives)
+                    state["retrieval_seconds"] = time.monotonic() - retrieval_started
+                    snapshot = attach_summary(snapshot, summary)
+                    state["task_evidence_status"] = (summary["status"] if "task_similarity_evidence" in snapshot["evidence"]
+                                                       else "omitted_snapshot_budget")
             except EvidenceError as exc:
                 snapshot = getattr(exc, "snapshot", None)
                 if snapshot is None:
@@ -142,6 +163,15 @@ class AdvisorWorkflow:
                     return self._finish(state, reason="no_advisor_needed")
                 if not self.advisor["enabled"]:
                     return self._finish(state, reason="advisor_disabled")
+                task_packets = snapshot["evidence"].get("task_similarity_evidence", {}).get("packets", [])
+                if len(task_packets) == len(snapshot["packets"]) and task_packets and all(
+                    p.get("comparison", {}).get("comparisons") and
+                    all(c["net_benefit"] <= 0 for c in p["comparison"]["comparisons"]) and
+                    p["comparison"].get("baseline") and
+                    {c["candidate_id"] for c in p["comparison"]["comparisons"]} ==
+                    {c["candidate_id"] for c in snapshot["candidates"]} - {p["comparison"]["baseline"]}
+                    for p in task_packets):
+                    return self._finish(state, reason="cost_no_benefit")
             if self.advisor["backend"] == "native-economy":
                 from .advisors.native import prepare_native
                 try:
@@ -167,6 +197,8 @@ class AdvisorWorkflow:
                             "decision_id": decision_id, "snapshot_id": snapshot["snapshot_id"],
                             "expires_at": snapshot["expires_at"], "handoff": handoff,
                             "launch_verified": False}
+                if "task_evidence_status" in state:
+                    response["task_evidence_status"] = state["task_evidence_status"]
                 if portable:
                     response["envelope"] = self._envelope(state)
                 return response

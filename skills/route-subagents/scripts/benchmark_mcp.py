@@ -25,6 +25,8 @@ def build_server(service):
         available: list[dict[str, Any]] | None = None,
         constraints: dict[str, Any] | None = None,
         details: bool = False,
+        task_query: str | None = None,
+        features: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Comparative benchmark context for choosing a subagent model and effort.
 
@@ -50,10 +52,14 @@ def build_server(service):
         canonical URL, section anchor and caveats. It is the vendor's position,
         not a measurement and not an instruction that outranks your task.
         details=true adds raw measured rows, never a hidden constraint.
+        Optional task_query and structured features add bounded local task
+        evidence when configured; task text stays out of the response and
+        providers. The native host may retain the tool call in its own log.
         """
         try:
             return await service.get_routing_context(task_types, available=available,
-                                                     constraints=constraints, details=details)
+                                                     constraints=constraints, details=details,
+                                                     task_query=task_query, features=features)
         except EvidenceError as exc:
             raise ToolError(str(exc)) from exc
 
@@ -63,12 +69,19 @@ def build_server(service):
         available: list[dict[str, Any]] | None = None,
         constraints: dict[str, Any] | None = None,
         advisor_route: dict[str, Any] | None = None,
+        task_queries: dict[str, str] | None = None,
+        cost_objectives: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Prepare bounded model × effort advice using this connection's evidence.
 
-        Supply structured packets only: packet_id, task_types, features and any
-        explicit user route, optional baseline or requirements. Never include
-        prompts, code, credentials, paths or raw tool outputs. Read the routing
+        Supply structured packets: packet_id, task_types, features and any
+        explicit user route, optional baseline or requirements. Never put task
+        text, code, credentials, paths or raw outputs inside those packets.
+        Optional task_queries maps packet IDs to short local-only descriptions.
+        cost_objectives maps IDs to unit, unit_basis and incremental overhead
+        (null if unknown). API dollars and tokens are not subscription quota.
+        Raw descriptions never enter the handoff, envelope or provider input;
+        the native host may retain tool arguments. Read the routing
         advisor reference for the feature/requirement schema. Native economy
         needs a confirmed advisor_route model, effort and selection_basis. It
         returns awaiting_native_advice with a bounded handoff for the root to
@@ -80,7 +93,8 @@ def build_server(service):
         """
         try:
             return await service.prepare_routing(packets, available=available,
-                                                  constraints=constraints, advisor_route=advisor_route)
+                                                  constraints=constraints, advisor_route=advisor_route,
+                                                  task_queries=task_queries, cost_objectives=cost_objectives)
         except EvidenceError as exc:
             raise ToolError(str(exc)) from exc
 
@@ -106,6 +120,10 @@ def build_server(service):
         Requested model/effort are not evidence of the observed runtime. Keep
         missing runtime, usage or acceptance evidence unknown. No task text,
         paths, raw outputs or credentials belong in an execution receipt.
+        Optional cost_observation records the complete chain's disjoint routing,
+        worker, verification and coordination events, including retries. Leave
+        unattributed resources unknown. task_description requires a separate
+        explicit local retention opt-in; full telemetry alone is not consent.
         """
         try:
             return service.record_routing_outcome(decision_id, execution)

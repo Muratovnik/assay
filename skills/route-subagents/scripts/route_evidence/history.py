@@ -48,6 +48,7 @@ _EXECUTION_KEYS = {
     "observed_model", "observed_effort", "observed_service_tier",
     "actual_model", "actual_effort", "actual_service_tier", "usage",
     "usage_provenance", "outcome", "outcome_basis", "evidence", "evidence_refs",
+    "cost_observation", "task_description",
 }
 
 
@@ -152,7 +153,7 @@ def _candidate(value: Any, field: str) -> dict:
     }
 
 
-def _packet_metadata(value: Any, field: str, candidates: list[dict]) -> dict:
+def _packet_metadata(value: Any, field: str, candidates: list[dict], *, include_task_features=False) -> dict:
     if not isinstance(value, dict):
         raise EvidenceError(f"{field}: expected an object")
     excluded = value.get("excluded", [])
@@ -174,7 +175,13 @@ def _packet_metadata(value: Any, field: str, candidates: list[dict]) -> dict:
         baseline = next((item["candidate_id"] for item in candidates
                          if item["model"] == baseline.get("model")
                          and item["effort"] == baseline.get("effort")), None)
+    context = {}
+    if include_task_features and "task_types" in value and "features" in value:
+        from .advice_contracts import validate_packets
+        packet = validate_packets([{k: value[k] for k in ("packet_id", "task_types", "features")}])[0]
+        context = {k: packet[k] for k in ("task_types", "features")}
     return {
+        **context,
         "packet_id": _identifier(value.get("packet_id"), field + ".packet_id"),
         "explicit": bool(value.get("explicit", False)),
         "baseline": _optional_identifier(baseline, field + ".baseline"),
@@ -183,7 +190,7 @@ def _packet_metadata(value: Any, field: str, candidates: list[dict]) -> dict:
     }
 
 
-def _snapshot_metadata(snapshot: Any) -> dict:
+def _snapshot_metadata(snapshot: Any, *, include_task_features=False) -> dict:
     if not isinstance(snapshot, dict) or snapshot.get("schema_version") != 1:
         raise EvidenceError("snapshot: expected schema_version=1")
     candidates = snapshot.get("candidates")
@@ -201,7 +208,7 @@ def _snapshot_metadata(snapshot: Any) -> dict:
         "evidence_hash": _identifier(snapshot.get("evidence_hash"), "evidence_hash"),
         "policy_hash": _identifier(snapshot.get("policy_hash"), "policy_hash"),
         "candidates": clean_candidates,
-        "packets": [_packet_metadata(value, "packet", clean_candidates) for value in packets],
+        "packets": [_packet_metadata(value, "packet", clean_candidates, include_task_features=include_task_features) for value in packets],
         "evidence_refs": _evidence_refs(snapshot.get("evidence")),
     }
     for key in ("created_at", "expires_at"):
@@ -439,7 +446,7 @@ def _route(execution: dict, prefix: str) -> dict:
     return result
 
 
-def _outcome(execution: Any) -> dict:
+def _outcome(execution: Any, *, retain_descriptions=False) -> dict:
     if not isinstance(execution, dict):
         raise EvidenceError("execution must be an object")
     unknown = set(execution) - _EXECUTION_KEYS
@@ -472,6 +479,16 @@ def _outcome(execution: Any) -> dict:
             "evidence_refs": evidence_refs,
         },
     }
+    if "cost_observation" in execution:
+        from .task_costs import validate_cost_observation
+        if status == "launched":
+            raise EvidenceError("chain cost requires a terminal receipt")
+        result["cost_observation"] = validate_cost_observation(execution["cost_observation"])
+    if "task_description" in execution:
+        if not retain_descriptions:
+            raise EvidenceError("task description retention requires explicit local opt-in")
+        from .task_evidence import query_text
+        result["task_description"] = query_text(execution["task_description"])
     return result
 
 
@@ -479,7 +496,7 @@ class HistoryStore:
     """Immutable per-decision telemetry records in a dedicated local namespace."""
 
     def __init__(self, root: Path, *, mode: str = "metadata", retention_days: int = 30,
-                 clock: Callable[[], float] = time.time):
+                 clock: Callable[[], float] = time.time, retain_descriptions=False):
         if mode not in MODES:
             raise EvidenceError("telemetry mode must be off, metadata, or full")
         if (isinstance(retention_days, bool) or not isinstance(retention_days, int)
@@ -489,6 +506,7 @@ class HistoryStore:
         self.mode = mode
         self.retention_days = retention_days
         self.clock = clock
+        self.retain_descriptions = retain_descriptions
         if mode != "off":
             _refuse_link_ancestors(self.root)
             self.root.mkdir(parents=True, exist_ok=True)
@@ -538,18 +556,25 @@ class HistoryStore:
         return {**copy.deepcopy(record), "write_status": "written"}
 
     def write_decision(self, decision_id: str, snapshot: dict, result: dict | None,
-                       decisions: list[dict]) -> dict:
+                       decisions: list[dict], *, retrieval_seconds=None) -> dict:
         if self.mode == "off":
             return {"status": "disabled", "persisted": False}
         if not isinstance(decisions, list) or not decisions or len(decisions) > 64:
             raise EvidenceError("decisions must be a list with 1..64 items")
-        metadata = _snapshot_metadata(snapshot)
+        metadata = _snapshot_metadata(snapshot, include_task_features="task_similarity_evidence" in snapshot.get("evidence", {}))
         advisor = _result_metadata(result)
         if advisor is not None and advisor["snapshot_id"] != metadata["snapshot_id"]:
             raise EvidenceError("advisor result snapshot_id does not match snapshot")
         record = self._base(decision_id, "decision")
         record.update(snapshot=metadata, advisor_result=advisor,
                       decisions=[_decision(value) for value in decisions])
+        task = snapshot.get("evidence", {}).get("task_similarity_evidence")
+        if task is not None:
+            if retrieval_seconds is not None:
+                from .core import number
+                number(retrieval_seconds, "retrieval_seconds")
+            record["task_evidence_usage"] = {"status": task["status"], "bytes": len(encoded(task)),
+                                             "seconds": retrieval_seconds}
         if self.mode == "full":
             record["full"] = _full_payload(snapshot, result)
         return self._write_immutable(self._path(decision_id, "decision"), record)
@@ -577,7 +602,7 @@ class HistoryStore:
         record = self._base(decision_id, "outcome")
         # One decision and all of its lifecycle receipts share a retention unit.
         record["expires_at"] = decision_record["expires_at"]
-        record["execution"] = _outcome(execution)
+        record["execution"] = _outcome(execution, retain_descriptions=self.retain_descriptions)
         record["packet_id"] = packet_id
         execution_ref = record["execution"]["execution_ref"]
         attempt_key = hashlib.sha256(encoded({"packet_id": packet_id,

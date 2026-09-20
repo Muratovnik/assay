@@ -130,6 +130,13 @@ def _status(error: BaseException) -> int | None:
 
 def _external_state(snapshot: dict[str, Any]) -> dict[str, Any]:
     """Project only contract-approved structured fields to the external call."""
+    snapshot = copy.deepcopy(snapshot)
+    task = snapshot.get("evidence", {}).get("task_similarity_evidence")
+    if task is not None:
+        # Existing consent covers public evidence, not personal history or objectives.
+        for packet in task.get("packets", []):
+            packet.pop("local", None)
+            packet.pop("comparison", None)
     packets = []
     for packet in snapshot["packets"]:
         packets.append({

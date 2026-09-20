@@ -1,0 +1,2 @@
+# Optional CPU semantic retrieval; lexical mode uses only the standard library.
+sentence-transformers==6.1.0

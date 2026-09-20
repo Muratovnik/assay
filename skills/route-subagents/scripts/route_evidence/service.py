@@ -97,7 +97,7 @@ def load_config(path: Path | None):
         raise EvidenceError("configuration requires schema_version=1 or 2")
     allowed = {"schema_version", "client", "preferences", "inventory"}
     if config["schema_version"] == 2:
-        allowed.update({"advisor", "policy", "telemetry"})
+        allowed.update({"advisor", "policy", "telemetry", "task_evidence"})
     if set(config) - allowed:
         raise EvidenceError("unknown configuration field")
     preferences = config.get("preferences", {})
@@ -162,9 +162,11 @@ an unqualified family alias nor the server's own guesses resolve model versions.
             self._advisor_workflow = AdvisorWorkflow(self, self._advisor_config)
         return self._advisor_workflow
 
-    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False):
+    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
+                              task_queries=None, cost_objectives=None):
         return await self.advisor_workflow.prepare_routing(
-            packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable)
+            packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable,
+            task_queries=task_queries, cost_objectives=cost_objectives)
 
     def complete_routing(self, decision_id, advisor_result, *, envelope=None):
         return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope)
@@ -280,12 +282,21 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         # load is reported inside the guidance block, not as missing evidence.
         return {**acquisition_summary(sources, offline=self.offline, matched=matched), **result}
 
-    async def get_routing_context(self, task_types, *, available=None, constraints=None, details=False):
+    async def get_routing_context(self, task_types, *, available=None, constraints=None, details=False,
+                                  task_query=None, features=None):
         request = self.prepare(task_types, available=available, constraints=constraints)
         if "status" in request:
             return {**request, "data_status": "not_checked", "usage": "setup_required",
                     "data_message": "Source refresh has not run: supply the required connection inputs first."}
         result = await self.context(request)
+        if task_query is not None or features is not None:
+            from .advice_contracts import candidate_id, validate_packets
+            from .core import effort
+            packets = validate_packets([{"packet_id": "context", "task_types": task_types, "features": features or {}}])
+            candidates = [{"candidate_id": candidate_id(a["model"], effort(e)), "model": a["model"], "effort": effort(e)}
+                          for a in request["available"] for e in a["efforts"]]
+            result["task_similarity_evidence"] = await self.advisor_workflow.task_evidence.async_summarize(
+                packets, candidates, {"context": task_query} if task_query is not None else None)
         # details keeps the raw measured rows; it never reveals a constraint that
         # the normal response withheld.
         return result if details else brief(result)
