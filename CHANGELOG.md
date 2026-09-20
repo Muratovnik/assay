@@ -6,6 +6,27 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.3.0](https://github.com/Muratovnik/assay/compare/v0.2.0...v0.3.0) (2026-09-20)
+
+Subagent routing gains optional advice, historical task evidence and estimates of
+the cost of a complete work chain. Recommendations remain advisory: the caller
+chooses and launches workers using its current model inventory.
+
+### Features
+
+* **routing:** request bounded advice through a caller-selected native economy model or the optional Jev adapter, with policy checks and local decision history; external advice requires separate consent ([b8bd160](https://github.com/Muratovnik/assay/commit/b8bd160a87480a2b452b3c66ba02948efe977cca))
+* **routing:** retrieve similar measured tasks and estimate complete-chain costs, including retries, verification and coordination; API prices, tokens and subscription quota remain separate, and missing measurements stay unknown ([04e58f9](https://github.com/Muratovnik/assay/commit/04e58f9929a59ab29e7b618f2475d5fb58b29a9c))
+* **routing:** automatically prepare a missing public task corpus when task evidence is enabled, or prefetch it with `task-setup`; pinned source checksums, cache reuse, offline mode and download status cover the first-use workflow ([9926ea1](https://github.com/Muratovnik/assay/commit/9926ea16bf27e0ea443748fd12a4766bd60a4d85))
+
+### Bug Fixes
+
+* **routing:** retain historical results and costs when the source models are absent from the current inventory, without transferring their scores to newer models or letting empty candidate estimates crowd out evidence ([54c3fba](https://github.com/Muratovnik/assay/commit/54c3fba539a3545ae1e56216ad6bc994c20f16e4))
+
+Task evidence is opt-in through `task_evidence.enabled` in a v2 routing
+configuration. The initial corpus covers 528 LiveCodeBench tasks and 13 historical
+models; it is coding-task context, not measured subscription savings or coverage
+of every workflow. Reconnect the MCP server after updating its code or configuration.
+
 ## [0.2.0](https://github.com/Muratovnik/assay/compare/v0.1.0...v0.2.0) (2026-09-19)
 
 Two writing methods join the library, and the documentation set now exists in
