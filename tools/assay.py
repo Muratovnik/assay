@@ -929,6 +929,27 @@ def gemini_extension(version: str) -> bytes:
     )
 
 
+def reminder_hooks() -> bytes:
+    # Both clients expose CLAUDE_PLUGIN_ROOT. Resolve it inside Python, not the
+    # shell: spaces and shell metacharacters in an install path stay data.
+    command = (
+        'python -I -B -c "import os, runpy; '
+        "runpy.run_path(os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], "
+        "'skills/route-subagents/scripts/skill_reminder.py'), "
+        "run_name='__main__')\""
+    )
+    return json_document({"hooks": {
+        "SessionStart": [{
+            "matcher": "^(startup|resume|clear|compact|fork)$",
+            "hooks": [{"type": "command", "command": command, "timeout": 5}],
+        }],
+        "PreToolUse": [{
+            "matcher": "^(spawn_agent|Agent|Task)$",
+            "hooks": [{"type": "command", "command": command, "timeout": 5}],
+        }],
+    }})
+
+
 def skills_index(root: Path, catalog: Catalog) -> bytes:
     lines = [
         "<!-- Generated from catalog.toml and skill frontmatter by",
@@ -975,6 +996,7 @@ def rendered_documents(root: Path = ROOT) -> dict[str, bytes]:
         ".agents/plugins/marketplace.json": codex_marketplace(),
         ".cursor-plugin/plugin.json": cursor_plugin(version),
         "gemini-extension.json": gemini_extension(version),
+        "hooks/hooks.json": reminder_hooks(),
         "skills/README.md": skills_index(root, catalog),
     }
     for asset in profile_assets(catalog):

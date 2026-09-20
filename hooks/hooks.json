@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I -B -c \"import os, runpy; runpy.run_path(os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], 'skills/route-subagents/scripts/skill_reminder.py'), run_name='__main__')\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(spawn_agent|Agent|Task)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I -B -c \"import os, runpy; runpy.run_path(os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], 'skills/route-subagents/scripts/skill_reminder.py'), run_name='__main__')\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

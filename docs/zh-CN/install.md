@@ -21,6 +21,42 @@ Claude Code 路径与技能 CLI 路径已针对已发布的仓库实际执行，
 运行过。这一区分是刻意保留的：一个要求别人区分「已验证」与「有文档」的库，自己
 更应当做到。
 
+## 自动技能提醒
+
+Codex 和 Claude Code 的完整插件包含由 `tools/assay.py render` 生成的
+[`hooks/hooks.json`](../../hooks/hooks.json)。会话开始、恢复及上下文压缩后，
+它提醒使用匹配的技能；启动子智能体时，提醒必须应用 `route-subagents`，
+明确选择模型和 effort，并使用最小必要上下文。替换执行者和审查者同样适用。
+
+客户端执行环境必须提供名为 `python` 的 Python 3.11+。处理器仅使用标准库，
+不调用模型或网络，不读取会话记录，不修改设置。每个事件添加少于 1,000 个字符，
+仍有少量上下文成本；超时为五秒。禁用或卸载插件会移除其提醒。
+
+安装或更新后启动新会话。在 **Codex** 中，通过客户端的 hooks 信任流程审阅并
+信任当前 Assay 定义；安装本身不代表信任。禁用 hooks 或仅允许托管 hooks 的策略
+会阻止插件提醒。在 **Claude Code** 的 `/hooks` 中检查 Assay 的 `SessionStart`
+和 `PreToolUse` 条目，执行失败时查看 hooks 诊断。参见
+[Codex 文档](https://learn.chatgpt.com/docs/hooks) 和
+[Claude Code 文档](https://code.claude.com/docs/en/hooks)。
+
+**技能 CLI 和 `install-links` 不会安装插件 hooks。** 需要提醒时使用完整插件。
+Assay 不修改个人 `AGENTS.md`。其他客户端保留普通技能发现；这些提醒事件仅针对
+支持相应 hooks 的 Codex 和 Claude Code。
+
+提醒不是强制门禁：pre-tool 上下文不会暂停已选择的调用让模型重新决策，部分工具
+路径也可能绕过 hooks。处理器不授权委派、不修改参数，也不固定模型。离线测试验证
+事件与命令，不证明客户端发现、技能遵守或配额节省。上面的安装验证早于这些 hooks。
+
+在 checkout 中无需调用模型即可检查处理器：
+
+```text
+python -B -m unittest tools.test_skill_reminder
+```
+
+若没有条目，确认启用的是包含此改动的完整插件，而不只是技能链接。若执行失败，
+检查客户端环境中的 `python --version` 和 hooks 诊断。处理器测试通过不等于插件
+已在该客户端启用并获得信任。
+
 ## Claude Code
 
 ```text

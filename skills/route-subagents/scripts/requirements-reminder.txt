@@ -1,0 +1,2 @@
+# skill_reminder.py uses only the Python 3.11+ standard library.
+# No package installation is required; the hook host must provide `python`.
