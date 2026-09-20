@@ -6,6 +6,17 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.4.0](https://github.com/Muratovnik/assay/compare/v0.3.0...v0.4.0) (2026-09-20)
+
+### Features
+
+* **routing:** ship plugin reminders for applicable skills at session start and after context compaction, and reinforce required routing before subagent launches ([e248ab8](https://github.com/Muratovnik/assay/commit/e248ab842fa200b93107b13ec4855bd7f2f0e716))
+
+Reminders are included in the full Codex and Claude Code plugin. They require
+Python 3.11+ available as `python`; Codex also requires native hook trust.
+Skills-only installations do not connect plugin hooks. These bounded reminders
+make no model or network calls and do not enforce or authorize delegation.
+
 ## [0.3.0](https://github.com/Muratovnik/assay/compare/v0.2.0...v0.3.0) (2026-09-20)
 
 Subagent routing gains optional advice, historical task evidence and estimates of
