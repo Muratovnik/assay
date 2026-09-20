@@ -1,0 +1,92 @@
+{
+  "url": "https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/0e5af1b/bench-release.tar.gz",
+  "manifest": {
+    "source": {
+      "id": "llmrouterbench-livecodebench",
+      "revision": "0e5af1b",
+      "url": "https://huggingface.co/datasets/NPULH/LLMRouterBench/tree/0e5af1b",
+      "license": "unspecified",
+      "use": "local-only"
+    },
+    "datasets": {
+      "livecodebench": {
+        "task_types": [
+          "implementation",
+          "hard-implementation"
+        ],
+        "metric": "pass-at-1",
+        "harness": "published-livecodebench-test",
+        "efforts": {},
+        "priced_models": [
+          "claude-sonnet-4",
+          "deepseek-v3.1-terminus",
+          "gemini-2.5-flash",
+          "gemini-2.5-pro",
+          "glm-4.6",
+          "gpt-5",
+          "gpt-5-chat",
+          "kimi-k2-0905",
+          "qwen3-235b-a22b-2507",
+          "qwen3-235b-a22b-thinking-2507"
+        ]
+      }
+    }
+  },
+  "members": {
+    "bench-release/livecodebench/test/qwen3-235b-a22b-2507/livecodebench-test-qwen3-235b-a22b-2507-20251013_105352.json": {
+      "sha256": "28133496f3b6032ea949c816e6ea2d1a797f198c3e5c9ca9ee328b20b6819e48",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/deepseek-v3.1-terminus/livecodebench-test-deepseek-v3.1-terminus-20251024_102915.json": {
+      "sha256": "3534dc6067877475b751e94bf0f097c244e3449de1e795b2f267366ac3213424",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/gemini-2.5-flash/livecodebench-test-gemini-2.5-flash-20251013_003249.json": {
+      "sha256": "902afe4bfa74465f524c21ea69b81a18015694929d59703f1647582db9089b36",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/claude-sonnet-4/livecodebench-test-claude-sonnet-4-20251013_031811.json": {
+      "sha256": "c5193b098dc71e5172ee0aacbf235e50ce7c3ba480cabc4222bed2d5960a1958",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/gemini-2.5-pro/livecodebench-test-gemini-2.5-pro-20251013_130201.json": {
+      "sha256": "f9f5739f606296b57c03b7592ca94a84e64f68ab077954b556b1288a09308762",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/kimi-k2-0905/livecodebench-test-kimi-k2-0905-20251017_155822.json": {
+      "sha256": "169e037b6e44a3ee11eda4b14ba0d6bbd4770ae360b79589886c081181fb7201",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/qwen3-235b-a22b-thinking-2507/livecodebench-test-qwen3-235b-a22b-thinking-2507-20251019_210359.json": {
+      "sha256": "41909498a4204fe38cce5470f239304baec45fbf522f1118f13d324287a3f9bf",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/gpt-5-chat/livecodebench-test-gpt-5-chat-20251013_114327.json": {
+      "sha256": "aac478e3c420345f45635bfb5599f062e4fe640ff79235285abf83979000b663",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/intern-s1/livecodebench-test-intern-s1-20251018_082944.json": {
+      "sha256": "ef17a53dc31d1868ff924ac0ad5f15c07929b544abde32e484a60397786cd518",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/gpt-5/livecodebench-test-gpt-5-20251013_115531.json": {
+      "sha256": "68871a481043a8d129daaf300edc68b94f95df87ba676814c42bbc6bc2f81ad6",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/deepseek-r1-0528/livecodebench-test-deepseek-r1-0528-20251018_090719.json": {
+      "sha256": "f567a73f190bb07f6845262c565da5959010abe921a56c55cd1b35cf4b2dcc73",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/deepseek-v3-0324/livecodebench-test-deepseek-v3-0324-20251017_111427.json": {
+      "sha256": "3a56a0caf016a4b2b44ef67dbdc47b67bf2fecde9a5ae7ccf5378ba591e172d0",
+      "rows": 1055
+    },
+    "bench-release/livecodebench/test/glm-4.6/livecodebench-test-glm-4.6-20251017_214543.json": {
+      "sha256": "07c723e15843d85e73b2bce3d3763b35384cec268e35596fc4b826d5ae3e9529",
+      "rows": 1055
+    }
+  },
+  "tasks": 1055,
+  "installed_tasks": 528,
+  "split": "normalized-query-sha256-alternating-train"
+}

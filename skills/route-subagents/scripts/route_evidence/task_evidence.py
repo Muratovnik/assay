@@ -24,7 +24,7 @@ def validate_summary(value):
     if not isinstance(value, dict) or value.get("schema_version") != 1 or len(encoded(value)) > MAX_SUMMARY:
         raise EvidenceError("invalid task evidence projection")
     allowed = {"schema_version", "mode", "packets", "cost_units_are_not_interchangeable", "status",
-               "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash"}
+               "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash", "acquisition"}
     if set(value) - allowed or not isinstance(value.get("packets"), list) or len(value["packets"]) > 8:
         raise EvidenceError("invalid task evidence fields")
     def check(node, depth=0):
@@ -60,11 +60,12 @@ def settings(value=None):
     value = copy.deepcopy({} if value is None else value)
     defaults = {"enabled": False, "mode": "lexical", "min_similarity": .15,
                 "neighbors": 32, "minimum_observations": 3, "deadline_seconds": 2,
-                "retain_descriptions": False, "encoder_path": None, "encoder_revision": None}
+                "retain_descriptions": False, "encoder_path": None, "encoder_revision": None,
+                "auto_download": True}
     if not isinstance(value, dict) or set(value) - set(defaults):
         raise EvidenceError("invalid task evidence settings")
     cfg = {**defaults, **value}
-    if type(cfg["enabled"]) is not bool or type(cfg["retain_descriptions"]) is not bool:
+    if any(type(cfg[k]) is not bool for k in ("enabled", "retain_descriptions", "auto_download")):
         raise EvidenceError("task evidence flags must be boolean")
     if cfg["mode"] not in {"lexical", "semantic"}:
         raise EvidenceError("invalid retrieval mode")
@@ -212,6 +213,7 @@ class TaskEvidence:
         self.root = Path(cache_root) / "task-evidence"
         self.config = settings(config)
         self.history, self.clock = history, clock
+        self.provisioner = None
 
     def purge_descriptions(self):
         """Explicit opt-out cleanup; only removes the optional field from owned receipts."""
@@ -240,20 +242,31 @@ class TaskEvidence:
         validate_queries(queries, [p["packet_id"] for p in packets])
         if not self.config["enabled"] or all(p.get("explicit") or len(packet_candidates(p, candidates)) <= 1 for p in packets):
             return self.summarize(packets, candidates, queries, objectives)
+        acquisition = None
+        if self.provisioner:
+            try:
+                acquisition = (await asyncio.to_thread(self.provisioner.ensure) if self.provisioner.wait
+                               else self.provisioner.ensure())
+            except asyncio.CancelledError:
+                self.provisioner.close()
+                raise
         scope = ProcessScope(self.config["deadline_seconds"])
         payload = {"root": str(self.cache_root.resolve()), "config": self.config, "now": self.clock(),
                    "history_mode": self.history.mode if self.history else "off",
                    "packets": packets, "candidates": candidates, "queries": queries, "objectives": objectives}
         try:
             raw = await asyncio.to_thread(scope.run, [sys.executable, "-B", str(Path(__file__).with_name("task_worker.py"))], encoded(payload))
-            return validate_summary(json.loads(raw))
+            result = json.loads(raw)
+            if acquisition:
+                result["acquisition"] = acquisition
+            return validate_summary(result)
         except (EvidenceError, ValueError, OSError):
             return {"schema_version": 1, "status": "unavailable", "reason": "invalid_missing_or_over_budget",
                     "mode": self.config["mode"], "packets": [], "cost_units_are_not_interchangeable": True}
         finally:
             scope.cancel()
 
-    def install(self, document):
+    def install(self, document, *, replace=True):
         corpus = validate_corpus(document)
         _refuse_link_ancestors(self.root)
         self.root.mkdir(parents=True, exist_ok=True)
@@ -263,6 +276,9 @@ class TaskEvidence:
         with source_lock(self.root / "corpus.lock") as acquired:
             if not acquired:
                 raise EvidenceError("task corpus is busy")
+            if not replace and path.exists():
+                existing = self.load()
+                return {"status": "present", "tasks": len(existing["corpus"]["records"])}
             fingerprint = digest(corpus)
             payload = {"schema_version": 1, "fingerprint": fingerprint, "corpus": corpus}
             atomic_write(path, payload)

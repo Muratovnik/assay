@@ -16,7 +16,16 @@ def build_server(service):
     from mcp.server import MCPServer
     from mcp.server.mcpserver.exceptions import ToolError
 
-    server = MCPServer("assay-benchmark-routing")
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(_server):
+        try:
+            yield {}
+        finally:
+            service.advisor_workflow.task_evidence.provisioner.close()
+
+    server = MCPServer("assay-benchmark-routing", lifespan=lifespan)
 
     @server.tool()
     async def get_routing_context(
@@ -55,6 +64,9 @@ def build_server(service):
         Optional task_query and structured features add bounded local task
         evidence when configured; task text stays out of the response and
         providers. The native host may retain the tool call in its own log.
+        When enabled, a missing public task corpus is prepared in the background;
+        read task_similarity_evidence.acquisition or routing_status for progress.
+        Subsequent calls reuse the installed corpus. Offline mode never downloads.
         """
         try:
             return await service.get_routing_context(task_types, available=available,

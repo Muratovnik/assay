@@ -29,6 +29,8 @@ class AdvisorWorkflow:
         from .task_evidence import TaskEvidence
         self.task_evidence = TaskEvidence(service.cache.root, (config or {}).get("task_evidence"),
                                           history=self.history, clock=self.clock)
+        from .task_bootstrap import CorpusProvisioner
+        self.task_evidence.provisioner = CorpusProvisioner(self.task_evidence, offline=service.offline)
         self.history.retain_descriptions = self.task_evidence.config["retain_descriptions"]
         self._states = OrderedDict()
         self._cache = OrderedDict()
@@ -51,8 +53,9 @@ class AdvisorWorkflow:
                 "pending": pending, "max_pending": self.advisor["max_pending"],
                 "usage": "diagnostic_only" if self.service.offline else "routing",
                 "launches_agents": False,
-                "task_evidence": {k: self.task_evidence.config[k] for k in
-                                  ("enabled", "mode", "deadline_seconds", "retain_descriptions")}}
+                "task_evidence": {**{k: self.task_evidence.config[k] for k in
+                                  ("enabled", "mode", "deadline_seconds", "retain_descriptions", "auto_download")},
+                                  "acquisition": self.task_evidence.provisioner.status()}}
 
     def _expire(self):
         now = self.clock()

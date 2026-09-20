@@ -25,15 +25,52 @@ Add to a **v2** client configuration, retaining its other settings:
 
 Absent configuration means disabled. Preserve the previous configuration and
 revision before changing the file; keep the registered Python, cache and browser
-arguments. Reconnect the server after editing configuration. No automatic
-installation, model invocation or background collection occurs.
+arguments. Reconnect the server after editing configuration. With the extension
+enabled, `auto_download` defaults to true: the first eligible MCP task-evidence
+request starts public corpus preparation in the background if no index exists.
+No model invocation or background collection of private tasks occurs.
+
+To prepare it before routing, use the same Python, configuration and cache as MCP:
+
+```sh
+python skills/route-subagents/scripts/benchmark_router.py --config CONFIG --cache-dir CACHE task-setup
+```
+
+This command waits and reports `ready` (exit 0), or a specific unavailable state
+(exit 2). It can prefetch before enabling the extension. CLI `context`, `prepare`
+and `task-context` also prepare a missing corpus when enabled; unlike the persistent
+MCP server, these short-lived commands wait for initial preparation.
+
+The shipped source manifest pins LLMRouterBench revision `0e5af1b` and SHA-256
+checksums for 13 LiveCodeBench model result files. It streams the upstream release
+(approximately 1.28 GB), keeps selected fields locally, and installs 528 of 1055
+tasks using the same deterministic query split as offline evaluation. The other
+527 tasks are excluded from the working index. This is coding evidence, not
+coverage for every task type or every current model. No dataset is redistributed
+inside Assay. Unknown effort and unpriced USD remain unknown.
+
+Preparation has its own 180-second process deadline and socket/size limits;
+the local retrieval deadline remains separate. `acquisition` in routing evidence
+and `routing_status` distinguishes `downloading`, `present`, `missing_offline`,
+`missing`, and `failed`. `present` means a file exists; bounded retrieval validates
+its checksum and schema before use. Routing continues while downloading and uses
+the corpus on a subsequent request. Failure preserves existing routing and waits
+five minutes before an automatic retry; `task-setup` explicitly retries sooner.
+Concurrent clients share a lock, writes are atomic, and an existing imported corpus
+is never replaced automatically. Reconnect/shutdown cancels an unfinished worker;
+completed indexes survive reconnects and do not download again.
+
+Set `auto_download: false` for manual-only provisioning. `--offline` never fetches
+even with automatic provisioning enabled. Installation of skill links alone does
+not download data; enabled routing or explicit setup does. Semantic model weights
+are still a separate explicit installation.
 
 Lexical search needs only the existing Python runtime. It uses Unicode words
 and cosine similarity, not translation. The threshold and minimum sample count
 are resource/coverage bounds, not calibrated probability or confidence levels.
 A relevant public corpus is useful without local chain history: it shows which
 historical models handled similar tasks and at what measured response cost.
-Enable that advisory context after import and a bounded lookup check. Local
+Enable that advisory context with automatic preparation or explicit import. Local
 history progressively adds current workflow cost estimates; it is not an
 activation prerequisite. Enabling public context does not establish measured
 subscription savings or justify transferring old scores to new models.
@@ -80,8 +117,8 @@ is untrusted data and never enters the advisor prompt.
 
 ## Import measured public answers
 
-Use explicit local files only. No corpus or weights download occurs during
-routing, and no third-party dataset is bundled with this package.
+For another corpus, import explicit local files. The import command itself never
+downloads data; automatic preparation above only fills an absent working index.
 
 ```sh
 python skills/route-subagents/scripts/benchmark_router.py --config CONFIG --cache-dir CACHE task-import --file CORPUS.json
@@ -247,7 +284,8 @@ python skills/route-subagents/scripts/benchmark_router.py --config CONFIG --cach
 ```
 
 `task-context` takes `packets`, `available`, optional `task_queries` and
-`cost_objectives`; it performs no source refresh or model call. `task-forecast`
+`cost_objectives`; after initial corpus preparation it performs only local retrieval,
+without benchmark-source refresh or model calls. `task-forecast`
 takes only `packets`. It evaluates cost prediction against strictly later retained
 chains of the same cohort, reporting coverage, absolute error and costly
 underestimates. No alternative execution means no counterfactual savings estimate.

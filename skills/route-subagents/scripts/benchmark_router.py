@@ -78,6 +78,7 @@ def main(argv=None):
     tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
     tp.add_argument("--file", type=Path, required=True)
     tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
+    subs.add_parser("task-setup", help="download and index pinned public evidence; no model calls")
     tp = subs.add_parser("task-context", help="local task evidence only; never calls a model")
     tp.add_argument("--request", required=True)
     subs.add_parser("task-purge-descriptions", help="remove only opted-in descriptions from local receipts")
@@ -98,8 +99,14 @@ def main(argv=None):
             print(json.dumps(result, indent=2))
             return 0
         service = make_service(args)
+        if args.command in {"prepare", "context", "task-context"}:
+            service.advisor_workflow.task_evidence.provisioner.wait = True
         code = 0
-        if args.command == "task-forecast":
+        if args.command == "task-setup":
+            from route_evidence.task_bootstrap import setup
+            result = setup(service.advisor_workflow.task_evidence, offline=args.offline)
+            code = 0 if result["status"] == "ready" else 2
+        elif args.command == "task-forecast":
             import time
             from route_evidence.advice_contracts import validate_packets
             from route_evidence.task_evaluation import forecast
@@ -211,6 +218,9 @@ def main(argv=None):
         return 2
     except KeyboardInterrupt:
         return 130
+    finally:
+        if "service" in locals() and service._advisor_workflow is not None:
+            service.advisor_workflow.task_evidence.provisioner.close()
 
 
 if __name__ == "__main__":
