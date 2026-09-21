@@ -72,9 +72,11 @@ def is_running(pid):
         stat = Path(f"/proc/{pid}/stat")
         try:
             return stat.read_text().split()[2] != "Z"
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             # Reaped between the lookup and the read: the entry can vanish
             # mid-call, so its absence is an answer rather than an error.
+            # Linux reports it as ENOENT when the open loses that race and as
+            # ESRCH when the read loses it, after the open already succeeded.
             pass
         try:
             os.kill(pid, 0)
@@ -99,6 +101,31 @@ def is_running(pid):
         return status.value == 259
     finally:
         kernel.CloseHandle(handle)
+
+
+@unittest.skipIf(os.name == "nt", "POSIX /proc probe")
+class ProcessProbeTests(unittest.TestCase):
+    """The probe above decides the ownership tests below, so a process that
+    disappears while it is being observed must answer it rather than raise."""
+
+    def test_an_entry_vanishing_mid_call_answers_instead_of_raising(self):
+        for error in (FileNotFoundError(2, "No such file or directory"),
+                      ProcessLookupError(3, "No such process")):
+            with (
+                self.subTest(errno=error.errno),
+                patch.object(Path, "read_text", side_effect=error),
+                patch.object(os, "kill", side_effect=ProcessLookupError(3, "gone")),
+            ):
+                self.assertFalse(is_running(4242))
+
+    def test_a_readable_entry_still_separates_live_from_zombie(self):
+        line = "4242 (python3) {} 1 4242 4242 0 -1"
+        for state, expected in (("R", True), ("S", True), ("Z", False)):
+            with (
+                self.subTest(state=state),
+                patch.object(Path, "read_text", return_value=line.format(state)),
+            ):
+                self.assertIs(is_running(4242), expected)
 
 
 class ProcessOwnershipTests(unittest.TestCase):

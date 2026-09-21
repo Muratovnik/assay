@@ -238,9 +238,15 @@ class ProcessTests(unittest.TestCase):
                     scope.cancel()
                 with self.assertRaises(FetchError):
                     future.result(timeout=4)
-            stat = Path(f"/proc/{pid}/stat")
-            if stat.exists():
-                self.assertEqual(stat.read_text().split()[2], "Z", "descendant still executing after cancellation")
+            # A reaped entry and a zombie both mean the group was killed. The
+            # read can lose that race after the entry was seen, and Linux
+            # answers that with ESRCH rather than with a missing file.
+            try:
+                state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+            except (FileNotFoundError, ProcessLookupError):
+                state = None
+            if state is not None:
+                self.assertEqual(state, "Z", "descendant still executing after cancellation")
 
     @unittest.skipIf(os.name == "nt" or not Path("/proc").exists(), "Linux process inspection")
     def test_timeout_kills_group_after_worker_parent_exited(self):
@@ -255,10 +261,11 @@ class ProcessTests(unittest.TestCase):
             # The descendant sleeps far longer than this test runs, so it cannot
             # have exited on its own: a zombie and a reaped entry both mean the
             # group was killed. Reading can lose the race, and that is the same
-            # answer rather than a failure.
+            # answer rather than a failure: the open reports it as ENOENT and
+            # the read, once the open has succeeded, as ESRCH.
             try:
                 state = Path(f"/proc/{pid}/stat").read_text().split()[2]
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 state = None
             if state is not None:
                 self.assertEqual(state, "Z")
