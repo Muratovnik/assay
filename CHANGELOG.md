@@ -6,6 +6,30 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.5.0](https://github.com/Muratovnik/assay/compare/v0.4.0...v0.5.0) (2026-09-21)
+
+The operational UI skill now covers the whole life of a UI artifact: designing a
+new screen, implementing a reference in code, transferring an existing interface
+into an editable design, editing a component library, and reviewing any of them.
+
+### Features
+
+* **operations-ui-delivery:** cover every layout mode from one entrypoint and add conditional procedures for the component system, design transfer and the Figwright adapter ([856bbc1](https://github.com/Muratovnik/assay/commit/856bbc1a8af3b22f5843b60575edc74c5f766ee6))
+
+Each mode names what establishes quality and which check distinguishes it. The
+new procedures own what the existing ones did not: shared bases, transitive
+reuse and property effects that must be observable; the duties that only a
+transfer carries, from fixing the source to migrating without breaking
+relations; and the adapter rules for reading documentation before choosing a
+method, checking every result and recovering from a partial write. Existing
+owners gained the source of truth for each decision, theme and token resolution
+through the composition, geometry depth, asset provenance and capture readiness.
+
+These are instructions, not a runner: nothing here installs a tool or measures
+behavior. The library-organization commands are named from the adapter source
+at a pinned revision ([baa643f](https://github.com/Muratovnik/assay/commit/baa643f56e550788d44080035c3cd58f2e8985cf)),
+so a client should still be asked which tools it exposes.
+
 ## [0.4.0](https://github.com/Muratovnik/assay/compare/v0.3.0...v0.4.0) (2026-09-20)
 
 ### Features
