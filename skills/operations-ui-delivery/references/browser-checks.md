@@ -42,6 +42,15 @@ When the existing harness lacks the required observation, the optional
 example; do not install a second runner, auto-enable hooks or copy all helpers.
 These are examples, not a qualified cross-product runtime dependency.
 
+Reproduce the chosen state deliberately. Reuse an existing story, fixture or
+scenario when one exists; set data, time and access, and confirm fonts and
+assets are ready before capturing. Do not wait for idle in a way that erases the
+loading, transition or failure state under test. Distinguish viewport, full-page
+and platform capture mechanisms. A native platform without Storybook or a
+browser does not require installing one: take the available path and name the
+gap. For capture used as transfer source material, the duties in
+[Design transfer](design-transfer.md) apply.
+
 Tie evidence to the build, scenario, current state and deterministic dataset.
 Observe before another action scrolls, focuses or dismisses the obstacle. Pointer
 hit samples and viewport intersection describe geometry, not complete operability,

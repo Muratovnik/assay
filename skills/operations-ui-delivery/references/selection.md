@@ -88,6 +88,19 @@ reveal the hidden values is not a usable summary. Avoid losing identity when
 labels repeat or localized names are long. Stable geometry does not require a
 fixed-height box that clips enlarged text.
 
+## Classify the control by its consumer's behavior
+
+Derive the selection model from real membership and the consumer's role.
+Distinguish a command (a menu trigger), a single choice, a multiple choice and
+value entry by what the consumer does, not by the shape of the button; a
+trigger labeled "More" may open commands or pick a value, and only the
+behavior decides which shared base it belongs to. Use partial/mixed only where
+it denotes a partially selected aggregate. In a library, do not generate every
+checkbox x interaction x theme combination by default; cover the states the
+consumers actually need. Shared styling between a menu trigger and a value
+picker is legitimate while their interaction contracts stay separate; see
+[Component system](component-system.md) for the shared base.
+
 ## Primary references
 
 - [WAI-ARIA APG: checkbox and mixed state](https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/)

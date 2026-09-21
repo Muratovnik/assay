@@ -66,6 +66,26 @@ clearing the fields keeps the user in a form they meant to leave.
 - Check: the form has one submit and, when something exists to return to, one
   Cancel; no single control discards all entered values without undo.
 
+## Treat the field as a composition
+
+A field is label, control, help and error together, in a mockup as much as in
+code; the input rectangle alone is not the field. The label may sit outside the
+control or be visually hidden where the context makes the purpose clear, but
+the purpose and the accessible name stay. Check the state of the whole
+composition and of the nested control: invalid must reach the border, the
+message and the exposed state, not only one layer. Keep justified differences
+between input kinds, such as multiline sizing, resize handles or monospace
+values, while shared error, focus and disabled treatment do not diverge without
+a reason. For the shell/content split of a reusable field and its property
+chain use [Component system](component-system.md).
+
+- Failure: every input is drawn as a bare box and labels are added per screen;
+  a textarea shows a different invalid color from the text input beside it.
+- Valid control: a compact search box with an accessible name and no visible
+  label; an intentionally distinct code editor field.
+- Check: change label, help and error on a fresh and an existing consumer and
+  confirm the composition, its size and the exposed name follow.
+
 ## Primary references
 
 - [Cloudscape: validation lifecycle](https://cloudscape.design/patterns/general/errors/validation/)

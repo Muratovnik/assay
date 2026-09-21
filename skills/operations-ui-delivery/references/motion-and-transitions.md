@@ -55,6 +55,17 @@ For a panel changing its layout or modality, use
 [workspace consistency](workspace-consistency.md) and
 [composed interaction](interaction-and-layout.md#treat-overlays-as-one-composed-interaction).
 
+## Establish an ordered transition before drawing it
+
+For a transition or animation that the brief orders in a design artifact,
+establish the trigger, the start and end states, the response and the timing
+behavior separately. A static structure or a screenshot does not prove the
+transition; use available prototype information and this procedure's endpoint
+inspection. Name an unsupported response instead of inventing it silently, and
+name an adapter that cannot express the motion rather than substituting a
+different effect; tool specifics live in [Figwright](figwright.md) when that
+adapter is in use. A visual-only order does not require a working prototype.
+
 ## Method references
 
 - [Impeccable: choosing and verifying motion](https://github.com/pbakaus/impeccable/blob/8dac6ae7e020c43ab10ce9b41939f6fd42627b96/.agents/skills/impeccable/reference/animate.md)

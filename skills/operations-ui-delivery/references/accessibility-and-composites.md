@@ -41,6 +41,13 @@ fitting discoverable control. Where a composite convention keeps disabled items
 focusable, expose the disabled state and prevent the real action; ARIA alone
 does not enforce it. Do not force every disabled control back into Tab order.
 
+In a design artifact, check that text, states, focus and action areas are
+distinguishable, and hand the keyboard, focus-order and semantic requirements
+to the implementation explicitly; in code, verify they actually execute. A
+static mockup does not prove accessibility. Choose numeric thresholds such as
+target size or contrast from the adopted platform and standard with its
+exceptions, not from a universal button size.
+
 For async completion/error announcements use
 [Content](content-and-recovery.md#announce-meaningful-updates); exposed text and
 a live-region attribute alone do not prove an understandable announcement.

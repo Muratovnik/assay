@@ -26,6 +26,13 @@ to the executor. Keep this table and prior answers out of its packet.
 | Align common identity/category columns across table variants | Entry + Workspace column section; Visual judgment for composed acceptance | Equal percentages or frozen widths despite different column sets |
 | Combine a resource count with its matching refresh action | Entry + Content count/action section; Data lifecycle if population/freshness changes | Making a global total imply an action on all resources |
 | Repair a form squeezed by a neighboring drawer at a fixed viewport | Entry + Workspace space-adaptation section; Interaction only if modality changes | Viewport conditions for a local space change, containment on every wrapper or treating queries as a replacement for Grid/Flex |
+| Build a new screen from an existing design system in a design tool | Entry + Component system + Visual judgment; Figwright only when that adapter is used | Loading Design transfer, or reading every reference because a library exists |
+| Transfer a running application screen into an editable design file | Entry + Design transfer + Component system; Visual judgment for composed acceptance; Figwright when used | A pixel-identity mandate, a second capture runner, or declaring done at import |
+| Implement a design reference in application code | Entry + Component system (design-to-code mapping); Forms/Workspace for affected owners; Reuse and migration for shared code | Requiring a code-mapping tool before starting, or pasting generated markup in place of real components |
+| Merge duplicated masters that differ only by label | Entry + Component system; Visual judgment for library readability and geometry; Figwright when used | Unifying visually similar controls with different behavior, or a full variant matrix |
+| Repair a nested instance that ignores the parent theme | Entry + Visual judgment (theme and ancestor paint) + Component system for the binding chain | Renaming the theme or recoloring the parent only |
+| Review a delivered mockup without editing it | Entry + the applicable owners in read-only mode; Acceptance for evidence levels | Creating probes without write authority, or marking unverified effects as passed |
+| Add a Boolean property that hides an icon inside a variant set through Figwright | Entry + Figwright + Component system (property chain) | Detaching instances or adding a variant axis because the command passed |
 
 Relevant scope is evidence-dependent, not a maximum number of files. An executor
 can read another procedure when an observed dependency requires it and explain

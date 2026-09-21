@@ -1,20 +1,28 @@
 ---
 name: operations-ui-delivery
-description: Design, repair or review operational UI, or explicitly critique generic visual design. Covers user actions, shared states and visual clarity; skip backend-only work.
+description: Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. Covers user actions, shared states, reusable components, editability and visual clarity in any layout mode; skip backend-only work, tool installation and illustration without UI.
 license: MIT
 ---
 
 # Operations UI delivery
 
-Make the next action apparent and its effect predictable. Preserve the product's
-language, supported journeys and authoritative state.
+Make the next action apparent and its effect predictable, and make the artifact
+that promises it hold up: a screen, mockup, component library or its code that
+stays accurate, complete, editable and consistent after the last write.
+Preserve the product's language, supported journeys and authoritative state.
 
 ## Scope and mode
 
-- Review/audit: inspect the scoped experience and report findings; keep it unchanged.
-- Repair: fix the smallest responsible owner and preserve nearby valid behavior.
-- Design/build: implement the requested experience; choose reversible details
-  without inventing a prior defect or requesting approval for each control.
+The mode sets what establishes quality and which check applies:
+
+| Mode | Quality source and distinguishing check |
+| --- | --- |
+| Review/audit | Apply the same criteria to the available evidence; keep the artifact unchanged and mark missing evidence as unverified. |
+| Repair / local edit | The changed contract, its dependencies and affected consumers; a shared base widens the check to its uses. |
+| New design / redesign | The user's task, product constraints and agreed system; check composition, required states and adaptation. Do not demand similarity to the old screen when change is allowed. |
+| Implementation in code | The reference and the behavior contract; check real components, semantics, actions and render in the application. A static capture does not prove interaction. |
+| Transfer | The given source and allowed delta; check preserved essential look, behavior and required editability. Do not hide a redesign inside a fidelity claim. |
+| Sketch / raster mockup | Meaning, composition and required states at the ordered fidelity. Do not demand instances, a working DOM or a finished library from a picture. |
 
 Honor explicit proposal/approval boundaries. Otherwise complete authorized work;
 ask only about consequential unresolved scope, shared effects or feature retirement.
@@ -28,7 +36,27 @@ does not need approval again.
 
 Use owner instructions and existing primitives. Material dependencies need a
 concrete gap and proportionate comparison. This skill grants no unrelated backend,
-data, installation, hook or client-configuration changes.
+data, installation, hook or client-configuration changes, no writes during a
+review-only request and no expansion of product scope.
+
+## Common contract
+
+Establish the user's task, the kind of result, the authoritative source for
+each decision and the allowed changes before building or judging. Then hold
+four invariants, each owned by one procedure:
+
+- Required states come from the brief, scenarios and source behavior, not from
+  the variants that exist: [Workspace](references/workspace-consistency.md).
+- A shared base is traced to its real consumers, inward and outward; a master or
+  an import does not prove use: [Component system](references/component-system.md).
+- Editability is an observable effect; a declared property proves nothing until
+  a changed value reaches its receiver: [Component system](references/component-system.md).
+- Geometry, theme and composition are judged at the affected depth after the
+  last write: [Visual judgment](references/visual-judgment.md).
+
+Report verified, defective, unverified and inapplicable separately, tied to the
+exact artifact; clean Git, a green build or a partial audit do not vouch for
+the rest: [Acceptance](references/scenario-testing.md).
 
 ## Select a thematic procedure
 
@@ -40,18 +68,21 @@ chain; do not load the whole directory or evaluation corpus.
 
 | Task or decision | Procedure |
 | --- | --- |
+| Shared base, families, nested reuse, property effect, design-to-code mapping | [Component system](references/component-system.md) |
 | Adding/changing primitive mechanics or adopting a UI library in stages | [Reuse and migration scope](../code-maintenance/references/reuse-and-migration.md) |
 | Action placement, draft departure, local/shared effects | [Actions and scope](references/actions-and-scope.md) |
-| Forms, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
-| Nested, filtered or bulk selection, counts/order | [Selection](references/selection.md) |
-| Hit areas, gestures, popup geometry, modality | [Interaction](references/interaction-and-layout.md) |
-| Animation, reveal, collapse, continuity | [Motion](references/motion-and-transitions.md) |
+| Forms, field composition, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
+| Nested, filtered or bulk selection, counts/order, control classification | [Selection](references/selection.md) |
+| Hit areas, gestures, popup geometry, modality, coexisting states | [Interaction](references/interaction-and-layout.md) |
+| Animation, reveal, collapse, continuity, ordered transitions | [Motion](references/motion-and-transitions.md) |
 | Tables/grids, composite keyboard behavior, assistive access | [Accessibility and composites](references/accessibility-and-composites.md) |
-| Shared screens, navigation state, panels, supported environments | [Workspace](references/workspace-consistency.md) |
+| Shared screens, navigation state, panels, size owners, supported environments | [Workspace](references/workspace-consistency.md) |
 | Computed results, async refresh, writes/retries, invalidation | [Data lifecycle](references/data-lifecycle.md) |
 | Labels, status meanings, recovery guidance | [Content](references/content-and-recovery.md) |
-| Acceptance/regression checks, interaction under realistic load | [Acceptance](references/scenario-testing.md) |
-| Visual composition, critique or generic presentation | [Visual judgment](references/visual-judgment.md) |
+| Acceptance/regression checks, evidence after the last write, realistic load | [Acceptance](references/scenario-testing.md) |
+| Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets | [Visual judgment](references/visual-judgment.md) |
+| Transferring an existing interface into an editable artifact, structural replacement or migration | [Design transfer](references/design-transfer.md) |
+| Any read or write through the Figwright adapter | [Figwright](references/figwright.md), before the first operation |
 
 When implementation changes component responsibilities, shared code or reactive
 ownership, use [code-maintenance](../code-maintenance/SKILL.md) for those decisions,
@@ -61,22 +92,29 @@ without changing this task's authority. UI journey rules remain in the procedure
 
 ## Common execution and finish
 
-1. Establish the outcome, starting state and actual entry path from the brief.
-   Before attributing live behavior, identify source/build, runtime and data.
+1. Establish the mode, outcome, starting state, authoritative source and actual
+   entry path from the brief. Before attributing live behavior, identify
+   source/build, runtime and data. Read only the applicable procedures and the
+   documentation of the tool in use.
 2. Trace affected owners to consumers. Classify missing shared rules, bypassed
-   primitives, flow mismatches or local defects. Repeated complaints require
-   revisiting that cause and omitted paths, not another isolated patch.
+   primitives, flow mismatches or local defects. For a systemic change decide
+   the shared contracts and migration order first; for a small one find the
+   nearest responsible owner. Repeated complaints require revisiting that cause
+   and omitted paths, not another isolated patch or another master.
 3. Apply the selected procedure and its distinguishing check plus valid control.
-   Scale content to the risk; a small repair need not inventory the whole product.
+   When compatibility is unclear, make a bounded reversible probe on a
+   representative and a risky case before propagating a mechanism. Scale
+   content to the risk; a small repair need not inventory the whole product.
 4. Repeat the real action across affected paths, preserving input and save/cancel.
    Reuse matching gate/hook evidence, run missing and owner-required checks. Ask
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
 
-When visual quality matters, use Visual judgment for the composed screen, inspect
-the rendered candidate and show a useful preview. A preview does not suspend
-authorized work; wait only for an explicit checkpoint or a consequential
-unresolved preference. Distinguish supplied facts,
+Whenever a rendered or drawn result exists, use Visual judgment for the composed
+artifact after the last write and show a useful preview; this applies to
+creation, implementation and transfer, not only to an explicit critique. A
+preview does not suspend authorized work; wait only for an explicit checkpoint
+or a consequential unresolved preference. Distinguish supplied facts,
 observations, inference and gaps; missing access is not proof that no check ran.
 
 For a cross-screen milestone, run a separate contrarian pass on the exact tested
@@ -84,9 +122,10 @@ artifact and challenge at least one stale, failed or recovery state. When
 delegation is already authorized, the primary may assign that pass to an
 independent reviewer; otherwise the primary runs it directly.
 
-Report the operator outcome, relevant criterion → evidence or gap, actual automated
-and visual checks, unresolved risks and owned runtime cleanup. A clean detector,
-skill read or existing test is not evidence of a working journey; user approval
-is separate from verification. Keep reporting in the existing task, without a
+Report the operator outcome, relevant criterion → evidence or gap, actual
+automated and visual checks, unresolved risks and owned runtime cleanup. A clean
+detector, skill read, existing test, successful import or matching defaults are
+not evidence of a working journey or an editable system; user approval is
+separate from verification. Keep reporting in the existing task, without a
 mandatory new document. When revising this skill, use
 [evaluation guidance](evals/evaluation.md); it is not part of ordinary UI work.

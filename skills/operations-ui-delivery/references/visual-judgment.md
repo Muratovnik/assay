@@ -1,7 +1,12 @@
 # Visual judgment
 
 Use for a requested visual critique, distinctive design or cleanup of a generic
-interface. Evaluate the actual audience, task, brand and rendered composition.
+interface, and for judging the composed result of any created, implemented or
+transferred UI artifact: a screen, a mockup, a component library or its code.
+Evaluate the actual audience, task, brand and rendered composition; match the
+depth of the check to the ordered artifact. Structural links and property
+effects belong to [Component system](component-system.md); sizing behavior of
+screens and containers to [Workspace](workspace-consistency.md).
 Reuse supplied visual references; a popular font, component library or color is
 not evidence of poor design or of how the work was produced.
 
@@ -49,6 +54,66 @@ Inspect the rendered result when possible and judge it against the original
 brief. Show a useful preview without turning it into an automatic stop. Separate
 what was observed, checked automatically and actually approved by the user.
 If the design already serves the task well, a clean assessment is valid.
+
+## Establish which source governs each decision
+
+When several sources exist, assign authority by question: the product's behavior
+contract answers what a control does, the current library or API answers what
+exists to build with, normative tokens answer intended values, the observed
+render answers what the build actually does and a visual reference answers how
+it should look. Check which theme or token source the build or instance really
+uses. Name a discrepancy with documentation and resolve it by the standing
+product decision; the runtime is not automatically right, and a convenient
+value must not be chosen silently. In a transfer compare essential properties
+with the source; in a new design compare with the brief and the agreed system.
+A local task needs only its affected sources; do not require a new
+design-system document or a rewritten owner instruction.
+
+## Check tokens, fonts and theme through the composition
+
+Choose a token by semantic role and source, not by a matching color value.
+Verify the actual font family, weight and line-height at the consumer; a
+foundations showcase and a bound size do not prove the right font on the screen.
+Theme must pass through nested instances, surfaces, text, borders and overlays:
+check mode/theme overrides and resolved values where the chain can break. Account
+for ancestor paint in the final surroundings: fill, opacity, radius, clipping,
+gaps and seams. A neutral wrapper must not add a surface by accident; a
+transparent wrapper and a deliberate local fill are both valid when they match
+the role. Do not mandate one variables collection, theme variants, styles,
+native slots, guides, annotations or code mapping; pick the mechanism that
+delivers the needed change with maintainable handoff.
+
+- Failure: a dark parent contains a nested instance left on the light theme; a
+  white rectangular wrapper shows at the corners of a rounded control.
+- Check: read resolved values and overrides on the nested elements, and inspect
+  the composed render in each affected theme, not the theme name.
+
+## Inspect geometry at the affected depth
+
+This file owns the depth rule; other procedures link here. After an edit,
+check the bounds of the content, its parent, the component set or section and
+the affected neighbors. Checking only the top-level children misses variants
+overlapping inside a set or a background bleeding through correct children.
+State the actual traversal depth of any geometric claim and do not declare the
+whole file sound from one sample.
+
+Distinguish an intended runtime overlay (popup, modal, stacked surface) from an
+accidental overlap of independent examples on a canvas. Check clipping,
+reachability of the last element, focus rings, padding/gap, wrapping and voids.
+Do not cure a wrong height owner with successive manual resizes; fix the owner
+of the size. A library is itself a composition to judge: meaningful grouping,
+stable order and readable axes let a user find the current element and compare
+variants. Zero intersections do not prove legibility. Do not impose one page
+skeleton, fixed grid or mandatory showcase set on every project.
+
+## Keep asset provenance
+
+Keep the origin and a fitting lifecycle for every asset used. A temporary tool
+link can serve a preview, but a delivered result obtains its resource through
+the accepted asset pipeline or a stable dynamic source. Verify the intended
+variant, size/aspect ratio and how the asset is fetched after the session ends.
+Do not replace an exact asset with an approximate glyph because of a similar
+name; a one-off preview and a standard CDN or API are both legitimate.
 
 ## Optional composition pilot for new surfaces
 

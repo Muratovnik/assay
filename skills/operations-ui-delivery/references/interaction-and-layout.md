@@ -94,6 +94,18 @@ previews can lose inherited fonts, theme or table widths. Check the active eleme
 against its intended anchor; a deliberately compact drag summary need not clone
 the row. Animated geometry additionally needs the Motion procedure above.
 
+## Resolve coexisting states
+
+Where states can coexist, define their combined result and the owner of each:
+selection does not disappear under hover, focus stays distinguishable over
+selected or invalid, and a disabled item keeps its selected identity where the
+product says so. Check the meaningful combinations for text, icon-plus-text and
+icon-only forms of the same family; the default form passing does not clear a
+new combination. Do not install one universal priority order or a full
+Cartesian product of states. An intended runtime overlay is judged by its
+behavior; accidental overlap of examples on a canvas belongs to
+[Visual judgment](visual-judgment.md#inspect-geometry-at-the-affected-depth).
+
 ## Treat overlays as one composed interaction
 
 Choose modality from the task. Establish which layer owns focus, Escape, outside

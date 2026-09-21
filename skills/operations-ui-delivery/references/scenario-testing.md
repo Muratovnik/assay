@@ -13,6 +13,11 @@ save/cancel, failure, retry and return behavior. Use the brief and approved cont
 recorded clicks reveal current behavior, not necessarily correct expectations.
 An API capability cannot resolve an unsettled product policy.
 
+Derive expectations independently of the catalog that was produced: the brief,
+scenarios and the source's behavior name the required states, so a complete set
+of manufactured variants can still miss a supported state. This is acceptance
+of ordinary UI work, not an evaluation of the skill.
+
 For broad work map supported journeys before generating tests, including older
 and direct-entry paths. Link reported defects to these outcomes and look for
 omitted consumers, states or scale conditions after the defect list turns green.
@@ -83,6 +88,12 @@ the apparent next step. Automation can preserve an approved presentation but can
 approve its meaning. A narrow objective invariant may have sufficient automated
 evidence without a visual pass. The entrypoint governs preview/approval boundaries;
 neither screenshots nor user approval replace required behavior checks.
+
+Tie the result to the exact artifact after the last write. Imported, linked to
+the system, visually compared and verified in a scenario are different results;
+a successful readback of a stored value does not hide a missing visible effect.
+Classify each claim as verified, defective, unverified or inapplicable with a
+brief basis.
 
 Keep scenario/criterion → assertion → execution evidence or gap in the existing
 task/test record. Separate specified, automated, executed, visually inspected and

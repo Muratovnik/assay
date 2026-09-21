@@ -20,6 +20,28 @@ do not prove matching computed colors, padding or text bounds. Use a fitting
 shared variant; a numeric label may not fit an icon-sized trigger. Reuse agreed
 selector behavior without adding search to every short fixed choice.
 
+## Derive states and size owners from the source
+
+List required functional states from the brief, scenarios and the source's
+behavior or code: selection, disclosure, loading, error, empty and recovery,
+separately from hover/focus/disabled. Do not read the expectation off the
+variants that already exist; an expanded/collapsed navigation that the product
+supports is required even when no variant was drawn. Pick width, theme and
+content axes from the product and give a local edit a local matrix; a full
+Cartesian product is not required.
+
+Decide who owns each size and behavior: content-driven, stretching, fixed or a
+structurally different variant. Check short and long text, item counts and an
+intermediate size between reference frames. Two copies drawn at two capture
+widths do not prove adaptation; when only the size differs, a resize contract
+usually suffices, and a genuinely different composition may earn a variant.
+FIXED sizing, a scroll region and an absolute overlay are valid when they match
+the role. Where an accessibility standard applies, also check that enlarged text
+and user spacing keep content and actions reachable; that is a robustness check,
+not a mandate for looser spacing everywhere. For the shared base and its
+consumers use [Component system](component-system.md); this file does not
+define a second component model.
+
 ## Compare semantic columns across tables
 
 When related screens show the same objects or fields, map columns by meaning

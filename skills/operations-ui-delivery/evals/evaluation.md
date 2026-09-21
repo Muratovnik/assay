@@ -76,6 +76,9 @@ practical variant and, unlike earlier pairs, was derived from a repair executed
 in a product harness whose oracle fails on both defective variants; fixtures for
 other harnesses remain specifications. T11 records a real request that was not
 discovered until a routing instruction was placed in the project instructions.
+T07 became positive when the skill widened to any layout mode; T12-T16 add the
+new modes (new design, transfer, implementation in code, library editing) with
+the nearby negatives that remain: illustration without UI and tool installation.
 
 ## Comparison
 

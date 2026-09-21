@@ -9,7 +9,7 @@ unused method costs little context.
 | Skill | Activation | What it is for |
 | --- | --- | --- |
 | [route-subagents](route-subagents/SKILL.md) | automatic | Prepare and route bounded Codex or Claude subagent packets after the user or an explicitly invoked workflow has already authorized delegation. |
-| [operations-ui-delivery](operations-ui-delivery/SKILL.md) | automatic | Design, repair or review operational UI, or explicitly critique generic visual design. |
+| [operations-ui-delivery](operations-ui-delivery/SKILL.md) | automatic | Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. |
 | [independent-audit](independent-audit/SKILL.md) | automatic | Audit a requested change, repository, release or migration against its brief and evidence. |
 | [skill-design](skill-design/SKILL.md) | automatic | Diagnose skill failures and evaluate whether a proposed method improves task outcomes. |
 | [evidence-research](evidence-research/SKILL.md) | automatic | Investigate questions, compare options or assess gaps using source-grounded research and synthesis. |
