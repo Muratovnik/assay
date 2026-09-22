@@ -69,6 +69,7 @@ chain; do not load the whole directory or evaluation corpus.
 | Task or decision | Procedure |
 | --- | --- |
 | Shared base, families, nested reuse, property effect, design-to-code mapping | [Component system](references/component-system.md) |
+| Design-system/library information architecture, consumer-facing resources, internal/example/lifecycle separation | [Design-system organization](references/design-system-organization.md) |
 | Adding/changing primitive mechanics or adopting a UI library in stages | [Reuse and migration scope](../code-maintenance/references/reuse-and-migration.md) |
 | Action placement, draft departure, local/shared effects | [Actions and scope](references/actions-and-scope.md) |
 | Forms, field composition, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
@@ -99,8 +100,10 @@ without changing this task's authority. UI journey rules remain in the procedure
 2. Trace affected owners to consumers. Classify missing shared rules, bypassed
    primitives, flow mismatches or local defects. For a systemic change decide
    the shared contracts and migration order first; for a small one find the
-   nearest responsible owner. Repeated complaints require revisiting that cause
-   and omitted paths, not another isolated patch or another master.
+   nearest responsible owner. When a reusable library itself changes, preserve
+   its consumer-facing organization and public/internal boundary as well as the
+   components inside it. Repeated complaints require revisiting that cause and
+   omitted paths, not another isolated patch or another master.
 3. Apply the selected procedure and its distinguishing check plus valid control.
    When compatibility is unclear, make a bounded reversible probe on a
    representative and a risky case before propagating a mechanism. Scale
@@ -109,6 +112,13 @@ without changing this task's authority. UI journey rules remain in the procedure
    Reuse matching gate/hook evidence, run missing and owner-required checks. Ask
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
+
+When an authorized multi-step mutation resumes after interruption, re-establish
+the source and target and read the current artifact before continuing. Continue
+from the last verified boundary: do not replay completed writes or treat an
+unverified step as completed. Adapter-specific reconnect, identifier and transport
+mechanics stay with the adapter in use. A short atomic edit needs no checkpoint
+artifact or persistent ledger.
 
 Whenever a rendered or drawn result exists, use Visual judgment for the composed
 artifact after the last write and show a useful preview; this applies to
@@ -125,7 +135,7 @@ independent reviewer; otherwise the primary runs it directly.
 Report the operator outcome, relevant criterion → evidence or gap, actual
 automated and visual checks, unresolved risks and owned runtime cleanup. A clean
 detector, skill read, existing test, successful import or matching defaults are
-not evidence of a working journey or an editable system; user approval is
-separate from verification. Keep reporting in the existing task, without a
+not evidence of a complete transfer, a working journey, an editable system or a
+usable library; user approval is separate from verification. Keep reporting in the existing task, without a
 mandatory new document. When revising this skill, use
 [evaluation guidance](evals/evaluation.md); it is not part of ordinary UI work.
