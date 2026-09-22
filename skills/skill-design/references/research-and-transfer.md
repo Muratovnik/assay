@@ -42,3 +42,27 @@ packaging. Prefer conditional `references/` with explicit reading conditions;
 preserve a justified existing consumer path. Moving all mandatory reading out of
 the entrypoint does not prove lower context use. Apply the parent skill's
 evaluation method before claiming improvement, savings or portability.
+
+## Recheck a method after a model or client change
+
+Use this branch when an upgrade is the reason for revising instructions. Separate
+model behavior, client discovery/tool schema, effective permissions and API
+adapter compatibility before changing the method. A release announcement or a
+recommendation for another configuration does not establish a local regression.
+Keep vendor scope, source date and conditions with each proposed transfer;
+[routing guidance](../../route-subagents/references/model-guidance.md) carries
+those distinctions without pinning a model in the neutral method.
+
+Start with existing work receipts. Identify an instruction that caused irrelevant
+reading, repeated unchanged checks, a premature stop or a wrong rejection. Compare
+its proposed change against the actual prior bytes or ordinary authoring under
+comparable settings, using a failure case and a nearby valid control when runs
+are authorized. Preserve task criteria, source fidelity and required verification;
+remove or reroute demonstrated process overhead, not safeguards merely because a
+new model is advertised as stronger. A shorter file is not a measured saving.
+
+Keep activation, execution and outcome claims separate. Record requested versus
+observed model/effort, skill revision, relevant client/tool boundary, corrections
+and full-chain cost when available. Unknown subscription usage remains unknown.
+No new evaluation service, paid campaign or simultaneous multi-model run follows
+from an upgrade; inconclusive evidence can justify retaining the current method.

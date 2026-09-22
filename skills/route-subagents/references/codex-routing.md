@@ -40,6 +40,22 @@ up for a new decision or repair delta. Resume only the stable identity returned
 by the tool. Creating a separate user-facing task is distinct from spawning a
 subagent; preserve the user's requested surface.
 
+## Model upgrades and API boundaries
+
+Use [registered guidance](model-guidance.md) for its declared models, surfaces
+and conditions. An Astra-specific prompt observation is not a rule for Sol or
+Luna. Reconfirm runtime IDs and supported efforts after an upgrade; identical
+effort labels are not evidence of equal compute, quality or subscription cost.
+Do not turn a model's API effort range into a native tool capability declaration.
+
+When the task actually involves a direct API adapter, the
+[GPT-6 migration guide](https://developers.openai.com/api/docs/guides/latest-model#update-api-and-model-parameters)
+recommends Responses for tools; its Sol/Luna Chat Completions function-calling
+support is restricted to `reasoning_effort: none`. This API limitation does not
+establish a failure or supported override in the active native Codex client.
+Check the adapter and endpoint in use before prescribing a migration. Routing
+one native child does not authorize editing an API adapter or global settings.
+
 Primary reference: [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents).
 Consult current documentation and the active schema when a capability is
 unclear; this reference records mechanics, not persistent model recommendations.

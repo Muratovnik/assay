@@ -40,6 +40,33 @@ Parent permissions, tool restrictions, environment overrides and MCP exposure
 can affect the actual worker; observe the relevant boundary instead of relying
 on frontmatter alone.
 
+## Model upgrades and completion
+
+For a changed model or provider binding, inspect the applicable
+[registered guidance](model-guidance.md), not a remembered family default.
+The [Opus 5.5 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5)
+recommends calibrating effort and describes unattended runs that can end a turn
+with a progress update before the task is complete. These are API/harness
+observations, not proof that a native Agent tool exposes the same controls.
+Preserve explicit user settings and verify the effective child route.
+
+Check completion against the packet's required result and oracle, not `end_turn`
+or the presence of a text update. Continue through the existing native identity
+only when required work remains, the next action is authorized, and no user
+stop, approval boundary, refusal, budget limit or real blocker intervenes. Keep
+continuations bounded by the task budget and require new material progress;
+do not replay writes or start replacements just because a turn ended. Reconcile
+current artifacts before resuming. An absent visible thinking/progress block is
+not itself a stall; use native lifecycle evidence.
+
+The [subagent permission documentation](https://code.claude.com/docs/en/sub-agents#permission-modes)
+also describes parent modes that override child `permissionMode`; plugin-supplied
+agents do not inherit every metadata capability of project agents. Check the
+actual restrictions before claiming a read-only reviewer. Do not alter parent
+permissions to make an unsupported child setting appear effective. A bounded
+formal reviewer is not required for every informal review; choose the role by
+its input and evidence contract, not its name.
+
 Primary references: [subagents](https://code.claude.com/docs/en/sub-agents),
 [model configuration](https://code.claude.com/docs/en/model-config) and
 [worktrees](https://code.claude.com/docs/en/worktrees).

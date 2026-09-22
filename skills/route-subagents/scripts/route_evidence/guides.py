@@ -10,9 +10,9 @@ from __future__ import annotations
 
 import re
 
-from .core import EvidenceError, digest, text
+from .core import EvidenceError, digest, identity, text, validate_guide_applicability
 
-EXTRACTOR_VERSION = 1
+EXTRACTOR_VERSION = 2
 MAX_EXCERPT = 1500
 MAX_CAVEAT = 800
 MAX_CAVEATS = 6
@@ -24,10 +24,15 @@ CALLOUT = re.compile(r"<(Note|Warning|Tip|Info|Danger|Check)>(.*?)</\1>", re.S)
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
 
 
-def guide(gid, publisher, clients, url, sections, *, page_url=None):
+def guide(gid, publisher, clients, url, sections, *, page_url=None,
+          models=(), surfaces=("api",), conditions=(), reviewed_on=None):
+    applicability = validate_guide_applicability({
+        "models": list(models), "surfaces": list(surfaces),
+        "conditions": list(conditions), "reviewed_on": reviewed_on})
     return {"id": gid, "kind": "guide", "adapter": "guide", "publisher": publisher,
             "clients": tuple(clients), "url": url, "page_url": page_url or url.removesuffix(".md"),
-            "sections": tuple(sections), "extractor_version": EXTRACTOR_VERSION}
+            "sections": tuple(sections), "extractor_version": EXTRACTOR_VERSION,
+            "applicability": applicability}
 
 
 # Canonical addresses: the documentation domains redirect across hosts, and the
@@ -42,12 +47,52 @@ GUIDES = {g["id"]: g for g in (
     guide("claude-model-choice", "Anthropic", ("claude",),
           "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model.md",
           ("Establish key criteria", "Model selection matrix")),
+    guide("openai-gpt-6", "OpenAI", ("codex",),
+          "https://developers.openai.com/api/docs/guides/latest-model.md",
+          ("Limitations", "Update API and model parameters"),
+          models=("gpt-6-astra", "gpt-6-sol", "gpt-6-luna"),
+          conditions=("API migration guidance; native client controls need separate verification.",
+                      "Model-specific exceptions inside the selected sections still apply."),
+          reviewed_on="2026-09-22"),
+    guide("openai-gpt-6-astra-skills", "OpenAI", ("codex",),
+          "https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra.md",
+          ("Better skills", "Up-to-date AGENTS.md"), models=("gpt-6-astra",),
+          surfaces=("codex",),
+          conditions=("Astra-specific observations do not establish behavior on Sol or Luna.",
+                      "Instruction changes need a task-specific comparison, not blanket removal of checks."),
+          reviewed_on="2026-09-22"),
+    guide("claude-opus-5-5", "Anthropic", ("claude",),
+          "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5.md",
+          ("Calibrate effort", "Unattended agentic runs"), models=("claude-opus-5-5",),
+          conditions=("API and harness guidance; verify controls exposed by the active native client.",
+                      "A turn ending is not a delivery receipt; continuation remains bounded by task authority.",
+                      "Vendor effort guidance is not a measured saving on this workload or subscription."),
+          reviewed_on="2026-09-22"),
 )}
 
 
-def guide_ids(client=None):
-    """Guides for this host. An unresolved client never guesses a publisher."""
-    return sorted(g["id"] for g in GUIDES.values() if client is None or client in g["clients"])
+def matching_models(applicability, available):
+    """Resolve only declared identities; null scope/inventory stays unknown."""
+    if applicability is None or available is None:
+        return None
+    wanted = set(map(identity, applicability["models"]))
+    return sorted(item["model"] for item in available
+                  if not wanted or wanted.intersection(
+                      identity(name) for name in [item["model"], *item.get("evidence_names", [])]))
+
+
+def guide_ids(client=None, available=None):
+    """Select registered scope using only caller-confirmed model identities.
+
+    None means a catalog/status query. A supplied inventory filters scoped
+    guides; unknown aliases never imply a family, version or provider binding.
+    An empty model selector means no extra model restriction, not universal
+    support for every API capability mentioned in the document.
+    """
+    return sorted(g["id"] for g in GUIDES.values()
+                  if (client is None or client in g["clients"])
+                  and (available is None or not g["applicability"]["models"]
+                       or matching_models(g["applicability"], available)))
 
 
 def anchor(heading):
@@ -172,4 +217,5 @@ def guide_snapshot(source: dict, body: str) -> dict:
             "source_url": source["url"], "document_title": text(title, "guide title"),
             "canonical_url": canonical, "extractor_version": EXTRACTOR_VERSION,
             "content_hash": digest(body), "applies_to": list(source["clients"]),
+            "applicability": validate_guide_applicability(source["applicability"]),
             "document_caveats": document_caveats, "retrieved_sections": sections}

@@ -261,10 +261,10 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         finally:
             scope.cancel()
 
-    def _guides(self):
+    def _guides(self, available=None):
         """Guides for this host; an unresolved client never picks a publisher."""
-        for_client = guide_ids(self.client)
-        return (for_client, "client") if for_client else (guide_ids(), "all_publishers")
+        for_client = guide_ids(self.client, available)
+        return (for_client, "client") if for_client else (guide_ids(available=available), "all_publishers")
 
     async def context(self, request):
         validate_request(request)
@@ -272,7 +272,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         # consume all the time budget before a required source is attempted.
         primary = [sid for name in request["task_types"] for sid, _ in TASK_TYPES[name]["primary"]]
         selected = list(dict.fromkeys(primary + source_ids(request)))
-        guides, scope = self._guides()
+        guides, scope = self._guides(request["available"])
         fetched = await self.refresh(selected + guides)
         sources = [s for s in fetched if s.get("kind") != "guide"]
         guidance = [s for s in fetched if s.get("kind") == "guide"]

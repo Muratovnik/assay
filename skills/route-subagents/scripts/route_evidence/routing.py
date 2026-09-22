@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 from collections import defaultdict
 from .core import METRICS, EvidenceError, effort, identity, number, text
+from .guides import matching_models
 
 TASK_TYPES = {
     "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "extended")], "support": ["cursorbench"]},
@@ -248,7 +249,7 @@ def build_context(request: dict, evidence: list[dict], guidance=(), guidance_sco
             "inventory": routes_json(expected),
             "tasks": [task_block(name, cohorts, expected, request) for name in request["task_types"]],
             "sources": statuses, "excluded": excluded,
-            "guidance": guidance_block(guidance, guidance_scope),
+            "guidance": guidance_block(guidance, guidance_scope, request["available"]),
             "declared_constraints": declared, "constraint_note": note,
             "warnings": ["Context only: no subagent is launched and no native configuration is changed.",
                          "This tool does not select a model or effort; the caller applies it to the task.",
@@ -260,7 +261,7 @@ def build_context(request: dict, evidence: list[dict], guidance=(), guidance_sco
                          "Missing or stale evidence is reported, not imputed; unseen configurations may be better."]}
 
 
-def guidance_block(views, scope):
+def guidance_block(views, scope, available=None):
     """Quoted vendor material. Never merged into a measurement or a ranking."""
     documents = []
     for view in sorted(views, key=lambda v: v["source_id"]):
@@ -278,13 +279,19 @@ def guidance_block(views, scope):
                           "retrieved_at": view.get("last_success_at"), "stale": view["stale"],
                           "content_hash": data["content_hash"],
                           "extractor_version": data["extractor_version"],
+                          "applicability": copy.deepcopy(data.get("applicability")),
+                          "matched_models": matching_models(data.get("applicability"), available),
                           "document_caveats": data["document_caveats"],
                           "sections": data["retrieved_sections"]})
     return {"evidence_type": "vendor_guidance", "scope": scope, "documents": documents,
             "note": ("Quoted publisher documentation with its provenance. It is the vendor's "
                      "position, not an independent measurement and not an instruction that "
                      "outranks the task: excerpts are material to weigh, and a shortened "
-                     "excerpt never drops a caveat.")}
+                     "excerpt never drops a caveat. Applicability is registered scope, not "
+                     "a vendor quotation or verified host capability. Match its model identities, "
+                     "documented surfaces and conditions before transferring advice. Model-scoped "
+                     "guidance cannot justify advice for candidates outside matched_models. A null "
+                     "applicability is legacy unknown scope, not universal support.")}
 
 
 def brief(result: dict) -> dict:
@@ -297,6 +304,7 @@ def brief(result: dict) -> dict:
         if "guide_id" in data:
             source.update(document_title=data["document_title"], canonical_url=data["canonical_url"],
                           sections=len(data["retrieved_sections"]),
+                          applicability=copy.deepcopy(data.get("applicability")),
                           extractor_version=data["extractor_version"], content_hash=data["content_hash"])
         else:
             source.update(benchmark=data["benchmark"], version=data["version"],
