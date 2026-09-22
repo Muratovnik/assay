@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 import os
+import re
 import tempfile
 import time
 from contextlib import contextmanager
@@ -18,6 +19,20 @@ CONTRACTS = {"benchmark": (validate_snapshot, (("source_id", "id"), ("source_url
                                                ("version", "version"), ("benchmark", "benchmark"))),
              "guide": (validate_guide, (("guide_id", "id"), ("source_url", "url"),
                                         ("extractor_version", "extractor_version")))}
+
+
+# A bounded history survives reconnects. A new inventory can bypass TTL once,
+# but cannot turn successive requests into an unbounded source poller.
+MAX_INVENTORY_KEYS = 256
+INVENTORY_REFRESH_INTERVAL = 300
+
+
+def checked_inventory_keys(value, limit=100):
+    if (not isinstance(value, (list, tuple)) or len(value) > limit
+            or any(not isinstance(k, str) or not re.fullmatch(r"[0-9a-f]{64}", k) for k in value)
+            or len(set(value)) != len(value)):
+        raise EvidenceError("invalid inventory refresh keys")
+    return set(value)
 
 
 def contract(source: dict):
@@ -101,13 +116,14 @@ class Cache:
                     raise EvidenceError("cached source identity mismatch")
                 if digest(state["snapshot"]) != state.get("data_hash"):
                     raise EvidenceError("cached data checksum mismatch")
-            for key in ("last_attempt_at", "last_success_at", "data_changed_at", "next_retry_at"):
+            for key in ("last_attempt_at", "last_success_at", "data_changed_at", "next_retry_at", "inventory_probe_after"):
                 if state.get(key) is not None:
                     epoch(state[key])
             if type(state.get("failures", 0)) is not int or state.get("failures", 0) < 0:
                 raise EvidenceError("invalid cache failure count")
             if not isinstance(state.get("validators", {}), dict):
                 raise EvidenceError("invalid cache validators")
+            checked_inventory_keys(state.get("inventory_checked", []), MAX_INVENTORY_KEYS)
             return state
         except FileNotFoundError:
             return {}
@@ -131,28 +147,52 @@ class Cache:
                 "next_retry_at": state.get("next_retry_at"),
                 "error": state.get("error"), "snapshot": state.get("snapshot"), **extra}
 
-    def get(self, source: dict, fetch: Callable, *, offline=False, force=False) -> dict:
+    def get(self, source: dict, fetch: Callable, *, offline=False, force=False,
+            inventory_keys=()) -> dict:
+        requested = checked_inventory_keys(inventory_keys)
+
+        def decision(state):
+            current = self.view(source, state)
+            unseen = requested - set(state.get("inventory_checked", []))
+            probe_after = state.get("inventory_probe_after")
+            deferred = bool(unseen and probe_after and self.clock() < epoch(probe_after))
+            early = bool(unseen and not current["stale"] and not deferred)
+            return current, early, deferred
+
+        def cached(current, deferred):
+            return {**current, "refresh": "inventory_deferred" if deferred else "cached",
+                    **({"next_inventory_refresh_at": state.get("inventory_probe_after")}
+                       if deferred else {})}
+
         state = self.read(source)
-        current = self.view(source, state)
-        if offline or (not force and not current["stale"]):
-            return {**current, "refresh": "offline" if offline else "cached"}
+        current, early, deferred = decision(state)
+        if offline:
+            return {**current, "refresh": "offline"}
         retry_at = state.get("next_retry_at")
-        # Force bypasses the normal TTL, NOT a publisher's Retry-After.
+        # Explicit force and inventory probes both respect Retry-After/backoff.
         if retry_at and self.clock() < epoch(retry_at):
             return {**current, "refresh": "backoff"}
+        if not force and not current["stale"] and not early:
+            return cached(current, deferred)
         with source_lock(self.root / (source["id"] + ".lock")) as acquired:
             if not acquired:
                 return self.view(source, self.read(source), refresh="update_in_progress")
             state = self.read(source)
-            current = self.view(source, state)
-            if not force and not current["stale"]:
-                return {**current, "refresh": "cached"}
+            current, early, deferred = decision(state)
             retry_at = state.get("next_retry_at")
             if retry_at and self.clock() < epoch(retry_at):
                 return {**current, "refresh": "backoff"}
+            if not force and not current["stale"] and not early:
+                return cached(current, deferred)
+            if early:
+                state["inventory_probe_after"] = timestamp(self.clock() + INVENTORY_REFRESH_INTERVAL)
             previous = state.get("snapshot")
             state.update(cache_schema=1, source_fingerprint=digest(source),
                          last_attempt_at=timestamp(self.clock()))
+            if early:
+                # Persist the probe lease before I/O: cancellation must not let
+                # a reconnect bypass the throttle, nor claim a successful check.
+                atomic_write(self.root / (source["id"] + ".json"), state)
             try:
                 validators = state.get("validators", {}) if previous else {}
                 snapshot, validators = fetch(source, validators)
@@ -171,6 +211,10 @@ class Cache:
                     state["data_changed_at"] = now
                 state.update(snapshot=snapshot, data_hash=data_hash, validators=validators,
                              last_success_at=now, next_retry_at=None, error=None, failures=0)
+                # A successful 200/304 checks the inventory even when the new
+                # model is not published yet. Failures do not consume this check.
+                old = sorted(set(state.get("inventory_checked", [])) - requested)
+                state["inventory_checked"] = sorted(requested) + old[:MAX_INVENTORY_KEYS - len(requested)]
                 action = "validated_not_modified" if not_modified else "updated"
             except (EvidenceError, OSError, TimeoutError) as exc:
                 # Cancellation must not manufacture a publisher backoff.
@@ -185,4 +229,5 @@ class Cache:
                              next_retry_at=timestamp(self.clock() + delay))
                 action = "failed"
             atomic_write(self.root / (source["id"] + ".json"), state)
-            return self.view(source, state, refresh=action)
+            return self.view(source, state, refresh=action,
+                             **({"refresh_reason": "inventory_changed"} if early else {}))

@@ -11,6 +11,7 @@ import urllib.request
 from html.parser import HTMLParser
 
 from .cache import FetchError
+from .model_names import model_identity
 from .core import MAX_BYTES, EvidenceError, effort, identity, loads, number, validate_snapshot
 
 # Endpoints, not a model ranking. A new model needs no code change. New benchmark
@@ -20,11 +21,12 @@ SOURCES = {
                 "url": "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json",
                 "page": "https://deepswe.datacurve.ai/", "adapter": "deepswe", "revision": 3},
     "cursorbench": {"id": "cursorbench", "benchmark": "CursorBench", "version": "4.0",
-                    "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 4},
+                    "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 5},
     "frontiercode": {"id": "frontiercode", "benchmark": "FrontierCode", "version": "1.1",
                      "url": "https://cognition.com/frontiercode", "adapter": "browser", "revision": 4},
     "terminal-bench": {"id": "terminal-bench", "benchmark": "Terminal-Bench", "version": "4.0",
-                       "url": "https://www.tbench.ai/", "adapter": "browser", "revision": 4},
+                       "url": "https://www.tbench.ai/", "adapter": "browser", "revision": 5,
+                       "preferred_data": "harbor-public-api"},
 }
 for key, name in (("qna", "Codebase QnA"), ("tw", "Test Writing"), ("refactoring", "Refactoring")):
     sid = "swe-atlas-" + key
@@ -212,6 +214,10 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
             default_harness = "Cursor" if source["id"] == "cursorbench" else "publisher-harness-unspecified"
             harness = cells[header["harness"]] if "harness" in header else default_harness
             row = base_row(model, reasoning, harness, subset, metric={"frontiercode": "mergeability", "cursorbench": "task_score"}.get(source["id"], "resolve_rate"))
+            if source["id"] == "cursorbench":
+                # Keep the publisher label; the annotation is source-scoped and
+                # routing rechecks it against the current reviewed alias table.
+                row["model_identity"] = model_identity("cursorbench", model)
             row["score"] = quantity(cells[header["score"]], percent=True)
             for key in ("cost_usd", "reported_tokens", "output_tokens", "steps"):
                 row[key] = quantity(cells[header[key]]) if key in header else None
@@ -298,6 +304,24 @@ class Fetcher:
         self.browser, self.timeout = browser, timeout
 
     def __call__(self, source, validators):
+        if source.get("preferred_data") == "harbor-public-api":
+            from .terminal_hub import ENDPOINT, HubUnavailable, fetch_snapshot
+            started = time.monotonic()
+            try:
+                return fetch_snapshot(source, timeout=self.timeout), {}
+            except HubUnavailable as exc:
+                # No fallback on malformed/version-mismatched JSON, access
+                # restrictions, or Retry-After. Browser access remains opt-in.
+                if not self.browser or exc.retry_after:
+                    raise
+                remaining = self.timeout - (time.monotonic() - started)
+                if remaining <= 0:
+                    raise FetchError("terminal_hub_deadline_exceeded") from exc
+                result = Fetcher(browser=True, timeout=remaining).browser_snapshot(source)
+                result["warnings"].append("Preferred public API unavailable: " + str(exc))
+                result["acquisition"] = {"kind": "browser_fallback", "url": source["url"],
+                                         "preferred_url": ENDPOINT, "preferred_error": str(exc)}
+                return result, {}
         if source["adapter"] == "browser":
             if not self.browser:
                 raise FetchError("browser_disabled: this source needs the optional browser adapter")

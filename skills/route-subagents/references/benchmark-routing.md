@@ -60,8 +60,9 @@ Codex instance or silently read undocumented host files. In either client the
 primary supplies a confirmed inventory once, not a permanent model ranking.
 
 `evidence_names` may list verified publisher spellings for an exact runtime
-model. Only lexical spelling is normalized. Never guess which concrete version
-a rolling alias represents. Unknown effort is not low, adaptive or the default;
+model. Matching uses lexical spelling plus reviewed source-local correspondences;
+see [model matching and refresh](benchmark-refresh.md) for their provenance and
+conflict rules. Never guess which concrete version a rolling alias represents. Unknown effort is not low, adaptive or the default;
 unmeasured efforts are not interpolated. Missing matches remain explicit.
 
 Preserve the user's explicit model/effort choice. This tool never overrides
@@ -268,6 +269,9 @@ an unmeasured expense as savings.
 
 ## Vendor guidance
 
+The generic documents below are supplemented by [model-specific guides](model-guidance.md)
+with model/surface scope; neither set is a numerical measurement.
+
 Guidance is extracted deterministically from official documentation: no
 summarizing model, no paid call, no rewriting. The registry binds each document
 to the client it applies to, so a Codex host is never handed Anthropic's effort
@@ -310,13 +314,16 @@ Registry: `scripts/route_evidence/providers.py`. It owns endpoint/parser contrac
 not model rankings. New model rows refresh without code changes. Changed dataset
 versions or incompatible page layouts need an adapter update; they are not
 silently relabeled. Older unsafe capture caches are invalidated by adapter revision.
+Prefer verified publisher data endpoints or owner-maintained result artifacts to
+rendered pages; [source selection and API limits](benchmark-refresh.md#prefer-publisher-data-to-a-rendered-page)
+describes the Terminal-Bench route and the remaining discovery gaps.
 
 | Source | Acquisition | Limitation |
 | --- | --- | --- |
 | [DeepSWE 1.1](https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json) | Public JSON | pass@1, API cost, output tokens, duration, steps, CI; not pass@4 |
 | [CursorBench 4.0](https://prod.cursor.com/evals) | HTML, optional browser fallback | Generic Tokens is `reported_tokens`, not known output/total |
 | [FrontierCode 1.1](https://cognition.com/frontiercode) | Opt-in rendered tables | Main/Extended and all reasoning levels; harness tooltip, cost per rollout, output tokens |
-| [Terminal-Bench 4.0](https://www.tbench.ai/) | Opt-in rendered table | Active benchmark selector or explicit version heading; harness and aggregate run expenses |
+| [Terminal-Bench 4.0](https://www.tbench.ai/) | Anonymous publisher JSON API; opt-in browser fallback | Exact board/version and full paging; API run totals kept outside per-task expense comparisons |
 | [SWE Atlas QnA](https://labs.scale.com/leaderboard/sweatlas-qna) | Score cards, optional browser | Quality-only; unknown effort stays unknown |
 | [SWE Atlas Test Writing](https://labs.scale.com/leaderboard/sweatlas-tw) | Score cards, optional browser | Specialized quality-only evidence |
 | [SWE Atlas Refactoring](https://labs.scale.com/leaderboard/sweatlas-refactoring) | Score cards, optional browser | Specialized quality-only evidence |
@@ -366,6 +373,9 @@ HTTP validators. `last_success_at` (validated fetch or 304) drives the 24h TTL.
 `last_attempt_at`, `data_changed_at`, publisher `source_updated_at` and per-row
 `evaluated_at` remain separate. Unchanged 200/304 does not advance data-change
 time. Failed fetches preserve last-good data and never extend freshness.
+A changed caller inventory can request one bounded early check of relevant
+benchmarks, with a per-source cooldown and persistent check history; see
+[inventory-aware refresh](benchmark-refresh.md#inventory-aware-lazy-refresh).
 
 Cache defaults to XDG user cache on POSIX / LOCALAPPDATA on Windows, under
 `assay/benchmark-evidence`. Keep cache, configs, logs and imports outside

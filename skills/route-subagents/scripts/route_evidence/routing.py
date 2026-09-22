@@ -5,6 +5,7 @@ import copy
 from collections import defaultdict
 from .core import METRICS, EvidenceError, effort, identity, number, text
 from .guides import matching_models
+from .model_names import matching_diagnostics, resolve_model
 
 TASK_TYPES = {
     "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "extended")], "support": ["cursorbench"]},
@@ -169,7 +170,14 @@ def collect(request, evidence):
         if sid in seen:
             raise EvidenceError("duplicate source snapshot: " + sid)
         seen.add(sid)
+        match_state = ("source_unavailable" if data is None else
+                       "source_not_requested" if sid not in wanted else
+                       "stale_disallowed" if source["stale"] and not request.get("allow_stale", True) else "loaded")
+        diagnostics = matching_diagnostics(sid, data["rows"] if data else [], request["available"],
+                                           state=match_state, harness=request.get("harness"))
         statuses.append({**{k: v for k, v in source.items() if k != "snapshot"},
+                         "model_matching": diagnostics,
+                         **({"acquisition": data["acquisition"]} if data and "acquisition" in data else {}),
                          "benchmark": data.get("benchmark") if data else None,
                          "version": data.get("version") if data else None,
                          "row_count": len(data["rows"]) if data else 0,
@@ -179,8 +187,13 @@ def collect(request, evidence):
         if sid != data["source_id"]:
             raise EvidenceError("source envelope and snapshot disagree")
         for row in data["rows"]:
-            candidate = inventory.get(identity(row["model"]))
+            candidate, annotation, match_error = resolve_model(sid, row["model"], inventory)
             if not candidate:
+                # Unmatched examples/counts are in the source diagnostics. An
+                # ambiguous reviewed/explicit binding is never silently chosen.
+                if match_error == "ambiguous_model_identity":
+                    excluded.append({"model": row["model"], "effort": row["effort"],
+                                     "source_id": sid, "reason": match_error})
                 continue
             if row["effort"] is None or row["effort"] not in list(map(effort, candidate["efforts"])):
                 excluded.append({"model": row["model"], "effort": row["effort"],
@@ -189,7 +202,7 @@ def collect(request, evidence):
             if request.get("harness") and identity(row["harness"]) != identity(request["harness"]):
                 continue
             key = (sid, data["version"], row["subset"], row["harness"], row["protocol"], row["metric"])
-            observed = {**row, "runtime_model": candidate["model"],
+            observed = {**row, "runtime_model": candidate["model"], "model_identity": annotation,
                         "source_url": data["source_url"], "stale": source["stale"]}
             if route(observed) in cohorts[key]:
                 # Two source labels cannot become two trials or competing prices
