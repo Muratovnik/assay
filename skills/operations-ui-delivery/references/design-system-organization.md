@@ -93,11 +93,10 @@ actually replaces, forks or deprecates a resource, use
 [component system](component-system.md) for the contract and
 [design transfer](design-transfer.md) for structural migration duties.
 
-Build shared dependencies before compositions that rely on them when authoring a
-new system, or otherwise ensure the composition points to the intended shared
-resource. Do not create temporary duplicate bases merely because they are easier to
-place. A valid local or unique composition remains valid when reuse would add more
-indirection than value.
+Dependency order, canonical shared bases and whether a nested entity should be
+shared at all belong to [component system](component-system.md). Organization must
+preserve those decisions rather than recreate resources merely to place or group
+them.
 
 ## Judge architecture separately from canvas polish
 
