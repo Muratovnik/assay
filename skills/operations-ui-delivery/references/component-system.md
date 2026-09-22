@@ -37,6 +37,13 @@ consistency or behavior at acceptable complexity. For the affected role, name
 the base in use, where it is composed and which consumers a change reaches,
 instead of adding another base beside those that already fit.
 
+A technically reusable entity is not automatically part of the consumer-facing
+library surface. It may be an internal building block, a public primitive, a
+higher-level composition or example material depending on the contract consumers
+are expected to use. This file decides that reuse contract; how the whole catalog
+exposes, groups and distinguishes those roles belongs to
+[design-system organization](design-system-organization.md).
+
 ## Follow reuse transitively to real consumers
 
 A shared base helps only where consumers pass through it. Trace the affected
@@ -62,8 +69,10 @@ consumer. An anatomy view documents structure, not the ordered composition.
   actions, sizes and surfaces survive.
 
 Sizing and adaptation of screens, panels and containers belong to
-[workspace](workspace-consistency.md); geometry, bounds, overlap and library
-readability to [visual judgment](visual-judgment.md); popup geometry and
+[workspace](workspace-consistency.md); geometry, bounds, overlap and visual
+library readability to [visual judgment](visual-judgment.md); consumer-facing
+catalog structure, public/internal separation and findability to
+[design-system organization](design-system-organization.md); popup geometry and
 modality to [interaction](interaction-and-layout.md); the duties of a transfer
 to [design transfer](design-transfer.md).
 
