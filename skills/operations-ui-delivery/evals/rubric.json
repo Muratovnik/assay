@@ -8,168 +8,1322 @@
     "delivery": "State the useful decision, preserved valid behavior and a discriminating check; no required headings, keyword counts or report length."
   },
   "contrasts": [
-    {"ids": ["C01", "C02"], "dimension": "Parent summarizes descendants versus parent is an independent selected resource."},
-    {"ids": ["C03", "C04"], "dimension": "Frequent task is buried versus rare action is intentionally secondary and forms are independent."},
-    {"ids": ["C05", "C06"], "dimension": "Unannounced shared effect versus explicit requested shared edit."},
-    {"ids": ["C07", "C08"], "dimension": "Noninteractive container feedback versus a deliberately associated label hit area."},
-    {"ids": ["C09", "C10"], "dimension": "Accidental clipping/layer conflicts versus coherent modality and legitimate text reflow."},
-    {"ids": ["C11", "C12"], "dimension": "Redundant narration and conflated state versus necessary consequence and distinct state semantics."},
-    {"ids": ["C13", "C14"], "dimension": "False empty/success and lost input versus truthful state and recoverable submission."},
-    {"ids": ["C15", "C16"], "dimension": "Unrequested loss of supported behavior versus owner-approved retirement."},
-    {"ids": ["C17", "C18"], "dimension": "Test actions conceal a silent offscreen transition versus intentional position preservation with visible feedback and an explicit route."},
-    {"ids": ["C19", "C20"], "dimension": "Cross-screen preservation needs a journey map versus a label-only fix can extend existing focused coverage."},
-    {"ids": ["C21", "C22"], "dimension": "Weakening tests to accept a regression versus reviewing and updating a baseline for an approved intended change."},
-    {"ids": ["C23", "C24"], "dimension": "Broad defect-list closure omits original journeys and scale versus an explicitly narrow label change with adequate focused coverage."},
-    {"ids": ["C25", "C26"], "dimension": "Objective smokes leave layout and hierarchy uninspected versus sufficient checks for a narrow objective accessibility/geometry contract."},
-    {"ids": ["C27", "C28"], "dimension": "Shared state must be traced to an affected consumer versus an explicitly local presentation state."},
-    {"ids": ["C29", "C30"], "dimension": "Authorized autonomous design without an existing defect versus proposal-only work with explicit approval and unresolved shared-data policy."},
-    {"ids": ["C31", "C32"], "dimension": "Intentional familiar presentation versus demonstrated visual/interaction defects."},
-    {"ids": ["C33", "C34"], "dimension": "Same-context refresh versus a result for a changed target."},
-    {"ids": ["C35", "C36"], "dimension": "Broken drag availability/geometry versus allowed read-only interactions and intentional compact preview."},
-    {"ids": ["C37", "C38"], "dimension": "Missing workspace consumers versus distinct tasks and legitimate scrolling."},
-    {"ids": ["C39", "C40"], "dimension": "Accidental selection/priority mutation versus explicit order, reset and live membership contracts."},
-    {"ids": ["C41", "C42"], "dimension": "Ritual hook and extra model loops versus reusable exact-candidate mechanical and journey evidence."},
-    {"ids": ["C43", "C44"], "dimension": "Lost useful reference semantics versus updated product-specific preferences."},
-    {"ids": ["C45", "C46"], "dimension": "Broken intermediate animation versus intentional stagger and reduced motion."},
-    {"ids": ["C47", "C48"], "dimension": "Nonmodal task obstruction versus deliberate modal prerequisite."},
-    {"ids": ["C49", "C50"], "dimension": "Unclear distinct selection semantics versus a sufficient single snapshot control."},
-    {"ids": ["C51", "C52"], "dimension": "Wasted working height versus necessary chrome and a legitimate short form."},
-    {"ids": ["C53", "C54"], "dimension": "Expected edge acquisition versus legitimate internal and system insets."},
-    {"ids": ["C55", "C56"], "dimension": "Reachable calculation and recovery versus true zero and honest partial results."},
-    {"ids": ["C57", "C58"], "dimension": "Accidental header displacement versus valid navigation and reflow contracts."},
-    {"ids": ["C59", "C60"], "dimension": "Broken adaptive state transition versus intentional modality and focus fallback."},
-    {"ids": ["C61", "C62"], "dimension": "Existing continuity mechanism for identity change versus sufficient local CSS."},
-    {"ids": ["C63", "C64"], "dimension": "Accidental panel-induced displacement versus intentional composition change."},
-    {"ids": ["C65", "C66"], "dimension": "Unreviewed whole-screen composition versus valid whitespace and scoped repair."},
-    {"ids": ["C67", "C68"], "dimension": "Broken prerequisite-to-action path versus legitimate authorization restriction."},
-    {"ids": ["C69", "C70"], "dimension": "Hidden row-opening handler versus a sufficient discoverable dedicated link."},
-    {"ids": ["C71", "C72"], "dimension": "Transient collapse and identity risk during object switching versus intentional content reflow."},
-    {"ids": ["C73", "C74"], "dimension": "Input and validation lifecycle versus a genuine confirmation prerequisite."},
-    {"ids": ["C75", "C76"], "dimension": "Dirty departure versus confirmed autosave and harmless disclosure."},
-    {"ids": ["C77", "C78"], "dimension": "Mutation outcomes versus permitted independent writes."},
-    {"ids": ["C79", "C80"], "dimension": "Meaningful accessible feedback versus unnecessary announcements."},
-    {"ids": ["C81", "C82"], "dimension": "Interactive composite focus versus a sufficient reading table."},
-    {"ids": ["C83", "C84"], "dimension": "Non-drag pointer equivalence versus native scrolling."},
-    {"ids": ["C85", "C86"], "dimension": "Usable disclosure versus sufficient optional help."},
-    {"ids": ["C87", "C88"], "dimension": "Collection context and invalid page versus intentional local state."},
-    {"ids": ["C89", "C90"], "dimension": "Observed interaction load versus arbitrary optimization."},
-    {"ids": ["C91", "C92"], "dimension": "Supported input/display/locale behavior versus unrequested platforms."},
-    {"ids": ["C93", "C94"], "dimension": "Contextual header clarity versus necessary visible explanation."},
-    {"ids": ["C95", "C96"], "dimension": "Row indication matches the interaction versus a valid tree expander."},
-    {"ids": ["C97", "C98"], "dimension": "Relocated panel composition versus intentional task-specific layout."},
-    {"ids": ["C99", "C100"], "dimension": "Shared semantic column policy versus legitimate differences in task and available width."},
-    {"ids": ["C101", "C102"], "dimension": "Count of the action population versus a distinct global total."},
-    {"ids": ["C103", "C104"], "dimension": "Component-space conditional styling versus viewport/environment conditions or no additional condition; layout mechanisms remain orthogonal."},
-    {"ids": ["C105", "C106"], "dimension": "Cancel restores the object a form replaced and whole-form Clear is rejected, versus an inline disclosure that legitimately collapses to its trigger with bounded per-field or confirmed reset actions."}
+    {
+      "ids": [
+        "C01",
+        "C02"
+      ],
+      "dimension": "Parent summarizes descendants versus parent is an independent selected resource."
+    },
+    {
+      "ids": [
+        "C03",
+        "C04"
+      ],
+      "dimension": "Frequent task is buried versus rare action is intentionally secondary and forms are independent."
+    },
+    {
+      "ids": [
+        "C05",
+        "C06"
+      ],
+      "dimension": "Unannounced shared effect versus explicit requested shared edit."
+    },
+    {
+      "ids": [
+        "C07",
+        "C08"
+      ],
+      "dimension": "Noninteractive container feedback versus a deliberately associated label hit area."
+    },
+    {
+      "ids": [
+        "C09",
+        "C10"
+      ],
+      "dimension": "Accidental clipping/layer conflicts versus coherent modality and legitimate text reflow."
+    },
+    {
+      "ids": [
+        "C11",
+        "C12"
+      ],
+      "dimension": "Redundant narration and conflated state versus necessary consequence and distinct state semantics."
+    },
+    {
+      "ids": [
+        "C13",
+        "C14"
+      ],
+      "dimension": "False empty/success and lost input versus truthful state and recoverable submission."
+    },
+    {
+      "ids": [
+        "C15",
+        "C16"
+      ],
+      "dimension": "Unrequested loss of supported behavior versus owner-approved retirement."
+    },
+    {
+      "ids": [
+        "C17",
+        "C18"
+      ],
+      "dimension": "Test actions conceal a silent offscreen transition versus intentional position preservation with visible feedback and an explicit route."
+    },
+    {
+      "ids": [
+        "C19",
+        "C20"
+      ],
+      "dimension": "Cross-screen preservation needs a journey map versus a label-only fix can extend existing focused coverage."
+    },
+    {
+      "ids": [
+        "C21",
+        "C22"
+      ],
+      "dimension": "Weakening tests to accept a regression versus reviewing and updating a baseline for an approved intended change."
+    },
+    {
+      "ids": [
+        "C23",
+        "C24"
+      ],
+      "dimension": "Broad defect-list closure omits original journeys and scale versus an explicitly narrow label change with adequate focused coverage."
+    },
+    {
+      "ids": [
+        "C25",
+        "C26"
+      ],
+      "dimension": "Objective smokes leave layout and hierarchy uninspected versus sufficient checks for a narrow objective accessibility/geometry contract."
+    },
+    {
+      "ids": [
+        "C27",
+        "C28"
+      ],
+      "dimension": "Shared state must be traced to an affected consumer versus an explicitly local presentation state."
+    },
+    {
+      "ids": [
+        "C29",
+        "C30"
+      ],
+      "dimension": "Authorized autonomous design without an existing defect versus proposal-only work with explicit approval and unresolved shared-data policy."
+    },
+    {
+      "ids": [
+        "C31",
+        "C32"
+      ],
+      "dimension": "Intentional familiar presentation versus demonstrated visual/interaction defects."
+    },
+    {
+      "ids": [
+        "C33",
+        "C34"
+      ],
+      "dimension": "Same-context refresh versus a result for a changed target."
+    },
+    {
+      "ids": [
+        "C35",
+        "C36"
+      ],
+      "dimension": "Broken drag availability/geometry versus allowed read-only interactions and intentional compact preview."
+    },
+    {
+      "ids": [
+        "C37",
+        "C38"
+      ],
+      "dimension": "Missing workspace consumers versus distinct tasks and legitimate scrolling."
+    },
+    {
+      "ids": [
+        "C39",
+        "C40"
+      ],
+      "dimension": "Accidental selection/priority mutation versus explicit order, reset and live membership contracts."
+    },
+    {
+      "ids": [
+        "C41",
+        "C42"
+      ],
+      "dimension": "Ritual hook and extra model loops versus reusable exact-candidate mechanical and journey evidence."
+    },
+    {
+      "ids": [
+        "C43",
+        "C44"
+      ],
+      "dimension": "Lost useful reference semantics versus updated product-specific preferences."
+    },
+    {
+      "ids": [
+        "C45",
+        "C46"
+      ],
+      "dimension": "Broken intermediate animation versus intentional stagger and reduced motion."
+    },
+    {
+      "ids": [
+        "C47",
+        "C48"
+      ],
+      "dimension": "Nonmodal task obstruction versus deliberate modal prerequisite."
+    },
+    {
+      "ids": [
+        "C49",
+        "C50"
+      ],
+      "dimension": "Unclear distinct selection semantics versus a sufficient single snapshot control."
+    },
+    {
+      "ids": [
+        "C51",
+        "C52"
+      ],
+      "dimension": "Wasted working height versus necessary chrome and a legitimate short form."
+    },
+    {
+      "ids": [
+        "C53",
+        "C54"
+      ],
+      "dimension": "Expected edge acquisition versus legitimate internal and system insets."
+    },
+    {
+      "ids": [
+        "C55",
+        "C56"
+      ],
+      "dimension": "Reachable calculation and recovery versus true zero and honest partial results."
+    },
+    {
+      "ids": [
+        "C57",
+        "C58"
+      ],
+      "dimension": "Accidental header displacement versus valid navigation and reflow contracts."
+    },
+    {
+      "ids": [
+        "C59",
+        "C60"
+      ],
+      "dimension": "Broken adaptive state transition versus intentional modality and focus fallback."
+    },
+    {
+      "ids": [
+        "C61",
+        "C62"
+      ],
+      "dimension": "Existing continuity mechanism for identity change versus sufficient local CSS."
+    },
+    {
+      "ids": [
+        "C63",
+        "C64"
+      ],
+      "dimension": "Accidental panel-induced displacement versus intentional composition change."
+    },
+    {
+      "ids": [
+        "C65",
+        "C66"
+      ],
+      "dimension": "Unreviewed whole-screen composition versus valid whitespace and scoped repair."
+    },
+    {
+      "ids": [
+        "C67",
+        "C68"
+      ],
+      "dimension": "Broken prerequisite-to-action path versus legitimate authorization restriction."
+    },
+    {
+      "ids": [
+        "C69",
+        "C70"
+      ],
+      "dimension": "Hidden row-opening handler versus a sufficient discoverable dedicated link."
+    },
+    {
+      "ids": [
+        "C71",
+        "C72"
+      ],
+      "dimension": "Transient collapse and identity risk during object switching versus intentional content reflow."
+    },
+    {
+      "ids": [
+        "C73",
+        "C74"
+      ],
+      "dimension": "Input and validation lifecycle versus a genuine confirmation prerequisite."
+    },
+    {
+      "ids": [
+        "C75",
+        "C76"
+      ],
+      "dimension": "Dirty departure versus confirmed autosave and harmless disclosure."
+    },
+    {
+      "ids": [
+        "C77",
+        "C78"
+      ],
+      "dimension": "Mutation outcomes versus permitted independent writes."
+    },
+    {
+      "ids": [
+        "C79",
+        "C80"
+      ],
+      "dimension": "Meaningful accessible feedback versus unnecessary announcements."
+    },
+    {
+      "ids": [
+        "C81",
+        "C82"
+      ],
+      "dimension": "Interactive composite focus versus a sufficient reading table."
+    },
+    {
+      "ids": [
+        "C83",
+        "C84"
+      ],
+      "dimension": "Non-drag pointer equivalence versus native scrolling."
+    },
+    {
+      "ids": [
+        "C85",
+        "C86"
+      ],
+      "dimension": "Usable disclosure versus sufficient optional help."
+    },
+    {
+      "ids": [
+        "C87",
+        "C88"
+      ],
+      "dimension": "Collection context and invalid page versus intentional local state."
+    },
+    {
+      "ids": [
+        "C89",
+        "C90"
+      ],
+      "dimension": "Observed interaction load versus arbitrary optimization."
+    },
+    {
+      "ids": [
+        "C91",
+        "C92"
+      ],
+      "dimension": "Supported input/display/locale behavior versus unrequested platforms."
+    },
+    {
+      "ids": [
+        "C93",
+        "C94"
+      ],
+      "dimension": "Contextual header clarity versus necessary visible explanation."
+    },
+    {
+      "ids": [
+        "C95",
+        "C96"
+      ],
+      "dimension": "Row indication matches the interaction versus a valid tree expander."
+    },
+    {
+      "ids": [
+        "C97",
+        "C98"
+      ],
+      "dimension": "Relocated panel composition versus intentional task-specific layout."
+    },
+    {
+      "ids": [
+        "C99",
+        "C100"
+      ],
+      "dimension": "Shared semantic column policy versus legitimate differences in task and available width."
+    },
+    {
+      "ids": [
+        "C101",
+        "C102"
+      ],
+      "dimension": "Count of the action population versus a distinct global total."
+    },
+    {
+      "ids": [
+        "C103",
+        "C104"
+      ],
+      "dimension": "Component-space conditional styling versus viewport/environment conditions or no additional condition; layout mechanisms remain orthogonal."
+    },
+    {
+      "ids": [
+        "C105",
+        "C106"
+      ],
+      "dimension": "Cancel restores the object a form replaced and whole-form Clear is rejected, versus an inline disclosure that legitimately collapses to its trigger with bounded per-field or confirmed reset actions."
+    },
+    {
+      "ids": [
+        "C107",
+        "C108"
+      ],
+      "dimension": "Broad source-derived transfer completeness versus a deliberately scoped single-state transfer."
+    },
+    {
+      "ids": [
+        "C109",
+        "C110"
+      ],
+      "dimension": "Dynamic capture readiness and materialization limits versus a genuinely static bounded capture."
+    },
+    {
+      "ids": [
+        "C111",
+        "C112"
+      ],
+      "dimension": "Reconciliation with a fitting maintained reusable system versus a justified unique editable composition."
+    },
+    {
+      "ids": [
+        "C113",
+        "C114"
+      ],
+      "dimension": "Over-componentization without a reuse contract versus a shared base with repeated behavior and consumers."
+    },
+    {
+      "ids": [
+        "C115",
+        "C116"
+      ],
+      "dimension": "Consumer-facing library findability and role separation versus a small already-obvious flat catalog."
+    },
+    {
+      "ids": [
+        "C117",
+        "C118"
+      ],
+      "dimension": "Semantic design-system organization versus cosmetic canvas polish; a plain but unambiguous catalog remains valid."
+    },
+    {
+      "ids": [
+        "C119",
+        "C120"
+      ],
+      "dimension": "Resume from current verified artifact state after interruption versus unnecessary checkpoint machinery for an atomic edit."
+    }
   ],
   "cases": [
-    {"id": "C01", "assess": ["Requires mixed/indeterminate summary for known partial selection, including accessible state and deliberate next activation.", "Addresses state-induced shift without banning text reflow and makes the selected composition inspectable/editable.", "Proposes none/some/all and reachability checks rather than glyph presence alone."]},
-    {"id": "C02", "assess": ["Preserves independent row-selection contract; does not force inherited selection or a mixed parent merely because children exist.", "Separates selection from deletion effect and retains explicit child-impact confirmation."]},
-    {"id": "C03", "assess": ["Moves or directly exposes frequent Refresh and contextual repair without redesigning all settings.", "Makes Add's next step perceivable/reachable with appropriate focus or visible feedback; does not count DOM insertion as success."]},
-    {"id": "C04", "assess": ["Allows rare Advanced action and a primary button per independent form.", "Does not demand exposing every secondary action in every row or invent a defect to justify work."]},
-    {"id": "C05", "assess": ["Identifies mismatch between apparent local editor and shared mutation.", "Requires explicit scope or a resolved product choice; does not assume copy/override support or change data semantics unasked.", "Checks intended changed and unchanged consumers and cancel/save."]},
-    {"id": "C06", "assess": ["Rejects silent copying because it contradicts the explicit shared-update request.", "Preserves visible shared scope and checks both consumers; does not label all shared edits unsafe."]},
-    {"id": "C07", "assess": ["Aligns hover with actual targets and distinguishes expansion, selection, close and deletion.", "Tests heading/spacing/control edges and nested propagation, not merely adding keyboard attributes."]},
-    {"id": "C08", "assess": ["Preserves the associated label's large clickable area and matching feedback.", "Does not universalize the static-heading complaint into a ban on interactive labels."]},
-    {"id": "C09", "assess": ["Uses actual primitive positioning and composed layer ownership rather than arbitrary z-index or overflow hiding.", "Addresses width/anchor, clipping, shift, focus, Escape and backdrop as related composed states.", "Does not assert a screenshot or live reproduction occurred."]},
-    {"id": "C10", "assess": ["Allows the coherent confirmation modal and preserves focus/input behavior.", "Rejects clipping-prone universal fixed row height; allows accessible text wrapping without calling all height changes defects."]},
-    {"id": "C11", "assess": ["Removes narration that adds no choice information, aligns action/result terminology and uses recognizable domain language.", "Separates false and failed/unknown status instead of choosing one decoration for both.", "Does not ban all helper text or impose English casing universally."]},
-    {"id": "C12", "assess": ["Retains necessary irreversible-consequence information and distinguishable status semantics.", "Allows an explained not-applicable dash; rejects blanket removal of help and every dash."]},
-    {"id": "C13", "assess": ["Distinguishes read failure from successful emptiness and preserves last-known data or clearly explains unavailability.", "Preserves input through failed submission and separates completed from failed bulk items before retry.", "Tests user recovery and real effects, not only error-toast appearance."]},
-    {"id": "C14", "assess": ["Recognizes distinct empty/filter/refresh/failure states as coherent from supplied facts.", "Allows disabling while the same submission is pending; avoids a universal never-disabled rule and fabricated findings."]},
-    {"id": "C15", "assess": ["Identifies loss of required reachable journeys despite green component tests.", "Recommends tracing/restoring composition and testing saved entry paths before rewriting existing working components.", "Limits conclusion to supplied evidence, without claiming a tested build or current runtime identity."]},
-    {"id": "C16", "assess": ["Respects authorized Graph retirement rather than restoring it by default.", "Preserves Board/export requirements and distinguishes supplied evidence from independently executed acceptance."]},
-    {"id": "C17", "assess": ["Rejects the green tests as proof of the reported transition: DOM visibility is not viewport presence, the second click can auto-scroll, and explicit focus manufactures the asserted focus.", "Derives checks from the supplied move-to-editor contract; asserts relevant viewport and focus immediately after Add, before helper actions can repair them.", "Does not claim an executed reproduction or require a whole-product specification."]},
-    {"id": "C18", "assess": ["Preserves the approved stay-in-place flow instead of forcing focus or scrolling for every append.", "Checks perceivable feedback and the explicit route before using it, then checks application-driven reveal/focus and real Tab reachability.", "Reuses supplied save/cancel coverage without treating its existence as a newly executed pass."]},
-    {"id": "C19", "assess": ["Uses approved retained outcomes and existing entry paths, not only a recording of the incomplete new UI, to define scenario criteria.", "Maps Board, saved context and editor return against existing tests before adding missing composed-journey checks.", "Retains bounded visual/UX judgment and distinguishes unit, browser and actual execution evidence without adding a second stack."]},
-    {"id": "C20", "assess": ["Rejects an exhaustive product specification, new BDD layer or duplicated test setup for a label-only change.", "Updates the affected name expectation and reuses the existing affected save/cancel journey with a bounded label/layout review where needed.", "States that rerunning affected checks is still required; does not claim supplied existing tests passed on the change."]},
-    {"id": "C21", "assess": ["Rejects blanket snapshot refresh, deleted focus assertions or skipped checks as acceptance of a reported regression.", "Keeps the required backdrop and focus outcomes; investigates the responsible implementation/environment against that contract.", "Separates behavior checks from reviewed visual evidence and does not report that tools ran."]},
-    {"id": "C22", "assess": ["Allows a reviewed baseline update for the explicit intended wrapping change; does not restore clipping solely to preserve an old snapshot.", "Retains behavior assertions and proposes rerunning comparisons in the controlled environment.", "Treats visual approval and test facts as supplied evidence, not its own executed acceptance."]},
-    {"id": "C23", "assess": ["Limits the established result to closure of the eight known rows and rejects the systemic completion claim.", "Returns to the original import/edit/conflict outcomes, adds an omission pass, and uses realistic conflict cardinality or interaction-cost evidence.", "Does not demand unrelated whole-product coverage or claim execution."]},
-    {"id": "C24", "assess": ["Accepts the explicitly narrow label acceptance and nearby preserved behavior without a whole-product scenario program.", "Keeps the conclusion scoped to the exact candidate and does not invent visual or migration requirements."]},
-    {"id": "C25", "assess": ["Explains that no-overflow, sequential presence and axe checks do not approve useful width, state hierarchy or clarity.", "Proposes rendered inspection and a bounded preview before the expensive suite; does not make user response a prerequisite unless requested approval or a consequential unresolved preference requires it.", "Distinguishes automated checks, visual inspection and user approval; does not claim to have viewed the candidate."]},
-    {"id": "C26", "assess": ["Accepts objective automated evidence for the published accessible-name, activation and hit-area contract without mandatory subjective approval.", "Does not broaden an unchanged layout into a redesign review or deny that the checks still need exact-candidate identity."]},
-    {"id": "C27", "assess": ["Treats the badge-only test as incomplete because the approved state changes route composition.", "Checks enabled and disabled outcomes at the route consumer and preserves source visibility without inventing deletion semantics."]},
-    {"id": "C28", "assess": ["Preserves the explicitly local, ephemeral presentation contract and rejects unrelated cross-screen tests.", "Uses the affected table behavior and return/reset control as the bounded oracle."]},
-    {"id": "C29", "assess": ["Continues authorized design and implementation without requiring a prior defect or routine layout approval.", "Keeps the agreed Save/Cancel and local persistence contract and completes relevant checks.", "Separates a preview and own visual judgment from actual user approval."]},
-    {"id": "C30", "assess": ["Delivers a concrete proposal and stops before implementation as explicitly requested.", "Leaves shared-versus-local rename as a consequential owner choice, without implementing an invented copy model.", "Does not turn permission to choose ordinary layout into permission to cross data or approval boundaries."]},
-    {"id": "H01", "assess": ["Identifies the missing snapshot-versus-live selection policy and its effect on counts and operations.", "Does not derive selection from the 25 loaded rows or silently choose a backend-supported mode as product intent.", "Proposes a concrete clarification and subsequent filter/membership-change checks."]},
-    {"id": "H02", "assess": ["Distinguishes reversible draft-reference removal from destruction of a shared source.", "Rejects identical destructive labeling/confirmation for both while keeping remove/close meaning clear.", "Checks draft cancel/save and source-impact paths without broadening a clarity fix into new deletion policy."]},
-    {"id": "C31", "assess": ["Не требовать смены шрифта или новизны только из-за повторения в других проектах.", "Оценивать по задаче и наблюдаемой ясности, не утверждая собственный рендер."]},
-    {"id": "C32", "assess": ["Исправить доказанные проблемы действия, содержимого и состояний в разрешённом масштабе.", "Отсутствие стилевых запретов не оправдывает игнорирование реального дефекта и не требует лишнего согласования."]},
-    {"id": "C33", "assess": ["Finds producer/consumer contradiction and checks visible value while response is held pending.", "Preserves truthful refresh feedback; does not merely retain store data or wait for settlement."]},
-    {"id": "C34", "assess": ["Rejects unlabeled old-context result and preserves the current-format contract.", "Allows initial/new-context loading and checks a late A response cannot replace B; does not ban retaining keyed cache."]},
-    {"id": "C35", "assess": ["Checks actual forbidden gesture and unchanged order/effect, plus permitted drag.", "Inspects active detached preview geometry and fixes the responsible interaction/size owner, not only button attributes."]},
-    {"id": "C36", "assess": ["Preserves useful read-only interactions and deliberately compact preview.", "Does not impose full-width ghosts or claim another executed browser run."]},
-    {"id": "C37", "assess": ["Maps shared styles/components to edit and other actual consumers, including relevant entry/reload paths.", "Separates scroll ownership and useful wide layout from no-overflow; checks actual composed pages, not only the table.", "Does not mandate mobile product, arbitrary width or global overflow hiding."]},
-    {"id": "C38", "assess": ["Preserves legitimate document and overflowing-navigation scroll and distinct tasks.", "Scopes repair to composed tooltip/owner; does not impose app-wide shell migration or zero scroll."]},
-    {"id": "C39", "assess": ["Adds scoped matches without dropping B and keeps visible set/mixed state coherent.", "Separates presentation sort from execution order; does not replace snapshot selection with live category membership."]},
-    {"id": "C40", "assess": ["Respects intentional selected-first view, explicit reset and live membership.", "Rejects universal stable ordering or silent conversion to snapshots while preserving execution priority."]},
-    {"id": "C41", "assess": ["Rejects ritual hook as behavior evidence and differentiates existing tests from executed results.", "Uses bounded actual temporal acceptance and existing tooling; does not add automatic reviewers or claim zero quota cost."]},
-    {"id": "C42", "assess": ["Reuses valid matching evidence instead of duplicating the same pass.", "Keeps mechanical and journey/visual acceptance distinct; invalidated coverage would require relevant rerun."]},
-    {"id": "C43", "assess": ["Preserves useful encoding and supported actions while removing fictional functionality.", "Compares composition and actual controls under comparable conditions without demanding pixel identity."]},
-    {"id": "C44", "assess": ["Applies updated preference to this product and subsequent acceptance, not old reference literally.", "Rejects retroactive blame and universal panel ban; preserves supported outcomes."]},
-    {"id": "C45", "assess": ["Rejects endpoint-only/disabled-animation evidence for normal transition quality.", "Inspects intermediate text wrapping, mount/layout/portal timing and parent-child alignment; checks normal and reduced motion separately.", "Does not conceal the defect by duration changes or mandate one easing/duration."]},
-    {"id": "C46", "assess": ["Preserves intentional staged reveal and instant reduced-motion behavior.", "Does not invent a visual defect or claim a new recording from supplied facts."]},
-    {"id": "C47", "assess": ["Requires parent completion while the supporting panel remains open, with pointer/keyboard access and correct committed object.", "Rejects helper dismissal and panel-local Add as proof of Save; chooses reflow/action placement without arbitrary z-index or lost draft."]},
-    {"id": "C48", "assess": ["Preserves deliberate modal prerequisite and return path.", "Does not generalize concurrent nonmodal completion into always-interactive background."]},
-    {"id": "C49", "assess": ["Distinguishes population/lifetime/effect and treats matching initial counts as insufficient redundancy evidence.", "Makes supported choice understandable or omits unnecessary mode according to product intent, without silent data-semantic conversion."]},
-    {"id": "C50", "assess": ["Keeps the sufficient existing control and does not expose unrequested live mode.", "Preserves snapshot semantics and avoids extra explanatory/control clutter."]},
-    {"id": "C51", "assess": ["Checks useful content/action area, redundant chrome, containing blocks and wrapping with panel open.", "Prefers task-based space allocation over universal equal heights, full-viewport panels or arbitrary density ratios."]},
-    {"id": "C52", "assess": ["Preserves necessary status/identity and valid short form.", "Rejects unrelated density redesign and forced matching heights."]},
-    {"id": "C53", "assess": ["Checks actual expected edge targeting and adjacent action isolation, not only a center click.", "Considers window/input context, stable placement and keyboard access; does not equate minimum size with comfort."]},
-    {"id": "C54", "assess": ["Preserves legitimate internal and safe-area insets; distinguishes a panel boundary from a pointer-stopping screen edge.", "Rejects universal zero padding and mixed platform units without inventing a defect."]},
-    {"id": "C55", "assess": ["Requires the actual eligibility/calculation/consumer path to produce the independently known result.", "Checks genuinely insufficient input then recovery through the supported action without reload or injected final answer; diagnoses first broken boundary."]},
-    {"id": "C56", "assess": ["Preserves true zero and honest permitted partial coverage; does not fabricate results or recovery actions.", "Separates value, coverage, freshness and request state without inventing polling or external effects."]},
-    {"id": "C57", "assess": ["Separates path/title/status/actions and checks actual composed geometry including loading and long paths.", "Uses appropriate allocation/disclosure, preserves accessible ancestors and useful work area; rejects illegible text and universal fixed height."]},
-    {"id": "C58", "assess": ["Preserves flat-page and current-link contracts and legitimate reflow.", "Treats public layout conventions as conditional patterns, not authority to rewrite the product."]},
-    {"id": "C59", "assess": ["Exercises the mounted inline-overlay-inline transition and preserves draft/selection and coherent modality/focus.", "Rejects separate cold-start states as acceptance of adaptation; verifies parent completion where intended."]},
-    {"id": "C60", "assess": ["Preserves intentional modal prerequisite and logical focus fallback when trigger no longer exists.", "Does not add unrequested adaptive modes or force focus to a removed element."]},
-    {"id": "C61", "assess": ["Checks/reuses the fitting existing continuity mechanism before a new dependency and verifies runtime constraints.", "Observes intermediate relationship, interruption, final state and preserved input/focus; does not accept API name or endpoints as proof."]},
-    {"id": "C62", "assess": ["Retains the sufficient CSS mechanism and scopes the label change.", "Rejects mandatory View Transitions, a new dependency or invented animation defect."]},
-    {"id": "C63", "assess": ["Identifies the change of outer width/alignment policy at the shared workspace owner and covers editor and library.", "Checks agreed anchors before/during/after open-close, useful remaining widths and compact adaptation; endpoint fit or smooth animation alone is insufficient.", "Suggests a fitting common-container allocation without universal dimensions or a new dependency."]},
-    {"id": "C64", "assess": ["Preserves intentional mode change, responsive reflow and usable whitespace.", "Rejects universal frozen positions or one fixed centered width; checks continuity and task usability under the agreed behavior."]},
-    {"id": "C65", "assess": ["Separates working components from whole-screen visual acceptance and identifies the supplied composition problems without claiming a new browser inspection.", "Relates space allocation, primary-next-action hierarchy and help placement to the task.", "Checks prerequisite meaning and reachable result path rather than inferring a broken calculation from a screenshot or treating unexplained dashes as sufficient."]},
-    {"id": "C66", "assess": ["Keeps the scoped tooltip repair and valid approved composition, whitespace and explained unavailable state.", "Rejects mandatory full-width layouts, extra helper clutter or a fabricated calculation failure."]},
-    {"id": "C67", "assess": ["Exercises the supported prerequisite-to-enabled transition while mounted, then ordinary activation and the intended effect.", "Rejects a disabled-only assertion, injected enabled prop or direct handler as composed-path proof; checks recovery from pending when supported."]},
-    {"id": "C68", "assess": ["Preserves the legitimate authorization boundary and truthful reason.", "Does not invent self-service permission changes or require every action to become enabled for every user."]},
-    {"id": "C69", "assess": ["Inspects the resting indication and proposes a discoverable accessible trigger before verifying pointer/keyboard activation.", "Separates disclosure from selection, dragging and deletion; known-coordinate success or hover alone does not prove discovery."]},
-    {"id": "C70", "assess": ["Retains the sufficient visible keyboard-operable link and independent row actions.", "Rejects mandatory whole-row clicks or universal chevrons, preserving copying and selection."]},
-    {"id": "C71", "assess": ["Tests object replacement inside the mounted panel with controlled pending/failure and late responses, not merely panel opening or final snapshots.", "Checks intermediate geometry plus identity and action ownership through A-B-A; preserves appropriate anchors without presenting A as B.", "Rejects delay-only masking or arbitrary fixed heights as universal solutions."]},
-    {"id": "C72", "assess": ["Preserves intentional content reflow and the agreed scroll behavior while keeping truthful loading and object identity.", "Rejects blanket fixed height, retaining old text as new or an invented defect from differing final content sizes."]},
-    {"id": "C73", "assess": ["Checks paste/autofill/composition and corrected validation through actual submit, not injected valid props.", "Preserves multiline input and uncommitted composition; reconciles client/server errors without an always-enabled rule."]},
-    {"id": "C74", "assess": ["Preserves the genuine prerequisite and associated label/reason.", "Does not impose always-enabled Submit, new input modes or premature validation."]},
-    {"id": "C75", "assess": ["Uses the existing draft policy across selection, Back and return, checking both persisted and draft values.", "Handles pending old save without overwriting B; does not equate a Cancel-button test with all exits."]},
-    {"id": "C76", "assess": ["Does not add discard dialogs to saved navigation or harmless disclosure.", "Distinguishes this supplied confirmed path from untested pending-save behavior."]},
-    {"id": "C77", "assess": ["Counts actual effects under repeated activation, reconciles affected optimistic changes and protects newer work.", "Treats lost response as unknown outcome and does not invent retry guarantees or backend infrastructure."]},
-    {"id": "C78", "assess": ["Preserves scoped concurrency and supported retry identity.", "Does not impose page-wide locking, ban all retries or silently merge conflicting versions."]},
-    {"id": "C79", "assess": ["Provides contextual status and discoverable restriction reason without unnecessary focus stealing.", "Separates semantic inspection from executed assistive behavior; text existence or aria-live alone is insufficient."]},
-    {"id": "C80", "assess": ["Preserves sufficient contextual feedback and restrained announcements.", "Does not add live regions per cell or force every disabled action into Tab order."]},
-    {"id": "C81", "assess": ["Checks the chosen composite keyboard model and logical record focus across sorting/recycling.", "Distinguishes focus from activation and considers manual tabs under latency; role presence is not implementation."]},
-    {"id": "C82", "assess": ["Retains the sufficient table and native controls.", "Rejects unjustified grid conversion and a universal focus-select policy."]},
-    {"id": "C83", "assess": ["Requires a fitting click/tap path without dragging as well as keyboard access.", "Exercises actual alternate actions and outcome/availability, not just the helper or shortcut."]},
-    {"id": "C84", "assess": ["Does not add redundant custom move controls for native scrolling.", "Keeps scope limited and does not infer a custom dragging defect."]},
-    {"id": "C85", "assess": ["Inspects rendered content, spacing, contrast and scanning as well as the anchor.", "Provides appropriate interactive disclosure and hover/focus/dismissal behavior; position or theme tokens alone cannot pass."]},
-    {"id": "C86", "assess": ["Retains the sufficient optional tooltip without mandatory persistent prose or a new dialog.", "Does not force every short value into a multirow list."]},
-    {"id": "C87", "assess": ["Reconciles the invalid page and checks filter-item-return plus direct entry where supported.", "Aligns control placement with actual population and preserves agreed state without serializing everything."]},
-    {"id": "C88", "assess": ["Preserves explicit selection reset and appropriate URL exclusions.", "Rejects universal hidden selection persistence and all-state URL rules."]},
-    {"id": "C89", "assess": ["Checks and profiles relevant interaction at supported cardinality, then measures the affected path again.", "Preserves identity/focus/selection while optimizing; does not equate network pending or small fixtures with responsiveness."]},
-    {"id": "C90", "assess": ["Keeps the sufficient small-table implementation and scoped style task.", "Rejects arbitrary row thresholds, new dependencies and universal debounce."]},
-    {"id": "C91", "assess": ["Separates input capability from width and checks actual non-hover completion.", "Checks state/focus beyond color and preserves date meaning under the declared locale/time-zone contract."]},
-    {"id": "C92", "assess": ["Preserves the supported environment and local scope.", "Does not introduce platforms, themes or localization solely to satisfy a broad checklist."]},
-    {"id": "C93", "assess": ["Reviews the whole group, removes redundant narration and honors scoped icon/placement preferences with accessible names.", "Preserves pending/error/freshness and distinguishable navigation versus mutation; avoids a universal icon-only policy."]},
-    {"id": "C94", "assess": ["Preserves necessary decision/recovery text and scope.", "Does not hide consequential meaning or remove live failure feedback to reduce word count."]},
-    {"id": "C95", "assess": ["Aligns indicator with the real details action and requested placement while preserving nested-action isolation.", "Checks the resting row and normal pointer/keyboard paths; does not introduce a second action or assume universal placement."]},
-    {"id": "C96", "assess": ["Preserves the legitimate leading tree expander and separate detail action.", "Rejects moving every chevron to the right or making every row a details trigger."]},
-    {"id": "C97", "assess": ["Recomposes internal labels/values/help/actions and checks reading order, grouping and completion in both mounted modes.", "Distinguishes useful internal layout from endpoint bounds or state retention; avoids fixed universal heights."]},
-    {"id": "C98", "assess": ["Preserves useful mode-specific composition.", "Does not demand identical alignment in all modes or invent a defect solely from layout differences."]},
-    {"id": "C99", "assess": ["Maps semantic columns and their space priorities, allowing for extra controls and numeric fields.", "Compares representative values at comparable usable widths and panel states; checks scanning/truncation and boundaries, not identical percentages."]},
-    {"id": "C100", "assess": ["Preserves legitimate task and width differences and the required fields.", "Rejects frozen widths, hidden data or equal percentages as proof of consistency; no defect is established by different final widths alone."]},
-    {"id": "C101", "assess": ["Combines count/action only with clear action semantics and an accessible name, preserving configuration as a separate effect.", "Checks counted versus affected objects through scope changes and unknown/failure states; badge presence or smaller header is insufficient."]},
-    {"id": "C102", "assess": ["Keeps the distinct global total and selected action instead of implying that all 120 will be refreshed.", "Does not mandate merging nearby metrics, icons or removal of necessary labels/status."]},
-    {"id": "C103", "assess": ["Uses container size as the local condition while retaining an appropriate layout mechanism such as Grid; does not frame queries and Grid/Flex as substitutes.", "Chooses an appropriate query ancestor and checks containment sizing/support; exercises the mounted form at fixed viewport with changing allocated width, real content, focus/input and reachable actions.", "Rejects viewport resize or @container presence alone as proof; does not require a new split-pane feature or JavaScript sizing."]},
-    {"id": "C104", "assess": ["Separates layout mechanism from conditional styling, preserving the existing Flex layout and legitimate viewport/environment media queries.", "Explains that no extra condition is needed for the supplied automatically wrapping layout, without claiming Flex replaces media/container queries.", "Does not infer hover or reduced-motion from container width or impose a global query migration."]},
-    {"id": "C105", "assess": ["Requires Cancel to discard the draft and restore the replaced connection with focus on it, rejecting an empty or collapsed work area as the landing state.", "Rejects the whole-form Clear as a substitute for Cancel and does not add a confirmation for discarding an empty draft.", "Keeps the no-connections form without Cancel because nothing exists to return to, and proposes a check that fails on both the collapse and the Clear variant: replaced object visible and focused, draft gone on reopen, no write."]},
-    {"id": "C106", "assess": ["Accepts collapsing the inline add row back to its trigger because the list remains the visible work area and focus returns to the trigger.", "Accepts the per-field search clear and the owner's confirmed restore-defaults as bounded actions, not a whole-form reset.", "Does not demand a separate editor surface, a return-to-object rule or removal of the confirmation where no object was displaced."]}
+    {
+      "id": "C01",
+      "assess": [
+        "Requires mixed/indeterminate summary for known partial selection, including accessible state and deliberate next activation.",
+        "Addresses state-induced shift without banning text reflow and makes the selected composition inspectable/editable.",
+        "Proposes none/some/all and reachability checks rather than glyph presence alone."
+      ]
+    },
+    {
+      "id": "C02",
+      "assess": [
+        "Preserves independent row-selection contract; does not force inherited selection or a mixed parent merely because children exist.",
+        "Separates selection from deletion effect and retains explicit child-impact confirmation."
+      ]
+    },
+    {
+      "id": "C03",
+      "assess": [
+        "Moves or directly exposes frequent Refresh and contextual repair without redesigning all settings.",
+        "Makes Add's next step perceivable/reachable with appropriate focus or visible feedback; does not count DOM insertion as success."
+      ]
+    },
+    {
+      "id": "C04",
+      "assess": [
+        "Allows rare Advanced action and a primary button per independent form.",
+        "Does not demand exposing every secondary action in every row or invent a defect to justify work."
+      ]
+    },
+    {
+      "id": "C05",
+      "assess": [
+        "Identifies mismatch between apparent local editor and shared mutation.",
+        "Requires explicit scope or a resolved product choice; does not assume copy/override support or change data semantics unasked.",
+        "Checks intended changed and unchanged consumers and cancel/save."
+      ]
+    },
+    {
+      "id": "C06",
+      "assess": [
+        "Rejects silent copying because it contradicts the explicit shared-update request.",
+        "Preserves visible shared scope and checks both consumers; does not label all shared edits unsafe."
+      ]
+    },
+    {
+      "id": "C07",
+      "assess": [
+        "Aligns hover with actual targets and distinguishes expansion, selection, close and deletion.",
+        "Tests heading/spacing/control edges and nested propagation, not merely adding keyboard attributes."
+      ]
+    },
+    {
+      "id": "C08",
+      "assess": [
+        "Preserves the associated label's large clickable area and matching feedback.",
+        "Does not universalize the static-heading complaint into a ban on interactive labels."
+      ]
+    },
+    {
+      "id": "C09",
+      "assess": [
+        "Uses actual primitive positioning and composed layer ownership rather than arbitrary z-index or overflow hiding.",
+        "Addresses width/anchor, clipping, shift, focus, Escape and backdrop as related composed states.",
+        "Does not assert a screenshot or live reproduction occurred."
+      ]
+    },
+    {
+      "id": "C10",
+      "assess": [
+        "Allows the coherent confirmation modal and preserves focus/input behavior.",
+        "Rejects clipping-prone universal fixed row height; allows accessible text wrapping without calling all height changes defects."
+      ]
+    },
+    {
+      "id": "C11",
+      "assess": [
+        "Removes narration that adds no choice information, aligns action/result terminology and uses recognizable domain language.",
+        "Separates false and failed/unknown status instead of choosing one decoration for both.",
+        "Does not ban all helper text or impose English casing universally."
+      ]
+    },
+    {
+      "id": "C12",
+      "assess": [
+        "Retains necessary irreversible-consequence information and distinguishable status semantics.",
+        "Allows an explained not-applicable dash; rejects blanket removal of help and every dash."
+      ]
+    },
+    {
+      "id": "C13",
+      "assess": [
+        "Distinguishes read failure from successful emptiness and preserves last-known data or clearly explains unavailability.",
+        "Preserves input through failed submission and separates completed from failed bulk items before retry.",
+        "Tests user recovery and real effects, not only error-toast appearance."
+      ]
+    },
+    {
+      "id": "C14",
+      "assess": [
+        "Recognizes distinct empty/filter/refresh/failure states as coherent from supplied facts.",
+        "Allows disabling while the same submission is pending; avoids a universal never-disabled rule and fabricated findings."
+      ]
+    },
+    {
+      "id": "C15",
+      "assess": [
+        "Identifies loss of required reachable journeys despite green component tests.",
+        "Recommends tracing/restoring composition and testing saved entry paths before rewriting existing working components.",
+        "Limits conclusion to supplied evidence, without claiming a tested build or current runtime identity."
+      ]
+    },
+    {
+      "id": "C16",
+      "assess": [
+        "Respects authorized Graph retirement rather than restoring it by default.",
+        "Preserves Board/export requirements and distinguishes supplied evidence from independently executed acceptance."
+      ]
+    },
+    {
+      "id": "C17",
+      "assess": [
+        "Rejects the green tests as proof of the reported transition: DOM visibility is not viewport presence, the second click can auto-scroll, and explicit focus manufactures the asserted focus.",
+        "Derives checks from the supplied move-to-editor contract; asserts relevant viewport and focus immediately after Add, before helper actions can repair them.",
+        "Does not claim an executed reproduction or require a whole-product specification."
+      ]
+    },
+    {
+      "id": "C18",
+      "assess": [
+        "Preserves the approved stay-in-place flow instead of forcing focus or scrolling for every append.",
+        "Checks perceivable feedback and the explicit route before using it, then checks application-driven reveal/focus and real Tab reachability.",
+        "Reuses supplied save/cancel coverage without treating its existence as a newly executed pass."
+      ]
+    },
+    {
+      "id": "C19",
+      "assess": [
+        "Uses approved retained outcomes and existing entry paths, not only a recording of the incomplete new UI, to define scenario criteria.",
+        "Maps Board, saved context and editor return against existing tests before adding missing composed-journey checks.",
+        "Retains bounded visual/UX judgment and distinguishes unit, browser and actual execution evidence without adding a second stack."
+      ]
+    },
+    {
+      "id": "C20",
+      "assess": [
+        "Rejects an exhaustive product specification, new BDD layer or duplicated test setup for a label-only change.",
+        "Updates the affected name expectation and reuses the existing affected save/cancel journey with a bounded label/layout review where needed.",
+        "States that rerunning affected checks is still required; does not claim supplied existing tests passed on the change."
+      ]
+    },
+    {
+      "id": "C21",
+      "assess": [
+        "Rejects blanket snapshot refresh, deleted focus assertions or skipped checks as acceptance of a reported regression.",
+        "Keeps the required backdrop and focus outcomes; investigates the responsible implementation/environment against that contract.",
+        "Separates behavior checks from reviewed visual evidence and does not report that tools ran."
+      ]
+    },
+    {
+      "id": "C22",
+      "assess": [
+        "Allows a reviewed baseline update for the explicit intended wrapping change; does not restore clipping solely to preserve an old snapshot.",
+        "Retains behavior assertions and proposes rerunning comparisons in the controlled environment.",
+        "Treats visual approval and test facts as supplied evidence, not its own executed acceptance."
+      ]
+    },
+    {
+      "id": "C23",
+      "assess": [
+        "Limits the established result to closure of the eight known rows and rejects the systemic completion claim.",
+        "Returns to the original import/edit/conflict outcomes, adds an omission pass, and uses realistic conflict cardinality or interaction-cost evidence.",
+        "Does not demand unrelated whole-product coverage or claim execution."
+      ]
+    },
+    {
+      "id": "C24",
+      "assess": [
+        "Accepts the explicitly narrow label acceptance and nearby preserved behavior without a whole-product scenario program.",
+        "Keeps the conclusion scoped to the exact candidate and does not invent visual or migration requirements."
+      ]
+    },
+    {
+      "id": "C25",
+      "assess": [
+        "Explains that no-overflow, sequential presence and axe checks do not approve useful width, state hierarchy or clarity.",
+        "Proposes rendered inspection and a bounded preview before the expensive suite; does not make user response a prerequisite unless requested approval or a consequential unresolved preference requires it.",
+        "Distinguishes automated checks, visual inspection and user approval; does not claim to have viewed the candidate."
+      ]
+    },
+    {
+      "id": "C26",
+      "assess": [
+        "Accepts objective automated evidence for the published accessible-name, activation and hit-area contract without mandatory subjective approval.",
+        "Does not broaden an unchanged layout into a redesign review or deny that the checks still need exact-candidate identity."
+      ]
+    },
+    {
+      "id": "C27",
+      "assess": [
+        "Treats the badge-only test as incomplete because the approved state changes route composition.",
+        "Checks enabled and disabled outcomes at the route consumer and preserves source visibility without inventing deletion semantics."
+      ]
+    },
+    {
+      "id": "C28",
+      "assess": [
+        "Preserves the explicitly local, ephemeral presentation contract and rejects unrelated cross-screen tests.",
+        "Uses the affected table behavior and return/reset control as the bounded oracle."
+      ]
+    },
+    {
+      "id": "C29",
+      "assess": [
+        "Continues authorized design and implementation without requiring a prior defect or routine layout approval.",
+        "Keeps the agreed Save/Cancel and local persistence contract and completes relevant checks.",
+        "Separates a preview and own visual judgment from actual user approval."
+      ]
+    },
+    {
+      "id": "C30",
+      "assess": [
+        "Delivers a concrete proposal and stops before implementation as explicitly requested.",
+        "Leaves shared-versus-local rename as a consequential owner choice, without implementing an invented copy model.",
+        "Does not turn permission to choose ordinary layout into permission to cross data or approval boundaries."
+      ]
+    },
+    {
+      "id": "H01",
+      "assess": [
+        "Identifies the missing snapshot-versus-live selection policy and its effect on counts and operations.",
+        "Does not derive selection from the 25 loaded rows or silently choose a backend-supported mode as product intent.",
+        "Proposes a concrete clarification and subsequent filter/membership-change checks."
+      ]
+    },
+    {
+      "id": "H02",
+      "assess": [
+        "Distinguishes reversible draft-reference removal from destruction of a shared source.",
+        "Rejects identical destructive labeling/confirmation for both while keeping remove/close meaning clear.",
+        "Checks draft cancel/save and source-impact paths without broadening a clarity fix into new deletion policy."
+      ]
+    },
+    {
+      "id": "C31",
+      "assess": [
+        "Не требовать смены шрифта или новизны только из-за повторения в других проектах.",
+        "Оценивать по задаче и наблюдаемой ясности, не утверждая собственный рендер."
+      ]
+    },
+    {
+      "id": "C32",
+      "assess": [
+        "Исправить доказанные проблемы действия, содержимого и состояний в разрешённом масштабе.",
+        "Отсутствие стилевых запретов не оправдывает игнорирование реального дефекта и не требует лишнего согласования."
+      ]
+    },
+    {
+      "id": "C33",
+      "assess": [
+        "Finds producer/consumer contradiction and checks visible value while response is held pending.",
+        "Preserves truthful refresh feedback; does not merely retain store data or wait for settlement."
+      ]
+    },
+    {
+      "id": "C34",
+      "assess": [
+        "Rejects unlabeled old-context result and preserves the current-format contract.",
+        "Allows initial/new-context loading and checks a late A response cannot replace B; does not ban retaining keyed cache."
+      ]
+    },
+    {
+      "id": "C35",
+      "assess": [
+        "Checks actual forbidden gesture and unchanged order/effect, plus permitted drag.",
+        "Inspects active detached preview geometry and fixes the responsible interaction/size owner, not only button attributes."
+      ]
+    },
+    {
+      "id": "C36",
+      "assess": [
+        "Preserves useful read-only interactions and deliberately compact preview.",
+        "Does not impose full-width ghosts or claim another executed browser run."
+      ]
+    },
+    {
+      "id": "C37",
+      "assess": [
+        "Maps shared styles/components to edit and other actual consumers, including relevant entry/reload paths.",
+        "Separates scroll ownership and useful wide layout from no-overflow; checks actual composed pages, not only the table.",
+        "Does not mandate mobile product, arbitrary width or global overflow hiding."
+      ]
+    },
+    {
+      "id": "C38",
+      "assess": [
+        "Preserves legitimate document and overflowing-navigation scroll and distinct tasks.",
+        "Scopes repair to composed tooltip/owner; does not impose app-wide shell migration or zero scroll."
+      ]
+    },
+    {
+      "id": "C39",
+      "assess": [
+        "Adds scoped matches without dropping B and keeps visible set/mixed state coherent.",
+        "Separates presentation sort from execution order; does not replace snapshot selection with live category membership."
+      ]
+    },
+    {
+      "id": "C40",
+      "assess": [
+        "Respects intentional selected-first view, explicit reset and live membership.",
+        "Rejects universal stable ordering or silent conversion to snapshots while preserving execution priority."
+      ]
+    },
+    {
+      "id": "C41",
+      "assess": [
+        "Rejects ritual hook as behavior evidence and differentiates existing tests from executed results.",
+        "Uses bounded actual temporal acceptance and existing tooling; does not add automatic reviewers or claim zero quota cost."
+      ]
+    },
+    {
+      "id": "C42",
+      "assess": [
+        "Reuses valid matching evidence instead of duplicating the same pass.",
+        "Keeps mechanical and journey/visual acceptance distinct; invalidated coverage would require relevant rerun."
+      ]
+    },
+    {
+      "id": "C43",
+      "assess": [
+        "Preserves useful encoding and supported actions while removing fictional functionality.",
+        "Compares composition and actual controls under comparable conditions without demanding pixel identity."
+      ]
+    },
+    {
+      "id": "C44",
+      "assess": [
+        "Applies updated preference to this product and subsequent acceptance, not old reference literally.",
+        "Rejects retroactive blame and universal panel ban; preserves supported outcomes."
+      ]
+    },
+    {
+      "id": "C45",
+      "assess": [
+        "Rejects endpoint-only/disabled-animation evidence for normal transition quality.",
+        "Inspects intermediate text wrapping, mount/layout/portal timing and parent-child alignment; checks normal and reduced motion separately.",
+        "Does not conceal the defect by duration changes or mandate one easing/duration."
+      ]
+    },
+    {
+      "id": "C46",
+      "assess": [
+        "Preserves intentional staged reveal and instant reduced-motion behavior.",
+        "Does not invent a visual defect or claim a new recording from supplied facts."
+      ]
+    },
+    {
+      "id": "C47",
+      "assess": [
+        "Requires parent completion while the supporting panel remains open, with pointer/keyboard access and correct committed object.",
+        "Rejects helper dismissal and panel-local Add as proof of Save; chooses reflow/action placement without arbitrary z-index or lost draft."
+      ]
+    },
+    {
+      "id": "C48",
+      "assess": [
+        "Preserves deliberate modal prerequisite and return path.",
+        "Does not generalize concurrent nonmodal completion into always-interactive background."
+      ]
+    },
+    {
+      "id": "C49",
+      "assess": [
+        "Distinguishes population/lifetime/effect and treats matching initial counts as insufficient redundancy evidence.",
+        "Makes supported choice understandable or omits unnecessary mode according to product intent, without silent data-semantic conversion."
+      ]
+    },
+    {
+      "id": "C50",
+      "assess": [
+        "Keeps the sufficient existing control and does not expose unrequested live mode.",
+        "Preserves snapshot semantics and avoids extra explanatory/control clutter."
+      ]
+    },
+    {
+      "id": "C51",
+      "assess": [
+        "Checks useful content/action area, redundant chrome, containing blocks and wrapping with panel open.",
+        "Prefers task-based space allocation over universal equal heights, full-viewport panels or arbitrary density ratios."
+      ]
+    },
+    {
+      "id": "C52",
+      "assess": [
+        "Preserves necessary status/identity and valid short form.",
+        "Rejects unrelated density redesign and forced matching heights."
+      ]
+    },
+    {
+      "id": "C53",
+      "assess": [
+        "Checks actual expected edge targeting and adjacent action isolation, not only a center click.",
+        "Considers window/input context, stable placement and keyboard access; does not equate minimum size with comfort."
+      ]
+    },
+    {
+      "id": "C54",
+      "assess": [
+        "Preserves legitimate internal and safe-area insets; distinguishes a panel boundary from a pointer-stopping screen edge.",
+        "Rejects universal zero padding and mixed platform units without inventing a defect."
+      ]
+    },
+    {
+      "id": "C55",
+      "assess": [
+        "Requires the actual eligibility/calculation/consumer path to produce the independently known result.",
+        "Checks genuinely insufficient input then recovery through the supported action without reload or injected final answer; diagnoses first broken boundary."
+      ]
+    },
+    {
+      "id": "C56",
+      "assess": [
+        "Preserves true zero and honest permitted partial coverage; does not fabricate results or recovery actions.",
+        "Separates value, coverage, freshness and request state without inventing polling or external effects."
+      ]
+    },
+    {
+      "id": "C57",
+      "assess": [
+        "Separates path/title/status/actions and checks actual composed geometry including loading and long paths.",
+        "Uses appropriate allocation/disclosure, preserves accessible ancestors and useful work area; rejects illegible text and universal fixed height."
+      ]
+    },
+    {
+      "id": "C58",
+      "assess": [
+        "Preserves flat-page and current-link contracts and legitimate reflow.",
+        "Treats public layout conventions as conditional patterns, not authority to rewrite the product."
+      ]
+    },
+    {
+      "id": "C59",
+      "assess": [
+        "Exercises the mounted inline-overlay-inline transition and preserves draft/selection and coherent modality/focus.",
+        "Rejects separate cold-start states as acceptance of adaptation; verifies parent completion where intended."
+      ]
+    },
+    {
+      "id": "C60",
+      "assess": [
+        "Preserves intentional modal prerequisite and logical focus fallback when trigger no longer exists.",
+        "Does not add unrequested adaptive modes or force focus to a removed element."
+      ]
+    },
+    {
+      "id": "C61",
+      "assess": [
+        "Checks/reuses the fitting existing continuity mechanism before a new dependency and verifies runtime constraints.",
+        "Observes intermediate relationship, interruption, final state and preserved input/focus; does not accept API name or endpoints as proof."
+      ]
+    },
+    {
+      "id": "C62",
+      "assess": [
+        "Retains the sufficient CSS mechanism and scopes the label change.",
+        "Rejects mandatory View Transitions, a new dependency or invented animation defect."
+      ]
+    },
+    {
+      "id": "C63",
+      "assess": [
+        "Identifies the change of outer width/alignment policy at the shared workspace owner and covers editor and library.",
+        "Checks agreed anchors before/during/after open-close, useful remaining widths and compact adaptation; endpoint fit or smooth animation alone is insufficient.",
+        "Suggests a fitting common-container allocation without universal dimensions or a new dependency."
+      ]
+    },
+    {
+      "id": "C64",
+      "assess": [
+        "Preserves intentional mode change, responsive reflow and usable whitespace.",
+        "Rejects universal frozen positions or one fixed centered width; checks continuity and task usability under the agreed behavior."
+      ]
+    },
+    {
+      "id": "C65",
+      "assess": [
+        "Separates working components from whole-screen visual acceptance and identifies the supplied composition problems without claiming a new browser inspection.",
+        "Relates space allocation, primary-next-action hierarchy and help placement to the task.",
+        "Checks prerequisite meaning and reachable result path rather than inferring a broken calculation from a screenshot or treating unexplained dashes as sufficient."
+      ]
+    },
+    {
+      "id": "C66",
+      "assess": [
+        "Keeps the scoped tooltip repair and valid approved composition, whitespace and explained unavailable state.",
+        "Rejects mandatory full-width layouts, extra helper clutter or a fabricated calculation failure."
+      ]
+    },
+    {
+      "id": "C67",
+      "assess": [
+        "Exercises the supported prerequisite-to-enabled transition while mounted, then ordinary activation and the intended effect.",
+        "Rejects a disabled-only assertion, injected enabled prop or direct handler as composed-path proof; checks recovery from pending when supported."
+      ]
+    },
+    {
+      "id": "C68",
+      "assess": [
+        "Preserves the legitimate authorization boundary and truthful reason.",
+        "Does not invent self-service permission changes or require every action to become enabled for every user."
+      ]
+    },
+    {
+      "id": "C69",
+      "assess": [
+        "Inspects the resting indication and proposes a discoverable accessible trigger before verifying pointer/keyboard activation.",
+        "Separates disclosure from selection, dragging and deletion; known-coordinate success or hover alone does not prove discovery."
+      ]
+    },
+    {
+      "id": "C70",
+      "assess": [
+        "Retains the sufficient visible keyboard-operable link and independent row actions.",
+        "Rejects mandatory whole-row clicks or universal chevrons, preserving copying and selection."
+      ]
+    },
+    {
+      "id": "C71",
+      "assess": [
+        "Tests object replacement inside the mounted panel with controlled pending/failure and late responses, not merely panel opening or final snapshots.",
+        "Checks intermediate geometry plus identity and action ownership through A-B-A; preserves appropriate anchors without presenting A as B.",
+        "Rejects delay-only masking or arbitrary fixed heights as universal solutions."
+      ]
+    },
+    {
+      "id": "C72",
+      "assess": [
+        "Preserves intentional content reflow and the agreed scroll behavior while keeping truthful loading and object identity.",
+        "Rejects blanket fixed height, retaining old text as new or an invented defect from differing final content sizes."
+      ]
+    },
+    {
+      "id": "C73",
+      "assess": [
+        "Checks paste/autofill/composition and corrected validation through actual submit, not injected valid props.",
+        "Preserves multiline input and uncommitted composition; reconciles client/server errors without an always-enabled rule."
+      ]
+    },
+    {
+      "id": "C74",
+      "assess": [
+        "Preserves the genuine prerequisite and associated label/reason.",
+        "Does not impose always-enabled Submit, new input modes or premature validation."
+      ]
+    },
+    {
+      "id": "C75",
+      "assess": [
+        "Uses the existing draft policy across selection, Back and return, checking both persisted and draft values.",
+        "Handles pending old save without overwriting B; does not equate a Cancel-button test with all exits."
+      ]
+    },
+    {
+      "id": "C76",
+      "assess": [
+        "Does not add discard dialogs to saved navigation or harmless disclosure.",
+        "Distinguishes this supplied confirmed path from untested pending-save behavior."
+      ]
+    },
+    {
+      "id": "C77",
+      "assess": [
+        "Counts actual effects under repeated activation, reconciles affected optimistic changes and protects newer work.",
+        "Treats lost response as unknown outcome and does not invent retry guarantees or backend infrastructure."
+      ]
+    },
+    {
+      "id": "C78",
+      "assess": [
+        "Preserves scoped concurrency and supported retry identity.",
+        "Does not impose page-wide locking, ban all retries or silently merge conflicting versions."
+      ]
+    },
+    {
+      "id": "C79",
+      "assess": [
+        "Provides contextual status and discoverable restriction reason without unnecessary focus stealing.",
+        "Separates semantic inspection from executed assistive behavior; text existence or aria-live alone is insufficient."
+      ]
+    },
+    {
+      "id": "C80",
+      "assess": [
+        "Preserves sufficient contextual feedback and restrained announcements.",
+        "Does not add live regions per cell or force every disabled action into Tab order."
+      ]
+    },
+    {
+      "id": "C81",
+      "assess": [
+        "Checks the chosen composite keyboard model and logical record focus across sorting/recycling.",
+        "Distinguishes focus from activation and considers manual tabs under latency; role presence is not implementation."
+      ]
+    },
+    {
+      "id": "C82",
+      "assess": [
+        "Retains the sufficient table and native controls.",
+        "Rejects unjustified grid conversion and a universal focus-select policy."
+      ]
+    },
+    {
+      "id": "C83",
+      "assess": [
+        "Requires a fitting click/tap path without dragging as well as keyboard access.",
+        "Exercises actual alternate actions and outcome/availability, not just the helper or shortcut."
+      ]
+    },
+    {
+      "id": "C84",
+      "assess": [
+        "Does not add redundant custom move controls for native scrolling.",
+        "Keeps scope limited and does not infer a custom dragging defect."
+      ]
+    },
+    {
+      "id": "C85",
+      "assess": [
+        "Inspects rendered content, spacing, contrast and scanning as well as the anchor.",
+        "Provides appropriate interactive disclosure and hover/focus/dismissal behavior; position or theme tokens alone cannot pass."
+      ]
+    },
+    {
+      "id": "C86",
+      "assess": [
+        "Retains the sufficient optional tooltip without mandatory persistent prose or a new dialog.",
+        "Does not force every short value into a multirow list."
+      ]
+    },
+    {
+      "id": "C87",
+      "assess": [
+        "Reconciles the invalid page and checks filter-item-return plus direct entry where supported.",
+        "Aligns control placement with actual population and preserves agreed state without serializing everything."
+      ]
+    },
+    {
+      "id": "C88",
+      "assess": [
+        "Preserves explicit selection reset and appropriate URL exclusions.",
+        "Rejects universal hidden selection persistence and all-state URL rules."
+      ]
+    },
+    {
+      "id": "C89",
+      "assess": [
+        "Checks and profiles relevant interaction at supported cardinality, then measures the affected path again.",
+        "Preserves identity/focus/selection while optimizing; does not equate network pending or small fixtures with responsiveness."
+      ]
+    },
+    {
+      "id": "C90",
+      "assess": [
+        "Keeps the sufficient small-table implementation and scoped style task.",
+        "Rejects arbitrary row thresholds, new dependencies and universal debounce."
+      ]
+    },
+    {
+      "id": "C91",
+      "assess": [
+        "Separates input capability from width and checks actual non-hover completion.",
+        "Checks state/focus beyond color and preserves date meaning under the declared locale/time-zone contract."
+      ]
+    },
+    {
+      "id": "C92",
+      "assess": [
+        "Preserves the supported environment and local scope.",
+        "Does not introduce platforms, themes or localization solely to satisfy a broad checklist."
+      ]
+    },
+    {
+      "id": "C93",
+      "assess": [
+        "Reviews the whole group, removes redundant narration and honors scoped icon/placement preferences with accessible names.",
+        "Preserves pending/error/freshness and distinguishable navigation versus mutation; avoids a universal icon-only policy."
+      ]
+    },
+    {
+      "id": "C94",
+      "assess": [
+        "Preserves necessary decision/recovery text and scope.",
+        "Does not hide consequential meaning or remove live failure feedback to reduce word count."
+      ]
+    },
+    {
+      "id": "C95",
+      "assess": [
+        "Aligns indicator with the real details action and requested placement while preserving nested-action isolation.",
+        "Checks the resting row and normal pointer/keyboard paths; does not introduce a second action or assume universal placement."
+      ]
+    },
+    {
+      "id": "C96",
+      "assess": [
+        "Preserves the legitimate leading tree expander and separate detail action.",
+        "Rejects moving every chevron to the right or making every row a details trigger."
+      ]
+    },
+    {
+      "id": "C97",
+      "assess": [
+        "Recomposes internal labels/values/help/actions and checks reading order, grouping and completion in both mounted modes.",
+        "Distinguishes useful internal layout from endpoint bounds or state retention; avoids fixed universal heights."
+      ]
+    },
+    {
+      "id": "C98",
+      "assess": [
+        "Preserves useful mode-specific composition.",
+        "Does not demand identical alignment in all modes or invent a defect solely from layout differences."
+      ]
+    },
+    {
+      "id": "C99",
+      "assess": [
+        "Maps semantic columns and their space priorities, allowing for extra controls and numeric fields.",
+        "Compares representative values at comparable usable widths and panel states; checks scanning/truncation and boundaries, not identical percentages."
+      ]
+    },
+    {
+      "id": "C100",
+      "assess": [
+        "Preserves legitimate task and width differences and the required fields.",
+        "Rejects frozen widths, hidden data or equal percentages as proof of consistency; no defect is established by different final widths alone."
+      ]
+    },
+    {
+      "id": "C101",
+      "assess": [
+        "Combines count/action only with clear action semantics and an accessible name, preserving configuration as a separate effect.",
+        "Checks counted versus affected objects through scope changes and unknown/failure states; badge presence or smaller header is insufficient."
+      ]
+    },
+    {
+      "id": "C102",
+      "assess": [
+        "Keeps the distinct global total and selected action instead of implying that all 120 will be refreshed.",
+        "Does not mandate merging nearby metrics, icons or removal of necessary labels/status."
+      ]
+    },
+    {
+      "id": "C103",
+      "assess": [
+        "Uses container size as the local condition while retaining an appropriate layout mechanism such as Grid; does not frame queries and Grid/Flex as substitutes.",
+        "Chooses an appropriate query ancestor and checks containment sizing/support; exercises the mounted form at fixed viewport with changing allocated width, real content, focus/input and reachable actions.",
+        "Rejects viewport resize or @container presence alone as proof; does not require a new split-pane feature or JavaScript sizing."
+      ]
+    },
+    {
+      "id": "C104",
+      "assess": [
+        "Separates layout mechanism from conditional styling, preserving the existing Flex layout and legitimate viewport/environment media queries.",
+        "Explains that no extra condition is needed for the supplied automatically wrapping layout, without claiming Flex replaces media/container queries.",
+        "Does not infer hover or reduced-motion from container width or impose a global query migration."
+      ]
+    },
+    {
+      "id": "C105",
+      "assess": [
+        "Requires Cancel to discard the draft and restore the replaced connection with focus on it, rejecting an empty or collapsed work area as the landing state.",
+        "Rejects the whole-form Clear as a substitute for Cancel and does not add a confirmation for discarding an empty draft.",
+        "Keeps the no-connections form without Cancel because nothing exists to return to, and proposes a check that fails on both the collapse and the Clear variant: replaced object visible and focused, draft gone on reopen, no write."
+      ]
+    },
+    {
+      "id": "C106",
+      "assess": [
+        "Accepts collapsing the inline add row back to its trigger because the list remains the visible work area and focus returns to the trigger.",
+        "Accepts the per-field search clear and the owner's confirmed restore-defaults as bounded actions, not a whole-form reset.",
+        "Does not demand a separate editor surface, a return-to-object rule or removal of the confirmation where no object was displaced."
+      ]
+    },
+    {
+      "id": "C107",
+      "assess": [
+        "Rejects the completeness claim because the expected set must come from the brief/source behavior rather than only the frames produced.",
+        "Separates completeness from fidelity of the seven transferred defaults and identifies the omitted loading/error/inspector/direct-entry states as unverified or missing.",
+        "Proposes a bounded source-item accounting check rather than a mandatory full product Cartesian matrix."
+      ]
+    },
+    {
+      "id": "C108",
+      "assess": [
+        "Keeps coverage scoped to the explicitly requested settings screen and default state.",
+        "Does not require unrelated routes, themes, failure states or an application-wide inventory.",
+        "Checks the known source conditions, requested state, editability/fidelity as applicable, and reports only that bounded claim."
+      ]
+    },
+    {
+      "id": "C109",
+      "assess": [
+        "Rejects network-idle or first-viewport stability as proof that visibility-triggered and virtualized material is complete.",
+        "Requires materializing/observing the relevant source state through supported interaction and preserves the distinction between visible virtualized state and whole-collection coverage.",
+        "Names capture scope and limitations instead of inferring that content absent from the capture is absent from the source."
+      ]
+    },
+    {
+      "id": "C110",
+      "assess": [
+        "Accepts the static bounded capture without inventing scrolling, virtualization or stabilization work.",
+        "Uses the confirmed viewport/content/assets conditions as sufficient readiness for the requested scope.",
+        "Does not turn capture-readiness guidance into a universal ritual."
+      ]
+    },
+    {
+      "id": "C111",
+      "assess": [
+        "Separates editability and visual fidelity from integration with the maintained reusable system.",
+        "Classifies matching regions against existing Button/Field/Alert contracts and recommends linking or replacing with real reusable resources where compatible.",
+        "Checks a real consumer/override effect and leaves genuinely incompatible regions explicit rather than redrawing everything."
+      ]
+    },
+    {
+      "id": "C112",
+      "assess": [
+        "Accepts the unique visualization as a local editable composition because no fitting reusable contract exists and the brief does not request a new family.",
+        "Does not create a shared component solely to eliminate raw layers or satisfy an expected name.",
+        "Keeps the rest of the already-linked screen intact and reports the unique region honestly."
+      ]
+    },
+    {
+      "id": "C113",
+      "assess": [
+        "Rejects reusable components for wrappers/spacers/one-off groups that have no independent contract or reuse value.",
+        "Uses repeated change, consistency or behavior and real consumers as the justification for a shared base rather than 'no raw layers'.",
+        "Preserves legitimate unique/native structure and avoids adding edit hops for their own sake."
+      ]
+    },
+    {
+      "id": "C114",
+      "assess": [
+        "Accepts a shared base because the role, behavior/state contract and repeated propagation need are established across real consumers.",
+        "Keeps consumer-specific content at the appropriate property/child boundary rather than multiplying bases.",
+        "Checks a base change through at least a real consumer and preserves neighboring invariants."
+      ]
+    },
+    {
+      "id": "C115",
+      "assess": [
+        "Diagnoses a consumer-facing information-architecture/findability problem rather than only spacing or overlap.",
+        "Separates public resources from internal/example/experimental/deprecated material and brings related family states into a discoverable relationship without imposing one external taxonomy.",
+        "Proposes a retrieval task from a consumer need as a distinguishing check and preserves component identity while reorganizing."
+      ]
+    },
+    {
+      "id": "C116",
+      "assess": [
+        "Keeps the small flat catalog because its roles and choices are already unambiguous.",
+        "Rejects mandatory Foundations/Components/Patterns pages, extra nesting or an invented internal tier.",
+        "Uses successful direct retrieval of the correct resource as sufficient evidence for this scope."
+      ]
+    },
+    {
+      "id": "C117",
+      "assess": [
+        "States that tidy alignment and spacing do not establish semantic library organization.",
+        "Requires the consumer-facing public resource to be distinguishable from internal primitives and demo-only examples.",
+        "Routes geometry/presentation to visual judgment while treating role/findability as the library-organization concern."
+      ]
+    },
+    {
+      "id": "C118",
+      "assess": [
+        "Accepts the plain presentation because consumer roles, internal/example boundaries and family relationships are already clear.",
+        "Does not require decorative showcases, a fixed page skeleton or another design system's visual style.",
+        "Uses consumer retrieval/choice plus local family comparison as the meaningful check."
+      ]
+    },
+    {
+      "id": "C119",
+      "assess": [
+        "Rejects replaying completed writes after interruption and treats the current artifact as the source of truth for progress.",
+        "Requires re-establishing target/current structure, resolving the partial step 6 and continuing from the last verified boundary.",
+        "Keeps adapter-specific reconnect/identifier handling separate from the general resume decision."
+      ]
+    },
+    {
+      "id": "C120",
+      "assess": [
+        "Rejects a persistent ledger/checkpoint file for the short atomic rename.",
+        "Uses immediate readback/effect verification as proportionate evidence.",
+        "Does not generalize long-workflow recovery machinery to every edit."
+      ]
+    }
   ]
 }
