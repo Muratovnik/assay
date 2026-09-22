@@ -44,6 +44,22 @@ are expected to use. This file decides that reuse contract; how the whole catalo
 exposes, groups and distinguishes those roles belongs to
 [design-system organization](design-system-organization.md).
 
+## Resolve reusable dependencies before their dependents
+
+When one reusable entity contains or exposes another reusable entity, resolve the
+shared dependency before building the dependent composition. Reuse the canonical
+dependency when it already exists; otherwise create and verify the dependency
+before a parent starts embedding local stand-ins that can later become a second
+base by accident. This is a dependency rule, not an atomic-design taxonomy.
+
+- Failure: a complex control is authored first with copied local icons, rows or
+  fields, then canonical shared versions are created later and the parent keeps
+  pointing at the copies.
+- Valid control: a child that is intentionally private to one composition can
+  remain local; not every nested layer becomes a public or shared base.
+- Check: trace each reusable child of the dependent composition to the intended
+  canonical base and verify one real consumer after the dependency is resolved.
+
 ## Follow reuse transitively to real consumers
 
 A shared base helps only where consumers pass through it. Trace the affected
@@ -145,6 +161,7 @@ itself, and the code catalog may name things differently while serving the role.
 - [Figma: design system structure](https://help.figma.com/hc/en-us/articles/38978644498199-AI-workflows-collection-Best-practices-to-help-Figma-AI-understand-your-design-system)
 - [Figma: slots for flexible content](https://help.figma.com/hc/en-us/articles/38231200344599-Use-slots-to-build-flexible-components-in-Figma)
 - [Edenspiekermann: replacement classification](https://github.com/edenspiekermann/Skills/blob/a49e859329aa99e81e8725bc66767d16e8fc9539/skills/apply-design-system/SKILL.md)
+- [Figma: dependency-ordered component creation](https://github.com/figma/mcp-server-guide/blob/main/skills/figma-generate-library/references/component-creation.md#1-component-architecture)
 - [Figma: component properties and their bound layers](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-library/references/component-creation.md#6-component-properties)
 - [Figma: Code Connect](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-code-connect/SKILL.md)
 - [Figma: design to code](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-design-to-code/SKILL.md)
