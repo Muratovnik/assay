@@ -322,295 +322,63 @@
       "prompt": "Обязательно ли переводить простой эффект на View Transitions? Только рекомендации по описанию, без инструментов и изменений.",
       "context": "Локальная смена прозрачности уже корректно реализована CSS и проверена при обычном и reduced motion. Переноса объекта между представлениями нет. Пользователь просит только скорректировать подпись; предлагается заменить механизм ради единого API."
     },
-    {
-      "id": "C63",
-      "prompt": "Как проверить общий контейнер при открытии панели? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "В редакторе и библиотеке исправляют лишнюю пустоту справа общим центрированием. В закрытом состоянии контент ограничен по ширине; при открытии встроенной панели ограничение снимается. Основной заголовок и левый край таблицы переезжают на 200 px. Пользователь хочет сохранить их положение. В обоих конечных состояниях всё помещается, snapshot-тесты проходят. На компактном экране предусмотрен overlay."
-    },
-    {
-      "id": "C64",
-      "prompt": "Нужно ли всегда фиксировать левый край контента? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "В согласованном режиме сравнения пользователь явно переключает одноколоночный обзор в две равноправные колонки; изменение расположения намеренное и понятное. На узком окне работает предусмотренный reflow без потери ввода. Отступы помогают чтению, поля не обрезаны. Предлагается запретить все сдвиги и центрировать все экраны по единой фиксированной ширине."
-    },
-    {
-      "id": "C65",
-      "prompt": "Можно ли считать экран готовым после исправления компонентов? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "Визуальный разбор входит в задание. Согласно предоставленному скриншоту справа много незанятого места, при этом поле назначения обрезано. Обновление источников заметнее следующего шага создания, а значок подсказки далеко от объясняемого текста. Выбор пока пуст, расчёт показывает прочерки без пояснения условий. Кнопки и анимация прошли проверки. Предлагается признать композицию готовой, а расчёт сломанным только по скриншоту."
-    },
-    {
-      "id": "C66",
-      "prompt": "Нужна ли новая композиция из-за свободного места? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "Пользователь просил только исправить tooltip. Текущая композиция согласована: пустое пространство ограничивает длину строк; все поля читаемы, основной шаг заметен, подсказка находится у своего текста. Прочерк имеет доступное объяснение отсутствующего условия, а штатный путь после его выполнения даёт проверенный результат. Предлагается растянуть все блоки и добавить инструкции к каждой кнопке."
-    },
-    {
-      "id": "C67",
-      "prompt": "Как проверить кнопку, которая всегда недоступна? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "Обновление разрешено после выбора существующего источника. Пользователь выбирает его штатным контролом, но кнопка остаётся disabled. Тест проверяет disabled без выбора; другой тест вручную передаёт enabled=true и вызывает обработчик. После неудачной попытки pending также может остаться установленным."
-    },
-    {
-      "id": "C68",
-      "prompt": "Нужно ли разблокировать недоступное обновление? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "У пользователя роль только для чтения. Обновление запрещено политикой, причина видна; изменять роль самостоятельно нельзя. Для пользователя с разрешением штатное обновление и восстановление после временного сбоя уже проверены. Предлагается убрать permission guard, чтобы любая видимая кнопка могла стать активной."
-    },
-    {
-      "id": "C69",
-      "prompt": "Понятно ли, как открыть детали строки? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "В покое строка выглядит как статический текст. Drawer открывает только невидимый обработчик на левой ячейке, инструкции о таком жесте нет. Рядом независимые чекбокс, drag handle и Delete. Тест кликает заранее известную координату и проверяет заголовок панели; предлагается считать обнаруживаемость доказанной."
-    },
-    {
-      "id": "C70",
-      "prompt": "Обязательно ли делать всю строку кликабельной? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "Название объекта — отчётливо оформленная ссылка с доступным именем и клавиатурным фокусом. Она открывает детали; чекбокс выделяет строку, остальные ячейки позволяют копировать текст. Путь понятен без hover. Предлагается сделать любую точку строки открывающей drawer и добавить всем строкам стрелку."
-    },
-    {
-      "id": "C71",
-      "prompt": "Как проверить скачок в уже открытой панели? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "При переключении строк A → B → A оболочка drawer остаётся открытой, но временный пустой body схлопывает её содержимое, после ответа оно возвращается. Конечные снимки и тест открытия панели проходят. Ответ B может прийти последним; действие панели должно относиться к текущему A. Предлагается оставить данные A под заголовком B или скрыть скачок задержкой."
-    },
-    {
-      "id": "C72",
-      "prompt": "Нужно ли запрещать изменение высоты при смене объекта? Только рекомендации по описанию, без инструментов и изменений.",
-      "context": "В панели у A короткое описание, у B длинный документ. Изменение размеров и возврат прокрутки к началу нового документа предусмотрены контрактом; оболочка не схлопывается в pending. Пока B загружается, его состояние честно обозначено, старые данные и действия не выдаются за B, поздние ответы не подменяют выбранный объект. Предлагается навсегда фиксировать высоту и сохранять старый текст."
-    },
-    {
-      "id": "C73",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "An editor validates only on keyup. Pasted and autofilled values leave Save disabled. Enter during IME composition submits incomplete text; ordinary Enter should submit after composition, while notes are multiline. Server rejection retains the draft but its field error remains after correction."
-    },
-    {
-      "id": "C74",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A destructive confirmation requires an exact visible phrase. Until it matches, the button is disabled with its reason beside the input. Paste works, input has a persistent associated label, and correction enables the action. This is a single confirmation, not a general editor."
-    },
-    {
-      "id": "C75",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "Editing record A changes a local draft. Selecting B or using Back silently discards it. Save can still be pending when the selection changes; the old completion overwrites the current draft. The product already supports retaining per-record drafts and cancelling departure."
-    },
-    {
-      "id": "C76",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A form confirms autosave before navigation; returning reconstructs the confirmed values. Opening its help does not unmount or modify the form. No pending or unsaved work exists on the described path."
-    },
-    {
-      "id": "C77",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "Create submits once on click and again on Enter while the first request is pending, producing duplicates. A lost response is shown as definite failure with automatic retry despite no retry identity or status endpoint. A failed optimistic edit restores an old whole-list snapshot over another successful edit."
-    },
-    {
-      "id": "C78",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "Two distinct records can be saved concurrently under the documented API contract. Each request is bound to its record and version. A supported idempotency token allows retrying a lost response without repeating the effect; conflict recovery is explicit."
-    },
-    {
-      "id": "C79",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "Search completion and Save failure update visible text only; focus stays in the input and users of the supported screen reader receive no result. A disabled command explains its restriction only in a tooltip on the skipped native button. Tests assert the message text exists."
-    },
-    {
-      "id": "C80",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "The screen announces one contextual completion through its existing status component. Background cell refreshes do not affect the current task, are not announcements and do not steal focus. A disabled action has a visible associated explanation outside the Tab sequence."
-    },
-    {
-      "id": "C81",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "An editable virtual grid exposes a grid role but has no arrow navigation. After sorting, focus remains at the same DOM position and edits a different record. Its adjacent tabs load slowly but every arrow automatically activates a request. Static tests inspect role attributes only."
-    },
-    {
-      "id": "C82",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A short read-only table has associated headers, exposed sorting and normal keyboard-operable links and checkboxes. It has no spreadsheet editing or virtual rows. A proposal would convert it to grid solely to reduce Tab presses."
-    },
-    {
-      "id": "C83",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A scheduling list can reorder by dragging and by a keyboard shortcut. Supported touch users who cannot hold and move have no alternative. The shortcut uses the correct allowed scope, and the current check calls the reorder helper directly."
-    },
-    {
-      "id": "C84",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "The only described dragging gesture is standard unmodified browser scrolling of a long document. There is no custom drag operation; normal keyboard and scrollbar navigation work."
-    },
-    {
-      "id": "C85",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A count reveals many comma-joined names in a dark tooltip with cramped padding and weak contrast. It vanishes when the pointer moves into it, has no focus route, and contains a repair link that cannot be reached. Position-only tests pass."
-    },
-    {
-      "id": "C86",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A short optional definition is readable on pointer and focus, remains available when approached and can be dismissed. The label is already clear; the tooltip has no actions or required decision information."
-    },
-    {
-      "id": "C87",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A table is on page 8 when a filter reduces results to one page. It shows no results because page 8 remains selected. Opening an item and using Back loses the agreed filter and sort. The list-local search appears above unrelated tabs, implying a global scope."
-    },
-    {
-      "id": "C88",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "The product intentionally clears selection on page change. Filter state is preserved on return, but a small tooltip and a sensitive draft token are intentionally absent from the URL. A shared link needs no secret to restore the public collection view."
-    },
-    {
-      "id": "C89",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "The product supports 20000 rows. Search synchronously rebuilds the full collection on each input event and freezes typing and scroll for seconds. Existing tests use three rows. A proposed virtualization patch improves speed but loses focused identity when rows recycle."
-    },
-    {
-      "id": "C90",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "The product contract caps a native table at twelve records. Typing and scrolling remain responsive under that maximum. A style-only change is requested; a proposal adds virtualization and debounce because large-table advice recommends them."
-    },
-    {
-      "id": "C91",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A supported wide touch laptop gets hover-only controls because touch support is inferred from viewport width. Selected state and focus vanish in its supported forced-colors mode. A supported localized date is parsed as a different calendar day after reload."
-    },
-    {
-      "id": "C92",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A desktop-only product supports one locale, visible focus and non-color state cues. A tooltip-padding fix is requested. The proposed audit declares missing RTL, mobile layouts and a second theme defects despite none being part of the product contract."
-    },
-    {
-      "id": "C93",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A drawer repeats the same resource noun in its title, count, long Refresh label and persistent success line. A selected All filter is repeated as a heading, followed by background documentation. The user explicitly requests a familiar refresh icon and a library-navigation icon next to the title."
-    },
-    {
-      "id": "C94",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A rare consequential action needs a visible label and a short explanation of shared effects. Its status reports a current partial failure and its scope is not conveyed elsewhere. The user requested only a nearby spacing repair."
-    },
-    {
-      "id": "C95",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A whole flat row opens details except for its independent checkbox and menu. A leading disclosure beside the title looks like a separate hierarchy expander. The user requests a trailing indicator; there is no tree expansion. The selected locale reads left to right."
-    },
-    {
-      "id": "C96",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A hierarchical table has a leading expander for children and a separate visible link for record details. Both are accessible and their meanings are distinct. The requested change is the detail link label."
-    },
-    {
-      "id": "C97",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A summary sidebar becomes an inline block at compact width. Its fixed columns leave detached help, large gaps and a Save button visually unrelated to its fields. Container-fit and retained-draft checks pass, but the requested compact composition is not usable."
-    },
-    {
-      "id": "C98",
-      "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.",
-      "context": "A compact comparison mode deliberately groups its actions below values while the wide sidebar places them beside the title. Both compositions are readable, keyboard-operable and preserve draft/focus on adaptation."
-    },
-    {
-      "id": "C99",
-      "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.",
-      "context": "Related library and editor tables show identical Name and Category values, but Name is unnecessarily cramped in the editor while the library leaves excessive empty space. The editor adds checkboxes and two numeric columns. Existing acceptance checks only shared CSS and no overflow."
-    },
-    {
-      "id": "C100",
-      "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.",
-      "context": "A compact inspector includes Name, Category and four required numeric columns; the wide library has only Name and Category. Their shared sizing policy preserves readable values and reachable actions. A proposal would force identical pixel widths and hide numeric fields to match the library."
-    },
-    {
-      "id": "C101",
-      "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.",
-      "context": "A header has a refresh icon button and a separate Resources 2 label. The product requests one compact control, and the count describes exactly the resources refreshed. After changing scope to one resource, the old count remains 2 while the action refreshes one. A failed count read renders 0. Tests only check that a badge is inside the button."
-    },
-    {
-      "id": "C102",
-      "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.",
-      "context": "A dashboard reports 120 total resources and has an action explicitly labeled Refresh selected 3. Its count and action are accurate, useful and visually clear. The total includes resources outside the selection; configuration is a separate control."
-    },
-    {
-      "id": "C103",
-      "prompt": "Review only the supplied facts. Explain the scoped implementation decision and a distinguishing check without running tools, editing files or claiming browser observations.",
-      "context": "A reusable form uses Grid for layout and viewport media queries to switch its field/action arrangement. Opening an existing neighboring drawer makes the form narrow while the viewport remains 1600px; actions become cramped because the intended compact arrangement never activates. The supported browsers have container size queries. Tests only resize the window; the task needs a conditional style change, not merely ordinary wrapping."
-    },
-    {
-      "id": "C104",
-      "prompt": "Review only the supplied facts. Explain the scoped implementation decision and a distinguishing check without running tools, editing files or claiming browser observations.",
-      "context": "A simple Flex layout already wraps automatically as intended, with no requested conditional style changes. The application shell deliberately uses viewport breakpoints and reduced-motion/hover media conditions. A proposal calls Grid/Flex and queries interchangeable, removes layout rules when introducing container queries, and moves all media conditions to container width."
-    },
-    {
-      "id": "C105",
-      "prompt": "Проверь сценарий добавления подключения на странице и предложи поведение отмены с проверкой. Только по приведённым фактам, без запуска инструментов и без правок файлов.",
-      "context": "Настольное приложение для операторов. Страница «Подключения»: слева список сохранённых подключений, справа рабочая область с карточкой выбранного. «Добавить подключение» в шапке заменяет карточку формой создания. В форме кнопки «Очистить» и «Сохранить», кнопки «Отменить» нет. В предыдущей версии «Отменить» сворачивала всю рабочую область в кнопку «Добавить», и карточка ранее выбранного подключения не возвращалась. Когда сохранённых подключений нет, форма — единственное содержимое страницы. Существующий тест проверяет только, что после отмены поле имени пустое."
-    },
-    {
-      "id": "C106",
-      "prompt": "Только по приведённым фактам: нужно ли менять сворачивание строки и элементы очистки? Объясни решение и проверку без запуска инструментов.",
-      "context": "Страница списка правил. «Добавить правило» раскрывает под кнопкой короткую строку ввода прямо в списке; список остаётся видимым и остаётся рабочей областью. «Отмена» сворачивает строку обратно в кнопку и возвращает на неё фокус. В поиске по списку есть значок «×», очищающий только поле поиска. В настройках есть кнопка «Восстановить значения по умолчанию» с подтверждением, принятым в продукте."
-    },
-    {
-      "id": "C107",
-      "prompt": "Review only the supplied transfer facts. Decide whether the delivered artifact can be called complete and name a distinguishing check. Do not run tools or edit files.",
-      "context": "The brief asks to transfer an existing application feature with all supported operational states. The source has seven screens plus a loading state, an error state, an open inspector and a direct-entry detail state. The delivered artifact contains the seven default screens and looks faithful in those states. The agent reports the transfer complete because every frame it created passed visual comparison."
-    },
-    {
-      "id": "C108",
-      "prompt": "Review only the supplied transfer facts. Decide what coverage is required and name a proportionate check. Do not run tools or edit files.",
-      "context": "The user explicitly asks to transfer one named settings screen in its current default state as an editable reference. Other routes, themes and error states are outside the request. The delivered artifact contains that state and its source conditions are known."
-    },
-    {
-      "id": "C109",
-      "prompt": "Review only the supplied capture facts. Decide whether the capture is sufficient source evidence and name a distinguishing check. Do not run tools or edit files.",
-      "context": "A long web page reveals sections with IntersectionObserver and a large result list is virtualized. The first viewport becomes network-idle and is captured. The agent treats the image as a complete full-page source although lower reveal sections were never scrolled into view and only the visible virtualized rows existed."
-    },
-    {
-      "id": "C110",
-      "prompt": "Review only the supplied capture facts. Decide whether extra capture-readiness work is needed and name a proportionate check. Do not run tools or edit files.",
-      "context": "A static documentation screen renders all required content immediately, has no lazy reveal, virtualization, independent scrolling or transient overlay state, and the requested artifact is the current viewport only. Fonts and assets are already confirmed ready."
-    },
-    {
-      "id": "C111",
-      "prompt": "Review only the supplied design-transfer facts. Recommend a scoped reconciliation decision and a distinguishing check. Do not run tools or edit files.",
-      "context": "The target artifact already has a maintained reusable Button, Field and Alert system whose contracts match the captured screen. The imported screen is visually accurate but every control remains a standalone copied group. The agent calls the result design-system integrated because the layers are editable."
-    },
-    {
-      "id": "C112",
-      "prompt": "Review only the supplied design-transfer facts. Recommend a scoped decision and a distinguishing check. Do not run tools or edit files.",
-      "context": "A transferred visualization is unique to one screen and no existing reusable resource matches its structure or behavior. The brief requires an editable faithful composition, not a new shared family. The rest of the screen is already linked to the maintained system."
-    },
-    {
-      "id": "C113",
-      "prompt": "Review only these component-system facts. Decide whether the proposed componentization is justified and name a distinguishing check. Do not run tools or edit files.",
-      "context": "During cleanup the agent converts every wrapper, spacer and one-off content group into a reusable component so the artifact has 'no raw layers'. Most new components have one consumer, no independent behavior and no repeated change contract. Their nesting adds several extra edit hops."
-    },
-    {
-      "id": "C114",
-      "prompt": "Review only these component-system facts. Decide whether a shared base is justified and name a distinguishing check. Do not run tools or edit files.",
-      "context": "The same status control appears in twelve consumers, shares one behavior and state contract, and product changes must propagate consistently. A new shared base would replace duplicated implementations while keeping consumer-specific content as properties or children."
-    },
-    {
-      "id": "C115",
-      "prompt": "Review only these library facts. Diagnose the organization problem and propose a distinguishing check without editing or running tools.",
-      "context": "A reusable UI library contains 45 working resources. Public components, internal building blocks, anatomy examples, experiments and deprecated items appear in one flat creation-order list. Several related states of the same family are far apart. Consumers can technically inspect everything, but must open many unrelated items to find the supported resource."
-    },
-    {
-      "id": "C116",
-      "prompt": "Review only these library facts. Decide whether additional hierarchy is necessary and propose a proportionate check without editing or running tools.",
-      "context": "A small internal library has five independent public components, clear role-based names, no deprecated or experimental items, no internal helper tier and no ambiguous alternatives. All five are visible together and consumers already find the correct one directly."
-    },
-    {
-      "id": "C117",
-      "prompt": "Review only these design-system facts. Distinguish semantic organization from visual polish and propose a check. Do not edit or run tools.",
-      "context": "The library canvas is perfectly aligned with consistent spacing and section cards. However, an internal IconButton primitive, the supported ToolbarButton component and two demo-only examples are presented with identical prominence under the same heading. A new consumer cannot tell which resource is intended for ordinary reuse."
-    },
-    {
-      "id": "C118",
-      "prompt": "Review only these design-system facts. Decide whether cosmetic reorganization is required and propose a check. Do not edit or run tools.",
-      "context": "The library is visually plain and uses minimal decoration, but supported components are clearly named and grouped by role, internal helpers are marked and separated, examples are unmistakably documentation, and family states are adjacent and easy to compare. Consumers reliably choose the intended public resource."
-    },
-    {
-      "id": "C119",
-      "prompt": "Review only these interrupted-transfer facts. Recommend how work should resume and a distinguishing check. Do not run tools or edit files.",
-      "context": "A multi-step transfer stopped after several structural replacements. On the next session the saved plan says step 6 was next, but the actual artifact contains steps 1-5 plus a partially applied step 6. The proposed recovery is to replay steps 1-6 from the beginning because the previous tool session ended."
-    },
-    {
-      "id": "C120",
-      "prompt": "Review only these edit facts. Decide whether persistent checkpoint machinery is justified and name a proportionate check. Do not run tools or edit files.",
-      "context": "The authorized task is one atomic rename of a single design resource. The target is known, the operation is immediately readable back, and there is no dependent write chain or interrupted prior session. A proposal adds a persistent transfer ledger and checkpoint file before making the rename."
-    }
+    {"id": "C63", "prompt": "Как проверить общий контейнер при открытии панели? Только рекомендации по описанию, без инструментов и изменений.", "context": "В редакторе и библиотеке исправляют лишнюю пустоту справа общим центрированием. В закрытом состоянии контент ограничен по ширине; при открытии встроенной панели ограничение снимается. Основной заголовок и левый край таблицы переезжают на 200 px. Пользователь хочет сохранить их положение. В обоих конечных состояниях всё помещается, snapshot-тесты проходят. На компактном экране предусмотрен overlay."},
+    {"id": "C64", "prompt": "Нужно ли всегда фиксировать левый край контента? Только рекомендации по описанию, без инструментов и изменений.", "context": "В согласованном режиме сравнения пользователь явно переключает одноколоночный обзор в две равноправные колонки; изменение расположения намеренное и понятное. На узком окне работает предусмотренный reflow без потери ввода. Отступы помогают чтению, поля не обрезаны. Предлагается запретить все сдвиги и центрировать все экраны по единой фиксированной ширине."},
+    {"id": "C65", "prompt": "Можно ли считать экран готовым после исправления компонентов? Только рекомендации по описанию, без инструментов и изменений.", "context": "Визуальный разбор входит в задание. Согласно предоставленному скриншоту справа много незанятого места, при этом поле назначения обрезано. Обновление источников заметнее следующего шага создания, а значок подсказки далеко от объясняемого текста. Выбор пока пуст, расчёт показывает прочерки без пояснения условий. Кнопки и анимация прошли проверки. Предлагается признать композицию готовой, а расчёт сломанным только по скриншоту."},
+    {"id": "C66", "prompt": "Нужна ли новая композиция из-за свободного места? Только рекомендации по описанию, без инструментов и изменений.", "context": "Пользователь просил только исправить tooltip. Текущая композиция согласована: пустое пространство ограничивает длину строк; все поля читаемы, основной шаг заметен, подсказка находится у своего текста. Прочерк имеет доступное объяснение отсутствующего условия, а штатный путь после его выполнения даёт проверенный результат. Предлагается растянуть все блоки и добавить инструкции к каждой кнопке."},
+    {"id": "C67", "prompt": "Как проверить кнопку, которая всегда недоступна? Только рекомендации по описанию, без инструментов и изменений.", "context": "Обновление разрешено после выбора существующего источника. Пользователь выбирает его штатным контролом, но кнопка остаётся disabled. Тест проверяет disabled без выбора; другой тест вручную передаёт enabled=true и вызывает обработчик. После неудачной попытки pending также может остаться установленным."},
+    {"id": "C68", "prompt": "Нужно ли разблокировать недоступное обновление? Только рекомендации по описанию, без инструментов и изменений.", "context": "У пользователя роль только для чтения. Обновление запрещено политикой, причина видна; изменять роль самостоятельно нельзя. Для пользователя с разрешением штатное обновление и восстановление после временного сбоя уже проверены. Предлагается убрать permission guard, чтобы любая видимая кнопка могла стать активной."},
+    {"id": "C69", "prompt": "Понятно ли, как открыть детали строки? Только рекомендации по описанию, без инструментов и изменений.", "context": "В покое строка выглядит как статический текст. Drawer открывает только невидимый обработчик на левой ячейке, инструкции о таком жесте нет. Рядом независимые чекбокс, drag handle и Delete. Тест кликает заранее известную координату и проверяет заголовок панели; предлагается считать обнаруживаемость доказанной."},
+    {"id": "C70", "prompt": "Обязательно ли делать всю строку кликабельной? Только рекомендации по описанию, без инструментов и изменений.", "context": "Название объекта — отчётливо оформленная ссылка с доступным именем и клавиатурным фокусом. Она открывает детали; чекбокс выделяет строку, остальные ячейки позволяют копировать текст. Путь понятен без hover. Предлагается сделать любую точку строки открывающей drawer и добавить всем строкам стрелку."},
+    {"id": "C71", "prompt": "Как проверить скачок в уже открытой панели? Только рекомендации по описанию, без инструментов и изменений.", "context": "При переключении строк A → B → A оболочка drawer остаётся открытой, но временный пустой body схлопывает её содержимое, после ответа оно возвращается. Конечные снимки и тест открытия панели проходят. Ответ B может прийти последним; действие панели должно относиться к текущему A. Предлагается оставить данные A под заголовком B или скрыть скачок задержкой."},
+    {"id": "C72", "prompt": "Нужно ли запрещать изменение высоты при смене объекта? Только рекомендации по описанию, без инструментов и изменений.", "context": "В панели у A короткое описание, у B длинный документ. Изменение размеров и возврат прокрутки к началу нового документа предусмотрены контрактом; оболочка не схлопывается в pending. Пока B загружается, его состояние честно обозначено, старые данные и действия не выдаются за B, поздние ответы не подменяют выбранный объект. Предлагается навсегда фиксировать высоту и сохранять старый текст."},
+    {"id": "C73", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "An editor validates only on keyup. Pasted and autofilled values leave Save disabled. Enter during IME composition submits incomplete text; ordinary Enter should submit after composition, while notes are multiline. Server rejection retains the draft but its field error remains after correction."},
+    {"id": "C74", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A destructive confirmation requires an exact visible phrase. Until it matches, the button is disabled with its reason beside the input. Paste works, input has a persistent associated label, and correction enables the action. This is a single confirmation, not a general editor."},
+    {"id": "C75", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "Editing record A changes a local draft. Selecting B or using Back silently discards it. Save can still be pending when the selection changes; the old completion overwrites the current draft. The product already supports retaining per-record drafts and cancelling departure."},
+    {"id": "C76", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A form confirms autosave before navigation; returning reconstructs the confirmed values. Opening its help does not unmount or modify the form. No pending or unsaved work exists on the described path."},
+    {"id": "C77", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "Create submits once on click and again on Enter while the first request is pending, producing duplicates. A lost response is shown as definite failure with automatic retry despite no retry identity or status endpoint. A failed optimistic edit restores an old whole-list snapshot over another successful edit."},
+    {"id": "C78", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "Two distinct records can be saved concurrently under the documented API contract. Each request is bound to its record and version. A supported idempotency token allows retrying a lost response without repeating the effect; conflict recovery is explicit."},
+    {"id": "C79", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "Search completion and Save failure update visible text only; focus stays in the input and users of the supported screen reader receive no result. A disabled command explains its restriction only in a tooltip on the skipped native button. Tests assert the message text exists."},
+    {"id": "C80", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "The screen announces one contextual completion through its existing status component. Background cell refreshes do not affect the current task, are not announcements and do not steal focus. A disabled action has a visible associated explanation outside the Tab sequence."},
+    {"id": "C81", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "An editable virtual grid exposes a grid role but has no arrow navigation. After sorting, focus remains at the same DOM position and edits a different record. Its adjacent tabs load slowly but every arrow automatically activates a request. Static tests inspect role attributes only."},
+    {"id": "C82", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A short read-only table has associated headers, exposed sorting and normal keyboard-operable links and checkboxes. It has no spreadsheet editing or virtual rows. A proposal would convert it to grid solely to reduce Tab presses."},
+    {"id": "C83", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A scheduling list can reorder by dragging and by a keyboard shortcut. Supported touch users who cannot hold and move have no alternative. The shortcut uses the correct allowed scope, and the current check calls the reorder helper directly."},
+    {"id": "C84", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "The only described dragging gesture is standard unmodified browser scrolling of a long document. There is no custom drag operation; normal keyboard and scrollbar navigation work."},
+    {"id": "C85", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A count reveals many comma-joined names in a dark tooltip with cramped padding and weak contrast. It vanishes when the pointer moves into it, has no focus route, and contains a repair link that cannot be reached. Position-only tests pass."},
+    {"id": "C86", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A short optional definition is readable on pointer and focus, remains available when approached and can be dismissed. The label is already clear; the tooltip has no actions or required decision information."},
+    {"id": "C87", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A table is on page 8 when a filter reduces results to one page. It shows no results because page 8 remains selected. Opening an item and using Back loses the agreed filter and sort. The list-local search appears above unrelated tabs, implying a global scope."},
+    {"id": "C88", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "The product intentionally clears selection on page change. Filter state is preserved on return, but a small tooltip and a sensitive draft token are intentionally absent from the URL. A shared link needs no secret to restore the public collection view."},
+    {"id": "C89", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "The product supports 20000 rows. Search synchronously rebuilds the full collection on each input event and freezes typing and scroll for seconds. Existing tests use three rows. A proposed virtualization patch improves speed but loses focused identity when rows recycle."},
+    {"id": "C90", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "The product contract caps a native table at twelve records. Typing and scrolling remain responsive under that maximum. A style-only change is requested; a proposal adds virtualization and debounce because large-table advice recommends them."},
+    {"id": "C91", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A supported wide touch laptop gets hover-only controls because touch support is inferred from viewport width. Selected state and focus vanish in its supported forced-colors mode. A supported localized date is parsed as a different calendar day after reload."},
+    {"id": "C92", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A desktop-only product supports one locale, visible focus and non-color state cues. A tooltip-padding fix is requested. The proposed audit declares missing RTL, mobile layouts and a second theme defects despite none being part of the product contract."},
+    {"id": "C93", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A drawer repeats the same resource noun in its title, count, long Refresh label and persistent success line. A selected All filter is repeated as a heading, followed by background documentation. The user explicitly requests a familiar refresh icon and a library-navigation icon next to the title."},
+    {"id": "C94", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A rare consequential action needs a visible label and a short explanation of shared effects. Its status reports a current partial failure and its scope is not conveyed elsewhere. The user requested only a nearby spacing repair."},
+    {"id": "C95", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A whole flat row opens details except for its independent checkbox and menu. A leading disclosure beside the title looks like a separate hierarchy expander. The user requests a trailing indicator; there is no tree expansion. The selected locale reads left to right."},
+    {"id": "C96", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A hierarchical table has a leading expander for children and a separate visible link for record details. Both are accessible and their meanings are distinct. The requested change is the detail link label."},
+    {"id": "C97", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A summary sidebar becomes an inline block at compact width. Its fixed columns leave detached help, large gaps and a Save button visually unrelated to its fields. Container-fit and retained-draft checks pass, but the requested compact composition is not usable."},
+    {"id": "C98", "prompt": "Review only the supplied facts. Recommend a scoped decision and a distinguishing check, preserving valid behavior. Do not edit files, run the app or delegate; supplied facts are not your browser observations.", "context": "A compact comparison mode deliberately groups its actions below values while the wide sidebar places them beside the title. Both compositions are readable, keyboard-operable and preserve draft/focus on adaptation."},
+    {"id": "C99", "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.", "context": "Related library and editor tables show identical Name and Category values, but Name is unnecessarily cramped in the editor while the library leaves excessive empty space. The editor adds checkboxes and two numeric columns. Existing acceptance checks only shared CSS and no overflow."},
+    {"id": "C100", "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.", "context": "A compact inspector includes Name, Category and four required numeric columns; the wide library has only Name and Category. Their shared sizing policy preserves readable values and reachable actions. A proposal would force identical pixel widths and hide numeric fields to match the library."},
+    {"id": "C101", "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.", "context": "A header has a refresh icon button and a separate Resources 2 label. The product requests one compact control, and the count describes exactly the resources refreshed. After changing scope to one resource, the old count remains 2 while the action refreshes one. A failed count read renders 0. Tests only check that a badge is inside the button."},
+    {"id": "C102", "prompt": "Review only these supplied facts. Recommend a scoped decision and a distinguishing check. Preserve valid behavior; do not edit, run the app or claim browser observations.", "context": "A dashboard reports 120 total resources and has an action explicitly labeled Refresh selected 3. Its count and action are accurate, useful and visually clear. The total includes resources outside the selection; configuration is a separate control."},
+    {"id": "C103", "prompt": "Review only the supplied facts. Explain the scoped implementation decision and a distinguishing check without running tools, editing files or claiming browser observations.", "context": "A reusable form uses Grid for layout and viewport media queries to switch its field/action arrangement. Opening an existing neighboring drawer makes the form narrow while the viewport remains 1600px; actions become cramped because the intended compact arrangement never activates. The supported browsers have container size queries. Tests only resize the window; the task needs a conditional style change, not merely ordinary wrapping."},
+    {"id": "C104", "prompt": "Review only the supplied facts. Explain the scoped implementation decision and a distinguishing check without running tools, editing files or claiming browser observations.", "context": "A simple Flex layout already wraps automatically as intended, with no requested conditional style changes. The application shell deliberately uses viewport breakpoints and reduced-motion/hover media conditions. A proposal calls Grid/Flex and queries interchangeable, removes layout rules when introducing container queries, and moves all media conditions to container width."},
+    {"id": "C105", "prompt": "Проверь сценарий добавления подключения на странице и предложи поведение отмены с проверкой. Только по приведённым фактам, без запуска инструментов и без правок файлов.", "context": "Настольное приложение для операторов. Страница «Подключения»: слева список сохранённых подключений, справа рабочая область с карточкой выбранного. «Добавить подключение» в шапке заменяет карточку формой создания. В форме кнопки «Очистить» и «Сохранить», кнопки «Отменить» нет. В предыдущей версии «Отменить» сворачивала всю рабочую область в кнопку «Добавить», и карточка ранее выбранного подключения не возвращалась. Когда сохранённых подключений нет, форма — единственное содержимое страницы. Существующий тест проверяет только, что после отмены поле имени пустое."},
+    {"id": "C106", "prompt": "Только по приведённым фактам: нужно ли менять сворачивание строки и элементы очистки? Объясни решение и проверку без запуска инструментов.", "context": "Страница списка правил. «Добавить правило» раскрывает под кнопкой короткую строку ввода прямо в списке; список остаётся видимым и остаётся рабочей областью. «Отмена» сворачивает строку обратно в кнопку и возвращает на неё фокус. В поиске по списку есть значок «×», очищающий только поле поиска. В настройках есть кнопка «Восстановить значения по умолчанию» с подтверждением, принятым в продукте."},
+    {"id": "C107", "prompt": "Review only the supplied transfer facts. Decide whether the delivered artifact can be called complete and name a distinguishing check. Do not run tools or edit files.", "context": "The brief asks to transfer an existing application feature with all supported operational states. The source has seven screens plus a loading state, an error state, an open inspector and a direct-entry detail state. The delivered artifact contains the seven default screens and looks faithful in those states. The agent reports the transfer complete because every frame it created passed visual comparison."},
+    {"id": "C108", "prompt": "Review only the supplied transfer facts. Decide what coverage is required and name a proportionate check. Do not run tools or edit files.", "context": "The user explicitly asks to transfer one named settings screen in its current default state as an editable reference. Other routes, themes and error states are outside the request. The delivered artifact contains that state and its source conditions are known."},
+    {"id": "C109", "prompt": "Review only the supplied capture facts. Decide whether the capture is sufficient source evidence and name a distinguishing check. Do not run tools or edit files.", "context": "A long web page reveals sections with IntersectionObserver and a large result list is virtualized. The first viewport becomes network-idle and is captured. The agent treats the image as a complete full-page source although lower reveal sections were never scrolled into view and only the visible virtualized rows existed."},
+    {"id": "C110", "prompt": "Review only the supplied capture facts. Decide whether extra capture-readiness work is needed and name a proportionate check. Do not run tools or edit files.", "context": "A static documentation screen renders all required content immediately, has no lazy reveal, virtualization, independent scrolling or transient overlay state, and the requested artifact is the current viewport only. Fonts and assets are already confirmed ready."},
+    {"id": "C111", "prompt": "Review only the supplied design-transfer facts. Recommend a scoped reconciliation decision and a distinguishing check. Do not run tools or edit files.", "context": "The target artifact already has a maintained reusable Button, Field and Alert system whose contracts match the captured screen. The imported screen is visually accurate but every control remains a standalone copied group. The agent calls the result design-system integrated because the layers are editable."},
+    {"id": "C112", "prompt": "Review only the supplied design-transfer facts. Recommend a scoped decision and a distinguishing check. Do not run tools or edit files.", "context": "A transferred visualization is unique to one screen and no existing reusable resource matches its structure or behavior. The brief requires an editable faithful composition, not a new shared family. The rest of the screen is already linked to the maintained system."},
+    {"id": "C113", "prompt": "Review only these component-system facts. Decide whether the proposed componentization is justified and name a distinguishing check. Do not run tools or edit files.", "context": "During cleanup the agent converts every wrapper, spacer and one-off content group into a reusable component so the artifact has 'no raw layers'. Most new components have one consumer, no independent behavior and no repeated change contract. Their nesting adds several extra edit hops."},
+    {"id": "C114", "prompt": "Review only these component-system facts. Decide whether a shared base is justified and name a distinguishing check. Do not run tools or edit files.", "context": "The same status control appears in twelve consumers, shares one behavior and state contract, and product changes must propagate consistently. A new shared base would replace duplicated implementations while keeping consumer-specific content as properties or children."},
+    {"id": "C115", "prompt": "Review only these library facts. Diagnose the organization problem and propose a distinguishing check without editing or running tools.", "context": "A reusable UI library contains 45 working resources. Public components, internal building blocks, anatomy examples, experiments and deprecated items appear in one flat creation-order list. Several related states of the same family are far apart. Consumers can technically inspect everything, but must open many unrelated items to find the supported resource."},
+    {"id": "C116", "prompt": "Review only these library facts. Decide whether additional hierarchy is necessary and propose a proportionate check without editing or running tools.", "context": "A small internal library has five independent public components, clear role-based names, no deprecated or experimental items, no internal helper tier and no ambiguous alternatives. All five are visible together and consumers already find the correct one directly."},
+    {"id": "C117", "prompt": "Review only these design-system facts. Distinguish semantic organization from visual polish and propose a check. Do not edit or run tools.", "context": "The library canvas is perfectly aligned with consistent spacing and section cards. However, an internal IconButton primitive, the supported ToolbarButton component and two demo-only examples are presented with identical prominence under the same heading. A new consumer cannot tell which resource is intended for ordinary reuse."},
+    {"id": "C118", "prompt": "Review only these design-system facts. Decide whether cosmetic reorganization is required and propose a check. Do not edit or run tools.", "context": "The library is visually plain and uses minimal decoration, but supported components are clearly named and grouped by role, internal helpers are marked and separated, examples are unmistakably documentation, and family states are adjacent and easy to compare. Consumers reliably choose the intended public resource."},
+    {"id": "C119", "prompt": "Review only these interrupted-transfer facts. Recommend how work should resume and a distinguishing check. Do not run tools or edit files.", "context": "A multi-step transfer stopped after several structural replacements. On the next session the saved plan says step 6 was next, but the actual artifact contains steps 1-5 plus a partially applied step 6. The proposed recovery is to replay steps 1-6 from the beginning because the previous tool session ended."},
+    {"id": "C120", "prompt": "Review only these edit facts. Decide whether persistent checkpoint machinery is justified and name a proportionate check. Do not run tools or edit files.", "context": "The authorized task is one atomic rename of a single design resource. The target is known, the operation is immediately readable back, and there is no dependent write chain or interrupted prior session. A proposal adds a persistent transfer ledger and checkpoint file before making the rename."}
   ]
 }
