@@ -14,6 +14,7 @@ from .cache import Cache, atomic_write, source_lock
 from .core import EvidenceError, digest, epoch, number, read_document, validate_snapshot
 from .processes import ProcessScope
 from .guides import GUIDES, guide_ids
+from .model_names import inventory_keys
 from .providers import SOURCES
 
 # Benchmarks and vendor guides share one registry, one cache mechanism and one
@@ -224,25 +225,26 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         if not isinstance(selected, list) or not selected or any(not isinstance(s, str) or s not in REGISTRY for s in selected):
             raise EvidenceError("select registered benchmark or guide sources")
 
-    def _refresh(self, selected, scope):
+    def _refresh(self, selected, scope, inventory=()):
         def get(sid):
             source = REGISTRY[sid]
             if scope.cancelled.is_set() or scope.remaining() <= 0:
                 return self.cache.view(source, self.cache.read(source), refresh="cancelled" if scope.cancelled.is_set() else "deadline_exceeded")
             try:
                 return self.cache.get(source, lambda s, v: scope.fetch(s, v, browser=self.browser),
-                                      offline=self.offline, force=self.force)
+                                      offline=self.offline, force=self.force,
+                                      inventory_keys=inventory if sid in SOURCES else ())
             except (EvidenceError, OSError) as exc:
                 return self.cache.view(source, self.cache.read(source), refresh="failed",
                                        error="local_source_error: " + type(exc).__name__)
         with ThreadPoolExecutor(max_workers=3) as pool:
             return list(pool.map(get, selected))
 
-    async def refresh(self, selected=None):
+    async def refresh(self, selected=None, *, inventory=()):
         selected = selected or sorted(REGISTRY)
         self._validate_sources(selected)
         scope = ProcessScope(self.timeout)
-        task = asyncio.create_task(asyncio.to_thread(self._refresh, list(dict.fromkeys(selected)), scope))
+        task = asyncio.create_task(asyncio.to_thread(self._refresh, list(dict.fromkeys(selected)), scope, inventory))
         try:
             return await asyncio.shield(task)
         except asyncio.CancelledError:
@@ -261,10 +263,10 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         finally:
             scope.cancel()
 
-    def _guides(self):
+    def _guides(self, available=None):
         """Guides for this host; an unresolved client never picks a publisher."""
-        for_client = guide_ids(self.client)
-        return (for_client, "client") if for_client else (guide_ids(), "all_publishers")
+        for_client = guide_ids(self.client, available)
+        return (for_client, "client") if for_client else (guide_ids(available=available), "all_publishers")
 
     async def context(self, request):
         validate_request(request)
@@ -272,8 +274,8 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         # consume all the time budget before a required source is attempted.
         primary = [sid for name in request["task_types"] for sid, _ in TASK_TYPES[name]["primary"]]
         selected = list(dict.fromkeys(primary + source_ids(request)))
-        guides, scope = self._guides()
-        fetched = await self.refresh(selected + guides)
+        guides, scope = self._guides(request["available"])
+        fetched = await self.refresh(selected + guides, inventory=inventory_keys(request["available"]))
         sources = [s for s in fetched if s.get("kind") != "guide"]
         guidance = [s for s in fetched if s.get("kind") == "guide"]
         result = build_context(request, sources, guidance=guidance, guidance_scope=scope)

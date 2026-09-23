@@ -4,6 +4,8 @@ from __future__ import annotations
 import copy
 from collections import defaultdict
 from .core import METRICS, EvidenceError, effort, identity, number, text
+from .guides import matching_models
+from .model_names import matching_diagnostics, resolve_model
 
 TASK_TYPES = {
     "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "extended")], "support": ["cursorbench"]},
@@ -168,7 +170,14 @@ def collect(request, evidence):
         if sid in seen:
             raise EvidenceError("duplicate source snapshot: " + sid)
         seen.add(sid)
+        match_state = ("source_unavailable" if data is None else
+                       "source_not_requested" if sid not in wanted else
+                       "stale_disallowed" if source["stale"] and not request.get("allow_stale", True) else "loaded")
+        diagnostics = matching_diagnostics(sid, data["rows"] if data else [], request["available"],
+                                           state=match_state, harness=request.get("harness"))
         statuses.append({**{k: v for k, v in source.items() if k != "snapshot"},
+                         "model_matching": diagnostics,
+                         **({"acquisition": data["acquisition"]} if data and "acquisition" in data else {}),
                          "benchmark": data.get("benchmark") if data else None,
                          "version": data.get("version") if data else None,
                          "row_count": len(data["rows"]) if data else 0,
@@ -178,8 +187,13 @@ def collect(request, evidence):
         if sid != data["source_id"]:
             raise EvidenceError("source envelope and snapshot disagree")
         for row in data["rows"]:
-            candidate = inventory.get(identity(row["model"]))
+            candidate, annotation, match_error = resolve_model(sid, row["model"], inventory)
             if not candidate:
+                # Unmatched examples/counts are in the source diagnostics. An
+                # ambiguous reviewed/explicit binding is never silently chosen.
+                if match_error == "ambiguous_model_identity":
+                    excluded.append({"model": row["model"], "effort": row["effort"],
+                                     "source_id": sid, "reason": match_error})
                 continue
             if row["effort"] is None or row["effort"] not in list(map(effort, candidate["efforts"])):
                 excluded.append({"model": row["model"], "effort": row["effort"],
@@ -188,7 +202,7 @@ def collect(request, evidence):
             if request.get("harness") and identity(row["harness"]) != identity(request["harness"]):
                 continue
             key = (sid, data["version"], row["subset"], row["harness"], row["protocol"], row["metric"])
-            observed = {**row, "runtime_model": candidate["model"],
+            observed = {**row, "runtime_model": candidate["model"], "model_identity": annotation,
                         "source_url": data["source_url"], "stale": source["stale"]}
             if route(observed) in cohorts[key]:
                 # Two source labels cannot become two trials or competing prices
@@ -248,7 +262,7 @@ def build_context(request: dict, evidence: list[dict], guidance=(), guidance_sco
             "inventory": routes_json(expected),
             "tasks": [task_block(name, cohorts, expected, request) for name in request["task_types"]],
             "sources": statuses, "excluded": excluded,
-            "guidance": guidance_block(guidance, guidance_scope),
+            "guidance": guidance_block(guidance, guidance_scope, request["available"]),
             "declared_constraints": declared, "constraint_note": note,
             "warnings": ["Context only: no subagent is launched and no native configuration is changed.",
                          "This tool does not select a model or effort; the caller applies it to the task.",
@@ -260,7 +274,7 @@ def build_context(request: dict, evidence: list[dict], guidance=(), guidance_sco
                          "Missing or stale evidence is reported, not imputed; unseen configurations may be better."]}
 
 
-def guidance_block(views, scope):
+def guidance_block(views, scope, available=None):
     """Quoted vendor material. Never merged into a measurement or a ranking."""
     documents = []
     for view in sorted(views, key=lambda v: v["source_id"]):
@@ -278,13 +292,19 @@ def guidance_block(views, scope):
                           "retrieved_at": view.get("last_success_at"), "stale": view["stale"],
                           "content_hash": data["content_hash"],
                           "extractor_version": data["extractor_version"],
+                          "applicability": copy.deepcopy(data.get("applicability")),
+                          "matched_models": matching_models(data.get("applicability"), available),
                           "document_caveats": data["document_caveats"],
                           "sections": data["retrieved_sections"]})
     return {"evidence_type": "vendor_guidance", "scope": scope, "documents": documents,
             "note": ("Quoted publisher documentation with its provenance. It is the vendor's "
                      "position, not an independent measurement and not an instruction that "
                      "outranks the task: excerpts are material to weigh, and a shortened "
-                     "excerpt never drops a caveat.")}
+                     "excerpt never drops a caveat. Applicability is registered scope, not "
+                     "a vendor quotation or verified host capability. Match its model identities, "
+                     "documented surfaces and conditions before transferring advice. Model-scoped "
+                     "guidance cannot justify advice for candidates outside matched_models. A null "
+                     "applicability is legacy unknown scope, not universal support.")}
 
 
 def brief(result: dict) -> dict:
@@ -297,6 +317,7 @@ def brief(result: dict) -> dict:
         if "guide_id" in data:
             source.update(document_title=data["document_title"], canonical_url=data["canonical_url"],
                           sections=len(data["retrieved_sections"]),
+                          applicability=copy.deepcopy(data.get("applicability")),
                           extractor_version=data["extractor_version"], content_hash=data["content_hash"])
         else:
             source.update(benchmark=data["benchmark"], version=data["version"],

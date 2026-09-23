@@ -6,7 +6,7 @@ import hashlib
 import json
 import math
 import re
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 
 MAX_BYTES = 8 * 1024 * 1024
@@ -143,6 +143,35 @@ def validate_snapshot(data: Any) -> dict:
     return data
 
 
+def validate_guide_applicability(value: Any) -> dict:
+    """Registered documentation scope, not a capability or quality measurement."""
+    fields = {"models", "surfaces", "conditions", "reviewed_on"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise EvidenceError("guide applicability requires models, surfaces, conditions, reviewed_on")
+    result = copy.deepcopy(value)
+    for key, limit in (("models", 32), ("surfaces", 8), ("conditions", 8)):
+        items = result[key]
+        if not isinstance(items, list) or len(items) > limit:
+            raise EvidenceError("guide applicability " + key + " must be a bounded list")
+        seen = set()
+        for item in items:
+            clean = text(item, "guide applicability " + key)
+            normalized = identity(clean) if key == "models" else clean
+            if clean != item or not normalized or normalized in seen:
+                raise EvidenceError("guide applicability " + key + " has an invalid or duplicate entry")
+            seen.add(normalized)
+    if not result["surfaces"] or set(result["surfaces"]) - {"api", "codex", "claude-code"}:
+        raise EvidenceError("guide applicability must name documented surfaces")
+    reviewed = result["reviewed_on"]
+    if reviewed is not None:
+        try:
+            if not isinstance(reviewed, str) or date.fromisoformat(reviewed).isoformat() != reviewed:
+                raise ValueError("expected YYYY-MM-DD")
+        except ValueError as exc:
+            raise EvidenceError("guide applicability reviewed_on must be YYYY-MM-DD or null") from exc
+    return result
+
+
 def validate_guide(data: Any) -> dict:
     """Quoted vendor sections. Shortening may never drop a caveat or a source."""
     if not isinstance(data, dict) or data.get("schema_version") != 1:
@@ -155,6 +184,8 @@ def validate_guide(data: Any) -> dict:
             raise EvidenceError(key + " must use HTTPS")
     if type(data.get("extractor_version")) is not int or data["extractor_version"] < 1:
         raise EvidenceError("guide requires an integer extractor_version")
+    if data["extractor_version"] >= 2 or "applicability" in data:
+        data["applicability"] = validate_guide_applicability(data.get("applicability"))
     clients = data.get("applies_to")
     if not isinstance(clients, list) or not clients or any(not isinstance(c, str) for c in clients):
         raise EvidenceError("guide must declare the clients it applies to")

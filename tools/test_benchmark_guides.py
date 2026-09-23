@@ -133,8 +133,10 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(source["kind"], "guide")
                 self.assertTrue(source["clients"])
                 self.assertTrue(source["sections"])
-        self.assertEqual(guide_ids("codex"), ["openai-reasoning"])
-        self.assertEqual(guide_ids("claude"), ["claude-model-choice", "claude-thinking"])
+        self.assertEqual(guide_ids("codex"),
+                         ["openai-gpt-6", "openai-gpt-6-astra-skills", "openai-reasoning"])
+        self.assertEqual(guide_ids("claude"),
+                         ["claude-model-choice", "claude-opus-5-5", "claude-thinking"])
         self.assertEqual(guide_ids("unconfigured"), [])
 
     def test_validate_guide_rejects_insecure_or_empty_documents(self):
