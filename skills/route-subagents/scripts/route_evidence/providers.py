@@ -315,8 +315,8 @@ class Fetcher:
             try:
                 return fetch_snapshot(source, timeout=self.timeout), {}
             except HubUnavailable as exc:
-                # No fallback on malformed/version-mismatched JSON, access
-                # restrictions, or Retry-After. Browser access remains opt-in.
+                # No fallback on malformed/version-mismatched JSON, other client
+                # errors or Retry-After. Browser access remains opt-in.
                 if not self.browser or exc.retry_after:
                     raise
                 remaining = self.timeout - (time.monotonic() - started)

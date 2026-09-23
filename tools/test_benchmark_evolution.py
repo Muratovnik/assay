@@ -343,12 +343,31 @@ class HubSourceTests(unittest.TestCase):
                 self.assertEqual(result["acquisition"]["kind"], "browser_fallback")
                 self.assertIn("fixture unavailable", result["warnings"][-1])
 
-    def test_never_fallback_around_throttling_access_or_semantic_failure(self):
-        for error in (FetchError("terminal_hub_http_429", 300), FetchError("terminal_hub_http_403"),
+    def test_never_fallback_around_throttling_client_or_semantic_failure(self):
+        for error in (FetchError("terminal_hub_http_429", 300), FetchError("terminal_hub_http_400"),
                       FetchError("terminal_hub_board_identity_changed"), hub.HubUnavailable("terminal_hub_http_503", 60)):
             with self.subTest(error=error), patch.object(hub, "fetch_snapshot", side_effect=error), patch.object(Fetcher, "browser_snapshot", side_effect=AssertionError("must not bypass")):
                 with self.assertRaises(FetchError):
                     Fetcher(browser=True)(SOURCES["terminal-bench"], {})
+
+    def test_http_status_decides_whether_the_enabled_browser_may_substitute(self):
+        def responding(code, headers=None):
+            opener = Mock()
+            opener.open.side_effect = urllib.error.HTTPError(hub.ENDPOINT, code, "fixture", headers or {}, None)
+            return patch.object(hub.urllib.request, "build_opener", return_value=opener)
+        for code in (401, 403, 404, 503):
+            with self.subTest(code=code), responding(code), \
+                    patch.object(Fetcher, "browser_snapshot", return_value=data("terminal-bench")) as browser:
+                result, _ = Fetcher(browser=True)(SOURCES["terminal-bench"], {})
+                self.assertEqual(browser.call_count, 1)
+                self.assertEqual(result["acquisition"]["preferred_error"], "terminal_hub_http_%d" % code)
+        for code, headers in ((429, {"Retry-After": "120"}), (403, {"Retry-After": "60"}), (400, None)):
+            with self.subTest(code=code, headers=headers), responding(code, headers), \
+                    patch.object(Fetcher, "browser_snapshot", side_effect=AssertionError("must not bypass")):
+                with self.assertRaises(FetchError):
+                    Fetcher(browser=True)(SOURCES["terminal-bench"], {})
+        with responding(403), self.assertRaises(hub.HubUnavailable):
+            Fetcher()(SOURCES["terminal-bench"], {})
 
 
 class EvolutionIntegrationTests(unittest.IsolatedAsyncioTestCase):

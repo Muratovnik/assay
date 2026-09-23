@@ -111,9 +111,11 @@ in `aggregate_usage`, outside per-task expense comparisons; release dates do not
 become evaluation dates. Inconsistent or malformed data fails closed.
 
 `sources[].acquisition` records the actual API URL and paging scope. Browser
-fallback is allowed only when already enabled, the endpoint is unavailable,
-and time remains. It retains the preferred-source failure. Authentication,
-access restrictions, rate limits, Retry-After, redirects or invalid data do not
+fallback is allowed only when already enabled, the endpoint is unavailable or
+refuses the anonymous read (401/403, such as a rotated application key), and
+time remains. The browser then reads the same public leaderboard page rather
+than a protected resource, and the result retains the preferred-source failure.
+Rate limits, Retry-After, redirects, other client errors or invalid data do not
 authorize browser fallback. Cache identity changes invalidate derived old data.
 
 DeepSWE already uses public JSON. The registered FrontierCode, CursorBench and

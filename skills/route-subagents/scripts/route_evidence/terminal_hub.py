@@ -26,7 +26,7 @@ MAX_PAGES = 100
 
 
 class HubUnavailable(FetchError):
-    """Transport/unavailable endpoint; an explicitly enabled browser may substitute."""
+    """Unavailable or refusing endpoint; an explicitly enabled browser may substitute."""
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -47,8 +47,10 @@ def fetch_page(body: dict, timeout: float) -> bytes:
                 raise FetchError("terminal_hub_response_too_large")
             return content
     except urllib.error.HTTPError as exc:
-        # Never route around authentication, access controls or throttling.
-        error = HubUnavailable if exc.code in (404, 410) or exc.code >= 500 else FetchError
+        # A refused anonymous read (401/403, e.g. a rotated application key)
+        # leaves this API unavailable, like 404/410/5xx: an enabled browser may
+        # read the same public page. Throttling and other client errors never do.
+        error = HubUnavailable if exc.code in (401, 403, 404, 410) or exc.code >= 500 else FetchError
         raise error("terminal_hub_http_%d" % exc.code,
                     retry_delay(exc.headers.get("Retry-After"))) from exc
     except (urllib.error.URLError, OSError) as exc:
