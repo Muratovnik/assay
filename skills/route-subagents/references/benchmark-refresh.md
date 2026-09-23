@@ -55,8 +55,11 @@ still apply. Failed or cancelled checks never certify the inventory. A cancelled
 early check retains its cooldown and last-good data without manufacturing a
 publisher failure. Offline requests do not change check history.
 
-Only the relevant benchmark sources receive these keys; generic/model-specific
-guides retain their existing TTL and scope filtering. The default advisor cache
+Only the relevant benchmark sources this host can fetch receive these keys. A
+browser-only source keeps its TTL while the browser adapter is disabled, rather
+than recording a check that cannot succeed as a publisher failure; enabling the
+browser makes it eligible again. Generic/model-specific guides retain their
+existing TTL and scope filtering. The default advisor cache
 is downstream of this acquisition step, not an alternative to it. An early
 check is reported as `refresh_reason=inventory_changed`; a successful fetch is
 still not evidence of complete model/effort coverage.

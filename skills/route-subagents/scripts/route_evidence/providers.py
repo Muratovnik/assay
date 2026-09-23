@@ -296,6 +296,11 @@ def retry_delay(value):
             return 0
 
 
+def needs_browser(source):
+    """Whether only the optional browser adapter can acquire this source."""
+    return source["adapter"] == "browser" and source.get("preferred_data") is None
+
+
 class Fetcher:
     def __init__(self, *, browser=False, timeout=15):
         number(timeout, "source timeout", upper=300)

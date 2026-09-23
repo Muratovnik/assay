@@ -367,6 +367,33 @@ class EvolutionIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(next(s for s in restored if s["source_id"] == "cursorbench")["model_matching"], source["model_matching"])
             self.assertTrue(any(c["model"] == "claude-opus-5-5" for t in again["tasks"] for cohort in t["supporting_comparisons"] for c in cohort["candidates"]))
 
+    async def test_new_inventory_skips_a_source_this_host_cannot_fetch(self):
+        from route_evidence.service import RoutingService
+        from route_evidence.processes import ProcessScope
+        from route_evidence.guides import guide_snapshot
+        now = 1800000000.0
+        for browser, frontier_calls, refresh in ((False, 1, "cached"), (True, 2, "updated")):
+            calls = []
+            def fetch(source, validators, *, browser=False):
+                calls.append(source["id"])
+                if source.get("kind") == "guide":
+                    body = "# Synthetic guide\n\n" + "\n\n".join("## " + h + "\nFixture prose." for h in source["sections"])
+                    return guide_snapshot(source, body), {}
+                return snapshot(source, [row("old-model")]), {}
+            with self.subTest(browser=browser), tempfile.TemporaryDirectory() as tmp, \
+                    patch.object(ProcessScope, "fetch", side_effect=fetch):
+                def service(enabled):
+                    return RoutingService(Cache(Path(tmp), clock=lambda: now), client="codex",
+                                          clock=lambda: now, browser=enabled)
+                # A browser-enabled run left a fresh snapshot for the old inventory.
+                await service(True).get_routing_context(["implementation"], available=inventory("old-model"))
+                result = await service(browser).get_routing_context(
+                    ["implementation"], available=inventory("old-model", "new-model"))
+                frontier = next(s for s in result["sources"] if s["source_id"] == "frontiercode")
+                self.assertEqual(calls.count("frontiercode"), frontier_calls)
+                self.assertEqual(frontier["refresh"], refresh)
+                self.assertEqual(calls.count("deepswe"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,7 +15,7 @@ from .core import EvidenceError, digest, epoch, number, read_document, validate_
 from .processes import ProcessScope
 from .guides import GUIDES, guide_ids
 from .model_names import inventory_keys
-from .providers import SOURCES
+from .providers import SOURCES, needs_browser
 
 # Benchmarks and vendor guides share one registry, one cache mechanism and one
 # refresh deadline; only their payload contracts differ.
@@ -230,10 +230,14 @@ an unqualified family alias nor the server's own guesses resolve model versions.
             source = REGISTRY[sid]
             if scope.cancelled.is_set() or scope.remaining() <= 0:
                 return self.cache.view(source, self.cache.read(source), refresh="cancelled" if scope.cancelled.is_set() else "deadline_exceeded")
+            # A new inventory brings a check forward only where this host can fetch:
+            # a doomed browser-only check would record a publisher failure and back
+            # off a fresh snapshot without ever certifying the inventory.
+            checkable = sid in SOURCES and (self.browser or not needs_browser(source))
             try:
                 return self.cache.get(source, lambda s, v: scope.fetch(s, v, browser=self.browser),
                                       offline=self.offline, force=self.force,
-                                      inventory_keys=inventory if sid in SOURCES else ())
+                                      inventory_keys=inventory if checkable else ())
             except (EvidenceError, OSError) as exc:
                 return self.cache.view(source, self.cache.read(source), refresh="failed",
                                        error="local_source_error: " + type(exc).__name__)
