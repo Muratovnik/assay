@@ -94,13 +94,6 @@ a transferred reaction's behavior to [motion](motion-and-transitions.md).
 - Check: parent, order, span, size, clipping and links at the affected levels, plus
   one real consumer of anything replaced.
 
-After an interruption or resumed session, treat persisted notes as a hypothesis
-about progress and the artifact as the source of truth for what now exists.
-Re-establish the target, reread the affected structure and continue from the last
-verified boundary. Do not replay completed replacements or mark an unverified
-write complete merely because it was the next planned step. Adapter-specific
-identity and reconnect mechanics remain with the adapter.
-
 ## Separate organizing from replacing
 
 Moving and reordering inside an existing library keeps the base's identity, its

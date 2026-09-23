@@ -161,7 +161,7 @@ itself, and the code catalog may name things differently while serving the role.
 - [Figma: design system structure](https://help.figma.com/hc/en-us/articles/38978644498199-AI-workflows-collection-Best-practices-to-help-Figma-AI-understand-your-design-system)
 - [Figma: slots for flexible content](https://help.figma.com/hc/en-us/articles/38231200344599-Use-slots-to-build-flexible-components-in-Figma)
 - [Edenspiekermann: replacement classification](https://github.com/edenspiekermann/Skills/blob/a49e859329aa99e81e8725bc66767d16e8fc9539/skills/apply-design-system/SKILL.md)
-- [Figma: dependency-ordered component creation](https://github.com/figma/mcp-server-guide/blob/main/skills/figma-generate-library/references/component-creation.md#1-component-architecture)
+- [Figma: dependency-ordered component creation](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-library/references/component-creation.md#1-component-architecture)
 - [Figma: component properties and their bound layers](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-library/references/component-creation.md#6-component-properties)
 - [Figma: Code Connect](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-code-connect/SKILL.md)
 - [Figma: design to code](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-design-to-code/SKILL.md)

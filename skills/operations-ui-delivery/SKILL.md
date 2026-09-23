@@ -113,12 +113,13 @@ without changing this task's authority. UI journey rules remain in the procedure
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
 
-When an authorized multi-step mutation resumes after interruption, re-establish
-the source and target and read the current artifact before continuing. Continue
-from the last verified boundary: do not replay completed writes or treat an
-unverified step as completed. Adapter-specific reconnect, identifier and transport
-mechanics stay with the adapter in use. A short atomic edit needs no checkpoint
-artifact or persistent ledger.
+When an authorized multi-step mutation resumes after interruption, persisted
+notes are a hypothesis about progress and the current artifact is the source of
+truth. Re-establish the source and target, reread the affected structure and
+continue from the last verified boundary: do not replay completed writes or treat
+an unverified step as completed. Adapter-specific reconnect, identifier and
+transport mechanics stay with the adapter in use. A short atomic edit needs no
+checkpoint artifact or persistent ledger.
 
 Whenever a rendered or drawn result exists, use Visual judgment for the composed
 artifact after the last write and show a useful preview; this applies to
@@ -136,6 +137,7 @@ Report the operator outcome, relevant criterion → evidence or gap, actual
 automated and visual checks, unresolved risks and owned runtime cleanup. A clean
 detector, skill read, existing test, successful import or matching defaults are
 not evidence of a complete transfer, a working journey, an editable system or a
-usable library; user approval is separate from verification. Keep reporting in the existing task, without a
-mandatory new document. When revising this skill, use
-[evaluation guidance](evals/evaluation.md); it is not part of ordinary UI work.
+usable library; user approval is separate from verification. Keep reporting in
+the existing task, without a mandatory new document. When revising this skill,
+use [evaluation guidance](evals/evaluation.md); it is not part of ordinary UI
+work.
