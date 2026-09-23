@@ -102,9 +102,12 @@ accidental overlap of independent examples on a canvas. Check clipping,
 reachability of the last element, focus rings, padding/gap, wrapping and voids.
 Do not cure a wrong height owner with successive manual resizes; fix the owner
 of the size. A library is itself a composition to judge: meaningful grouping,
-stable order and readable axes let a user find the current element and compare
-variants. Zero intersections do not prove legibility. Do not impose one page
-skeleton, fixed grid or mandatory showcase set on every project.
+stable order and readable axes let a user scan the current element and compare
+variants. Zero intersections do not prove legibility. This visual judgment does
+not establish the library's information architecture: consumer findability,
+public/internal/example boundaries and family discoverability belong to
+[design-system organization](design-system-organization.md). Do not impose one
+page skeleton, fixed grid or mandatory showcase set on every project.
 
 ## Keep asset provenance
 

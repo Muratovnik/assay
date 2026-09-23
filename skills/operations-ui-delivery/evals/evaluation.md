@@ -80,6 +80,19 @@ T07 became positive when the skill widened to any layout mode; T12-T16 add the
 new modes (new design, transfer, implementation in code, library editing) with
 the nearby negatives that remain: illustration without UI and tool installation.
 
+C107-C120 add paired supplied-fact cases for broad transfer completeness,
+capture readiness, reconciliation with an existing reusable system,
+over-componentization, consumer-facing library organization, semantic organization
+versus cosmetic canvas order, and interruption/resume behavior. Their controls
+preserve legitimate single-state transfers, static captures, justified unique
+regions, unique compositions, small flat libraries, plain but semantically clear
+catalogs and short atomic edits. These are decision cases only; they do not claim
+that a browser, design editor or adapter was executed.
+
+T17 adds consumer-facing design-system organization as a positive library task;
+T18 keeps a non-UI software component registry outside this skill despite
+"component" and "library" vocabulary.
+
 ## Comparison
 
 Before editing, retain the actual prior skill bytes, including already-present

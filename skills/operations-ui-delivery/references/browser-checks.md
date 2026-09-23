@@ -34,6 +34,33 @@ current position and exposes visible feedback plus an explicit route to the new
 editor: assert that feedback and route first, then follow it. Do not require every
 offscreen append to auto-scroll or steal focus.
 
+## Establish capture readiness
+
+Before using a browser/render capture as source evidence, establish whether the
+chosen state is materially present, not merely whether the page stopped making
+requests. Interfaces can reveal content only after scrolling or intersection,
+render large collections through virtualization, keep independent scroll regions,
+or place overlays and sticky/fixed content outside the geometry implied by a
+full-document capture. A canvas or other opaque rendered surface can also limit
+what structural evidence the capture mechanism exposes.
+
+Use the product's supported interaction to materialize the state needed for the
+claim and observe the expected region before capturing it. If content is
+visibility-triggered, exercise the relevant reveal/scroll rather than assuming a
+generic idle condition loaded it. For virtualization, a viewport capture can
+represent the visible state but cannot establish that the whole collection was
+captured; preserve that scope or use a fitting bounded source/capture method for
+the required material.
+
+- Failure: a long page is called complete because the initial viewport is stable,
+  while sections that render on intersection were never materialized.
+- Valid control: a static page whose required content is already present needs no
+  synthetic scroll tour or extra stabilization ritual.
+- Check: name the state/material required by the claim, the observation that shows
+  it is present, and the capture scope (viewport, document, region or platform).
+  If the mechanism cannot represent the needed content faithfully, keep that as a
+  limitation instead of treating absence in the capture as absence in the source.
+
 ## State-specific evidence
 
 When the existing harness lacks the required observation, the optional
@@ -87,3 +114,5 @@ the reviewed baseline while retaining behavior checks.
 - [Visual comparisons](https://playwright.dev/docs/test-snapshots)
 - [Test Agents](https://playwright.dev/docs/test-agents)
 - [Accessibility testing and its limits](https://playwright.dev/docs/accessibility-testing)
+- [Figma: capture limitations for scroll-driven, animated, canvas and virtualized UI](https://help.figma.com/hc/en-us/articles/40826832449303-Turn-coded-screens-into-editable-design-layers)
+- [CodeMiner42: reproduced Code-to-Canvas reveal and full-page geometry failures](https://blog.codeminer42.com/figma-code-to-canvas-what-the-demo-didnt-show-you/)

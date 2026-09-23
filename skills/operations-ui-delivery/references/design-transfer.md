@@ -19,6 +19,30 @@ redesign is legitimate when the brief allows it, and then it is declared. A sour
 defect is its own finding, resolved by decision, not quietly corrected inside a
 claim of fidelity.
 
+## Establish coverage before a broad transfer
+
+When the requested result spans multiple screens, journeys or material states,
+derive the expected transfer set from the brief and source behavior before using
+the produced artifact as evidence of completeness. Reuse the supported journeys
+and states already identified by [workspace](workspace-consistency.md) and
+[acceptance](scenario-testing.md); do not invent a second product specification.
+
+Keep the inventory proportional to the claim. Record the surfaces and material
+states needed to support "complete" or "all required states", including loading,
+empty, error, expanded/overlay or role/theme/size differences only where the
+source actually supports them and they change the ordered result. A single
+explicitly requested static state does not require an application-wide inventory
+or a full Cartesian product of route × state × viewport × theme.
+
+- Failure: nine default screens are transferred and called complete although the
+  source contract also requires an error state, an open inspector and a direct
+  entry state that were never considered.
+- Valid control: the user orders one named screen in one state; unrelated routes
+  and hidden states remain out of scope.
+- Check: each expected source item ends as transferred and verified, intentionally
+  omitted, unavailable/unverified, or explicitly out of scope. The candidate set
+  itself cannot be the oracle for whether anything was missed.
+
 ## Capture the chosen state, then treat it as raw material
 
 Reproduce the state from an existing story, fixture or scenario when one exists. Set
@@ -28,15 +52,16 @@ missing Storybook or browser on a native platform does not require installing on
 take the available path and name the gap. Capture mechanics stay with
 [browser checks](browser-checks.md).
 
-What comes back is material, not a result. Confirm accuracy and the required
-structure/editability separately; neither follows from the other or from import.
-Inspect the usual losses: substituted fonts, flattened SVG and masks, missing border
-and focus rings, displaced overlays, clipped content. Never promise 1:1 from the
-fact of import; keep captured, visually compared, linked to the system and verified
-after replacement distinct in the report. A flat or raster result is a legitimate
-deliverable when the ordered artifact is a reference image, and an intentional popup
-over content is a state to reproduce, not an overlap to remove. Structure depth and
-property chains belong to [component system](component-system.md).
+What comes back is material, not a result. Confirm transfer coverage, source
+accuracy and the required structure/editability separately; none follows from the
+others or from import. Inspect the usual losses: substituted fonts, flattened SVG
+and masks, missing border and focus rings, displaced overlays, clipped content.
+Never promise 1:1 from the fact of import; keep expected/captured, visually
+compared, linked to the system and verified after replacement distinct in the
+report. A flat or raster result is a legitimate deliverable when the ordered
+artifact is a reference image, and an intentional popup over content is a state to
+reproduce, not an overlap to remove. Structure depth and property chains belong to
+[component system](component-system.md).
 
 ## Classify a region before replacing it
 
@@ -68,6 +93,13 @@ a transferred reaction's behavior to [motion](motion-and-transitions.md).
   keeps its named skips in the result.
 - Check: parent, order, span, size, clipping and links at the affected levels, plus
   one real consumer of anything replaced.
+
+After an interruption or resumed session, treat persisted notes as a hypothesis
+about progress and the artifact as the source of truth for what now exists.
+Re-establish the target, reread the affected structure and continue from the last
+verified boundary. Do not replay completed replacements or mark an unverified
+write complete merely because it was the next planned step. Adapter-specific
+identity and reconnect mechanics remain with the adapter.
 
 ## Separate organizing from replacing
 
