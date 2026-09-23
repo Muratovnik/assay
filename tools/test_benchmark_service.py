@@ -260,13 +260,19 @@ class ProcessTests(unittest.TestCase):
             pid = int(pidfile.read_text())
             # The descendant sleeps far longer than this test runs, so it cannot
             # have exited on its own: a zombie and a reaped entry both mean the
-            # group was killed. Reading can lose the race, and that is the same
-            # answer rather than a failure: the open reports it as ENOENT and
-            # the read, once the open has succeeded, as ESRCH.
-            try:
-                state = Path(f"/proc/{pid}/stat").read_text().split()[2]
-            except (FileNotFoundError, ProcessLookupError):
-                state = None
+            # group was killed. The kill is queued rather than synchronous, so
+            # the state gets a bounded moment to change. Reading can lose the
+            # race, and that is the same answer rather than a failure: the open
+            # reports it as ENOENT and the read, once the open has succeeded, as ESRCH.
+            until = time.monotonic() + 2
+            while True:
+                try:
+                    state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+                except (FileNotFoundError, ProcessLookupError):
+                    state = None
+                if state in (None, "Z") or time.monotonic() >= until:
+                    break
+                time.sleep(.01)
             if state is not None:
                 self.assertEqual(state, "Z")
 

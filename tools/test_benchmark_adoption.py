@@ -103,6 +103,15 @@ def is_running(pid):
         kernel.CloseHandle(handle)
 
 
+def stops_within(pid, seconds=2):
+    """A group kill is queued, not synchronous: allow the member a bounded moment
+    to die. A missed kill still fails, because every fixture sleeps far longer."""
+    until = time.monotonic() + seconds
+    while is_running(pid) and time.monotonic() < until:
+        time.sleep(.01)
+    return not is_running(pid)
+
+
 @unittest.skipIf(os.name == "nt", "POSIX /proc probe")
 class ProcessProbeTests(unittest.TestCase):
     """The probe above decides the ownership tests below, so a process that
@@ -146,10 +155,7 @@ class ProcessOwnershipTests(unittest.TestCase):
                 "stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); "
                 "print(p.pid)")
         pid = int(ProcessScope(3).run([sys.executable, "-B", "-S", "-c", code]))
-        until = time.monotonic() + 2
-        while is_running(pid) and time.monotonic() < until:
-            time.sleep(.01)
-        self.assertFalse(is_running(pid))
+        self.assertTrue(stops_within(pid))
 
     def test_deadline_owns_descendant_after_direct_parent_exit(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -163,7 +169,7 @@ class ProcessOwnershipTests(unittest.TestCase):
             elapsed = time.monotonic() - started
             self.assertTrue(pidfile.exists(), "worker did not reach readiness")
             self.assertLess(elapsed, 3)
-            self.assertFalse(is_running(int(pidfile.read_text())), "owned descendant still running")
+            self.assertTrue(stops_within(int(pidfile.read_text())), "owned descendant still running")
 
     def test_cancel_after_parent_exit_preserves_unrelated_process(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -187,7 +193,7 @@ class ProcessOwnershipTests(unittest.TestCase):
                     with self.assertRaises(EvidenceError):
                         future.result(timeout=3)
                     self.assertLess(time.monotonic() - started, 3)
-                    self.assertFalse(is_running(int(pidfile.read_text())))
+                    self.assertTrue(stops_within(int(pidfile.read_text())))
                 self.assertIsNone(unrelated.poll())
             finally:
                 scope.cancel()
