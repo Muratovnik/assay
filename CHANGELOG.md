@@ -6,6 +6,30 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.6.0](https://github.com/Muratovnik/assay/compare/v0.5.0...v0.6.0) (2026-09-23)
+
+Subagent routing now scopes vendor guidance to the exact models a host has and
+brings benchmark evidence up to date when that inventory changes. The UI skill
+gains a procedure for organizing a design-system library for its consumers and
+a clearer account of what a complete transfer requires.
+
+### Features
+
+* **operations-ui-delivery:** organize a design-system library for its consumers, cover broad transfer completeness and capture readiness, add Figma library mechanics through the Figwright adapter, and resume interrupted multi-step work from the current artifact ([f005a6c](https://github.com/Muratovnik/assay/commit/f005a6cd2f036b8b5f8d0de8cdd60b9206fe10ac))
+* **route-subagents:** scope GPT-6 and Opus 5.5 guidance to the models and surfaces it documents, match reviewed CursorBench model names, give a newly confirmed inventory one bounded early benchmark check with per-model matching diagnostics, and read Terminal-Bench 4.0 from the publisher's public JSON API before the opt-in browser route ([519cf94](https://github.com/Muratovnik/assay/commit/519cf94698ccc9bc6af625df8cfb18713e4f8d9f))
+
+### Bug Fixes
+
+* **route-subagents:** check a new inventory only against sources the host can fetch, so a browser-only source with the browser disabled keeps its fresh snapshot instead of recording a failure and backing off ([066cf4f](https://github.com/Muratovnik/assay/commit/066cf4f6a96f7802c91eb0bdd9dd5a4199391a30))
+* **route-subagents:** report fresh data during a backoff as cached, and evict the oldest inventory checks first when the history is full ([f56e4a4](https://github.com/Muratovnik/assay/commit/f56e4a41ac776c8d31daf5e47f2374fa864eb290))
+* **route-subagents:** let an enabled browser read Terminal-Bench when the API refuses an anonymous read; rate limits and other client errors still never substitute for it ([f5de75b](https://github.com/Muratovnik/assay/commit/f5de75b637ee05b36896c2d94125132ed94bd0bc))
+
+Guidance scope and model-name matching are registry contracts checked against
+fixtures, not live retrievals or model evaluations; confirm the Terminal-Bench
+API with the online smoke in the installed environment before relying on it. The
+new UI decision cases are specifications, and no behavioral run is claimed.
+Reconnect the MCP server after updating its code.
+
 ## [0.5.0](https://github.com/Muratovnik/assay/compare/v0.4.0...v0.5.0) (2026-09-21)
 
 The operational UI skill now covers the whole life of a UI artifact: designing a
