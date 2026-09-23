@@ -43,8 +43,9 @@ expires. Reordering entries/efforts or removing a model alone does not.
 
 A successful 200 or 304 records the check even when the new model has no row.
 Its absence must not trigger a fetch on every recommendation. The check history
-survives reconnects and holds at most 256 entries per source; an evicted entry
-can be checked again under the same throttle. Old cache envelopes without this
+survives reconnects and holds at most 256 entries per source, evicting the
+oldest checks first; an evicted entry can be checked again under the same
+throttle. Old cache envelopes without this
 history receive one check rather than an invented historical inventory.
 
 Inventory-triggered checks have a five-minute per-source cooldown. Further new

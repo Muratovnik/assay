@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, source_lock
+from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, source_lock
 from route_evidence.core import EvidenceError, encoded, identity, timestamp
 from route_evidence.model_names import inventory_keys, matching_diagnostics, model_identity, resolve_model
 from route_evidence.providers import Fetcher, SOURCES, parse_tables, snapshot
@@ -210,6 +210,25 @@ class InventoryRefreshTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             self.get(["unbounded arbitrary task prose"])
         self.assertEqual(self.fetch.call_count, 0)
+
+    def test_fresh_data_during_backoff_is_reported_cached(self):
+        self.get(self.a)
+        self.fetch.side_effect = FetchError("fixture throttled", retry_after=900)
+        self.assertEqual(self.get(self.a, force=True)["refresh"], "failed")
+        self.assertEqual(self.get(self.a)["refresh"], "cached")
+        self.assertEqual(self.get(self.a, force=True)["refresh"], "backoff")
+        self.assertEqual(self.fetch.call_count, 2)
+
+    def test_full_check_history_evicts_the_oldest_checks(self):
+        batches = [["%064x" % (100 * b + i) for i in range(100)] for b in range(3)]
+        for batch in batches:
+            self.get(batch)
+            self.now += INVENTORY_REFRESH_INTERVAL
+        checked = self.cache.read(self.source)["inventory_checked"]
+        self.assertEqual(len(checked), MAX_INVENTORY_KEYS)
+        self.assertLessEqual(set(batches[1] + batches[2]), set(checked))
+        self.assertNotIn(batches[0][-1], checked)
+        self.assertEqual(self.fetch.call_count, 3)
 
 
 def hub_row(i=0, **extra):

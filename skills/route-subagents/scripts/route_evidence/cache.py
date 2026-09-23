@@ -168,22 +168,24 @@ class Cache:
         current, early, deferred = decision(state)
         if offline:
             return {**current, "refresh": "offline"}
+        # Fresh data that needs no check is cached, even while a backoff runs:
+        # "backoff" means a wanted refresh was withheld.
+        if not force and not current["stale"] and not early:
+            return cached(current, deferred)
         retry_at = state.get("next_retry_at")
         # Explicit force and inventory probes both respect Retry-After/backoff.
         if retry_at and self.clock() < epoch(retry_at):
             return {**current, "refresh": "backoff"}
-        if not force and not current["stale"] and not early:
-            return cached(current, deferred)
         with source_lock(self.root / (source["id"] + ".lock")) as acquired:
             if not acquired:
                 return self.view(source, self.read(source), refresh="update_in_progress")
             state = self.read(source)
             current, early, deferred = decision(state)
+            if not force and not current["stale"] and not early:
+                return cached(current, deferred)
             retry_at = state.get("next_retry_at")
             if retry_at and self.clock() < epoch(retry_at):
                 return {**current, "refresh": "backoff"}
-            if not force and not current["stale"] and not early:
-                return cached(current, deferred)
             if early:
                 state["inventory_probe_after"] = timestamp(self.clock() + INVENTORY_REFRESH_INTERVAL)
             previous = state.get("snapshot")
@@ -213,7 +215,8 @@ class Cache:
                              last_success_at=now, next_retry_at=None, error=None, failures=0)
                 # A successful 200/304 checks the inventory even when the new
                 # model is not published yet. Failures do not consume this check.
-                old = sorted(set(state.get("inventory_checked", [])) - requested)
+                # The history is kept newest first, so eviction drops the oldest.
+                old = [key for key in state.get("inventory_checked", []) if key not in requested]
                 state["inventory_checked"] = sorted(requested) + old[:MAX_INVENTORY_KEYS - len(requested)]
                 action = "validated_not_modified" if not_modified else "updated"
             except (EvidenceError, OSError, TimeoutError) as exc:
