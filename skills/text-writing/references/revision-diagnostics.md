@@ -108,6 +108,6 @@ unverified coverage. Without `--style`, a pair containing no recognized facts ex
 explicitly unverified. `--term` without `--style` is an input error.
 
 Inputs are limited to 2,000,000 bytes each, NUL bytes are rejected, and file errors
-have an `unverified` JSON report with `--json`. Configure the receiving terminal
-for UTF-8. Keep reports outside the final document unless the reader needs a real
+have an `unverified` JSON report with `--json`. CLI output is explicitly UTF-8, including redirected output on Windows.
+Configure the receiving terminal or pipe consumer to decode UTF-8. Keep reports outside the final document unless the reader needs a real
 unresolved limitation. The checker adds no authorization to read additional files.

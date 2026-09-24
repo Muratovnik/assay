@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -234,14 +235,14 @@ class FixtureTests(unittest.TestCase):
 
 
 class CLITests(unittest.TestCase):
-    def invoke(self, before: bytes, after: bytes, *flags: str):
+    def invoke(self, before: bytes, after: bytes, *flags: str, environment: dict[str, str] | None = None):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             paths = [root / "before.md", root / "after.md"]
             for path, data in zip(paths, (before, after)):
                 path.write_bytes(data)
             result = subprocess.run([sys.executable, "-B", str(SCRIPT), *map(str, paths), *flags],
-                                    capture_output=True, text=True, check=False)
+                                    capture_output=True, encoding="utf-8", check=False, env=environment)
             self.assertEqual([path.read_bytes() for path in paths], [before, after])
             self.assertEqual(set(root.iterdir()), set(paths))
             self.assertFalse(result.stderr)
@@ -259,6 +260,18 @@ class CLITests(unittest.TestCase):
         result = self.invoke("Доза 1 мг.".encode(), "Доза 2 мг.".encode(), "--json", "--strict")
         self.assertEqual(result.returncode, 1)
         self.assertEqual(json.loads(result.stdout)["status"], "review")
+
+    def test_cli_utf8_is_independent_of_legacy_pipe_encoding(self):
+        for encoding in ("ascii", "cp1252"):
+            for flags in (["--json"], []):
+                with self.subTest(encoding=encoding, flags=flags):
+                    result = self.invoke("Доза 1 мг.".encode(), "Доза 2 мг.".encode(),
+                                         "--strict", *flags,
+                                         environment=dict(os.environ, PYTHONIOENCODING=encoding))
+                    self.assertEqual(result.returncode, 1)
+                    self.assertIn("мг", result.stdout)
+                    if flags:
+                        self.assertEqual(json.loads(result.stdout)["status"], "review")
 
     def test_invalid_utf8_is_machine_readable(self):
         result = self.invoke(b"\xff", b"10 users.", "--json")
