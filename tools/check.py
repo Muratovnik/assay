@@ -38,6 +38,14 @@ GATES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "-p", "test_text_check.py",
         ),
     ),
+    (
+        "revision diagnostics",
+        (
+            "-m", "unittest", "discover",
+            "-s", "skills/text-writing/evals",
+            "-p", "test_revision_check.py",
+        ),
+    ),
 )
 
 

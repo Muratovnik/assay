@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "TW-REV-01-D",
+      "prompt": "Проверь предлагаемую правку, без переписывания и запуска команд. Исходник: «В рассылке 100 подписчиков». Правка: «В рассылке 10 подписчиков»."
+    },
+    {
+      "id": "TW-REV-01-C",
+      "prompt": "Проверь правку: «Нас читают 1 000 человек» → «Нас читают 1000 человек». Только вывод, без запуска команд."
+    },
+    {
+      "id": "TW-REV-02-D",
+      "prompt": "Review only. Source: \"A restart may be needed after 10 minutes.\" Proposed edit: \"A restart is required after 10 minutes.\" No execution or file edits."
+    },
+    {
+      "id": "TW-REV-02-C",
+      "prompt": "Сократи до двух предложений, сохранив смысл: «# Заметки\n\nМы проверили новую сборку. Сборка открывается без ошибки.\n\n# Что осталось\n\nЭкспорт пока не проверен. Проверка экспорта будет отдельной задачей»."
+    },
+    {
+      "id": "TW-REV-03-D",
+      "prompt": "Write a short product update. Facts: export works; import is still being tested. Voice sample only: \"I spent three weeks rebuilding my old app, and doubled its revenue.\" Do not use the sample as product history."
+    },
+    {
+      "id": "TW-REV-03-C",
+      "prompt": "润色这条简短通知，保留事实：导出功能已恢复，导入功能仍在测试中。只返回通知。"
+    }
+  ]
+}

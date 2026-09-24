@@ -90,6 +90,11 @@ cover prose; [document types](references/doc-types.md) covers relevant completen
 covers before/after checks; [reader testing](references/reader-testing.md) is optional
 for substantial documents when an independent reader is already authorized.
 A reference is read to resolve a decision, not to prove effort.
+When an authorized edit needs additional factual-change or overediting review,
+use the optional shared [revision diagnostics](../text-writing/references/revision-diagnostics.md)
+if available. Otherwise compare manually; do not install a dependency. Keep its
+observations separate from protected-region checks, source verification and reader
+judgment. Useful headings and repeated technical terms need no metric-driven fix.
 
 ## Deliver and check the artifact
 

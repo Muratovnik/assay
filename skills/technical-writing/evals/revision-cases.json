@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TECH-REV-01-D",
+      "prompt": "Review the copyedit only; do not run commands. Before: \"Retry delay: 10 ms.\" After: \"Retry delay: 10 s.\""
+    },
+    {
+      "id": "TECH-REV-01-C",
+      "prompt": "Update only the documented retry delay from the release note. Before: \"Retry delay: 10 ms.\" Authoritative note: \"The retry delay is now 20 ms. This change does not apply to connection timeout.\""
+    },
+    {
+      "id": "TECH-REV-02-D",
+      "prompt": "Review only. Source: \"Delete the local cache only after export succeeds. The remote archive stays unchanged.\" Proposed: \"Delete the local cache after export. The remote archive stays unchanged.\" A numerical-token comparison found no additions. No commands."
+    },
+    {
+      "id": "TECH-REV-02-C",
+      "prompt": "Review this task-oriented excerpt without a rewrite or commands: \"# Backup\n\nCreate a backup before changing the configuration.\n\n# Restore\n\nUse the backup to restore the previous configuration.\""
+    }
+  ]
+}

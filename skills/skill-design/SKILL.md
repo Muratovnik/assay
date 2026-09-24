@@ -99,3 +99,9 @@ to another file is not progressive disclosure. Report whether the result was
 authored, structurally checked, discovered, behaviorally exercised or supported
 by comparison. State untested hypotheses and meaningful limits. Small pilots
 do not prove general quality, savings or portability across models.
+
+For a material rule change, keep a compact [decision record](references/rule-decisions.md)
+with evidence, a valid control, negative results and the retain/weaken/remove decision.
+For writing methods, separate meaning, task fit, restraint, authorized effects and
+delivery from optional style observations or reader preference. Do not average
+a factual failure away or turn implementation tests into behavioral evidence.

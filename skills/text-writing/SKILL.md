@@ -85,6 +85,12 @@ context for a standalone deliverable belongs in that deliverable. Facts guarante
 to its actual audience need not all be repeated. Keep legitimate placeholders and
 attribution, licence, generation and safety notices.
 
+For an authorized before/after check, use the optional
+[revision diagnostics](references/revision-diagnostics.md) when a concrete risk
+justifies it. Compare facts and possible overediting separately; token matches and
+style observations prove neither meaning nor quality. No check, notes interview or
+repeat-until-clean loop is mandatory for a short task.
+
 ## References and delivery
 
 Read a reference only for the decision that needs it:

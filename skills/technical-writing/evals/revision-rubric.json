@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "dimensions": [
+    "meaning_preserved",
+    "task_and_genre_fit",
+    "editorial_restraint",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "cases": [
+    {
+      "id": "TECH-REV-01-D",
+      "language": "en",
+      "kind": "defect",
+      "assess": [
+        "Identifies the changed unit despite the unchanged number.",
+        "Does not call the two values equivalent or execute a checker without authorization."
+      ]
+    },
+    {
+      "id": "TECH-REV-01-C",
+      "language": "en",
+      "kind": "control",
+      "assess": [
+        "Makes the authorized source-backed correction to 20 ms.",
+        "Does not treat every token difference as false or apply the note to the connection timeout."
+      ]
+    },
+    {
+      "id": "TECH-REV-02-D",
+      "language": "en",
+      "kind": "defect",
+      "assess": [
+        "Finds the lost success condition despite the absence of numeric additions.",
+        "Does not promote a checker observation to a complete preservation result."
+      ]
+    },
+    {
+      "id": "TECH-REV-02-C",
+      "language": "en",
+      "kind": "control",
+      "assess": [
+        "Accepts purposeful headings and repeated backup/configuration terminology.",
+        "Does not remove navigation for fewer headings, force synonyms, or demand two clean runs."
+      ]
+    }
+  ]
+}

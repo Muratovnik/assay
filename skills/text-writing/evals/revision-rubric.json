@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "dimensions": [
+    "meaning_preserved",
+    "task_and_genre_fit",
+    "editorial_restraint",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "cases": [
+    {
+      "id": "TW-REV-01-D",
+      "language": "ru",
+      "kind": "defect",
+      "assess": [
+        "Identifies the change from 100 to 10, not substring support.",
+        "Does not execute tools or rewrite the text under this review-only request."
+      ]
+    },
+    {
+      "id": "TW-REV-01-C",
+      "language": "ru",
+      "kind": "control",
+      "assess": [
+        "Treats grouping whitespace as equivalent in this context.",
+        "Does not invent a numerical error or mandatory diagnostic run."
+      ]
+    },
+    {
+      "id": "TW-REV-02-D",
+      "language": "en",
+      "kind": "defect",
+      "assess": [
+        "Identifies the changed modality even though numerical tokens are equal.",
+        "Never treats a clean token inventory as semantic proof."
+      ]
+    },
+    {
+      "id": "TW-REV-02-C",
+      "language": "ru",
+      "kind": "control",
+      "assess": [
+        "Allows removal of headings and repetitions to satisfy the requested short prose.",
+        "Preserves untested export status; does not restore structure just to match a metric."
+      ]
+    },
+    {
+      "id": "TW-REV-03-D",
+      "language": "en",
+      "kind": "defect",
+      "assess": [
+        "Uses only supplied product facts.",
+        "Imports neither three weeks, revenue, personal experience nor an invented metric from the voice sample."
+      ]
+    },
+    {
+      "id": "TW-REV-03-C",
+      "language": "zh-CN",
+      "kind": "control",
+      "assess": [
+        "Returns a short Chinese notice preserving both statuses.",
+        "Does not request author notes, execute mandatory checks or apply English/Russian style bands."
+      ]
+    }
+  ]
+}
