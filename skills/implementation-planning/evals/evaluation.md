@@ -1,0 +1,106 @@
+# Evaluation protocol and evidence boundary
+
+Coordinator material for developing this skill, never executor instructions.
+The shipped cases are authored scenarios, not records of successful model runs.
+All cases were visible during authoring; none is claimed as an unseen holdout.
+Reserve fresh cases outside the executor packet before future material tuning.
+After use, retain them as regression evidence rather than calling them held out.
+
+## What to compare
+
+Use the client's ordinary planning/implementation behavior as the baseline, or
+freeze the actual prior skill bytes for a revision comparison. Keep the task,
+project snapshot, relevant owner instructions, tools, permissions and model
+settings comparable. Distinguish an explicit skill invocation from automatic
+discovery. The discovery cases include valid non-activation controls; an explicit
+method packet cannot establish discovery behavior.
+
+Start with a bounded multi-file change and a staged task with a real interruption
+when such work and fresh execution are authorized. A budget-constrained pilot can
+use ordinary permitted work; this protocol authorizes no paid campaign, delegation,
+installation, external mutation or new evaluation runner. A fresh model context
+and filesystem isolation are different properties. Record which method sources,
+keys, prior answers and surrounding files the executor could actually access.
+
+## Existing packet preparation
+
+Use `tools/eval_assets.py prepare` from the repository root. For example, with an
+existing task-owned directory outside canonical skill packages:
+
+```sh
+python -B tools/eval_assets.py prepare \
+  --cases skills/implementation-planning/evals/cases.json \
+  --case bounded-form --output-parent .cache/planning-evaluation \
+  --method skills/implementation-planning
+```
+
+Omit `--method` for a baseline packet. Choose `--collection discovery_cases` for
+an activation case, but evaluate discovery through the intended client route;
+manually loading the skill is a confounder. Do not give `rubric.json`, this file,
+research notes, previous answers or result records to the executor. Freeze any
+additional criteria skills explicitly and keep them identical between conditions
+unless their presence is the intended treatment. Optional unavailable skills do
+not authorize fetching or installing them during the test.
+
+The preparation command freezes inputs and selected runtime sources and returns a
+manifest digest. Retain that digest externally and use the existing audit packet
+verifier for postflight byte checks. It does not run a model, enforce isolation,
+prove read history or grade plans. A changed packet should be investigated, not
+quietly rebuilt to obtain a preferred result.
+
+## Semantic assessment
+
+Use `rubric.json` after inspecting actual output and tool evidence. Its `required`
+and `reject` entries describe decisions, not mandatory headings, wording or a
+universal plan format. A justified alternative can pass. Recheck a disputed
+expectation against the original brief and verified source; do not fit the brief
+to the candidate's answer. Distinguish:
+
+- Plan correctness: required outcomes, scope, grounding, dependencies, interfaces,
+  uncertainty and observable acceptance. Document coverage is not code correctness.
+- Executability: missing decisions, contradictions, invalid assumptions and work
+  the next executor had to redo. A plan-only case cannot prove implementation.
+- Authority and lifecycle: permitted effects, correct task selection, interruption,
+  safe handling of uncertain external effects and affected-only replanning.
+- Outcome and burden: actual delivery, user corrections, checks and full-chain
+  cost when available. Token count, number of steps and plan length are not quality.
+
+For the staged case compare planning plus continuation and implementation, not
+only the resumed tail. Keep failures, tool/harness faults and confounders. Record
+requested and observed configuration, relevant source/input identities, actual
+checks, partial outcomes and remaining gaps. Unknown subscription consumption
+stays unknown. Do not repeat unchanged trials solely to obtain a preferred answer.
+
+## Deterministic coverage
+
+`tools/test_implementation_planning.py` is discovered by the existing tools unit
+suite. It checks corpus registration, paired identities, invalid data rejection,
+input-only packet preparation, method/rubric separation, packet integrity, native
+projection expectations and resolving consumer links. These tests do not grade the
+behavioral cases. The existing compatibility fixture and render checks remain
+independent owners of projection and generated-byte correctness.
+
+Useful commands:
+
+```sh
+python -B -m unittest discover -s tools -p test_implementation_planning.py -v
+python -B tools/eval_assets.py check
+python -B tools/check.py --all
+python .github/relkit.pyz audit
+```
+
+## Current evidence
+
+The initial corpus has 18 planning/lifecycle cases and 6 discovery cases. Its
+nearby controls include complete migration versus scoped pilot, missing versus
+sufficient acceptance, and approved requirement change versus unauthorized drift.
+The rule decisions and source limits are recorded in
+[research and transfer](research-and-transfer.md).
+
+Initial authoring exercised the corpus and packet tests in a task-local partial
+source snapshot. Full repository integration, publication and platform results
+belong to the exact pull-request CI run. Do not turn a command listed here into a
+claim that it was run. No fresh client discovery, model comparison, human outcome
+study or quota/cost comparison was performed as part of authoring this method.
+Claims of improved planning or savings remain hypotheses until such evidence
+exists. A small later pilot will still not establish universal model portability.

@@ -61,3 +61,10 @@ document when the owning task suffices. At completion, reconcile code and consum
 with the original scope; report a partial result as partial. A requested pilot is
 complete when its own acceptance contract is met, without forcing a whole-system
 migration. Lack of authority for the remainder must stay explicit.
+
+For a multi-stage plan, use available
+[long-horizon planning](../../implementation-planning/references/long-horizon.md)
+for readiness, dependencies and the next detailed stage. Supply the consumers,
+compatibility constraints and retirement conditions established here; the planner
+must not redefine them. If already in that planning workflow, return these criteria
+to the same plan rather than re-entering the method or creating another inventory.

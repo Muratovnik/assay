@@ -91,6 +91,14 @@ including its conditional Vue procedure. For read-only review, use the applicabl
 criteria through [code quality verification](../independent-audit/references/code-quality.md)
 without changing this task's authority. UI journey rules remain in the procedures above.
 
+For explicit delivery planning, cross-screen sequencing or a multi-stage transfer,
+use available [implementation-planning](../implementation-planning/SKILL.md) with
+the agreed journeys, artifact identity, required states and shared dependencies.
+Use its units, readiness and continuation conditions in the same owning task;
+UI criteria and artifact checks remain here. A small local edit needs no extra
+planning document, and plan review preserves the read-only boundary. Do not
+restart planning when this skill is supplying criteria to an existing plan.
+
 ## Common execution and finish
 
 1. Establish the mode, outcome, starting state, authoritative source and actual
