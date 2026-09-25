@@ -193,6 +193,7 @@ class AgentAssetsTests(unittest.TestCase):
                 "skill/test-writing",
                 "skill/test-audit",
                 "skill/code-maintenance",
+                "skill/implementation-planning",
                 "skill/technical-writing",
                 "skill/text-writing",
                 "profile/evidence-reviewer",
