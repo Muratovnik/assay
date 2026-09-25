@@ -36,6 +36,19 @@ trace; without it the cause remains a hypothesis. Improve routing when the branc
 was missed and the oracle when the check was weak. Another paraphrase does not
 establish that an execution failure is fixed.
 
+For a recurring incident, recover the requirement's source/scope and the previous
+causal hypothesis and acceptance check before accepting the report's diagnosis.
+Separate a missing norm, a missed procedure, an ignored instruction and an oracle
+that accepts the original failure. Without the trace, retain competing explanations.
+A self-authored decision can corrupt several otherwise consistent downstream checks.
+
+Challenge the proposed safeguard with the original defect intact, a nearby lawful
+alternative, a new defect inside an old exception, and a valid terminal state where
+relevant. Test coverage loss and changes to the expected-result basis separately
+from defect detection. A safeguard must not require permanent debt or turn a
+continuing goal into permission for a new task. Keep concrete cases and source
+qualifications in evaluation records, not a product-specific runtime checklist.
+
 Keep general decisions in the skill, concrete incidents in evaluations/history
 and mechanical invariants in existing owner tools. Use ordinary authoring for
 packaging. Prefer conditional `references/` with explicit reading conditions;

@@ -68,9 +68,10 @@ assignments hide distinct state owners or couple future changes.
 - When a repair needs causal diagnosis or a persistent reproducer, use
   [diagnostic reproducers](references/diagnostic-reproducer.md). An already
   justified narrow fix does not require a new debugging campaign.
-- Before adding or materially changing a reusable mechanism, or delivering a
-  staged adoption, read [reuse and migration scope](references/reuse-and-migration.md).
-  Existing names and dependencies do not establish who performs the behavior.
+- Before a material decision to add, retain or change reusable behavior or
+  standard visual states, or deliver a staged adoption, read
+  [reuse and migration scope](references/reuse-and-migration.md). A dependency or
+  shared location does not establish delegation or completion of the outcome.
 - For TypeScript/Vue style choices, read the
   [conventions profile](references/typescript-vue-conventions.md). Its adoption
   boundary matters; it is not a universal language standard.

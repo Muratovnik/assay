@@ -26,6 +26,8 @@ owner rules and representative implementation. Select applicable areas such as
 responsibilities, state, reused mechanics, tests and effective tooling from that
 evidence; an implementer's claims or a recent diff are not prerequisites.
 Existing substantial custom primitives or infrastructure can make reuse relevant.
+In UI work, repeated controls, shared states, library agreements and recurring
+complaints can require system-level comparison even when no bug is named.
 A narrow review keeps its named boundary and records consequential outside risks
 without silently absorbing the rest of the repository.
 
@@ -46,7 +48,7 @@ Inspect only the relevant methods:
 | Implementation/refactoring quality, conventions, state or effective checks | [Code quality verification](references/code-quality.md) |
 | Ownership, migration, discovery, retirement or compatibility | [Architecture and migration](references/architecture-and-migration.md) |
 | Repository readers, onboarding, installation or distribution | [Repository and release](references/repository-and-release.md) |
-| Material custom mechanisms, dependencies or product-flow choices | [Solution choices and reuse](references/solution-choices-and-reuse.md) |
+| Material custom mechanics or visual states, repeated UI families, dependencies or product-flow choices | [Solution choices and reuse](references/solution-choices-and-reuse.md) |
 | Probe execution, frozen artifact identity, ambiguous absence or completeness claims | [Evidence and probes](references/evidence-and-probes.md) |
 | Authorized audit delegation, or invocation inside a bounded reviewer role | [Bounded review](references/bounded-review.md) |
 

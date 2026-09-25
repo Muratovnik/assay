@@ -24,6 +24,26 @@ shared constraints and prerequisite decisions. Do not reread every future detail
 or omit a shared contract to save context. Selective reading is a mechanism to
 check, not an assumed token saving.
 
+## Carry a goal across different tasks
+
+When several tasks serve a continuing outcome, preserve the current goal and
+source/scope, confirmed changes and unresolved interpretations, verified subset,
+remaining acceptance and next authorized stage or dependency in the same owning
+record. Include version-sensitive reasons for retained workarounds. A completed
+pilot and an incomplete overall migration can both be true; a no-growth gate
+alone provides no next step toward retiring the remainder.
+
+On a new task, reconcile that record with its present authority as well as the
+current artifact. Apply still-relevant constraints without treating old execution
+permission as permission for a new read-only task. Recheck an exception when its
+premise changes, not merely because a file was reformatted. Do not replay completed
+effects or reopen sufficient unaffected decisions to make the record look uniform.
+
+For a recurring complaint after a claimed repair, recover the prior causal
+hypothesis and its acceptance check. Determine whether the goal, selected subject,
+procedure selection, implementation or oracle was wrong before repeating the fix.
+Recurrence is a reason to investigate, not a fixed retry count authorizing a rewrite.
+
 ## Reconcile before continuing
 
 Resolve the selected task exactly. If its identifier or source is unavailable,

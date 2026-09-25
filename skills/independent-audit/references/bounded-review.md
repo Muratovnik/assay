@@ -16,6 +16,13 @@ The reviewer performing a comparison must have the applicable criteria sections
 available and read them or receive their exact relevant text with source/scope.
 The primary's reading alone does not establish that the delegated check used them.
 
+Carry the current outcome's relevant source and scope, the current assignment's
+authority, material changes to acceptance, disputed decisions and unverified
+premises with the packet. An implementer's summary is not a substitute for the
+source of a consequential exception. Include enough original context to test that
+basis within permitted reads; absent evidence stays an explicit limitation. Two
+reviewers agreeing on the same unsupported premise do not independently validate it.
+
 Each return identifies the assigned questions actually checked, decisive evidence,
 partial or unverified questions, exclusions and any material newly observed gap.
 Findings alone are not a coverage receipt. The primary reconciles returns against

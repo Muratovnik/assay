@@ -19,6 +19,28 @@ redesign is legitimate when the brief allows it, and then it is declared. A sour
 defect is its own finding, resolved by decision, not quietly corrected inside a
 claim of fidelity.
 
+## Distinguish the observed UI from the target system
+
+For system selection or redesign, inspect the code library and available design
+resources before recreating a catalog. Treat official kits as candidates: compare
+actual versions, license/access, editable properties, supported states, tokens and
+code APIs. Similar names and publisher branding do not establish compatibility.
+Record mapped, product-specific and unmapped parts in the existing work record;
+unavailable resources limit the claim rather than requiring a paid dependency.
+
+For a faithful transfer, preserve the authorized source and identify defects or
+possible target-system changes separately. Do not silently redesign it to match a
+kit. For an authorized target system, establish its basis and material allowed
+differences before propagating components to consumers. Public availability does
+not authorize installation, import, publication or a purchase. Resolve only choices
+that materially change the deliverable, not a fresh approval for every instance.
+
+Check an important state/property/token in the design and the actual code consumer
+when claiming correspondence. Keep capture fidelity, mapping and observed consumer
+effect distinct. Use existing tools or manual verification; no specific connector
+or design-kit subscription is required. Consumer-facing support and observed-only
+material are distinguished by [system organization](design-system-organization.md).
+
 ## Establish coverage before a broad transfer
 
 When the requested result spans multiple screens, journeys or material states,

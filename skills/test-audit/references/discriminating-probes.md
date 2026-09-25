@@ -55,6 +55,26 @@ should constrain. A banned string in a source file need not be a forbidden
 runtime dependency; an unreferenced name search need not prove unused code.
 Conversely, an exact exported name or release-format field can be intentional.
 
+## Does the transition gate protect new work and permit completion?
+
+For a suppression or migration gate, test the claim against the prior accepted
+basis, not only a list rewritten with the implementation. A remaining violation
+can keep a whole-file exception looking current while new violations appear
+inside it. Probe that case and removal of A with addition of B at the same count.
+Keep a legitimate move/rename and an authorized new exception as controls; neither
+line numbers nor a decreasing total alone settle identity and authority.
+
+Test the initial state, intermediate repair, last removal and cleared state when
+those states are supported. A gate requiring debt to remain nonempty locks in an
+incorrect end state. Distinguish no debt after a real scan from no files inspected,
+missing evidence and genuine non-applicability. Validate expected coverage apart
+from the candidate's own discovered list. A centralization check cannot establish
+that code inside the permitted layer delegates behavior or visual states.
+
+Use the actual owner configuration and relevant diagnostic in disposable probes.
+An illustrative checker establishes only the example's result; do not count it as
+production protection or as evidence that a model will choose this procedure.
+
 ## Are observations real and stable?
 
 Follow outputs and side effects beyond mock calls where the claim requires it.
