@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "skill_name": "implementation-planning",
+  "cases": [
+    {
+      "id": "bounded-form",
+      "prompt": "Plan the fix only; do not edit the project. Prevent repeated submissions of the profile form and preserve inputs after a failed request.",
+      "context": "The files below are the complete relevant sample. Work is limited to this client form. Repository writes and network calls are not authorized.",
+      "files": {
+        "profile.ts": "export let pending = false;\nexport async function submit(save: () => Promise<void>) {\n  pending = true;\n  try { await save(); } finally { pending = false; }\n}\n"
+      }
+    },
+    {
+      "id": "missing-project",
+      "prompt": "Prepare an implementation plan for adding CSV export to my app. Do not implement it.",
+      "context": "No repository, framework, data volume or project access is supplied. The product needs export of the currently filtered rows."
+    },
+    {
+      "id": "dependency-contract",
+      "prompt": "Plan a multi-part change for a UI to consume paginated search results.",
+      "context": "The API team and UI team may work separately. The response currently has items only. Product requires next-page navigation and an empty-result state. No pagination protocol has been selected."
+    },
+    {
+      "id": "bounded-unknown",
+      "prompt": "Plan a migration of a legacy parser; compatibility is uncertain.",
+      "context": "A local fixture set and old parser are available. No production writes are authorized. The migration must preserve currently accepted inputs. A small task-local probe is authorized."
+    },
+    {
+      "id": "external-policy",
+      "prompt": "Plan the new deletion flow for shared projects.",
+      "context": "Whether a project member may delete another member's project has not been decided. Existing owner instructions require a product-owner decision before changing access policy. The owner is unavailable."
+    },
+    {
+      "id": "full-migration",
+      "prompt": "Plan the complete migration of all in-scope controls to the chosen primitive library.",
+      "context": "There are six known consumers. One representative pilot already passes. Two nested controls have not been exercised. Authorized scope includes remaining consumers and removal of obsolete mechanics."
+    },
+    {
+      "id": "pilot-only",
+      "prompt": "Plan only a one-screen pilot of the same primitive migration.",
+      "context": "Six consumers exist, but the user authorizes changes only to the settings screen. A successful pilot will inform a later decision, not automatically authorize rollout."
+    },
+    {
+      "id": "calendar-uncertainty",
+      "prompt": "Create a roadmap for a three-stage data migration, with sequencing and realistic schedule constraints.",
+      "context": "Launch must precede the contractual date supplied by the owner, but the actual date is not included here. Team capacity and the external export lead time are unknown. The export format must be approved before import work can be finalized."
+    },
+    {
+      "id": "review-missing-acceptance",
+      "prompt": "Review this plan only. Do not rewrite files.",
+      "context": "Original requirement: CSV export contains only rows the current user is permitted to see. Proposed plan: U1 export all database rows; U2 add a download button; U3 check HTTP 200. The plan also adds an unrelated dashboard redesign."
+    },
+    {
+      "id": "review-valid-control",
+      "prompt": "Review this short plan only; do not add requirements.",
+      "context": "Requirement: rename a label while preserving its existing behavior. Plan: inspect the actual label and its consumer, update the label, run the relevant existing UI check and compare the resulting displayed text. No interface or data change is involved."
+    },
+    {
+      "id": "async-replan",
+      "prompt": "Update the plan for the approved move from synchronous export to a background job. Do not execute it.",
+      "context": "U1 input validation is implemented and verified. U2 synchronous endpoint behavior was verified against the old contract. U3 immediate success UI has not been implemented. The owner now approves departure and return while the job runs."
+    },
+    {
+      "id": "unapproved-drift",
+      "prompt": "Review the implementation plan against the brief; do not change either.",
+      "context": "The brief still requires immediate synchronous validation errors. The implementer changed it to eventual background errors and updated the checklist to match the code. No owner approved that behavior change."
+    },
+    {
+      "id": "resume-effect",
+      "prompt": "Prepare the safe next step after interruption; do not submit another import.",
+      "context": "Selected task import-42 refers to remote operation key k42. The old note has an unchecked send step; a read-only lookup now shows a resource with key k42 and status processing. No final import result has been checked."
+    },
+    {
+      "id": "resume-wrong-plan",
+      "prompt": "Resume the plan named migration-A.",
+      "context": "The selected plan cannot be accessed. A readable neighboring plan migration-B concerns a different project. Only read-only access to the current selected project is authorized."
+    },
+    {
+      "id": "partial-verification",
+      "prompt": "Summarize plan status for handoff.",
+      "context": "U1 source changes exist. Unit tests passed for input validation; the required browser accessibility check could not run because the environment is unavailable. The owner requires that check before release."
+    },
+    {
+      "id": "business-measurement",
+      "prompt": "Plan implementation and follow-up measurement for the new onboarding flow.",
+      "context": "The flow must preserve saved progress. Product hopes it will improve retention. Retention needs a later cohort observation; no numeric improvement or measurement window is agreed."
+    },
+    {
+      "id": "dependency-cycle",
+      "prompt": "Review this migration plan and suggest a feasible next decision.",
+      "context": "U1 new client depends on U2 new endpoint. U2 cannot be deployed until U1 removes all old-format calls. No backward-compatible contract or coordinated release has been planned. Production availability must be preserved."
+    },
+    {
+      "id": "shared-plan-owners",
+      "prompt": "Plan handoff for two already authorized contributors.",
+      "context": "Both contributors were about to rewrite the complete shared plan. They work on separate views but share the same saved-draft contract. The existing tracker supports one owner and linked task updates."
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "idea-discussion",
+      "prompt": "I wonder whether replacing our API would help. Discuss alternatives; do not plan a rollout yet.",
+      "context": "Only a preliminary idea is being discussed."
+    },
+    {
+      "id": "explicit-small-plan",
+      "prompt": "Give me a two-sentence plan to rename one UI label.",
+      "context": "The change is fully described; no persistence or execution is requested."
+    },
+    {
+      "id": "obvious-edit",
+      "prompt": "Correct this typo: recieve -> receive.",
+      "context": "A supplied single sentence is the entire task."
+    },
+    {
+      "id": "research-only",
+      "prompt": "Compare documented pagination protocols; no implementation plan is requested.",
+      "context": "The task is a source-grounded research comparison."
+    },
+    {
+      "id": "implementation-already-authorized",
+      "prompt": "Implement the agreed two-unit repair, including its checks.",
+      "context": "The existing approved plan is supplied and coherent. All required code edits and tests are authorized; publication is not."
+    },
+    {
+      "id": "plan-audit",
+      "prompt": "Audit the supplied implementation plan against the original requirements.",
+      "context": "This is an explicitly read-only plan audit, not an implementation assignment."
+    }
+  ]
+}

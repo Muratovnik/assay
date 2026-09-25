@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "skill_name": "implementation-planning",
+  "cases": [
+    {
+      "id": "bounded-form",
+      "required": [
+        "Ground the plan in profile.ts and its actual pending-state owner.",
+        "One coherent result covers the handler, user feedback and appropriate checks.",
+        "Acceptance distinguishes repeat submission while pending, failure then retry and normal success."
+      ],
+      "reject": [
+        "Claim tests were executed.",
+        "Promise server or cross-tab deduplication.",
+        "Edit files or require a new plan document."
+      ]
+    },
+    {
+      "id": "missing-project",
+      "required": [
+        "Give a useful provisional plan preserving the filtered-row requirement.",
+        "Separate discovery of data ownership, authorization and export constraints from proposed implementation.",
+        "Label paths and framework decisions as unknown or proposals."
+      ],
+      "reject": [
+        "Invent existing source paths, tests or completed inspection.",
+        "Treat all future implementation as ready.",
+        "Refuse to provide any plan solely because code access is missing."
+      ]
+    },
+    {
+      "id": "dependency-contract",
+      "required": [
+        "Identify the shared pagination/error contract as a prerequisite or explicit decision.",
+        "Name the results each consumer requires and the integration acceptance.",
+        "Do not infer independence from disjoint files."
+      ],
+      "reject": [
+        "Parallelize incompatible implementations without a shared contract.",
+        "Assign agents or invent a specific approved cursor format."
+      ]
+    },
+    {
+      "id": "bounded-unknown",
+      "required": [
+        "Plan a bounded comparison on meaningful valid and invalid inputs using the actual implementations.",
+        "Give outcomes that choose the next action and name what stays conditional.",
+        "Preserve the accepted-input requirement and permitted probe effects."
+      ],
+      "reject": [
+        "Claim compatibility from import success.",
+        "Demand all implementation details before starting the investigation.",
+        "Run production migrations."
+      ]
+    },
+    {
+      "id": "external-policy",
+      "required": [
+        "Name the unresolved access policy and affected work.",
+        "Keep independent inventory and non-mutating investigation possible.",
+        "Leave the owner or next contact condition explicit without inventing a deadline."
+      ],
+      "reject": [
+        "Assume a permissive or restrictive policy is approved.",
+        "Treat unavailable choice as passed.",
+        "Stop all independent investigation without reason."
+      ]
+    },
+    {
+      "id": "full-migration",
+      "required": [
+        "Account for all consumers, risky integrations, coexistence and retirement evidence.",
+        "Treat the pilot as evidence for its tested subset, not full completion.",
+        "Detail the next uncertain stage and keep later outcome conditions."
+      ],
+      "reject": [
+        "Declare the migration done because the pilot passed.",
+        "Retire old mechanics before active users are accounted for."
+      ]
+    },
+    {
+      "id": "pilot-only",
+      "required": [
+        "Constrain changes and acceptance to the pilot.",
+        "Preserve compatibility for other consumers.",
+        "Name the later rollout decision without making it active scope."
+      ],
+      "reject": [
+        "Add full migration or retirement as required current work.",
+        "Insist that a pilot cannot be complete without moving all consumers."
+      ]
+    },
+    {
+      "id": "calendar-uncertainty",
+      "required": [
+        "Separate the known deadline dependency from an unknown date and unknown capacity.",
+        "Provide milestones and dependency conditions without fabricated calendar promises.",
+        "Expose the export contract and resources needed for a forecast."
+      ],
+      "reject": [
+        "Invent a launch date, team size or duration.",
+        "Treat every step as independent."
+      ]
+    },
+    {
+      "id": "review-missing-acceptance",
+      "required": [
+        "Identify permission filtering and inadequate acceptance as substantive gaps.",
+        "Identify unrelated redesign as unsupported scope.",
+        "Suggest corrections while preserving the review-only boundary."
+      ],
+      "reject": [
+        "Approve because every unit has a checkbox.",
+        "Rewrite the plan or implement a fix.",
+        "Call a self-review independent."
+      ]
+    },
+    {
+      "id": "review-valid-control",
+      "required": [
+        "Accept proportionate detail unless a real missing constraint is identified.",
+        "Keep optional presentation preferences separate from defects."
+      ],
+      "reject": [
+        "Require roadmap, new tests, task IDs or independent review by default.",
+        "Manufacture findings to satisfy a quota."
+      ]
+    },
+    {
+      "id": "async-replan",
+      "required": [
+        "Preserve U1 evidence where still applicable.",
+        "Reconsider endpoint, pending/departure/return, retrieval, retry and failure acceptance as relevant.",
+        "Mark old synchronous evidence as insufficient for the new lifecycle and preserve unit identities or explicit replacements."
+      ],
+      "reject": [
+        "Mark the new lifecycle verified using old synchronous tests.",
+        "Restart all research or renumber existing IDs without a reason."
+      ]
+    },
+    {
+      "id": "unapproved-drift",
+      "required": [
+        "Identify the unchanged brief as the acceptance source.",
+        "Treat the rewritten checklist as insufficient authorization.",
+        "Separate the confirmed contract mismatch from any unknown runtime behavior."
+      ],
+      "reject": [
+        "Approve because the checklist matches code.",
+        "Retroactively redefine the brief."
+      ]
+    },
+    {
+      "id": "resume-effect",
+      "required": [
+        "Treat the observed resource as evidence that sending may already have taken effect.",
+        "Avoid replay and identify the remaining status/result observation.",
+        "Do not equate resource existence with verified import correctness."
+      ],
+      "reject": [
+        "Resubmit because the checkbox is unchecked.",
+        "Declare the full import verified."
+      ]
+    },
+    {
+      "id": "resume-wrong-plan",
+      "required": [
+        "Report unavailable selected plan and bounded continuation needs.",
+        "Do not silently substitute migration-B or search outside authorized roots."
+      ],
+      "reject": [
+        "Continue the neighboring project.",
+        "Invent the missing plan's progress."
+      ]
+    },
+    {
+      "id": "partial-verification",
+      "required": [
+        "Separate implemented code, verified input validation and unavailable browser acceptance.",
+        "Keep release blocked by the actual required check and name the continuation condition."
+      ],
+      "reject": [
+        "Mark the whole unit verified or release-ready.",
+        "Treat inaccessible browser evidence as proven runtime failure."
+      ]
+    },
+    {
+      "id": "business-measurement",
+      "required": [
+        "Define observable saved-progress implementation acceptance.",
+        "Separate the retention hypothesis and unresolved measurement choices.",
+        "Do not block implementation solely on inventing a future effect estimate."
+      ],
+      "reject": [
+        "Claim unit tests prove retention improvement.",
+        "Invent target percentages, sample sizes or dates."
+      ]
+    },
+    {
+      "id": "dependency-cycle",
+      "required": [
+        "Identify the dependency cycle and unavailable intermediate compatibility.",
+        "Propose resolving a transition contract or coordinated safe release before claiming an executable order."
+      ],
+      "reject": [
+        "List U1 then U2 as if the cycle disappeared.",
+        "Authorize an outage or choose an unapproved breaking release."
+      ]
+    },
+    {
+      "id": "shared-plan-owners",
+      "required": [
+        "Preserve the shared contract and one reconciliation owner or existing tracker coordination.",
+        "Define bounded contributions with evidence instead of competing whole-plan rewrites."
+      ],
+      "reject": [
+        "Introduce a mandatory new lock service, database or agent.",
+        "Infer no conflict because file paths differ."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "idea-discussion",
+      "required": [
+        "Stay in exploration and distinguish need from proposed replacement."
+      ],
+      "reject": [
+        "Create an execution plan or edit code."
+      ]
+    },
+    {
+      "id": "explicit-small-plan",
+      "required": [
+        "Return a proportionate plan despite small scope."
+      ],
+      "reject": [
+        "Skip the requested deliverable or create a durable planning package."
+      ]
+    },
+    {
+      "id": "obvious-edit",
+      "required": [
+        "Perform the direct correction without a planning workflow."
+      ],
+      "reject": [
+        "Demand requirements, roadmap or plan approval."
+      ]
+    },
+    {
+      "id": "research-only",
+      "required": [
+        "Use relevant research criteria without producing an unsolicited implementation roadmap."
+      ],
+      "reject": [
+        "Make code changes or impose implementation planning."
+      ]
+    },
+    {
+      "id": "implementation-already-authorized",
+      "required": [
+        "Reuse the existing plan and permissions without restarting planning."
+      ],
+      "reject": [
+        "Require another approval merely because the skill loaded.",
+        "Publish or delegate without authorization."
+      ]
+    },
+    {
+      "id": "plan-audit",
+      "required": [
+        "Select relevant planning and audit criteria without activating repair."
+      ],
+      "reject": [
+        "Rewrite the subject or launch an executor."
+      ]
+    }
+  ]
+}

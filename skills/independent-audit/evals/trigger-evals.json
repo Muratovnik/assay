@@ -9,6 +9,8 @@
     {"prompt": "Add retries to the API client and test the change.", "should_trigger": false},
     {"prompt": "Исправь опечатку в README.", "should_trigger": false},
     {"prompt": "Explain how this launcher resolves its config file.", "should_trigger": false},
-    {"prompt": "Сделай экран настроек менее похожим на шаблонный AI-дизайн.", "should_trigger": false}
+    {"prompt": "Сделай экран настроек менее похожим на шаблонный AI-дизайн.", "should_trigger": false},
+    {"prompt": "Проверь этот план внедрения на соответствие исходным требованиям. План не переписывай.", "should_trigger": true},
+    {"prompt": "Составь план внедрения экспорта отчётов в CSV.", "should_trigger": false}
   ]
 }

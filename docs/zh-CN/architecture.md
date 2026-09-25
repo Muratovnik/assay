@@ -32,6 +32,7 @@ Assay 负责契约、本地元数据和诊断重放，不引入新守护进程�
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/code-maintenance` | automatic | `~/.agents/skills/code-maintenance` | `~/.claude/skills/code-maintenance` |
+| `skill/implementation-planning` | automatic | `~/.agents/skills/implementation-planning` | `~/.claude/skills/implementation-planning` |
 | `skill/technical-writing` | automatic | `~/.agents/skills/technical-writing` | `~/.claude/skills/technical-writing` |
 | `skill/text-writing` | automatic | `~/.agents/skills/text-writing` | `~/.claude/skills/text-writing` |
 | `profile/evidence-reviewer` | explicit | `~/.codex/agents/evidence-reviewer.toml` | `~/.claude/agents/evidence-reviewer.md` |

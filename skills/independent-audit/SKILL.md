@@ -1,6 +1,6 @@
 ---
 name: independent-audit
-description: Audit a requested change, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
+description: Audit a requested plan, change, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
 ---
 
@@ -13,7 +13,7 @@ product requirements or authority to repair the subject.
 ## Frame the decision
 
 Read the original brief and applicable owner instructions. Name the subject,
-consumer, required outcome, prohibited effects and stage: scoped change,
+consumer, required outcome, prohibited effects and stage: plan readiness, scoped change,
 repository readiness, local candidate, hosted validation or published artifact.
 The implementer's report, checklist and available gates cannot define their
 own acceptance contract. Without a brief, infer provisional criteria from owner
@@ -42,6 +42,7 @@ Inspect only the relevant methods:
 
 | Audit concern | Reference |
 | --- | --- |
+| A plan's readiness, requirement coverage, dependencies or stale acceptance | [Plan review and replanning criteria](../implementation-planning/references/review-and-replan.md) |
 | Implementation/refactoring quality, conventions, state or effective checks | [Code quality verification](references/code-quality.md) |
 | Ownership, migration, discovery, retirement or compatibility | [Architecture and migration](references/architecture-and-migration.md) |
 | Repository readers, onboarding, installation or distribution | [Repository and release](references/repository-and-release.md) |

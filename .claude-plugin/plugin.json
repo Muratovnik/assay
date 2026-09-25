@@ -14,8 +14,10 @@
     "audit",
     "code-review",
     "delegation",
+    "planning",
     "research",
-    "testing"
+    "testing",
+    "writing"
   ],
   "skills": "./skills/",
   "agents": [

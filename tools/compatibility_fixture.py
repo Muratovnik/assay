@@ -22,6 +22,7 @@ EXPECTED_ASSETS = {
     "skill/test-writing",
     "skill/test-audit",
     "skill/code-maintenance",
+    "skill/implementation-planning",
     "skill/technical-writing",
     "skill/text-writing",
 }
@@ -59,6 +60,8 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             home / ".claude/skills/test-audit",
             home / ".agents/skills/code-maintenance",
             home / ".claude/skills/code-maintenance",
+            home / ".agents/skills/implementation-planning",
+            home / ".claude/skills/implementation-planning",
             home / ".agents/skills/technical-writing",
             home / ".claude/skills/technical-writing",
             home / ".agents/skills/text-writing",
@@ -111,7 +114,8 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
                 "compatibility fixture: deprecated Codex skill root returned"
             )
 
-        for name in ("test-writing", "test-audit", "evidence-research", "code-maintenance"):
+        for name in ("test-writing", "test-audit", "evidence-research", "code-maintenance",
+                     "implementation-planning"):
             asset_id = f"skill/{name}"
             asset = next(item for item in catalog.assets if item.id == asset_id)
             if asset.activation != "automatic":

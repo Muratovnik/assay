@@ -103,6 +103,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/implementation-planning"
+kind = "skill"
+path = "skills/implementation-planning"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/implementation-planning", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/implementation-planning", mode = "link" },
+]
+
+[[assets]]
 id = "skill/technical-writing"
 kind = "skill"
 path = "skills/technical-writing"
