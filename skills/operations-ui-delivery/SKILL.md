@@ -94,10 +94,7 @@ without changing this task's authority. UI journey rules remain in the procedure
 For explicit delivery planning, cross-screen sequencing or a multi-stage transfer,
 use available [implementation-planning](../implementation-planning/SKILL.md) with
 the agreed journeys, artifact identity, required states and shared dependencies.
-Use its units, readiness and continuation conditions in the same owning task;
-UI criteria and artifact checks remain here. A small local edit needs no extra
-planning document, and plan review preserves the read-only boundary. Do not
-restart planning when this skill is supplying criteria to an existing plan.
+UI criteria and artifact checks remain here.
 
 ## Common execution and finish
 
@@ -121,13 +118,9 @@ restart planning when this skill is supplying criteria to an existing plan.
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
 
-When an authorized multi-step mutation resumes after interruption, persisted
-notes are a hypothesis about progress and the current artifact is the source of
-truth. Re-establish the source and target, reread the affected structure and
-continue from the last verified boundary: do not replay completed writes or treat
-an unverified step as completed. Adapter-specific reconnect, identifier and
-transport mechanics stay with the adapter in use. A short atomic edit needs no
-checkpoint artifact or persistent ledger.
+When an authorized multi-step mutation resumes after interruption, reconcile it
+with the available [continuation procedure](../implementation-planning/references/continuation.md)
+before the next write.
 
 Whenever a rendered or drawn result exists, use Visual judgment for the composed
 artifact after the last write and show a useful preview; this applies to

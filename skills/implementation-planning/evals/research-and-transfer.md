@@ -24,20 +24,23 @@ checks. The baseline was main at `c642a41f9d9c88b252b775514a62fd8c242d7b09`.
 
 | Source and examined location | Decision-relevant observation | Limit |
 | --- | --- | --- |
-| [Superpowers writing-plans](https://github.com/obra/superpowers/blob/main/skills/writing-plans/SKILL.md), task sizing, file structure and plan template | Outcome-sized reviewable tasks, concrete files and carried interface constraints; also prescriptive small steps and code examples | Mutable source; instruction design, not a comparative outcome study |
+| [Superpowers writing-plans](https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/writing-plans/SKILL.md), task sizing, file structure and plan template | Outcome-sized reviewable tasks, concrete files and carried interface constraints; also prescriptive small steps and code examples | Instruction design, not a comparative outcome study |
 | [Compound Engineering traceability design](https://github.com/EveryInc/compound-engineering-plugin/blob/4043703d32c5df9e35f22757dee22f3a72a99c66/docs/plans/2026-04-21-001-feat-ce-plan-traceability-loop-plan.md), overview and R1-R9 | Stable unit IDs and origin/acceptance links survive reordering; origin-only structures are conditional | Historical design document, not proof of current shipped behavior. The previously discussed current ce-plan paths returned 404 during this implementation; no current implementation claim is made |
-| [Spec Kit analyze](https://github.com/github/spec-kit/blob/main/templates/commands/analyze.md), semantic models and detection passes | Compare requirements, tasks, coverage, ambiguity and consistency | Consistent documents do not establish implemented behavior |
-| [OpenSpec editing changes](https://github.com/Fission-AI/OpenSpec/blob/main/docs/editing-changes.md), editing artifacts and resolving discrepancies | Plans/specification can evolve during implementation; determine whether specification or implementation must change | Flexibility does not authorize changing the brief to excuse code drift |
+| [Spec Kit analyze](https://github.com/github/spec-kit/blob/b60057692cd726ea56331ec47f9ebc3e8877d8f7/templates/commands/analyze.md), semantic models and detection passes | Compare requirements, tasks, coverage, ambiguity and consistency | Consistent documents do not establish implemented behavior |
+| [OpenSpec editing changes](https://github.com/Fission-AI/OpenSpec/blob/65a7233f36ad022e99cc23115279768b8ca24fb6/docs/editing-changes.md), editing artifacts and resolving discrepancies | Plans/specification can evolve during implementation; determine whether specification or implementation must change | Flexibility does not authorize changing the brief to excuse code drift |
 | [ExecPlans recipe](https://developers.openai.com/cookbook/articles/codex_exec_plans), plan expectations and template | Recoverable context, observations/decisions, behavioral validation and recovery | Archived recipe; used as historical method evidence, not current client/API policy |
-| [GSD phase planning](https://github.com/open-gsd/gsd-core/blob/next/docs/how-to/plan-a-phase.md), phase plans and tracer-first | Stage-level planning and early end-to-end integration slice | Development branch `next`; no stable-interface or comparative effectiveness claim |
-| [Planning with Files](https://github.com/OthmanAdi/planning-with-files/blob/master/skills/planning-with-files/SKILL.md), task-specific recovery and shared-plan ownership considered in prior research | Recover the chosen task, preserve evidence and avoid competing writers | Prior-research transfer, not independently rerun here; no import of fixed files, hooks or interaction counters |
+| [GSD phase planning](https://github.com/open-gsd/gsd-core/blob/155c08facfed172a14fbd204ab75c841c706d1f9/docs/how-to/plan-a-phase.md), phase plans and tracer-first | Stage-level planning and early end-to-end integration slice | Revision from the development branch `next`; no stable-interface or comparative effectiveness claim |
+| [Planning with Files](https://github.com/OthmanAdi/planning-with-files/blob/4d24d9a8a2baa55a15e7f8f9ec6da8d19793ee8c/skills/planning-with-files/SKILL.md), task-specific recovery and shared-plan ownership considered in prior research | Recover the chosen task, preserve evidence and avoid competing writers | Prior-research transfer, not independently rerun here; no import of fixed files, hooks or interaction counters |
+| [Claude Code plan mode](https://code.claude.com/docs/en/common-workflows#plan-before-editing), plan before editing | A permission mode: read files and propose a plan, make no edits until approval | Mutable client documentation; limits effects and sets the flow, not plan-quality criteria |
+| [Codex Plan Mode](https://github.com/openai/codex/blob/782826663df3e898d0c594a13f6f75cc2a498644/codex-rs/collaboration-mode-templates/templates/plan.md), mode rules, phases and finalization | Non-mutating exploration before questions, two kinds of unknowns, a decision-complete plan in a compact format | Client template for a plan implemented right away; no roadmap, replanning or interrupted continuation |
 | [Assay skill-design transfer method](../../skill-design/references/research-and-transfer.md) and [evaluation method](../../skill-design/SKILL.md) | Tie rules to decisions, valid controls and observable checks; distinguish packaging, discovery and outcomes | Local authoring method, not evidence of benefit |
 
-Sources with branch URLs are mutable; the PR records the Assay implementation
-identity. Recheck a source before making a new version-specific claim. No popularity
-ranking, vendor benchmark or process-compliance percentage is treated as proof of
-planning quality. Long autonomous execution and multi-week planning are distinct:
-the latter additionally needs real external owners, resources and date constraints.
+Repository sources are pinned to the revision current when this record was
+written; the recipe and client documentation are mutable pages. Recheck a source
+before making a new version-specific claim. No popularity ranking, vendor
+benchmark or process-compliance percentage is treated as proof of planning
+quality. Long autonomous execution and multi-week planning are distinct: the
+latter additionally needs real external owners, resources and date constraints.
 
 ## Rule decisions
 
@@ -56,6 +59,8 @@ the latter additionally needs real external owners, resources and date constrain
 | Shared status ownership | Adapt single-owner reconciliation, not a new lock/database | Disjoint tasks may be worked in parallel under existing permissions | `shared-plan-owners` |
 | Honest readiness | Separate implementation, verification and blocked evidence in all stages | Unavailable browser evidence need not invalidate already demonstrated unit behavior | `partial-verification` |
 | Authority and read-only plan review | Retain existing audit authority; planning cannot grant implementation or delegates | Already authorized implementation needs no repeated ritual approval | `plan-audit`, `idea-discussion`, `implementation-already-authorized` |
+| Client plan modes | Retain as the host workflow: a mode limits effects and sets the flow and output format; this method supplies plan criteria inside it and names no client | Under a decision-complete rule, complete the next ready stage; later roadmap stages keep outcomes and entry conditions | Not exercised; no corpus case |
+| Rules owned by other skills | Link to the owner instead of restating: staged-adoption completion stays in code maintenance, review authority in independent audit | A consumer still names when to use this method and what stays with itself | Resolving consumer-link test; manual duplication review |
 | Selective reading and evaluation isolation | Retain Assay conditional references and existing packet builder | Installing only one skill may leave optional criteria unavailable; no auto-install | Packet snapshot tests and resolving consumer-link tests |
 
 ## Rejected or deferred transfers
@@ -74,11 +79,12 @@ is justified by this prose capability.
 
 The catalog entry and three consumer links establish an authored integration.
 Independent compatibility expectations check the two native links; generated
-inventory checks cover the three architecture languages and skill index. The new
-unit module is discovered by the existing `tools/test_*.py` suite instead of growing
-`test_validation.py`; it uses the same existing owner APIs. No new gate is needed.
-Client manifests already select the skills directory and do not need a version bump
-or a manual new skill list.
+inventory checks cover the three architecture languages and skill index.
+Skill-specific packet and consumer-link checks live in
+`tools/test_implementation_planning.py`, which the existing `tools/test_*.py`
+suite discovers; refusal cases of the shared packet utility belong to
+`test_validation.py`. No new gate is needed. Client manifests already select the
+skills directory and do not need a version bump or a manual new skill list.
 
 Semantic cases, code tests and a manual review are separate evidence. File moves
 or smaller entry text do not establish context savings. All behavioral scenarios

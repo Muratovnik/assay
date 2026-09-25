@@ -23,6 +23,9 @@ profile adapters are generated from those two, never edited by hand.
   second half is what stops it firing on the wrong task.
 - Keep `SKILL.md` short and route conditional depth into `references/`. An
   unused method should cost little context.
+- Link to a rule another skill owns instead of restating it. The linking skill
+  says when to use that method and what stays with itself; the owner keeps the
+  rule, so it changes in one place.
 - Keep client-specific facts — model aliases, tool names, permission metadata —
   in adapters or routed client references, never in neutral prose.
 - Evaluation data lives in `evals/` and is never read while performing a user's

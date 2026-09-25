@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implementation Planning"
+  short_description: "Plan grounded work, from one change to a staged roadmap"
+  default_prompt: "Use $implementation-planning to plan this work from the actual project: outcome-sized units, real dependencies, observable acceptance and what is ready next."

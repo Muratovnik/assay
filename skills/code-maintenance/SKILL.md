@@ -24,11 +24,10 @@ unrelated cleanup, dependency replacement, shared-package extraction or policy
 changes. Complete necessary in-scope repairs without inventing approval gates.
 
 For an explicit plan or consequential sequencing, dependencies or handoff, use
-available [implementation-planning](../implementation-planning/SKILL.md). Pass the
-scope, inspected consumers, shared contracts and required checks; use its ready
-units and acceptance conditions in the existing task. Keep code-boundary decisions
-here. A known small edit needs no extra plan, and a plan-only request grants no
-implementation authority. Reuse an active plan rather than starting a parallel one.
+available [implementation-planning](../implementation-planning/SKILL.md) with the
+scope, inspected consumers, shared contracts and required checks established here.
+Code-boundary decisions stay with this method; a plan-only request grants no
+implementation authority.
 
 ## Responsibilities and interfaces
 

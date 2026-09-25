@@ -383,6 +383,46 @@ class EvaluationDataTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "outside source"):
                 ev.prepare(cases_path=cases, case_id="E01", output_parent=source)
 
+    def test_skill_identity_and_collection_mismatches_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cases, rubric = self.corpus(Path(directory))
+            ev.check_pair(cases, rubric, "evidence-research")
+            with self.assertRaisesRegex(ValueError, "skill identity mismatch"):
+                ev.check_pair(cases, rubric, "code-maintenance")
+            data = ev.load(rubric)
+            del data["discovery_cases"]
+            rubric.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "collections disagree"):
+                ev.check_pair(cases, rubric, "evidence-research")
+
+    def test_refused_preparation_allocates_no_packet(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            source = base / "source" / "method" / "evals"
+            source.mkdir(parents=True)
+            foreign = base / "foreign"
+            foreign.mkdir()
+            output = base / "packets"
+            output.mkdir()
+            method = base / "runtime" / "evidence-research"
+            method.mkdir(parents=True)
+            (method / "SKILL.md").write_text("method\n", encoding="utf-8")
+            cases, _ = self.corpus(source)
+            unregistered, _ = self.corpus(foreign, "not-a-paired-skill")
+            refusals = (
+                ("unknown case", {"cases_path": cases, "case_id": "missing"}),
+                ("unsupported inline corpus", {"cases_path": unregistered, "case_id": "E01"}),
+                ("duplicate method roots", {"cases_path": cases, "case_id": "E01",
+                                            "skill_roots": (method, method)}),
+            )
+            for message, arguments in refusals:
+                with self.subTest(refusal=message):
+                    with self.assertRaisesRegex(ValueError, message):
+                        ev.prepare(output_parent=output, **arguments)
+                    self.assertEqual([], list(output.iterdir()))
+            ev.prepare(cases_path=cases, case_id="E01", output_parent=output)
+            self.assertEqual(1, len(list(output.iterdir())))
+
 
 if __name__ == "__main__":
     unittest.main()

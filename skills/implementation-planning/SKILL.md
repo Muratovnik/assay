@@ -38,9 +38,10 @@ units stable identifiers; a reordered unit keeps its identity. Separate complete
 changes from verified results and name blocked or unavailable checks.
 
 Order work by real dependencies and uncertainty. A bounded investigation can be
-ready while the implementation it informs is not. A pilot is not a complete
-migration unless the user requested only a pilot. Keep incidental cleanup outside
-the active plan unless it is necessary for the agreed result.
+ready while the implementation it informs is not. Pilot and staged-adoption
+completion follow [staged adoption](../code-maintenance/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request).
+Keep incidental cleanup outside the active plan unless it is necessary for the
+agreed result.
 
 Before delivery, trace requirements to units and checks, and units back to their
 purpose. Check the next step can actually begin. Report what is ready, what needs

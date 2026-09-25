@@ -17,10 +17,6 @@ Explain which result is affected and what evidence or decision would resolve it.
 An unavailable future measurement need not block shipping verified behavior unless
 the brief makes it a prerequisite. Missing evidence is not proof of failure.
 
-When the request is read-only review, report supported corrections without editing
-the plan, tests or source. A self-review is not independent; another review role
-requires existing authorization, not merely this procedure. Use the existing
-audit method when required without recursively restarting planning or execution.
 A sound small plan need not undergo fixed repeated passes or numeric scoring.
 
 ## Replan the affected work

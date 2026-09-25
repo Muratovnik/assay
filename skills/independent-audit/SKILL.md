@@ -42,7 +42,7 @@ Inspect only the relevant methods:
 
 | Audit concern | Reference |
 | --- | --- |
-| Plan readiness, requirement coverage, dependencies or stale acceptance | [Plan review and replanning criteria](../implementation-planning/references/review-and-replan.md) |
+| A plan's readiness, requirement coverage, dependencies or stale acceptance | [Plan review and replanning criteria](../implementation-planning/references/review-and-replan.md) |
 | Implementation/refactoring quality, conventions, state or effective checks | [Code quality verification](references/code-quality.md) |
 | Ownership, migration, discovery, retirement or compatibility | [Architecture and migration](references/architecture-and-migration.md) |
 | Repository readers, onboarding, installation or distribution | [Repository and release](references/repository-and-release.md) |
@@ -56,13 +56,6 @@ Read the applicable criteria owned by linked skills as review criteria; this
 does not activate their implementation authority. If reuse is applicable, trace
 representative behavior through callers, local handlers and native/library calls
 before concluding that a facade either reuses or replaces a primitive.
-
-For a plan audit, use the original brief, inspected project evidence and the
-selected plan as inputs. Apply the planning criteria in read-only mode and report
-blocking gaps, still-ready work and unresolved decisions; do not rewrite the plan
-or execute it. A sound plan establishes readiness of the scoped next work, not
-correctness of a future implementation or permission to publish. If planning is
-already active, contribute the audit result to it rather than starting a new plan.
 
 ## Preserve authority and the subject
 

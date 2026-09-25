@@ -64,7 +64,5 @@ migration. Lack of authority for the remainder must stay explicit.
 
 For a multi-stage plan, use available
 [long-horizon planning](../../implementation-planning/references/long-horizon.md)
-for readiness, dependencies and the next detailed stage. Supply the consumers,
-compatibility constraints and retirement conditions established here; the planner
-must not redefine them. If already in that planning workflow, return these criteria
-to the same plan rather than re-entering the method or creating another inventory.
+for sequencing and readiness; the consumers, compatibility constraints and
+retirement conditions established here stay authoritative.

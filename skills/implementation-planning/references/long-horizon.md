@@ -33,19 +33,14 @@ user's actual priorities; do not impose another team's sprint length.
 ## Staged adoption and retirement
 
 Follow the existing [reuse and migration](../../code-maintenance/references/reuse-and-migration.md)
-criteria for behavior ownership, compatibility and completion scope. This procedure
-owns sequencing and refinement, not a second migration inventory. Keep switched
-consumers, retained mechanisms and exceptions in the same owning task.
+criteria for behavior ownership, compatibility, completion scope and the record of
+switched consumers. This procedure owns sequencing and refinement, not a second
+migration inventory.
 
 Define compatibility while old and new coexist, the evidence permitting retirement,
 and a safe recovery path where the change is consequential. An irreversible step
 needs prerequisite validation, a recovery/compensation strategy or explicit risk
 acceptance; do not promise a rollback that cannot restore the relevant data.
-
-A completed pilot does not finish a requested full migration. Continue authorized
-remaining stages unless a real dependency, budget limit or explicit checkpoint
-prevents it. Conversely, stop at the agreed pilot boundary when only that was
-requested. Report missing authority for the remainder rather than manufacturing it.
 
 ## Example: migrate shared controls
 
@@ -58,5 +53,4 @@ requested. Report missing authority for the remainder rather than manufacturing 
 Initially detail the integration stage; later stages retain their outcomes and
 entry/exit conditions. If the risky case cannot preserve focus behavior, settle
 configuration, a justified adaptation or an owner-approved exception before broad
-propagation. Do not keep migrating because the easy case passed. Success of an
-import or a stub proves less than behavior of the actual primitive.
+propagation. Do not keep migrating because the easy case passed.
