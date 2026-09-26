@@ -20,11 +20,10 @@ plan-only request stops at its plan; a request for implementation and a pull
 request does not end with research or an intention to publish.
 
 Use the existing owning plan, issue or authorized notes. A short task can keep its
-account in chat. For interrupted work, changed subjects or authority, use the
-[planning continuation method](../implementation-planning/references/continuation.md)
-to reconcile the record with the current artifact. Do not select a nearby plan
-when the requested one is unresolved. Existing evidence is reusable when its
-relevant premises still hold; refresh affected uncertainty, not the whole survey.
+account in chat. For interrupted work, changed subjects or authority, the
+[planning continuation method](../implementation-planning/references/continuation.md#reconcile-before-continuing)
+reconciles the record with the current artifact and decides which prior evidence
+still applies; enter at what then remains unresolved.
 
 Distinguish readiness, authorization and available capability. This skill supplies
 no permission to write, delegate, install, publish, merge or release. Apply the
@@ -68,8 +67,7 @@ An unavailable optional method is an evidence limit, not permission to install i
 For feedback, verification drift or publication use
 [review and delivery](references/review-and-delivery.md). Validate a finding and
 return to the responsible decision, implementation or check. Do not restart every
-stage or accept review advice mechanically. Keep self-review distinct from an
-independent audit, and audit authority distinct from repair authority.
+stage or accept review advice mechanically.
 
 Report the attained endpoint against the request, its exact subject/revision,
 applicable evidence and remaining work. Changed, checked, published, CI-complete,

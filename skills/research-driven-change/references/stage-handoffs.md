@@ -9,8 +9,10 @@ sequencing and the plan; do not create a parallel plan or a new status schema.
 
 Identify the requested endpoint and which dependencies of it are unresolved.
 Research, planning, execution and review can each be the entry point. A known
-narrow correction inside a larger cycle needs only the affected work. An existing
-plan is evidence to reconcile, not an instruction to repeat its completed stages.
+narrow correction inside a larger cycle needs only the affected work. Reconcile an
+existing plan through planning's
+[continuation](../../implementation-planning/references/continuation.md#reconcile-before-continuing)
+before choosing where to enter.
 
 For each next action distinguish:
 
@@ -40,7 +42,7 @@ unrelated stages finish. Publication never implies merge or release.
 
 Use [evidence to change](evidence-to-change.md) when accepting a research choice and
 [review and delivery](review-and-delivery.md) when a finding or remote effect is
-involved. A file, checkbox or method invocation alone cannot establish its output.
+involved. A method invocation alone cannot establish its output.
 
 ## Return from a selected method
 
@@ -60,11 +62,10 @@ choice request; it is not a receipt for a separately requested implementation.
 
 Use the user's chosen record and its existing labels. When a durable record is
 needed, planning's
-[continuation procedure](../../implementation-planning/references/continuation.md)
-owns what to preserve and how to resume. This method connects its stage results;
-it does not copy that procedure into another ledger. At a transition retain the
-critical qualification in addition to its source link so the next method need
-not reconstruct the old conversation.
+[continuation procedure](../../implementation-planning/references/continuation.md#preserve-sufficient-context)
+owns what to preserve, including the critical details that travel with a link,
+and how to resume. This method connects its stage results; it does not copy that
+procedure into another ledger.
 
 For example, a compact entry in an existing plan can say:
 

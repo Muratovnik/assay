@@ -37,19 +37,6 @@ model, effort, runtime state, package manifest or machine path. `VERSION` labels
 the source contract; the installer and the client manifests read it rather than
 repeating it.
 
-## Research-backed changes
-
-[research-driven-change](../skills/research-driven-change/SKILL.md) connects
-requested stages without becoming their executor. Evidence research owns sources;
-planning owns units, contract changes and continuation; the domain methods own
-their criteria; independent audit owns its verdict. The new method owns handoffs,
-end-to-end traceability and the account of actual delivery. A child returns its
-result and limits to one owning workflow, not a second lifecycle or task store.
-Standalone research, routine edits and read-only audits keep their existing entry
-points. Skill-behavior improvements and executable adapter changes use the same
-handoff contract with different domain methods. Publication uses existing owner
-tools only when requested; no new service or mandatory delegation is installed.
-
 ## Discovery topology
 
 A skill is installed once and reached twice. The native skill root holds the link

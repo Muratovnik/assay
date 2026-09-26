@@ -3,24 +3,24 @@
 Use when the active change receives feedback, verification becomes stale, or the
 request includes a remote proposal. This method routes the next action and
 accounts for delivery. [Independent audit](../../independent-audit/SKILL.md) owns
-audit criteria and verdicts; [planning](../../implementation-planning/SKILL.md)
-owns replanning and continuation. Neither a review finding nor this workflow gives
-an auditor authority to repair the subject.
+audit criteria, verdicts and its read-only authority;
+[planning](../../implementation-planning/SKILL.md) owns replanning and
+continuation.
 
 ## Give review the actual contract
 
 Supply the original requested outcome, current constraints and approved decisions,
-exact subject/revision, in-scope changes and relevant check results. The executor's
-summary and its green commands are evidence, not a replacement acceptance contract.
-Respect the reviewer's read boundary and keep evaluator grading keys outside
-executor inputs. Disclose self-review; a fresh context alone is not an independent
-oracle. No additional reviewer, delegation or audit gate is mandatory for every
-edit; use the review depth the request and its consequences justify.
+exact subject/revision, in-scope changes and relevant check results. The audit's
+[framing](../../independent-audit/SKILL.md#frame-the-decision) and
+[authority](../../independent-audit/SKILL.md#preserve-authority-and-the-subject)
+criteria decide what this evidence establishes, what a reviewer may read and how
+self-review is disclosed. No additional reviewer, delegation or audit gate is
+mandatory for every edit; use the review depth the request and its consequences
+justify.
 
-Carry the audit's verdict and coverage limits as well as its findings. An empty
-finding list with unexamined required areas is not a cleared review. Conversely,
-a complete supported clean review does not need invented findings or another
-approval ritual. The audit method owns that distinction; preserve it on return.
+Return the audit's verdict, coverage and findings to the next decision unchanged;
+its [report criteria](../../independent-audit/SKILL.md#report-the-decision) define
+what each establishes. This method only chooses the authorized work that follows.
 
 ## Route feedback to its cause
 
@@ -37,23 +37,22 @@ or a proposed new requirement.
 | A reported defect is contradicted by the contract and evidence | Explain the counterevidence and retain valid behavior |
 | Feedback proposes new scope | Record the proposal under the owner's contract-change process; do not silently absorb it |
 
-A repeated complaint calls for recovery of the previous hypothesis and acceptance
-check through
-[continuation](../../implementation-planning/references/continuation.md#carry-a-goal-across-different-tasks).
-It is not a fixed retry counter or permission for a broad rewrite. Preserve
-unresolved alternatives when the cause is unknown. Stop the affected loop when no
-new discriminating evidence or ready authorized action exists, or when its agreed
-resource boundary is reached. Report the remainder instead of rephrasing the same
-rule until a favorable verdict appears. A clean review is valid.
+For a repeated complaint,
+[continuation](../../implementation-planning/references/continuation.md#carry-a-goal-across-different-tasks)
+recovers the previous hypothesis and acceptance check. This method owns the loop:
+stop it when no new discriminating evidence or ready authorized action exists, or
+when its agreed resource boundary is reached, and report the remainder instead of
+rephrasing the same rule until a favorable verdict appears.
 
 ## Keep checks attached to the checked result
 
 After a repair or incoming change, compare the current subject with the revision
-and inputs each result checked. Refresh affected evidence; do not reuse an earlier
-PASS across relevant drift. Unaffected evidence may remain valid with its scope
-stated. File existence, a successful commit and a reviewer's assertion cannot stand
-in for behavior checks. Distinguish changed, structurally checked, behaviorally
-exercised and supported by a comparison.
+and inputs each result checked. Planning's
+[continuation](../../implementation-planning/references/continuation.md) decides
+which evidence to refresh and separates changed from verified claims;
+[skill design](../../skill-design/SKILL.md#decide-within-the-evidence) names the
+evidence level of a skill change. The delivery account keeps each retained result
+with the revision and scope it covered.
 
 For published work also distinguish local verification, hosted CI, review and
 merge. Pending, failed and unavailable checks have different meanings. A local
@@ -82,17 +81,17 @@ and retry only from the reconciled state; do not force an old candidate over it.
 Describe the need, significant decisions and source context, actual changes,
 checks and limits in the proposal. Link larger authorized research instead of
 copying it. Publish only relevant material; exclude secrets, private traces and
-withheld grading keys. Test fixtures intentionally shipped as evaluator assets are
-not withheld keys, but must still stay out of executor packets.
+withheld grading keys. Evaluator assets intentionally shipped with the source are
+publishable; their packet boundary stays with
+[skill design](../../skill-design/SKILL.md#preserve-the-evidence-boundary).
 
 After creation or update, read back the remote proposal and compare its identity,
 base/head and revision with the intended delivered candidate. Correct branch names
 alone do not prove the checked bytes were delivered. If they differ, reconcile
 before attributing local results to the remote state. A successful local commit or
-an attempted API call is not a publication receipt. If the response was lost, use
-[reconciliation before replay](../../implementation-planning/references/continuation.md#reconcile-before-continuing)
-to observe whether the effect already happened. Do not retry an ambiguous remote
-creation merely to obtain a cleaner receipt.
+an attempted API call is not a publication receipt. A lost response follows
+planning's
+[reconciliation before replay](../../implementation-planning/references/continuation.md#reconcile-before-continuing).
 
 Read available CI/review state for the relevant revision when it bears on the
 claim being delivered. Do not wait indefinitely or promise future monitoring. A

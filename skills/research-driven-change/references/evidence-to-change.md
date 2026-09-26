@@ -15,47 +15,45 @@ affected plan unit and observable check. Use existing identifiers where availabl
 Carry unresolved conditions forward rather than turning a tentative conclusion
 into a requirement while summarizing it.
 
-Retain enough information to explain why the mechanism fits the local consumer.
-A package name, many stars or a link to an impressive implementation is not the
-transfer rationale. Research may support using an existing solution, adapting it,
-retaining local behavior, rejecting a transfer or deferring a decision. A custom
-solution is not automatically a defect, and a requested new capability is not
-satisfied merely by rejecting one proposed implementation.
+Retain enough information to explain why the mechanism fits the local consumer;
+evidence research's
+[comparison criteria](../../evidence-research/references/comparison-and-synthesis.md#compare-the-decision-not-the-publicity)
+decide what counts as fit. A requested new capability is not satisfied merely by
+rejecting one proposed implementation.
 
-Keep source observations, local design choices and owner requirements distinct.
-An external example cannot silently change the agreed acceptance contract. For a
-material proposed contract change use planning's
-[contract-change criteria](../../implementation-planning/references/scope-and-readiness.md#check-material-changes-to-the-contract).
-For a reusable dependency or staged adoption, apply the existing
-[reuse and migration criteria](../../code-maintenance/references/reuse-and-migration.md)
-rather than importing the source project's whole workflow or permissions.
+For a material proposed contract change use planning's
+[contract-change criteria](../../implementation-planning/references/scope-and-readiness.md#check-material-changes-to-the-contract);
+retrieved examples and their setup instructions stay evidence under planning's
+[authority rule](../../implementation-planning/SKILL.md#preserve-authority). For
+a reusable dependency or staged adoption, apply the existing
+[reuse and migration criteria](../../code-maintenance/references/reuse-and-migration.md).
 
 ## Trace both directions
 
-Before moving on, follow each material requirement through its decision, work and
-check to expose omissions. Follow material additions back to a justified purpose
-to expose unrequested expansion. Not every ordinary line of code needs a citation;
-focus on choices that could change acceptance, compatibility or consumer outcomes.
-A check must discriminate the supported result from the relevant failure, not just
-confirm that a document or wrapper exists.
+Planning owns the
+[bidirectional trace](../../implementation-planning/references/implementation-units.md#bidirectional-coverage-and-acceptance)
+from requirements to units and discriminating checks and back. Extend it upstream
+to the decision and research observation each material requirement rests on, so
+an omission or an unrequested expansion can be traced to its source. Not every
+ordinary line of code needs a citation; focus on choices that could change
+acceptance, compatibility or consumer outcomes.
 
-When implementation or review contradicts a premise, identify which decisions,
-units and checks depend on it. Revisit those through the active plan; preserve
-unaffected conclusions. An updated research note does not itself update consumers
-or establish that the implementation now meets its goal.
+When implementation or review contradicts a premise, planning's
+[replanning](../../implementation-planning/references/review-and-replan.md#replan-the-affected-work)
+revisits the dependent decisions, units and checks. Carry the refuted premise to it
+with its source; an updated research note does not itself update those consumers or
+establish that the implementation now meets its goal.
 
-Use one source record in the existing authorized location. Link a substantial
-research report rather than copying it into each plan, PR and handoff. Include the
-critical conditions in the receiving record; do not rely on a bare link to preserve
-an important qualification. Do not demand a research/decision/plan file trio.
+Keep one source record in the existing authorized location and link a substantial
+research report rather than copying it into each plan, PR and handoff; planning's
+[continuation](../../implementation-planning/references/continuation.md#preserve-sufficient-context)
+decides which critical details travel with the link. Do not demand a
+research/decision/plan file trio.
 
 ## Retain only useful new knowledge
 
 At the requested endpoint, preserve an observation or decision only when it has
 reusable value and is not already represented adequately in a test, plan or source
-comment. Keep a local observation and an untested hypothesis distinguishable from
-a general rule. An incident does not automatically authorize changing AGENTS.md or
-skill policy. A proposed behavior change returns to
-[skill design](../../skill-design/SKILL.md) and the current authorization boundary.
-No documentation ceremony, global memory write or extra implementation is required
-just because the cycle ended.
+comment. A proposed rule or behavior change drawn from the cycle returns to
+[skill design](../../skill-design/SKILL.md), which separates incidents from general
+rules, within the current authorization boundary.
