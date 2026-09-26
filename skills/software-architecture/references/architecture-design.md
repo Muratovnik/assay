@@ -67,7 +67,7 @@ revision and avoid maintaining a second editable copy of the repository tree.
 Turning adopted decisions into units, dependencies and acceptance belongs to
 available [implementation planning](../../implementation-planning/references/implementation-units.md);
 the implementation method owns execution and
-[migration](../../code-maintenance/references/reuse-and-migration.md).
+[migration](../../code-change/references/reuse-and-migration.md).
 
 ## Check fitness before handoff
 
@@ -78,6 +78,6 @@ migration cost, reversible steps, and the conditions that would change the choic
 Code rollback does not restore migrated data by itself.
 
 Use existing project checks for formalizable restrictions; their effectiveness is
-established by [effective quality checks](../../code-maintenance/references/effective-quality-checks.md),
+established by [effective quality checks](../../code-change/references/effective-quality-checks.md),
 not by configuration presence. Leave unexecuted checks explicitly proposed. A small
 site may need only a local owner and a short explanation, not a new architecture file.

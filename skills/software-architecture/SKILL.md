@@ -2,6 +2,8 @@
 name: software-architecture
 description: Design and assess application, site or library boundaries, contracts and file placement. Use for architecture proposals, structural decisions and architectural review criteria; skip routine local edits, prose polishing, implementation sequencing and audit authority or verdicts.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change evidence-research implementation-planning independent-audit"
 ---
 
 # Software architecture
@@ -20,7 +22,7 @@ material decision; name nonblocking assumptions and continue useful work.
 
 A proposal or placement question does not authorize application changes. A request
 that already authorizes implementation needs no extra approval ceremony. Use
-[code-maintenance](../code-maintenance/SKILL.md) for that work, and available
+[code-change](../code-change/SKILL.md) for that work, and available
 [implementation-planning](../implementation-planning/SKILL.md) to sequence adopted
 decisions into units and handoffs; the boundary decisions stay here. For an
 independent review, [independent-audit](../independent-audit/SKILL.md) owns

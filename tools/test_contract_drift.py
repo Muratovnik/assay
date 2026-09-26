@@ -18,11 +18,11 @@ import unittest
 import eval_assets as ea
 
 ROOT = Path(__file__).resolve().parents[1]
-EVALS = ROOT / "skills/code-maintenance/evals"
+EVALS = ROOT / "skills/code-change/evals"
 CASES = EVALS / "contract-drift-cases.json"
 RUBRIC = EVALS / "contract-drift-rubric.json"
-METHODS = {"code-maintenance", "implementation-planning", "independent-audit",
-           "operations-ui-delivery", "test-audit", "skill-design"}
+METHODS = {"code-change", "implementation-planning", "independent-audit",
+           "ui-delivery", "test-audit", "skill-evaluation"}
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -39,11 +39,11 @@ class DriftCorpusTests(unittest.TestCase):
             root = Path(directory)
             write_json(root / "cases.json", self.cases)
             write_json(root / "rubric.json", self.rubric)
-            ea.check_pair(root / "cases.json", root / "rubric.json", "code-maintenance")
+            ea.check_pair(root / "cases.json", root / "rubric.json", "code-change")
 
     def test_existing_pair_checker_accepts_corpus(self) -> None:
         self.check_pair()
-        self.assertIn("code-maintenance", ea.PAIRED_SKILLS)
+        self.assertIn("code-change", ea.PAIRED_SKILLS)
         self.assertEqual(CASES.with_name(CASES.name.replace("-cases", "-rubric")), RUBRIC)
 
     def test_all_eighteen_families_have_two_distinct_inputs(self) -> None:
@@ -179,7 +179,7 @@ class DriftPacketTests(unittest.TestCase):
     def test_explicit_multi_method_packet_excludes_all_evaluation_data(self) -> None:
         with tempfile.TemporaryDirectory(prefix="drift-methods-") as directory:
             parent = Path(directory)
-            methods = ("code-maintenance", "implementation-planning")
+            methods = ("code-change", "implementation-planning")
             packet, digest = self.prepare(parent, methods=methods)
             files = [p.relative_to(packet) for p in packet.rglob("*") if p.is_file()]
             self.assertFalse(any("evals" in p.parts for p in files))
@@ -193,7 +193,7 @@ class DriftPacketTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="drift-comparison-") as directory:
             parent = Path(directory)
             plain, _ = self.prepare(parent)
-            treated, _ = self.prepare(parent, methods=("code-maintenance",))
+            treated, _ = self.prepare(parent, methods=("code-change",))
             for path in plain.rglob("*"):
                 if path.is_file() and path.name != "manifest.json":
                     self.assertEqual(path.read_bytes(), (treated / path.relative_to(plain)).read_bytes())

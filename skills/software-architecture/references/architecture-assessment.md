@@ -39,7 +39,7 @@ when the implementation functions or the auditor prefers another design.
 Cycles, large files and high fan-in can direct inspection but are not universal defect
 thresholds. Claims of absence or inactivity follow the evidence rules of
 [current architecture](current-architecture.md). For formal rules apply the
-[architectural restrictions](../../code-maintenance/references/effective-quality-checks.md#architectural-restrictions)
+[architectural restrictions](../../code-change/references/effective-quality-checks.md#architectural-restrictions)
 of effective checks.
 
 ## Return to the owning review

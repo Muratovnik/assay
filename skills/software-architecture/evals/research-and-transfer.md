@@ -2,12 +2,12 @@
 
 Maintenance record, not mandatory runtime reading. Research cutoff: 2026-09-25.
 Assay baseline: `c642a41f9d9c88b252b775514a62fd8c242d7b09`. The agreed implementation
-extracts a standalone method rather than placing design inside code-maintenance.
+extracts a standalone method rather than placing design inside code-change.
 
 ## Capability and evidenced consumers
 
 The shared capability is choosing and assessing architectural boundaries,
-contracts, ownership and placement. Existing code-maintenance already makes
+contracts, ownership and placement. Existing code-change already makes
 these decisions during changes; existing independent-audit already assesses
 ownership, dependencies, discovery and migration. Their source responsibilities
 establish concrete demand, not a claim of completed external deployments.
@@ -33,7 +33,7 @@ caller is still not evidence.
 | Respect framework reachability and lifetime | Vue and migration procedures existed | Extend Vue organization/SSR and framework discovery examples | Immutable shared data and deliberate framework entry points; ARC-05/06 |
 | Preserve exports and effective coverage | Existing migration and effective-check procedures remain canonical | Add Node entry points and architecture-rule controls | Supported facade, separate valid checker; ARC-07/08/09 |
 | Adopt checks incrementally without hiding violations | No new scanner is needed | Adapt explicit baseline idea from ArchUnit; use fitting existing project tooling | Agreed debt reduction versus refreeze of new debt; ARC-10 |
-| Separate integration from behavioral evidence | skill-design already owns comparison discipline | Reuse existing paired evals and file-backed audit snapshots | Explicit loading is not automatic discovery; discovery cases and packet tests |
+| Separate integration from behavioral evidence | skill-evaluation already owns comparison discipline | Reuse existing paired evals and file-backed audit snapshots | Explicit loading is not automatic discovery; discovery cases and packet tests |
 
 These are original Assay instructions informed by the sources below. No upstream
 code, instruction file or workflow is vendored. Before any later verbatim/code
@@ -43,7 +43,7 @@ superior task outcomes or lower cost.
 
 ## Primary sources and limits
 
-- [Assay authoring contract at the baseline](https://github.com/Muratovnik/assay/blob/c642a41f9d9c88b252b775514a62fd8c242d7b09/AGENTS.md) and its maintenance, audit, skill-design and test-writing methods: preserve existing authority and tooling owners.
+- [Assay authoring contract at the baseline](https://github.com/Muratovnik/assay/blob/c642a41f9d9c88b252b775514a62fd8c242d7b09/AGENTS.md) and its maintenance, audit, skill-evaluation and test-writing methods: preserve existing authority and tooling owners.
 - [levnikolaevich architecture proposal](https://github.com/levnikolaevich/claude-code-skills/blob/master/plugins/architecture-suite/skills/ln-23-system-design-proposal-builder/SKILL.md): process comparison, not an executed benchmark.
 - [Feature-Sliced Design skill](https://github.com/feature-sliced/skills): v2.1-oriented guidance and educational examples, not a universal framework contract.
 - [BMAD architecture](https://github.com/bmad-code-org/BMAD-METHOD): agreement/invariant idea; no mandatory memory system, subprocess or review quorum imported.

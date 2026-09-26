@@ -3,7 +3,7 @@ name: UI evidence examples
 on:
   pull_request:
     paths:
-      - skills/operations-ui-delivery/**
+      - skills/ui-delivery/**
       - tools/test_ui_context.py
       - .github/workflows/ui-evidence.yml
   workflow_dispatch:
@@ -30,8 +30,8 @@ jobs:
           set -euo pipefail
           harness="$RUNNER_TEMP/operations-ui-evidence"
           mkdir -p "$harness/skills"
-          cp -R skills/operations-ui-delivery "$harness/skills/"
+          cp -R skills/ui-delivery "$harness/skills/"
           npm install --prefix "$harness" --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
             playwright@1.63.0 @axe-core/playwright@4.13.0 axe-core@4.13.0
           "$harness/node_modules/.bin/playwright" install --with-deps chromium
-          node --test "$harness"/skills/operations-ui-delivery/evals/browser/*.test.mjs
+          node --test "$harness"/skills/ui-delivery/evals/browser/*.test.mjs

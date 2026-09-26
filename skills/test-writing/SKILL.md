@@ -2,6 +2,8 @@
 name: test-writing
 description: Write or repair automated tests for justified behavior and meaningful regression protection. Skip test execution alone, testing explanations and read-only audits.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change"
 ---
 
 # Test writing

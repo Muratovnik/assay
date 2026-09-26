@@ -2,6 +2,8 @@
 name: test-audit
 description: Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. Skip ordinary implementation and test execution alone.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change independent-audit test-writing"
 ---
 
 # Test audit

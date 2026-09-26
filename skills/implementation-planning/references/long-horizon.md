@@ -32,7 +32,7 @@ user's actual priorities; do not impose another team's sprint length.
 
 ## Staged adoption and retirement
 
-Follow the existing [reuse and migration](../../code-maintenance/references/reuse-and-migration.md)
+Follow the existing [reuse and migration](../../code-change/references/reuse-and-migration.md)
 criteria for behavior ownership, compatibility, completion scope and the record of
 switched consumers. This procedure owns sequencing and refinement, not a second
 migration inventory.

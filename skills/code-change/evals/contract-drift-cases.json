@@ -1,0 +1,369 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "drift-01-a",
+      "prompt": "Review whether the recorded completion is supported. Do not change the project.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "request.md": "Owner: Replace standard control mechanics and states throughout the console. You may stage the work; keep the remaining consumers visible.\n",
+        "decision.md": "Author: implementer. Status: accepted. Install the kit for buttons only; all other controls will remain custom permanently. Owner was informed.\n",
+        "progress.md": "Buttons switched and checked. There is no remaining work in the plan.\n"
+      }
+    },
+    {
+      "id": "drift-01-b",
+      "prompt": "Review whether the recorded completion is supported. Do not change the project.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "request.md": "Owner: This assignment is a buttons-only pilot. The maintainer may choose its implementation; broader adoption is a later separate decision.\n",
+        "decision.md": "Maintainer, under delegated implementation authority: use the kit through a button facade. Pilot complete; no wider adoption is claimed.\n",
+        "progress.md": "Buttons switched and checked. There is no remaining work in the plan.\n"
+      }
+    },
+    {
+      "id": "drift-02-a",
+      "prompt": "Check this implementation plan against the supplied decisions.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "history.md": "Phase 1 owner: Dropdowns need deep brand styling. Use headless for that family.\nPhase 2 owner: For the remaining standard controls use the styled kit and its theme; do not reproduce its standard visual states.\n",
+        "plan.md": "Apply the phase-1 dropdown decision to buttons, file inputs and tables; reproduce all their visual states locally.\n"
+      }
+    },
+    {
+      "id": "drift-02-b",
+      "prompt": "Check this implementation plan against the supplied decisions.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "history.md": "Phase 1 owner: Dropdowns need deep brand styling. Use headless for that family.\nPhase 2 owner: For the remaining standard controls use the styled kit and its theme; do not reproduce its standard visual states.\n",
+        "plan.md": "Continue maintaining the dropdown family with the already-selected headless primitive and brand theme. Buttons and tables continue to use the styled kit.\n"
+      }
+    },
+    {
+      "id": "drift-03-a",
+      "prompt": "Review the proposed account-form change and give the next in-scope implementation step.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "goal.md": "Owner: Standard controls should move to the selected kit. Remaining text inputs migrate when their form family is next changed. Screens must retain the supported form behavior.\n",
+        "task.md": "Owner: Add the requested new text field to the account form using established project conventions.\n",
+        "plan.md": "Create another private text-input implementation. The earlier adoption work is not listed because it happened in another session.\n",
+        "kit.md": "Installed kit provides the required text input and states; the account form has no recorded exception.\n"
+      }
+    },
+    {
+      "id": "drift-03-b",
+      "prompt": "Perform only the current task described in task.md.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "goal.md": "Owner: Standard controls should move to the selected kit. Remaining text inputs migrate when their form family is next changed. Screens must retain the supported form behavior.\n",
+        "task.md": "Owner: Read-only review of the account form. Report findings only; do not edit code or start the migration.\n",
+        "plan.md": "Create another private text-input implementation. The earlier adoption work is not listed because it happened in another session.\n",
+        "kit.md": "Installed kit provides the required text input and states; the account form has no recorded exception.\n"
+      }
+    },
+    {
+      "id": "drift-04-a",
+      "prompt": "Review readiness of these import implementation documents.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "source.md": "Owner: Import must reject a malformed record without modifying any existing records.\n",
+        "spec.md": "Valid records before a malformed record may be persisted.\n",
+        "plan.md": "Persist records as they arrive until a malformed row.\n",
+        "tasks.md": "Implement partial persistence; test that earlier valid rows remain.\n"
+      }
+    },
+    {
+      "id": "drift-04-b",
+      "prompt": "Review readiness of these import implementation documents.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "source.md": "Owner, initial: Import rejects malformed records atomically.\nOwner, revised: For this import mode explicitly accept partial success; keep valid rows and return per-row failures. Update the spec, plan and tests.\n",
+        "spec.md": "Valid records before a malformed record may be persisted; return per-row failures.\n",
+        "plan.md": "Persist valid records and collect per-row failures for the response.\n",
+        "tasks.md": "Implement partial persistence and per-row error reporting; test both returned errors and the records kept.\n"
+      }
+    },
+    {
+      "id": "drift-05-a",
+      "prompt": "Review the reuse claim using these complete excerpts.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Use the library tab primitive to own arrow navigation and focus management. Keep public labels stable.\n",
+        "tabs.ts": "import { Tabs } from \"installed-kit\";\nexport function tabs() { return { onArrow: ownArrowNavigation, onFocus: ownFocusManagement }; }\n",
+        "usage.md": "All screens import tabs from shared/ui. Report: delegation complete because the library is imported and features share one wrapper.\n"
+      }
+    },
+    {
+      "id": "drift-05-b",
+      "prompt": "Review the reuse claim using these complete excerpts.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Use the library tab primitive to own arrow navigation and focus management. Keep public labels stable.\n",
+        "tabs.ts": "import { Tabs } from \"installed-kit\";\nexport function tabs(labels: string[]) { return Tabs({ items: labels.map(label => ({ label })) }); }\n",
+        "usage.md": "All screens import tabs from shared/ui. No other arrow or focus handlers are installed.\n",
+        "kit.md": "The supplied installed-version contract for Tabs owns arrow navigation and focus management. This excerpt supports delegation, not a captured runtime run.\n"
+      }
+    },
+    {
+      "id": "drift-06-a",
+      "prompt": "Assess this shared button against the goal and propose a bounded correction, without editing.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "goal.md": "Use the styled library to avoid maintaining standard button loading and disabled presentation locally.\n",
+        "button.md": "Shared Button wraps the kit button but replaces its loading and disabled visual states with local copies. No product-specific requirement is recorded.\n",
+        "installed-api.md": "This exact installed version supports loading and disabled states, a loading-icon slot and shared theme variables.\n"
+      }
+    },
+    {
+      "id": "drift-06-b",
+      "prompt": "Assess this shared button against the goal and propose a bounded correction, without editing.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "goal.md": "Owner: Use library button mechanics and disabled behavior. Keep our distinct branded progress animation through its supported loading slot.\n",
+        "button.md": "Shared Button passes disabled and loading to the kit. Its loading slot renders the required branded animation; no duplicate event or disabled-state logic exists.\n",
+        "installed-api.md": "This exact installed version supports loading and disabled states, a loading-icon slot and shared theme variables.\n"
+      }
+    },
+    {
+      "id": "drift-07-a",
+      "prompt": "Review the stated compatibility decision. Do not change policy.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "policy.md": "Utility classes are forbidden in feature components. Central theme configuration is allowed. Strict CSP must remain unchanged.\n",
+        "api.md": "Installed kit supports shared theme configuration through CSS variables. Supplied integration evidence confirms that this path preserves the stated CSP.\n",
+        "decision.md": "Reimplement all kit states: the feature utility-class ban means the shared theme is also forbidden.\n"
+      }
+    },
+    {
+      "id": "drift-07-b",
+      "prompt": "Review the stated compatibility decision. Do not change policy.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "policy.md": "Utility classes are forbidden in feature components. Central theme configuration is allowed. Strict CSP must remain unchanged.\n",
+        "api.md": "The installed kit version needs inline script evaluation for the required control. The supported CSP forbids that operation; no compatible path has been established.\n",
+        "decision.md": "Keep the existing compatible control temporarily. Owner has not authorized loosening CSP. Revisit when a supported compatible path is available.\n"
+      }
+    },
+    {
+      "id": "drift-08-a",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Only control-a is temporarily excepted; new controls are forbidden.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nremaining = [v for v in d[\"violations\"] if v[\"file\"] not in d[\"excepted_files\"]]\nprint(json.dumps({\"status\": \"fail\" if remaining else \"pass\", \"remaining\": remaining}))\nraise SystemExit(1 if remaining else 0)\n",
+        "state.json": "{\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    },\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"excepted_files\": [\n    \"src/form.vue\"\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-08-b",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Only control-a is temporarily excepted; new controls are forbidden.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nremaining = [v for v in d[\"violations\"] if v[\"file\"] not in d[\"excepted_files\"]]\nprint(json.dumps({\"status\": \"fail\" if remaining else \"pass\", \"remaining\": remaining}))\nraise SystemExit(1 if remaining else 0)\n",
+        "state.json": "{\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"excepted_files\": [\n    \"src/form.vue\"\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-09-a",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Only the stable object control-a is excepted. New object identities require review.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = len(d[\"violations\"]) > len(d[\"baseline\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"violations\": [\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-09-b",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Only the stable object control-a is excepted. Its move to src/settings/form.vue was checked to preserve identity and behavior.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = len(d[\"violations\"]) > len(d[\"baseline\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/settings/form.vue\"\n    }\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-10-a",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "The accepted baseline is control-a only. The implementer added control-b to the candidate baseline. No authority to add exceptions was given.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = any(v not in d[\"candidate_baseline\"] for v in d[\"violations\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"accepted_baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"candidate_baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    },\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    },\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-10-b",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Owner approved control-b as a temporary exception after a documented upstream regression. The accepted baseline remains the historical comparison; this decision authorizes the candidate delta. Revisit when the fixed upstream release is available.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = any(v not in d[\"candidate_baseline\"] for v in d[\"violations\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"accepted_baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"candidate_baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    },\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    },\n    {\n      \"id\": \"control-b\",\n      \"file\": \"src/form.vue\"\n    }\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-11-a",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Debt may reach zero. src/form.vue was inspected; the last excepted control was migrated and verified.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = len(d[\"baseline\"]) == 0\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"baseline\": [],\n  \"files_seen\": [\n    \"src/form.vue\"\n  ],\n  \"violations\": []\n}\n"
+      }
+    },
+    {
+      "id": "drift-11-b",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Debt may reach zero. src/form.vue was inspected; control-a remains a permitted interim exception.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = len(d[\"baseline\"]) == 0\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\"}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"baseline\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ],\n  \"files_seen\": [\n    \"src/form.vue\"\n  ],\n  \"violations\": [\n    {\n      \"id\": \"control-a\",\n      \"file\": \"src/form.vue\"\n    }\n  ]\n}\n"
+      }
+    },
+    {
+      "id": "drift-12-a",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Expected scan scope includes src/form.vue. Missing expected coverage must not pass.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = bool(d[\"violations\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\", \"files_seen\": d[\"files_seen\"]}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"files_seen\": [],\n  \"violations\": []\n}\n"
+      }
+    },
+    {
+      "id": "drift-12-b",
+      "prompt": "Review whether the supplied gate protects its contract. You may run python -B check.py in a disposable copy. Do not edit the source or claim this synthetic checker is production configuration.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "contract.md": "Expected scope is src/form.vue. It was inspected with no violations.\n",
+        "check.py": "import json\nfrom pathlib import Path\nd = json.loads(Path(\"state.json\").read_text(encoding=\"utf-8\"))\nfailed = bool(d[\"violations\"])\nprint(json.dumps({\"status\": \"fail\" if failed else \"pass\", \"files_seen\": d[\"files_seen\"]}))\nraise SystemExit(1 if failed else 0)\n",
+        "state.json": "{\n  \"files_seen\": [\n    \"src/form.vue\"\n  ],\n  \"violations\": []\n}\n"
+      }
+    },
+    {
+      "id": "drift-13-a",
+      "prompt": "Perform the review in brief.md. Report what the available evidence does and does not establish.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "brief.md": "Review the console repository for readiness. No particular bug list is supplied.\n",
+        "policy.md": "Standard focus and selection behavior belongs to the installed kit.\n",
+        "inventory.md": "src/shared/Picker.vue and src/orders/Picker.vue independently implement arrow and selection logic. Both serve production screens. Installed kit implements the required behavior.\n",
+        "last-check.md": "The build passed. A label typo has been corrected.\n"
+      }
+    },
+    {
+      "id": "drift-13-b",
+      "prompt": "Perform the review in brief.md. Report what the available evidence does and does not establish.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "brief.md": "Review only the label typo patch in the orders screen. No component behavior changed. Do not perform a repository-wide audit.\n",
+        "policy.md": "Standard focus and selection behavior belongs to the installed kit.\n",
+        "inventory.md": "src/shared/Picker.vue and src/orders/Picker.vue independently implement arrow and selection logic. Both serve production screens. Installed kit implements the required behavior.\n",
+        "last-check.md": "The build passed. A label typo has been corrected.\n"
+      }
+    },
+    {
+      "id": "drift-14-a",
+      "prompt": "Assess whether the handoff is sufficient to accept completion.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "owner.md": "All selected control families must be migrated, with staged progress allowed.\n",
+        "handoff.md": "Reviewer 1 and reviewer 2 both accepted the implementer's summary: only buttons count. Neither received owner.md.\n",
+        "result.md": "Only buttons are migrated; overall work is marked complete.\n"
+      }
+    },
+    {
+      "id": "drift-14-b",
+      "prompt": "Assess whether the handoff is sufficient to accept completion.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "owner.md": "The historical source of scope approval is not available in this supplied snapshot.\n",
+        "handoff.md": "An older record says a maintainer accepted a buttons-only pilot. The delegated authority and original scope are not recorded here.\n",
+        "result.md": "Buttons are implemented; the report claims this completes the approved pilot.\n"
+      }
+    },
+    {
+      "id": "drift-15-a",
+      "prompt": "Review the proposed design work before any write.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "task.md": "Design the target component system using the installed kit. Current screens are reference material; do not perpetuate their duplicated controls by default.\n",
+        "transfer-plan.md": "Capture every existing local control as a new target master, then use those masters as the approved system. No kit mapping is planned.\n"
+      }
+    },
+    {
+      "id": "drift-15-b",
+      "prompt": "Review the proposed design work before any write.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "task.md": "Faithfully transfer the current screen into an editable artifact. Preserve appearance; do not redesign in this task.\n",
+        "transfer-plan.md": "Preserve the captured current controls and separately label candidate kit replacements for a later owner decision.\n"
+      }
+    },
+    {
+      "id": "drift-16-a",
+      "prompt": "Review the design-to-code correspondence claim.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "code-api.md": "Installed library v2: Button uses busy and tone props. Checked input screen uses tone=danger.\n",
+        "kit.md": "Publisher official design kit v1: loading and appearance properties. The danger state is absent. No cross-version mapping has been verified.\n",
+        "claim.md": "Names match, so every state and property already corresponds to the installed code.\n"
+      }
+    },
+    {
+      "id": "drift-16-b",
+      "prompt": "Review the design-to-code correspondence claim.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "code-api.md": "Installed library v2: Button uses busy and tone props. Checked input screen uses tone=danger.\n",
+        "kit.md": "Publisher official design kit v1: loading and appearance properties. The danger state is absent. No cross-version mapping has been verified.\n",
+        "claim.md": "Manual inspection confirms loading maps to busy for the checked default button. The input screen danger state is not mapped. Correspondence is partial; no full propagation claim.\n"
+      }
+    },
+    {
+      "id": "drift-17-a",
+      "prompt": "Update the in-scope maintenance plan from these records; do not implement it.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "decision.md": "Keep a local file-control workaround only because kit v2 lacks cancellation. Recheck when the installed kit supports it.\n",
+        "installed.md": "The project now uses v3. Its cancellation API was verified to cover the required behavior and compatibility constraints.\n",
+        "plan.md": "Retain the local workaround indefinitely because the historical decision is accepted.\n"
+      }
+    },
+    {
+      "id": "drift-17-b",
+      "prompt": "Update the in-scope maintenance plan from these records; do not implement it.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "decision.md": "Keep a local file-control workaround only because kit v2 lacks cancellation. Recheck when the installed kit supports it.\n",
+        "installed.md": "Project remains on v2; required platform support prevents v3 adoption. No compatible cancellation primitive has been found in the checked supported options.\n",
+        "plan.md": "Retain the compatible local file-control workaround; revisit with a supported cancellation-capable version.\n"
+      }
+    },
+    {
+      "id": "drift-18-a",
+      "prompt": "Review the proposed release claim against the evidence; do not run new evaluations.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "change.md": "New instructions and synthetic cases were authored to address an incident. All cases were visible during development.\n",
+        "receipts.md": "Formatting, corpus schema and unit tests passed. No client discovery, model comparison, production-project probe or unseen holdout was run.\n",
+        "draft.md": "These tests prove the incident class is fixed for all models and save subscription quota.\n"
+      }
+    },
+    {
+      "id": "drift-18-b",
+      "prompt": "Review the proposed release claim against the evidence; do not run new evaluations.",
+      "context": "Synthetic project excerpts. These are the complete supplied records for this task; do not assume access to earlier conversations. Keep source files unchanged unless the request expressly authorizes edits.",
+      "files": {
+        "change.md": "New instructions and synthetic cases were authored to address an incident. All cases were visible during development.\n",
+        "receipts.md": "Formatting, corpus schema and unit tests passed. No client discovery, model comparison, production-project probe or unseen holdout was run.\n",
+        "draft.md": "Structural and synthetic-fixture checks passed. Model effectiveness, discovery and cost remain unverified. Review was self-review; a bounded paired pilot is documented but not executed.\n"
+      }
+    }
+  ]
+}

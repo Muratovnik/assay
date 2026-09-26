@@ -19,7 +19,7 @@ chains below for migration.
 ## Trace migration through actual consumers
 
 For a staged implementation adoption, verify the
-[scope and continuation criteria](../../code-maintenance/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request)
+[scope and continuation criteria](../../code-change/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request)
 against the original brief. A completed pilot establishes only its accepted
 subset; an explicitly scoped pilot does not imply whole-system retirement.
 
@@ -37,7 +37,7 @@ Choose migration scenarios by risk: adding a consumer, renaming the canonical so
 starting a clean client, or independently upgrading or rolling back an owner. Identify
 required edits, manual synchronization, crossed boundaries, hidden historical knowledge
 and failure detection. For structural relocation, apply the implementation method's
-[public-contract preservation criteria](../../code-maintenance/references/reuse-and-migration.md#preserve-structural-and-public-contracts)
+[public-contract preservation criteria](../../code-change/references/reuse-and-migration.md#preserve-structural-and-public-contracts)
 as review criteria without changing the subject.
 
 ## Investigate legacy references

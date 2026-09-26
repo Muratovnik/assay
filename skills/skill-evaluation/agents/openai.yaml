@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill evaluation"
+  short_description: "Evaluate skill behavior and proposed changes"
+  default_prompt: "Use $skill-evaluation to diagnose this skill's behavior and assess its proposed changes with proportionate evidence."

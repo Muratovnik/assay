@@ -27,6 +27,12 @@ profile adapters are generated from those two, never edited by hand.
 - Link to a rule another skill owns instead of restating it. The linking skill
   says when to use that method and what stays with itself; the owner keeps the
   rule, so it changes in one place.
+- Declare optional peer names in the string-valued frontmatter metadata key
+  `assay-optional-skills`. It is Assay validation metadata, not a standard
+  dependency installer. A missing optional peer limits the composed outcome;
+  never classify a required resource as optional merely to pass a check.
+  Skill-local resources remain mandatory. Validate both the whole collection
+  and singleton copies; see [composition boundaries](docs/explanation/skill-composition.md).
 - Keep client-specific facts — model aliases, tool names, permission metadata —
   in adapters or routed client references, never in neutral prose.
 - Evaluation data lives in `evals/` and is never read while performing a user's
@@ -52,8 +58,9 @@ It does not package anything or keep install state.
 ## Gates
 
 Set up tooling in an isolated Python 3.11+ environment with
-`python -m pip install -r requirements-tools.txt`. Never auto-install into a
-user's global environment.
+`python -m pip install -r requirements-tools.txt`. PyYAML parses metadata and
+markdown-it-py parses CommonMark; do not replace either format with ad-hoc syntax.
+Never auto-install into a user's global environment.
 
 ```text
 python -B tools/check.py --all

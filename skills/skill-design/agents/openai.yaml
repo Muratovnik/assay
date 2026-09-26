@@ -1,4 +1,0 @@
-interface:
-  display_name: "Skill Behavior Review"
-  short_description: "Evaluate skill behavior and proposed changes"
-  default_prompt: "Use $skill-design to diagnose this skill's behavior and assess its proposed changes with proportionate evidence."

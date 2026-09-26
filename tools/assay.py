@@ -17,6 +17,13 @@ from typing import Any
 
 import tomllib
 
+if __package__:
+    from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from .skill_resources import distribution_problems, markdown_problems, validate_plain_tree
+else:
+    from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from skill_resources import distribution_problems, markdown_problems, validate_plain_tree
+
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
 SEMVER = re.compile(
@@ -26,8 +33,6 @@ SEMVER = re.compile(
 )
 ASCII_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 ASSET_ID = re.compile(r"^(?:skill|profile)/[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
-FRONTMATTER = re.compile(r"\A---\r?\n(?P<body>.*?)\r?\n---(?:\r?\n|\Z)", re.DOTALL)
-MARKDOWN_LINK = re.compile(r"!?\[[^]]*\]\(([^)]+)\)")
 LITERAL_MACHINE_PATH = re.compile(
     r"(?:[A-Za-z]:\\Users\\[^\\/\s]+|/(?:Users|home)/[^/\s]+)"
 )
@@ -77,10 +82,6 @@ BASE_FILES = (
     "VERSION",
     "catalog.toml",
 )
-
-
-class ContractError(ValueError):
-    """A user-facing contract violation."""
 
 
 @dataclass(frozen=True)
@@ -371,53 +372,6 @@ def parse_version(root: Path = ROOT) -> str:
     return text[:-1]
 
 
-def frontmatter(path: Path) -> dict[str, object]:
-    match = FRONTMATTER.match(path.read_text(encoding="utf-8", errors="strict"))
-    if not match:
-        raise ContractError("missing YAML frontmatter")
-    values: dict[str, object] = {}
-    nested_key: str | None = None
-    for line in match.group("body").splitlines():
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if line.startswith((" ", "\t")):
-            if nested_key is None:
-                raise ContractError("frontmatter has an unexpected nested value")
-            child, separator, child_value = line.strip().partition(":")
-            if not separator or not child:
-                raise ContractError(
-                    f"frontmatter {nested_key} has an invalid mapping entry"
-                )
-            if values[nested_key] is None:
-                values[nested_key] = {}
-            if not isinstance(values[nested_key], dict) or child in values[nested_key]:
-                raise ContractError(f"frontmatter {nested_key} has an invalid mapping")
-            values[nested_key][child] = child_value.strip().strip("\"'")
-            continue
-        key, separator, value = line.partition(":")
-        key, value = key.strip(), value.strip()
-        if not separator or not key or key in values:
-            raise ContractError("frontmatter must use unique top-level keys")
-        nested_key = None
-        if value in {"true", "false"}:
-            values[key] = value == "true"
-        elif value.startswith(("[", "{")):
-            try:
-                values[key] = json.loads(value)
-            except json.JSONDecodeError as error:
-                raise ContractError(
-                    f"invalid frontmatter value for {key}: {error}"
-                ) from error
-        else:
-            values[key] = value.strip("\"'") if value else None
-            if not value:
-                nested_key = key
-    unresolved = [key for key, value in values.items() if value is None]
-    if unresolved:
-        raise ContractError(f"frontmatter keys require values: {', '.join(unresolved)}")
-    return values
-
-
 def canonical_inventory(root: Path) -> dict[str, tuple[str, str]]:
     result: dict[str, tuple[str, str]] = {}
     skills = root / "skills"
@@ -429,28 +383,6 @@ def canonical_inventory(root: Path) -> dict[str, tuple[str, str]]:
         for path in sorted(profiles.glob("*.json")):
             result[path.relative_to(root).as_posix()] = ("profile", path.stem)
     return result
-
-
-def markdown_problems(path: Path, root: Path) -> list[str]:
-    problems: list[str] = []
-    for target in MARKDOWN_LINK.findall(
-        path.read_text(encoding="utf-8", errors="strict")
-    ):
-        target = target.strip().split(maxsplit=1)[0].strip('<>"')
-        if not target or target.startswith(("#", "http://", "https://", "mailto:")):
-            continue
-        raw = target.split("#", 1)[0]
-        if not raw:
-            continue
-        try:
-            (path.parent / raw).resolve(strict=True).relative_to(
-                root.resolve(strict=True)
-            )
-        except (OSError, ValueError):
-            problems.append(
-                f"{path.relative_to(root).as_posix()}: broken or out-of-root link {target!r}"
-            )
-    return problems
 
 
 def walk_keys(value: object) -> Iterator[str]:
@@ -567,60 +499,32 @@ def skill_problems(path: Path, asset: Asset, root: Path) -> list[str]:
         or not str(metadata["description"]).strip()
     ):
         problems.append(f"{relative}: description is required")
+    name = metadata.get("name")
+    if not isinstance(name, str) or not 1 <= len(name) <= 64 or not re.fullmatch(
+        r"[a-z0-9]+(?:-[a-z0-9]+)*", name
+    ):
+        problems.append(f"{relative}: name must be 1-64 lowercase letters, digits or single hyphens")
+    description = metadata.get("description")
+    if isinstance(description, str) and len(description) > 1024:
+        problems.append(f"{relative}: description must not exceed 1024 characters")
+    if "compatibility" in metadata:
+        compatibility = metadata["compatibility"]
+        if not isinstance(compatibility, str) or not compatibility.strip() or len(compatibility) > 500:
+            problems.append(f"{relative}: compatibility must be a non-empty string of at most 500 characters")
+    if "allowed-tools" in metadata:
+        tools = metadata["allowed-tools"]
+        if not isinstance(tools, str) or not tools.strip():
+            problems.append(f"{relative}: allowed-tools must be a non-empty string")
+    if "metadata" in metadata:
+        values = metadata["metadata"]
+        if not isinstance(values, dict) or any(
+            not isinstance(key, str) or not isinstance(value, str)
+            for key, value in values.items()
+        ):
+            problems.append(f"{relative}: metadata must map strings to strings")
     if metadata.get("license") != asset.license:
         problems.append(f"{relative}: license must equal the catalog license")
     return problems
-
-
-def openai_adapter_document(text: str) -> dict[str, Any]:
-    """Parse YAML safely, without duplicate keys, aliases or ambiguous booleans.
-
-    Use the maintained parser rather than interpreting YAML with regular
-    expressions. This loader is local: other PyYAML consumers are unaffected.
-    """
-    try:
-        import yaml
-    except ImportError as error:
-        raise ContractError(
-            "YAML validation requires PyYAML; run "
-            "python -m pip install -r requirements-tools.txt in your environment"
-        ) from error
-
-    class AdapterLoader(yaml.SafeLoader):
-        def compose_node(self, parent: Any, index: Any) -> Any:
-            if self.check_event(yaml.AliasEvent):
-                raise ContractError("adapter YAML aliases are not supported")
-            return super().compose_node(parent, index)
-
-        def construct_mapping(self, node: Any, deep: bool = False) -> dict[str, Any]:
-            if not isinstance(node, yaml.MappingNode):
-                raise ContractError("adapter YAML requires a mapping")
-            result: dict[str, Any] = {}
-            for key_node, value_node in node.value:
-                key = self.construct_object(key_node, deep=deep)
-                if not isinstance(key, str):
-                    raise ContractError("adapter YAML keys must be strings")
-                if key in result:
-                    raise ContractError(f"duplicate YAML key {key!r}")
-                result[key] = self.construct_object(value_node, deep=deep)
-            return result
-
-    # YAML 1.1 yes/no/on/off must not silently turn into invocation policy.
-    AdapterLoader.yaml_implicit_resolvers = {
-        key: [(tag, pattern) for tag, pattern in values
-              if tag != "tag:yaml.org,2002:bool"]
-        for key, values in yaml.SafeLoader.yaml_implicit_resolvers.items()
-    }
-    AdapterLoader.add_implicit_resolver(
-        "tag:yaml.org,2002:bool", re.compile(r"^(?:true|false)$"), list("tf")
-    )
-    try:
-        document = yaml.load(text, Loader=AdapterLoader)
-    except yaml.YAMLError as error:
-        raise ContractError(f"invalid adapter YAML: {error}") from error
-    if not isinstance(document, dict):
-        raise ContractError("adapter YAML must be an object")
-    return document
 
 
 def openai_adapter_problems(path: Path, asset: Asset, root: Path) -> list[str]:
@@ -780,6 +684,12 @@ def check(root: Path = ROOT) -> list[str]:
                 except ContractError as error:
                     problems.append(str(error))
 
+    # Validate a full copied collection and every singleton, not only checkout
+    # links. Unsafe source trees never enter the copying boundary.
+    skill_sources = [root / asset.path for asset in catalog.assets if asset.kind == "skill"]
+    if skill_sources and not path_problems and not stale:
+        problems.extend(distribution_problems(skill_sources))
+
     bridge = root / "CLAUDE.md"
     if bridge.is_file() and bridge.read_bytes() != b"@AGENTS.md\n":
         problems.append("CLAUDE.md: expected the one-line @AGENTS.md bridge")
@@ -790,7 +700,7 @@ def check(root: Path = ROOT) -> list[str]:
 SUMMARY = "Evidence-grounded methods for coding agents"
 LONG_SUMMARY = (
     "Skills and agent profiles for implementation, planning, architecture, testing, "
-    "audit, research, writing, operational UI and bounded delegation. Each method "
+    "audit, research, writing, UI delivery and bounded delegation. Each method "
     "says what it checked, what that establishes and what it does not."
 )
 HOMEPAGE = "https://github.com/Muratovnik/assay"
@@ -961,16 +871,18 @@ def skills_index(root: Path, catalog: Catalog) -> bytes:
         "# Skills",
         "",
         "Each skill is one directory with a `SKILL.md`. A client reads the name and",
-        "description at startup and loads the body only when a task matches, so an",
-        "unused method costs little context.",
+        "description for discovery; actual loading depends on the client and task.",
+        "Declared automatic activation is eligibility, not a successful-run receipt.",
         "",
         "| Skill | Activation | What it is for |",
         "| --- | --- | --- |",
     ]
     for asset in skill_assets(catalog):
         metadata = frontmatter(root / asset.path / "SKILL.md")
-        description = str(metadata.get("description", "")).strip()
-        summary = description.split(". ")[0].rstrip(".")
+        # YAML block scalars are valid metadata, but a Markdown table cell must
+        # stay on one line and must not introduce an extra column.
+        description = " ".join(str(metadata.get("description", "")).split())
+        summary = description.split(". ")[0].rstrip(".").replace("|", "\\|")
         lines.append(
             f"| [{asset.name}]({asset.name}/SKILL.md) | {asset.activation} | {summary}. |"
         )
@@ -1073,6 +985,9 @@ def native_plan(
     root = root.resolve(strict=True)
     home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
+    # Lifecycle commands cannot rely on the publication gate to reject a
+    # redirected source. This does not validate unrelated documentation.
+    validate_plain_tree(root / "catalog.toml")
     catalog = load_catalog(root)
     native_skill_targets: dict[str, Path] = {}
     for asset in catalog.assets:
@@ -1086,7 +1001,10 @@ def native_plan(
     entries: list[PlannedEntry] = []
     client_order = {"codex": 0, "claude": 1}
     for asset in sorted(catalog.assets, key=lambda item: item.id):
-        source = (root / asset.path).resolve(strict=True)
+        source = root / asset.path
+        preflight_safe_parent(root, source.parent)
+        validate_plain_tree(source)
+        source = source.resolve(strict=True)
         for projection in sorted(
             asset.projections, key=lambda item: client_order[item.client]
         ):
@@ -1634,6 +1552,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 print("render: SYNCHRONIZED")
             return 0
 
+        # Removal validates exact owned targets, adapters and safe ancestors.
+        # An unrelated source-format or generated-file error must not trap an
+        # installation. The lifecycle's preflight and rollback remain mandatory.
+        if options.command == "uninstall-links":
+            print("\n".join(uninstall_links(root, options.home, options.clients)))
+            print("uninstall-links: APPLIED")
+            return 0
+
         problems = check(root)
         if problems:
             raise ContractError("\n".join(problems))
@@ -1649,9 +1575,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
         elif options.command == "install-links":
             print("\n".join(install_links(root, options.home, options.clients)))
             print("install-links: APPLIED")
-        else:
-            print("\n".join(uninstall_links(root, options.home, options.clients)))
-            print("uninstall-links: APPLIED")
     except (ContractError, OSError) as error:
         print(error, file=sys.stderr)
         return 1

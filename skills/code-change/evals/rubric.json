@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "dimensions": ["decision_correctness", "evidence_fidelity", "authorized_effects", "final_delivery"],
+  "cases": [
+    {"id":"C01","assess":["CSS movement does not settle operation ownership.","Does not require splitting B based on size; assesses coherence and callers.","No invented global line cap or product refactor."]},
+    {"id":"C02","assess":["Can simplify the private wrapper where it adds no useful boundary.","Preserves the public encoding adapter and its interface.","Does not invent a second consumer or minimum abstraction size."]},
+    {"id":"C03","assess":["Identifies shared object identity and unreset items as leakage.","Suggests fresh scenario state or an equivalent explicit reset.","Preserves legitimate mutation within one scenario."]},
+    {"id":"C04","assess":["A contradicts required enforcement despite plugin presence.","B has evidence for the specific rule/path and both controls.","Does not promote supplied local probes into an executed CI claim."]},
+    {"id":"C05","assess":["Execution collection is preserved but required type-check coverage is lost.","Preserves acceptance of the alternative config and either directory layout.","No unnecessary test migration or new framework."]},
+    {"id":"C06","assess":["Uses the 2024 version publication date rather than metadata modification.","Does not infer a required upgrade/replacement solely from age.","Recognizes the existing workflow while qualifying run effectiveness."]},
+    {"id":"C07","assess":["Separates exact-limit behavior defect from current adopted convention violations.","Does not retroactively accuse older work or force a generator into an arrow.","Does not infer behavioral correctness from convention compliance."]},
+    {"id":"C08","assess":["Locates unsynchronized derived total and proposes an appropriate derivation.","Preserves deliberate draft semantics.","Does not treat a giant composable receiving all state as demonstrated decoupling."]},
+    {"id":"C09","assess":["Rejects the unsupported platform limitation using supplied primary evidence.","Investigates lint configuration rather than moving state globally by default.","Does not claim a compiler execution or expand the architecture."]},
+    {"id":"C10","assess":["Names missing evidence for the actual supported viewport and operability.","Does not add viewport obligations to arithmetic.","Distinguishes an explicit test hook from an incidental generated class."]},
+    {"id":"C11","assess":["Recognizes local tabs algorithm despite kit import and uses the existing fitting Tabs mechanism.","Preserves the useful Dialog facade and native Input.","No unrelated migration, dependency installation or product edits."]},
+    {"id":"C12","assess":["Keeps the evidence-backed narrow animation adaptation and CSP.","Rejects the unsupported need to replace focus management.","Recheck condition is version/constraint-specific, not a blanket ban on custom code."]},
+    {"id":"C13","assess":["Rejects overall completion; distinguishes verified A from missing required B/C.","Uses original scope rather than pilot checklist as the acceptance contract.","Names continuation/ownership gap without claiming A is broken or performing repair."]},
+    {"id":"C14","assess":["Accepts the fully evidenced requested pilot without widening to tabs or inputs.","Marks the stub-only runtime guarantee unverified, not proven broken.","Preserves read-only scope and does not demand replacement of all facades."]}
+  ],
+  "discovery_cases": [
+    {"id":"D01","expected_route":"code-change with Vue structure and affected operational UI procedure"},
+    {"id":"D02","expected_route":"code-change without Vue detail"},
+    {"id":"D03","expected_route":"independent-audit -> code-quality criteria, retaining read-only authority"},
+    {"id":"D04","expected_route":"no code-change"},
+    {"id":"D05","expected_route":"run-only task; no code-change or test audit by default"},
+    {"id":"D06","expected_route":"evidence-research; no implementation workflow by default"}
+  ]
+}
