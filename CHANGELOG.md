@@ -6,6 +6,28 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.8.0](https://github.com/Muratovnik/assay/compare/v0.7.0...v0.8.0) (2026-09-26)
+
+Two new methods: product flow mapping, which reconstructs an existing product's
+journeys from evidence for a redesign or test handoff, and research-driven change,
+which carries an evidence-backed change through planning, implementation, review
+and delivery. Three skills are renamed to match their scope, and the source checks
+now parse metadata and links with maintained parsers and check every skill as a
+standalone copy.
+
+### ⚠ BREAKING CHANGES
+
+* `code-maintenance` is now `code-change`, `operations-ui-delivery` is now `ui-delivery` and `skill-design` is now `skill-evaluation`, together with their catalog IDs, native link targets and adapters; no old-name aliases are shipped, so remove existing links with the previous revision before installing this one ([7716739](https://github.com/Muratovnik/assay/commit/7716739440ffa2eed65012a2ceb5069a7467a034))
+
+### Features
+
+* **product-flow-mapping:** reconstruct an existing product's journeys and trace its screens, states and controls to evidence, keeping observed, adopted and proposed behavior apart, with a bidirectional inventory and paired description and screenshot frames for a designer; UI acceptance and design transfer route journey reconstruction to it, and test writing consumes the same scenarios ([630e59c](https://github.com/Muratovnik/assay/commit/630e59ca2164a468df851a52318150d33827a947))
+* **research-driven-change:** carry a change from need through evidence, decision, plan unit, implementation, verification and the requested delivery, entering at existing research, a plan, a changed artifact or review feedback without restarting sufficient prior work; research, planning, code change, skill evaluation and audit link back to it and keep their own authority ([5b76f5c](https://github.com/Muratovnik/assay/commit/5b76f5c5f12f5ad0116af940308fb83a5862e87b))
+
+### Bug Fixes
+
+* parse skill frontmatter and adapter YAML with one local safe loader and check name, description, compatibility, allowed-tools and metadata against the Agent Skills specification; parse links with markdown-it-py, including reference links and HTML resources, and check the full collection and every single skill in copied layouts with declared optional peers; `uninstall-links` no longer depends on unrelated publication checks but still refuses linked sources, foreign targets and modified adapters ([7716739](https://github.com/Muratovnik/assay/commit/7716739440ffa2eed65012a2ceb5069a7467a034))
+
 ## [0.7.0](https://github.com/Muratovnik/assay/compare/v0.6.0...v0.7.0) (2026-09-26)
 
 Two new methods: implementation planning for a bounded change or a staged
