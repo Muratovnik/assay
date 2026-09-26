@@ -3,7 +3,7 @@ name: skill-evaluation
 description: Diagnose skill failures and evaluate whether a proposed method improves task outcomes. Use for behavioral skill assessment, not routine authoring or metadata edits.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research implementation-planning route-subagents test-audit"
+  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change route-subagents test-audit"
 ---
 
 # Skill behavior and evaluation
@@ -50,6 +50,12 @@ folder creates no invocation or context-saving mechanism. Use a different layout
 only for a concrete consumer/tooling need; preserve a working justified exception.
 Check links and selective reading separately from package validity. File moves
 alone do not demonstrate better behavior or lower context cost.
+
+When this assessment belongs to an already active
+[research-driven change](../research-driven-change/references/stage-handoffs.md),
+return the supported transfer, behavior evidence and remaining limits to its
+owner. This method retains behavioral diagnosis and evaluation; it does not
+restart the lifecycle or imply that a local candidate was published.
 
 For a small paired comparison, use [paired pilot](references/paired-pilot.md).
 It reuses existing execution and inspection tools; it is not another platform.

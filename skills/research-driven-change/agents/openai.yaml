@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research-Driven Change"
+  short_description: "Carry evidence through decisions, changes, review and delivery"
+  default_prompt: "Use $research-driven-change to carry this research-backed change through its requested stages, reusing valid prior work and reporting the actual checked and delivered result."

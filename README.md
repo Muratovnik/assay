@@ -26,6 +26,7 @@ proof of activation. Each row links to the method itself.
 | [test-audit](skills/test-audit/SKILL.md) | Someone claims a suite protects against regressions | You are writing the tests, or merely executing them |
 | [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, architecture, release or migration needs checking against its brief | You want the change made; this method does not fix things |
 | [evidence-research](skills/evidence-research/SKILL.md) | A consequential claim needs sources located and reconciled | The answer is one lookup away |
+| [research-driven-change](skills/research-driven-change/SKILL.md) | Research must lead into a plan, change, review or delivery, or that cycle is being resumed | Only an idea discussion, research, a routine edit, or a standalone skill assessment or read-only audit is requested |
 | [ui-delivery](skills/ui-delivery/SKILL.md) | A product interface needs designing, repairing, transferring or critiquing | The work is backend only |
 | [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | An existing product's journeys, screens and controls need reconstructing from evidence for a redesign, handoff or test inventory | The product is new, the change is visual only, or the scenario is already known |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |

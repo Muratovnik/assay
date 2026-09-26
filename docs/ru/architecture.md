@@ -34,6 +34,7 @@
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-evaluation` | automatic | `~/.agents/skills/skill-evaluation` | `~/.claude/skills/skill-evaluation` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
+| `skill/research-driven-change` | automatic | `~/.agents/skills/research-driven-change` | `~/.claude/skills/research-driven-change` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |

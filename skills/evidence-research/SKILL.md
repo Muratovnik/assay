@@ -3,7 +3,7 @@ name: evidence-research
 description: Investigate questions, compare options or assess gaps using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence; skip simple fact lookups, text summaries and routine implementation.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change"
+  assay-optional-skills: "code-change research-driven-change"
 ---
 
 # Evidence research
@@ -13,6 +13,12 @@ This is a research method, not a new search service or an instruction to run
 agents. Use available domain tools and existing research artifacts. If another
 explicitly selected research workflow is active, contribute missing criteria
 within that workflow rather than starting a second plan or source ledger.
+
+When research contributes to an already requested research-to-change cycle,
+return qualified conclusions and remaining questions through its
+[stage handoff](../research-driven-change/references/stage-handoffs.md).
+This method still owns evidence quality; the handoff does not start implementation
+or add a second research plan to a standalone investigation.
 
 ## Frame the work
 

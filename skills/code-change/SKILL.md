@@ -3,7 +3,7 @@ name: code-change
 description: Implement or refactor code with clear responsibilities, controlled state and effective quality checks. Use for changes affecting code structure, shared logic or tooling; skip prose-only edits and read-only audits.
 license: MIT
 metadata:
-  assay-optional-skills: "evidence-research implementation-planning independent-audit software-architecture test-writing ui-delivery"
+  assay-optional-skills: "evidence-research implementation-planning independent-audit research-driven-change software-architecture test-writing ui-delivery"
 ---
 
 # Code change
@@ -30,6 +30,12 @@ available [implementation-planning](../implementation-planning/SKILL.md) with th
 scope, inspected consumers, shared contracts and required checks established here.
 Planning sequences the work; boundary decisions follow the next section, and a
 plan-only request grants no implementation authority.
+
+When implementing a unit of an already active
+[research-driven change](../research-driven-change/references/stage-handoffs.md),
+return the actual changed subject, checks and unfinished scope to that owner.
+This method retains implementation quality; it does not restart research or own
+the remaining publication steps of the larger request.
 
 ## Responsibilities and interfaces
 

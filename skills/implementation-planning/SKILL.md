@@ -3,7 +3,7 @@ name: implementation-planning
 description: Create, review or update implementation plans, from a bounded change to a multi-stage roadmap. Use for explicit planning requests or consequential sequencing, dependencies and handoffs; skip idea-only discussion, research-only work and obvious edits that need no plan.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research independent-audit software-architecture test-audit test-writing ui-delivery"
+  assay-optional-skills: "code-change evidence-research independent-audit research-driven-change software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Implementation planning
@@ -72,6 +72,12 @@ Reuse the active workflow and one owning plan. These links are criteria, not
 instructions to start each workflow or recurse back into planning. If an optional
 method is unavailable, apply the relevant criteria directly and disclose any
 material evidence gap; do not install it automatically.
+
+When planning contributes to an already active
+[research-driven change](../research-driven-change/references/stage-handoffs.md),
+return the ready units, supporting decisions and unresolved dependencies to that
+owner. Planning retains one owning plan and its continuation rules; it neither
+restarts the lifecycle nor extends a plan-only request into execution.
 
 ## Preserve authority
 
