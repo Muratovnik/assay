@@ -156,6 +156,15 @@ adapter or a reparse-point parent stops the run before anything is written.
 Developer Mode or an elevated terminal. The installer fails closed if it is
 missing; it will not fall back to a shell command.
 
+With the Claude Code plugin installed, the plugin already supplies the skills and
+both profiles, so the Claude entries would show every skill twice. Add
+`--client codex` to `plan`, `install-links` and `uninstall-links` to handle only
+the Codex entries, or `--client claude` for only the Claude ones. A Claude skill
+link resolves through the Codex one, so installing Claude alone needs the Codex
+links in place, and removing Codex alone is refused while Claude links remain. To
+drop the Claude entries from an existing install, run
+`python tools/assay.py uninstall-links --client claude`.
+
 ## Optional routing advisor
 
 `route-subagents` can use `native-economy` through the active client's available
@@ -185,7 +194,8 @@ assay@assay`, or the client's plugin manager.
 
 ## Upgrading
 
-Pull the new revision and re-run the installer. If the profile adapters changed
+Pull the new revision and re-run the installer, keeping the same `--client`
+selection on every step. If the profile adapters changed
 between revisions, the upgrade is two steps in order:
 
 ```text

@@ -431,6 +431,69 @@ class AgentAssetsTests(unittest.TestCase):
             self.assertTrue((root / "skills/route-subagents/SKILL.md").is_file())
             self.assertEqual("codex-owned\n", system.read_text(encoding="utf-8"))
 
+    def test_client_selection_keeps_the_link_chain_whole(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root, home = base / "source", base / "home"
+            root.mkdir()
+            home.mkdir()
+            write_fixture(root)
+            codex_skill = home / ".agents/skills/route-subagents"
+            claude_skill = home / ".claude/skills/route-subagents"
+            claude_profile = home / ".claude/agents/evidence-reviewer.md"
+
+            self.assertEqual(
+                {"codex"},
+                {entry.client for entry in aa.native_plan(root, home, ["codex"])},
+            )
+            with self.assertRaisesRegex(aa.ContractError, "unknown client selection"):
+                aa.native_plan(root, home, ["cursor"])
+            with self.assertRaisesRegex(aa.ContractError, "broken link chain"):
+                aa.install_links(root, home, ["claude"])
+            self.assertFalse(aa.lexists(claude_skill))
+
+            aa.install_links(root, home)
+            with self.assertRaisesRegex(aa.ContractError, "broken link chain"):
+                aa.uninstall_links(root, home, ["codex"])
+            self.assertTrue(aa.lexists(codex_skill))
+
+            removed = aa.uninstall_links(root, home, ["claude"])
+            self.assertTrue(all(action.startswith("REMOVED ") for action in removed))
+            self.assertFalse(aa.lexists(claude_skill))
+            self.assertFalse(aa.lexists(claude_profile))
+            self.assertTrue(
+                all(
+                    aa.entry_state(entry)[0] == "exact"
+                    for entry in aa.native_plan(root, home, ["codex"])
+                )
+            )
+
+            aa.install_links(root, home, ["claude"])
+            self.assertTrue(
+                all(
+                    aa.entry_state(entry)[0] == "exact"
+                    for entry in aa.native_plan(root, home)
+                )
+            )
+
+    def test_codex_only_selection_skips_claude_prerequisites(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root, home = base / "source", base / "home"
+            root.mkdir()
+            home.mkdir()
+            write_fixture(root, CATALOG + EXPLICIT_SKILL)
+            add_explicit_skill(root)
+
+            self.assertEqual([], aa.plan_document(root, home, ["codex"])["prerequisites"])
+            actions = aa.install_links(root, home, ["codex"])
+            self.assertTrue(all(action.startswith("INSTALLED ") for action in actions))
+            self.assertFalse((home / ".claude").exists())
+            options = aa.parser().parse_args(
+                ["uninstall-links", "--client", "claude", "--client", "codex"]
+            )
+            self.assertEqual(["claude", "codex"], options.clients)
+
     def test_install_preflight_refuses_a_real_directory_without_partial_writes(
         self,
     ) -> None:

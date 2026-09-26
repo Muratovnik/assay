@@ -145,6 +145,13 @@ python tools/assay.py install-links
 **在 Windows 上**，创建目录符号链接需要相应权限，通常是开发者模式或提升权限的
 终端。缺少该权限时安装器直接失败，不会退回到调用 shell。
 
+如果 Claude Code 已安装插件，插件本身就提供这些技能和两个配置，Claude 条目会让每个
+技能出现两次。给 `plan`、`install-links` 和 `uninstall-links` 加上
+`--client codex` 只处理 Codex 条目，加上 `--client claude` 则只处理 Claude 条目。
+Claude 的技能链接经由 Codex 链接解析，因此单独安装 Claude 需要 Codex 链接已就位；
+只要 Claude 链接仍在，单独移除 Codex 就会被拒绝。要从现有安装中去掉 Claude 条目，
+运行 `python tools/assay.py uninstall-links --client claude`。
+
 ## 卸载
 
 ```text
@@ -159,7 +166,8 @@ assay@assay`，或你所用客户端的插件管理器。
 
 ## 升级
 
-拉取新版本后重新运行安装器。如果两个版本之间配置适配器发生了变化，升级需要按
+拉取新版本后重新运行安装器，每一步都保持相同的 `--client` 选择。如果两个版本之间
+配置适配器发生了变化，升级需要按
 以下顺序分两步进行：
 
 ```text

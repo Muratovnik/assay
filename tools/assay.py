@@ -10,7 +10,7 @@ import re
 import stat
 import sys
 import tempfile
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -67,6 +67,7 @@ ROOT_LAYOUT = {
     "codex": Path(".codex"),
     "claude": Path(".claude"),
 }
+CLIENTS = ("codex", "claude")
 BASE_FILES = (
     "AGENTS.md",
     "CHANGELOG.md",
@@ -1051,9 +1052,27 @@ def lexical_absolute(path: Path) -> Path:
     return Path(os.path.abspath(os.fspath(path)))
 
 
-def native_plan(root: Path = ROOT, home: Path | None = None) -> list[PlannedEntry]:
+def selected_clients(clients: Iterable[str] | None = None) -> frozenset[str]:
+    if clients is None:
+        return frozenset(CLIENTS)
+    chosen = frozenset(clients)
+    unknown = sorted(chosen - set(CLIENTS))
+    if not chosen or unknown:
+        raise ContractError(
+            f"unknown client selection: {', '.join(unknown) or 'none'}; "
+            f"expected {', '.join(CLIENTS)}"
+        )
+    return chosen
+
+
+def native_plan(
+    root: Path = ROOT,
+    home: Path | None = None,
+    clients: Iterable[str] | None = None,
+) -> list[PlannedEntry]:
     root = root.resolve(strict=True)
     home = lexical_absolute((home or Path.home()).expanduser())
+    chosen = selected_clients(clients)
     catalog = load_catalog(root)
     native_skill_targets: dict[str, Path] = {}
     for asset in catalog.assets:
@@ -1109,7 +1128,41 @@ def native_plan(root: Path = ROOT, home: Path | None = None) -> list[PlannedEntr
                         data,
                     )
                 )
-    return entries
+    return [entry for entry in entries if entry.client in chosen]
+
+
+def link_chain_problems(
+    root: Path, home: Path, clients: frozenset[str], installing: bool
+) -> list[str]:
+    """A Claude skill link resolves through the Codex one; keep the chain whole."""
+    if installing:
+        dependent = "claude" in clients and "codex" not in clients
+    else:
+        dependent = "codex" in clients and "claude" not in clients
+    if not dependent:
+        return []
+    entries = native_plan(root, home)
+    codex_links = {
+        entry.asset_id: entry
+        for entry in entries
+        if entry.client == "codex" and entry.mode == "link"
+    }
+    problems: list[str] = []
+    for entry in entries:
+        if entry.client != "claude" or entry.mode != "link":
+            continue
+        codex = codex_links[entry.asset_id]
+        if installing and entry_state(codex)[0] != "exact":
+            problems.append(
+                f"{entry.target} resolves through {codex.target}, which is not "
+                "installed; include the codex client"
+            )
+        elif not installing and lexists(entry.target):
+            problems.append(
+                f"{entry.target} still resolves through {codex.target}; "
+                "remove the claude client first"
+            )
+    return problems
 
 
 def lexists(path: Path) -> bool:
@@ -1160,8 +1213,12 @@ def entry_state(entry: PlannedEntry) -> tuple[str, str]:
 
 
 def activation_prerequisites(
-    root: Path = ROOT, home: Path | None = None
+    root: Path = ROOT,
+    home: Path | None = None,
+    clients: Iterable[str] | None = None,
 ) -> list[dict[str, str]]:
+    if "claude" not in selected_clients(clients):
+        return []
     selected_home = lexical_absolute((home or Path.home()).expanduser())
     settings = selected_home / ".claude" / "settings.json"
     catalog = load_catalog(root.resolve(strict=True))
@@ -1226,9 +1283,14 @@ def activation_prerequisites(
     return prerequisites
 
 
-def plan_document(root: Path = ROOT, home: Path | None = None) -> dict[str, Any]:
+def plan_document(
+    root: Path = ROOT,
+    home: Path | None = None,
+    clients: Iterable[str] | None = None,
+) -> dict[str, Any]:
     selected_home = lexical_absolute((home or Path.home()).expanduser())
-    entries = native_plan(root, selected_home)
+    chosen = selected_clients(clients)
+    entries = native_plan(root, selected_home, chosen)
     planned: list[dict[str, Any]] = []
     for entry in entries:
         state, detail = entry_state(entry)
@@ -1259,7 +1321,7 @@ def plan_document(root: Path = ROOT, home: Path | None = None) -> dict[str, Any]
         "schema": 2,
         "source_root": str(root.resolve(strict=True)),
         "version": parse_version(root),
-        "prerequisites": activation_prerequisites(root, selected_home),
+        "prerequisites": activation_prerequisites(root, selected_home, chosen),
         "entries": planned,
     }
 
@@ -1398,9 +1460,14 @@ def remove_entry(entry: PlannedEntry) -> None:
         entry.target.unlink()
 
 
-def install_links(root: Path = ROOT, home: Path | None = None) -> list[str]:
+def install_links(
+    root: Path = ROOT,
+    home: Path | None = None,
+    clients: Iterable[str] | None = None,
+) -> list[str]:
     home = lexical_absolute((home or Path.home()).expanduser())
-    prerequisites = activation_prerequisites(root, home)
+    chosen = selected_clients(clients)
+    prerequisites = activation_prerequisites(root, home, chosen)
     unmet = [item for item in prerequisites if item["state"] != "exact"]
     if unmet:
         raise ContractError(
@@ -1410,7 +1477,13 @@ def install_links(root: Path = ROOT, home: Path | None = None) -> list[str]:
                 for item in unmet
             )
         )
-    entries = native_plan(root, home)
+    chain = link_chain_problems(root, home, chosen, installing=True)
+    if chain:
+        raise ContractError(
+            "native install preflight refused a broken link chain:\n"
+            + "\n".join(chain)
+        )
+    entries = native_plan(root, home, chosen)
     states = [(entry, *entry_state(entry)) for entry in entries]
     foreign = [(entry, detail) for entry, state, detail in states if state == "foreign"]
     parent_problems: list[str] = []
@@ -1461,9 +1534,20 @@ def install_links(root: Path = ROOT, home: Path | None = None) -> list[str]:
     ]
 
 
-def uninstall_links(root: Path = ROOT, home: Path | None = None) -> list[str]:
+def uninstall_links(
+    root: Path = ROOT,
+    home: Path | None = None,
+    clients: Iterable[str] | None = None,
+) -> list[str]:
     selected_home = lexical_absolute((home or Path.home()).expanduser())
-    entries = native_plan(root, selected_home)
+    chosen = selected_clients(clients)
+    chain = link_chain_problems(root, selected_home, chosen, installing=False)
+    if chain:
+        raise ContractError(
+            "native uninstall preflight refused a broken link chain:\n"
+            + "\n".join(chain)
+        )
+    entries = native_plan(root, selected_home, chosen)
     states = [(entry, *entry_state(entry)) for entry in entries]
     foreign = [(entry, detail) for entry, state, detail in states if state == "foreign"]
     parent_problems: list[str] = []
@@ -1517,12 +1601,18 @@ def parser() -> argparse.ArgumentParser:
     commands = result.add_subparsers(dest="command", required=True)
     commands.add_parser("check")
     plan = commands.add_parser("plan")
-    plan.add_argument("--home", type=Path, default=Path.home())
     plan.add_argument("--json", action="store_true")
     install = commands.add_parser("install-links")
-    install.add_argument("--home", type=Path, default=Path.home())
     uninstall = commands.add_parser("uninstall-links")
-    uninstall.add_argument("--home", type=Path, default=Path.home())
+    for command in (plan, install, uninstall):
+        command.add_argument("--home", type=Path, default=Path.home())
+        command.add_argument(
+            "--client",
+            dest="clients",
+            action="append",
+            choices=CLIENTS,
+            help="limit to this client's entries; repeat for more (default: all)",
+        )
     render = commands.add_parser("render")
     render.add_argument("--check", action="store_true")
     return result
@@ -1550,17 +1640,17 @@ def main(arguments: Sequence[str] | None = None) -> int:
         if options.command == "check":
             print("check: PASS")
         elif options.command == "plan":
-            document = plan_document(root, options.home)
+            document = plan_document(root, options.home, options.clients)
             if options.json:
                 print(canonical_json(document).decode("utf-8"), end="")
             else:
                 print("\n".join(format_plan(document)))
                 print("plan: PREVIEW")
         elif options.command == "install-links":
-            print("\n".join(install_links(root, options.home)))
+            print("\n".join(install_links(root, options.home, options.clients)))
             print("install-links: APPLIED")
         else:
-            print("\n".join(uninstall_links(root, options.home)))
+            print("\n".join(uninstall_links(root, options.home, options.clients)))
             print("uninstall-links: APPLIED")
     except (ContractError, OSError) as error:
         print(error, file=sys.stderr)
