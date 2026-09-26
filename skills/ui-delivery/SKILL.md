@@ -13,15 +13,6 @@ that promises it hold up: a screen, mockup, component library or its code that
 stays accurate, complete, editable and consistent after the last write.
 Preserve the product's language, supported journeys and authoritative state.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Preserve source fidelity and the requested deliverable; a missing collaborator does not authorize a substitute exporter or artifact.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Scope and mode
 
 The mode sets what establishes quality and which check applies:

@@ -12,15 +12,6 @@ Keep the primary session's model and effort unchanged. Select each child's
 model and reasoning effort for its task and quota budget. A semantic profile
 defines a capability boundary; it does not choose the child model or effort.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Use the available model inventory and an explicit bounded choice; a missing advisor is not permission to guess capabilities.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Confirm authorization
 
 This skill does not grant permission to delegate. Continue only when the user

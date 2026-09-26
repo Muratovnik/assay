@@ -55,9 +55,8 @@
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
 第三方 skills CLI 安装选定的技能，不安装插件钩子或智能体配置。组合使用方法时
-建议安装完整集合（`--skill '*'`）。单个技能保留核心约定；缺少可选方法时必须
-说明结果的限制。检查当前 CLI 显示的目标路径。参见[安装指南](docs/zh-CN/install.md)
-及[名称迁移](docs/how-to/migrate-skill-names.md)。
+建议安装完整集合（`--skill '*'`）。单个技能保留核心约定，CLI 不会安装关联方法。
+检查当前 CLI 显示的目标路径。参见[安装指南](docs/zh-CN/install.md)。
 
 ## 快速开始
 

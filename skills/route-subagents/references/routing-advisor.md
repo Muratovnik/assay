@@ -243,13 +243,10 @@ not a mandatory paid comparison campaign.
 
 ## Cost of a completed task
 
-Compare routing policies on representative completed tasks, not API price alone.
-Count packet preparation, advisor calls, worker attempts, retries, verification
-and integration; retain unsuccessful attempts and user corrections. Keep actual
-measurements separate from estimates and distinguish API billing from subscription
-quota accounting. Public benchmarks can inform a prior, not establish this cost.
+Compare routing policies on representative completed tasks, not API price alone,
+counting their cost as the [paired pilot](../../skill-evaluation/references/paired-pilot.md#inspect-four-distinct-results)
+does. Public benchmarks can inform a prior, not establish this cost.
 
 Use the existing explicit choice when the candidate is already justified; do not
 add a paid advisor call merely to certify the same answer. Compare an advisor
-against that simple baseline before claiming savings. A small pilot can reject
-a wasteful policy without establishing universal rankings or model superiority.
+against that simple baseline before claiming savings.

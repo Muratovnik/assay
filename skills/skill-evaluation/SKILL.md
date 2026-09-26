@@ -12,15 +12,6 @@ Evaluate the useful difference a skill makes. Use the client's ordinary
 authoring workflow for packaging and metadata; this method supplies behavioral
 diagnosis and evidence criteria. Routine skill authoring is a different task.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Keep input identity, comparable conditions and independent acceptance criteria; missing evidence limits the conclusion.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Locate the failure
 
 Recover the requested outcome, current method, invocation route and relevant

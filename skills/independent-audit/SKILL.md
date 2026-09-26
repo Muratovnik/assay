@@ -12,15 +12,6 @@ Establish whether the actual result meets the requested acceptance contract.
 A clean result is valid; findings are not a quota. This method supplies no new
 product requirements or authority to repair the subject.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Continue supported checks against the brief; a missing specialist criterion leaves that area NOT VERIFIED, not compliant.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Frame the decision
 
 Read the original brief and applicable owner instructions. Name the subject,

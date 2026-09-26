@@ -20,8 +20,7 @@ Claude Code/Codex 插件提醒需要可通过 `python` 调用的 Python 3.11+。
 skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配置。
 单个技能保留核心约定，但不包含全部可选方法。`assay-optional-skills`
 是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的
-加载或行为。参见[交付矩阵](../install.md#installation-surfaces)与
-[名称迁移](../how-to/migrate-skill-names.md)。
+加载或行为。参见[交付矩阵](../install.md#installation-surfaces)。
 
 ## 自动技能提醒
 
@@ -94,7 +93,7 @@ npx skills add Muratovnik/assay
 
 使用 `-a claude-code` 或 `-a codex` 选择客户端，`-g` 选择全局范围。
 `--skill '*'` 选择完整集合；`--skill <名称>` 只安装一个技能，不会递归安装
-关联方法。缺少重要准则时必须说明单个技能结果的限制。
+关联方法。
 
 根据客户端当前文档核对该 CLI 版本报告的目标路径。发现遗漏时使用受支持的
 项目级安装或下方明确的链接布局，不要猜测并创建额外别名。

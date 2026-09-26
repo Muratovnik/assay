@@ -11,15 +11,6 @@ metadata:
 Make the requested change easier to understand and safely change again. Assess
 the resulting code and its consumers, not just the patch size or green commands.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Preserve inspected callers and established contracts; do not invent a missing architectural policy.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Establish the working contract
 
 Read the request, owner instructions, affected callers and effective project

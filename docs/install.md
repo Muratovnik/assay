@@ -26,11 +26,9 @@ loader invocation, followed criteria and outcome quality are different claims.
 The collection preserves relative peer links. A singleton supplies its bounded
 core, not every specialist criterion in the collection. `metadata.assay-optional-skills`
 records optional collaborators for Assay checks; no client is expected to install
-dependencies from this field. Unavailable criteria must be disclosed, never
-invented or silently treated as satisfied. The source gate copies the collection
-and each singleton into temporary layouts to check Markdown resource boundaries;
-it does not simulate a third-party installer or prove prose fallback quality.
-See [composition](explanation/skill-composition.md) and [name migration](how-to/migrate-skill-names.md).
+dependencies from this field. The source gate copies the collection and each
+singleton into temporary layouts to check Markdown resource boundaries; it does
+not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
 ## Automatic skill reminders
 

@@ -12,15 +12,6 @@ Connect the requested outcome to grounded, verifiable work. Detail the next read
 part; keep later work revisable. This method supplies planning criteria, not an
 executor, task store, architecture policy or permission to act.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Keep dependencies, acceptance and continuation in the owning plan. A pilot does not complete rollout to the intended consumers.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Establish mode and depth
 
 Distinguish discussing an idea, producing a plan, executing authorized work and
@@ -51,9 +42,8 @@ changes from verified results and name blocked or unavailable checks.
 Order work by real dependencies and uncertainty. A bounded investigation can be
 ready while the implementation it informs is not. Pilot and staged-adoption
 completion follow [staged adoption](../code-change/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request).
-The plan unit names its inputs, resulting artifact or behavior, verification and
-return condition. Keep incidental cleanup outside the active plan unless it is
-necessary for the agreed result.
+Keep incidental cleanup outside the active plan unless it is necessary for the
+agreed result.
 
 Before delivery, trace requirements to units and checks, and units back to their
 purpose. Check the next step can actually begin. Report what is ready, what needs

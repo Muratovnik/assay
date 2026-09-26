@@ -59,10 +59,9 @@ install them.
 
 The third-party skills CLI installs selected skills, not plugin hooks or agent
 profiles. Prefer the full collection (`--skill '*'`) for composed work. A single
-skill has a bounded core and declares optional peers; missing criteria are not
-silently supplied. Check the destination reported by your CLI version. See the
-[installation and evidence matrix](docs/install.md#installation-surfaces) and
-[name migration](docs/how-to/migrate-skill-names.md).
+skill has a bounded core and declares optional peers, which the CLI does not
+install. Check the destination reported by your CLI version. See the
+[installation and evidence matrix](docs/install.md#installation-surfaces).
 
 ## Quick start
 

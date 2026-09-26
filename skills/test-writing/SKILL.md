@@ -12,15 +12,6 @@ Protect the intended contract without freezing accidental implementation.
 Passing tests are evidence of the assertions exercised, not approval of the
 requirements or proof that the whole product works.
 
-## Optional method boundaries
-
-Sibling methods named in metadata supply conditional criteria, not automatic
-assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not silently install it or invent its rules.
-Justify expected behavior independently of implementation; do not infer test applicability from an unrelated successful command.
-Report a consequential missing criterion rather than claiming the full composed
-method was completed. Available core work can continue without that claim.
-
 ## Establish the oracle and authority
 
 Read the task, owner instructions, affected interface and existing test setup.

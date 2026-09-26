@@ -33,7 +33,6 @@ SEMVER = re.compile(
 )
 ASCII_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 ASSET_ID = re.compile(r"^(?:skill|profile)/[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
-MARKDOWN_LINK = re.compile(r"!?\[[^]]*\]\(([^)]+)\)")
 LITERAL_MACHINE_PATH = re.compile(
     r"(?:[A-Za-z]:\\Users\\[^\\/\s]+|/(?:Users|home)/[^/\s]+)"
 )
