@@ -26,6 +26,7 @@ Assay 负责契约、本地元数据和诊断重放，不引入新守护进程�
 | --- | --- | --- | --- |
 | `skill/route-subagents` | automatic | `~/.agents/skills/route-subagents` | `~/.claude/skills/route-subagents` |
 | `skill/operations-ui-delivery` | automatic | `~/.agents/skills/operations-ui-delivery` | `~/.claude/skills/operations-ui-delivery` |
+| `skill/product-flow-mapping` | automatic | `~/.agents/skills/product-flow-mapping` | `~/.claude/skills/product-flow-mapping` |
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |

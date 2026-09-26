@@ -16,6 +16,7 @@ EXPECTED_ASSETS = {
     "profile/official-docs-researcher",
     "skill/independent-audit",
     "skill/operations-ui-delivery",
+    "skill/product-flow-mapping",
     "skill/route-subagents",
     "skill/skill-design",
     "skill/evidence-research",
@@ -49,6 +50,8 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             home / ".claude/skills/route-subagents",
             home / ".agents/skills/operations-ui-delivery",
             home / ".claude/skills/operations-ui-delivery",
+            home / ".agents/skills/product-flow-mapping",
+            home / ".claude/skills/product-flow-mapping",
             home / ".agents/skills/independent-audit",
             home / ".claude/skills/independent-audit",
             home / ".agents/skills/skill-design",
@@ -118,7 +121,7 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             )
 
         for name in ("test-writing", "test-audit", "evidence-research", "code-maintenance",
-                     "implementation-planning", "software-architecture"):
+                     "implementation-planning", "software-architecture", "product-flow-mapping"):
             asset_id = f"skill/{name}"
             asset = next(item for item in catalog.assets if item.id == asset_id)
             if asset.activation != "automatic":

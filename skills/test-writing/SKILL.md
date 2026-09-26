@@ -36,6 +36,14 @@ repairs, a framework migration, dependency installation, delegation or live
 data changes. Preflight test collection, imports, setup and teardown as well as
 the command itself. Use task-owned fixtures and safe existing runners.
 
+When a broad existing-product test task lacks a reliable scenario inventory,
+use [product-flow-mapping](../product-flow-mapping/SKILL.md) to reconstruct scoped
+paths and link goals, controls, states and source evidence. Consume an existing
+map when sufficient; do not resurvey the product for a bounded test. Adopted
+requirements and observations remain separate, and this skill still owns the
+oracle, boundary and assertions. Neither a mapped bug nor a screenshot is an
+expected result or execution receipt.
+
 ## Choose an informative set
 
 Reuse the project's maintained framework, fixtures and relevant existing

@@ -96,6 +96,13 @@ use available [implementation-planning](../implementation-planning/SKILL.md) wit
 the agreed journeys, artifact identity, required states and shared dependencies.
 UI criteria and artifact checks remain here.
 
+When an existing product's journeys must first be reconstructed for a broad
+redesign, screen/control inventory or designer handoff, use
+[product-flow-mapping](../product-flow-mapping/SKILL.md). Consume its stable
+scenario/state/action links, retained outcomes and evidence gaps; this skill
+retains UI quality, capture and canvas-operation criteria. A local edit with an
+already sufficient scenario contract does not need a new product-wide map.
+
 ## Common execution and finish
 
 1. Establish the mode, outcome, starting state, authoritative source and actual

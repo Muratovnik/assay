@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "skill_name": "product-flow-mapping",
+  "cases": [
+    {
+      "id": "T01",
+      "assess": [
+        "Consumes scenario/state IDs and retained outcome, not a fixed panel layout.",
+        "Keeps capture/runtime gaps visible; UI acceptance remains with operations-ui-delivery."
+      ]
+    },
+    {
+      "id": "T02",
+      "assess": [
+        "Derives expected retention from REQ, not the defective handler.",
+        "Uses the existing runner/fixture and makes no execution claim; test design remains with test-writing."
+      ]
+    },
+    {
+      "id": "T03",
+      "assess": [
+        "Keeps Close, Quit and system completion distinct.",
+        "Uses the available native evidence without requiring browser tools; external delivery stays unverified."
+      ]
+    },
+    {
+      "id": "T04",
+      "assess": [
+        "Retires only the approved action, preserving the distinct same-state download.",
+        "Retains unmatched manual notes and stable surviving IDs; does not silently delete canvas nodes."
+      ]
+    }
+  ]
+}

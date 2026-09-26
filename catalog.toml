@@ -31,6 +31,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/product-flow-mapping"
+kind = "skill"
+path = "skills/product-flow-mapping"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/product-flow-mapping", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/product-flow-mapping", mode = "link" },
+]
+
+[[assets]]
 id = "skill/independent-audit"
 kind = "skill"
 path = "skills/independent-audit"

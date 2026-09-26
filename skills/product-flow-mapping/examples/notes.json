@@ -1,0 +1,4 @@
+{
+  "EDIT_FLOW/FAILURE": "Retain a recovery explanation in the redesign. This note is separate from generated descriptions.",
+  "RETIRED/OLD": "Unmatched notes remain in the output for reconciliation, never silently discarded."
+}
