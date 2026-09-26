@@ -1,0 +1,4 @@
+interface:
+  display_name: "Software Architecture"
+  short_description: "Choose and assess boundaries, contracts and file placement"
+  default_prompt: "Use $software-architecture to choose or assess this system's boundaries, contracts and file placement against its requirements, and name the check that shows each decision holds."

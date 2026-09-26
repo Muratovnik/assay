@@ -26,28 +26,22 @@ changes. Complete necessary in-scope repairs without inventing approval gates.
 For an explicit plan or consequential sequencing, dependencies or handoff, use
 available [implementation-planning](../implementation-planning/SKILL.md) with the
 scope, inspected consumers, shared contracts and required checks established here.
-Code-boundary decisions stay with this method; a plan-only request grants no
-implementation authority.
+Planning sequences the work; boundary decisions follow the next section, and a
+plan-only request grants no implementation authority.
 
 ## Responsibilities and interfaces
 
-Group code by the decision or operation it owns and the reasons it changes.
-Keep orchestration, domain rules and presentation distinguishable where their
-consumers or lifecycles differ. File count and architectural labels do not
-establish separation: follow the actual imports, calls and knowledge exchanged.
+For material decisions about ownership, contracts, dependency direction or file
+placement, use [software architecture](../software-architecture/SKILL.md). It owns
+the shared boundary criteria; this method owns implementing the authorized change
+and checking its callers. A request for an architecture proposal belongs directly
+to that method and does not authorize implementation.
 
-Extract when the new boundary hides meaningful complexity, isolates a lifecycle
-or gives a consumer a coherent operation. Judge the resulting interface and its
-callers together. A forwarding wrapper can be useful for compatibility, policy
-or a replaceable boundary; it needs no arbitrary minimum size or second adapter.
-An extraction that merely spreads the same decisions across files has not
-reduced complexity. Remove unnecessary indirection when doing so serves the task.
-
-Prefer the narrowest real owner. Local helpers may stay beside their consumer;
-cross-project source needs demonstrated common semantics and compatible lifecycle,
-not merely similar syntax. Product rules, import boundaries and release/runtime
-contracts remain with the owning project. A lower-layer import is not wrong
-without an actual dependency rule or harmful coupling.
+Apply the resulting owner/contract/placement decisions to code and consumers
+together. For an already justified local repair, preserve its established boundary
+without launching system-wide design. If the architecture method is unavailable,
+keep the existing contract and report any material design gap; do not silently
+install it or invent a replacement policy.
 
 ## State and effects
 
@@ -90,15 +84,12 @@ requires an audit or delegation for every edit.
 ## Inspect the final structure
 
 Read the resulting affected units with their important callers and tests.
-Reconsider accumulated responsibilities even when today's diff is small. Size
-is a signal to inspect coherence, not a universal line cap. Splitting by line
-count, moving CSS or renaming a helper does not itself improve maintainability;
-an enforced project cap still applies until the owner changes it.
-
-Check whether a likely next change is localized, state ownership is clearer and
-the new interface removes knowledge from callers. Preserve a cohesive large unit
-when splitting adds coordination without benefit. Avoid speculative extensibility
-and keep cleanup proportional to the actual burden within scope.
+Reconsider accumulated responsibilities even when today's diff is small, and judge
+each new or changed boundary by the architecture method's
+[extraction criteria](../software-architecture/references/file-placement.md#evaluate-both-sides-of-extraction);
+moving CSS or renaming a helper does not itself improve maintainability. Check that
+state ownership is clearer, avoid speculative extensibility and keep cleanup
+proportional to the actual burden within scope.
 
 Run relevant owner checks and verify behavior at affected boundaries. For test
 design use the test method above; do not equate a file move with unchanged check

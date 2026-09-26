@@ -21,9 +21,10 @@
 | --- | --- | --- |
 | [code-maintenance](skills/code-maintenance/SKILL.md) | 改动涉及代码结构、共享逻辑或工具链 | 只改文字，或任务是只读审计 |
 | [implementation-planning](skills/implementation-planning/SKILL.md) | 需要为一次改动乃至分阶段路线图制定计划，或修订已有计划 | 只是在讨论想法、仅需调研，或改动显而易见 |
+| [software-architecture](skills/software-architecture/SKILL.md) | 需要选择或评估系统的边界、契约或文件位置 | 改动是局部的常规修改，或需要的是审计结论而非准则 |
 | [test-writing](skills/test-writing/SKILL.md) | 需要依据契约编写或修复测试 | 只需运行既有测试集，或讲解测试方法 |
 | [test-audit](skills/test-audit/SKILL.md) | 有人声称某测试集能防止回归 | 你在编写测试，或只是执行它们 |
-| [independent-audit](skills/independent-audit/SKILL.md) | 需要对照原始要求核查计划、改动、发布或迁移 | 你想要的是把改动做完；此方法不做修复 |
+| [independent-audit](skills/independent-audit/SKILL.md) | 需要对照原始要求核查计划、改动、架构、发布或迁移 | 你想要的是把改动做完；此方法不做修复 |
 | [evidence-research](skills/evidence-research/SKILL.md) | 重要结论需要定位并核对来源 | 答案只需一次查询即可得到 |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | 需要设计、修复或评审运维界面 | 工作仅涉及后端 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |

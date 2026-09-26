@@ -61,8 +61,9 @@ implementation quality.
 
 Read only procedures needed for the decision; already available criteria do not
 need a second reading. Use available [evidence-research](../evidence-research/SKILL.md)
-for unresolved consequential comparisons, [code-maintenance](../code-maintenance/SKILL.md)
-for changed code boundaries, [operations-ui-delivery](../operations-ui-delivery/SKILL.md)
+for unresolved consequential comparisons, [software-architecture](../software-architecture/SKILL.md)
+for boundary, contract or placement decisions, [code-maintenance](../code-maintenance/SKILL.md)
+for code changes, [operations-ui-delivery](../operations-ui-delivery/SKILL.md)
 for UI behavior, and [test-writing](../test-writing/SKILL.md) or
 [test-audit](../test-audit/SKILL.md) for test design or existing check quality.
 Reuse the active workflow and one owning plan. These links are criteria, not

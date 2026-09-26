@@ -20,9 +20,10 @@ links to the instructions the agent will actually read.
 | --- | --- | --- |
 | [code-maintenance](skills/code-maintenance/SKILL.md) | A change affects code structure, shared logic or tooling | The edit is prose, or the task is a read-only audit |
 | [implementation-planning](skills/implementation-planning/SKILL.md) | Work needs a plan, from one change to a staged roadmap, or a plan needs revising | You are still discussing an idea, only researching, or the edit is obvious |
+| [software-architecture](skills/software-architecture/SKILL.md) | A system's boundaries, contracts or file placement need choosing or assessing | The edit is local and routine, or you need an audit verdict rather than criteria |
 | [test-writing](skills/test-writing/SKILL.md) | Tests need writing or repairing against a contract | You only need to run an existing suite, or explain testing |
 | [test-audit](skills/test-audit/SKILL.md) | Someone claims a suite protects against regressions | You are writing the tests, or merely executing them |
-| [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, release or migration needs checking against its brief | You want the change made; this method does not fix things |
+| [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, architecture, release or migration needs checking against its brief | You want the change made; this method does not fix things |
 | [evidence-research](skills/evidence-research/SKILL.md) | A consequential claim needs sources located and reconciled | The answer is one lookup away |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | Operational UI needs designing, repairing or critiquing | The work is backend only |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |

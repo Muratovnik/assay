@@ -64,3 +64,21 @@ and available run evidence before claiming it is absent, effective or broken.
 Newer versions alone do not establish a project defect. Dependency freshness
 and platform-support claims use the research method's
 [component evidence](../../evidence-research/references/component-evidence.md).
+
+## Architectural restrictions
+
+For a material boundary rule, use the owner-adopted contract and
+[architectural criteria](../../software-architecture/SKILL.md). Record its owner,
+protected outcome, scope, permitted counterpart and enforcing invocation. Trace
+aliases, re-exports, type-only edges and dynamic loading where the rule depends
+on them; a static graph need not see every runtime dependency.
+
+Use the fitting existing project mechanism. Possible choices, not dependencies
+of Assay, include ESLint/Nx boundaries or dependency-cruiser for JS/TS, Steiger
+for adopted FSD, ArchUnit for Java and Import Linter for Python. Verify the
+installed version, support and licensing before selecting or configuring one.
+A linter can enforce a declared edge rule; it does not establish business ownership.
+
+Prove the restriction as for any [claimed protection](#prove-the-claimed-protection).
+A baseline of existing violations follows
+[exclusions and the reachable end state](#check-exclusions-and-the-reachable-end-state).

@@ -91,6 +91,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/software-architecture"
+kind = "skill"
+path = "skills/software-architecture"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/software-architecture", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/software-architecture", mode = "link" },
+]
+
+[[assets]]
 id = "skill/code-maintenance"
 kind = "skill"
 path = "skills/code-maintenance"

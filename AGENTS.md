@@ -7,7 +7,8 @@ find the same rules readable.
 ## What belongs here
 
 A skill earns its place by having more than one proven consumer and one concrete
-capability. A second hypothetical consumer is not evidence. Single-project
+capability. Consumers may be projects, existing skills or distinct recurring
+workflows. A second hypothetical consumer is not evidence. Single-project
 workflows stay with the project that needs them.
 
 Store canonical content once. `catalog.toml` is the complete inventory and the

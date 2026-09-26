@@ -1,8 +1,9 @@
 # Vue structure
 
 Use for component responsibility, reactive ownership and composable boundaries.
-The entrypoint owns the general maintainability principles; this procedure
-applies them to Vue without choosing a product's folder architecture.
+Use the [architecture method](../../software-architecture/SKILL.md) for material
+ownership and placement decisions; this procedure owns their Vue implementation
+detail without choosing a product's folder architecture.
 
 ## Component and composable boundaries
 
@@ -22,6 +23,11 @@ rules out of presentation helpers when they serve other consumers. Place code
 by real ownership and the project's import contract, not an imposed FSD layout
 or a rule that every component needs a model file.
 
+Vue documents composable
+[extraction for code organization](https://vuejs.org/guide/reusability/composables.html#extracting-composables-for-code-organization),
+not only reuse, so a local composable can own one consumer's upload, cancellation
+and cleanup without moving to a global shared layer.
+
 ## Reactive ownership and lifecycle
 
 Prefer a minimal authoritative state and computed derivations. Use watchers for
@@ -34,6 +40,12 @@ make the provider and supported mutation actions clear. Module-level reactive
 state intentionally shares a lifetime: distinguish that from per-instance state,
 especially across remounts, tests and server requests. Verify the relevant Vue
 version before relying on reactivity, destructuring or script-context behavior.
+
+For SSR, trace whether mutable user/session state is created per request or shared
+by the server process; a module singleton can cause
+[cross-request state pollution](https://vuejs.org/guide/scaling-up/ssr.html#cross-request-state-pollution).
+An immutable shared lookup table or intentional client-app state is a different
+case. Do not prescribe a new state library without examining the existing owner.
 
 Subscriptions, listeners and asynchronous work belong to a lifecycle with cleanup
 and handling for stale completion where it can affect the user. The operational

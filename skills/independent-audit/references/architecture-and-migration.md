@@ -1,19 +1,20 @@
 # Architecture and migration
 
-Use for ownership changes, standardization, relocation, discovery, and retirement. Follow the actual system; do not prescribe a registry, service boundary, or repository layout merely because this reference names it.
+Use for architecture proposals, application structure, ownership changes,
+standardization, relocation, discovery and retirement. Follow the actual system;
+do not prescribe a service boundary or repository layout merely because it is named.
 
-## Reconstruct ownership and authority
+## Assess architecture without taking implementation authority
 
-Map material components against the brief:
-
-| Component | Intended owner | Canonical source | Consumers | Discovery/configuration path | Lifecycle owner |
-| --- | --- | --- | --- | --- | --- |
-
-Compare expected and observed ownership, dependency direction, and authority. Physical nesting is not ownership; an interface such as MCP does not alone define an independently operated service.
-
-Separate canonical inputs, generated projections, installed state, caches, and history. Similar bytes are not automatically duplicated truth: determine who edits them, how they propagate, and whether independently authoritative copies can diverge.
-
-Select representative scenarios by risk: adding a consumer, renaming the canonical source, starting a clean client, or independently upgrading/rolling back an owner. Identify required edits, manual synchronization, crossed boundaries, hidden historical knowledge, and failure detection. A walkthrough supports reasoning, not a claim that the scenario ran.
+Use [software architecture](../../software-architecture/SKILL.md) as the criteria
+owner: its [current architecture](../../software-architecture/references/current-architecture.md)
+procedure reconstructs owners, dependencies, state and flows, and its
+[assessment](../../software-architecture/references/architecture-assessment.md)
+procedure separates proposal fitness from implemented conformance. Load only the
+relevant branches, not an implementation workflow. This audit keeps authority,
+coverage, evidence statuses and the verdict, and treats the implementer's
+architectural rationale as a claim to check. Trace the affected owner and discovery
+chains below for migration.
 
 ## Trace migration through actual consumers
 
@@ -31,6 +32,13 @@ A new directory proves existence, not cutover. Follow callers, registrations, co
 For retained compatibility seek its current consumer or requirement, owner, limited purpose, source-of-truth direction, and retirement condition or explicitly supported lifetime. Do not demand retirement when support is required. Missing documentation makes the role uncertain, or establishes a documentation gap if the contract requires it; it does not prove a second implementation. Demonstrate independently authoritative behavior before alleging duplicated truth.
 
 Compare standardization across placement, discovery, configuration, startup, diagnostics, and lifecycle. Record justified differences; shared naming is insufficient, and identical shapes are not always appropriate.
+
+Choose migration scenarios by risk: adding a consumer, renaming the canonical source,
+starting a clean client, or independently upgrading or rolling back an owner. Identify
+required edits, manual synchronization, crossed boundaries, hidden historical knowledge
+and failure detection. For structural relocation, apply the implementation method's
+[public-contract preservation criteria](../../code-maintenance/references/reuse-and-migration.md#preserve-structural-and-public-contracts)
+as review criteria without changing the subject.
 
 ## Investigate legacy references
 

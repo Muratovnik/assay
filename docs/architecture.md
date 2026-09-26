@@ -21,6 +21,7 @@ location a client reads.
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
+| `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |
 | `skill/code-maintenance` | automatic | `~/.agents/skills/code-maintenance` | `~/.claude/skills/code-maintenance` |
 | `skill/implementation-planning` | automatic | `~/.agents/skills/implementation-planning` | `~/.claude/skills/implementation-planning` |
 | `skill/technical-writing` | automatic | `~/.agents/skills/technical-writing` | `~/.claude/skills/technical-writing` |

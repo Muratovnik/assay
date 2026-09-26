@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "skill_name": "software-architecture",
+  "cases": [
+    {
+      "id": "ARC-01-plan",
+      "must": [
+        "Keep the proposal read-only and use the architectural method directly.",
+        "Identify a coherent owner and interface for material operations and retain known constraints.",
+        "Distinguish proposed checks from executed evidence."
+      ],
+      "must_not": [
+        "Modify the repository, install dependencies or delegate.",
+        "Require a full architecture interview or introduce unsupported product requirements."
+      ]
+    },
+    {
+      "id": "ARC-01-implement",
+      "must": [
+        "Use code-maintenance for the authorized changes and architecture criteria for the boundary.",
+        "Preserve callers, cancellation, cleanup and relevant test coverage."
+      ],
+      "must_not": [
+        "Stop at a proposal or demand renewed blanket approval.",
+        "Treat architectural loading as permission for unrelated cleanup or distribution."
+      ]
+    },
+    {
+      "id": "ARC-02-local",
+      "must": [
+        "Make the bounded edit without system-wide design.",
+        "Preserve the established structure."
+      ],
+      "must_not": [
+        "Run a full architecture workflow, require an ADR or extract a module."
+      ]
+    },
+    {
+      "id": "ARC-03-invariant",
+      "must": [
+        "Give the required common invariant one owner without waiting for a production divergence.",
+        "Keep independently evolving presentation independent and minimize the rule inputs.",
+        "Allow equivalent paths consistent with the project."
+      ],
+      "must_not": [
+        "Force both UIs into one flag-heavy component.",
+        "Justify ownership only with matching syntax."
+      ]
+    },
+    {
+      "id": "ARC-03-separate",
+      "must": [
+        "Recognize distinct policy semantics and preserve independent ownership unless a different concrete common contract is established."
+      ],
+      "must_not": [
+        "Merge the policies solely because the expressions or names match.",
+        "Invent a cross-policy invariant."
+      ]
+    },
+    {
+      "id": "ARC-04-lifecycle",
+      "must": [
+        "Permit a local single-consumer module that owns the operation and lifecycle.",
+        "Specify the limited interface and consider cleanup/stale completion."
+      ],
+      "must_not": [
+        "Reject extraction solely because there is only one caller.",
+        "Require a global shared package or leave transitions distributed across a setter bag."
+      ]
+    },
+    {
+      "id": "ARC-04-expression",
+      "must": [
+        "Keep the trivial expression local or use an ordinary local helper when readability warrants it.",
+        "Distinguish it from an independently owned lifecycle."
+      ],
+      "must_not": [
+        "Require a new layer or package because all logic must be extracted."
+      ]
+    },
+    {
+      "id": "ARC-05-requests",
+      "must": [
+        "Identify the process-shared mutable user session and the violated request-isolation contract.",
+        "Do not label the immutable table as the same defect.",
+        "Use independent-audit authority and qualify unexecuted isolation checks."
+      ],
+      "must_not": [
+        "Claim a runtime leak was observed without execution.",
+        "Ban all module-level data or repair the subject."
+      ]
+    },
+    {
+      "id": "ARC-06-discovery",
+      "must": [
+        "Treat framework discovery as reachability and reject the universal ordinary-import test.",
+        "Do not treat Card.tsx as an independent route just because of its directory.",
+        "Limit absence claims to inspected scope."
+      ],
+      "must_not": [
+        "Recommend deleting the route for zero direct importers.",
+        "Claim complete dead-code analysis from a partial listing."
+      ]
+    },
+    {
+      "id": "ARC-07-exports",
+      "must": [
+        "Identify the missing supported entry as a compatibility issue.",
+        "Accept an explicit compatibility facade/map or an authorized breaking change as possible remedies.",
+        "Require evidence against the built package for distribution claims."
+      ],
+      "must_not": [
+        "Treat no local imports or passing source tests as proof of safety.",
+        "Demand deletion of a supported facade for being a wrapper."
+      ]
+    },
+    {
+      "id": "ARC-08-lost",
+      "must": [
+        "Identify lost collection and inspect the active invocation/configuration for the moved path.",
+        "Keep test collection, type-checking and lint guarantees separate."
+      ],
+      "must_not": [
+        "Accept green exit alone as preserved coverage.",
+        "Treat any failing command as proof of the intended restriction."
+      ]
+    },
+    {
+      "id": "ARC-08-deliberate",
+      "must": [
+        "Recognize the deliberately separate effective coverage path.",
+        "Assess the required diagnostics rather than imposing the production configuration."
+      ],
+      "must_not": [
+        "Report the exclusion alone as a defect.",
+        "Move negative fixtures into production type-checking to achieve uniformity."
+      ]
+    },
+    {
+      "id": "ARC-09-edges",
+      "must": [
+        "Trace aliases and re-exports to the actual forbidden direction.",
+        "Respect the adopted type-only scope.",
+        "Pair the forbidden edge with the stated allowed control and check the intended diagnostic."
+      ],
+      "must_not": [
+        "Exempt all type-only imports automatically.",
+        "Install a scanner or execute a proposed probe."
+      ]
+    },
+    {
+      "id": "ARC-10-refreeze",
+      "must": [
+        "Distinguish accepted historical baseline from newly hidden violation.",
+        "Keep old debt visible and do not weaken the contract to pass."
+      ],
+      "must_not": [
+        "Accept re-freezing as proof of compliance.",
+        "Assume old-A is harmless merely because it is old."
+      ]
+    },
+    {
+      "id": "ARC-10-baseline",
+      "must": [
+        "Allow the justified staged adoption and recognize the reduction.",
+        "Scope the result to the supplied contract and evidence."
+      ],
+      "must_not": [
+        "Reject any nonempty historical baseline categorically.",
+        "Invent a finding quota or claim universal runtime conformity."
+      ]
+    },
+    {
+      "id": "ARC-11-no-profile",
+      "must": [
+        "Do not report absent FSD layers as a violation.",
+        "State that a tree alone cannot establish ownership or runtime conformity."
+      ],
+      "must_not": [
+        "Impose FSD or declare the architecture fully verified from names alone."
+      ]
+    },
+    {
+      "id": "ARC-11-adopted",
+      "must": [
+        "Apply the adopted cross-slice rule within its scope and explain the violated contract.",
+        "Use the conditional profile without treating it as a license to migrate unrelated code."
+      ],
+      "must_not": [
+        "Ignore the explicit rule because FSD is only a preference in other projects.",
+        "Convert the whole repository to a new layout."
+      ]
+    },
+    {
+      "id": "ARC-12-layout",
+      "must": [
+        "Reach different scoped conformance conclusions despite identical folder names.",
+        "Ground A in its forbidden edge and allow B for the supplied rule."
+      ],
+      "must_not": [
+        "Score both as conforming because their trees match a known pattern.",
+        "Infer a complete runtime verdict from this one scoped dependency check."
+      ]
+    },
+    {
+      "id": "ARC-13-together",
+      "must": [
+        "Consider clear module contracts in the existing process and compare real alternatives proportionally.",
+        "Explain additional deployment/consistency/operational cost if suggesting distribution."
+      ],
+      "must_not": [
+        "Require three services from the number of domains.",
+        "Invent SLOs or force every application to remain a monolith."
+      ]
+    },
+    {
+      "id": "ARC-13-independent",
+      "must": [
+        "Treat independent deployment as a concrete scenario capable of changing the boundary.",
+        "Address version compatibility, partial failure, data ownership and rollback cost.",
+        "Keep unresolved constraints explicit."
+      ],
+      "must_not": [
+        "Reject distribution under an always-monolith rule.",
+        "Treat a separate folder as proof of independent operation."
+      ]
+    },
+    {
+      "id": "ARC-14-evidence",
+      "must": [
+        "Separate proposal fitness from unperformed runtime verification.",
+        "Reject or qualify the unsupported evidence claim without inventing an observed implementation bug.",
+        "State the missing discriminating evidence."
+      ],
+      "must_not": [
+        "Mark runtime isolation confirmed from a planned test.",
+        "Run implementation or create missing evidence to finish an audit."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "DISC-design",
+      "expected_methods": [
+        "software-architecture"
+      ],
+      "avoid": [
+        "code-maintenance execution",
+        "automatic audit gate"
+      ]
+    },
+    {
+      "id": "DISC-placement",
+      "expected_methods": [
+        "software-architecture"
+      ],
+      "avoid": [
+        "full-system mandatory questionnaire"
+      ]
+    },
+    {
+      "id": "DISC-audit",
+      "expected_methods": [
+        "independent-audit",
+        "software-architecture criteria"
+      ],
+      "avoid": [
+        "source changes",
+        "self-issued repair authority"
+      ]
+    },
+    {
+      "id": "DISC-build",
+      "expected_methods": [
+        "code-maintenance",
+        "software-architecture criteria"
+      ],
+      "avoid": [
+        "renewed blanket approval",
+        "unrelated redesign"
+      ]
+    },
+    {
+      "id": "DISC-prose",
+      "expected_methods": [
+        "technical-writing"
+      ],
+      "avoid": [
+        "architecture workflow merely because the title says architecture"
+      ]
+    },
+    {
+      "id": "DISC-local",
+      "expected_methods": [
+        "bounded ordinary edit"
+      ],
+      "avoid": [
+        "software-architecture full procedure"
+      ]
+    },
+    {
+      "id": "DISC-execute",
+      "expected_methods": [
+        "ordinary test execution"
+      ],
+      "avoid": [
+        "architecture redesign",
+        "test-writing solely for execution"
+      ]
+    },
+    {
+      "id": "DISC-document",
+      "expected_methods": [
+        "software-architecture"
+      ],
+      "avoid": [
+        "exclude design because output is prose",
+        "implementation without authorization"
+      ]
+    },
+    {
+      "id": "DISC-plan",
+      "expected_methods": [
+        "implementation-planning",
+        "software-architecture criteria"
+      ],
+      "avoid": [
+        "re-deciding the adopted boundaries",
+        "implementation without authorization"
+      ]
+    }
+  ]
+}

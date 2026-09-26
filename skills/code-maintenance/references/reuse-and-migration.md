@@ -109,3 +109,29 @@ For a multi-stage plan, use available
 [long-horizon planning](../../implementation-planning/references/long-horizon.md)
 for sequencing and readiness; the consumers, compatibility constraints and
 retirement conditions established here stay authoritative.
+
+## Preserve structural and public contracts
+
+For changed ownership or placement, consume the
+[architecture method](../../software-architecture/SKILL.md) and implement its
+adopted decisions without copying its criteria into a second architecture document.
+Trace old mechanism, canonical replacement, switched consumers and retirement or
+justified compatibility. Separate file relocation from intentional behavior changes.
+
+Record old and new entry points and affected consumers, including supported
+external paths. Check public imports/exports, route registration, aliases,
+generated artifacts, assets, style scoping, build output, package contents and
+lint/type/test selection; a green command can select none of the relocated files.
+Adding Node package `exports`, for example, can close formerly reachable entry
+points: establish the supported surface rather than inferring compatibility from
+updated local imports. Test the built artifact with a representative supported
+consumer where relevant. A facade can remain for an external support obligation
+without an in-repository importer; name its owner and supported lifetime. Retiring
+a supported path needs evidence or explicit authorization to change that contract.
+
+Keep required consumers working at each promised intermediate stage. Record what
+is reversible and what requires a separate data/schema recovery step; restoring
+source alone does not prove rollback of the system. Coverage uses
+[effective checks](effective-quality-checks.md), and agreed violation debt follows
+[finite exceptions](#keep-exceptions-finite-and-test-the-final-state). Do not
+silently expand the task into a new release or live data migration.

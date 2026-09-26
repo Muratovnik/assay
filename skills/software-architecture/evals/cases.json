@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "skill_name": "software-architecture",
+  "cases": [
+    {
+      "id": "ARC-01-plan",
+      "prompt": "Propose a structure for the report editor. Explain the important boundaries; do not modify files.",
+      "context": "An existing Vue client has one editor screen. It owns document edits, upload progress and cancellation. No independent deployment or FSD convention is required. The user has not authorized implementation."
+    },
+    {
+      "id": "ARC-01-implement",
+      "prompt": "Implement the approved local upload-session boundary and update the editor caller and relevant tests.",
+      "context": "The approved design places upload state, cancellation and cleanup in a local module beside the editor. The user explicitly authorizes code and test changes. Existing requests and cancel semantics must remain supported."
+    },
+    {
+      "id": "ARC-02-local",
+      "prompt": "Rename the local display label from Drafts to Saved drafts.",
+      "context": "Only the literal label in an existing component changes. No public interface, state owner, imports or lifecycle changes. The user authorizes this edit."
+    },
+    {
+      "id": "ARC-03-invariant",
+      "prompt": "Choose where the eligibility logic should live and explain the consumer interfaces.",
+      "context": "The customer page and bulk action both must use the same legally reviewed eligibility rule. Their presentation and change cadence differ. Both currently repeat an eligibility expression; a shared rule owner is explicitly required, but no folder methodology is adopted."
+    },
+    {
+      "id": "ARC-03-separate",
+      "prompt": "Review whether these two conditions should be extracted into a common eligibility module.",
+      "context": "The customer page checks eligibility for buying; the archive page checks eligibility for archival. Expressions currently coincide, but the product owner explicitly states the policies are independent and will evolve separately."
+    },
+    {
+      "id": "ARC-04-lifecycle",
+      "prompt": "Choose a boundary for image export state and explain whether reuse is required.",
+      "context": "Only one editor consumes the export operation. It has progress, cancel/restart, stale completion and disposal of a temporary URL. No shared package is requested."
+    },
+    {
+      "id": "ARC-04-expression",
+      "prompt": "Should this local expression become a reusable architecture module?",
+      "context": "One template displays count + 1. It has no independent policy, state, lifecycle, contract or other consumer. No owner convention requires extraction."
+    },
+    {
+      "id": "ARC-05-requests",
+      "prompt": "Audit the supplied state ownership, read-only. Distinguish real isolation risks from harmless shared data.",
+      "context": "The server caches modules for the process and calls render for multiple users. COUNTRY_CODES is immutable. Session userId must be request-local. No runtime run is provided.",
+      "files": {
+        "src/session.ts": "export const session = { userId: \"\" };\nexport const COUNTRY_CODES = Object.freeze([\"DE\", \"FR\"]);\n",
+        "src/render.ts": "import { session } from \"./session\";\nexport async function render(userId: string) { session.userId = userId; await Promise.resolve(); return session.userId; }\n"
+      }
+    },
+    {
+      "id": "ARC-06-discovery",
+      "prompt": "Review the claim that every file without an ordinary importer is dead code.",
+      "context": "The project uses Next.js App Router. app/catalog/page.tsx is a configured framework entry point. A neighboring Card.tsx is imported by that page. There is no complete evidence about external/plugin consumers elsewhere."
+    },
+    {
+      "id": "ARC-07-exports",
+      "prompt": "Review the compatibility of this package move; do not change it.",
+      "context": "The released package documents pkg/legacy as supported. A downstream consumer still imports it. The candidate adds exports for only the main entry; source-only unit tests pass.",
+      "files": {
+        "package.json": "{\"name\":\"pkg\",\"exports\":{\".\":\"./dist/index.js\"}}\n",
+        "consumer.ts": "import { open } from \"pkg/legacy\";\nopen();\n"
+      }
+    },
+    {
+      "id": "ARC-08-lost",
+      "prompt": "Assess whether the successful test command proves this relocation preserved checks.",
+      "context": "The same spec moved from src/panel.test.ts to modules/panel/panel.test.ts. The active include remains src/**/*.test.ts. The command passes on the remaining tests. No other runner covers modules/."
+    },
+    {
+      "id": "ARC-08-deliberate",
+      "prompt": "Audit this fixture exclusion without changing configuration.",
+      "context": "Production type-check excludes invalid-type-fixtures/. A separate required fixture job includes that directory and asserts its expected diagnostics. Both configurations and successful jobs are supplied. The owner explicitly wants negative type fixtures."
+    },
+    {
+      "id": "ARC-09-edges",
+      "prompt": "Review the dependency boundary and suggest a discriminating check, without executing or editing anything.",
+      "context": "The adopted rule forbids all domain-to-UI imports, including type-only edges. @view resolves to src/ui; src/public.ts re-exports a UI type. A domain module imports that type through src/public.ts. A UI module importing a public domain type is allowed."
+    },
+    {
+      "id": "ARC-10-refreeze",
+      "prompt": "Audit the proposed architecture-rule baseline update.",
+      "context": "The agreed baseline contains violation old-A. The change introduces new-B and updates the baseline to include both so CI is green. The owner authorized reducing old debt, not admitting new violations."
+    },
+    {
+      "id": "ARC-10-baseline",
+      "prompt": "Audit this staged rule adoption against the stated contract.",
+      "context": "The owner accepts a documented baseline of old-A while forbidding new violations. A follow-up removes old-A from both code and baseline; no new violation appears in supplied dependency output. No high-impact unresolved defect is claimed."
+    },
+    {
+      "id": "ARC-11-no-profile",
+      "prompt": "Review the folder organization of this existing application.",
+      "context": "The application uses routes and colocated components. The owner explicitly did not adopt FSD, and no supplied dependency contract is violated. Only a tree listing is supplied."
+    },
+    {
+      "id": "ARC-11-adopted",
+      "prompt": "Review the import against the project architectural contract.",
+      "context": "The owner adopted FSD with a concrete rule: page slices must not import each other; shared policy goes through its agreed public API. pages/orders imports an internal module from pages/profile. The file paths and resolved import are supplied."
+    },
+    {
+      "id": "ARC-12-layout",
+      "prompt": "Compare the two supplied architecture candidates against the dependency rule. Give a read-only review.",
+      "context": "Both trees contain domain/, ui/ and adapters/. The adopted contract forbids domain importing ui. Candidate A has domain/rule.ts importing ui/state.ts; candidate B has ui/page.ts importing the public domain API and no reverse edge. These are complete edges for this scoped rule."
+    },
+    {
+      "id": "ARC-13-together",
+      "prompt": "Propose deployment boundaries for this application.",
+      "context": "Three business areas, one team, coordinated releases, modest load and no independent deployment or isolation requirement. Preserve current behavior; no numeric SLOs have been supplied."
+    },
+    {
+      "id": "ARC-13-independent",
+      "prompt": "Assess whether one domain should become independently deployable.",
+      "context": "The owner requires the reporting worker to upgrade without stopping checkout and has supplied a supported versioned queue contract. The current single deployable cannot meet that operational requirement. Data consistency and rollback still need design."
+    },
+    {
+      "id": "ARC-14-evidence",
+      "prompt": "Review the architecture proposal and the evidence claim, read-only.",
+      "context": "The proposal explains owners, failure handling and a future two-request isolation test. No implementation or test receipt exists. The author claims: The architecture has passed runtime isolation checks."
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "DISC-design",
+      "prompt": "Propose architecture for a new booking application. Do not implement.",
+      "context": "Requirements and target framework are supplied."
+    },
+    {
+      "id": "DISC-placement",
+      "prompt": "Where should the shared pricing policy live?",
+      "context": "Two real consumers must enforce one accepted policy."
+    },
+    {
+      "id": "DISC-audit",
+      "prompt": "Audit the implemented architecture; read-only.",
+      "context": "Repository, brief and adopted constraints are available."
+    },
+    {
+      "id": "DISC-build",
+      "prompt": "Implement the approved module split.",
+      "context": "Code and tests may be changed within the approved design."
+    },
+    {
+      "id": "DISC-prose",
+      "prompt": "Correct spelling in this architecture description without changing its technical meaning.",
+      "context": "This is a prose edit, not a design review."
+    },
+    {
+      "id": "DISC-local",
+      "prompt": "Change the button label.",
+      "context": "No boundaries, state or public contracts change."
+    },
+    {
+      "id": "DISC-execute",
+      "prompt": "Run the existing unit suite and report results.",
+      "context": "No test changes or architectural assessment requested."
+    },
+    {
+      "id": "DISC-document",
+      "prompt": "Create an architecture proposal in Markdown from these requirements.",
+      "context": "The output is a document, but the task requires technical boundary choices."
+    },
+    {
+      "id": "DISC-plan",
+      "prompt": "Plan the staged move to the agreed module boundaries. Do not implement yet.",
+      "context": "The target boundaries and their owners are already adopted; ordered, verifiable work units are wanted."
+    }
+  ]
+}
