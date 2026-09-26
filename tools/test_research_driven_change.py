@@ -118,7 +118,17 @@ class ResearchChangeIntegrationTests(unittest.TestCase):
         self.assertNotIn("required", valid)
 
     def test_runtime_links_and_fragments_resolve_without_evaluation_keys(self) -> None:
-        for path in [SKILL / "SKILL.md", *(SKILL / "references").glob("*.md")]:
+        self.assert_links_resolve([SKILL / "SKILL.md", *(SKILL / "references").glob("*.md")],
+                                  runtime=True)
+
+    def test_maintainer_provenance_links_and_fragments_resolve(self) -> None:
+        # The source gate checks linked files, not fragments, outside runtime text.
+        paths = sorted((SKILL / "evals").glob("*.md"))
+        self.assertIn(SKILL / "evals" / "research-basis.md", paths)
+        self.assert_links_resolve(paths, runtime=False)
+
+    def assert_links_resolve(self, paths: list[Path], *, runtime: bool) -> None:
+        for path in paths:
             for target in aa.MARKDOWN_LINK.findall(path.read_text(encoding="utf-8")):
                 if target.startswith(("https://", "http://", "mailto:")):
                     continue
@@ -126,7 +136,8 @@ class ResearchChangeIntegrationTests(unittest.TestCase):
                 linked = (path.parent / relative).resolve() if relative else path
                 linked.relative_to(ROOT)
                 self.assertTrue(linked.is_file(), f"{path.name}: {target}")
-                self.assertNotIn("evals", linked.relative_to(ROOT).parts)
+                if runtime:
+                    self.assertNotIn("evals", linked.relative_to(ROOT).parts)
                 if fragment:
                     # Linked headings are ASCII, unique and punctuation-free here.
                     headings = re.findall(r"^#{1,6}\s+(.+)$",

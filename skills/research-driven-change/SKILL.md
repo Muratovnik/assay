@@ -75,6 +75,5 @@ reviewed and merged are different claims. A blocked effect leaves that part open
 continue useful authorized work without silently substituting a different outcome.
 No mandatory learning document or new global rule follows from a completed task.
 
-`references/research-basis.md` records provenance for maintainers, not mandatory
-runtime reading. `evals/` contains evaluator inputs and grading criteria; never
-read it while executing a user's change.
+`evals/` contains evaluator inputs, grading criteria and the maintainers' research
+provenance; never read it while executing a user's change.
