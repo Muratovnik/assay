@@ -50,8 +50,15 @@ confinement, redaction gating, create-only export, manual note preservation,
 HTML escaping, change propagation and the two handoff consumers. These are
 mechanical tests, not a behavioral comparison or discovery qualification.
 
-The initial corpus has 14 task cases, 8 discovery cases and 4 transfer cases.
+The corpus has 18 task cases, 8 discovery cases and 4 transfer cases. C15-C18
+were added during self-review as regressions, not as fresh held-out evidence.
 Authoring and validating these files does not mean those cases were executed by
 a model. Store future receipts and outputs outside skill inputs/source; report
 actual runs and gaps in the delivery record. No claim of improved recall, lower
 quota use or portability follows from this implementation alone.
+
+The browser probe in `browser/export.test.mjs` runs through the existing UI
+evidence workflow. It opens the real exported file with unchanged CSP and local
+PNG paths, checks rendered explanations, unique anchors, callout navigation and
+wide/narrow composition. It uses only synthetic data. A green result establishes
+this exporter path in that browser, not live Figma or Routevane behavior.

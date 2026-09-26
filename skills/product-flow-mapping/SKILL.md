@@ -16,7 +16,9 @@ Recover audience, product/build identity, scope, required format and allowed
 access. Reuse known decisions and inspect available sources before asking.
 Distinguish mapping, updating a map and read-only review. A mapping request
 allows the requested documentation, not edits to the application, production
-mutations, credential use, installations, publication or independent agents.
+mutations, credential extraction, installations, unrequested sharing or independent agents.
+Existing authorized connections can serve the scoped reads and requested destination;
+using one is not permission to obtain new access or change account settings.
 Use authorized disposable data for consequential actions. Missing runtime or
 canvas access narrows claims; it need not block a useful source-backed result.
 

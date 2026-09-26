@@ -71,6 +71,26 @@
       "id": "C14",
       "prompt": "Review the new map without editing it.",
       "context": "The map claims full coverage but shows only list -> editor -> save. The independently supplied requirement includes Cancel and failed-save recovery. No branch is marked out of scope."
+    },
+    {
+      "id": "C15",
+      "prompt": "Document the shared navigation and two contextual Save buttons.",
+      "context": "One global Help action has the same effect on two screens. The two Save buttons have the same label but persist different objects. Do not duplicate the global explanation or conflate the Save scopes."
+    },
+    {
+      "id": "C16",
+      "prompt": "Show current behavior and proposed recovery in the designer handoff.",
+      "context": "An observed transition ends at ERROR. A proposed Retry action leaves ERROR, but does not exist in the current product. An old execution trace comes from another build. These are related material, not one verified current path."
+    },
+    {
+      "id": "C17",
+      "prompt": "Review the HTML and canvas handoff for completeness.",
+      "context": "The source JSON contains screen purposes, state conditions and descriptions of an unmapped menu action. The delivered index contains only IDs and titles. Callout 1 has no named legend. Two hyphenated scenario/step pairs produce the same HTML anchor."
+    },
+    {
+      "id": "C18",
+      "prompt": "Write the requested map into this already authorized Figma file.",
+      "context": "The file/page is identified and a connected adapter already has access. No new permissions, account changes, installation or public sharing is requested. The map sources are sufficient."
     }
   ],
   "discovery_cases": [

@@ -37,20 +37,26 @@ editable frame pairs and stable keys for an adapter; it is not a Figma API scrip
 It explicitly records `canvas_delivery: not performed`.
 
 Exports are create-only snapshots. An existing destination is refused, even when
-empty. A write failure can leave a partial new snapshot, which is reported as a
+empty. Files are exclusively created and the HTML index is published last; a
+concurrent file is not overwritten. A write failure can leave a partial new snapshot, which is reported as a
 failure rather than deleted under a reader. The user-owned notes input is never
 modified; unmatched notes are retained and displayed. Regenerate into a new
 snapshot and reconcile canvas nodes by stable keys, preserving manual regions.
 The exporter does not perform live Figma reconciliation or certify its success.
+`handoff.json` retains complete action records, even without scenario use, and
+resolves callout labels. HTML exposes screen purposes, state conditions, action
+effects/roles, entry/terminal states and evidence rather than hiding these in JSON.
 
 ## Schema version 1
 
-All listed fields are required. Arrays are nonempty except captures, step
-`capture_ids` and capture `callouts`. Use an empty string only for an unmapped
+All listed fields are required unless explicitly optional below. Arrays are nonempty except captures, step
+`capture_ids`, capture `callouts` and optional action `shared_screen_ids`. Use an empty string only for an unmapped
 inventory `target_id` or an intentionally empty note. IDs are ASCII letters
 followed by letters, digits, underscore or hyphen (up to 80 characters). IDs are
 unique ignoring case within their collection; step IDs are unique ignoring case
-within a scenario. This prevents filename collisions on case-insensitive systems.
+within a scenario. Generated images use `captures/capture-<ID>.png`, so a legal
+ID such as `CON` does not produce a Windows reserved device filename. HTML step
+anchors use the slash-delimited scenario/step key, not ambiguous hyphen joining.
 
 | Collection | Record fields |
 | --- | --- |
@@ -69,11 +75,23 @@ The root also contains integer `schema_version: 1`. See the complete
 [source-only example](../examples/source-only-map.json), which is synthetic,
 contains no screenshots and makes no claim about Routevane runtime behavior.
 
+An action may additionally declare `shared_screen_ids`: other screens exposing
+the same canonical control/event. The primary `screen_id` and additional screens
+must be distinct, valid screen IDs. Both steps and callouts may use those surfaces.
+Do not use this to merge context-dependent effects merely because labels match.
+Existing single-screen maps remain valid without the optional field.
+
 Evidence `kind`: requirement, documentation, code, runtime or inference. An action
 `kind` is control or system. A step's `layer` is observed, intended or proposed;
 `verification` is executed, read, unverified or blocked. An executed claim needs
 a runtime source; an intended outcome needs an adopted requirement source.
-This checks the declared provenance, not the truthfulness of that source.
+This checks the declared provenance, not the truthfulness of that source. An
+executed step supported only by other runtime revisions records an applicability
+gap. Requirement/documentation revisions are not forced to equal the product
+build. Every declared entry must lead to a recorded terminal. Mixed-layer graphs
+remain representable but record a gap: their combined reachability is not proof
+of an executable current-product path. In the handoff, `next_step_keys` stay
+within one claim layer; `related_step_keys` carry cross-layer relations instead.
 
 Inventory `kind` is goal, screen, state or action; its target is respectively a
 scenario, screen, state or action. `disposition` is mapped, unresolved or excluded.
@@ -94,12 +112,15 @@ Callout `box` is normalized `[x, y, width, height]` inside the image. Its action
 must be a control on the depicted screen; `image_sha256` must match that capture.
 Replacing the image requires new coordinates or explicit revalidation. A capture
 attached to a step must show one of its endpoints. Same-screen actions retain
-separate steps and are labeled BEFORE / UNCHANGED SCREEN rather than inventing
-an after-screen. Conditions are text, not a formally proven state-machine guard.
+separate steps and are labeled UNCHANGED STATE / MOMENT UNSPECIFIED; neither
+a temporal BEFORE claim nor an after-screen is invented. Conditions are text, not a formally proven state-machine guard.
 
 `notes.json` is an object from `scenarioID/stepID` to text. Keep it outside
 regenerated map content. `diff` returns changed records, affected scenarios and
-retirement candidates, never deletion commands. Inventory changes also set
-`coverage_review_required`, even when the scenario records themselves are unchanged. Shared source/action changes
+retirement candidates, never deletion commands. Inventory changes, changes to evidence used only by inventory items and product
+scope/revision changes also set `coverage_review_required`, even when scenario
+records themselves are unchanged. Mapped inventory changes propagate to the
+known consuming scenarios; excluded/unresolved changes remain coverage review
+work rather than being discarded. Shared source/action changes
 propagate to consuming scenarios. The caller still verifies semantic dependencies,
 current canvas identity and annotation placement before any write.

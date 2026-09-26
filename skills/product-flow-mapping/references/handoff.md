@@ -23,7 +23,9 @@ purpose and prerequisites, before-state, action or system event, element identit
 availability/scope, observable result and applicable next/cancel/error links.
 Name the claim layer and verification, with concise source references. The right
 shows the matching state capture and numbered callouts linked to action IDs.
-Label it BEFORE or AFTER; do not make the reader infer the moment from the text.
+Label the depicted endpoint BEFORE or AFTER. With identical endpoints and no
+timing evidence, label the moment unspecified rather than inventing BEFORE.
+Provide a numbered legend with the action names; IDs alone are not a legend.
 
 A large dialog or complex result can need its own pair. An unchanged-screen
 copy/download still has a result description; a fake destination is unnecessary.
@@ -33,7 +35,15 @@ region. A missing image is an explicit not-captured state, not a silent blank.
 
 Keep existing behavior separate from intended constraints and redesign proposals.
 A designer may replace navigation or combine screens while preserving outcomes;
-current screenshots are not a fidelity requirement for a redesign.
+current screenshots are not a fidelity requirement for a redesign. Do not draw a
+continuous current-product path by splicing observed, intended and proposed
+transitions. Show cross-layer relations separately from next-step connections.
+
+Keep screen purposes, state conditions and every action's role/effect/scope in the
+reader-facing index, including inventoried controls without a mapped scenario.
+The JSON containing these facts does not compensate for omitting them from HTML
+or canvas frames. Entry/terminal states and source links must remain navigable.
+Use unambiguous composite step keys even when IDs contain hyphens.
 
 ## Select tools by the actual destination
 

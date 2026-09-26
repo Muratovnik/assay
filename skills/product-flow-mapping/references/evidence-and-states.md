@@ -14,7 +14,11 @@ before-state, action or system event, condition, after-state and result.
 Treat system events separately from controls: scheduled completion, session
 expiry or a late response may change state without a click. Do not invent a
 button for such an event. Preserve unchanged-state actions and different actions
-sharing endpoints. Selection of another interchangeable record need not create
+sharing endpoints. Reuse one action identity on several screens only when its
+meaning, scope and effect really agree; otherwise describe the contextual actions
+separately. A common label alone does not establish shared behavior.
+
+Selection of another interchangeable record need not create
 a distinct state; a record with different permissions or validation may do so.
 
 For each consequential action explain prerequisites, what it changes or leaves
@@ -39,6 +43,11 @@ visible state only. Pair behavior claims with a trace or action/result observati
 a screenshot filename, HTTP success or toast does not prove committed data.
 Where available, use the existing [Playwright trace](https://playwright.dev/docs/trace-viewer)
 rather than creating a new recorder.
+
+An old executed trace is not automatically applicable to the current build.
+Retain its original revision and identify what needs rechecking; an older adopted
+requirement or external reference need not share the application version. Never
+refresh provenance merely to make a checker accept the map.
 
 Keep conflicts explicit, including implementation/documentation disagreement.
 Do not select code as universally authoritative or rewrite requirements to match

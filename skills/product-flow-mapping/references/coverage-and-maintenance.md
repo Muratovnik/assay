@@ -74,6 +74,10 @@ steps, reverse index and downstream references, not just the image.
 Report scoped inventories and dispositions, verified/source-only paths, conflicts,
 blocked actions, missing captures and unexamined surfaces. Structural validation
 is not behavioral acceptance; generated/exported, visually inspected and approved
-are separate results. Counts describe the recorded inventory, never internet or
+are separate results. Changes to evidence attached only to an inventory entry still reopen its
+disposition and affected consumers. This also applies to previously excluded
+items; an unchanged scenario is not proof that a retirement decision still holds.
+
+Counts describe the recorded inventory, never internet or
 whole-product recall. Preserve material limits in the designer-facing artifact,
 not only in an accompanying chat message.

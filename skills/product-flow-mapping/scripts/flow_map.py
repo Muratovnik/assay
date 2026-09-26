@@ -39,9 +39,11 @@ def require(condition: bool, message: str, code: int = 2) -> None:
         raise MapError(message, code)
 
 
-def keys(obj: Any, expected: str, where: str) -> dict[str, Any]:
+def keys(obj: Any, expected: str, where: str, *, optional: str = "") -> dict[str, Any]:
     require(isinstance(obj, dict), f"{where}: expected an object")
-    require(set(obj) == set(expected.split()), f"{where}: fields must be {expected}")
+    required = set(expected.split())
+    require(required <= set(obj) <= required | set(optional.split()),
+            f"{where}: fields must be {expected}; optional: {optional or 'none'}")
     return obj
 
 
@@ -115,6 +117,11 @@ def image_bytes(root: Path, capture: dict[str, Any]) -> bytes:
     return data
 
 
+def action_screens(action: dict[str, Any]) -> list[str]:
+    """One canonical effect may be exposed on several verified screens."""
+    return [action["screen_id"], *action.get("shared_screen_ids", [])]
+
+
 def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
     keys(document, "schema_version product " + " ".join(GROUPS), "map")
     require(type(document["schema_version"]) is int and document["schema_version"] == 1, "unsupported schema_version")
@@ -164,8 +171,10 @@ def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
         text(item["conditions"], "state.conditions")
         references(item["evidence_ids"], "evidence")
     for item in document["actions"]:
-        keys(item, "id screen_id kind label role availability effect scope evidence_ids", "action")
-        reference(item["screen_id"], "screens")
+        keys(item, "id screen_id kind label role availability effect scope evidence_ids", "action",
+             optional="shared_screen_ids")
+        array(item.get("shared_screen_ids", []), "action.shared_screen_ids")
+        references(action_screens(item), "screens")
         require(item["kind"] in {"control", "system"}, "action kind must be control or system")
         for field in ("label", "role", "availability", "effect", "scope"):
             text(item[field], f"action.{field}")
@@ -189,7 +198,7 @@ def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
         for mark in array(item["callouts"], "callouts"):
             keys(mark, "number action_id box image_sha256", "callout")
             action = reference(mark["action_id"], "actions")
-            require(action["screen_id"] == state["screen_id"] and action["kind"] == "control", "callout must target a control on its screen", 1)
+            require(state["screen_id"] in action_screens(action) and action["kind"] == "control", "callout must target a control on its screen", 1)
             require(type(mark["number"]) is int and mark["number"] > 0, "invalid callout number")
             require(mark["number"] not in numbers, "duplicate callout number", 1)
             numbers.add(mark["number"])
@@ -224,7 +233,7 @@ def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
             before = reference(step["before"], "states")
             after = reference(step["after"], "states")
             action = reference(step["action_id"], "actions")
-            require(action["screen_id"] == before["screen_id"], f"{sid}: action belongs to another screen", 1)
+            require(before["screen_id"] in action_screens(action), f"{sid}: action belongs to another screen", 1)
             text(step["condition"], "step.condition")
             text(step["result"], "step.result")
             require(step["layer"] in {"observed", "intended", "proposed"}, "invalid claim layer")
@@ -233,6 +242,11 @@ def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
             kinds = {indexes["evidence"][eid]["kind"] for eid in evidence}
             if step["verification"] == "executed":
                 require("runtime" in kinds, f"{sid}: execution claim lacks runtime evidence", 1)
+                runtime = [indexes["evidence"][eid] for eid in evidence
+                           if indexes["evidence"][eid]["kind"] == "runtime"]
+                if not any(source["revision"] == product["revision"] for source in runtime):
+                    gaps.append(f"{scenario['id']}/{sid}: runtime evidence revision needs "
+                                f"applicability review: {', '.join(source['id'] for source in runtime)}")
             if step["layer"] == "intended":
                 require("requirement" in kinds, f"{sid}: intended outcome lacks adopted requirement", 1)
             if step["verification"] in {"blocked", "unverified"} or (step["layer"] == "observed" and step["verification"] != "executed"):
@@ -261,6 +275,11 @@ def check(document: dict[str, Any], root: Path) -> dict[str, Any]:
                 break
             leads_to_terminal = expanded
         require(all(step["after"] in leads_to_terminal for step in steps), f"{scenario['id']}: branch has no recorded terminal outcome", 1)
+        require(set(entries) <= leads_to_terminal,
+                f"{scenario['id']}: entry has no recorded terminal outcome", 1)
+        if len({step["layer"] for step in steps}) > 1:
+            gaps.append(f"{scenario['id']}: mixed claim layers; combined graph reachability "
+                        "does not establish an executable current-product path")
 
     for item in document["inventory"]:
         keys(item, "id kind evidence_ids disposition target_id reason", "inventory")
@@ -315,77 +334,157 @@ def read_notes(path: Path | None) -> dict[str, str]:
     return document
 
 
+def capture_file(capture_id: str) -> str:
+    # A valid map ID such as CON must not become a Windows device filename.
+    return f"captures/capture-{capture_id}.png"
+
+
 def handoff(document: dict[str, Any], report: dict[str, Any], notes: dict[str, str]) -> dict[str, Any]:
-    actions = {x["id"]: x for x in document["actions"]}
-    captures = {x["id"]: x for x in document["captures"]}
+    actions = {item["id"]: item for item in document["actions"]}
+    captures = {item["id"]: item for item in document["captures"]}
     pairs = []
     for scenario in document["scenarios"]:
+        following: dict[str, list[dict[str, Any]]] = {}
+        for step in scenario["steps"]:
+            following.setdefault(step["before"], []).append(step)
         for step in scenario["steps"]:
             key = f"{scenario['id']}/{step['id']}"
             pictures = []
             for cid in step["capture_ids"]:
                 capture = captures[cid]
-                moment = "BEFORE / UNCHANGED SCREEN" if step["before"] == step["after"] else ("BEFORE" if capture["state_id"] == step["before"] else "AFTER")
-                pictures.append({**capture, "file": f"captures/{cid}.png", "moment": moment})
-            pairs.append({"key": key, "left_frame": {"name": key + " description", "goal": scenario["goal"],
-                          "actor": scenario["actor"], "prerequisites": scenario["prerequisites"],
-                          "step": step, "action": actions[step["action_id"]]},
-                          "right_frame": {"name": key + " evidence", "captures": pictures,
-                          "placeholder": "Not captured" if not pictures else ""},
-                          "manual_note": notes.get(key, "")})
+                if step["before"] == step["after"]:
+                    moment = "UNCHANGED STATE / MOMENT UNSPECIFIED"
+                else:
+                    moment = "BEFORE" if capture["state_id"] == step["before"] else "AFTER"
+                pictures.append({**capture, "file": capture_file(cid), "moment": moment,
+                                 "callouts": [{**mark, "label": actions[mark["action_id"]]["label"]}
+                                              for mark in capture["callouts"]]})
+            continuations = following.get(step["after"], [])
+            pairs.append({
+                "key": key,
+                "left_frame": {"name": key + " description", "goal": scenario["goal"],
+                               "actor": scenario["actor"], "prerequisites": scenario["prerequisites"],
+                               "step": step, "action": actions[step["action_id"]]},
+                "right_frame": {"name": key + " evidence", "captures": pictures,
+                                "placeholder": "Not captured" if not pictures else ""},
+                "next_step_keys": [f"{scenario['id']}/{item['id']}" for item in continuations
+                                   if item["layer"] == step["layer"]],
+                "related_step_keys": [f"{scenario['id']}/{item['id']}" for item in continuations
+                                      if item["layer"] != step["layer"]],
+                "manual_note": notes.get(key, ""),
+            })
     used_keys = {pair["key"] for pair in pairs}
-    return {"schema_version": 1, "product": document["product"], "report": report,
-            "canvas_delivery": "not performed", "layout": "description frame beside state capture frame",
-            "ownership": "Reconcile stable pair keys. Never overwrite manual notes or delete unmentioned nodes.",
-            "pairs": pairs, "reverse_index": reverse_index(document),
-            "sources": document["evidence"], "screens": document["screens"],
-            "states": document["states"], "inventory": document["inventory"],
-            "scenarios": [{k: v for k, v in item.items() if k != "steps"} for item in document["scenarios"]],
-            "unmatched_notes": {k: v for k, v in notes.items() if k not in used_keys}}
+    return {
+        "schema_version": 1, "product": document["product"], "report": report,
+        "canvas_delivery": "not performed", "layout": "description frame beside state capture frame",
+        "ownership": "Reconcile stable pair keys. Never overwrite manual notes or delete unmentioned nodes.",
+        "pairs": pairs, "reverse_index": reverse_index(document),
+        "sources": document["evidence"], "screens": document["screens"],
+        "states": document["states"], "actions": document["actions"], "inventory": document["inventory"],
+        "scenarios": [{k: v for k, v in item.items() if k != "steps"} for item in document["scenarios"]],
+        "unmatched_notes": {k: v for k, v in notes.items() if k not in used_keys},
+    }
 
 
 def render_html(document: dict[str, Any], plan: dict[str, Any]) -> str:
+    """Render the reader's full contract; the JSON is not a hidden appendix."""
     def esc(value: Any) -> str:
         return html.escape(str(value), quote=True)
 
-    def link(group: str, rid: str) -> str:
-        return f'<a href="#{group}-{esc(rid)}">{esc(rid)}</a>'
+    def link(group: str, rid: str, label: str | None = None) -> str:
+        return f'<a href="#{group}-{esc(rid)}">{esc(rid if label is None else label)}</a>'
 
-    parts = ['<!doctype html><html lang="en"><meta charset="utf-8">',
+    def fields(rows: dict[str, Any]) -> str:
+        return '<dl>' + ''.join('<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>'
+                               for k, v in rows.items()) + '</dl>'
+
+    def sources(ids: list[str]) -> str:
+        return '<p>Evidence: ' + ', '.join(link('source', eid) for eid in ids) + '</p>'
+
+    def state_links(ids: list[str]) -> str:
+        return ', '.join(link('states', sid, f"{states[sid]['title']} ({sid})") for sid in ids)
+
+    def step_links(keys: list[str]) -> str:
+        return ', '.join(link('step', key,
+            f"{pair_index[key]['left_frame']['step']['id']}: "
+            f"{pair_index[key]['left_frame']['step']['condition']} "
+            f"[{pair_index[key]['left_frame']['step']['layer']}]") for key in keys)
+
+    states = {item['id']: item for item in document['states']}
+    pair_index = {pair['key']: pair for pair in plan['pairs']}
+    css = """
+body{font:16px/1.55 system-ui,sans-serif;margin:32px auto;max-width:1500px;padding:0 24px}
+h1,h2,h3{line-height:1.2}a{color:inherit}nav{display:flex;gap:18px;flex-wrap:wrap}
+.pair{display:grid;grid-template-columns:minmax(280px,1fr) minmax(320px,1.6fr);gap:24px;border-top:1px solid;padding:24px 0}
+.pair>*{min-width:0}p,dd,dt,li,code,h1,h2,h3,a,figcaption{overflow-wrap:anywhere}
+dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px}dt{font-weight:650}dd{margin:0}
+figure{margin:0 0 24px}.capture{position:relative}.capture img{width:100%;height:auto;display:block}
+.callout{position:absolute;border:2px solid;border-radius:4px;box-sizing:border-box;color:#111;text-align:center;font-weight:bold}
+.callout span{position:absolute;left:-10px;top:-13px;background:white;border:1px solid;border-radius:50%;width:22px;height:22px;line-height:22px}
+.missing{padding:60px 24px;border:1px dashed}figcaption,small{font-size:13px}.note{border-left:3px solid;padding-left:12px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere}.index-item{border-top:1px solid;padding:16px 0}
+@media(max-width:760px){.pair{grid-template-columns:1fr}body{margin:20px auto;padding:0 16px}}
+@media print{.pair{break-inside:avoid}}
+"""
+    parts = ['<!doctype html><html lang="en"><head><meta charset="utf-8">',
              '<meta name="viewport" content="width=device-width, initial-scale=1">',
              '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src \'self\'; style-src \'unsafe-inline\'">',
-             '<title>' + esc(document["product"]["name"]) + ' — Product map</title>',
-             '<style>body{font:16px/1.55 system-ui,sans-serif;margin:32px auto;max-width:1500px;padding:0 24px}h1,h2,h3{line-height:1.2}a{color:inherit}nav{display:flex;gap:18px;flex-wrap:wrap}.pair{display:grid;grid-template-columns:minmax(280px,1fr) minmax(320px,1.6fr);gap:24px;border-top:1px solid;padding:24px 0}p,dd,li,code{overflow-wrap:anywhere}dl{display:grid;grid-template-columns:110px 1fr;gap:8px}dt{font-weight:650}dd{margin:0}figure{margin:0 0 24px}.capture{position:relative}.capture img{width:100%;height:auto;display:block}.callout{position:absolute;border:2px solid;border-radius:4px;box-sizing:border-box;color:#111;text-align:center;font-weight:bold}.callout span{position:absolute;left:-10px;top:-13px;background:white;border:1px solid;border-radius:50%;width:22px;height:22px;line-height:22px}.missing{padding:60px 24px;border:1px dashed}figcaption,small{font-size:13px}.note{border-left:3px solid;padding-left:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:760px){.pair{grid-template-columns:1fr}body{margin:20px auto;padding:0 16px}dl{grid-template-columns:110px minmax(0,1fr)}}@media print{.pair{break-inside:avoid}}</style>',
-             '<h1>' + esc(document["product"]["name"]) + '</h1>',
-             '<p>Revision: ' + esc(document["product"]["revision"]) + '<br>Scope: ' + esc(document["product"]["scope"]) + '</p>',
+             '<title>' + esc(document['product']['name']) + ' — Product map</title>',
+             '<style>' + css + '</style></head><body>',
+             '<h1>' + esc(document['product']['name']) + '</h1>',
+             fields({'Revision': document['product']['revision'], 'Scope': document['product']['scope']}),
              '<p><strong>Evidence-linked documentation, not certified product coverage. Canvas delivery not performed.</strong></p>',
-             '<nav>' + ''.join(f'<a href="#scenario-{esc(s["id"])}">{esc(s["title"])}</a>' for s in document['scenarios']) + ' <a href="#index">Reverse index</a> <a href="#gaps">Gaps</a> <a href="#sources">Sources</a></nav>']
-    pair_index = {pair['key']: pair for pair in plan['pairs']}
+             '<nav>' + ''.join(link('scenario', s['id'], s['title']) for s in document['scenarios'])
+             + ' <a href="#index">Reverse index</a> <a href="#gaps">Gaps</a> <a href="#sources">Sources</a></nav>']
     for scenario in document['scenarios']:
         parts += [f'<section id="scenario-{esc(scenario["id"])}"><h2>{esc(scenario["id"])} · {esc(scenario["title"])}</h2>',
-                  '<p>' + esc(scenario['goal']) + '</p>']
+                  fields({'Goal': scenario['goal'], 'Actor': scenario['actor'], 'Prerequisites': scenario['prerequisites']}),
+                  '<p>Entry states: ' + state_links(scenario['entry_state_ids'])
+                  + '<br>Terminal states: ' + state_links(scenario['terminal_state_ids']) + '</p>',
+                  sources(scenario['evidence_ids'])]
         for step in scenario['steps']:
-            pair = pair_index[f"{scenario['id']}/{step['id']}"]
+            key = f"{scenario['id']}/{step['id']}"
+            pair = pair_index[key]
             action = pair['left_frame']['action']
-            parts.append(f'<article class="pair" id="step-{esc(scenario["id"])}-{esc(step["id"])}"><div><h3>{esc(step["id"])} · {esc(action["label"])}</h3><dl>')
-            rows = {'Actor': scenario['actor'], 'Prerequisites': scenario['prerequisites'], 'Before': step['before'],
-                    'Condition': step['condition'], 'Availability': action['availability'], 'Scope': action['scope'],
-                    'Result': step['result'], 'After': step['after'], 'Claim': step['layer'], 'Verification': step['verification']}
-            parts.extend('<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>' for k, v in rows.items())
-            parts += ['</dl><p>Control/event: ' + link('action', step['action_id']) + '<br>Evidence: ' + ', '.join(link('source', e) for e in step['evidence_ids']) + '</p>']
-            following = [s for s in scenario['steps'] if s['before'] == step['after']]
-            parts.append('<p>' + ('Recorded terminal outcome. Other actions: ' if step['after'] in scenario['terminal_state_ids'] else 'Next / alternatives: ') + (', '.join(f'<a href="#step-{esc(scenario["id"])}-{esc(s["id"])}">{esc(s["id"])}: {esc(s["condition"])}</a>' for s in following) or 'Recorded terminal outcome') + '</p>')
+            # '/' is forbidden inside either ID; unlike '-', it cannot collide.
+            parts.append(f'<article class="pair" id="step-{esc(key)}"><div><h3>{esc(step["id"])} · {esc(action["label"])}</h3>')
+            parts.append(fields({'Condition': step['condition'], 'Kind / role': f"{action['kind']} / {action['role']}",
+                'Availability': action['availability'], 'Effect': action['effect'], 'Scope': action['scope'],
+                'Result': step['result'], 'Claim': step['layer'], 'Verification': step['verification']}))
+            parts += ['<p>Before: ' + state_links([step['before']]) + '<br>After: '
+                      + state_links([step['after']]) + '<br>Control/event: ' + link('action', step['action_id']) + '</p>',
+                      sources(step['evidence_ids'])]
+            if step['after'] in scenario['terminal_state_ids']:
+                parts.append('<p>Recorded terminal state; see the result and claim layer above.</p>')
+            if pair['next_step_keys']:
+                parts.append('<p>Next / alternatives in this claim layer: ' + step_links(pair['next_step_keys']) + '</p>')
+            if pair['related_step_keys']:
+                parts.append('<p>Different claim layers — related, not confirmed continuations: '
+                             + step_links(pair['related_step_keys']) + '</p>')
+            if not pair['next_step_keys'] and step['after'] not in scenario['terminal_state_ids']:
+                parts.append('<p>No continuation recorded in this claim layer.</p>')
             if pair['manual_note']:
                 parts.append('<p class="note">Designer note: ' + esc(pair['manual_note']) + '</p>')
             parts.append('</div><div>')
             if not pair['right_frame']['captures']:
                 parts.append('<div class="missing">Not captured. Consult the source and verification status; this is not a screenshot.</div>')
             for capture in pair['right_frame']['captures']:
-                parts.append('<figure><div class="capture"><img src="' + esc(capture['file']) + '" alt="' + esc(capture['state_id']) + '">')
+                title = states[capture['state_id']]['title']
+                parts.append('<figure><div class="capture"><img src="' + esc(capture['file'])
+                             + '" alt="' + esc(title) + '">')
                 for mark in capture['callouts']:
                     x, y, w, h = [v * 100 for v in mark['box']]
-                    parts.append(f'<a class="callout" href="#action-{esc(mark["action_id"])}" style="left:{x}%;top:{y}%;width:{w}%;height:{h}%" aria-label="Control {esc(mark["action_id"])}"><span>{mark["number"]}</span></a>')
-                parts.append('</div><figcaption>' + esc(capture['moment']) + ' · ' + esc(capture['state_id']) + ' · ' + ('SIMULATED' if capture['simulated'] else 'runtime capture') + '<br>' + esc(capture['scope']) + ' · ' + esc(capture['source_revision']) + ' · ' + esc(capture['captured_at']) + '<br>Readiness: ' + esc(capture['readiness']) + '</figcaption></figure>')
+                    parts.append(f'<a class="callout" href="#action-{esc(mark["action_id"])}" '
+                        f'style="left:{x}%;top:{y}%;width:{w}%;height:{h}%" '
+                        f'aria-label="{mark["number"]}: {esc(mark["label"])}"><span>{mark["number"]}</span></a>')
+                parts.append('</div><figcaption>' + esc(capture['moment']) + ' · ' + esc(title) + ' · '
+                    + ('SIMULATED' if capture['simulated'] else 'runtime capture') + '<br>'
+                    + esc(capture['scope']) + ' · ' + esc(capture['source_revision']) + ' · '
+                    + esc(capture['captured_at']) + '<br>Readiness: ' + esc(capture['readiness']))
+                if capture['callouts']:
+                    parts.append('<p>Callouts: ' + '; '.join(str(mark['number']) + ' — '
+                        + link('action', mark['action_id'], mark['label']) for mark in capture['callouts']) + '</p>')
+                parts += [sources(capture['evidence_ids']), '</figcaption></figure>']
             parts.append('</div></article>')
         parts.append('</section>')
     parts.append('<section id="index"><h2>Reverse index</h2>')
@@ -393,18 +492,33 @@ def render_html(document: dict[str, Any], plan: dict[str, Any]) -> str:
         for item in document[group]:
             anchor = 'action' if group == 'actions' else group
             title = item.get('title', item.get('label', item['id']))
-            parts.append(f'<p id="{anchor}-{esc(item["id"])}"><strong>{esc(item["id"])} · {esc(title)}</strong>: ' + ', '.join(link('scenario', sid) for sid in plan['reverse_index'][group].get(item['id'], [])) + '</p>')
+            parts.append(f'<section class="index-item" id="{anchor}-{esc(item["id"])}"><h3>{esc(item["id"])} · {esc(title)}</h3>')
+            details = {field.replace('_', ' ').capitalize(): value for field, value in item.items()
+                       if field not in {'id', 'title', 'label', 'screen_id', 'shared_screen_ids', 'evidence_ids'}}
+            parts.append(fields(details))
+            if 'screen_id' in item:
+                surface_ids = action_screens(item) if group == 'actions' else [item['screen_id']]
+                parts.append('<p>Screens: ' + ', '.join(link('screens', sid) for sid in surface_ids) + '</p>')
+            users = plan['reverse_index'][group].get(item['id'], [])
+            parts.append('<p>Scenarios: ' + (', '.join(link('scenario', sid) for sid in users)
+                                           or 'No recorded scenario use — review this gap') + '</p>')
+            if 'evidence_ids' in item:
+                parts.append(sources(item['evidence_ids']))
+            parts.append('</section>')
     parts += ['</section><section id="gaps"><h2>Gaps and inventory dispositions</h2><ul>']
     parts += ['<li>' + esc(gap) + '</li>' for gap in plan['report']['recorded_gaps']]
-    parts += ['</ul>']
+    parts.append('</ul>')
     for item in document['inventory']:
-        parts.append('<p>' + esc(item['id']) + ' · ' + esc(item['disposition']) + ' · ' + esc(item['target_id']) + ': ' + esc(item['reason']) + '</p>')
+        parts.append('<p>' + esc(item['id']) + ' · ' + esc(item['kind']) + ' · '
+                     + esc(item['disposition']) + ' · ' + esc(item['target_id']) + ': '
+                     + esc(item['reason']) + '</p>' + sources(item['evidence_ids']))
     for key, note in plan['unmatched_notes'].items():
         parts.append('<p class="note">Unmatched designer note (preserved) ' + esc(key) + ': ' + esc(note) + '</p>')
     parts.append('</section><section id="sources"><h2>Sources</h2>')
     for source in document['evidence']:
-        parts.append(f'<p id="source-{esc(source["id"])}"><strong>{esc(source["id"])} · {esc(source["kind"])}</strong><br>' + esc(source['locator']) + '<br>' + esc(source['revision']) + '<br>' + esc(source['detail']) + '</p>')
-    return ''.join(parts) + '</section></html>\n'
+        parts.append(f'<p id="source-{esc(source["id"])}"><strong>{esc(source["id"])} · {esc(source["kind"])}</strong><br>'
+                     + esc(source['locator']) + '<br>' + esc(source['revision']) + '<br>' + esc(source['detail']) + '</p>')
+    return ''.join(parts) + '</section></body></html>\n'
 
 
 def dump(value: Any) -> str:
@@ -423,23 +537,27 @@ def export(document: dict[str, Any], root: Path, output: Path, notes: dict[str, 
     try:
         (scratch / 'captures').mkdir()
         for capture in document['captures']:
-            (scratch / 'captures' / (capture['id'] + '.png')).write_bytes(image_bytes(root, capture))
+            (scratch / capture_file(capture['id'])).write_bytes(image_bytes(root, capture))
         portable = json.loads(dump(document))
         for capture in portable['captures']:
-            capture['file'] = 'captures/' + capture['id'] + '.png'
+            capture['file'] = capture_file(capture['id'])
         (scratch / 'map.json').write_text(dump(portable), encoding='utf-8')
         (scratch / 'notes.json').write_text(dump(notes), encoding='utf-8')
         (scratch / 'handoff.json').write_text(dump(plan), encoding='utf-8')
         (scratch / 'index.html').write_text(render_html(document, plan), encoding='utf-8')
         # mkdir reserves the destination without overwriting an existing empty dir.
         output.mkdir()
-        try:
-            for child in scratch.iterdir():
-                child.rename(output / child.name)
-        except OSError:
-            # A partial export remains visible; never delete a destination that a
-            # caller may have inspected or modified. Report failure, not success.
-            raise
+        (output / 'captures').mkdir()
+        # Publish index last and exclusively create each file: rename may replace
+        # a note another writer created after we reserved the directory.
+        files = sorted(path for path in scratch.rglob('*') if path.is_file())
+        files.sort(key=lambda path: path == scratch / 'index.html')
+        for source in files:
+            target = output / source.relative_to(scratch)
+            no_links(target)
+            with source.open('rb') as reader, target.open('xb') as writer:
+                shutil.copyfileobj(reader, writer)
+        # On failure the partial destination stays visible; never erase user work.
     finally:
         shutil.rmtree(scratch)
     return {'output': str(output), 'pairs': len(plan['pairs']), **report}
@@ -457,7 +575,19 @@ def compare(previous: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]
         changed_ids[group] = set(changed) | (before.keys() ^ after.keys())
     affected = set(changed_ids['scenarios'])
     product_changed = previous['product'] != current['product']
+    coverage_review = product_changed or bool(changed_ids['inventory'])
     for document in (previous, current):
+        consumers = reverse_index(document)
+        for item in document['inventory']:
+            if (item['id'] in changed_ids['inventory']
+                    or set(item['evidence_ids']) & changed_ids['evidence']):
+                coverage_review = True
+                if item['disposition'] == 'mapped':
+                    group = KINDS[item['kind']]
+                    if group == 'scenarios':
+                        affected.add(item['target_id'])
+                    else:
+                        affected.update(consumers[group].get(item['target_id'], []))
         states = {x['id']: x for x in document['states']}
         actions = {x['id']: x for x in document['actions']}
         captures = {x['id']: x for x in document['captures']}
@@ -474,7 +604,7 @@ def compare(previous: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]
                 relevant |= any(set(captures[cid]['evidence_ids']) & changed_ids['evidence'] for cid in step['capture_ids'])
             if relevant:
                 affected.add(scenario['id'])
-    return {'product_changed': product_changed, 'coverage_review_required': bool(changed_ids['inventory']),
+    return {'product_changed': product_changed, 'coverage_review_required': coverage_review,
             'changes': changes, 'affected_scenarios': sorted(affected),
             'canvas_writes': 'none; reconcile target IDs, annotations and manual notes before writing'}
 

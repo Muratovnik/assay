@@ -216,12 +216,12 @@ class ProductFlowMapTests(unittest.TestCase):
         result = M["export"](self.map, self.root, output, {})
         self.assertEqual(result["pairs"], 8)
         self.assertEqual(self.map, original)
-        self.assertTrue((output / "captures/CAP_VIEW.png").is_file())
+        self.assertTrue((output / "captures/capture-CAP_VIEW.png").is_file())
         roundtrip = M["read_json"](output / "map.json")
         M["check"](roundtrip, output)
         plan = M["read_json"](output / "handoff.json")
         self.assertEqual(plan["canvas_delivery"], "not performed")
-        self.assertEqual(plan["pairs"][6]["right_frame"]["captures"][0]["moment"], "BEFORE / UNCHANGED SCREEN")
+        self.assertEqual(plan["pairs"][6]["right_frame"]["captures"][0]["moment"], "UNCHANGED STATE / MOMENT UNSPECIFIED")
 
     def test_repeated_export_stable_ids_preserves_notes_and_refuses_overwrite(self) -> None:
         notes = {"EDIT_FLOW/FAILURE": "Owner text", "OLD/GONE": "Preserve unmatched text"}
