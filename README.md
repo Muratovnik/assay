@@ -25,7 +25,7 @@ links to the instructions the agent will actually read.
 | [test-audit](skills/test-audit/SKILL.md) | Someone claims a suite protects against regressions | You are writing the tests, or merely executing them |
 | [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, architecture, release or migration needs checking against its brief | You want the change made; this method does not fix things |
 | [evidence-research](skills/evidence-research/SKILL.md) | A consequential claim needs sources located and reconciled | The answer is one lookup away |
-| [research-driven-change](skills/research-driven-change/SKILL.md) | Research must lead into a plan, change, review or delivery, or that cycle is being resumed | Only research, a routine edit or a standalone read-only audit is requested |
+| [research-driven-change](skills/research-driven-change/SKILL.md) | Research must lead into a plan, change, review or delivery, or that cycle is being resumed | Only an idea discussion, research, a routine edit, or a standalone skill assessment or read-only audit is requested |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | Operational UI needs designing, repairing or critiquing | The work is backend only |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |

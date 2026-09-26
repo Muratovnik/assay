@@ -1,6 +1,6 @@
 ---
 name: research-driven-change
-description: Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. Use for multi-stage research-to-change work or resuming that cycle; skip isolated research, routine edits and standalone read-only audits.
+description: Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. Use for multi-stage research-to-change work or resuming that cycle; skip idea-only discussion, isolated research, routine edits and standalone skill assessments or read-only audits.
 license: MIT
 ---
 
