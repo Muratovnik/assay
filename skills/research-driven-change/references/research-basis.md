@@ -67,6 +67,13 @@ endpoint was attained.
   dependency/license policy. Local check: a popular but incompatible candidate is
   not adopted solely because it is popular.
 
+Evaluation setup also draws a limited comparison with
+[Anthropic's skill creator](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md#running-and-evaluating-test-cases):
+it separates prior skill snapshots from per-run outputs. Retain that distinction
+between immutable evidence and an editable subject without importing a parallel-run
+policy or adding an evaluation service. The local packet verifier protects the original
+snapshot; an authorized repair is assessed in a separate working copy.
+
 The small, explicit handoff account also fits the failure modes described in
 [Anthropic's long-running agent experiments](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents):
 premature completion and lost context. That report is bounded experimental

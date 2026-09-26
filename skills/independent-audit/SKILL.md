@@ -151,7 +151,7 @@ stops, access limits and the agreed budget; never infer coverage from silence.
 
 When contributing to an already active
 [research-driven change](../research-driven-change/references/review-and-delivery.md),
-return findings, checked revision and coverage limits to the caller. That caller
+return the verdict, findings, checked revision and coverage limits. The caller
 owns any authorized repair and delivery; this audit remains read-only. The link
 explains the receiving workflow, not permission to start it during a standalone
 audit or to repair findings within a bounded reviewer role.

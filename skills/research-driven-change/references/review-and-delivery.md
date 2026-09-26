@@ -17,6 +17,11 @@ executor inputs. Disclose self-review; a fresh context alone is not an independe
 oracle. No additional reviewer, delegation or audit gate is mandatory for every
 edit; use the review depth the request and its consequences justify.
 
+Carry the audit's verdict and coverage limits as well as its findings. An empty
+finding list with unexamined required areas is not a cleared review. Conversely,
+a complete supported clean review does not need invented findings or another
+approval ritual. The audit method owns that distinction; preserve it on return.
+
 ## Route feedback to its cause
 
 Validate technical feedback against the subject and applicable criteria before
@@ -54,6 +59,10 @@ For published work also distinguish local verification, hosted CI, review and
 merge. Pending, failed and unavailable checks have different meanings. A local
 pass does not establish hosted CI success, and an empty list of checks does not
 establish that all required checks ran. Name unverified requirements explicitly.
+For an integration result, retain the base and head or tested merge identity and
+relevant configuration, not only the feature head. A changed base can invalidate
+integration evidence even when the feature commit is unchanged; retain local
+checks only for the inputs they actually covered.
 
 ## Publish only the requested proposal
 
@@ -65,15 +74,22 @@ continues that proposal; do not create a duplicate or update a neighboring branc
 Follow owner commit and publication rules rather than assuming a fixed Git client,
 branch convention, model or hosted service.
 
+Before updating a shared head, compare it with the revision the local candidate
+was based on. Use the owner's conditional update or non-overwriting mechanism.
+If another change arrived, preserve it, reconcile the affected work and checks,
+and retry only from the reconciled state; do not force an old candidate over it.
+
 Describe the need, significant decisions and source context, actual changes,
 checks and limits in the proposal. Link larger authorized research instead of
 copying it. Publish only relevant material; exclude secrets, private traces and
 withheld grading keys. Test fixtures intentionally shipped as evaluator assets are
 not withheld keys, but must still stay out of executor packets.
 
-After creation or update, read back the remote proposal and confirm its identity,
-base/head and current revision. A successful local commit or an attempted API call
-is not a publication receipt. If the response was lost, use
+After creation or update, read back the remote proposal and compare its identity,
+base/head and revision with the intended delivered candidate. Correct branch names
+alone do not prove the checked bytes were delivered. If they differ, reconcile
+before attributing local results to the remote state. A successful local commit or
+an attempted API call is not a publication receipt. If the response was lost, use
 [reconciliation before replay](../../implementation-planning/references/continuation.md#reconcile-before-continuing)
 to observe whether the effect already happened. Do not retry an ambiguous remote
 creation merely to obtain a cleaner receipt.

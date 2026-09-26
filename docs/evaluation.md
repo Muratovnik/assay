@@ -32,8 +32,11 @@ receipts. Its unit tests prepare every case, preserve identical task inputs and
 exclude grading keys from method snapshots. Publication cases describe recorded
 synthetic observations; they do not execute live hosted writes. Native discovery,
 full-cycle model behavior and comparative savings remain unmeasured until real
-bounded runs provide that evidence. The evaluator protocol describes a proposed
-small comparison against the existing Assay methods, not a completed experiment.
+bounded runs provide that evidence. Local execution cases use separate editable
+copies; the frozen packet and its retained digest remain unchanged. Decision-only cases assess proposed actions,
+not live execution. The evaluator protocol distinguishes these modes and describes
+a proposed small comparison against pinned Assay method sets, not a completed
+experiment.
 
 ## What the gates check
 

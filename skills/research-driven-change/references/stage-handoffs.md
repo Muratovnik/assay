@@ -28,7 +28,7 @@ unavailable endpoint; an untried relevant tool is not proof of unavailability.
 | Research to choice | The relevant options, local constraints, source conditions and material unknowns | A supported choice, retained alternative or bounded unresolved decision |
 | Choice to plan | Expected outcome, transfer rationale and applicable acceptance | Ready units and their dependencies, with unresolved work named |
 | Plan to implementation | The next unit is grounded in the current subject and its effects are authorized | Actual changed artifact, intentional deviations, checks and unfinished scope |
-| Implementation to review | Exact subject/revision, original acceptance, actual changes and available checks | Findings with evidence, exclusions and verification limits; not repair authority |
+| Implementation to review | Exact subject/revision, original acceptance, actual changes and available checks | Review outcome, findings with evidence, coverage and verification limits; not repair authority |
 | Checked work to publication | The state is suitable for the requested kind of proposal and publication is authorized | Confirmed remote identity and revision, with pending checks or delivery gaps |
 | Feedback to renewed work | A supported finding or changed premise, the affected decision and current subject | A bounded correction or replan, relevant renewed evidence, or a reasoned non-change |
 

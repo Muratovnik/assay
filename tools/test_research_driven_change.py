@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -214,6 +215,125 @@ class ResearchChangePacketTests(unittest.TestCase):
                                          (candidate / name).read_bytes())
                     self.assertFalse((plain / "skill").exists())
                     self.assertEqual({p.name for p in (candidate / "skill").iterdir()}, {NAME})
+
+    def test_local_execution_cases_have_complete_subjects(self) -> None:
+        # Packaging coverage: these tasks require edits, not hypothetical advice.
+        subjects = {
+            "RDC-02-adapter": {"adapter.py", "test_adapter.py", "research.md", "plan.md"},
+            "RDC-03-skill": {"method/SKILL.md", "research.md", "plan.md"},
+            "RDC-06-resume-valid": {"adapter.py", "test_adapter.py", "research.md", "plan.md"},
+            "RDC-10-review-defect": {"adapter.py", "test_adapter.py", "research.md", "plan.md"},
+        }
+        records = {case["id"]: case for case in ea.load(CASES)["cases"]}
+        for case_id, expected in subjects.items():
+            with self.subTest(case=case_id):
+                self.assertEqual(set(records[case_id].get("files", {})), expected)
+                self.assertTrue(all(records[case_id]["files"].values()))
+
+    def test_authorized_working_copy_preserves_frozen_evidence(self) -> None:
+        # Exercise the documented coordinator setup, not model behavior.
+        edits = {
+            "RDC-02-adapter": ("adapter.py", "return name.lower()",
+                               "return ALIASES.get(name, name)"),
+            "RDC-03-skill": ("method/SKILL.md",
+                             "Always discard existing research and start a new survey before any answer.",
+                             "Reuse sufficient research; refresh materially changed premises."),
+            "RDC-06-resume-valid": ("adapter.py", "ALIASES.get(name, name.lower())",
+                                    "ALIASES.get(name, name)"),
+            "RDC-10-review-defect": ("adapter.py", "ALIASES.get(name, name.lower())",
+                                     "ALIASES.get(name, name)"),
+        }
+        with tempfile.TemporaryDirectory(prefix="rdc-editable-") as directory:
+            parent = Path(directory).resolve()
+            for case_id, (relative, old, new) in edits.items():
+                with self.subTest(case=case_id):
+                    packet, digest = self.prepare(parent, case_id, skill_roots=(SKILL,))
+                    workspace = parent / case_id
+                    before = hashes(packet)
+                    shutil.copytree(packet / "inputs", workspace)
+                    self.assertEqual(hashes(packet / "inputs"), hashes(workspace))
+                    target = workspace / relative
+                    original = target.read_text(encoding="utf-8")
+                    self.assertEqual(original.count(old), 1)
+                    target.write_text(original.replace(old, new), encoding="utf-8")
+                    self.assertNotEqual(target.read_bytes(),
+                                        (packet / "inputs" / relative).read_bytes())
+                    if relative == "adapter.py":
+                        result = self.run_fixture(workspace)
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertEqual(hashes(packet), before)
+                    self.assertEqual(ea.audit_tools(ROOT).verify_packet(packet, digest)
+                                     ["byte_integrity"], "pass")
+                    changed = {name for name, value in hashes(workspace).items()
+                               if value != hashes(packet / "inputs").get(name)}
+                    self.assertEqual(changed, {relative})
+
+    def test_editing_frozen_input_is_still_rejected(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="rdc-frozen-") as directory:
+            parent = Path(directory).resolve()
+            packet, digest = self.prepare(parent)
+            control, retained = self.prepare(parent)
+            target = packet / "inputs/adapter.py"
+            target.write_text(target.read_text(encoding="utf-8").replace(
+                "return name.lower()", "return ALIASES.get(name, name)"), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Packet drift"):
+                ea.audit_tools(ROOT).verify_packet(packet, digest)
+            self.assertEqual(ea.audit_tools(ROOT).verify_packet(control, retained)
+                             ["byte_integrity"], "pass")
+
+    @staticmethod
+    def run_fixture(workspace: Path, *modules: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, "-B", "-E", "-s", "-m", "unittest",
+             *(modules or ("test_adapter.py",))],
+            cwd=workspace, capture_output=True, text=True, timeout=30,
+        )
+
+    def test_review_fixture_exposes_defect_hidden_by_green_original_suite(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="rdc-review-oracle-") as directory:
+            parent = Path(directory).resolve()
+            packet, digest = self.prepare(parent, "RDC-10-review-defect")
+            workspace = parent / "work"
+            shutil.copytree(packet / "inputs", workspace)
+            original = self.run_fixture(workspace)
+            self.assertEqual(original.returncode, 0, original.stdout + original.stderr)
+            # Coordinator probe, never inserted into the executor's frozen inputs.
+            contract = next(case for case in ea.load(CASES)["cases"]
+                            if case["id"] == "RDC-02-adapter")["files"]["test_adapter.py"]
+            (workspace / "test_contract.py").write_text(contract, encoding="utf-8")
+            failed = self.run_fixture(workspace, "test_adapter.py", "test_contract.py")
+            self.assertEqual(failed.returncode, 1, failed.stdout + failed.stderr)
+            self.assertIn("test_unknown_identifier", failed.stderr)
+            self.assertIn("test_similar_but_unknown", failed.stderr)
+            target = workspace / "adapter.py"
+            target.write_text(target.read_text(encoding="utf-8").replace(
+                "ALIASES.get(name, name.lower())", "ALIASES.get(name, name)"), encoding="utf-8")
+            corrected = self.run_fixture(workspace, "test_adapter.py", "test_contract.py")
+            self.assertEqual(corrected.returncode, 0, corrected.stdout + corrected.stderr)
+            self.assertIn("Ran 4 tests", corrected.stderr)
+            self.assertEqual(ea.audit_tools(ROOT).verify_packet(packet, digest)
+                             ["byte_integrity"], "pass")
+
+    def test_continuation_fixture_preserves_completed_unit(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="rdc-continuation-") as directory:
+            parent = Path(directory).resolve()
+            packet, digest = self.prepare(parent, "RDC-06-resume-valid")
+            workspace = parent / "work"
+            shutil.copytree(packet / "inputs", workspace)
+            ready = self.run_fixture(workspace, "test_adapter.AdapterTests.test_exact_alias")
+            self.assertEqual(ready.returncode, 0, ready.stdout + ready.stderr)
+            incomplete = self.run_fixture(workspace)
+            self.assertEqual(incomplete.returncode, 1, incomplete.stdout + incomplete.stderr)
+            target = workspace / "adapter.py"
+            target.write_text(target.read_text(encoding="utf-8").replace(
+                "ALIASES.get(name, name.lower())", "ALIASES.get(name, name)"), encoding="utf-8")
+            completed = self.run_fixture(workspace)
+            self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+            for name in ("research.md", "plan.md", "test_adapter.py"):
+                self.assertEqual((workspace / name).read_bytes(),
+                                 (packet / "inputs" / name).read_bytes())
+            self.assertEqual(ea.audit_tools(ROOT).verify_packet(packet, digest)
+                             ["byte_integrity"], "pass")
 
     def test_method_drift_is_detected_without_rejecting_untouched_control(self) -> None:
         with tempfile.TemporaryDirectory(prefix="rdc-drift-") as directory:
