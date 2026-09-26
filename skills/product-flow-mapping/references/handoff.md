@@ -13,80 +13,90 @@ Use three sections in the existing product design file or requested destination:
 - Index and gaps: screen/control -> scenarios, conflicts, unverified surfaces and
   open owner decisions.
 
-These are sections/pages, not three mandatory files. Do not construct a separate
-design system or reproduce the old UI in editable components for documentation.
-Raster captures are sufficient; descriptions, labels, callouts and connections
-should remain editable in the destination that supports them.
+These are sections/pages, not three mandatory files. Do not construct a design
+system or reproduce the old UI as editable components for documentation. Raster
+captures are sufficient; descriptions, callouts and connections should remain
+editable in a destination that supports them.
 
-Each pair has two neighboring frames. The left contains stable step/scenario ID,
-purpose and prerequisites, before-state, action or system event, element identity,
-availability/scope, observable result and applicable next/cancel/error links.
-Name the claim layer and verification, with concise source references. The right
-shows the matching state capture and numbered callouts linked to action IDs.
-Label the depicted endpoint BEFORE or AFTER. With identical endpoints and no
-timing evidence, label the moment unspecified rather than inventing BEFORE.
-Provide a numbered legend with the action names; IDs alone are not a legend.
+Each pair has two neighboring frames. The left contains stable step/scenario
+names, purpose and prerequisites, before-state, action or system event, element
+identity, availability/scope, result and applicable next/cancel/error links.
+Name the claim layer and verification with source references. The right shows
+the matching capture with numbered, editable callouts and a named action legend.
+Label BEFORE or AFTER only when the capture's moment is known; otherwise make
+that limit explicit. A missing image is labeled not captured, not silently blank.
 
-A large dialog or complex result can need its own pair. An unchanged-screen
-copy/download still has a result description; a fake destination is unnecessary.
-Shared controls can use a canonical explanation with links from actual uses.
-A useful crop is acceptable when linked to its parent screen and labeled as a
-region. A missing image is an explicit not-captured state, not a silent blank.
+A complex dialog or result can need its own pair. Same-screen copy/download still
+has a result description; a fake destination is unnecessary. Shared controls can
+have one explanation linked from their actual uses. A useful crop is acceptable
+when linked to its parent screen and identified as a region.
 
-Keep existing behavior separate from intended constraints and redesign proposals.
-A designer may replace navigation or combine screens while preserving outcomes;
-current screenshots are not a fidelity requirement for a redesign. Do not draw a
-continuous current-product path by splicing observed, intended and proposed
-transitions. Show cross-layer relations separately from next-step connections.
+Keep existing behavior, intended constraints and redesign proposals separate.
+A designer may combine screens while preserving outcomes: old screenshots are
+not a fidelity requirement. Cross-layer relations are not confirmed next steps;
+do not join a proposed Retry to an observed error as a current executable path.
 
-Keep screen purposes, state conditions and every action's role/effect/scope in the
-reader-facing index, including inventoried controls without a mapped scenario.
-The JSON containing these facts does not compensate for omitting them from HTML
-or canvas frames. Entry/terminal states and source links must remain navigable.
-Use unambiguous composite step keys even when IDs contain hyphens.
+Keep screen purposes, state conditions, and actions' roles/effects/scopes in the
+reader-facing index, including significant controls without a mapped scenario.
+Information in working notes does not compensate for omitting it from the actual
+deliverable. Give related steps unambiguous names and navigable links.
 
-## Select tools by the actual destination
+## Use the existing capture and Figma tools directly
 
-Reuse [operations-ui-delivery](../../operations-ui-delivery/SKILL.md) for composition,
-visual judgment and the documented adapter mechanism. For Figwright, read its
-[procedure](../../operations-ui-delivery/references/figwright.md) before using that
-adapter. Other adapters use their own current schemas. A portable handoff manifest
-is not an executable Figma API request and cannot confirm a write capability.
+Use the existing browser/Playwright setup for screenshots and available traces,
+following [evidence and states](evidence-and-states.md). Use Figwright for the
+requested Figma artifact through the existing
+[Figwright procedure](../../operations-ui-delivery/references/figwright.md).
+It owns connection/file identity, vendor documentation, operation schemas,
+partial failures and verification. Read it before that adapter's first operation;
+read the installed vendor build instructions for the selected writes. With another
+already authorized adapter, use its actual schema rather than Figwright commands.
 
-Confirm file/page identity and permitted destination before a write. Create or
-reconcile only task-owned sections. Use stable map IDs in the adapter's supported
-metadata or a separate node mapping; the file title alone is insufficient. Keep
-manual notes in a separate owner-managed region. Preserve existing pages,
-components, comments and proposal layers. No universal tool names or paid service
-is required by this skill.
+Construct the description frame, screenshot frame, editable annotations and
+links through documented operations. Work directly from the scenario explanation
+and captured image. Do not build an HTML intermediary, a custom interchange
+format, wrapper CLI, validator or maintained export/synchronization service.
+Existing maintained templates and ordinary task-scoped tool calls are valid.
 
-Pilot a representative pair and a risky case (long text, alternate branch, missing
-capture) before bulk placement. Check text bounds, image aspect ratio and cropping,
-callout targets, source readability and links. Re-read actual nodes after the
-last write and export a composed preview. Successful acknowledgements or an image
-of an asset do not establish a correct canvas placement.
+Confirm the exact file/page and allowed sections. Keep stable scenario/step names
+in the supported node naming/metadata or existing project notes. Preserve manual
+notes, components, comments and proposal layers; this task does not authorize
+replacing the whole document. Existing access is usable without requesting new
+permissions that the operation does not need.
 
-On resume, compare the recorded target and node IDs with actual state. Reuse
-owned nodes; do not duplicate every card or delete old cards merely because they
-are absent from the current subset. Reconcile changed screenshots and annotations
-as described in [maintenance](coverage-and-maintenance.md).
+Pilot a representative pair and a risky case (long text, alternative branch or
+missing capture) before bulk placement. Use
+[visual judgment](../../operations-ui-delivery/references/visual-judgment.md)
+for readability, image aspect ratio, callout placement and composed acceptance.
+Read back actual affected nodes and inspect the composition after the last write.
+Successful tool acknowledgements are not proof of usable frames or working links.
 
-## Accept as the designer would use it
+On resume, follow the adapter's identity/readback procedure and
+[maintenance](coverage-and-maintenance.md). Reuse task-owned nodes, do not duplicate
+all cards or delete absent ones merely because the current task covers a subset.
+Changing an image requires checking its annotations again, not retaining stale
+coordinates on trust.
 
-Select a consequential path and answer from the handoff alone: why enter, which
-element to use, what changes, what is retained, where to go next, how to cancel or
-recover, and which assertions remain unverified. Then use the reverse index to
-find all uses of a shared control. Resolve ambiguity rather than add more screenshots.
+## Missing access and acceptance
 
-Where a readable HTML/package fallback is delivered, name it precisely. It is
-not a completed Figma file. The optional [portable map](portable-map.md) provides
-validation and offline export without modifying the product or installing tools.
+Check available connected tools before concluding a capability is absent. When
+runtime or Figma writing is unavailable, preserve useful scenario text in the
+requested conversation or existing document and retain actual captured images.
+State which observations or writes remain blocked. Do not replace the requested
+Figma file with a new exporter, and do not call a text/capture handoff a completed
+Figma delivery. No adapter installation, new account permissions or unrelated
+application changes follow from this gap.
+
+Answer from the handoff alone: why enter, what to use, what changes or is retained,
+where to go next, how to cancel/recover and what remains unverified. Then use the
+reverse index to find all uses of a shared control. Resolve ambiguity, rather
+than adding more screenshots or a new publishing tool.
 
 ## Method sources
 
 - [NN/g: wireflows](https://www.nngroup.com/articles/wireflows/) combines screen context with actions and state changes.
-- [NN/g: prototype specifications](https://www.nngroup.com/articles/prototype-specifications/) motivates functional annotations alongside images.
+- [NN/g: prototype specifications](https://www.nngroup.com/articles/prototype-specifications/) informs functional annotations alongside images.
 - [Overflow](https://overflow.io/) and [Supademo branches](https://docs.supademo.com/customize/chapters/conditional-branching) inform navigable paths, not evidence that a product supports them.
 
-These are adapted presentation patterns, not a claim that a particular format
-has been experimentally shown to eliminate designer misunderstandings.
+These are presentation patterns, not experimental proof that this format removes
+all misunderstandings. Tool mechanics stay with their existing owners.

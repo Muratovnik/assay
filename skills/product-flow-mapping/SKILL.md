@@ -17,7 +17,7 @@ access. Reuse known decisions and inspect available sources before asking.
 Distinguish mapping, updating a map and read-only review. A mapping request
 allows the requested documentation, not edits to the application, production
 mutations, credential extraction, installations, unrequested sharing or independent agents.
-Existing authorized connections can serve the scoped reads and requested destination;
+Existing authorized connections can serve scoped reads and the requested destination;
 using one is not permission to obtain new access or change account settings.
 Use authorized disposable data for consequential actions. Missing runtime or
 canvas access narrows claims; it need not block a useful source-backed result.
@@ -27,6 +27,21 @@ and proposed changes. A code/document conflict stays visible until resolved;
 neither source wins automatically. A recorded path is not its own acceptance
 oracle. Goals inferred from controls are hypotheses, not user research.
 
+## Use existing tools, not a new delivery system
+
+This skill owns discovery and explanation, not capture, rendering or export
+infrastructure. Use the existing browser/Playwright setup for actions, screenshots
+and available traces; use the existing Figwright adapter for an authorized Figma
+handoff. Read their owning procedures below before the relevant operation.
+Do not add an Assay exporter, renderer, intermediate schema, graph validator,
+wrapper CLI, recorder or another test stack for this workflow. Task-specific
+steps through the existing tools are normal use, not a new reusable runtime.
+
+Keep descriptions in the requested destination or the project's existing notes.
+A missing capability calls for checking the available tools and documenting the
+gap, not building a substitute. A test report is evidence, not the requested
+Figma deliverable. Preserve useful text and captures without claiming canvas work.
+
 ## Select the needed procedure
 
 | Decision | Read |
@@ -35,11 +50,10 @@ oracle. Goals inferred from controls are hypotheses, not user research.
 | Distinguish states, actions and evidence; inspect or capture behavior safely | [Evidence and states](references/evidence-and-states.md) |
 | Check omissions, reconcile conflicts or update an existing map | [Coverage and maintenance](references/coverage-and-maintenance.md) |
 | Prepare designer-facing pairs, reverse indexes or an authorized canvas update | [Handoff](references/handoff.md) |
-| A large map needs portable validation/export rather than ordinary prose | [Portable map](references/portable-map.md) |
 
 Read only applicable branches. The optional [scenario template](templates/scenario.md)
-is a starting point, not a mandatory document for a single question. Research
-history and `evals/` are not runtime reading.
+is a writing aid, not a machine-readable format or mandatory document for a single
+question. Research history and `evals/` are not runtime reading.
 
 ## Reconstruct and connect
 
@@ -54,14 +68,14 @@ history and `evals/` are not runtime reading.
 3. Attach source identity, relevant conditions and evidence to consequential
    claims. Separate specified, source-read, executed and unverified results.
    A screenshot shows a state; it does not prove how it was reached or what an
-   action saved. Redact before exporting and keep simulated states labeled.
+   action saved. Redact before sharing and keep simulated states labeled.
 4. Check both directions: each scoped task has a supporting path or named gap;
    each significant control/state has a purpose or explicit disposition. Check
-   omissions and contradictory evidence, not just dangling links. A narrow task
+   omissions and contradictory evidence, not just broken links. A narrow task
    stays narrow; a broad one names unexamined surfaces and conditions.
-5. Present at the requested depth. Use stable IDs and a screen/control-to-scenario
-   index for a large handoff. Keep existing facts apart from redesign decisions.
-   Report scope, material findings, remaining gaps and actual delivered locations.
+5. Present at the requested depth. Use stable names/links and a screen/control-to-
+   scenario index for a large handoff. Keep existing facts apart from redesign
+   decisions. Report scope, material findings, gaps and actual delivered locations.
 
 ## Consumers and ownership
 
@@ -79,7 +93,7 @@ can consume the map when sequencing is requested, without starting a new plan
 for every mapping task. These are conditional consumers, not automatic workflows.
 
 Before finishing, trace one consequential path in both directions and challenge
-one material omission or conflicting source. Use a nearby valid control: a
-same-screen download is not a missing navigation edge, and a decorative icon
-need not become a scenario. Structural validation, a successful export and a
-manual walkthrough do not prove exhaustive coverage, usability or user approval.
+one material omission or conflicting source. A same-screen download is not a
+missing navigation edge, and a decorative icon need not become a scenario.
+Successful tool calls, a complete-looking canvas and a manual walkthrough do not
+prove exhaustive coverage, usability or user approval.

@@ -1,38 +1,59 @@
-# Two handoffs from the same map
+# Two handoffs from one scenario description
 
-These use `source-only-map.json`, a synthetic collection-editor example. They
-are concrete views of the same state/action contract, not Routevane observations
-or evidence that an agent has executed either workflow successfully.
+This is a synthetic collection-editor example, not a Routevane observation or a
+new interchange format. Keep it as ordinary text or existing Figma frames. Neither
+consumer has been exercised by a fresh agent run merely because this example exists.
+
+## Shared source and scenario
+
+`REQ` is the supplied example requirement: saving succeeds only when the new data
+is committed; failure retains the draft and permits retry; cancellation leaves
+committed data unchanged. `CODE` is an example source observation: Copy link and
+Download do not change the visible collection. No runtime or capture is supplied.
+These names identify the example's sources, not invented real repository files.
+
+| Scenario / step | Before | Action or event | Result / after | Basis |
+| --- | --- | --- | --- | --- |
+| EDIT_FLOW / OPEN | VIEW | Edit | DRAFT is available for input. | Intended from REQ; not executed. |
+| EDIT_FLOW / ABANDON | DRAFT | Cancel | VIEW; committed data unchanged. | Intended from REQ; not executed. |
+| EDIT_FLOW / COMMIT | DRAFT | Save | PENDING; completion still awaited. | Intended from REQ; not executed. |
+| EDIT_FLOW / SUCCESS | PENDING | Save completes | VIEW with committed changes. | Intended from REQ; not executed. |
+| EDIT_FLOW / FAILURE | PENDING | Save fails | ERROR; entered input remains. | Intended from REQ; not executed. |
+| EDIT_FLOW / RETRY_SAVE | ERROR | Retry | PENDING with the retained draft. | Intended from REQ; not executed. |
+| EXPORT_FLOW / COPY_RESULT | VIEW | Copy link | Clipboard changes; visible state unchanged. | Source-read CODE; not executed. |
+| EXPORT_FLOW / DOWNLOAD_RESULT | VIEW | Download | Download requested; visible state unchanged. | Source-read CODE; not executed. |
 
 ## UI redesign acceptance
 
-Consumer: operations-ui-delivery. Scenario `EDIT_FLOW`, transition `FAILURE`,
-action/system event `FAIL`, before `PENDING`, after `ERROR`, requirement `REQ`.
+Consumer: operations-ui-delivery. Use EDIT_FLOW / FAILURE and its adopted source
+REQ. Preserve entered input on failed Save and the retry/cancel outcomes, not the
+old panel arrangement. The designer may replace or combine screens.
 
-Retain the entered draft when saving fails and provide a route back to submission
-through `RETRY_SAVE`. `ABANDON` intentionally leaves committed data unchanged.
-A designer can replace or combine panels; neither the old layout nor a new modal
-is a requirement. Show the failure and retry states in the redesign and keep the
-same result/scope contract. The map contains no captures or runtime observations,
-so behavior still requires a real application check when available.
+In the requested Figma file, put this step explanation beside the matching capture
+through the existing Figwright adapter. Here no image is supplied: mark it not
+captured rather than manufacture a screenshot or generate an HTML substitute.
+An authorized application check can later obtain that state using the existing
+browser/Playwright setup. Label a simulated failure fixture as such.
 
 ## Regression-test design
 
-Consumer: test-writing. Use exactly the same `FAILURE` link, but obtain the
-expected retained input from `REQ`, not from a handler or the map author's verdict.
-Set up a valid local draft, start Save through the actual relevant boundary,
-cause the existing fixture's save failure, and assert retained input plus the
-supported retry path. Then exercise the successful or cancelled nearby case as
-appropriate to the chosen test boundary. Do not write a test that expects input
-loss just because a defective implementation does it.
+Consumer: test-writing. Use the same FAILURE step, but justify the expected retained
+input with REQ, not a handler or the map author's verdict. Set up a valid draft,
+start Save through the relevant boundary, and use the project's existing failure
+fixture to check retained input and the supported retry. Exercise the successful
+or cancelled nearby case as appropriate. Do not freeze an input-loss bug as intent.
 
-Reuse the project's test runner and fixtures; this example adds neither. A code
-reading or missing screenshot does not become an executed test. The test-writing
-method chooses the smallest boundary that actually exposes the promised behavior.
+Reuse the existing test runner and fixtures. Reading CODE or this table is not an
+executed test. The test-writing method selects the smallest boundary that exposes
+the promised result; this example adds no runner or report system.
 
-## Reverse lookup
+## Reverse lookup and updates
 
-`VIEW` belongs to both `EDIT_FLOW` and `EXPORT_FLOW`. `COPY` and `DOWNLOAD` both
-leave it unchanged but have different external results. Their steps must survive
-state deduplication. A shared-state redesign review must inspect both scenarios;
-a test for successful Save alone does not cover downloads or clipboard effects.
+VIEW belongs to EDIT_FLOW and EXPORT_FLOW. Copy and Download have different effects
+even though both leave the screen unchanged; keep both descriptions. A Save test
+alone says nothing about clipboard/download behavior.
+
+Preserve a designer's note beside EDIT_FLOW / FAILURE when updating descriptions
+or screenshots. Use the existing frame identity and tool readback, not a separate
+notes database or synchronization service. Recheck consumers after a shared action
+changes and retain any unresolved source conflict in the actual deliverable.

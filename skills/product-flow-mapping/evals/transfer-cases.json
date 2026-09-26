@@ -20,7 +20,7 @@
     {
       "id": "T04",
       "prompt": "Update a partial map after an owner-approved feature retirement.",
-      "context": "Owner adopted: remove Copy URL, preserve Download. The old map has COPY_RESULT and DOWNLOAD_RESULT on the same state. A designer note still references COPY_RESULT. The new export must not erase it."
+      "context": "Owner adopted: remove Copy URL, preserve Download. The old map has COPY_RESULT and DOWNLOAD_RESULT on the same state. A designer note still references COPY_RESULT. Update the existing Figma frames through the authorized adapter without erasing that note."
     }
   ]
 }

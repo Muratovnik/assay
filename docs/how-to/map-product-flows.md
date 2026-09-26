@@ -6,44 +6,52 @@ existing product and the requested audience/format. For example:
 > Reconstruct the current Routevane user journeys for a designer. Inspect the
 > documentation, routes, controls and available runtime without changing the
 > app. Relate each task and action to its screen/state, result, alternatives and
-> evidence. In the authorized Figma destination, use adjacent editable description
-> and screenshot frames, plus an overview and reverse index. Keep existing
-> behavior, adopted intent and redesign proposals separate. Do not send rules to
-> real devices or expose subscription secrets; mark unavailable runtime/canvas
-> evidence explicitly.
+> evidence. Use the existing Playwright/browser setup for actions and screenshots,
+> and the existing Figwright adapter to build adjacent editable description and
+> screenshot frames in the authorized Figma file. Include an overview and reverse
+> index. Keep existing behavior, adopted intent and redesign proposals separate.
+> Do not create an exporter, intermediate schema or another application. Do not
+> send rules to real devices or expose subscription secrets. State unavailable
+> observations or writes without inventing a replacement delivery system.
 
 A repository URL alone supplies no running application or target Figma file.
-The method can prepare a source-backed map while those observations are missing;
-it must not claim verified behavior or a completed canvas transfer.
+Inspect available project context and connected tools first. While runtime or
+canvas access is missing, useful source-backed descriptions can still be prepared;
+they are not verified behavior or completed Figma work.
 
-## Try the portable example locally
+## Work through existing tools
 
-From the Assay checkout, choose a new output directory. This example is synthetic,
-not a Routevane walkthrough; missing captures are intentionally visible.
+Start with requirements and the actual navigation/control owners. Maintain a
+compact inventory in the existing task notes, then connect tasks to actions,
+results and important alternatives. Use the optional
+[scenario writing aid](../../skills/product-flow-mapping/templates/scenario.md)
+only where it helps; no custom JSON format is required.
 
-```sh
-python -B skills/product-flow-mapping/scripts/flow_map.py check skills/product-flow-mapping/examples/source-only-map.json
-python -B skills/product-flow-mapping/scripts/flow_map.py export skills/product-flow-mapping/examples/source-only-map.json --notes skills/product-flow-mapping/examples/notes.json --output ./flow-map-example
-```
+Use the existing browser/Playwright connection and project fixtures to exercise
+authorized paths and capture the relevant states. Retain actual attachments and
+available traces; use Playwright's built-in Trace Viewer or existing test report
+when needed. Follow the existing
+[browser checks](../../skills/operations-ui-delivery/references/browser-checks.md)
+for capture readiness and evidence limits. A trace/report is not a design handoff.
 
-Open `flow-map-example/index.html`. The output also contains `map.json`, a portable
-`handoff.json`, separate notes and any supplied sanitized captures. Existing output
-directories are refused. Use another snapshot directory for a repeat export and
-retain your notes input; never store owner notes only inside generated HTML.
+For Figma, use the existing
+[Figwright procedure](../../skills/operations-ui-delivery/references/figwright.md)
+and the installed vendor instructions. Confirm the destination, build a description
+frame and an adjacent screenshot frame, add editable numbered callouts and connect
+steps. Read back nodes and inspect the composed result. Reuse existing nodes and
+preserve manual comments on updates; do not insert an HTML export/import stage.
 
-For a real capture, use the established application/browser fixture, record the
-state, build and readiness, sanitize it, and add its PNG hash/dimensions and
-callouts to the map. See the [portable schema and commands](../../skills/product-flow-mapping/references/portable-map.md).
-The optional tool checks declared provenance and references, not the truth of an
-observation or the full decoding/usability of an image.
+If the relevant tool is unavailable, retain the descriptions and any genuine
+captures in the requested conversation or existing document, and name the remaining
+gap. Do not auto-install a tool, change the product or write a replacement exporter.
 
 ## Routevane first slice
 
-A useful first slice from the product documentation is lists/categories ->
-profile -> output formats/forecast -> build -> obtain the result, plus a failed
-refresh that preserves the previous published output. Treat this as a starting
-scope from the [Routevane README](https://github.com/Muratovnik/routevane/blob/main/README.md),
-not an executed or exhaustive inventory. Check its current source/build before
-attributing live behavior. Building a result, downloading it and sending it to a
-device are different actions. Use only permitted disposable resources for the
-last one; blocked execution should remain blocked, not silently simulated.
+A starting scope from the product documentation is lists/categories -> profile ->
+output formats/forecast -> build -> obtain the result, plus a failed refresh that
+preserves the previous published output. The
+[Routevane README](https://github.com/Muratovnik/routevane/blob/main/README.md)
+is a starting source, not an executed or exhaustive inventory. Check its current
+source/build before attributing live behavior. Building, downloading and sending
+to a device are different actions; consequential execution requires authorized
+disposable resources. A blocked action must not be silently simulated.

@@ -5,79 +5,76 @@ is relative to the recorded product revision, scope and independent inventory.
 
 ## Trace both directions
 
-For every inventoried goal, find a scenario and a recognizable outcome or explicit
+For every inventoried goal, find a scenario and recognizable outcome or explicit
 gap. For each significant screen/state/control, find its scenario uses or a
-reasoned disposition. Reconcile the list against entry-point and consumer sources,
-not the number of generated cards. A nonempty but partial inventory cannot prove
-whole-product coverage.
+reasoned disposition. Reconcile against entry-point and consumer sources, not
+the number of cards. A partial inventory cannot prove whole-product coverage.
 
 Check relevant alternative/direct entry, blank data, validation, pending/success,
-partial failure, retry, cancellation, departure and return. Use the supported
-product contract instead of inventing all these states for every button. Include
-material interactions between conditions, such as a late save after switching
-records or returning to a filtered list; avoid a Cartesian test matrix.
+partial failure, retry, cancellation, departure and return. Include material
+combinations, such as a late save after switching records, not every possible
+combination for every button. Use the supported contract rather than inventing
+failure modes or unsupported devices.
 
-Keep structural errors, missing evidence, product defects and inapplicability
-separate. A dangling state ID is a map error; an unexecuted transition is a gap;
-a known wrong runtime result can be documented faithfully. It must not become
-an intended outcome. Mere absence from documentation is not evidence that a
-feature does not exist.
+Keep broken links, missing evidence, product defects and inapplicability separate.
+A stale frame link is a document defect; an unexecuted transition is a gap; a known
+wrong runtime result can be documented faithfully but is not intended behavior.
+Missing documentation does not prove a feature is absent. An intended/proposed
+recovery must not silently finish an observed path that has no known recovery.
+Check each entry, not only the successful main path, and mark unknown outcomes.
 
-Challenge at least one plausible omission with the defect still present. The
-nearby control matters: two same-screen export actions must survive deduplication,
-while a decorative icon need not acquire a fabricated action. A list of visited
-URLs or successful screenshots can pass while a menu-only action is missing.
+Challenge a plausible omission with the defect still present. Two same-screen
+export actions must survive deduplication, while a decorative icon needs no
+fabricated scenario. Visited URLs or successful screenshots can hide a menu-only
+action. Trace these relationships in the existing document/canvas; do not build
+a graph validator as a substitute for inspecting the sources.
 
 ## Give downstream consumers a usable contract
 
-For [operations UI delivery](../../operations-ui-delivery/SKILL.md), pass goal and
-state/action IDs, source-backed retained outcomes, safe-to-change presentation and
-unresolved product decisions. Redesign acceptance follows outcomes, not old widget
-positions. Screen consolidation can preserve a scenario; deleting an obscure
-entry path can break it.
+For [operations UI delivery](../../operations-ui-delivery/SKILL.md), pass the goal,
+state/action links, source-backed retained outcomes, changeable presentation and
+unresolved decisions. Consolidating screens can preserve a scenario; dropping an
+obscure entry can break it. Outcomes, not old coordinates, govern the redesign.
 
-For [test writing](../../test-writing/SKILL.md), pass prerequisites, real boundary,
-transition/result and expected-behavior authority separately from observations.
-Mark mocks, failures and unverified execution. The test author determines the
-assertion; this map is not a circular oracle. Keep existing fixtures and test stack.
+For [test writing](../../test-writing/SKILL.md), pass prerequisites, the real
+boundary, action/result and expected-behavior authority separately from observations.
+Mark mocks, failures and unverified execution. The test author owns assertions;
+this map is not a circular oracle. Keep existing fixtures and the test stack.
 
-For an authorized review, use these criteria without repairing the application
-or the reviewed artifact. An independent verdict still belongs to
-[independent audit](../../independent-audit/SKILL.md); a self-check is labeled as such.
+A read-only review uses these criteria without editing the application or reviewed
+artifact. An independent verdict belongs to
+[independent audit](../../independent-audit/SKILL.md); label a self-check as such.
 
-## Update without erasing history or owner work
+## Update without a second synchronization system
 
-Record the prior map/build and inspect changes in requirements, source owners,
-shared controls and supported runtime paths. Identify affected scenario/state IDs;
-recheck their consumers and retained entry/exit paths. Do not restart the entire
-survey for one label change, or retain stale evidence after changed semantics.
+Inspect the prior handoff/build and changes to requirements, source owners,
+shared controls and supported paths. Use existing source diffs, project notes and
+actual frame readback to identify affected scenarios. Do not implement a map-diff
+CLI or a custom interchange schema. One changed label need not restart the survey;
+changed behavior must not inherit old verification without checking applicability.
 
-Keep stable IDs across sorting and renaming. A genuinely retired item retains a
-reason and replacement/tombstone reference in the handoff record. Do not silently
-reuse its ID for another function. New IDs are additions, not a reason to replace
-all existing cards. Refresh the displayed source/build for changed evidence only;
-never make an old screenshot appear freshly captured by updating a date globally.
+Keep stable names/links across reordering and renaming. Retired items need a reason
+and replacement reference where useful; do not reuse their identity for another
+function. Keep original capture provenance. Updating a date does not make a stale
+screenshot or trace current.
 
-Before any external write, reconcile target identity and existing notes. Keep
-owned generated text/captures separate from designer comments and proposal layers.
-Compare desired IDs with actual created/updated IDs, not only counts. Repeated
-exports should reconcile the same nodes; removed items need explicit retirement,
-not unrequested deletion. A failed write stops dependent updates and requires a
-readback before retrying.
+Before a Figma write, use the existing adapter procedure to confirm target identity
+and current nodes. Preserve designer comments and manually maintained proposal
+layers. Reuse task-owned nodes; removal from the current subset is not permission
+to delete them. Resolve partial writes through readback before retrying. Keep any
+working cross-references in the existing task or supported node metadata, not a
+new database or maintained synchronization service.
 
-If a screenshot hash or dimensions change, invalidate its annotations until
-reviewed against the new capture. If state meaning changes, revisit evidence,
-steps, reverse index and downstream references, not just the image.
+When a screenshot changes, recheck the annotations against the actual image. When
+state meaning changes, revisit scenarios, sources, reverse links and downstream
+consumers, not just the picture. A change to a requirement used only to justify an
+inventory exclusion still reopens that exclusion; unchanged scenario prose does
+not prove a retirement decision remains valid.
 
 ## Report what the evidence establishes
 
-Report scoped inventories and dispositions, verified/source-only paths, conflicts,
-blocked actions, missing captures and unexamined surfaces. Structural validation
-is not behavioral acceptance; generated/exported, visually inspected and approved
-are separate results. Changes to evidence attached only to an inventory entry still reopen its
-disposition and affected consumers. This also applies to previously excluded
-items; an unchanged scenario is not proof that a retirement decision still holds.
-
-Counts describe the recorded inventory, never internet or
-whole-product recall. Preserve material limits in the designer-facing artifact,
-not only in an accompanying chat message.
+Report scoped inventory dispositions, observed/source-only paths, conflicts,
+blocked actions, missing captures and unexamined surfaces. Tool success and
+readback are not behavioral acceptance. Authored, placed in Figma, visually
+inspected and approved are different results. Keep material limits in the
+actual designer-facing artifact, not only its accompanying message.

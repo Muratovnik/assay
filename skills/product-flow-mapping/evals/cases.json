@@ -40,7 +40,7 @@
     {
       "id": "C08",
       "prompt": "Update the Figma handoff after this shared button changes.",
-      "context": "Existing file/page IDs and step keys are known. Two scenarios use the action. Designer comments are in a separate manual region. One screenshot hash changed. The adapter supports only read operations today."
+      "context": "Existing file/page IDs and step names are known. Two scenarios use the action. Designer comments are in a separate manual region. One screenshot changed. The adapter supports only read operations today."
     },
     {
       "id": "C09",
@@ -49,7 +49,7 @@
     },
     {
       "id": "C10",
-      "prompt": "Continue the handoff export after an interrupted write.",
+      "prompt": "Continue placing the handoff frames after an interrupted write.",
       "context": "The prior call created two frame IDs and failed on the third. Another Figma tab is now active. A tool transport returned success but one nested result has isError."
     },
     {
@@ -84,47 +84,33 @@
     },
     {
       "id": "C17",
-      "prompt": "Review the HTML and canvas handoff for completeness.",
-      "context": "The source JSON contains screen purposes, state conditions and descriptions of an unmapped menu action. The delivered index contains only IDs and titles. Callout 1 has no named legend. Two hyphenated scenario/step pairs produce the same HTML anchor."
+      "prompt": "Review the delivered Figma handoff for completeness against the source notes.",
+      "context": "The notes contain screen purposes, state conditions and an unmapped menu action's effect. The delivered index contains only names. Callout 1 has no named legend, and two steps link to the wrong frame. No application changes are requested."
     },
     {
       "id": "C18",
       "prompt": "Write the requested map into this already authorized Figma file.",
       "context": "The file/page is identified and a connected adapter already has access. No new permissions, account changes, installation or public sharing is requested. The map sources are sufficient."
+    },
+    {
+      "id": "C19",
+      "prompt": "Create the designer handoff with adjacent explanation and screenshot frames using the existing tools. Do not write another tool.",
+      "context": "Playwright can inspect the authorized running application, take screenshots and retain traces. Figwright exposes documented frame/image/text operations for the target file. The app has working fixtures. There are many similar pairs to place."
+    },
+    {
+      "id": "C20",
+      "prompt": "Continue the scenario documentation without replacing the requested Figma handoff with custom software.",
+      "context": "Existing code and owner requirements can be read. Browser screenshot tools work, but available Figma connections are confirmed read-only. No new installation or account permissions are authorized. The user asked for Figma, not an HTML viewer or an interchange format."
     }
   ],
   "discovery_cases": [
-    {
-      "id": "D01",
-      "prompt": "Prepare a complete screen/control-to-scenario map for the existing product before redesign."
-    },
-    {
-      "id": "D02",
-      "prompt": "Explain the existing user journeys with screenshots for the designer."
-    },
-    {
-      "id": "D03",
-      "prompt": "Update the behavior map and preserve designer notes after a shared menu change."
-    },
-    {
-      "id": "D04",
-      "prompt": "Review whether this scenario inventory omits meaningful paths."
-    },
-    {
-      "id": "D05",
-      "prompt": "Change only this border color; behavior is unchanged."
-    },
-    {
-      "id": "D06",
-      "prompt": "Invent a new onboarding design for a product with no existing interface."
-    },
-    {
-      "id": "D07",
-      "prompt": "Optimize a backend-only SQL query."
-    },
-    {
-      "id": "D08",
-      "prompt": "Run the already written tests; do not plan new coverage."
-    }
+    {"id": "D01", "prompt": "Prepare a complete screen/control-to-scenario map for the existing product before redesign."},
+    {"id": "D02", "prompt": "Explain the existing user journeys with screenshots for the designer."},
+    {"id": "D03", "prompt": "Update the behavior map and preserve designer notes after a shared menu change."},
+    {"id": "D04", "prompt": "Review whether this scenario inventory omits meaningful paths."},
+    {"id": "D05", "prompt": "Change only this border color; behavior is unchanged."},
+    {"id": "D06", "prompt": "Invent a new onboarding design for a product with no existing interface."},
+    {"id": "D07", "prompt": "Optimize a backend-only SQL query."},
+    {"id": "D08", "prompt": "Run the already written tests; do not plan new coverage."}
   ]
 }
