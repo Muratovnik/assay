@@ -33,6 +33,7 @@
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
+| `skill/research-driven-change` | automatic | `~/.agents/skills/research-driven-change` | `~/.claude/skills/research-driven-change` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |
@@ -49,6 +50,20 @@
 нет ни модели, ни уровня усилий, ни состояния времени выполнения, ни манифеста
 пакета, ни путей с конкретной машины. `VERSION` помечает контракт исходников;
 установщик и клиентские манифесты читают его, а не повторяют.
+
+## Изменения на основе исследования
+
+[research-driven-change](../../skills/research-driven-change/SKILL.md) связывает
+запрошенные стадии, но не становится их исполнителем. Источниками владеет
+`evidence-research`, планом и продолжением — `implementation-planning`, предметными
+критериями — профильные методы, выводом аудита — `independent-audit`. Новый навык
+отвечает за передачу результатов, связь решений с изменениями и учёт фактической
+доставки. Дочерний метод возвращает результат и ограничения в один процесс,
+не создавая второй план или хранилище задач. Одиночное исследование, простая правка
+и read-only аудит сохраняют прежние точки входа. Изменение поведения навыка и
+исполняемого адаптера используют один контракт передачи с разными предметными
+методами. Публикация идёт через существующие инструменты по запросу; новый сервис
+или обязательное делегирование не устанавливаются.
 
 ## Топология обнаружения
 

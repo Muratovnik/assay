@@ -67,6 +67,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/research-driven-change"
+kind = "skill"
+path = "skills/research-driven-change"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/research-driven-change", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/research-driven-change", mode = "link" },
+]
+
+[[assets]]
 id = "skill/test-writing"
 kind = "skill"
 path = "skills/test-writing"

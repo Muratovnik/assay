@@ -26,6 +26,7 @@
 | [test-audit](skills/test-audit/SKILL.md) | 有人声称某测试集能防止回归 | 你在编写测试，或只是执行它们 |
 | [independent-audit](skills/independent-audit/SKILL.md) | 需要对照原始要求核查计划、改动、架构、发布或迁移 | 你想要的是把改动做完；此方法不做修复 |
 | [evidence-research](skills/evidence-research/SKILL.md) | 重要结论需要定位并核对来源 | 答案只需一次查询即可得到 |
+| [research-driven-change](skills/research-driven-change/SKILL.md) | 需要把研究衔接到计划、改动、评审或交付，或继续这个过程 | 只需独立研究、常规修改或只读审计 |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | 需要设计、修复或评审运维界面 | 工作仅涉及后端 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
 | [skill-design](skills/skill-design/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |

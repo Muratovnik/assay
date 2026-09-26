@@ -29,6 +29,12 @@ scope, inspected consumers, shared contracts and required checks established her
 Planning sequences the work; boundary decisions follow the next section, and a
 plan-only request grants no implementation authority.
 
+When implementing a unit of an already active
+[research-driven change](../research-driven-change/references/stage-handoffs.md),
+return the actual changed subject, checks and unfinished scope to that owner.
+This method retains implementation quality; it does not restart research or own
+the remaining publication steps of the larger request.
+
 ## Responsibilities and interfaces
 
 For material decisions about ownership, contracts, dependency direction or file

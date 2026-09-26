@@ -29,6 +29,7 @@ Assay 负责契约、本地元数据和诊断重放，不引入新守护进程�
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
+| `skill/research-driven-change` | automatic | `~/.agents/skills/research-driven-change` | `~/.claude/skills/research-driven-change` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |
@@ -44,6 +45,16 @@ Assay 负责契约、本地元数据和诊断重放，不引入新守护进程�
 `catalog.toml` 记录归属、启用方式与确切的安装目标，不包含模型、投入档位、运行时
 状态、软件包清单或任何本机路径。`VERSION` 标记源契约；安装器与客户端清单读取它，
 而不是各自重复一份。
+
+## 以研究为依据的改动
+
+[research-driven-change](../../skills/research-driven-change/SKILL.md) 衔接请求中的
+各阶段，但不充当执行器。`evidence-research` 负责证据，`implementation-planning`
+负责任务单元、契约变更和续接，领域方法负责各自准则，`independent-audit` 负责审计
+结论。新方法负责交接、决策到改动的可追溯关系及实际交付状态。子方法把结果和限制
+返回同一个工作流，不另建计划或任务库。独立研究、常规修改和只读审计保留原有入口。
+技能行为改进和可执行适配器改动采用同一交接契约，但使用不同的领域方法。发布仅在
+请求授权后使用现有工具，不安装新服务，也不强制委派。
 
 ## 发现拓扑
 

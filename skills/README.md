@@ -13,6 +13,7 @@ unused method costs little context.
 | [independent-audit](independent-audit/SKILL.md) | automatic | Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. |
 | [skill-design](skill-design/SKILL.md) | automatic | Diagnose skill failures and evaluate whether a proposed method improves task outcomes. |
 | [evidence-research](evidence-research/SKILL.md) | automatic | Investigate questions, compare options or assess gaps using source-grounded research and synthesis. |
+| [research-driven-change](research-driven-change/SKILL.md) | automatic | Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. |
 | [test-writing](test-writing/SKILL.md) | automatic | Write or repair automated tests for justified behavior and meaningful regression protection. |
 | [test-audit](test-audit/SKILL.md) | automatic | Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. |
 | [software-architecture](software-architecture/SKILL.md) | automatic | Design and assess application, site or library boundaries, contracts and file placement. |

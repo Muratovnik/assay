@@ -26,6 +26,15 @@ while performing a user's task, the skill must not read its own cases or rubrics
 Reading the grading key is how a method starts scoring well without getting
 better.
 
+The `research-driven-change` corpus adds paired plan/implementation and
+skill/adapter scenarios, continuation and review controls, and synthetic proposal
+receipts. Its unit tests prepare every case, preserve identical task inputs and
+exclude grading keys from method snapshots. Publication cases describe recorded
+synthetic observations; they do not execute live hosted writes. Native discovery,
+full-cycle model behavior and comparative savings remain unmeasured until real
+bounded runs provide that evidence. The evaluator protocol describes a proposed
+small comparison against the existing Assay methods, not a completed experiment.
+
 ## What the gates check
 
 `python tools/eval_assets.py check` validates structure: every declared case has

@@ -19,6 +19,7 @@ location a client reads.
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
+| `skill/research-driven-change` | automatic | `~/.agents/skills/research-driven-change` | `~/.claude/skills/research-driven-change` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |
@@ -35,6 +36,19 @@ location a client reads.
 model, effort, runtime state, package manifest or machine path. `VERSION` labels
 the source contract; the installer and the client manifests read it rather than
 repeating it.
+
+## Research-backed changes
+
+[research-driven-change](../skills/research-driven-change/SKILL.md) connects
+requested stages without becoming their executor. Evidence research owns sources;
+planning owns units, contract changes and continuation; the domain methods own
+their criteria; independent audit owns its verdict. The new method owns handoffs,
+end-to-end traceability and the account of actual delivery. A child returns its
+result and limits to one owning workflow, not a second lifecycle or task store.
+Standalone research, routine edits and read-only audits keep their existing entry
+points. Skill-behavior improvements and executable adapter changes use the same
+handoff contract with different domain methods. Publication uses existing owner
+tools only when requested; no new service or mandatory delegation is installed.
 
 ## Discovery topology
 

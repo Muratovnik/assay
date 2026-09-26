@@ -71,6 +71,12 @@ instructions to start each workflow or recurse back into planning. If an optiona
 method is unavailable, apply the relevant criteria directly and disclose any
 material evidence gap; do not install it automatically.
 
+When planning contributes to an already active
+[research-driven change](../research-driven-change/references/stage-handoffs.md),
+return the ready units, supporting decisions and unresolved dependencies to that
+owner. Planning retains one owning plan and its continuation rules; it neither
+restarts the lifecycle nor extends a plan-only request into execution.
+
 ## Preserve authority
 
 A plan or automatically discovered skill authorizes no execution, delegation,
