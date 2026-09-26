@@ -44,6 +44,24 @@ are expected to use. This file decides that reuse contract; how the whole catalo
 exposes, groups and distinguishes those roles belongs to
 [design-system organization](design-system-organization.md).
 
+## Make the ownership and system basis explicit
+
+For a material library or system choice, distinguish the observed interface from
+the intended reusable basis and the differences this task permits; existing custom
+presentation is not automatically the target. Establish source/target and version
+correspondence with [design transfer](design-transfer.md) before multiplying bases.
+
+For each affected role, trace who owns interaction, accessibility, standard visual
+states, variants and theming, and judge that boundary with the
+[reuse criteria](../../code-maintenance/references/reuse-and-migration.md#apply-this-to-ui-primitives),
+which also decide when a headless, native or branded basis remains correct. This
+file keeps the role and family contract.
+
+Verify a significant shared state or token through representative real consumers,
+including relevant overrides or opt-outs. A design/code mapping or a change visible
+only in the catalog does not prove propagation. Do not mutate a read-only audit
+subject to obtain this evidence; use allowed observations or name the missing check.
+
 ## Resolve reusable dependencies before their dependents
 
 When one reusable entity contains or exposes another reusable entity, resolve the

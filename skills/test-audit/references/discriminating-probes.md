@@ -55,6 +55,16 @@ should constrain. A banned string in a source file need not be a forbidden
 runtime dependency; an unreferenced name search need not prove unused code.
 Conversely, an exact exported name or release-format field can be intentional.
 
+## Does the transition gate protect new work and permit completion?
+
+For a suppression or migration gate, take the probes from the
+[exclusion and end-state checks](../../code-maintenance/references/effective-quality-checks.md#check-exclusions-and-the-reachable-end-state).
+The verdict stays here and covers both directions: a new violation the gate admits
+is false acceptance, and a cleared or last-removal state it rejects is false
+rejection. An illustrative checker establishes only the example's result; do not
+count it as production protection or as evidence that a model will choose this
+procedure.
+
 ## Are observations real and stable?
 
 Follow outputs and side effects beyond mock calls where the claim requires it.

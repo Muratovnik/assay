@@ -52,6 +52,14 @@ and documented release states take precedence over a newly invented taxonomy.
   any lifecycle warning that changes whether it should be adopted, and which nearby
   items are examples or implementation support rather than substitutes.
 
+When documenting an existing interface alongside a target system, distinguish
+observed-only material, recommended reusable resources and retained exceptions
+where those statuses affect adoption. A captured control or an older official-kit
+component must not become the supported target merely by appearing in the catalog.
+Preserve source/version and unmapped limitations where material, using
+[design transfer](design-transfer.md) for correspondence. Do not impose a new tier
+on a small system that has no such distinction or silently replace its resources.
+
 ## Keep related families and states comparable
 
 A consumer should be able to discover the supported members, states and meaningful

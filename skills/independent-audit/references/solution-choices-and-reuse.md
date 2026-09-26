@@ -10,7 +10,11 @@ Existing material owned mechanics can trigger this review in a broad repository
 audit; no new dependency, migration claim or explicit user reminder is required.
 For implementation reuse checks, read the applicable
 [reuse criteria](../../code-maintenance/references/reuse-and-migration.md).
-Verify actual behavior behind wrappers, not only dependency presence. For a
+Verify actual behavior and standard visual-state ownership behind wrappers, not
+only dependency presence or shared placement. For repeated UI families, apply the
+[component-system criteria](../../operations-ui-delivery/references/component-system.md)
+to representative bases, configurations, compositions and real consumers. A narrow
+review traces its affected chain rather than inventorying the whole product. For a
 partial adoption, compare the delivered subset and recorded remainder with the
 original request using that method's staged-adoption criteria. Retain read-only
 authority; its implementation instructions are criteria, not a repair assignment.
@@ -32,6 +36,18 @@ documentation/source and relevant versions, not names, popularity, or marketing.
 Use a bounded isolated probe only within the audit's authority. Without access,
 report the specific unverified comparison; do not invent a replacement's fitness
 or make unrelated acceptance claims inconclusive.
+
+## Test the decision basis separately from conformance
+
+For an exception or material change of result, apply the available
+[contract-change criteria](../../implementation-planning/references/scope-and-readiness.md#check-material-changes-to-the-contract)
+in read-only mode. An unresolved basis is an open question, not a finding, and
+the current task still bounds repair authority.
+
+Keep decision basis, fitness for the current outcome, implementation conformance
+and audit coverage separate. Matching an ADR may establish conformance while
+leaving its authority or fitness unresolved. No new verdict taxonomy or mandatory
+report table is needed.
 
 ## Resolve retained mechanics
 

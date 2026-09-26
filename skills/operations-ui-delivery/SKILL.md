@@ -70,7 +70,7 @@ chain; do not load the whole directory or evaluation corpus.
 | --- | --- |
 | Shared base, families, nested reuse, property effect, design-to-code mapping | [Component system](references/component-system.md) |
 | Design-system/library information architecture, consumer-facing resources, internal/example/lifecycle separation | [Design-system organization](references/design-system-organization.md) |
-| Adding/changing primitive mechanics or adopting a UI library in stages | [Reuse and migration scope](../code-maintenance/references/reuse-and-migration.md) |
+| Adding/retaining primitive mechanics or standard visual states; staged library adoption | [Reuse and migration scope](../code-maintenance/references/reuse-and-migration.md) |
 | Action placement, draft departure, local/shared effects | [Actions and scope](references/actions-and-scope.md) |
 | Forms, field composition, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
 | Nested, filtered or bulk selection, counts/order, control classification | [Selection](references/selection.md) |
@@ -82,7 +82,7 @@ chain; do not load the whole directory or evaluation corpus.
 | Labels, status meanings, recovery guidance | [Content](references/content-and-recovery.md) |
 | Acceptance/regression checks, evidence after the last write, realistic load | [Acceptance](references/scenario-testing.md) |
 | Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets | [Visual judgment](references/visual-judgment.md) |
-| Transferring an existing interface into an editable artifact, structural replacement or migration | [Design transfer](references/design-transfer.md) |
+| Transferring an interface, selecting its target-system basis, structural replacement or migration | [Design transfer](references/design-transfer.md) |
 | Any read or write through the Figwright adapter | [Figwright](references/figwright.md), before the first operation |
 
 When implementation changes component responsibilities, shared code or reactive

@@ -36,6 +36,19 @@ trace; without it the cause remains a hypothesis. Improve routing when the branc
 was missed and the oracle when the check was weak. Another paraphrase does not
 establish that an execution failure is fixed.
 
+For a recurring incident, recover the prior hypothesis and acceptance check with
+the available [continuation procedure](../../implementation-planning/references/continuation.md#carry-a-goal-across-different-tasks)
+and the requirement's source with the planning
+[contract-change criteria](../../implementation-planning/references/scope-and-readiness.md#check-material-changes-to-the-contract)
+before accepting the report's diagnosis. For a skill, then separate a missing norm,
+a missed procedure, an ignored instruction and an oracle that accepts the original
+failure; without the trace, retain competing explanations.
+
+Challenge a proposed safeguard with the original defect intact and a nearby lawful
+alternative, using [discriminating probes](../../test-audit/references/discriminating-probes.md);
+for an exception or migration gate, add the
+[exclusion and end-state checks](../../code-maintenance/references/effective-quality-checks.md#check-exclusions-and-the-reachable-end-state).
+
 Keep general decisions in the skill, concrete incidents in evaluations/history
 and mechanical invariants in existing owner tools. Use ordinary authoring for
 packaging. Prefer conditional `references/` with explicit reading conditions;

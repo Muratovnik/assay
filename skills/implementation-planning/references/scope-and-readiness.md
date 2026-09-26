@@ -23,6 +23,31 @@ possible improvement. Carry exact version, compatibility, data and environment
 constraints into affected units. Incidental debt goes outside the active scope;
 necessary enabling work needs a clear connection to the requested result.
 
+## Check material changes to the contract
+
+Keep the desired outcome, chosen means, continuing constraints and authority of
+this task distinct. For a decision that changes acceptance, retain its source,
+date/scope, what it preserves or changes, and the basis for the decision in the
+existing plan or decision record. An author's `accepted` label or notification
+of an owner is not evidence that a reduced outcome was authorized. Direct owner
+instruction, delegated competence or the project's accepted review process can
+supply that basis; do not demand a fresh approval for each delegated detail.
+
+Read accessible source decisions before resolving a consequential conflict.
+Agreement among a specification, plan and task list can repeat the same mistaken
+interpretation. Compare their material changes with the source, not just each
+other. Apply an older preference only to its actual family, stage and period;
+a newer requirement does not retroactively make prior permitted work defective.
+Distinguish supported authority, contradicted authority and unavailable evidence.
+An incomplete historical record alone proves neither consent nor a violation.
+Keep unresolved material choices visible and continue independent authorized work.
+
+A surviving product goal is not perpetual execution permission. A current narrow
+review or faithful transfer can leave a broader goal unfinished without authorizing
+its implementation. Preserve that remainder and its continuation condition rather
+than dropping it or silently expanding the current assignment. No extra tracker,
+mandatory approval field or fixed document schema is required.
+
 ## Classify unknowns by the next decision
 
 | Unknown | Treatment |

@@ -351,6 +351,8 @@ class EvaluationDataTests(unittest.TestCase):
         for files in ({"a": "x", "A": "y"}, {"a": "x", "a/b": "y"}):
             with self.subTest(files=files), self.assertRaises(ValueError):
                 ev.input_case({"id": "X", "prompt": "x", "files": files})
+        with self.assertRaisesRegex(ValueError, "non-text input"):
+            ev.input_case({"id": "X", "prompt": "x", "files": {"a.txt": None}})
         with self.assertRaises(ValueError):
             ev.input_case({"id": "X", "prompt": "x", "expected_output": "canary"})
 

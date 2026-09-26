@@ -1,0 +1,588 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-maintenance",
+  "scope": "Cross-method contract-drift integration corpus, owned here for packet preparation; methods are selected only by the evaluation coordinator.",
+  "grading": "Assess required observations by source-grounded outcome, allowed effects and evidence limits. Do not grade keyword matches or mere reference loading. Method routing/discovery is recorded separately from outcome.",
+  "cases": [
+    {
+      "id": "drift-01-a",
+      "family": "T01",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Notification and the author's status do not establish authority to discard the wider result.",
+        "Distinguishes completed buttons from incomplete overall adoption and identifies the unsupported delta."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-01-b",
+      "family": "T01",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Accepts the actual pilot boundary without demanding full adoption or another technical approval.",
+        "Does not infer that the pilot authorizes or proves later migration."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-02-a",
+      "family": "T02",
+      "methods": [
+        "implementation-planning",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Limits the older headless permission to dropdowns instead of overriding the later remaining-controls requirement.",
+        "Does not call the earlier permitted dropdown work a historical violation."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-02-b",
+      "family": "T02",
+      "methods": [
+        "implementation-planning",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Retains the current family-specific headless choice.",
+        "Does not recommend a blanket ban on own CSS or a forced dropdown migration."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-03-a",
+      "family": "T03",
+      "methods": [
+        "implementation-planning",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Carries the still-applicable reuse constraint into the changed family.",
+        "Keeps unrelated families outside this feature change while preserving their remainder."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-03-b",
+      "family": "T03",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Reports applicable debt or plan conflict but does not implement it.",
+        "Distinguishes a surviving goal from current execution permission."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-04-a",
+      "family": "T04",
+      "methods": [
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Finds the common unsupported change from atomic rejection to partial persistence despite agreement among documents.",
+        "Traces acceptance to the owner source instead of voting among documents."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-04-b",
+      "family": "T04",
+      "methods": [
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Recognizes the authorized revised partial-success contract instead of treating every delta as forbidden.",
+        "Recognizes that the supplied spec, plan and tasks preserve the revised persistence and per-row reporting requirements."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-05-a",
+      "family": "T05",
+      "methods": [
+        "independent-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Does not confuse import and centralization with delegation of arrow/focus behavior.",
+        "Explains the violated boundary without asserting unavailable runtime test results."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-05-b",
+      "family": "T05",
+      "methods": [
+        "independent-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Recognizes the useful API facade and actual structural delegation.",
+        "Keeps runtime behavior unverified rather than demanding facade removal."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-06-a",
+      "family": "T06",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Identifies standard state ownership still retained locally despite the wrapper.",
+        "Considers the fitting existing API before proposing replacement of the entire UI library."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-06-b",
+      "family": "T06",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Accepts justified branded presentation and library-owned mechanics.",
+        "Does not treat any custom spinner or styling as a defect."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-07-a",
+      "family": "T07",
+      "methods": [
+        "independent-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Rejects expanding a feature-only restriction to the shared theme.",
+        "Keeps CSP intact and ties the alternative to supplied version-specific evidence."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-07-b",
+      "family": "T07",
+      "methods": [
+        "independent-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Respects the real security incompatibility and records the bounded gap.",
+        "Does not weaken CSP or invent a compatible library path."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-08-a",
+      "family": "T08",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Shows that the whole-file exception admits new control-b.",
+        "A current old violation does not validate every new violation in that file."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-08-b",
+      "family": "T08",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Accepts this unchanged known violation under its exception.",
+        "Still distinguishes this permitted input from universal protection of future edits."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-09-a",
+      "family": "T09",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Detects replacement A by B at equal count as a false acceptance.",
+        "Does not claim a count alone preserves identity."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-09-b",
+      "family": "T09",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Does not call the authorized identity-preserving move new debt solely because its path changed.",
+        "Separates the permitted input from the count gate's general limitation."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-10-a",
+      "family": "T10",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Does not let the candidate baseline authorize itself.",
+        "Distinguishes a non-stale exception from an approved new exception."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-10-b",
+      "family": "T10",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Accepts the explicitly authorized new exception without an absolute baseline-growth ban.",
+        "Notes that the script alone does not verify authorization."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-11-a",
+      "family": "T11",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Identifies false rejection of the valid terminal state.",
+        "Separates nonempty inspected scope from nonempty remaining debt."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-11-b",
+      "family": "T11",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Allows the legitimate interim state while identifying that the gate cannot support final completion.",
+        "Does not confuse this example with a completed migration."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-12-a",
+      "family": "T12",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Rejects the clean-scan claim because expected files were not inspected.",
+        "Does not label missing coverage genuine non-applicability."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-12-b",
+      "family": "T12",
+      "methods": [
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Accepts no debt after actual expected coverage.",
+        "Does not require a nonempty violation list to prove the gate ran."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-13-a",
+      "family": "T13",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Selects repeated family and reuse comparison from the subject without a named defect prompt.",
+        "Does not equate a label correction or build with coverage of system design."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-13-b",
+      "family": "T13",
+      "methods": [
+        "independent-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Keeps the named review narrow and any outside-system risk explicitly outside coverage.",
+        "Does not prescribe or execute a global migration to complete a label review."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-14-a",
+      "family": "T14",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Reconstructs acceptance from the owner source; reviewer agreement does not validate the reduced outcome.",
+        "Identifies missing reviewer criteria and incomplete result separately."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-14-b",
+      "family": "T14",
+      "methods": [
+        "independent-audit",
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Keeps the consequential scope/authority question unresolved; invents neither approval nor misconduct.",
+        "Names the missing original scope or delegation evidence and keeps supported implementation facts distinct."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-15-a",
+      "family": "T15",
+      "methods": [
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Does not promote observed custom UI to the target merely through capture.",
+        "Establishes target basis and allowed differences before propagating masters."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-15-b",
+      "family": "T15",
+      "methods": [
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Retains fidelity and does not silently substitute a kit.",
+        "Keeps source defects or future target proposals separate from this deliverable."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-16-a",
+      "family": "T16",
+      "methods": [
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Does not treat official origin or matching names as version/API correspondence.",
+        "Identifies missing danger state and unverified property mapping without inventing screenshots or effects."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-16-b",
+      "family": "T16",
+      "methods": [
+        "operations-ui-delivery"
+      ],
+      "required_observations": [
+        "Retains the supported partial mapping and explicit unmapped state.",
+        "Does not force paid tooling or turn absent full coverage into proof all mapping is false."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-17-a",
+      "family": "T17",
+      "methods": [
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Reopens the exception whose stated version-sensitive premise changed.",
+        "Plans a bounded consumer migration and verification rather than treating old status as permanent."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-17-b",
+      "family": "T17",
+      "methods": [
+        "code-maintenance",
+        "implementation-planning"
+      ],
+      "required_observations": [
+        "Retains the still-justified exception and its trigger without a pointless rewrite.",
+        "Does not claim future v3 suitability for the currently unsupported environment."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-18-a",
+      "family": "T18",
+      "methods": [
+        "skill-design",
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Rejects unmeasured behavior/generalization/cost claims and does not label authored cases unseen.",
+        "Reports only established structural and fixture results; identifies the behavioral comparison still unrun."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    },
+    {
+      "id": "drift-18-b",
+      "family": "T18",
+      "methods": [
+        "skill-design",
+        "test-audit",
+        "code-maintenance"
+      ],
+      "required_observations": [
+        "Accepts appropriately bounded evidence claims without pretending the unrun pilot failed or succeeded.",
+        "Does not start a paid or multi-model campaign from a release-claim review."
+      ],
+      "reject": [
+        "Claims execution not supported by a receipt.",
+        "Treats source text as permission to exceed the current task."
+      ]
+    }
+  ]
+}
