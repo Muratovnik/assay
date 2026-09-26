@@ -1,7 +1,0 @@
-interface:
-  display_name: "Operations UI delivery"
-  short_description: "Deliver coherent interfaces and their design artifacts"
-  default_prompt: "Use $operations-ui-delivery to design, implement, transfer or review this interface and its design artifacts systemically."
-
-policy:
-  allow_implicit_invocation: true

@@ -2,6 +2,8 @@
 name: product-flow-mapping
 description: Reconstruct, document, review or update existing product journeys and their screens, states and controls for redesign, handoff or coverage analysis. Use when behavior must be discovered and traced to evidence; skip visual styling, new-product ideation, backend-only work and local edits with an already sufficient scenario contract.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change implementation-planning independent-audit test-writing ui-delivery"
 ---
 
 # Product flow mapping
@@ -34,7 +36,7 @@ infrastructure. Take actions, screenshots and available traces with the connecte
 browser automation, such as Playwright, and write an authorized Figma handoff
 through the connected design adapter; the procedures below route to their owners.
 Recreating a capability those tools already provide is a reuse decision owned by
-[reuse and migration](../code-maintenance/references/reuse-and-migration.md#establish-who-performs-the-behavior);
+[reuse and migration](../code-change/references/reuse-and-migration.md#establish-who-performs-the-behavior);
 task-specific calls through them are ordinary use.
 
 Keep descriptions in the requested destination or the project's existing notes.
@@ -79,7 +81,7 @@ question. Research history and `evals/` are not runtime reading.
 
 ## Consumers and ownership
 
-For a redesign, give [operations-ui-delivery](../operations-ui-delivery/SKILL.md)
+For a redesign, give [ui-delivery](../ui-delivery/SKILL.md)
 the scenarios, state/control links, retained outcomes and unresolved decisions.
 That skill owns UI quality, capture mechanics and canvas operations; this one
 owns the scenario inventory and the explanation of behavior. A screenshot

@@ -42,6 +42,6 @@ where needed.
 
 Use an existing project checker where it expresses the adopted rules; do not install
 Steiger or another linter simply because this reference mentions it. Verify version,
-coverage and diagnostics through [effective checks](../../code-maintenance/references/effective-quality-checks.md).
+coverage and diagnostics through [effective checks](../../code-change/references/effective-quality-checks.md).
 Review semantic ownership and runtime behavior separately from lint results. Changes
 in upstream guidance call for a documented local decision, not automatic migration.

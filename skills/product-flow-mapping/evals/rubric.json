@@ -32,7 +32,7 @@
     {"id": "D06", "assess": ["Do not invoke a product-wide mapping workflow; use the appropriate design method."]},
     {"id": "D07", "assess": ["Do not invoke the flow-mapping method for backend work."]},
     {"id": "D08", "assess": ["Do not invoke a new mapping workflow for already specified test execution."]},
-    {"id": "D09", "assess": ["Use operations-ui-delivery for a UI quality review of known states; do not reconstruct journeys with product-flow-mapping."]},
-    {"id": "D10", "assess": ["Use operations-ui-delivery design transfer; one requested screen state needs no journey reconstruction."]}
+    {"id": "D09", "assess": ["Use ui-delivery for a UI quality review of known states; do not reconstruct journeys with product-flow-mapping."]},
+    {"id": "D10", "assess": ["Use ui-delivery design transfer; one requested screen state needs no journey reconstruction."]}
   ]
 }

@@ -16,7 +16,7 @@ comparative trial.
 | [Scribe](https://get.scribehow.com/) and [Folge](https://folge.me/) | Action/image pairs can support an explanation. | Recording one path does not establish coverage or justify adopting/recreating a recording product. |
 | [Overflow](https://overflow.io/) and [Supademo](https://docs.supademo.com/customize/chapters/conditional-branching) | Navigable paths and explicit alternatives. | Branch presentation is not proof of supported behavior. |
 | [Playwright screenshots](https://playwright.dev/docs/screenshots), [traces](https://playwright.dev/docs/trace-viewer) and [reporters](https://playwright.dev/docs/test-reporters#html-reporter) | Reuse available capture/inspection and existing fixtures. | Browser-checks owner. Test reports do not replace the requested Figma file. |
-| [Figwright procedure](../../skills/operations-ui-delivery/references/figwright.md) | Use the connected adapter and its installed vendor documentation. | Direct authorized frame/image/annotation operations and readback. |
+| [Figwright procedure](../../skills/ui-delivery/references/figwright.md) | Use the connected adapter and its installed vendor documentation. | Direct authorized frame/image/annotation operations and readback. |
 | [Feature-Driven End-to-End Test Generation](https://arxiv.org/html/2408.01894v2) | Treat generated functions as candidates to check. | Inventory and evidence; count supported outcomes, not generated cards. |
 | [Temac](https://arxiv.org/html/2506.00520v1) | Breadth followed by targeted gaps. | Discovery; retain distinct actions and self-transitions. |
 
@@ -27,7 +27,7 @@ session; the installed tool documentation and exposed schemas govern operations.
 
 ## Ownership and consumers
 
-operations-ui-delivery delegates journey reconstruction and the scenario inventory
+ui-delivery delegates journey reconstruction and the scenario inventory
 to this method: its acceptance and transfer procedures link here and keep the
 stage families, transfer proportionality and UI quality, capture and canvas
 criteria. test-writing consumes the same scenario with requirement authority

@@ -18,7 +18,7 @@ because a higher-level test was added.
 
 When relocating tests, preserve the cases, assertions, fixtures and cleanup that
 provide the existing guarantees. Check collection and applicable lint/type-check
-coverage via the [quality-check procedure](../../code-maintenance/references/effective-quality-checks.md).
+coverage via the [quality-check procedure](../../code-change/references/effective-quality-checks.md).
 Colocation and separate test directories are both valid owner choices; a general
 skill example cannot override the project's accepted layout. Use repeat/order
 checks when shared-state risk warrants them, not as a ritual for every test edit.

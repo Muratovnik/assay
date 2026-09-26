@@ -25,7 +25,7 @@ These names identify the example's sources, not invented real repository files.
 
 ## UI redesign acceptance
 
-Consumer: operations-ui-delivery. Use EDIT_FLOW / FAILURE and its adopted source
+Consumer: ui-delivery. Use EDIT_FLOW / FAILURE and its adopted source
 REQ. Preserve entered input on failed Save and the retry/cancel outcomes, not the
 old panel arrangement. The designer may replace or combine screens.
 

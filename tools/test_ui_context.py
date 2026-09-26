@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parents[1] / 'skills/operations-ui-delivery/scripts/ui_context.py'
+SCRIPT = Path(__file__).resolve().parents[1] / 'skills/ui-delivery/scripts/ui_context.py'
 # Execute the script without importlib's bytecode cache beside canonical skill source.
 inspect_sources = runpy.run_path(str(SCRIPT))['inspect_sources']
 
@@ -22,7 +22,7 @@ class ContextTests(unittest.TestCase):
 
     def test_loading_test_module_leaves_skill_source_unchanged(self):
         test_copy = self.root / 'tools/test_ui_context.py'
-        script_copy = self.root / 'skills/operations-ui-delivery/scripts/ui_context.py'
+        script_copy = self.root / 'skills/ui-delivery/scripts/ui_context.py'
         for target, source in [(test_copy, Path(__file__)), (script_copy, SCRIPT)]:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(source.read_bytes())

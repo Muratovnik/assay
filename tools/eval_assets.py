@@ -17,7 +17,7 @@ from typing import Any
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
-PAIRED_SKILLS = ("route-subagents", "code-maintenance", "evidence-research", "test-writing", "test-audit",
+PAIRED_SKILLS = ("route-subagents", "code-change", "evidence-research", "test-writing", "test-audit",
                  "technical-writing", "text-writing", "implementation-planning",
                  "software-architecture", "product-flow-mapping")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
@@ -126,9 +126,9 @@ def check(root: Path = ROOT) -> dict[str, str]:
     # Keep the existing, separately tested fixture/file validation path.
     audit_tools(root).load_cases(root / "skills/independent-audit/evals")
     report["independent-audit"] = "legacy fixture paths checked, no model run"
-    if not (root / "skills/skill-design/evals/research-and-transfer.md").is_file():
-        raise ValueError("skill-design: missing manual evaluation document")
-    report["skill-design"] = "manual Markdown evaluation; no JSON conversion or behavioral claim"
+    if not (root / "skills/skill-evaluation/evals/research-and-transfer.md").is_file():
+        raise ValueError("skill-evaluation: missing manual evaluation document")
+    report["skill-evaluation"] = "manual Markdown evaluation; no JSON conversion or behavioral claim"
     return report
 
 

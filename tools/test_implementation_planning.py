@@ -10,8 +10,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-import assay as aa
 import eval_assets as ea
+from skill_resources import markdown_targets
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "skills/implementation-planning"
@@ -83,10 +83,10 @@ class PlanningPacketTests(unittest.TestCase):
 class PlanningConsumerTests(unittest.TestCase):
     def test_consumers_link_into_the_method(self) -> None:
         # Consumers route to the method by link; which file they target may change.
-        for name in ("code-maintenance", "operations-ui-delivery", "independent-audit"):
+        for name in ("code-change", "ui-delivery", "independent-audit"):
             with self.subTest(consumer=name):
                 path = ROOT / "skills" / name / "SKILL.md"
-                targets = aa.MARKDOWN_LINK.findall(path.read_text(encoding="utf-8"))
+                targets = markdown_targets(path.read_text(encoding="utf-8"))
                 resolved = [(path.parent / target.split("#", 1)[0]).resolve()
                             for target in targets if not target.startswith(("http", "#"))]
                 self.assertTrue(any(SKILL.resolve() in target.parents and target.is_file()

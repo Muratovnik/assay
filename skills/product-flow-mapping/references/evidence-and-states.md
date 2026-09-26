@@ -24,7 +24,7 @@ a record with different permissions or validation may do so. For consequential
 actions explain what changes or stays unchanged, pending/partial failure, retry
 and exit/return as applicable. A parent Save and panel Apply may have different
 scopes. Do not infer persistence, propagation or undo merely from a label. Use
-[UI acceptance](../../operations-ui-delivery/references/scenario-testing.md)
+[UI acceptance](../../ui-delivery/references/scenario-testing.md)
 when judging correctness rather than duplicating those criteria.
 
 ## Keep claims and evidence separate
@@ -49,7 +49,7 @@ provisional until grounded; useful source-only work need not claim verification.
 ## Capture with the connected browser tools
 
 Use the connected browser automation, such as Playwright, and the project's
-existing fixtures. Read [browser checks](../../operations-ui-delivery/references/browser-checks.md)
+existing fixtures. Read [browser checks](../../ui-delivery/references/browser-checks.md)
 for readiness, virtualized/lazy content, before-helper observations and capture
 scope, and use the tool's supported screenshot mechanism.
 

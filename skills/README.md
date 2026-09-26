@@ -3,21 +3,21 @@
 # Skills
 
 Each skill is one directory with a `SKILL.md`. A client reads the name and
-description at startup and loads the body only when a task matches, so an
-unused method costs little context.
+description for discovery; actual loading depends on the client and task.
+Declared automatic activation is eligibility, not a successful-run receipt.
 
 | Skill | Activation | What it is for |
 | --- | --- | --- |
 | [route-subagents](route-subagents/SKILL.md) | automatic | Prepare and route bounded Codex or Claude subagent packets after the user or an explicitly invoked workflow has already authorized delegation. |
-| [operations-ui-delivery](operations-ui-delivery/SKILL.md) | automatic | Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. |
+| [ui-delivery](ui-delivery/SKILL.md) | automatic | Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. |
 | [product-flow-mapping](product-flow-mapping/SKILL.md) | automatic | Reconstruct, document, review or update existing product journeys and their screens, states and controls for redesign, handoff or coverage analysis. |
 | [independent-audit](independent-audit/SKILL.md) | automatic | Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. |
-| [skill-design](skill-design/SKILL.md) | automatic | Diagnose skill failures and evaluate whether a proposed method improves task outcomes. |
+| [skill-evaluation](skill-evaluation/SKILL.md) | automatic | Diagnose skill failures and evaluate whether a proposed method improves task outcomes. |
 | [evidence-research](evidence-research/SKILL.md) | automatic | Investigate questions, compare options or assess gaps using source-grounded research and synthesis. |
 | [test-writing](test-writing/SKILL.md) | automatic | Write or repair automated tests for justified behavior and meaningful regression protection. |
 | [test-audit](test-audit/SKILL.md) | automatic | Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. |
 | [software-architecture](software-architecture/SKILL.md) | automatic | Design and assess application, site or library boundaries, contracts and file placement. |
-| [code-maintenance](code-maintenance/SKILL.md) | automatic | Implement or refactor code with clear responsibilities, controlled state and effective quality checks. |
+| [code-change](code-change/SKILL.md) | automatic | Implement or refactor code with clear responsibilities, controlled state and effective quality checks. |
 | [implementation-planning](implementation-planning/SKILL.md) | automatic | Create, review or update implementation plans, from a bounded change to a multi-stage roadmap. |
 | [technical-writing](technical-writing/SKILL.md) | automatic | Write, reshape, translate or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from its sources. |
 | [text-writing](text-writing/SKILL.md) | automatic | Write or reshape ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — or review an existing text. |

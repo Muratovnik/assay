@@ -19,15 +19,15 @@ projections = [
 ]
 
 [[assets]]
-id = "skill/operations-ui-delivery"
+id = "skill/ui-delivery"
 kind = "skill"
-path = "skills/operations-ui-delivery"
+path = "skills/ui-delivery"
 activation = "automatic"
 license = "MIT"
 attribution = "Nikolai Muratov and contributors"
 projections = [
-  { client = "codex", root = "agents", path = "skills/operations-ui-delivery", mode = "link" },
-  { client = "claude", root = "claude", path = "skills/operations-ui-delivery", mode = "link" },
+  { client = "codex", root = "agents", path = "skills/ui-delivery", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/ui-delivery", mode = "link" },
 ]
 
 [[assets]]
@@ -55,15 +55,15 @@ projections = [
 ]
 
 [[assets]]
-id = "skill/skill-design"
+id = "skill/skill-evaluation"
 kind = "skill"
-path = "skills/skill-design"
+path = "skills/skill-evaluation"
 activation = "automatic"
 license = "MIT"
 attribution = "Nikolai Muratov and contributors"
 projections = [
-  { client = "codex", root = "agents", path = "skills/skill-design", mode = "link" },
-  { client = "claude", root = "claude", path = "skills/skill-design", mode = "link" },
+  { client = "codex", root = "agents", path = "skills/skill-evaluation", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/skill-evaluation", mode = "link" },
 ]
 
 [[assets]]
@@ -115,15 +115,15 @@ projections = [
 ]
 
 [[assets]]
-id = "skill/code-maintenance"
+id = "skill/code-change"
 kind = "skill"
-path = "skills/code-maintenance"
+path = "skills/code-change"
 activation = "automatic"
 license = "MIT"
 attribution = "Nikolai Muratov and contributors"
 projections = [
-  { client = "codex", root = "agents", path = "skills/code-maintenance", mode = "link" },
-  { client = "claude", root = "claude", path = "skills/code-maintenance", mode = "link" },
+  { client = "codex", root = "agents", path = "skills/code-change", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/code-change", mode = "link" },
 ]
 
 [[assets]]

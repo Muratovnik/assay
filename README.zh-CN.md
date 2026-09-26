@@ -14,22 +14,22 @@
 
 ## 能做什么
 
-当任务与技能的描述相符时，技能会自行启用。下表每一行都链接到智能体实际会读取的
-指令。
+客户端可以根据任务描述选择技能，但实际加载取决于客户端、安装方式和请求。
+元数据并不证明技能已被启用。下表链接到方法本身。
 
 | 技能 | 适用场景 | 不适用场景 |
 | --- | --- | --- |
-| [code-maintenance](skills/code-maintenance/SKILL.md) | 改动涉及代码结构、共享逻辑或工具链 | 只改文字，或任务是只读审计 |
+| [code-change](skills/code-change/SKILL.md) | 改动涉及代码结构、共享逻辑或工具链 | 只改文字，或任务是只读审计 |
 | [implementation-planning](skills/implementation-planning/SKILL.md) | 需要为一次改动乃至分阶段路线图制定计划，或修订已有计划 | 只是在讨论想法、仅需调研，或改动显而易见 |
 | [software-architecture](skills/software-architecture/SKILL.md) | 需要选择或评估系统的边界、契约或文件位置 | 改动是局部的常规修改，或需要的是审计结论而非准则 |
 | [test-writing](skills/test-writing/SKILL.md) | 需要依据契约编写或修复测试 | 只需运行既有测试集，或讲解测试方法 |
 | [test-audit](skills/test-audit/SKILL.md) | 有人声称某测试集能防止回归 | 你在编写测试，或只是执行它们 |
 | [independent-audit](skills/independent-audit/SKILL.md) | 需要对照原始要求核查计划、改动、架构、发布或迁移 | 你想要的是把改动做完；此方法不做修复 |
 | [evidence-research](skills/evidence-research/SKILL.md) | 重要结论需要定位并核对来源 | 答案只需一次查询即可得到 |
-| [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | 需要设计、修复或评审运维界面 | 工作仅涉及后端 |
+| [ui-delivery](skills/ui-delivery/SKILL.md) | 需要设计、修复、迁移或评审产品界面 | 工作仅涉及后端 |
 | [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | 需要依据来源还原现有产品的用户流程、界面和控件，用于重新设计、设计交接或测试清单 | 产品是全新的、改动仅涉及视觉，或场景已经明确 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
-| [skill-design](skills/skill-design/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
+| [skill-evaluation](skills/skill-evaluation/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
 | [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
 
@@ -43,9 +43,9 @@
 
 ## 安装
 
-技能本身是 Markdown，客户端只需加载即可。Python 3.11 及以上版本与
-`requirements-tools.txt` 中固定的依赖，仅用于下文的符号链接安装器和仓库自身的
-工具。
+指令使用 Markdown。**Claude Code 与 Codex 插件的提醒钩子**要求可通过 `python`
+调用的 Python 3.11+，只使用标准库。符号链接安装器及仓库检查还需要
+`requirements-tools.txt`。可选技能脚本另有依赖；读取指令不会安装这些依赖。
 
 | 客户端 | 命令 |
 | --- | --- |
@@ -55,9 +55,9 @@
 | Cursor | `npx skills add Muratovnik/assay -a cursor` |
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
-对 Codex 而言，该 CLI 的全局安装会写入 `~/.codex/skills/`，而该路径并未出现在
-当前 Codex 文档所列的技能根目录中：请改为安装到项目中，或使用下方的符号链接
-安装器。各客户端的细节、卸载与升级说明见[安装指南](docs/zh-CN/install.md)。
+第三方 skills CLI 安装选定的技能，不安装插件钩子或智能体配置。组合使用方法时
+建议安装完整集合（`--skill '*'`）。单个技能保留核心约定，CLI 不会安装关联方法。
+检查当前 CLI 显示的目标路径。参见[安装指南](docs/zh-CN/install.md)。
 
 ## 快速开始
 
@@ -70,14 +70,14 @@
 审查 tests/test_billing.py，告诉我它是真的能防止回归，还是仅仅能跑通。
 ```
 
-`test-audit` 会自行启用，无需按名称调用：它寻找的是错误的预期、漏掉的缺陷与
-脆弱的断言，而不是确认这个测试集能够运行。此外不需要再安装任何东西。
+`test-audit` 适用于此任务：检查错误的预期、漏掉的缺陷和脆弱的断言。请确认
+实际加载情况；自动发现遗漏时可明确指定名称。加载本身不证明准则得到遵守。
 
 <details>
 <summary><b>符号链接安装器</b> —— 获取智能体配置，并让改动即时生效</summary>
 
-插件路径只安装技能。两个智能体配置，以及让你对检出目录的改动无需重装即可生效的
-用法，来自仓库自带的安装器：
+Claude Code 插件已包含两个智能体配置。符号链接安装器还提供 Codex 配置，
+并使检出目录中的修改无需重装即可生效。不要重复安装插件已提供的 Claude 条目：
 
 ```text
 git clone https://github.com/Muratovnik/assay.git

@@ -6,7 +6,7 @@
       "id": "T01",
       "assess": [
         "Consumes scenario/state IDs and retained outcome, not a fixed panel layout.",
-        "Keeps capture/runtime gaps visible; UI acceptance remains with operations-ui-delivery."
+        "Keeps capture/runtime gaps visible; UI acceptance remains with ui-delivery."
       ]
     },
     {

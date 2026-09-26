@@ -5,7 +5,7 @@
     {
       "id": "T01",
       "prompt": "Using the supplied behavior map, prepare the scoped redesign acceptance brief. Do not reproduce the old layout.",
-      "context": "operations-ui-delivery consumer: goal EDIT_FLOW; failed-save step FAILURE retains input per adopted REQ. The image is missing and runtime unverified. The old screen has two panels, but presentation can change."
+      "context": "ui-delivery consumer: goal EDIT_FLOW; failed-save step FAILURE retains input per adopted REQ. The image is missing and runtime unverified. The old screen has two panels, but presentation can change."
     },
     {
       "id": "T02",

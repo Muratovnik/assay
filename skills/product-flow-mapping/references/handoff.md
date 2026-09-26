@@ -46,7 +46,7 @@ deliverable. Give related steps unambiguous names and navigable links.
 Take screenshots and available traces with the connected browser tools, following
 [evidence and states](evidence-and-states.md). Write the requested Figma artifact
 through the connected adapter. With Figwright, read the
-[Figwright procedure](../../operations-ui-delivery/references/figwright.md) before
+[Figwright procedure](../../ui-delivery/references/figwright.md) before
 its first operation; it owns connection/file identity, vendor documentation,
 operation schemas, partial failures and verification. With another authorized
 adapter, use its own documentation and actual schema.
@@ -64,7 +64,7 @@ permissions that the operation does not need.
 
 Pilot a representative pair and a risky case (long text, alternative branch or
 missing capture) before bulk placement. Use
-[visual judgment](../../operations-ui-delivery/references/visual-judgment.md)
+[visual judgment](../../ui-delivery/references/visual-judgment.md)
 for readability, image aspect ratio, callout placement and composed acceptance.
 Read back actual affected nodes and inspect the composition after the last write.
 Successful tool acknowledgements are not proof of usable frames or working links.

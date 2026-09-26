@@ -11,7 +11,7 @@ reasoned disposition. Reconcile against entry-point and consumer sources, not
 the number of cards. A partial inventory cannot prove whole-product coverage.
 
 Check each material workflow against the stage families and material combinations
-owned by [UI acceptance](../../operations-ui-delivery/references/scenario-testing.md#derive-the-scenario),
+owned by [UI acceptance](../../ui-delivery/references/scenario-testing.md#derive-the-scenario),
 and give each family a mapped path, a named gap or a reason it does not apply.
 Use the supported contract rather than inventing failure modes or unsupported
 devices.
@@ -30,7 +30,7 @@ action. Trace these relationships in the existing document or canvas.
 
 ## Give downstream consumers a usable contract
 
-For [operations UI delivery](../../operations-ui-delivery/SKILL.md), pass the goal,
+For [UI delivery](../../ui-delivery/SKILL.md), pass the goal,
 state/action links, source-backed retained outcomes, changeable presentation and
 unresolved decisions. Consolidating screens can preserve a scenario; dropping an
 obscure entry can break it. Outcomes, not old coordinates, govern the redesign.

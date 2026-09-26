@@ -1,4 +1,0 @@
-interface:
-  display_name: "Code Maintenance"
-  short_description: "Clear code boundaries, owned state and checks that hold"
-  default_prompt: "Use $code-maintenance to implement this change with clear responsibilities, owned state and a review of the structure it leaves behind."

@@ -11,7 +11,7 @@ model settings using (A) the existing UI method and ordinary authoring, and (B)
 that method with product-flow-mapping. Use the same connected browser and design
 adapter capabilities on both sides. Explicit loading does not demonstrate
 automatic discovery; run discovery cases through the normal client route. D09 and
-D10 are near misses that operations-ui-delivery owns.
+D10 are near misses that ui-delivery owns.
 
 Record actual client/model, relevant skill revisions, tool failures, corrections
 and cost only when available. Build input-only packets with the existing

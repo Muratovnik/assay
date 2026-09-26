@@ -186,14 +186,14 @@ class AgentAssetsTests(unittest.TestCase):
         self.assertEqual(
             {
                 "skill/route-subagents",
-                "skill/operations-ui-delivery",
+                "skill/ui-delivery",
                 "skill/product-flow-mapping",
                 "skill/independent-audit",
-                "skill/skill-design",
+                "skill/skill-evaluation",
                 "skill/evidence-research",
                 "skill/test-writing",
                 "skill/test-audit",
-                "skill/code-maintenance",
+                "skill/code-change",
                 "skill/implementation-planning",
                 "skill/software-architecture",
                 "skill/technical-writing",
@@ -221,7 +221,7 @@ class AgentAssetsTests(unittest.TestCase):
             aa.ROOT / "skills/route-subagents/references/writing-and-integration.md"
         ).read_text(encoding="utf-8")
         operations = (
-            aa.ROOT / "skills/operations-ui-delivery/SKILL.md"
+            aa.ROOT / "skills/ui-delivery/SKILL.md"
         ).read_text(encoding="utf-8")
         orchestrated_words = " ".join(orchestrated.split())
         operations_words = " ".join(operations.split())

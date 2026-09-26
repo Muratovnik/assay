@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME = "product-flow-mapping"
 SKILL = ROOT / "skills" / NAME
 CONSUMERS = (
-    "skills/operations-ui-delivery/SKILL.md",
-    "skills/operations-ui-delivery/references/design-transfer.md",
-    "skills/operations-ui-delivery/references/scenario-testing.md",
+    "skills/ui-delivery/SKILL.md",
+    "skills/ui-delivery/references/design-transfer.md",
+    "skills/ui-delivery/references/scenario-testing.md",
     "skills/test-writing/SKILL.md",
 )
 

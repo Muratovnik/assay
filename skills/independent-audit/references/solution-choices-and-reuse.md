@@ -9,10 +9,10 @@ or a presumption that custom work is wrong.
 Existing material owned mechanics can trigger this review in a broad repository
 audit; no new dependency, migration claim or explicit user reminder is required.
 For implementation reuse checks, read the applicable
-[reuse criteria](../../code-maintenance/references/reuse-and-migration.md).
+[reuse criteria](../../code-change/references/reuse-and-migration.md).
 Verify actual behavior and standard visual-state ownership behind wrappers, not
 only dependency presence or shared placement. For repeated UI families, apply the
-[component-system criteria](../../operations-ui-delivery/references/component-system.md)
+[component-system criteria](../../ui-delivery/references/component-system.md)
 to representative bases, configurations, compositions and real consumers. A narrow
 review traces its affected chain rather than inventorying the whole product. For a
 partial adoption, compare the delivered subset and recorded remainder with the

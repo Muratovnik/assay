@@ -47,7 +47,7 @@ mean identical effects.
 
 Start with a representative goal-to-result path. Compare it with the inventory,
 then inspect the consequential branches named by the stage families in
-[UI acceptance](../../operations-ui-delivery/references/scenario-testing.md#derive-the-scenario).
+[UI acceptance](../../ui-delivery/references/scenario-testing.md#derive-the-scenario).
 Include role, data size, language or platform variations only when they alter the
 supported behavior. Use the owner's existing fixtures and browser or runtime
 tools without adding a special app route.
