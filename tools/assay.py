@@ -17,6 +17,11 @@ from typing import Any
 
 import tomllib
 
+if __package__:
+    from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+else:
+    from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
 SEMVER = re.compile(
@@ -26,7 +31,6 @@ SEMVER = re.compile(
 )
 ASCII_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 ASSET_ID = re.compile(r"^(?:skill|profile)/[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
-FRONTMATTER = re.compile(r"\A---\r?\n(?P<body>.*?)\r?\n---(?:\r?\n|\Z)", re.DOTALL)
 MARKDOWN_LINK = re.compile(r"!?\[[^]]*\]\(([^)]+)\)")
 LITERAL_MACHINE_PATH = re.compile(
     r"(?:[A-Za-z]:\\Users\\[^\\/\s]+|/(?:Users|home)/[^/\s]+)"
@@ -77,10 +81,6 @@ BASE_FILES = (
     "VERSION",
     "catalog.toml",
 )
-
-
-class ContractError(ValueError):
-    """A user-facing contract violation."""
 
 
 @dataclass(frozen=True)
@@ -371,53 +371,6 @@ def parse_version(root: Path = ROOT) -> str:
     return text[:-1]
 
 
-def frontmatter(path: Path) -> dict[str, object]:
-    match = FRONTMATTER.match(path.read_text(encoding="utf-8", errors="strict"))
-    if not match:
-        raise ContractError("missing YAML frontmatter")
-    values: dict[str, object] = {}
-    nested_key: str | None = None
-    for line in match.group("body").splitlines():
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if line.startswith((" ", "\t")):
-            if nested_key is None:
-                raise ContractError("frontmatter has an unexpected nested value")
-            child, separator, child_value = line.strip().partition(":")
-            if not separator or not child:
-                raise ContractError(
-                    f"frontmatter {nested_key} has an invalid mapping entry"
-                )
-            if values[nested_key] is None:
-                values[nested_key] = {}
-            if not isinstance(values[nested_key], dict) or child in values[nested_key]:
-                raise ContractError(f"frontmatter {nested_key} has an invalid mapping")
-            values[nested_key][child] = child_value.strip().strip("\"'")
-            continue
-        key, separator, value = line.partition(":")
-        key, value = key.strip(), value.strip()
-        if not separator or not key or key in values:
-            raise ContractError("frontmatter must use unique top-level keys")
-        nested_key = None
-        if value in {"true", "false"}:
-            values[key] = value == "true"
-        elif value.startswith(("[", "{")):
-            try:
-                values[key] = json.loads(value)
-            except json.JSONDecodeError as error:
-                raise ContractError(
-                    f"invalid frontmatter value for {key}: {error}"
-                ) from error
-        else:
-            values[key] = value.strip("\"'") if value else None
-            if not value:
-                nested_key = key
-    unresolved = [key for key, value in values.items() if value is None]
-    if unresolved:
-        raise ContractError(f"frontmatter keys require values: {', '.join(unresolved)}")
-    return values
-
-
 def canonical_inventory(root: Path) -> dict[str, tuple[str, str]]:
     result: dict[str, tuple[str, str]] = {}
     skills = root / "skills"
@@ -567,60 +520,32 @@ def skill_problems(path: Path, asset: Asset, root: Path) -> list[str]:
         or not str(metadata["description"]).strip()
     ):
         problems.append(f"{relative}: description is required")
+    name = metadata.get("name")
+    if not isinstance(name, str) or not 1 <= len(name) <= 64 or not re.fullmatch(
+        r"[a-z0-9]+(?:-[a-z0-9]+)*", name
+    ):
+        problems.append(f"{relative}: name must be 1-64 lowercase letters, digits or single hyphens")
+    description = metadata.get("description")
+    if isinstance(description, str) and len(description) > 1024:
+        problems.append(f"{relative}: description must not exceed 1024 characters")
+    if "compatibility" in metadata:
+        compatibility = metadata["compatibility"]
+        if not isinstance(compatibility, str) or not compatibility.strip() or len(compatibility) > 500:
+            problems.append(f"{relative}: compatibility must be a non-empty string of at most 500 characters")
+    if "allowed-tools" in metadata:
+        tools = metadata["allowed-tools"]
+        if not isinstance(tools, str) or not tools.strip():
+            problems.append(f"{relative}: allowed-tools must be a non-empty string")
+    if "metadata" in metadata:
+        values = metadata["metadata"]
+        if not isinstance(values, dict) or any(
+            not isinstance(key, str) or not isinstance(value, str)
+            for key, value in values.items()
+        ):
+            problems.append(f"{relative}: metadata must map strings to strings")
     if metadata.get("license") != asset.license:
         problems.append(f"{relative}: license must equal the catalog license")
     return problems
-
-
-def openai_adapter_document(text: str) -> dict[str, Any]:
-    """Parse YAML safely, without duplicate keys, aliases or ambiguous booleans.
-
-    Use the maintained parser rather than interpreting YAML with regular
-    expressions. This loader is local: other PyYAML consumers are unaffected.
-    """
-    try:
-        import yaml
-    except ImportError as error:
-        raise ContractError(
-            "YAML validation requires PyYAML; run "
-            "python -m pip install -r requirements-tools.txt in your environment"
-        ) from error
-
-    class AdapterLoader(yaml.SafeLoader):
-        def compose_node(self, parent: Any, index: Any) -> Any:
-            if self.check_event(yaml.AliasEvent):
-                raise ContractError("adapter YAML aliases are not supported")
-            return super().compose_node(parent, index)
-
-        def construct_mapping(self, node: Any, deep: bool = False) -> dict[str, Any]:
-            if not isinstance(node, yaml.MappingNode):
-                raise ContractError("adapter YAML requires a mapping")
-            result: dict[str, Any] = {}
-            for key_node, value_node in node.value:
-                key = self.construct_object(key_node, deep=deep)
-                if not isinstance(key, str):
-                    raise ContractError("adapter YAML keys must be strings")
-                if key in result:
-                    raise ContractError(f"duplicate YAML key {key!r}")
-                result[key] = self.construct_object(value_node, deep=deep)
-            return result
-
-    # YAML 1.1 yes/no/on/off must not silently turn into invocation policy.
-    AdapterLoader.yaml_implicit_resolvers = {
-        key: [(tag, pattern) for tag, pattern in values
-              if tag != "tag:yaml.org,2002:bool"]
-        for key, values in yaml.SafeLoader.yaml_implicit_resolvers.items()
-    }
-    AdapterLoader.add_implicit_resolver(
-        "tag:yaml.org,2002:bool", re.compile(r"^(?:true|false)$"), list("tf")
-    )
-    try:
-        document = yaml.load(text, Loader=AdapterLoader)
-    except yaml.YAMLError as error:
-        raise ContractError(f"invalid adapter YAML: {error}") from error
-    if not isinstance(document, dict):
-        raise ContractError("adapter YAML must be an object")
-    return document
 
 
 def openai_adapter_problems(path: Path, asset: Asset, root: Path) -> list[str]:
@@ -1634,6 +1559,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 print("render: SYNCHRONIZED")
             return 0
 
+        # Removal validates exact owned targets, adapters and safe ancestors.
+        # An unrelated source-format or generated-file error must not trap an
+        # installation. The lifecycle's preflight and rollback remain mandatory.
+        if options.command == "uninstall-links":
+            print("\n".join(uninstall_links(root, options.home, options.clients)))
+            print("uninstall-links: APPLIED")
+            return 0
+
         problems = check(root)
         if problems:
             raise ContractError("\n".join(problems))
@@ -1649,9 +1582,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
         elif options.command == "install-links":
             print("\n".join(install_links(root, options.home, options.clients)))
             print("install-links: APPLIED")
-        else:
-            print("\n".join(uninstall_links(root, options.home, options.clients)))
-            print("uninstall-links: APPLIED")
     except (ContractError, OSError) as error:
         print(error, file=sys.stderr)
         return 1
