@@ -14,6 +14,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "skills/route-subagents/scripts/skill_reminder.py"
+# Bounds a hung shell, not the hook budget asserted below: a cold Windows
+# PowerShell 5 start on a hosted runner can take 5 s on its own.
+SHELL_WIRING_TIMEOUT = 30
 
 
 class ReminderTests(unittest.TestCase):
@@ -123,7 +126,7 @@ class ReminderTests(unittest.TestCase):
                         shell=shell is None, cwd=base,
                         env=dict(os.environ, CLAUDE_PLUGIN_ROOT=str(plugin)),
                         input=b'{"hook_event_name":"SessionStart","source":"compact"}',
-                        capture_output=True, timeout=5,
+                        capture_output=True, timeout=SHELL_WIRING_TIMEOUT,
                     )
                     self.assertEqual(0, result.returncode, result.stderr)
                     self.assertEqual("SessionStart", json.loads(result.stdout)["hookSpecificOutput"]["hookEventName"])
