@@ -187,6 +187,7 @@ class AgentAssetsTests(unittest.TestCase):
             {
                 "skill/route-subagents",
                 "skill/operations-ui-delivery",
+                "skill/product-flow-mapping",
                 "skill/independent-audit",
                 "skill/skill-design",
                 "skill/evidence-research",
