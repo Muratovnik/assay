@@ -46,16 +46,13 @@
 `requirements-tools.txt` 中固定的依赖，仅用于下文的符号链接安装器和仓库自身的
 工具。
 
-| 客户端 | 命令 | 路径状态 |
-| --- | --- | --- |
-| Claude Code | `/plugin marketplace add Muratovnik/assay`，然后 `/plugin install assay@assay` | 已实测 |
-| 任意受支持的智能体 | `npx skills add Muratovnik/assay` | 已实测 |
-| Codex | `codex plugin marketplace add Muratovnik/assay`，然后从 `/plugins` 安装 | 依据文档 |
-| Cursor | `npx skills add Muratovnik/assay -a cursor` | 依据文档 |
-| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` | 依据文档 |
-
-**已实测**指该安装路径已针对本已发布仓库实际执行，并对安装后的文件逐字节比对。
-**依据文档**指该路径遵循客户端自身的文档，但未在此处运行过。
+| 客户端 | 命令 |
+| --- | --- |
+| Claude Code | `/plugin marketplace add Muratovnik/assay`，然后 `/plugin install assay@assay` |
+| 任意受支持的智能体 | `npx skills add Muratovnik/assay` |
+| Codex | `codex plugin marketplace add Muratovnik/assay`，然后从 `/plugins` 安装 |
+| Cursor | `npx skills add Muratovnik/assay -a cursor` |
+| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
 对 Codex 而言，该 CLI 的全局安装会写入 `~/.codex/skills/`，而该路径并未出现在
 当前 Codex 文档所列的技能根目录中：请改为安装到项目中，或使用下方的符号链接

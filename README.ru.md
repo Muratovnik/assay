@@ -50,18 +50,13 @@ Claude Code, Codex, Cursor и Gemini CLI. Assay — это проба на со�
 новее и закреплённая зависимость из `requirements-tools.txt` нужны только
 установщику симлинков и собственным инструментам репозитория, описанным ниже.
 
-| Клиент | Команда | Статус пути |
-| --- | --- | --- |
-| Claude Code | `/plugin marketplace add Muratovnik/assay`, затем `/plugin install assay@assay` | проверено |
-| Любой поддерживаемый агент | `npx skills add Muratovnik/assay` | проверено |
-| Codex | `codex plugin marketplace add Muratovnik/assay`, затем установка через `/plugins` | по документации |
-| Cursor | `npx skills add Muratovnik/assay -a cursor` | по документации |
-| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` | по документации |
-
-**Проверено** означает, что путь установки был выполнен против этого
-опубликованного репозитория, а установленные файлы сверены байт в байт.
-**По документации** означает, что он следует документации самого клиента, но
-здесь не запускался.
+| Клиент | Команда |
+| --- | --- |
+| Claude Code | `/plugin marketplace add Muratovnik/assay`, затем `/plugin install assay@assay` |
+| Любой поддерживаемый агент | `npx skills add Muratovnik/assay` |
+| Codex | `codex plugin marketplace add Muratovnik/assay`, затем установка через `/plugins` |
+| Cursor | `npx skills add Muratovnik/assay -a cursor` |
+| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
 Для Codex глобальная установка через CLI пишет в `~/.codex/skills/`, которого
 нет в актуальной документации Codex среди корней навыков: ставьте в проект либо

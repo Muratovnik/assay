@@ -46,17 +46,13 @@ The skills themselves are Markdown; a client just needs to load them. Python
 3.11 or newer, plus the pinned dependency in `requirements-tools.txt`, is only
 needed for the symlink installer and this repository's own tools below.
 
-| Client | Command | Route status |
-| --- | --- | --- |
-| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` | verified |
-| Any supported agent | `npx skills add Muratovnik/assay` | verified |
-| Codex | `codex plugin marketplace add Muratovnik/assay`, then install from `/plugins` | documented |
-| Cursor | `npx skills add Muratovnik/assay -a cursor` | documented |
-| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` | documented |
-
-**Verified** means the route was exercised against this published repository
-and the installed files compared byte for byte. **Documented** means it
-follows the client's own documentation and has not been run here.
+| Client | Command |
+| --- | --- |
+| Claude Code | `/plugin marketplace add Muratovnik/assay` then `/plugin install assay@assay` |
+| Any supported agent | `npx skills add Muratovnik/assay` |
+| Codex | `codex plugin marketplace add Muratovnik/assay`, then install from `/plugins` |
+| Cursor | `npx skills add Muratovnik/assay -a cursor` |
+| Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
 For Codex, the CLI's global install writes to `~/.codex/skills/`, which
 current Codex documentation does not list as a skill root; install into the
