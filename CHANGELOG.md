@@ -6,6 +6,22 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.7.0](https://github.com/Muratovnik/assay/compare/v0.6.0...v0.7.0) (2026-09-26)
+
+Two new methods: implementation planning for a bounded change or a staged
+roadmap, and software architecture for boundaries, contracts and code placement.
+Skills now link to the method that owns a rule instead of restating it, so each
+criterion has one owner.
+
+### Features
+
+* **implementation-planning:** plan a bounded change or a staged roadmap from the actual project, with outcome-sized units, real dependencies, observable acceptance and the readiness of the next stage, then replan affected work and continue safely after an interruption; code maintenance, UI delivery and independent audit link to it, and independent audit also reviews plans ([74a203c](https://github.com/Muratovnik/assay/commit/74a203c6f33f29c48fd5b58b1fe022ffed0a5dd5))
+* **software-architecture:** reconstruct a system's current architecture, design boundaries, place and share code, assess a proposal or an implementation and apply an adopted FSD profile; code maintenance, implementation planning and independent audit link to it for boundary, contract and placement decisions ([07eecca](https://github.com/Muratovnik/assay/commit/07eecca30e936e3540aa34c0057ddc6b917418b4))
+
+### Bug Fixes
+
+* **skills:** give each contract and reuse criterion one owner: planning keeps contract-change authority and recovery from recurring complaints, effective quality checks keep exception and end-state probes, reuse and migration keep delegation, exception approval and the terminal-state policy; a facade now expresses visual tokens through the library's theme where one exists ([06d9236](https://github.com/Muratovnik/assay/commit/06d92362e771277b62f1e0a9f03979ec0babd06a))
+
 ## [0.6.0](https://github.com/Muratovnik/assay/compare/v0.5.0...v0.6.0) (2026-09-23)
 
 Subagent routing now scopes vendor guidance to the exact models a host has and
