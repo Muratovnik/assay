@@ -3,7 +3,7 @@ name: ui-delivery
 description: Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. Covers user actions, shared states, reusable components, editability and visual clarity in any layout mode; skip backend-only work, tool installation and illustration without UI.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change implementation-planning independent-audit"
+  assay-optional-skills: "code-change implementation-planning independent-audit product-flow-mapping"
 ---
 
 # UI delivery
@@ -97,6 +97,13 @@ For explicit delivery planning, cross-screen sequencing or a multi-stage transfe
 use available [implementation-planning](../implementation-planning/SKILL.md) with
 the agreed journeys, artifact identity, required states and shared dependencies.
 UI criteria and artifact checks remain here.
+
+When an existing product's journeys must first be reconstructed for a broad
+redesign, screen/control inventory or designer handoff, use
+[product-flow-mapping](../product-flow-mapping/SKILL.md). Consume its stable
+scenario/state/action links, retained outcomes and evidence gaps; this skill
+retains UI quality, capture and canvas-operation criteria. A local edit with an
+already sufficient scenario contract does not need a new product-wide map.
 
 ## Common execution and finish
 

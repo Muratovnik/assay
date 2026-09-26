@@ -47,7 +47,9 @@ When the requested result spans multiple screens, journeys or material states,
 derive the expected transfer set from the brief and source behavior before using
 the produced artifact as evidence of completeness. Reuse the supported journeys
 and states already identified by [workspace](workspace-consistency.md) and
-[acceptance](scenario-testing.md); do not invent a second product specification.
+[acceptance](scenario-testing.md); when they are not yet known, reconstruct them
+with [product-flow-mapping](../../product-flow-mapping/SKILL.md), which owns that
+inventory. Do not invent a second product specification.
 
 Keep the inventory proportional to the claim. Record the surfaces and material
 states needed to support "complete" or "all required states", including loading,

@@ -91,7 +91,8 @@ that a browser, design editor or adapter was executed.
 
 T17 adds consumer-facing design-system organization as a positive library task;
 T18 keeps a non-UI software component registry outside this skill despite
-"component" and "library" vocabulary.
+"component" and "library" vocabulary. T19 leaves reconstruction of existing
+journeys for a designer to product-flow-mapping despite "screens" and "states".
 
 ## Comparison
 

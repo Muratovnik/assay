@@ -11,7 +11,7 @@
   "interface": {
     "displayName": "Assay",
     "shortDescription": "Evidence-grounded methods for coding agents",
-    "longDescription": "Skills and agent profiles for implementation, planning, architecture, testing, audit, research, writing, UI delivery and bounded delegation. Each method says what it checked, what that establishes and what it does not.",
+    "longDescription": "Skills and agent profiles for implementation, planning, architecture, testing, audit, research, writing, UI delivery, product flows and bounded delegation. Each method says what it checked, what that establishes and what it does not.",
     "developerName": "Nikolai Muratov",
     "category": "Developer Tools",
     "capabilities": [

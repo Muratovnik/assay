@@ -19,6 +19,7 @@
     {"id": "T15", "prompt": "Установи и настрой Figma MCP-плагин на моей машине. Интерфейс приложения не трогай.", "should_trigger": false, "rationale": "Tool installation is not layout work."},
     {"id": "T16", "prompt": "Объедини дублирующиеся мастер-компоненты кнопок в библиотеке и проверь, что экземпляры на экранах не сломались.", "should_trigger": true, "rationale": "Component-library editing: a shared base and its consumers."},
     {"id": "T17", "prompt": "Организуй библиотеку дизайн-системы: рабочие публичные компоненты, внутренние helpers, примеры и deprecated-элементы сейчас перемешаны, и нужный ресурс трудно найти.", "should_trigger": true, "rationale": "Consumer-facing organization of a reusable UI design artifact."},
-    {"id": "T18", "prompt": "Reorganize the backend plugin component registry and package library metadata. There is no rendered UI or design artifact.", "should_trigger": false, "rationale": "Software component/library vocabulary without UI or a design artifact is outside the skill."}
+    {"id": "T18", "prompt": "Reorganize the backend plugin component registry and package library metadata. There is no rendered UI or design artifact.", "should_trigger": false, "rationale": "Software component/library vocabulary without UI or a design artifact is outside the skill."},
+    {"id": "T19", "prompt": "Восстанови пользовательские сценарии существующего приложения для дизайнера: какие экраны, состояния и действия есть и откуда это известно. Интерфейс не меняй.", "should_trigger": false, "rationale": "Reconstructing existing journeys into a scenario inventory belongs to product-flow-mapping; no interface is designed, repaired, transferred or reviewed."}
   ]
 }

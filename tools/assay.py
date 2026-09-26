@@ -700,8 +700,8 @@ def check(root: Path = ROOT) -> list[str]:
 SUMMARY = "Evidence-grounded methods for coding agents"
 LONG_SUMMARY = (
     "Skills and agent profiles for implementation, planning, architecture, testing, "
-    "audit, research, writing, UI delivery and bounded delegation. Each method "
-    "says what it checked, what that establishes and what it does not."
+    "audit, research, writing, UI delivery, product flows and bounded delegation. "
+    "Each method says what it checked, what that establishes and what it does not."
 )
 HOMEPAGE = "https://github.com/Muratovnik/assay"
 AUTHOR = {"name": "Nikolai Muratov", "url": "https://github.com/Muratovnik"}
@@ -714,6 +714,7 @@ KEYWORDS = [
     "planning",
     "research",
     "testing",
+    "user-flows",
     "writing",
 ]
 CATEGORY = "Developer Tools"

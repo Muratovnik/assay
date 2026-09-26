@@ -12,7 +12,7 @@
     {
       "name": "assay",
       "source": "./",
-      "description": "Skills and agent profiles for implementation, planning, architecture, testing, audit, research, writing, UI delivery and bounded delegation. Each method says what it checked, what that establishes and what it does not.",
+      "description": "Skills and agent profiles for implementation, planning, architecture, testing, audit, research, writing, UI delivery, product flows and bounded delegation. Each method says what it checked, what that establishes and what it does not.",
       "version": "0.7.0",
       "author": {
         "name": "Nikolai Muratov",
@@ -31,6 +31,7 @@
         "planning",
         "research",
         "testing",
+        "user-flows",
         "writing"
       ]
     }

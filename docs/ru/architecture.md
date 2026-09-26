@@ -30,6 +30,7 @@
 | --- | --- | --- | --- |
 | `skill/route-subagents` | automatic | `~/.agents/skills/route-subagents` | `~/.claude/skills/route-subagents` |
 | `skill/ui-delivery` | automatic | `~/.agents/skills/ui-delivery` | `~/.claude/skills/ui-delivery` |
+| `skill/product-flow-mapping` | automatic | `~/.agents/skills/product-flow-mapping` | `~/.claude/skills/product-flow-mapping` |
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
 | `skill/skill-evaluation` | automatic | `~/.agents/skills/skill-evaluation` | `~/.claude/skills/skill-evaluation` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
