@@ -2,6 +2,8 @@
 name: research-driven-change
 description: Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. Use for multi-stage research-to-change work or resuming that cycle; skip idea-only discussion, isolated research, routine edits and standalone skill assessments or read-only audits.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change evidence-research implementation-planning independent-audit route-subagents skill-evaluation software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Research-driven change
@@ -47,9 +49,9 @@ Select only methods whose decisions matter:
 | Unresolved substantive comparison, sources or research sufficiency | [Evidence research](../evidence-research/SKILL.md) |
 | Plan, dependencies, acceptance, contract changes or continuation | [Implementation planning](../implementation-planning/SKILL.md) |
 | System boundaries, contracts or placement | [Software architecture](../software-architecture/SKILL.md) |
-| Authorized changes to executable code or tooling | [Code maintenance](../code-maintenance/SKILL.md) |
-| A skill's behavior, transfer or comparative evaluation | [Skill design](../skill-design/SKILL.md) |
-| UI behavior or design artifacts | [Operations UI delivery](../operations-ui-delivery/SKILL.md) |
+| Authorized changes to executable code or tooling | [Code change](../code-change/SKILL.md) |
+| A skill's behavior, transfer or comparative evaluation | [Skill evaluation](../skill-evaluation/SKILL.md) |
+| UI behavior or design artifacts | [UI delivery](../ui-delivery/SKILL.md) |
 | Test design or a claim about an existing check | [Test writing](../test-writing/SKILL.md) / [test audit](../test-audit/SKILL.md) |
 | A requested audit conclusion | [Independent audit](../independent-audit/SKILL.md) |
 

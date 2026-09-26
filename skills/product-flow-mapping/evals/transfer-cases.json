@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "skill_name": "product-flow-mapping",
+  "cases": [
+    {
+      "id": "T01",
+      "prompt": "Using the supplied behavior map, prepare the scoped redesign acceptance brief. Do not reproduce the old layout.",
+      "context": "ui-delivery consumer: goal EDIT_FLOW; failed-save step FAILURE retains input per adopted REQ. The image is missing and runtime unverified. The old screen has two panels, but presentation can change."
+    },
+    {
+      "id": "T02",
+      "prompt": "Use the map to specify a regression test with the existing fixture and runner.",
+      "context": "test-writing consumer: FAILURE is intended/read from adopted REQ: retain draft on error. The handler currently clears the draft. No test was run. The map links state ERROR, action FAIL and scenario EDIT_FLOW."
+    },
+    {
+      "id": "T03",
+      "prompt": "Map a native desktop tray exit and background completion, using only the supplied recording.",
+      "context": "The recording shows Close hiding the window while scheduled work continues. Quit exits. An external device operation is not recorded. No DOM or browser automation is available."
+    },
+    {
+      "id": "T04",
+      "prompt": "Update a partial map after an owner-approved feature retirement.",
+      "context": "Owner adopted: remove Copy URL, preserve Download. The old map has COPY_RESULT and DOWNLOAD_RESULT on the same state. A designer note still references COPY_RESULT. Update the existing Figma frames through the authorized adapter without erasing that note."
+    }
+  ]
+}

@@ -38,7 +38,7 @@ python -B tools/eval_assets.py prepare \
   --method skills/software-architecture
 ```
 
-For implementation cases, explicitly include `code-maintenance` and architecture.
+For implementation cases, explicitly include `code-change` and architecture.
 For independent review cases, explicitly include `independent-audit` and
 architecture. Include other linked criteria roots only when the selected task
 needs them; recording an explicit set does not prove automatic skill selection.

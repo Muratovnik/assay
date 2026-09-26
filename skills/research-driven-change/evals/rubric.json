@@ -32,7 +32,7 @@
       "id": "RDC-03-skill",
       "required": [
         "Adapt the rule to reuse sufficient evidence and refresh material changed premises.",
-        "Use behavioral skill assessment rather than code-maintenance solely because the file is versioned.",
+        "Use behavioral skill assessment rather than code-change solely because the file is versioned.",
         "Distinguish authored/self-reviewed guidance from behavioral testing and comparative improvement."
       ],
       "reject": [
@@ -497,7 +497,7 @@
     {
       "id": "DISC-code-only",
       "expected_methods": [
-        "code-maintenance",
+        "code-change",
         "test-writing as needed"
       ],
       "avoid": [
@@ -517,7 +517,7 @@
     {
       "id": "DISC-skill-assessment",
       "expected_methods": [
-        "skill-design"
+        "skill-evaluation"
       ],
       "avoid": [
         "research-driven-change",

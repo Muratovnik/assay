@@ -369,7 +369,7 @@ class EvaluationDataTests(unittest.TestCase):
             (method / "references" / "detail.md").write_text("detail\n", encoding="utf-8")
             (method / "evals").mkdir()
             (method / "evals" / "rubric.json").write_text("never-copy-me", encoding="utf-8")
-            for name in ("evidence-research", "code-maintenance"):
+            for name in ("evidence-research", "code-change"):
                 with self.subTest(name=name):
                     cases, _ = self.corpus(source, name)
                     packet, retained = ev.prepare(cases_path=cases, case_id="E01", output_parent=output,
@@ -390,7 +390,7 @@ class EvaluationDataTests(unittest.TestCase):
             cases, rubric = self.corpus(Path(directory))
             ev.check_pair(cases, rubric, "evidence-research")
             with self.assertRaisesRegex(ValueError, "skill identity mismatch"):
-                ev.check_pair(cases, rubric, "code-maintenance")
+                ev.check_pair(cases, rubric, "code-change")
             data = ev.load(rubric)
             del data["discovery_cases"]
             rubric.write_text(json.dumps(data), encoding="utf-8")

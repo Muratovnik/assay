@@ -15,13 +15,14 @@ EXPECTED_ASSETS = {
     "profile/evidence-reviewer",
     "profile/official-docs-researcher",
     "skill/independent-audit",
-    "skill/operations-ui-delivery",
+    "skill/ui-delivery",
+    "skill/product-flow-mapping",
     "skill/route-subagents",
-    "skill/skill-design",
+    "skill/skill-evaluation",
     "skill/evidence-research",
     "skill/test-writing",
     "skill/test-audit",
-    "skill/code-maintenance",
+    "skill/code-change",
     "skill/implementation-planning",
     "skill/software-architecture",
     "skill/research-driven-change",
@@ -48,20 +49,22 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
         expected_targets = {
             home / ".agents/skills/route-subagents",
             home / ".claude/skills/route-subagents",
-            home / ".agents/skills/operations-ui-delivery",
-            home / ".claude/skills/operations-ui-delivery",
+            home / ".agents/skills/ui-delivery",
+            home / ".claude/skills/ui-delivery",
+            home / ".agents/skills/product-flow-mapping",
+            home / ".claude/skills/product-flow-mapping",
             home / ".agents/skills/independent-audit",
             home / ".claude/skills/independent-audit",
-            home / ".agents/skills/skill-design",
-            home / ".claude/skills/skill-design",
+            home / ".agents/skills/skill-evaluation",
+            home / ".claude/skills/skill-evaluation",
             home / ".agents/skills/evidence-research",
             home / ".claude/skills/evidence-research",
             home / ".agents/skills/test-writing",
             home / ".claude/skills/test-writing",
             home / ".agents/skills/test-audit",
             home / ".claude/skills/test-audit",
-            home / ".agents/skills/code-maintenance",
-            home / ".claude/skills/code-maintenance",
+            home / ".agents/skills/code-change",
+            home / ".claude/skills/code-change",
             home / ".agents/skills/implementation-planning",
             home / ".claude/skills/implementation-planning",
             home / ".agents/skills/software-architecture",
@@ -93,24 +96,24 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
         operations = next(
             entry
             for entry in entries
-            if entry.asset_id == "skill/operations-ui-delivery"
+            if entry.asset_id == "skill/ui-delivery"
             and entry.client == "claude"
         )
-        if operations.source != home / ".agents/skills/operations-ui-delivery":
+        if operations.source != home / ".agents/skills/ui-delivery":
             raise aa.ContractError(
                 "compatibility fixture: operations UI delivery must use native skills"
             )
         skill_design = next(
             entry
             for entry in entries
-            if entry.asset_id == "skill/skill-design" and entry.client == "claude"
+            if entry.asset_id == "skill/skill-evaluation" and entry.client == "claude"
         )
-        if skill_design.source != home / ".agents/skills/skill-design":
+        if skill_design.source != home / ".agents/skills/skill-evaluation":
             raise aa.ContractError(
                 "compatibility fixture: skill design must use native skills"
             )
         if next(
-            asset for asset in catalog.assets if asset.id == "skill/skill-design"
+            asset for asset in catalog.assets if asset.id == "skill/skill-evaluation"
         ).activation != "automatic":
             raise aa.ContractError(
                 "compatibility fixture: skill design must retain automatic discovery"
@@ -120,8 +123,9 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
                 "compatibility fixture: deprecated Codex skill root returned"
             )
 
-        for name in ("test-writing", "test-audit", "evidence-research", "code-maintenance",
-                     "implementation-planning", "software-architecture", "research-driven-change"):
+        for name in ("test-writing", "test-audit", "evidence-research", "code-change",
+                     "implementation-planning", "software-architecture", "product-flow-mapping",
+                     "research-driven-change"):
             asset_id = f"skill/{name}"
             asset = next(item for item in catalog.assets if item.id == asset_id)
             if asset.activation != "automatic":

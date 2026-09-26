@@ -7,11 +7,28 @@ profiles as well as the skills. All of them install the same source.
 
 ## What is verified and what is not
 
-The Claude Code route and the skills CLI route were exercised against the
-published repository, and the installed files were compared byte for byte. The
-Codex, Cursor and Gemini CLI routes follow those clients' own documentation and
-have not been run here. The distinction is kept on purpose: a library that asks
-others to separate verified from documented owes the same of itself.
+Earlier installation observations do not verify this revision's discovery,
+hooks or behavior. The matrix below states shipped surfaces from manifests and
+installer code. Claim a successful native run only with a receipt identifying
+client/version, package revision, route and observed event. Metadata eligibility,
+loader invocation, followed criteria and outcome quality are different claims.
+
+## Installation surfaces
+
+| Route | Skills | Profiles | Reminders | Requirements and evidence boundary |
+| --- | --- | --- | --- | --- |
+| Claude Code plugin | Collection | Both Claude adapters | Packaged hooks | Client plus Python 3.11+ as `python`; manifest/handler checks are not a current native-run receipt |
+| Codex plugin | Collection | Not installed into native agents directory | Packaged hooks, subject to client trust | Client plus Python 3.11+ as `python`; no discovery guarantee from packaging |
+| Third-party skills CLI, including Cursor selection | Selected directories | No | No | Node/npx and compatible client; inspect the reported destination and selected files |
+| Gemini skills installation | Skills | No Assay profile installation | No Assay plugin reminders | Gemini CLI; check its reported skill root and discovery |
+| `install-links` | Linked collection | Selected Codex/Claude adapters | No | Python 3.11+, `requirements-tools.txt`, symlink support; exact filesystem checks are not behavior evidence |
+
+The collection preserves relative peer links. A singleton supplies its bounded
+core, not every specialist criterion in the collection. `metadata.assay-optional-skills`
+records optional collaborators for Assay checks; no client is expected to install
+dependencies from this field. The source gate copies the collection and each
+singleton into temporary layouts to check Markdown resource boundaries; it does
+not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
 ## Automatic skill reminders
 
@@ -46,8 +63,8 @@ Reminders are not enforcement. The pre-tool context does not pause a pending
 launch to let the model revise it, and some tool paths bypass hooks. It neither
 authorizes delegation nor changes arguments or fixes models. Offline tests
 exercise events and packaged commands, not native discovery, agent compliance
-or quota savings. The earlier installation verification below predates these
-hooks; it is not a live verification of them.
+or quota savings. Historical installation observations do not verify these hooks
+on the current client and package revision.
 
 To check the handler without starting a model, run from the checkout:
 
@@ -95,14 +112,12 @@ write: for the profiles, use the symlink installer below.
 npx skills add Muratovnik/assay
 ```
 
-Add `-a claude-code` or `-a codex` to target one client, `-g` for a global rather
-than project install, and `--skill <name>` to take one method rather than the
-whole library.
-
-One caveat worth knowing: for Codex the CLI's global install writes to
-`~/.codex/skills/`, which current Codex documentation does not list as a skill
-root. If Codex does not see the skills afterwards, install into the project
-instead, or use the symlink installer.
+Add `-a claude-code` or `-a codex` to target a client and `-g` for global scope.
+Use `--skill '*'` to select the full collection. `--skill <name>` selects a
+bounded standalone method; it does not recursively install linked peers.
+Check the destination shown by the installed CLI version against your client's
+current skill roots. If discovery misses, use a supported project installation
+or the explicit native link layout below; do not create guessed aliases.
 
 ## Gemini CLI
 
@@ -187,7 +202,9 @@ python tools/assay.py uninstall-links
 
 It removes only entries whose link target or rendered bytes still exactly match
 the current plan. Anything you changed by hand is left alone and reported, so an
-uninstall cannot quietly discard your edit.
+uninstall cannot quietly discard your edit. Unrelated Markdown-format or
+render-drift errors do not block removal; the catalog, exact target ownership,
+profile identity and safe-parent checks still apply.
 
 For the plugin routes, use your client's own uninstall: `claude plugin uninstall
 assay@assay`, or the client's plugin manager.

@@ -8,15 +8,15 @@ token savings or a guarantee that an instruction will be followed.
 
 ## Local fit and existing owners
 
-The recurring consumers are skill-behavior changes assessed by `skill-design` and
-executable/tooling changes implemented by `code-maintenance`, both following
+The recurring consumers are skill-behavior changes assessed by `skill-evaluation` and
+executable/tooling changes implemented by `code-change`, both following
 research and leading to review and delivery. Their conditional return links use
 one handoff method with distinct domain criteria. This capability is not a second
 implementation of research, planning or skill evaluation.
 
 Assay already owns [continuation](../../implementation-planning/references/continuation.md),
 [contract changes](../../implementation-planning/references/scope-and-readiness.md#check-material-changes-to-the-contract)
-and [skill transfer](../../skill-design/references/research-and-transfer.md).
+and [skill transfer](../../skill-evaluation/references/research-and-transfer.md).
 Retain those owners rather than copying their rules. The new boundary is deciding
 which supported and authorized transition is next and whether the requested
 endpoint was attained.

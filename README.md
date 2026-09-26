@@ -13,12 +13,13 @@ does not.
 
 ## What you can do
 
-A skill activates on its own when a task matches its description. Each row
-links to the instructions the agent will actually read.
+Skills are eligible for discovery when a task matches their descriptions.
+Selection depends on the client, installation and task; metadata alone is not
+proof of activation. Each row links to the method itself.
 
 | Skill | Use it when | Skip it when |
 | --- | --- | --- |
-| [code-maintenance](skills/code-maintenance/SKILL.md) | A change affects code structure, shared logic or tooling | The edit is prose, or the task is a read-only audit |
+| [code-change](skills/code-change/SKILL.md) | A change affects code structure, shared logic or tooling | The edit is prose, or the task is a read-only audit |
 | [implementation-planning](skills/implementation-planning/SKILL.md) | Work needs a plan, from one change to a staged roadmap, or a plan needs revising | You are still discussing an idea, only researching, or the edit is obvious |
 | [software-architecture](skills/software-architecture/SKILL.md) | A system's boundaries, contracts or file placement need choosing or assessing | The edit is local and routine, or you need an audit verdict rather than criteria |
 | [test-writing](skills/test-writing/SKILL.md) | Tests need writing or repairing against a contract | You only need to run an existing suite, or explain testing |
@@ -26,9 +27,10 @@ links to the instructions the agent will actually read.
 | [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, architecture, release or migration needs checking against its brief | You want the change made; this method does not fix things |
 | [evidence-research](skills/evidence-research/SKILL.md) | A consequential claim needs sources located and reconciled | The answer is one lookup away |
 | [research-driven-change](skills/research-driven-change/SKILL.md) | Research must lead into a plan, change, review or delivery, or that cycle is being resumed | Only an idea discussion, research, a routine edit, or a standalone skill assessment or read-only audit is requested |
-| [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | Operational UI needs designing, repairing or critiquing | The work is backend only |
+| [ui-delivery](skills/ui-delivery/SKILL.md) | A product interface needs designing, repairing, transferring or critiquing | The work is backend only |
+| [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | An existing product's journeys, screens and controls need reconstructing from evidence for a redesign, handoff or test inventory | The product is new, the change is visual only, or the scenario is already known |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
-| [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
+| [skill-evaluation](skills/skill-evaluation/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
 | [technical-writing](skills/technical-writing/SKILL.md) | Product documentation needs writing, reshaping, translating or reviewing from its sources | The text is an ordinary message or article, or the change is code |
 | [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
 
@@ -43,9 +45,11 @@ primary documentation. Neither pins a model.
 
 ## Install
 
-The skills themselves are Markdown; a client just needs to load them. Python
-3.11 or newer, plus the pinned dependency in `requirements-tools.txt`, is only
-needed for the symlink installer and this repository's own tools below.
+The instructions are Markdown. The **Claude Code and Codex plugin reminders**
+require Python 3.11+ available as `python` and use only its standard library.
+The symlink installer and repository checks also need `requirements-tools.txt`.
+Optional skill scripts declare their own dependencies; loading prose does not
+install them.
 
 | Client | Command |
 | --- | --- |
@@ -55,10 +59,11 @@ needed for the symlink installer and this repository's own tools below.
 | Cursor | `npx skills add Muratovnik/assay -a cursor` |
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
-For Codex, the CLI's global install writes to `~/.codex/skills/`, which
-current Codex documentation does not list as a skill root; install into the
-project instead, or use the symlink installer below. Per-client detail,
-uninstall and upgrade are in [the install guide](docs/install.md).
+The third-party skills CLI installs selected skills, not plugin hooks or agent
+profiles. Prefer the full collection (`--skill '*'`) for composed work. A single
+skill has a bounded core and declares optional peers, which the CLI does not
+install. Check the destination reported by your CLI version. See the
+[installation and evidence matrix](docs/install.md#installation-surfaces).
 
 ## Quick start
 
@@ -73,16 +78,17 @@ Review tests/test_billing.py and tell me whether it actually protects
 against regressions, or only runs.
 ```
 
-`test-audit` activates on its own, with nothing to invoke by name: it looks
-for wrong expectations, missed defects and brittle checks rather than
-confirming that the suite runs. There is nothing else to install.
+`test-audit` is the intended method: it looks for wrong expectations, missed
+defects and brittle checks rather than just confirming that the suite runs.
+Check that it was loaded; name it explicitly when discovery misses. Loading
+does not prove that its criteria were followed.
 
 <details>
 <summary><b>Symlink installer</b> — the agent profiles, and edits that take effect immediately</summary>
 
-The plugin routes install skills. The two agent profiles, and a setup where
-your edits to a checkout are live without reinstalling, come from the
-repository's own installer:
+The Claude Code plugin already includes both profiles. The symlink installer
+also supplies Codex profiles and makes checkout edits available without
+reinstalling. Do not install duplicate Claude entries alongside the plugin:
 
 ```text
 git clone https://github.com/Muratovnik/assay.git

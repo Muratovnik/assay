@@ -2,6 +2,8 @@
 name: route-subagents
 description: Prepare and route bounded Codex or Claude subagent packets after the user or an explicitly invoked workflow has already authorized delegation. Select client-native routes, ownership, isolation, return contracts, and oracles; parallelism alone is never permission to spawn.
 license: MIT
+metadata:
+  assay-optional-skills: "independent-audit skill-evaluation"
 ---
 
 # Route subagents

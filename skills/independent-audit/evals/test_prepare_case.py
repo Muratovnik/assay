@@ -220,8 +220,8 @@ class PreparationTests(unittest.TestCase):
         import re
 
         criteria = [prep.SKILL_ROOT.parent / name for name in (
-            "code-maintenance", "test-writing", "test-audit",
-            "evidence-research", "operations-ui-delivery", "implementation-planning",
+            "code-change", "test-writing", "test-audit",
+            "evidence-research", "ui-delivery", "implementation-planning",
             "software-architecture", "research-driven-change")]
         packet = prep.prepare_case(1, self.parent, criteria_roots=criteria)
         skill = packet / "skill" / "independent-audit"
@@ -235,7 +235,7 @@ class PreparationTests(unittest.TestCase):
                 self.assertTrue(linked.is_file(), f"Unresolved link in {path}: {target}")
 
     def test_explicit_criteria_snapshot_preserves_old_bytes_and_hides_evals(self):
-        frozen = self.owned_root / "frozen" / "code-maintenance"
+        frozen = self.owned_root / "frozen" / "code-change"
         frozen.mkdir(parents=True)
         (frozen / "SKILL.md").write_text("Frozen criteria\n", encoding="utf-8")
         (frozen / "evals").mkdir()
@@ -243,14 +243,14 @@ class PreparationTests(unittest.TestCase):
         for with_skill in (False, True):
             packet = prep.prepare_case(18, self.parent, with_skill=with_skill,
                                        criteria_roots=[frozen])
-            self.assertEqual((packet / "skill/code-maintenance/SKILL.md").read_text(),
+            self.assertEqual((packet / "skill/code-change/SKILL.md").read_text(),
                              "Frozen criteria\n")
-            self.assertFalse((packet / "skill/code-maintenance/evals").exists())
+            self.assertFalse((packet / "skill/code-change/evals").exists())
             self.assertEqual((packet / "skill/independent-audit").exists(), with_skill)
             prep.verify_packet(packet, self.pin_manifest(packet))
 
     def test_criteria_reject_collision_and_output_inside_source_before_writes(self):
-        source = prep.SKILL_ROOT.parent / "code-maintenance"
+        source = prep.SKILL_ROOT.parent / "code-change"
         before = list(self.parent.iterdir())
         for roots in ([source, source], [prep.SKILL_ROOT]):
             with self.assertRaisesRegex(ValueError, "Duplicate"):

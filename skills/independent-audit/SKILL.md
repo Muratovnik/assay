@@ -2,6 +2,8 @@
 name: independent-audit
 description: Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Independent audit

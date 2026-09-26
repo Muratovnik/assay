@@ -2,6 +2,8 @@
 name: evidence-research
 description: Investigate questions, compare options or assess gaps using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence; skip simple fact lookups, text summaries and routine implementation.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change research-driven-change"
 ---
 
 # Evidence research

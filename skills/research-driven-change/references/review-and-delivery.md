@@ -50,7 +50,7 @@ After a repair or incoming change, compare the current subject with the revision
 and inputs each result checked. Planning's
 [continuation](../../implementation-planning/references/continuation.md) decides
 which evidence to refresh and separates changed from verified claims;
-[skill design](../../skill-design/SKILL.md#decide-within-the-evidence) names the
+[skill evaluation](../../skill-evaluation/SKILL.md#decide-within-the-evidence) names the
 evidence level of a skill change. The delivery account keeps each retained result
 with the revision and scope it covered.
 
@@ -83,7 +83,7 @@ checks and limits in the proposal. Link larger authorized research instead of
 copying it. Publish only relevant material; exclude secrets, private traces and
 withheld grading keys. Evaluator assets intentionally shipped with the source are
 publishable; their packet boundary stays with
-[skill design](../../skill-design/SKILL.md#preserve-the-evidence-boundary).
+[skill evaluation](../../skill-evaluation/SKILL.md#preserve-the-evidence-boundary).
 
 After creation or update, read back the remote proposal and compare its identity,
 base/head and revision with the intended delivered candidate. Correct branch names

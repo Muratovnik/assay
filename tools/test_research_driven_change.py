@@ -17,6 +17,7 @@ import unittest
 
 from tools import assay as aa
 from tools import eval_assets as ea
+from tools.skill_resources import markdown_targets
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "research-driven-change"
@@ -129,7 +130,7 @@ class ResearchChangeIntegrationTests(unittest.TestCase):
 
     def assert_links_resolve(self, paths: list[Path], *, runtime: bool) -> None:
         for path in paths:
-            for target in aa.MARKDOWN_LINK.findall(path.read_text(encoding="utf-8")):
+            for target in markdown_targets(path.read_text(encoding="utf-8")):
                 if target.startswith(("https://", "http://", "mailto:")):
                     continue
                 relative, _, fragment = target.partition("#")
@@ -150,14 +151,14 @@ class ResearchChangeIntegrationTests(unittest.TestCase):
         for name, destination in (
             ("evidence-research", "stage-handoffs.md"),
             ("implementation-planning", "stage-handoffs.md"),
-            ("code-maintenance", "stage-handoffs.md"),
-            ("skill-design", "stage-handoffs.md"),
+            ("code-change", "stage-handoffs.md"),
+            ("skill-evaluation", "stage-handoffs.md"),
             ("independent-audit", "review-and-delivery.md"),
         ):
             with self.subTest(consumer=name):
                 path = ROOT / "skills" / name / "SKILL.md"
                 targets = {(path.parent / target.split("#", 1)[0]).resolve()
-                           for target in aa.MARKDOWN_LINK.findall(path.read_text(encoding="utf-8"))
+                           for target in markdown_targets(path.read_text(encoding="utf-8"))
                            if NAME in target}
                 self.assertIn(SKILL / "references" / destination, targets)
 
@@ -191,8 +192,8 @@ class ResearchChangePacketTests(unittest.TestCase):
 
     def test_two_consumers_receive_only_explicit_methods(self) -> None:
         with tempfile.TemporaryDirectory(prefix="rdc-consumers-") as directory:
-            for name, case_id in (("code-maintenance", "RDC-02-adapter"),
-                                  ("skill-design", "RDC-03-skill")):
+            for name, case_id in (("code-change", "RDC-02-adapter"),
+                                  ("skill-evaluation", "RDC-03-skill")):
                 with self.subTest(consumer=name):
                     methods = (SKILL, ROOT / "skills" / name)
                     before = [hashes(method) for method in methods]

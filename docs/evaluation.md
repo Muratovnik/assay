@@ -16,7 +16,7 @@ describes how a run is set up.
 
 Two directories are shaped differently, and it is worth knowing which one you
 are looking at. `independent-audit` keeps its cases in its own fixture layout
-rather than the paired JSON files. `skill-design` has no machine-readable cases
+rather than the paired JSON files. `skill-evaluation` has no machine-readable cases
 at all: its `research-and-transfer.md` is an evaluator-only specification of
 what to supply and what to look for, and the gate checks only that the document
 is there.
@@ -77,3 +77,10 @@ Retain the returned manifest digest somewhere outside the packet, then verify th
 packet with `skills/independent-audit/evals/verify_packet.py` before and after
 the run. Comparing a method against a baseline means using the baseline's own
 frozen directory from its revision, not today's copy of the skill.
+
+## Small paired comparisons
+
+For an initial method-change comparison, use the existing
+[paired-pilot procedure](../skills/skill-evaluation/references/paired-pilot.md).
+It distinguishes discovery, decisions, preserved valid behavior and total cost.
+A small diagnostic sample is not a score for the library or evidence of general savings.

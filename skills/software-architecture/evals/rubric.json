@@ -17,7 +17,7 @@
     {
       "id": "ARC-01-implement",
       "must": [
-        "Use code-maintenance for the authorized changes and architecture criteria for the boundary.",
+        "Use code-change for the authorized changes and architecture criteria for the boundary.",
         "Preserve callers, cancellation, cleanup and relevant test coverage."
       ],
       "must_not": [
@@ -245,7 +245,7 @@
         "software-architecture"
       ],
       "avoid": [
-        "code-maintenance execution",
+        "code-change execution",
         "automatic audit gate"
       ]
     },
@@ -272,7 +272,7 @@
     {
       "id": "DISC-build",
       "expected_methods": [
-        "code-maintenance",
+        "code-change",
         "software-architecture criteria"
       ],
       "avoid": [

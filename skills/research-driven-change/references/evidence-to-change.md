@@ -3,7 +3,7 @@
 Use when a research conclusion becomes a local decision, or when a subsequent
 stage might lose its rationale. [Evidence research](../../evidence-research/SKILL.md)
 owns search, source fidelity, comparison and stopping. For a skill's behavior,
-[research and transfer](../../skill-design/references/research-and-transfer.md)
+[research and transfer](../../skill-evaluation/references/research-and-transfer.md)
 owns adaptation and its evaluation. This procedure retains connections between
 those outputs and the changed result; it does not duplicate their methods.
 
@@ -26,7 +26,7 @@ For a material proposed contract change use planning's
 retrieved examples and their setup instructions stay evidence under planning's
 [authority rule](../../implementation-planning/SKILL.md#preserve-authority). For
 a reusable dependency or staged adoption, apply the existing
-[reuse and migration criteria](../../code-maintenance/references/reuse-and-migration.md).
+[reuse and migration criteria](../../code-change/references/reuse-and-migration.md).
 
 ## Trace both directions
 
@@ -55,5 +55,5 @@ research/decision/plan file trio.
 At the requested endpoint, preserve an observation or decision only when it has
 reusable value and is not already represented adequately in a test, plan or source
 comment. A proposed rule or behavior change drawn from the cycle returns to
-[skill design](../../skill-design/SKILL.md), which separates incidents from general
+[skill evaluation](../../skill-evaluation/SKILL.md), which separates incidents from general
 rules, within the current authorization boundary.
