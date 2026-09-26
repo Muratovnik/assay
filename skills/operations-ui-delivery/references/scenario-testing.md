@@ -19,19 +19,22 @@ of manufactured variants can still miss a supported state. This is acceptance
 of ordinary UI work, not an evaluation of the skill.
 
 For broad work map supported journeys before generating tests, including older
-and direct-entry paths. Link reported defects to these outcomes and look for
+and direct-entry paths; when no reliable scenario inventory exists, reconstruct
+it with [product-flow-mapping](../../product-flow-mapping/SKILL.md), which owns
+that inventory. Link reported defects to these outcomes and look for
 omitted consumers, states or scale conditions after the defect list turns green.
 Record that omission check separately in existing task reporting. Defect closure
 is narrower than systemic acceptance. A label-only change need not acquire a full
 product specification or invented failure modes.
 
-For a material workflow, account for entry/discovery, input/selection, commit,
-pending, success/partial failure, departure and return. Check applicable keyboard,
-assistive/non-hover access and load conditions across those stages. Mark a family
-as covered, needing a check, inapplicable or unresolved in existing task evidence;
-use the routed procedure for detail. Do not turn this into every-device testing
-for a local repair. A fresh combination such as filter + pagination + return or
-edit + row switch + late save can reveal gaps that isolated complaint cases miss.
+For a material workflow, account for entry/discovery, empty or initial data,
+input/selection and validation, commit, pending, success/partial failure,
+departure and return. Check applicable keyboard, assistive/non-hover access and
+load conditions across those stages. Mark a family as covered, needing a check,
+inapplicable or unresolved in existing task evidence; use the routed procedure
+for detail. Do not turn this into every-device testing for a local repair. A
+fresh combination such as filter + pagination + return or edit + row switch +
+late save can reveal gaps that isolated complaint cases miss.
 
 ## Choose distinguishing checks
 

@@ -1,16 +1,17 @@
 # Evaluation protocol and current limits
 
 Coordinator material, not runtime instructions. Use the existing
-`tools/eval_assets.py` input/rubric protocol. No new runner, report system, model
-dependency or paid campaign is introduced. The method bundles no exporter.
+`tools/eval_assets.py` input/rubric protocol; no new runner, model dependency or
+paid campaign is needed.
 
 ## Conditions
 
 Compare the same scoped input, repository bytes, permissions, runtime/data and
 model settings using (A) the existing UI method and ordinary authoring, and (B)
-that method with product-flow-mapping. Use the same existing browser/Playwright
-and Figwright capabilities on both sides. Explicit loading does not demonstrate
-automatic discovery; run discovery cases through the normal client route.
+that method with product-flow-mapping. Use the same connected browser and design
+adapter capabilities on both sides. Explicit loading does not demonstrate
+automatic discovery; run discovery cases through the normal client route. D09 and
+D10 are near misses that operations-ui-delivery owns.
 
 Record actual client/model, relevant skill revisions, tool failures, corrections
 and cost only when available. Build input-only packets with the existing
@@ -49,15 +50,14 @@ surfaces it cannot inspect. T04 checks retirement without erasing manual notes.
 
 ## Current verification boundary
 
-`tools/test_product_flow_mapping.py` checks registration/native projection,
-input/rubric structure, consumer links and removal of the rejected export system.
-These are packaging tests, not semantic grading, live tool tests or a model
-comparison. Existing repository checks cover links and generated registration.
-The pre-existing UI evidence workflow is unchanged from the PR base; it is not
-a new product-flow acceptance claim.
+`tools/test_product_flow_mapping.py` checks that the corpus is registered with the
+evaluation-data gate, that consumers route to the method and that runtime links
+resolve outside `evals/`. These are packaging tests, not semantic grading, live
+tool tests or a model comparison. Repository gates cover pair structure, native
+projection and generated registration.
 
-The corpus contains 20 task cases, 8 discovery cases and 4 transfer cases. C15-C18
-came from self-review; C19-C20 cover the owner's reuse correction. Revised cases
-are regression material. Preparing/checking them does not mean a model ran them.
+The corpus contains 20 task cases, 10 discovery cases and 4 transfer cases.
+C15-C20 informed revisions of the method, so they are regression material, not
+held-out evidence. Preparing or checking cases does not mean a model ran them.
 Keep future receipts outside skill inputs and report actual runs and limitations.
 No improvement in coverage, quota use or cross-client discovery is claimed.

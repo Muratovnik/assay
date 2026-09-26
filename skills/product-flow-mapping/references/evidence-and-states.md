@@ -9,8 +9,8 @@ A scenario has a goal, actor, prerequisites, entries, steps, branches and termin
 outcomes. A screen has a purpose. A state adds conditions that change available
 actions, their meaning, results or recovery. An action names its real element,
 availability, affected object/scope and observable effect. A transition connects
-before-state, action or system event, condition, after-state and result. These
-are things to explain in the handoff, not a serialization schema to implement.
+before-state, action or system event, condition, after-state and result. The
+handoff explains each of these.
 
 Treat system events separately from controls: scheduled completion, session
 expiry or a late response may change state without a click. Do not invent a
@@ -46,27 +46,26 @@ Keep implementation/documentation disagreement explicit. Neither code nor
 recordings automatically settle correct behavior. Inferred scenarios remain
 provisional until grounded; useful source-only work need not claim verification.
 
-## Capture with the existing browser setup
+## Capture with the connected browser tools
 
-Use the available Playwright/browser connection and the project's existing
-fixtures. Read [browser checks](../../operations-ui-delivery/references/browser-checks.md)
+Use the connected browser automation, such as Playwright, and the project's
+existing fixtures. Read [browser checks](../../operations-ui-delivery/references/browser-checks.md)
 for readiness, virtualized/lazy content, before-helper observations and capture
-scope. Use the tool's supported screenshot mechanism; do not write a capture or
-image-export pipeline. A fixed sleep or network idle is not universal readiness.
+scope, and use the tool's supported screenshot mechanism.
 
 Keep existing screenshot attachments and available traces with the scenario.
 Use Playwright's existing [Trace Viewer](https://playwright.dev/docs/trace-viewer)
 for inspection; where a test report is needed and Playwright Test is in use,
 use its [built-in reporter](https://playwright.dev/docs/test-reporters#html-reporter).
-Do not create a custom report or mandate recording every action for a small task.
-A browser connection need not have Playwright Test or its reporter installed.
+Do not mandate recording every action for a small task. A browser connection
+need not have Playwright Test or its reporter installed.
 
 Associate the image or attachment with the state, build, viewport/region,
-readiness and capture moment. Use the existing artifact identity/path; no custom
-manifest or hash checker is required. Open menus and dialogs through a supported
-path when claiming reachability. A fixture, component story or mocked failure
-is labeled simulated and cannot prove ordinary runtime behavior. Missing captures
-get explicit placeholders, never invented screenshots.
+readiness and capture moment, using its existing artifact identity and path.
+Open menus and dialogs through a supported path when claiming reachability. A
+fixture, component story or mocked failure is labeled simulated and cannot prove
+ordinary runtime behavior. Missing captures get explicit placeholders, never
+invented screenshots.
 
 Label BEFORE or AFTER only when timing is known. An unchanged-state copy/download
 needs an action/result observation; the image alone cannot establish its moment.

@@ -10,11 +10,11 @@ gap. For each significant screen/state/control, find its scenario uses or a
 reasoned disposition. Reconcile against entry-point and consumer sources, not
 the number of cards. A partial inventory cannot prove whole-product coverage.
 
-Check relevant alternative/direct entry, blank data, validation, pending/success,
-partial failure, retry, cancellation, departure and return. Include material
-combinations, such as a late save after switching records, not every possible
-combination for every button. Use the supported contract rather than inventing
-failure modes or unsupported devices.
+Check each material workflow against the stage families and material combinations
+owned by [UI acceptance](../../operations-ui-delivery/references/scenario-testing.md#derive-the-scenario),
+and give each family a mapped path, a named gap or a reason it does not apply.
+Use the supported contract rather than inventing failure modes or unsupported
+devices.
 
 Keep broken links, missing evidence, product defects and inapplicability separate.
 A stale frame link is a document defect; an unexecuted transition is a gap; a known
@@ -26,8 +26,7 @@ Check each entry, not only the successful main path, and mark unknown outcomes.
 Challenge a plausible omission with the defect still present. Two same-screen
 export actions must survive deduplication, while a decorative icon needs no
 fabricated scenario. Visited URLs or successful screenshots can hide a menu-only
-action. Trace these relationships in the existing document/canvas; do not build
-a graph validator as a substitute for inspecting the sources.
+action. Trace these relationships in the existing document or canvas.
 
 ## Give downstream consumers a usable contract
 
@@ -45,13 +44,13 @@ A read-only review uses these criteria without editing the application or review
 artifact. An independent verdict belongs to
 [independent audit](../../independent-audit/SKILL.md); label a self-check as such.
 
-## Update without a second synchronization system
+## Update an existing map
 
 Inspect the prior handoff/build and changes to requirements, source owners,
 shared controls and supported paths. Use existing source diffs, project notes and
-actual frame readback to identify affected scenarios. Do not implement a map-diff
-CLI or a custom interchange schema. One changed label need not restart the survey;
-changed behavior must not inherit old verification without checking applicability.
+actual frame readback to identify affected scenarios. One changed label need not
+restart the survey; changed behavior must not inherit old verification without
+checking applicability.
 
 Keep stable names/links across reordering and renaming. Retired items need a reason
 and replacement reference where useful; do not reuse their identity for another
@@ -61,9 +60,8 @@ screenshot or trace current.
 Before a Figma write, use the existing adapter procedure to confirm target identity
 and current nodes. Preserve designer comments and manually maintained proposal
 layers. Reuse task-owned nodes; removal from the current subset is not permission
-to delete them. Resolve partial writes through readback before retrying. Keep any
-working cross-references in the existing task or supported node metadata, not a
-new database or maintained synchronization service.
+to delete them. Resolve partial writes through readback before retrying. Keep
+working cross-references in the existing task notes or supported node metadata.
 
 When a screenshot changes, recheck the annotations against the actual image. When
 state meaning changes, revisit scenarios, sources, reverse links and downstream

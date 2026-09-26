@@ -1,8 +1,8 @@
 # Two handoffs from one scenario description
 
-This is a synthetic collection-editor example, not a Routevane observation or a
-new interchange format. Keep it as ordinary text or existing Figma frames. Neither
-consumer has been exercised by a fresh agent run merely because this example exists.
+This is a synthetic collection-editor example, not an observation of a real
+product. Keep it as ordinary text or existing Figma frames. Neither consumer has
+been exercised by a fresh agent run merely because this example exists.
 
 ## Shared source and scenario
 
@@ -30,10 +30,10 @@ REQ. Preserve entered input on failed Save and the retry/cancel outcomes, not th
 old panel arrangement. The designer may replace or combine screens.
 
 In the requested Figma file, put this step explanation beside the matching capture
-through the existing Figwright adapter. Here no image is supplied: mark it not
-captured rather than manufacture a screenshot or generate an HTML substitute.
-An authorized application check can later obtain that state using the existing
-browser/Playwright setup. Label a simulated failure fixture as such.
+through the connected design adapter. Here no image is supplied: mark it not
+captured rather than manufacture a screenshot. An authorized application check
+can later obtain that state with the connected browser tools. Label a simulated
+failure fixture as such.
 
 ## Regression-test design
 
@@ -45,7 +45,7 @@ or cancelled nearby case as appropriate. Do not freeze an input-loss bug as inte
 
 Reuse the existing test runner and fixtures. Reading CODE or this table is not an
 executed test. The test-writing method selects the smallest boundary that exposes
-the promised result; this example adds no runner or report system.
+the promised result.
 
 ## Reverse lookup and updates
 
@@ -54,6 +54,6 @@ even though both leave the screen unchanged; keep both descriptions. A Save test
 alone says nothing about clipboard/download behavior.
 
 Preserve a designer's note beside EDIT_FLOW / FAILURE when updating descriptions
-or screenshots. Use the existing frame identity and tool readback, not a separate
-notes database or synchronization service. Recheck consumers after a shared action
-changes and retain any unresolved source conflict in the actual deliverable.
+or screenshots. Use the existing frame identity and tool readback. Recheck
+consumers after a shared action changes and retain any unresolved source conflict
+in the actual deliverable.

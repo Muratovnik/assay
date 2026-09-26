@@ -41,22 +41,20 @@ reader-facing index, including significant controls without a mapped scenario.
 Information in working notes does not compensate for omitting it from the actual
 deliverable. Give related steps unambiguous names and navigable links.
 
-## Use the existing capture and Figma tools directly
+## Use the connected capture and Figma tools directly
 
-Use the existing browser/Playwright setup for screenshots and available traces,
-following [evidence and states](evidence-and-states.md). Use Figwright for the
-requested Figma artifact through the existing
-[Figwright procedure](../../operations-ui-delivery/references/figwright.md).
-It owns connection/file identity, vendor documentation, operation schemas,
-partial failures and verification. Read it before that adapter's first operation;
-read the installed vendor build instructions for the selected writes. With another
-already authorized adapter, use its actual schema rather than Figwright commands.
+Take screenshots and available traces with the connected browser tools, following
+[evidence and states](evidence-and-states.md). Write the requested Figma artifact
+through the connected adapter. With Figwright, read the
+[Figwright procedure](../../operations-ui-delivery/references/figwright.md) before
+its first operation; it owns connection/file identity, vendor documentation,
+operation schemas, partial failures and verification. With another authorized
+adapter, use its own documentation and actual schema.
 
 Construct the description frame, screenshot frame, editable annotations and
-links through documented operations. Work directly from the scenario explanation
-and captured image. Do not build an HTML intermediary, a custom interchange
-format, wrapper CLI, validator or maintained export/synchronization service.
-Existing maintained templates and ordinary task-scoped tool calls are valid.
+links through documented operations, working directly from the scenario
+explanation and the captured image. Existing maintained templates and ordinary
+task-scoped tool calls are valid.
 
 Confirm the exact file/page and allowed sections. Keep stable scenario/step names
 in the supported node naming/metadata or existing project notes. Preserve manual
@@ -82,15 +80,14 @@ coordinates on trust.
 Check available connected tools before concluding a capability is absent. When
 runtime or Figma writing is unavailable, preserve useful scenario text in the
 requested conversation or existing document and retain actual captured images.
-State which observations or writes remain blocked. Do not replace the requested
-Figma file with a new exporter, and do not call a text/capture handoff a completed
-Figma delivery. No adapter installation, new account permissions or unrelated
-application changes follow from this gap.
+State which observations or writes remain blocked, and do not call a text/capture
+handoff a completed Figma delivery. No adapter installation, new account
+permissions or unrelated application changes follow from this gap.
 
 Answer from the handoff alone: why enter, what to use, what changes or is retained,
 where to go next, how to cancel/recover and what remains unverified. Then use the
-reverse index to find all uses of a shared control. Resolve ambiguity, rather
-than adding more screenshots or a new publishing tool.
+reverse index to find all uses of a shared control. Resolve ambiguity rather than
+adding more screenshots.
 
 ## Method sources
 

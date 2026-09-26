@@ -27,6 +27,7 @@
 | [independent-audit](skills/independent-audit/SKILL.md) | 需要对照原始要求核查计划、改动、架构、发布或迁移 | 你想要的是把改动做完；此方法不做修复 |
 | [evidence-research](skills/evidence-research/SKILL.md) | 重要结论需要定位并核对来源 | 答案只需一次查询即可得到 |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | 需要设计、修复或评审运维界面 | 工作仅涉及后端 |
+| [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | 需要依据来源还原现有产品的用户流程、界面和控件，用于重新设计、设计交接或测试清单 | 产品是全新的、改动仅涉及视觉，或场景已经明确 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
 | [skill-design](skills/skill-design/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |

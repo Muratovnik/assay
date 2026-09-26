@@ -111,6 +111,8 @@
     {"id": "D05", "prompt": "Change only this border color; behavior is unchanged."},
     {"id": "D06", "prompt": "Invent a new onboarding design for a product with no existing interface."},
     {"id": "D07", "prompt": "Optimize a backend-only SQL query."},
-    {"id": "D08", "prompt": "Run the already written tests; do not plan new coverage."}
+    {"id": "D08", "prompt": "Run the already written tests; do not plan new coverage."},
+    {"id": "D09", "prompt": "Critique the empty, loading and error states of the existing orders screen for clarity and consistency with the rest of the interface."},
+    {"id": "D10", "prompt": "Transfer the settings screen in its default state into the connected Figma file."}
   ]
 }

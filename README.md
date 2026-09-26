@@ -26,6 +26,7 @@ links to the instructions the agent will actually read.
 | [independent-audit](skills/independent-audit/SKILL.md) | A plan, change, architecture, release or migration needs checking against its brief | You want the change made; this method does not fix things |
 | [evidence-research](skills/evidence-research/SKILL.md) | A consequential claim needs sources located and reconciled | The answer is one lookup away |
 | [operations-ui-delivery](skills/operations-ui-delivery/SKILL.md) | Operational UI needs designing, repairing or critiquing | The work is backend only |
+| [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | An existing product's journeys, screens and controls need reconstructing from evidence for a redesign, handoff or test inventory | The product is new, the change is visual only, or the scenario is already known |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-design](skills/skill-design/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
 | [technical-writing](skills/technical-writing/SKILL.md) | Product documentation needs writing, reshaping, translating or reviewing from its sources | The text is an ordinary message or article, or the change is code |

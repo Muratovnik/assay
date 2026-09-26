@@ -46,11 +46,11 @@ mean identical effects.
 ## Explore breadth, then missing branches
 
 Start with a representative goal-to-result path. Compare it with the inventory,
-then inspect consequential gaps: alternate/direct entry, initial empty state,
-validation, commit/cancel, pending work, failure/retry, departure and return.
+then inspect the consequential branches named by the stage families in
+[UI acceptance](../../operations-ui-delivery/references/scenario-testing.md#derive-the-scenario).
 Include role, data size, language or platform variations only when they alter the
-supported behavior. Use the owner's existing fixtures and browser/runtime tools;
-this method does not install a crawler, a second test stack or a special app route.
+supported behavior. Use the owner's existing fixtures and browser or runtime
+tools without adding a special app route.
 
 State equivalence is functional. Different URLs can show the same task state;
 the same URL can contain several materially different states. Keep copy,
@@ -71,7 +71,7 @@ external exits before calling the inventory reconciled. Never equate this with
 all possible paths explored.
 
 Use the requested handoff for durable facts; keep exploratory logs separate when
-not useful to the designer. No mandatory PRD, persona exercise or new task store.
+not useful to the designer. No mandatory PRD or persona exercise.
 
 ## Method sources
 

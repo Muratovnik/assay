@@ -27,20 +27,20 @@ and proposed changes. A code/document conflict stays visible until resolved;
 neither source wins automatically. A recorded path is not its own acceptance
 oracle. Goals inferred from controls are hypotheses, not user research.
 
-## Use existing tools, not a new delivery system
+## Use the connected tools
 
 This skill owns discovery and explanation, not capture, rendering or export
-infrastructure. Use the existing browser/Playwright setup for actions, screenshots
-and available traces; use the existing Figwright adapter for an authorized Figma
-handoff. Read their owning procedures below before the relevant operation.
-Do not add an Assay exporter, renderer, intermediate schema, graph validator,
-wrapper CLI, recorder or another test stack for this workflow. Task-specific
-steps through the existing tools are normal use, not a new reusable runtime.
+infrastructure. Take actions, screenshots and available traces with the connected
+browser automation, such as Playwright, and write an authorized Figma handoff
+through the connected design adapter; the procedures below route to their owners.
+Recreating a capability those tools already provide is a reuse decision owned by
+[reuse and migration](../code-maintenance/references/reuse-and-migration.md#establish-who-performs-the-behavior);
+task-specific calls through them are ordinary use.
 
 Keep descriptions in the requested destination or the project's existing notes.
-A missing capability calls for checking the available tools and documenting the
-gap, not building a substitute. A test report is evidence, not the requested
-Figma deliverable. Preserve useful text and captures without claiming canvas work.
+When a capability is missing, check the available tools, document the gap and keep
+useful text and genuine captures without claiming canvas work. A test report is
+evidence, not the requested Figma deliverable.
 
 ## Select the needed procedure
 
@@ -82,8 +82,8 @@ question. Research history and `evals/` are not runtime reading.
 For a redesign, give [operations-ui-delivery](../operations-ui-delivery/SKILL.md)
 the scenarios, state/control links, retained outcomes and unresolved decisions.
 That skill owns UI quality, capture mechanics and canvas operations; this one
-owns discovering and explaining the behavior. A screenshot handoff does not
-require reconstructing the old UI as editable components.
+owns the scenario inventory and the explanation of behavior. A screenshot
+handoff does not require reconstructing the old UI as editable components.
 
 For scenario-based tests, give [test-writing](../test-writing/SKILL.md) the same
 paths with their requirement sources and observation limits. It owns test
