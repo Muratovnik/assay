@@ -6,7 +6,7 @@ metadata:
   assay-optional-skills: "code-change implementation-planning independent-audit"
 ---
 
-# Operations UI delivery
+# UI delivery
 
 Make the next action apparent and its effect predictable, and make the artifact
 that promises it hold up: a screen, mockup, component library or its code that
@@ -17,7 +17,7 @@ Preserve the product's language, supported journeys and authoritative state.
 
 Sibling methods named in metadata supply conditional criteria, not automatic
 assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not install it or invent its rules.
+authority and result. If a peer is absent, do not silently install it or invent its rules.
 Preserve source fidelity and the requested deliverable; a missing collaborator does not authorize a substitute exporter or artifact.
 Report a consequential missing criterion rather than claiming the full composed
 method was completed. Available core work can continue without that claim.

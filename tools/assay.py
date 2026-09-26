@@ -19,10 +19,10 @@ import tomllib
 
 if __package__:
     from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from .skill_resources import distribution_problems, markdown_problems
+    from .skill_resources import distribution_problems, markdown_problems, validate_plain_tree
 else:
     from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from skill_resources import distribution_problems, markdown_problems
+    from skill_resources import distribution_problems, markdown_problems, validate_plain_tree
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
@@ -687,10 +687,9 @@ def check(root: Path = ROOT) -> list[str]:
 
     # Validate a full copied collection and every singleton, not only checkout
     # links. Unsafe source trees never enter the copying boundary.
-    if not path_problems and not stale:
-        problems.extend(distribution_problems([
-            root / asset.path for asset in catalog.assets if asset.kind == "skill"
-        ]))
+    skill_sources = [root / asset.path for asset in catalog.assets if asset.kind == "skill"]
+    if skill_sources and not path_problems and not stale:
+        problems.extend(distribution_problems(skill_sources))
 
     bridge = root / "CLAUDE.md"
     if bridge.is_file() and bridge.read_bytes() != b"@AGENTS.md\n":
@@ -881,8 +880,10 @@ def skills_index(root: Path, catalog: Catalog) -> bytes:
     ]
     for asset in skill_assets(catalog):
         metadata = frontmatter(root / asset.path / "SKILL.md")
-        description = str(metadata.get("description", "")).strip()
-        summary = description.split(". ")[0].rstrip(".")
+        # YAML block scalars are valid metadata, but a Markdown table cell must
+        # stay on one line and must not introduce an extra column.
+        description = " ".join(str(metadata.get("description", "")).split())
+        summary = description.split(". ")[0].rstrip(".").replace("|", "\\|")
         lines.append(
             f"| [{asset.name}]({asset.name}/SKILL.md) | {asset.activation} | {summary}. |"
         )
@@ -985,6 +986,9 @@ def native_plan(
     root = root.resolve(strict=True)
     home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
+    # Lifecycle commands cannot rely on the publication gate to reject a
+    # redirected source. This does not validate unrelated documentation.
+    validate_plain_tree(root / "catalog.toml")
     catalog = load_catalog(root)
     native_skill_targets: dict[str, Path] = {}
     for asset in catalog.assets:
@@ -998,7 +1002,10 @@ def native_plan(
     entries: list[PlannedEntry] = []
     client_order = {"codex": 0, "claude": 1}
     for asset in sorted(catalog.assets, key=lambda item: item.id):
-        source = (root / asset.path).resolve(strict=True)
+        source = root / asset.path
+        preflight_safe_parent(root, source.parent)
+        validate_plain_tree(source)
+        source = source.resolve(strict=True)
         for projection in sorted(
             asset.projections, key=lambda item: client_order[item.client]
         ):

@@ -62,8 +62,8 @@ It does not package anything or keep install state.
 
 Set up tooling in an isolated Python 3.11+ environment with
 `python -m pip install -r requirements-tools.txt`. PyYAML parses metadata and
-markdown-it-py parses CommonMark; do not replace either format with ad-hoc syntax. Never auto-install into a
-user's global environment.
+markdown-it-py parses CommonMark; do not replace either format with ad-hoc syntax.
+Never auto-install into a user's global environment.
 
 ```text
 python -B tools/check.py --all

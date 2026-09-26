@@ -16,7 +16,7 @@ diagnosis and evidence criteria. Routine skill authoring is a different task.
 
 Sibling methods named in metadata supply conditional criteria, not automatic
 assignments. Consult only the relevant procedure; the caller keeps its goal,
-authority and result. If a peer is absent, do not install it or invent its rules.
+authority and result. If a peer is absent, do not silently install it or invent its rules.
 Keep input identity, comparable conditions and independent acceptance criteria; missing evidence limits the conclusion.
 Report a consequential missing criterion rather than claiming the full composed
 method was completed. Available core work can continue without that claim.

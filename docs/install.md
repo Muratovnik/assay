@@ -65,8 +65,8 @@ Reminders are not enforcement. The pre-tool context does not pause a pending
 launch to let the model revise it, and some tool paths bypass hooks. It neither
 authorizes delegation nor changes arguments or fixes models. Offline tests
 exercise events and packaged commands, not native discovery, agent compliance
-or quota savings. The earlier installation verification below predates these
-hooks; it is not a live verification of them.
+or quota savings. Historical installation observations do not verify these hooks
+on the current client and package revision.
 
 To check the handler without starting a model, run from the checkout:
 

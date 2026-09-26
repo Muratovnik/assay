@@ -65,3 +65,9 @@ python tools/eval_assets.py prepare --cases skills/<skill>/evals/cases.json --ca
 把返回的清单摘要保存到材料包之外，然后在运行前后用
 `skills/independent-audit/evals/verify_packet.py` 校验该材料包。把一个方法与基线
 比较，意味着使用基线自身版本中的冻结目录，而不是今天这份技能副本。
+
+## 小规模配对比较
+
+方法修改的初步比较使用现有[配对流程](../../skills/skill-evaluation/references/paired-pilot.md)。
+分别观察加载、决策、合法行为是否保留以及总成本。小规模诊断不等于整个技能库的
+评分，也不能证明普遍节省。

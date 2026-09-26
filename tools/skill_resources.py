@@ -95,7 +95,7 @@ def markdown_problems(path: Path, root: Path) -> list[str]:
     return problems
 
 
-def _plain_tree(path: Path) -> None:
+def validate_plain_tree(path: Path) -> None:
     """Refuse links, reparse points and special files before reading/copying."""
     def inspect(item: Path) -> None:
         info = item.lstat()
@@ -121,7 +121,7 @@ def selection_problems(skills_root: Path, known: set[str]) -> list[str]:
     """
     problems: list[str] = []
     try:
-        _plain_tree(skills_root)
+        validate_plain_tree(skills_root)
         boundary = skills_root.resolve(strict=True)
         skills = sorted(path for path in skills_root.iterdir() if path.is_dir())
         if not skills or any(skill.name not in known for skill in skills):
@@ -155,8 +155,11 @@ def selection_problems(skills_root: Path, known: set[str]) -> list[str]:
                             if peer not in optional:
                                 raise ValueError("undeclared cross-skill resource")
                             used.add(peer)
-                            if not (skills_root / peer).exists():
+                            peer_root = skills_root / peer
+                            if not peer_root.exists():
                                 continue
+                            if not peer_root.is_dir():
+                                raise ValueError("present peer must be a skill directory")
                         if not resolved.exists():
                             raise ValueError("missing required resource")
                     except (OSError, ValueError) as error:
@@ -177,7 +180,7 @@ def distribution_problems(sources: list[Path]) -> list[str]:
         return ["distribution: expected distinct, non-empty skill sources"]
     try:
         for source in sources:
-            _plain_tree(source)
+            validate_plain_tree(source)
         problems: list[str] = []
         for selected in [sources] + [[source] for source in sources]:
             with tempfile.TemporaryDirectory(prefix="assay-skill-copy-") as directory:
