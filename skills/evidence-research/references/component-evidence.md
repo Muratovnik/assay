@@ -23,6 +23,6 @@ prior evidence and do not repeat a market survey for a trivial implementation.
 
 Inspect existing update tooling before recommending a new process. Its effective
 coverage and observed execution belong to the implementation method's
-[quality-check procedure](../../code-maintenance/references/effective-quality-checks.md).
+[quality-check procedure](../../code-change/references/effective-quality-checks.md).
 Keep findings, unverified risk and optional upgrades separate. Research does not
 authorize installation or replacement.

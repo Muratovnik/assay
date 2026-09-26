@@ -31,14 +31,14 @@ I/O failure are retained for inspection, not automatically cleaned up.
 
 For an old-skill comparison, provide `--skill-root <preserved-old-skill>`.
 Include needed criteria owners explicitly with repeated
-`--criteria-skill <frozen-skills-root/code-maintenance>` (and other applicable
+`--criteria-skill <frozen-skills-root/code-change>` (and other applicable
 owners). These copy runtime-only content to sibling paths under `skill/`, so
 audit links retain their meaning. No installed criteria are discovered implicitly.
 Use the same frozen criteria bytes in both audit-version arms; a changed criteria
 set is a separate intervention. Criteria remain present with `--without-skill`
 when explicitly supplied. Missing owners remain evidence limits, never an excuse
 to fetch an installed current copy into the old-version arm. Fixture 18-27 source
-reviews need code-maintenance; include other selected criteria if their questions
+reviews need code-change; include other selected criteria if their questions
 will be evaluated. Audit links to absent, unselected criteria are not permission
 to enlarge the frozen read boundary.
 For a no-skill baseline, provide `--without-skill`. These affect the skill
@@ -261,7 +261,7 @@ from those inputs, not merely repeat that the mechanism is locally implemented.
 - 31: accepted scope is withheld; report an unresolved comparison, not compliance,
   N/A or an invented violation. Do not leave the permitted read boundary.
 
-Use the same frozen code-maintenance criteria in both audit-version arms. Grade
+Use the same frozen code-change criteria in both audit-version arms. Grade
 whether the final conclusion connects actual mechanics, applicable contract and
 exception/evidence limits, including what the primary preserves from the return.
 No particular phrase, heading, tool sequence or number of findings is required.

@@ -58,7 +58,7 @@ Conversely, an exact exported name or release-format field can be intentional.
 ## Does the transition gate protect new work and permit completion?
 
 For a suppression or migration gate, take the probes from the
-[exclusion and end-state checks](../../code-maintenance/references/effective-quality-checks.md#check-exclusions-and-the-reachable-end-state).
+[exclusion and end-state checks](../../code-change/references/effective-quality-checks.md#check-exclusions-and-the-reachable-end-state).
 The verdict stays here and covers both directions: a new violation the gate admits
 is false acceptance, and a cleared or last-removal state it rejects is false
 rejection. An illustrative checker establishes only the example's result; do not

@@ -67,7 +67,7 @@ Keep task criteria in neutral skills and observed model differences in dated
 source/run evidence. Do not infer that a new model makes test or visual oracles
 unnecessary. Investigate actual irrelevant reading, repeated unchanged checks,
 wrong rejections or premature stops before changing instructions. Use the
-[skill evaluation method](../../skill-design/SKILL.md) and its upgrade controls;
+[skill evaluation method](../../skill-evaluation/SKILL.md) and its upgrade controls;
 ordinary work receipts can support a narrow change without a paid campaign.
 
 Reconfirm the current host's routes and permissions. Select effort deliberately,

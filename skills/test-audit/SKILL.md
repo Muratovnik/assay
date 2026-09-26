@@ -2,6 +2,8 @@
 name: test-audit
 description: Review requested test suites or regression-protection claims for wrong expectations, missed defects and brittle checks. Skip ordinary implementation and test execution alone.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change independent-audit test-writing"
 ---
 
 # Test audit
@@ -9,6 +11,15 @@ license: MIT
 Determine what the scoped tests actually protect and where their verdict can
 mislead. Audit both false acceptance of wrong behavior and false rejection of
 supported behavior. A clean result is valid; test smells are leads, not findings.
+
+## Optional method boundaries
+
+Sibling methods named in metadata supply conditional criteria, not automatic
+assignments. Consult only the relevant procedure; the caller keeps its goal,
+authority and result. If a peer is absent, do not install it or invent its rules.
+Keep the brief as the oracle and inspect both missed defects and rejected valid behavior; missing tool-scope evidence remains unknown.
+Report a consequential missing criterion rather than claiming the full composed
+method was completed. Available core work can continue without that claim.
 
 ## Frame the review
 

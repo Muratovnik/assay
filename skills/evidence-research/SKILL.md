@@ -2,6 +2,8 @@
 name: evidence-research
 description: Investigate questions, compare options or assess gaps using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence; skip simple fact lookups, text summaries and routine implementation.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change"
 ---
 
 # Evidence research
@@ -11,6 +13,15 @@ This is a research method, not a new search service or an instruction to run
 agents. Use available domain tools and existing research artifacts. If another
 explicitly selected research workflow is active, contribute missing criteria
 within that workflow rather than starting a second plan or source ledger.
+
+## Optional method boundaries
+
+Sibling methods named in metadata supply conditional criteria, not automatic
+assignments. Consult only the relevant procedure; the caller keeps its goal,
+authority and result. If a peer is absent, do not install it or invent its rules.
+Evaluate primary evidence directly; an unavailable tooling assessment cannot turn a green command into proof of coverage.
+Report a consequential missing criterion rather than claiming the full composed
+method was completed. Available core work can continue without that claim.
 
 ## Frame the work
 

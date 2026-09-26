@@ -14,12 +14,14 @@ v1 配置保留原有基准证据流程，v2 迁移创建新文件。原生模�
 
 英文版本为准。命令输出、规则名称与配置键不作翻译。
 
-## 哪些已实测，哪些没有
+## 当前交付边界
 
-Claude Code 路径与技能 CLI 路径已针对已发布的仓库实际执行，并对安装后的文件逐
-字节比对。Codex、Cursor 与 Gemini CLI 的路径遵循各自客户端的文档，但未在此处
-运行过。这一区分是刻意保留的：一个要求别人区分「已验证」与「有文档」的库，自己
-更应当做到。
+Claude Code/Codex 插件提醒需要可通过 `python` 调用的 Python 3.11+。
+skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配置。
+单个技能保留核心约定，但不包含全部可选方法。`assay-optional-skills`
+是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的
+加载或行为。参见[交付矩阵](../install.md#installation-surfaces)与
+[名称迁移](../how-to/migrate-skill-names.md)。
 
 ## 自动技能提醒
 

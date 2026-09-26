@@ -55,7 +55,7 @@ re-exports, type-only dependencies and runtime loading according to the actual c
 Type-only does not grant an automatic exemption from a project dependency rule.
 
 Use [FSD](fsd-profile.md) only under its adoption conditions. Vue implementation details
-remain in [Vue structure](../../code-maintenance/references/vue-structure.md). Other
+remain in [Vue structure](../../code-change/references/vue-structure.md). Other
 frameworks use their own versioned contracts; do not infer a route from every colocated
 file or dead code from the absence of a normal importer.
 
@@ -63,6 +63,6 @@ file or dead code from the absence of a normal importer.
 
 This method decides the target placement and which surface stays supported; what a
 move must preserve and check follows the implementation method's
-[structural-contract criteria](../../code-maintenance/references/reuse-and-migration.md#preserve-structural-and-public-contracts).
+[structural-contract criteria](../../code-change/references/reuse-and-migration.md#preserve-structural-and-public-contracts).
 Return the ownership reason, concrete placement, affected contracts and check; do not
 silently refactor the application in response to a placement question.

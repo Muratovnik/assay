@@ -2,6 +2,8 @@
 name: software-architecture
 description: Design and assess application, site or library boundaries, contracts and file placement. Use for architecture proposals, structural decisions and architectural review criteria; skip routine local edits, prose polishing, implementation sequencing and audit authority or verdicts.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change evidence-research implementation-planning independent-audit"
 ---
 
 # Software architecture
@@ -10,6 +12,15 @@ Choose and assess boundaries by the requirements they protect, not by a preferre
 pattern or folder tree. This is the shared architectural method for direct design,
 implementation decisions and independent review; it is not an implementation
 workflow, automatic audit gate or a second source of product requirements.
+
+## Optional method boundaries
+
+Sibling methods named in metadata supply conditional criteria, not automatic
+assignments. Consult only the relevant procedure; the caller keeps its goal,
+authority and result. If a peer is absent, do not install it or invent its rules.
+Make supported boundary decisions from inspected consumers; distinguish an unresolved design question from permission to implement.
+Report a consequential missing criterion rather than claiming the full composed
+method was completed. Available core work can continue without that claim.
 
 ## Establish the decision and authority
 
@@ -20,7 +31,7 @@ material decision; name nonblocking assumptions and continue useful work.
 
 A proposal or placement question does not authorize application changes. A request
 that already authorizes implementation needs no extra approval ceremony. Use
-[code-maintenance](../code-maintenance/SKILL.md) for that work, and available
+[code-change](../code-change/SKILL.md) for that work, and available
 [implementation-planning](../implementation-planning/SKILL.md) to sequence adopted
 decisions into units and handoffs; the boundary decisions stay here. For an
 independent review, [independent-audit](../independent-audit/SKILL.md) owns

@@ -19,8 +19,10 @@ import tomllib
 
 if __package__:
     from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from .skill_resources import distribution_problems, markdown_problems
 else:
     from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from skill_resources import distribution_problems, markdown_problems
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
@@ -384,28 +386,6 @@ def canonical_inventory(root: Path) -> dict[str, tuple[str, str]]:
     return result
 
 
-def markdown_problems(path: Path, root: Path) -> list[str]:
-    problems: list[str] = []
-    for target in MARKDOWN_LINK.findall(
-        path.read_text(encoding="utf-8", errors="strict")
-    ):
-        target = target.strip().split(maxsplit=1)[0].strip('<>"')
-        if not target or target.startswith(("#", "http://", "https://", "mailto:")):
-            continue
-        raw = target.split("#", 1)[0]
-        if not raw:
-            continue
-        try:
-            (path.parent / raw).resolve(strict=True).relative_to(
-                root.resolve(strict=True)
-            )
-        except (OSError, ValueError):
-            problems.append(
-                f"{path.relative_to(root).as_posix()}: broken or out-of-root link {target!r}"
-            )
-    return problems
-
-
 def walk_keys(value: object) -> Iterator[str]:
     if isinstance(value, dict):
         for key, nested in value.items():
@@ -705,6 +685,13 @@ def check(root: Path = ROOT) -> list[str]:
                 except ContractError as error:
                     problems.append(str(error))
 
+    # Validate a full copied collection and every singleton, not only checkout
+    # links. Unsafe source trees never enter the copying boundary.
+    if not path_problems and not stale:
+        problems.extend(distribution_problems([
+            root / asset.path for asset in catalog.assets if asset.kind == "skill"
+        ]))
+
     bridge = root / "CLAUDE.md"
     if bridge.is_file() and bridge.read_bytes() != b"@AGENTS.md\n":
         problems.append("CLAUDE.md: expected the one-line @AGENTS.md bridge")
@@ -715,7 +702,7 @@ def check(root: Path = ROOT) -> list[str]:
 SUMMARY = "Evidence-grounded methods for coding agents"
 LONG_SUMMARY = (
     "Skills and agent profiles for implementation, planning, architecture, testing, "
-    "audit, research, writing, operational UI and bounded delegation. Each method "
+    "audit, research, writing, UI delivery and bounded delegation. Each method "
     "says what it checked, what that establishes and what it does not."
 )
 HOMEPAGE = "https://github.com/Muratovnik/assay"
@@ -886,8 +873,8 @@ def skills_index(root: Path, catalog: Catalog) -> bytes:
         "# Skills",
         "",
         "Each skill is one directory with a `SKILL.md`. A client reads the name and",
-        "description at startup and loads the body only when a task matches, so an",
-        "unused method costs little context.",
+        "description for discovery; actual loading depends on the client and task.",
+        "Declared automatic activation is eligibility, not a successful-run receipt.",
         "",
         "| Skill | Activation | What it is for |",
         "| --- | --- | --- |",

@@ -1,2 +1,3 @@
-# Used by structural native-adapter validation only; no runtime installation.
+# Repository metadata and Markdown-resource validation; not installed by skills.
 PyYAML==6.0.3
+markdown-it-py==4.2.0

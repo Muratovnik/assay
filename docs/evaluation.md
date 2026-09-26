@@ -16,7 +16,7 @@ describes how a run is set up.
 
 Two directories are shaped differently, and it is worth knowing which one you
 are looking at. `independent-audit` keeps its cases in its own fixture layout
-rather than the paired JSON files. `skill-design` has no machine-readable cases
+rather than the paired JSON files. `skill-evaluation` has no machine-readable cases
 at all: its `research-and-transfer.md` is an evaluator-only specification of
 what to supply and what to look for, and the gate checks only that the document
 is there.

@@ -75,7 +75,7 @@ class ArchitectureCorpusTests(unittest.TestCase):
                 linked.relative_to(ROOT.resolve())
                 self.assertTrue(linked.is_file(), f"Missing runtime target: {path.name}: {target}")
                 self.assertNotIn("evals", linked.relative_to(ROOT).parts)
-        for relative in ("skills/code-maintenance/SKILL.md",
+        for relative in ("skills/code-change/SKILL.md",
                          "skills/implementation-planning/SKILL.md",
                          "skills/independent-audit/references/architecture-and-migration.md"):
             path = ROOT / relative
@@ -104,7 +104,7 @@ class ArchitecturePacketTests(unittest.TestCase):
     def test_both_consumers_receive_explicit_criteria_without_evals(self) -> None:
         with tempfile.TemporaryDirectory(prefix="assay-architecture-") as directory:
             parent = Path(directory).resolve()
-            for consumer, case_id in (("code-maintenance", "ARC-01-implement"),
+            for consumer, case_id in (("code-change", "ARC-01-implement"),
                                       ("independent-audit", "ARC-12-layout")):
                 with self.subTest(consumer=consumer):
                     roots = (SKILL, ROOT / "skills" / consumer)

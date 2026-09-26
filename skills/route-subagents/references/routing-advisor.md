@@ -240,3 +240,16 @@ merely having a backup is not a rollback receipt. Preserve benchmark caches and
 the separate history namespace. Static/fake-transport tests establish contracts;
 provider/native effectiveness and quota savings require ordinary work receipts,
 not a mandatory paid comparison campaign.
+
+## Cost of a completed task
+
+Compare routing policies on representative completed tasks, not API price alone.
+Count packet preparation, advisor calls, worker attempts, retries, verification
+and integration; retain unsuccessful attempts and user corrections. Keep actual
+measurements separate from estimates and distinguish API billing from subscription
+quota accounting. Public benchmarks can inform a prior, not establish this cost.
+
+Use the existing explicit choice when the candidate is already justified; do not
+add a paid advisor call merely to certify the same answer. Compare an advisor
+against that simple baseline before claiming savings. A small pilot can reject
+a wasteful policy without establishing universal rankings or model superiority.

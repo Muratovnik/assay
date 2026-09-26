@@ -2,6 +2,8 @@
 name: independent-audit
 description: Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
+metadata:
+  assay-optional-skills: "code-change evidence-research implementation-planning software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Independent audit
@@ -9,6 +11,15 @@ license: MIT
 Establish whether the actual result meets the requested acceptance contract.
 A clean result is valid; findings are not a quota. This method supplies no new
 product requirements or authority to repair the subject.
+
+## Optional method boundaries
+
+Sibling methods named in metadata supply conditional criteria, not automatic
+assignments. Consult only the relevant procedure; the caller keeps its goal,
+authority and result. If a peer is absent, do not install it or invent its rules.
+Continue supported checks against the brief; a missing specialist criterion leaves that area NOT VERIFIED, not compliant.
+Report a consequential missing criterion rather than claiming the full composed
+method was completed. Available core work can continue without that claim.
 
 ## Frame the decision
 

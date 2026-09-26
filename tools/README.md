@@ -38,13 +38,13 @@ present but absent from the workflow. `catalog_docs.py --write` updates only
 the marked architecture table; it never rewrites the independent expected
 inventory in `compatibility_fixture.py`. Evaluation validation checks declared
 case/rubric IDs and input paths. It does not execute fixture code or a model.
-The Markdown-only skill-design evaluation remains explicitly manual.
+The Markdown-only skill-evaluation evaluation remains explicitly manual.
 
 ## Frozen input-only packets
 
 ```text
 python tools/eval_assets.py prepare --cases skills/evidence-research/evals/cases.json --case E05 --output-parent <existing-evidence-directory>
-python tools/eval_assets.py prepare --cases skills/code-maintenance/evals/cases.json --case C04 --method skills/code-maintenance --output-parent <existing-evidence-directory>
+python tools/eval_assets.py prepare --cases skills/code-change/evals/cases.json --case C04 --method skills/code-change --output-parent <existing-evidence-directory>
 ```
 
 Use `--collection triggers` or `--collection discovery_cases` with the actual
@@ -164,7 +164,7 @@ the classifier and control contract stable across examined revisions. This is
 not a general flaky-test, performance or crashing-program oracle; use an existing
 project-specific reproducer for those cases.
 
-The conditional [diagnostic procedure](../skills/code-maintenance/references/diagnostic-reproducer.md)
+The conditional [diagnostic procedure](../skills/code-change/references/diagnostic-reproducer.md)
 explains when a reproducer, minimization or bisection is useful without imposing
 arbitrary hypothesis counts or blocking an already justified small repair.
 

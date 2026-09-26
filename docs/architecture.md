@@ -15,14 +15,14 @@ location a client reads.
 | Asset | Activation | Codex target | Claude target |
 | --- | --- | --- | --- |
 | `skill/route-subagents` | automatic | `~/.agents/skills/route-subagents` | `~/.claude/skills/route-subagents` |
-| `skill/operations-ui-delivery` | automatic | `~/.agents/skills/operations-ui-delivery` | `~/.claude/skills/operations-ui-delivery` |
+| `skill/ui-delivery` | automatic | `~/.agents/skills/ui-delivery` | `~/.claude/skills/ui-delivery` |
 | `skill/independent-audit` | automatic | `~/.agents/skills/independent-audit` | `~/.claude/skills/independent-audit` |
-| `skill/skill-design` | automatic | `~/.agents/skills/skill-design` | `~/.claude/skills/skill-design` |
+| `skill/skill-evaluation` | automatic | `~/.agents/skills/skill-evaluation` | `~/.claude/skills/skill-evaluation` |
 | `skill/evidence-research` | automatic | `~/.agents/skills/evidence-research` | `~/.claude/skills/evidence-research` |
 | `skill/test-writing` | automatic | `~/.agents/skills/test-writing` | `~/.claude/skills/test-writing` |
 | `skill/test-audit` | automatic | `~/.agents/skills/test-audit` | `~/.claude/skills/test-audit` |
 | `skill/software-architecture` | automatic | `~/.agents/skills/software-architecture` | `~/.claude/skills/software-architecture` |
-| `skill/code-maintenance` | automatic | `~/.agents/skills/code-maintenance` | `~/.claude/skills/code-maintenance` |
+| `skill/code-change` | automatic | `~/.agents/skills/code-change` | `~/.claude/skills/code-change` |
 | `skill/implementation-planning` | automatic | `~/.agents/skills/implementation-planning` | `~/.claude/skills/implementation-planning` |
 | `skill/technical-writing` | automatic | `~/.agents/skills/technical-writing` | `~/.claude/skills/technical-writing` |
 | `skill/text-writing` | automatic | `~/.agents/skills/text-writing` | `~/.claude/skills/text-writing` |

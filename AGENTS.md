@@ -6,10 +6,12 @@ find the same rules readable.
 
 ## What belongs here
 
-A skill earns its place by having more than one proven consumer and one concrete
-capability. Consumers may be projects, existing skills or distinct recurring
-workflows. A second hypothetical consumer is not evidence. Single-project
-workflows stay with the project that needs them.
+A skill owns one concrete capability. General reuse needs evidence of a repeated
+decision across materially different consumers or recurring workflows; two links
+to a skill are not proof. Record the observed uses and limits, not a magic count.
+A method with one real consumer may remain explicitly experimental when its
+proposed generalization is useful to investigate; do not call that generalization
+proven. A workflow inseparable from one project's policy stays with that project.
 
 Store canonical content once. `catalog.toml` is the complete inventory and the
 projection contract; `VERSION` is the only revision label. Client manifests and
@@ -24,9 +26,16 @@ profile adapters are generated from those two, never edited by hand.
   second half is what stops it firing on the wrong task.
 - Keep `SKILL.md` short and route conditional depth into `references/`. An
   unused method should cost little context.
-- Link to a rule another skill owns instead of restating it. The linking skill
-  says when to use that method and what stays with itself; the owner keeps the
-  rule, so it changes in one place.
+- Keep one canonical owner for shared criteria, but preserve the minimum safe
+  contract in each supported standalone skill. A reference is not availability.
+  For a peer method, state the condition, input, returned result, retained owner
+  and unavailable-method behavior. References do not transfer authority.
+- Declare optional peer names in the string-valued frontmatter metadata key
+  `assay-optional-skills`. It is Assay validation metadata, not a standard
+  dependency installer. A missing optional peer limits the composed outcome;
+  never classify a required resource as optional merely to pass a check.
+  Skill-local resources remain mandatory. Validate both the whole collection
+  and singleton copies; see [composition boundaries](docs/explanation/skill-composition.md).
 - Keep client-specific facts — model aliases, tool names, permission metadata —
   in adapters or routed client references, never in neutral prose.
 - Evaluation data lives in `evals/` and is never read while performing a user's
@@ -52,7 +61,8 @@ It does not package anything or keep install state.
 ## Gates
 
 Set up tooling in an isolated Python 3.11+ environment with
-`python -m pip install -r requirements-tools.txt`. Never auto-install into a
+`python -m pip install -r requirements-tools.txt`. PyYAML parses metadata and
+markdown-it-py parses CommonMark; do not replace either format with ad-hoc syntax. Never auto-install into a
 user's global environment.
 
 ```text
