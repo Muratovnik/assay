@@ -14,12 +14,11 @@ must not contain. Some skills add a `trigger-cases.json` for the separate
 question of whether the skill should activate at all, and `evaluation.md`
 describes how a run is set up.
 
-Two directories are shaped differently, and it is worth knowing which one you
-are looking at. `independent-audit` keeps its cases in its own fixture layout
-rather than the paired JSON files. `skill-evaluation` has no machine-readable cases
-at all: its `research-and-transfer.md` is an evaluator-only specification of
-what to supply and what to look for, and the gate checks only that the document
-is there.
+`independent-audit` keeps its cases in its own fixture layout rather than the
+paired JSON files. `skill-evaluation` now has paired decision and discovery cases,
+separate evaluator-only metadata and a run protocol. Its manual
+`research-and-transfer.md` specifications remain available for source-backed
+transfer scenarios; those specifications are not executed results.
 
 They are evaluation data, not runtime instructions. A skill's own text says so:
 while performing a user's task, the skill must not read its own cases or rubrics.
@@ -33,7 +32,7 @@ an id, every rubric entry points at a case that exists, every referenced input
 path resolves, and no case smuggles a grading field into the input side. It does
 not execute a fixture and it does not run a model.
 
-Two suites do execute, and neither runs a model. The audit packet suite
+Utility suites do execute, without running models. The audit packet suite
 (`skills/independent-audit/evals/test_prepare_case.py`) builds frozen input-only
 packets and verifies that preparation excludes rubrics, other cases and previous
 answers, and that a packet's manifest digest matches what was actually written.
@@ -42,15 +41,17 @@ that skill's shipped `text_check.py` against fixture pairs and holds it to its
 documented contract: which regions each mode compares, which exit code each
 outcome produces, and that the check leaves both input files untouched.
 
-So the gates establish that the evaluation material is internally consistent,
-that packet preparation is honest, and that one shipped script behaves as its
-own documentation says. They establish nothing about answer quality.
+`tools/test_eval_assets.py` also exercises inline packet preparation and metadata
+validation, including invalid-input rejection and exclusion of coordinator keys.
+These checks establish structural consistency and the specific utility behavior
+asserted by the tests. They do not establish semantic case independence, correct
+grading expectations, effective access isolation or answer quality.
 
 ## What is deliberately not proven
 
 No model is run in CI. There is no score in this repository, no leaderboard and
 no claim that a skill improves outcomes by some percentage. Measuring that needs
-a paid run against a frozen baseline, and a result would belong to the client,
+authorized comparable runs against a frozen baseline, and a result would belong to the client,
 model and date it was measured on rather than to the skill.
 
 Static files also cannot prove discovery. That a skill is installed where a
@@ -84,3 +85,63 @@ For an initial method-change comparison, use the existing
 [paired-pilot procedure](../skills/skill-evaluation/references/paired-pilot.md).
 It distinguishes discovery, decisions, preserved valid behavior and total cost.
 A small diagnostic sample is not a score for the library or evidence of general savings.
+
+## Evaluator-only case metadata
+
+An optional `case-metadata.json` sits beside `cases.json`; an auxiliary
+`<prefix>-cases.json` uses `<prefix>-case-metadata.json`. Existing pairs without
+metadata remain supported. Metadata has `schema_version: 1`, the same
+`skill_name`, and exactly the same case collections and IDs as its input file.
+Every record contains the following nonempty, trimmed string fields:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Matching case ID within its collection. |
+| `group` | Related incident, template, project or answer family. |
+| `purpose` | `routine`, `regression`, `challenge` or `should-not-fire`. |
+| `source` | Provenance, including whether the case is synthetic. |
+| `rationale` | Why this case belongs in the intended task population. |
+| `split` | `working`, `selection` or `final`. |
+| `exposure` | `public`, `development` or `sealed`. |
+
+The checker rejects unknown or missing fields, invalid classifications, unmatched
+IDs, orphan sidecars and declared groups crossing splits within one skill's main
+and auxiliary corpora. A final case must be declared sealed. This declaration
+is not proof of access restrictions: a public file does not become secret by
+changing a label. The checker cannot discover undeclared semantic relatedness or
+verify representativeness. All shipped `skill-evaluation` cases are explicitly
+public working material, never a private final set.
+
+`prepare` does not load or copy sidecars or rubrics. It still accepts only `id`,
+`prompt`, `context` and `files` on the input side. This is a packaging boundary,
+not a guarantee that an executor cannot access the original repository elsewhere.
+The source digest identifies inputs, not the measurement version: retain rubric,
+judge configuration, metadata and split/exposure history separately in the
+coordinator's existing evidence record.
+
+## From a pilot to iterative improvement
+
+Use [evaluation design](../skills/skill-evaluation/references/eval-design.md) when
+creating or materially changing a corpus or evaluator. It connects user outcomes
+to criteria, calibrates false acceptance and false rejection, and distinguishes
+judge variability from executor variability. Reuse applicable calibration rather
+than making every minor edit start a new evaluation project.
+
+Use [bounded iterative improvement](../skills/skill-evaluation/references/iterative-improvement.md)
+when the request needs several candidate changes. Fix the objective, baseline,
+authorized surface, budget, guardrails and stopping policy first. Keep working
+cases, candidate-selection evidence and final untouched groups distinct; repeated
+aggregate feedback is selection, not independent final evidence. Tiny pilots
+remain diagnostic instead of being divided into misleading miniature splits.
+
+Deleting a duplicate rule, narrowing a trigger, relocating guidance and retaining
+the current method are legitimate candidates. Preserve valid nearby work and test
+automatic activation in the actual enabled collection. A plateau calls for causal
+diagnosis, not more emphatic instructions or removal of inconvenient failures.
+Correcting the evaluator creates a new measurement version; compare both
+conditions under the same corrected criteria and preserve earlier evidence.
+
+These procedures reuse existing execution, inspection and Git tools. They add no
+runner, model campaign, autonomous self-editing service or requirement to publish
+results. Authored, structurally checked, behaviorally exercised and comparatively
+supported remain separate claims.

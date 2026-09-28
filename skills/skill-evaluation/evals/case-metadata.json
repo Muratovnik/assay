@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "SE01",
+      "group": "attribution",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Detect causal overclaim when executor and instructions change together.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE02",
+      "group": "attribution",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Valid matched pilot must remain useful without being oversold.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE03",
+      "group": "measurement",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "A better number after weakening acceptance is not better behavior.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE04",
+      "group": "measurement",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Permit legitimate oracle repair without a misleading performance curve.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE05",
+      "group": "selection",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Adaptive feedback contaminates selection even without prompt access.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE06",
+      "group": "selection",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Preserve the valid counterpart to adaptive test reuse.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE07",
+      "group": "grouping",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Related incidents and repetitions must not inflate effective diversity.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE08",
+      "group": "cost",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Token savings can hide a larger correction burden.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE09",
+      "group": "diagnosis",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Reproduces the existing unread-versus-missing diagnostic distinction.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE10",
+      "group": "calibration",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "A judge must distinguish correctness from superficial format.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE11",
+      "group": "calibration",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Fixed-output rescoring separates two different noise sources.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE12",
+      "group": "calibration",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Preference stability and impartiality require evidence, not model branding.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE13",
+      "group": "plateau",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Aggregate plateau diagnosis should redirect repairs rather than multiply rules.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE14",
+      "group": "subtraction",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Deletion is a legitimate experimental change, not automatic evidence of benefit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE15",
+      "group": "discovery",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Routing requires evidence under the real enabled collection.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE16",
+      "group": "budget",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "The deeper method must not turn every small correction into a campaign.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE17",
+      "group": "coverage",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Regression assurance and capability headroom have different purposes.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE18",
+      "group": "coverage",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Difficulty for one current model is not a population definition.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE19",
+      "group": "isolation",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Prevent false assurance from a fresh context and unchanged files.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE20",
+      "group": "noise",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Adaptive retry selection must not manufacture a winner.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE21",
+      "group": "guardrails",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Hard constraints cannot be traded for average quality.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE22",
+      "group": "measurement",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Task-input correction differs from regrading sufficient saved outputs.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE23",
+      "group": "outcome",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Optimization must serve the requested outcome rather than ritual artifacts.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE24",
+      "group": "calibration",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Protect the grader from instructions carried in the material it evaluates.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "SD01",
+      "group": "activation-positive",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD02",
+      "group": "activation-positive",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD03",
+      "group": "activation-positive",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD04",
+      "group": "activation-positive",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD05",
+      "group": "activation-negative",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD06",
+      "group": "activation-negative",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD07",
+      "group": "activation-negative",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD08",
+      "group": "activation-negative",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

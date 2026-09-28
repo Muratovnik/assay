@@ -59,6 +59,12 @@ restart the lifecycle or imply that a local candidate was published.
 
 For a small paired comparison, use [paired pilot](references/paired-pilot.md).
 It reuses existing execution and inspection tools; it is not another platform.
+Before trusting a new or materially changed evaluator, use
+[evaluation design](references/eval-design.md) for task coverage, grading
+calibration and separation of working, selection and final evidence. For an
+explicit multi-candidate improvement, use
+[bounded iteration](references/iterative-improvement.md); reuse an applicable
+measurement, freeze the budget and do not promote an inconclusive result.
 
 ## Compare relevant conditions
 
@@ -69,8 +75,10 @@ skill. For this supplement compare against ordinary authoring alone.
 
 Keep inputs, surrounding instructions, tools, permissions and model settings
 comparable. Include a failure case and a nearby valid control. Reserve a case
-before tuning a material generalization; once used, it is regression evidence.
-Test unintended activation separately when discovery is in scope. A model or
+before tuning a material generalization. Repeated selection feedback is tuning
+evidence, not an independent final result; exposed cases become regression data.
+Test unintended activation with the actual enabled collection when discovery is
+in scope; isolated explicit loading misses competing entries. A model or
 client change calls for rechecking relevant assumptions, not universal claims
 from an earlier executor's results.
 

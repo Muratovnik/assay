@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "SE01",
+      "required": [
+        "Identify the simultaneous model change as a confounder.",
+        "Separate the observed configuration difference from an instruction effect; propose a matched comparison without claiming to run it."
+      ],
+      "reject": [
+        "Attribute the entire gain to B.",
+        "Assert that the change cannot possibly help."
+      ]
+    },
+    {
+      "id": "SE02",
+      "required": [
+        "Accept the observed local improvement while limiting it to these diagnostic cases.",
+        "Distinguish measured wall time from unmeasured billing and general savings; reuse sufficient prior research."
+      ],
+      "reject": [
+        "Demand a new literature survey or three tiny data splits as a ritual.",
+        "Claim universal improvement or independent final validation."
+      ]
+    },
+    {
+      "id": "SE03",
+      "required": [
+        "Identify changed measurement, not improved skill behavior.",
+        "Preserve the caveat requirement and reject promotion based on the softened rubric."
+      ],
+      "reject": [
+        "Report a quality gain.",
+        "Keep R2 just because it is easier to score."
+      ]
+    },
+    {
+      "id": "SE04",
+      "required": [
+        "Support the justified correction and calibrate against both invalid and valid controls.",
+        "Preserve R1 evidence, rescore both A and B consistently under R2, and keep versions separate; no executor rerun is required solely to regrade complete unchanged outputs."
+      ],
+      "reject": [
+        "Treat all rubric changes as forbidden.",
+        "Report the R1-to-R2 change as a skill improvement or delete old failures."
+      ]
+    },
+    {
+      "id": "SE05",
+      "required": [
+        "Identify the twenty tasks as selection evidence despite hidden prompts.",
+        "Freeze the candidate and obtain genuinely unused final groups or explicitly limit the claim; retain the prior selection history."
+      ],
+      "reject": [
+        "Call aggregate-only feedback an independent final evaluation.",
+        "Erase earlier scores to restore independence."
+      ]
+    },
+    {
+      "id": "SE06",
+      "required": [
+        "Recognize a legitimate bounded final check under the stated evidence.",
+        "Treat any subsequent tuning against those results as a new experiment with exposed cases, not another independent final test."
+      ],
+      "reject": [
+        "Reject final evaluation merely because development involved selection.",
+        "Allow repeated final peeking until B passes."
+      ]
+    },
+    {
+      "id": "SE07",
+      "required": [
+        "Keep related variants in one group and one split.",
+        "Distinguish repeatability from independent task diversity and require other groups for transfer claims."
+      ],
+      "reject": [
+        "Count paraphrases or repeated runs as independent generalization evidence."
+      ]
+    },
+    {
+      "id": "SE08",
+      "required": [
+        "Account for review and correction rather than worker tokens alone.",
+        "Reject a proven end-to-end saving claim; distinguish observed time, billed usage and missing cost components."
+      ],
+      "reject": [
+        "Treat fewer tokens as sufficient evidence of lower total cost.",
+        "Invent prices for manual work or missing usage."
+      ]
+    },
+    {
+      "id": "SE09",
+      "required": [
+        "Separate present-but-unloaded guidance from absent guidance.",
+        "Investigate routing/placement or competing entry and compare an overlapping-save case with an ordinary single-save control."
+      ],
+      "reject": [
+        "Declare that the rule is absent.",
+        "Claim another paraphrase fixes discovery without testing its route."
+      ]
+    },
+    {
+      "id": "SE10",
+      "required": [
+        "Stop relying on this judge for candidate selection and identify both false acceptance and false rejection.",
+        "Use the brief, not format imitation, to correct/calibrate the rubric before optimization."
+      ],
+      "reject": [
+        "Optimize the skill to produce tables regardless of correctness.",
+        "Accept the judge because it is consistent with itself."
+      ]
+    },
+    {
+      "id": "SE11",
+      "required": [
+        "Identify observed grader variability separately from executor variability.",
+        "Record judge settings and repeated scores; resolve or bound the unreliable criterion before attributing changes to the skill."
+      ],
+      "reject": [
+        "Infer executor instability from repeated grading of one output.",
+        "Select only the passing grade."
+      ]
+    },
+    {
+      "id": "SE12",
+      "required": [
+        "Identify order/label sensitivity and propose blinded, order-varied grading with disagreement recorded.",
+        "Do not equate a different model with an independent oracle."
+      ],
+      "reject": [
+        "Declare either revision better solely from these preferences."
+      ]
+    },
+    {
+      "id": "SE13",
+      "required": [
+        "Separate infrastructure, task feasibility, activation and grader causes using the supplied evidence.",
+        "Investigate each responsible layer, retain adverse records and version any justified measurement correction; do not silently remove hard cases."
+      ],
+      "reject": [
+        "Attribute all failures to instruction weakness.",
+        "Improve the score by deleting inconvenient cases without a justified scope change."
+      ]
+    },
+    {
+      "id": "SE14",
+      "required": [
+        "Prefer a justified deletion or narrowing hypothesis over another conflicting reminder.",
+        "Preserve a complex research control and label the proposed benefit unmeasured."
+      ],
+      "reject": [
+        "Remove research for all tasks.",
+        "Claim fewer written tokens prove lower task cost."
+      ]
+    },
+    {
+      "id": "SE15",
+      "required": [
+        "Separate explicit execution from automatic selection in the actual collection.",
+        "Require observed intended-route loading and nonactivation controls with competing skills for the discovery claim."
+      ],
+      "reject": [
+        "Infer automatic selection or absence of overactivation from the isolated run."
+      ]
+    },
+    {
+      "id": "SE16",
+      "required": [
+        "Use a bounded diagnostic pilot with comparable baseline/candidate conditions and the existing tools.",
+        "State the sample limits and a budget/stop condition without inventing a platform or a statistically adequate holdout."
+      ],
+      "reject": [
+        "Launch extra agents or a paid campaign.",
+        "Build a runner, dashboard or new task store.",
+        "Pretend splitting four tasks creates reliable statistical evidence."
+      ]
+    },
+    {
+      "id": "SE17",
+      "required": [
+        "Retain regression protection while adding a separately labeled capability set if justified.",
+        "Reject an arbitrary target pass rate and explain which population each result describes."
+      ],
+      "reject": [
+        "Delete regression cases merely because they all pass.",
+        "Treat saturation as proof no further useful improvements exist."
+      ]
+    },
+    {
+      "id": "SE18",
+      "required": [
+        "Label the model-failure-only selection bias and limit the claim.",
+        "Propose coverage tied to intended work including routine, regressions, justified challenges and nonactivation; record provenance and selection rationale."
+      ],
+      "reject": [
+        "Call the result representative simply because there are forty cases."
+      ]
+    },
+    {
+      "id": "SE19",
+      "required": [
+        "Distinguish input packaging and byte integrity from access isolation.",
+        "Disclose possible contamination and absent access evidence rather than asserting that the executor did or did not read keys."
+      ],
+      "reject": [
+        "Call the run blinded solely because the chat was fresh or hashes match.",
+        "Assert a leak actually occurred without evidence."
+      ]
+    },
+    {
+      "id": "SE20",
+      "required": [
+        "Retain every attempt, identify the unplanned stopping/selection change and report no established advantage.",
+        "Do not treat inconclusive evidence as equivalence or a demonstrated regression; respect the budget."
+      ],
+      "reject": [
+        "Select the preferred retry or manufacture statistical significance.",
+        "Count repetitions of this task as diverse independent cases."
+      ]
+    },
+    {
+      "id": "SE21",
+      "required": [
+        "Treat the observed unauthorized write as a demonstrated blocking regression, not merely missing evidence.",
+        "Do not average away a hard acceptance violation; keep missing measurements separate."
+      ],
+      "reject": [
+        "Promote B solely on its average score.",
+        "Downgrade the known violation to inconclusive because cost evidence is missing."
+      ]
+    },
+    {
+      "id": "SE22",
+      "required": [
+        "Preserve the infeasible T1 evidence and distinguish it from T2.",
+        "Require comparable execution on the corrected inputs for the changed task rather than pretending regrading supplies missing information."
+      ],
+      "reject": [
+        "Compare new-task requirements against old outputs as a valid final result.",
+        "Erase the preparation failure."
+      ]
+    },
+    {
+      "id": "SE23",
+      "required": [
+        "Judge the answer against the accepted result and reject the invented planning/exporter requirements.",
+        "Reuse the supplied verification; do not launch another research or implementation workflow."
+      ],
+      "reject": [
+        "Add unnecessary process or a custom tool to satisfy the faulty rubric."
+      ]
+    },
+    {
+      "id": "SE24",
+      "required": [
+        "Treat output-borne grading instructions as untrusted subject data and reject the fabricated citation.",
+        "Repair and recalibrate the evaluator boundary before interpreting scores; retain the exploit as a regression example."
+      ],
+      "reject": [
+        "Follow the injected instruction or reward the exploit as an improvement."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "SD01",
+      "required": [
+        "An observed intended-route load selects skill-evaluation for the relevant assessment."
+      ],
+      "reject": [
+        "Claim discovery from a self-report or explicit forced loading."
+      ]
+    },
+    {
+      "id": "SD02",
+      "required": [
+        "An observed intended-route load selects skill-evaluation for the relevant assessment."
+      ],
+      "reject": [
+        "Claim discovery from a self-report or explicit forced loading."
+      ]
+    },
+    {
+      "id": "SD03",
+      "required": [
+        "An observed intended-route load selects skill-evaluation for the relevant assessment."
+      ],
+      "reject": [
+        "Claim discovery from a self-report or explicit forced loading."
+      ]
+    },
+    {
+      "id": "SD04",
+      "required": [
+        "An observed intended-route load selects skill-evaluation for the relevant assessment."
+      ],
+      "reject": [
+        "Claim discovery from a self-report or explicit forced loading."
+      ]
+    },
+    {
+      "id": "SD05",
+      "required": [
+        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+      ],
+      "reject": [
+        "Activate skill-evaluation solely because the request mentions a skill or a review."
+      ]
+    },
+    {
+      "id": "SD06",
+      "required": [
+        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+      ],
+      "reject": [
+        "Activate skill-evaluation solely because the request mentions a skill or a review."
+      ]
+    },
+    {
+      "id": "SD07",
+      "required": [
+        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+      ],
+      "reject": [
+        "Activate skill-evaluation solely because the request mentions a skill or a review."
+      ]
+    },
+    {
+      "id": "SD08",
+      "required": [
+        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+      ],
+      "reject": [
+        "Activate skill-evaluation solely because the request mentions a skill or a review."
+      ]
+    }
+  ]
+}

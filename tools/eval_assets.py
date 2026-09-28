@@ -20,9 +20,13 @@ ROOT = Path(__file__).resolve().parents[1]
 PAIRED_SKILLS = ("route-subagents", "code-change", "evidence-research", "test-writing", "test-audit",
                  "technical-writing", "text-writing", "implementation-planning",
                  "software-architecture", "product-flow-mapping",
-                 "research-driven-change")
+                 "research-driven-change", "skill-evaluation")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
 COLLECTIONS = ("cases", "discovery_cases", "triggers")
+METADATA_KEYS = {"id", "group", "purpose", "source", "rationale", "split", "exposure"}
+PURPOSES = {"routine", "regression", "challenge", "should-not-fire"}
+SPLITS = {"working", "selection", "final"}
+EXPOSURES = {"public", "development", "sealed"}
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -95,7 +99,46 @@ def record_ids(records: Any, label: str) -> set[str]:
     return set(ids)
 
 
-def check_pair(cases_path: Path, rubric_path: Path, name: str) -> None:
+def metadata_path(cases_path: Path) -> Path:
+    """Adjacent evaluator-only metadata; never part of an executor packet."""
+    if cases_path.name == "cases.json":
+        return cases_path.with_name("case-metadata.json")
+    return cases_path.with_name(cases_path.name.removesuffix("-cases.json") + "-case-metadata.json")
+
+
+def check_metadata(path: Path, cases: dict[str, Any], name: str, *,
+                   group_splits: dict[str, str] | None = None) -> None:
+    """Validate declared membership, not semantic independence or actual secrecy."""
+    metadata = load(path)
+    if (set(metadata) - {"schema_version", "skill_name", *COLLECTIONS}
+            or type(metadata.get("schema_version")) is not int
+            or metadata["schema_version"] != 1 or metadata.get("skill_name") != name):
+        raise ValueError(f"{name}: metadata schema/skill identity mismatch")
+    source_groups, meta_groups = collections(cases), collections(metadata)
+    if not source_groups or source_groups.keys() != meta_groups.keys():
+        raise ValueError(f"{name}: metadata collections disagree")
+    if group_splits is None:
+        group_splits = {}
+    for key, records in meta_groups.items():
+        if record_ids(records, key) != record_ids(source_groups[key], key):
+            raise ValueError(f"{name}: {key} metadata IDs disagree")
+        for record in records:
+            if set(record) != METADATA_KEYS or any(
+                    not isinstance(value, str) or not value.strip()
+                    or value != value.strip() for value in record.values()):
+                raise ValueError(f"{name}: invalid metadata fields")
+            if (record["purpose"] not in PURPOSES or record["split"] not in SPLITS
+                    or record["exposure"] not in EXPOSURES):
+                raise ValueError(f"{name}: unsupported metadata classification")
+            if record["split"] == "final" and record["exposure"] != "sealed":
+                raise ValueError(f"{name}: final cases must be declared sealed, not exposed")
+            group = record["group"]
+            if group_splits.setdefault(group, record["split"]) != record["split"]:
+                raise ValueError(f"{name}: related group crosses evaluation splits: {group}")
+
+
+def check_pair(cases_path: Path, rubric_path: Path, name: str, *,
+               group_splits: dict[str, str] | None = None) -> None:
     cases, rubric = load(cases_path), load(rubric_path)
     for document in (cases, rubric):
         if type(document.get("schema_version")) is not int or document["schema_version"] != 1 or document.get("skill_name") != name:
@@ -108,6 +151,9 @@ def check_pair(cases_path: Path, rubric_path: Path, name: str) -> None:
             raise ValueError(f"{name}: {key} IDs disagree with rubric")
         for record in records:
             input_case(record)
+    metadata = metadata_path(cases_path)
+    if metadata.exists() or metadata.is_symlink():
+        check_metadata(metadata, cases, name, group_splits=group_splits)
 
 
 def audit_tools(root: Path = ROOT) -> Any:
@@ -120,16 +166,24 @@ def check(root: Path = ROOT) -> dict[str, str]:
     report = {}
     for name in PAIRED_SKILLS:
         directory = root / "skills" / name / "evals"
-        check_pair(directory / "cases.json", directory / "rubric.json", name)
-        for cases in sorted(directory.glob("*-cases.json")):
-            check_pair(cases, cases.with_name(cases.name.replace("-cases.json", "-rubric.json")), name)
+        case_paths = [directory / "cases.json", *sorted(directory.glob("*-cases.json"))]
+        expected_metadata = {metadata_path(path) for path in case_paths}
+        observed_metadata = set(directory.glob("*-case-metadata.json"))
+        if (directory / "case-metadata.json").exists():
+            observed_metadata.add(directory / "case-metadata.json")
+        if observed_metadata - expected_metadata:
+            raise ValueError(f"{name}: orphan case metadata")
+        group_splits: dict[str, str] = {}
+        for cases in case_paths:
+            rubric = cases.with_name("rubric.json" if cases.name == "cases.json"
+                                     else cases.name.removesuffix("-cases.json") + "-rubric.json")
+            check_pair(cases, rubric, name, group_splits=group_splits)
         report[name] = "input/rubric structure checked, no model run"
     # Keep the existing, separately tested fixture/file validation path.
     audit_tools(root).load_cases(root / "skills/independent-audit/evals")
     report["independent-audit"] = "legacy fixture paths checked, no model run"
     if not (root / "skills/skill-evaluation/evals/research-and-transfer.md").is_file():
         raise ValueError("skill-evaluation: missing manual evaluation document")
-    report["skill-evaluation"] = "manual Markdown evaluation; no JSON conversion or behavioral claim"
     return report
 
 
