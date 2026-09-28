@@ -1,0 +1,24 @@
+name: Routing review source
+
+on:
+  push:
+    branches: [fix/routing-pipeline-enforcement]
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    if: startsWith(github.event.head_commit.message, 'chore(routing): prepare source snapshot')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Export pinned source
+        run: git archive --format=zip --output=routing-source.zip 171a951c71eced1a9a99dd769bc78ae85db421eb
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: routing-source
+          path: routing-source.zip
+          retention-days: 1
