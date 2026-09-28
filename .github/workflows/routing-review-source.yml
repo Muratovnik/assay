@@ -8,22 +8,16 @@ permissions:
   contents: read
 
 jobs:
-  snapshot:
+  dependencies:
     if: >-
-      startsWith(github.event.head_commit.message, 'chore(routing): prepare source snapshot')
+      startsWith(github.event.head_commit.message, 'chore(routing): prepare isolated SDK')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          fetch-depth: 0
-      - name: Export pinned source and history
-        run: |
-          git archive --format=zip --output=routing-source.zip 171a951c71eced1a9a99dd769bc78ae85db421eb
-          git bundle create routing-history.bundle --all
+      - name: Download pinned MCP verification dependencies
+        run: python -m pip download --python-version 3.13 --only-binary=:all: --dest routing-wheels -r skills/route-subagents/scripts/requirements-mcp.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: routing-source
-          path: |
-            routing-source.zip
-            routing-history.bundle
+          name: routing-sdk-wheels
+          path: routing-wheels
           retention-days: 1
