@@ -15,7 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Download pinned MCP verification dependencies
-        run: python -m pip download --python-version 3.13 --only-binary=:all: --dest routing-wheels -r skills/route-subagents/scripts/requirements-mcp.txt
+        run: |
+          python -m pip download --python-version 3.13 --only-binary=:all: --dest routing-wheels -r skills/route-subagents/scripts/requirements-mcp.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: routing-sdk-wheels
