@@ -25,6 +25,11 @@ future inputs. Authorized work copies and frozen evidence packets serve differen
 purposes; use existing isolation controls without claiming a fresh context alone
 isolates the filesystem.
 
+For an untrusted or materially changed evaluation, use
+[evaluation design](eval-design.md) first. A pilot's few tasks need not be
+divided into working, selection and final splits; identify what was exposed and
+keep the conclusion explicitly diagnostic.
+
 ## Inspect four distinct results
 
 | Question | Useful observation | Invalid substitute |
@@ -48,6 +53,11 @@ Keep uncertainty and adverse results. Do not rerun unchanged cases until they
 pass, average incompatible conditions or substitute successful discovery for
 successful delivery. Remove or narrow guidance only when the protected outcome
 and the legitimate control remain represented.
+
+## When a pilot is not enough
+
+Use [bounded iterative improvement](iterative-improvement.md) when the authorized
+task calls for successive candidates.
 
 ## Prior work and limits of transfer
 

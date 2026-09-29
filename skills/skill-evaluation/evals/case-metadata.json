@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "SE01",
+      "group": "SE01",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Attribution family. Detect causal overclaim when executor and instructions change together.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE02",
+      "group": "SE02",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Attribution family. Valid matched pilot must remain useful without being oversold.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE03",
+      "group": "SE03",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Measurement family. A better number after weakening acceptance is not better behavior.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE04",
+      "group": "SE04",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Measurement family. Permit legitimate oracle repair without a misleading performance curve.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE05",
+      "group": "SE05",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Selection family. Adaptive feedback contaminates selection even without prompt access.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE06",
+      "group": "SE06",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Selection family. Preserve the valid counterpart to adaptive test reuse.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE07",
+      "group": "SE07",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Grouping family. Related incidents and repetitions must not inflate effective diversity.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE08",
+      "group": "SE08",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Cost family. Token savings can hide a larger correction burden.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE09",
+      "group": "SE09",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Diagnosis family. Reproduces the existing unread-versus-missing diagnostic distinction.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE10",
+      "group": "SE10",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Calibration family. A judge must distinguish correctness from superficial format.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE11",
+      "group": "SE11",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Calibration family. Fixed-output rescoring separates two different noise sources.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE12",
+      "group": "SE12",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Calibration family. Preference stability and impartiality require evidence, not model branding.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE13",
+      "group": "SE13",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Plateau family. Aggregate plateau diagnosis should redirect repairs rather than multiply rules.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE14",
+      "group": "SE14",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Subtraction family. Deletion is a legitimate experimental change, not automatic evidence of benefit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE15",
+      "group": "SE15",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Discovery family. Routing requires evidence under the real enabled collection.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE16",
+      "group": "SE16",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Budget family. The deeper method must not turn every small correction into a campaign.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE17",
+      "group": "SE17",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Coverage family. Regression assurance and capability headroom have different purposes.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE18",
+      "group": "SE18",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Coverage family. Difficulty for one current model is not a population definition.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE19",
+      "group": "SE19",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Isolation family. Prevent false assurance from a fresh context and unchanged files.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE20",
+      "group": "SE20",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Noise family. Adaptive retry selection must not manufacture a winner.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE21",
+      "group": "SE21",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Guardrails family. Hard constraints cannot be traded for average quality.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE22",
+      "group": "SE22",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Measurement family. Task-input correction differs from regrading sufficient saved outputs.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE23",
+      "group": "SE23",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Outcome family. Optimization must serve the requested outcome rather than ritual artifacts.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE24",
+      "group": "SE24",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Calibration family. Protect the grader from instructions carried in the material it evaluates.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "SD01",
+      "group": "positive-routing-template",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD02",
+      "group": "positive-routing-template",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD03",
+      "group": "positive-routing-template",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD04",
+      "group": "positive-routing-template",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Exercise the intended behavioral-assessment boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD05",
+      "group": "negative-routing-template",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD06",
+      "group": "negative-routing-template",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD07",
+      "group": "negative-routing-template",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD08",
+      "group": "negative-routing-template",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Preserve a neighboring task that needs no behavioral assessment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SD09",
+      "group": "SD09",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored routing request; not a captured run.",
+      "rationale": "Routing family. Evaluating whether a test suite catches a regression belongs to test-audit, not to a skill assessment.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}
