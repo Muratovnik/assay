@@ -29,6 +29,7 @@ AVAILABLE = [{"model": "worker-alpha", "efforts": ["low", "high"]},
              {"model": "worker-beta", "efforts": ["medium"]}]
 ROUTE = {"model": "worker-beta", "effort": "medium",
          "selection_basis": {"source": "client_role", "reason_code": "bounded_ranking"}}
+BASELINE = {"model": "worker-alpha", "effort": "low"}
 PACKETS = [{"packet_id": "work", "task_types": ["implementation"], "features": {}}]
 
 
@@ -42,7 +43,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.config = {"schema_version": 3, "client": "claude", "telemetry": {"mode": "off"},
             "inventory": {"available": AVAILABLE, "observed_at": timestamp(self.now)},
             "pipeline": {"mode": "required", "state_dir": str(self.root / "state"), "agents_dir": str(self.root / "agents"),
-                "advisor_route": ROUTE,
+                "advisor_route": ROUTE, "baseline": BASELINE,
                 "variants": [{"profile": "general-purpose", "model": m["model"], "effort": e}
                              for m in AVAILABLE for e in m["efforts"]]}}
         self.configure()
@@ -272,25 +273,98 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(EvidenceError):
             self.event("PreToolUse", tool_name="Agent", tool_use_id="w", tool_input=launch["input"])
 
+    def assert_fallback(self, result, cause):
+        """The configured baseline, recorded with the reason it was needed."""
+        self.assertEqual(result["status"], "decided")
+        decision = result["decisions"][0]
+        self.assertEqual(decision["decision_type"], "fallback")
+        self.assertEqual({k: decision["selected"][k] for k in BASELINE}, BASELINE)
+        self.assertEqual(decision["reason_codes"], [cause, "caller_baseline"])
+        self.assertNotIn('"ranking"', json.dumps(result))
+
     async def test_failed_advisor_uses_only_configured_baseline(self):
-        self.config["pipeline"]["baseline"] = {"model": "worker-alpha", "effort": "low"}
-        self.configure()
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.event("PostToolUseFailure", tool_name="Agent", tool_use_id="call-a")
-        result = self.decision(prepared["decision_id"])
-        self.assertEqual(result["status"], "decided")
-        self.assertEqual(result["decisions"][0]["selected"]["model"], "worker-alpha")
-        self.assertNotIn('"ranking"', json.dumps(result))
+        self.assert_fallback(self.decision(prepared["decision_id"]), "advisor_ended_without_result")
 
-    async def test_finished_advisor_without_baseline_does_not_inherit_parent(self):
+    async def test_advisor_ending_without_result_falls_back_instead_of_inheriting_parent(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.event("SubagentStop", agent="advisor-a")
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
-        self.assertEqual(self.decision(prepared["decision_id"])["status"], "no_decision")
-        with self.assertRaises(EvidenceError):
-            self.authorize(prepared["decision_id"])
+        self.assert_fallback(self.decision(prepared["decision_id"]), "advisor_ended_without_result")
+        launch = self.authorize(prepared["decision_id"])
+        self.assertEqual((launch["requested_model"], launch["requested_effort"]), (BASELINE["model"], BASELINE["effort"]))
+
+    async def test_abstaining_advisor_falls_back_to_the_baseline(self):
+        prepared = await self.prepare()
+        self.launch(prepared["handoff"])
+        answer = self.private_input(prepared["decision_id"])["result_contract"]
+        answer["rankings"][0].update(abstained=True, ranking=[], ties=[])
+        self.submit(prepared["decision_id"], answer)
+        self.event("SubagentStop", agent="advisor-a")
+        self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
+        self.assert_fallback(self.decision(prepared["decision_id"]), "advisor_abstained")
+
+    async def test_disabled_advisor_falls_back_without_a_handoff(self):
+        self.config["advisor"] = {"enabled": False, "backend": "native-economy"}
+        self.configure()
+        prepared = await self.prepare()
+        self.assertNotIn("handoff", prepared)
+        self.assert_fallback(prepared, "advisor_disabled")
+
+    async def test_required_mode_without_baseline_is_not_set_up(self):
+        self.config["pipeline"]["baseline"] = None
+        self.config["pipeline"]["unrouted_agents"] = ["Explore"]
+        self.configure()
+        status = self.pipeline.status()
+        self.assertEqual((status["status"], status["setup_gaps"]), ("setup_required", ["baseline"]))
+        self.assertFalse(status["baseline_configured"])
+        # The hook issues no receipt; the server names the gap instead.
+        self.assertEqual(self.event("PreToolUse", tool_name="mcp__assay-benchmark-routing__prepare_routing",
+                                    tool_input={"packets": PACKETS}), {})
+        with self.assertRaisesRegex(EvidenceError, "setup_incomplete:baseline"):
+            await self.pipeline.prepare({"packets": copy.deepcopy(PACKETS), "launch_requests": {
+                "work": {"profile": "general-purpose", "prompt": "bounded"}}})
+        self.service.context.assert_not_called()
+        start = self.event("SessionStart")["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("not set up", start)
+        denied = self.event("PreToolUse", tool_name="Agent", tool_use_id="t",
+                            tool_input={"subagent_type": "general-purpose", "prompt": "work"})
+        self.assertIn("setup is incomplete", denied["hookSpecificOutput"]["permissionDecisionReason"])
+        exempt = self.event("PreToolUse", tool_name="Agent", tool_use_id="t2",
+                            tool_input={"subagent_type": "Explore", "prompt": "find"})
+        self.assertEqual(exempt, {})
+
+    async def test_doctor_reports_unnamed_models_with_candidate_spellings(self):
+        from route_evidence.providers import SOURCES, snapshot
+        from route_evidence.service import ingest
+        rows = [{"model": label, "effort": "medium", "harness": "fixture", "subset": "all", "metric": "pass_at_1",
+                 "protocol": "synthetic", "score": .8} for label in ("Worker Alpha", "Worker Beta 2")]
+        ingest(self.service.cache, snapshot(SOURCES["frontiercode"], rows), timestamp(self.now))
+        names = {m["model"]: m for m in self.service.status()["model_names"]["models"]}
+        self.assertEqual(names["worker-alpha"]["named_in"], ["frontiercode"])
+        self.assertEqual(names["worker-beta"]["unnamed_in"], ["frontiercode"])
+        self.assertEqual(names["worker-beta"]["candidates"], [{"label": "Worker Beta 2", "sources": ["frontiercode"]}])
+        self.service.context.assert_not_called()
+
+    async def test_doctor_checks_routes_before_any_launch(self):
+        ready = self.pipeline.status()
+        self.assertEqual((ready["status"], ready["setup_gaps"]), ("requires_host_receipt", []))
+        self.assertEqual(ready["route_checks"]["problems"], [])
+        self.assertTrue(all(r["definition"] == "ready" and r["in_inventory"] for r in ready["route_checks"]["routes"]))
+        self.assertEqual(ready["route_checks"]["baseline"]["expressible_profiles"], ["general-purpose"])
+        # A rolling alias outside the inventory and a route nobody generated.
+        self.config["pipeline"]["variants"] += [{"profile": "general-purpose", "model": "sonnet", "effort": "low"}]
+        self.path.write_text(json.dumps(self.config), encoding="utf-8")
+        self.config = load_config(self.path)
+        self.pipeline = RoutingPipeline(self.make_service())
+        problems = {(p["code"], p["route"]) for p in self.pipeline.status()["route_checks"]["problems"]}
+        self.assertEqual(problems, {("variant_not_generated", "general-purpose sonnet/low"),
+                                    ("route_not_in_inventory", "general-purpose sonnet/low"),
+                                    ("rolling_alias_in_definition", "general-purpose sonnet/low")})
+        self.service.context.assert_not_called()
 
     async def test_restart_restores_only_host_owned_private_envelope(self):
         prepared = await self.prepare()
@@ -321,7 +395,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.submit(prepared["decision_id"], answer)
         self.event("SubagentStop", agent="advisor-a")
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
-        self.assertEqual(self.decision(prepared["decision_id"])["status"], "no_decision")
+        # The advice is discarded; only the configured baseline remains.
+        self.assert_fallback(self.decision(prepared["decision_id"]), "invalid_advisor_result")
 
     async def test_retry_requires_host_observed_failure(self):
         decision = await self.decided()
@@ -612,6 +687,29 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         # Same session registration and server: no reconnect, no restart.
         prepared = await self.prepare()
         self.assertEqual(prepared["status"], "awaiting_native_advice")
+
+    async def test_confirmed_spelling_binds_only_through_the_inventory_file(self):
+        self.use_inventory_file()
+        location = Path(self.config["pipeline"]["inventory_file"])
+        before = location.read_bytes()
+        for names, error in (([("unlisted-model", "Unlisted 1")], "not_in_inventory"),
+                             ([("worker-alpha", "Shared Label"), ("worker-beta", "Shared Label")], "ambiguous")):
+            with self.subTest(error=error), self.assertRaisesRegex(EvidenceError, error):
+                confirm_inventory(self.config, evidence_names=names, clock=lambda: self.now)
+            self.assertEqual(location.read_bytes(), before)
+        cache = self.root / "empty-cache"
+        proc = subprocess.run([sys.executable, "-B", str(SCRIPTS / "benchmark_router.py"), "--cache-dir", str(cache),
+                               "--config", str(self.path), "inventory-confirm",
+                               "--evidence-name", "worker-alpha=Worker Alpha 2", "--evidence-name", "worker-alpha=Worker Alpha 2"],
+                              env={k: v for k, v in os.environ.items() if k != "ASSAY_ROUTING_CONFIG"},
+                              capture_output=True, text=True, timeout=60)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        report = json.loads(proc.stdout)
+        self.assertFalse(report["configuration_changed"])
+        self.assertEqual(report["model_names"]["status"], "no_cached_rows")
+        recorded = json.loads(location.read_text(encoding="utf-8"))["available"]
+        self.assertEqual(recorded[0], {**AVAILABLE[0], "evidence_names": ["Worker Alpha 2"]})
+        self.assertEqual(recorded[1], AVAILABLE[1])
 
     async def test_inline_and_file_inventory_together_are_refused(self):
         location = self.root / "inventory.json"

@@ -135,8 +135,9 @@ registered prompt. Never invent or copy a host receipt.
 Use `retry_of` only for a host-observed failed invocation and `resume_agent_id`
 only to continue the same observed idle worker's original work. A changed task,
 reviewer, replacement or new constraint needs its own decision. Failure or
-abstention permits only a separately configured eligible baseline; otherwise
-report no executable decision. Do not silently inherit the primary model, switch
+abstention selects the configured baseline, which required mode cannot run
+without; if the packet's hard constraints exclude it, report no executable
+decision. Do not silently inherit the primary model, switch
 providers, disable the advisor, bypass the host gate through CLI or substitute
 local execution when the user required delegation. Setup or host support gaps
 are explicit: Claude uses generated client-specific definitions, other hosts have

@@ -72,7 +72,7 @@ observed supported combinations, not these names or the date verbatim.
     "agent_templates": {},
     "profile_capabilities": {},
     "approved_choices": {},
-    "baseline": null
+    "baseline": {"model": "confirmed-worker-id", "effort": "medium"}
   }
 }
 ```
@@ -84,8 +84,15 @@ policy configuration, and confirming the inventory must not require a reconnect.
 Record that the host still offers the listed models, or replace the list, with:
 
 ```sh
-python skills/route-subagents/scripts/benchmark_router.py --config NEW_CONFIG inventory-confirm [--available FILE]
+python skills/route-subagents/scripts/benchmark_router.py --config NEW_CONFIG inventory-confirm [--available FILE] [--evidence-name MODEL=LABEL ...]
 ```
+
+`--evidence-name` records the owner's confirmation that a benchmark source spells
+a listed model as `LABEL`, for example a full ID that a source prints as a short
+display name. The command then reports, for every inventory model, which cached
+sources name it and up to five candidate spellings from sources that do not.
+Candidates are advice for the owner: nothing binds a benchmark row until it is
+confirmed, and a source that does not name a model may simply not measure it.
 
 Preparation rereads the file. An observation older than `inventory_ttl_hours`
 (1 to 720, default 24) refuses preparation; a caller repeating an old list cannot
@@ -104,9 +111,9 @@ and otherwise reports `invalid_explicit_choice`; it never substitutes another
 pair. `approved_choices` maps packet IDs to owner-approved pairs that bind even
 when the primary omits `explicit`; a request that contradicts one is refused.
 `baseline` is a complete, separately authorized fallback pair, subject to all
-packet constraints; absent or ineligible means no fallback. The primary cannot
-narrow the configured inventory or supply per-candidate capability masks to
-manufacture a single-candidate shortcut.
+packet constraints, and required mode needs one; see the failure boundaries
+below. The primary cannot narrow the configured inventory or supply
+per-candidate capability masks to manufacture a single-candidate shortcut.
 
 `unrouted_agents` lists native agent types, such as `Explore`, that the root may
 launch without routing; they keep the client's ordinary permission flow and
@@ -150,6 +157,10 @@ definitions directly, but those of a project definition only after the folder's
 workspace trust and never in a `-p` session; there the agent still runs unchecked
 by its own hook, while the plugin-level launch guard still applies.
 
+In this mode the plugin's delegation reminder stays silent on Claude launches:
+the registered protocol and the guard's refusals already speak for them. The
+session reminder and Codex launches keep their reminders.
+
 Set `ASSAY_ROUTING_CONFIG` to the absolute new configuration path in the environment
 that launches **both Claude Code and its MCP child**. For example on POSIX:
 
@@ -167,10 +178,15 @@ updated generated plugin hooks and reconnect. A skill-only install does not
 supply those hooks. Do not silently edit global permissions or root effort.
 
 Doctor/status reports configuration, inventory age and support gaps, not
-fabricated discovery or effective permissions. It deliberately leaves
-installation/discovery unverified until there is real client evidence. Verify with
-one authorized bounded task in the intended client/version before asserting native
-behavior or quota savings.
+fabricated discovery or effective permissions. `setup_gaps` names what required
+mode still lacks. `route_checks` examines every configured route before any
+launch: whether its pair is in the confirmed inventory, whether its definition is
+generated and unmodified without a conflicting environment override, whether its
+model is a rolling alias, and for which profiles the baseline has a variant.
+`model_names` is the spelling report described with `inventory-confirm`. Doctor
+deliberately leaves installation/discovery unverified until there is real client
+evidence. Verify with one authorized bounded task in the intended client/version
+before asserting native behavior or quota savings.
 
 ## Execute the registered chain
 
@@ -254,10 +270,17 @@ self-reported `resolved_model` in the advisor JSON is not host evidence. An earl
 stop event does not skip the later Agent result check. Late discovery of a
 mismatch cannot undo a tool action already performed by the native client.
 Conflicting effort/subagent-model environment overrides are rejected, not changed.
-Use confirmed runtime IDs: unresolved rolling aliases may not match observed IDs.
+Configure confirmed full IDs: the host reports the ID a rolling alias resolved to,
+so an alias in a definition fails the check after the worker has already run.
+Doctor reports such a route as `rolling_alias_in_definition`.
 
-Abstention, bad output or observed advisor failure allows only the eligible
-configured baseline. No baseline means no decision, not root-side selection.
+Required mode is not set up without a configured baseline. Status and doctor
+report `setup_required` with the `baseline` gap, routing operations fail with
+`required_routing_setup_incomplete`, and the hook refuses every launch outside
+`unrouted_agents`. Abstention, invalid advice, an advisor that ends without a
+result and a disabled advisor select the eligible baseline as a `fallback`
+decision whose reason codes name the cause. A baseline that a packet's hard
+constraints exclude still means no decision, not root-side selection.
 Expiry or configuration/inventory change requires preparation again.
 
 The guard fails closed only where it is the gate. When it cannot load the
@@ -301,7 +324,8 @@ ends its ownership and is recreated when still configured. Superseded definition
 remain recorded as retired, never selected. `--prune` removes only unchanged owned
 inactive variants and retains variants referenced by active runtime records.
 `--remove` uninstalls every unchanged owned inactive definition and the manifest,
-keeping modified or active ones recorded. Creation, deletion and final manifest
+keeping modified or active ones recorded; once nothing owned remains it deletes
+the generation lock file as well. Creation, deletion and final manifest
 writes have rollback for recoverable I/O errors; user-authored files are not
 overwritten. Do not manually rename a managed definition or edit its file.
 

@@ -55,7 +55,8 @@ Assay 不修改个人 `AGENTS.md`。其他客户端保留普通技能发现；�
 调用和生成的 `assay-` 定义上运行，不会为普通工具启动。未显式配置 required 模式时，
 它不作任何决定，也不添加上下文。设置 `pipeline.mode: "required"` 并在客户端环境中
 提供 `ASSAY_ROUTING_CONFIG` 后，它按[强制路由契约](../../skills/route-subagents/references/required-routing.md)
-检查启动。这是对常规协议的约束，而不是安全边界。
+检查启动。这是对常规协议的约束，而不是安全边界。在该模式下，Claude 启动由路由守卫
+回应，启动提醒保持静默；会话提醒和 Codex 启动不变。
 
 在 checkout 中无需调用模型即可检查处理器：
 

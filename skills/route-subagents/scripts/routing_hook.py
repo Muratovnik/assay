@@ -278,7 +278,9 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
     name, tool = event.get("hook_event_name"), event.get("tool_name")
     if name == "PreToolUse" and tool in SPAWN_TOOLS and _unrouted(event, mode):
         return {}  # An owner-listed native agent keeps the normal permission flow.
-    if not mode["state_dir"] or not mode["agents_dir"]:
+    # A baseline is part of the setup: without it an abstaining or failed
+    # advisor would leave every packet without a route.
+    if not mode["state_dir"] or not mode["agents_dir"] or not mode["baseline"]:
         if name == "PreToolUse" and tool in SPAWN_TOOLS:
             return deny("required routing setup is incomplete; run the routing doctor or select evidence-only mode")
         if name == "SessionStart":

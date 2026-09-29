@@ -94,26 +94,47 @@ class RoutingPipeline:
                 "ttl_hours": self.config["inventory_ttl_hours"],
                 "expired": not -60 <= age < self.service.inventory_ttl}
 
+    def setup_gaps(self):
+        """What required mode still lacks; each gap blocks registered delegation."""
+        if not self.required:
+            return []
+        gaps = [] if self.service.client == "claude" else ["host_adapter"]
+        # Without a baseline an abstaining or failed advisor would leave the
+        # packet without a route, so required mode is not set up without one.
+        return gaps + [key for key in ("state_dir", "agents_dir", "baseline") if not self.config[key]]
+
     def status(self):
         supported = self.service.client == "claude"
-        return {"protocol_version": PROTOCOL, "mode": self.config["mode"],
-                "host_adapter": "claude" if supported else None,
-                "state_configured": bool(self.config["state_dir"]),
-                "definitions_configured": bool(self.config["agents_dir"]),
-                "advisor_route_configured": bool(self.config["advisor_route"]),
-                "unrouted_agents": list(self.config["unrouted_agents"]),
-                "inventory": self._inventory_status(),
-                "guard_installed_verified": False, "discovery_verified": False,
-                "runtime_model_observed": None,
-                "status": ("evidence_only" if not self.required else "requires_host_receipt" if supported
-                           and self.config["state_dir"] and self.config["agents_dir"] else "setup_required"),
-                "no_implicit_root_ranking": self.required}
+        gaps = self.setup_gaps()
+        result = {"protocol_version": PROTOCOL, "mode": self.config["mode"],
+                  "host_adapter": "claude" if supported else None,
+                  "state_configured": bool(self.config["state_dir"]),
+                  "definitions_configured": bool(self.config["agents_dir"]),
+                  "advisor_route_configured": bool(self.config["advisor_route"]),
+                  "baseline_configured": bool(self.config["baseline"]),
+                  "unrouted_agents": list(self.config["unrouted_agents"]),
+                  "inventory": self._inventory_status(),
+                  "guard_installed_verified": False, "discovery_verified": False,
+                  "runtime_model_observed": None,
+                  "status": ("evidence_only" if not self.required else "setup_required" if gaps
+                             else "requires_host_receipt"),
+                  "setup_gaps": gaps,
+                  "no_implicit_root_ranking": self.required}
+        if self.required:
+            from .claude_agents import route_checks
+            result["route_checks"] = route_checks(self.raw_config)
+        return result
 
     def host(self, tool: str, supplied: dict):
         if not self.required:
             return None
         if self.service.client != "claude":
             raise EvidenceError("required_routing_host_adapter_unavailable")
+        gaps = self.setup_gaps()
+        if gaps:
+            # The hook issues no receipt for an incomplete setup; name the gap
+            # instead of reporting a missing receipt.
+            raise EvidenceError("required_routing_setup_incomplete:" + ",".join(gaps))
         token = supplied.get("host_receipt")
         if not isinstance(token, str) or len(token) > 200:
             raise EvidenceError("host_receipt_required")

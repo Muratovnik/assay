@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 from .cache import atomic_write, source_lock
@@ -10,7 +11,12 @@ from .core import EvidenceError, digest, read_document
 from .pipeline_config import PROTOCOL, plain_path, runtime_overrides
 
 MANIFEST = ".assay-routing-v2.json"
+LOCK = ".assay-routing-v2.lock"
 ADVISOR_PROFILE = "routing-advisor"
+# Rolling model aliases that Claude Code accepts for subagents
+# (https://code.claude.com/docs/en/sub-agents). The host resolves one to a full
+# model ID at launch and reports that ID, never the alias.
+CLAUDE_MODEL_ALIASES = frozenset({"sonnet", "opus", "haiku", "fable"})
 
 
 def _hash(data: bytes) -> str:
@@ -130,6 +136,61 @@ def resolve_variant(config: dict, profile: str, route: dict, *, environment: dic
     return record
 
 
+def route_checks(raw_config: dict) -> dict:
+    """Pre-launch checks of configured routes; no launch, discovery or model call.
+
+    Each route is checked against the confirmed inventory, the generated
+    definition and the process environment. A rolling alias in a definition is
+    reported because the host observes the resolved ID, so the check after the
+    worker fails; the configured route needs the confirmed full ID instead.
+    """
+    from .pipeline_config import configured_inventory, settings
+    config = settings(raw_config)
+    try:
+        inventory = configured_inventory(raw_config) or {}
+    except EvidenceError:
+        inventory = {}  # Reported by the inventory status; every pair is then absent.
+    pairs = {(item["model"], level) for item in inventory.get("available", []) for level in item["efforts"]}
+    routes = [{"role": "worker", **variant} for variant in config["variants"]]
+    if config["advisor_route"]:
+        routes.append({"role": "advisor", "profile": ADVISOR_PROFILE,
+                       **{k: config["advisor_route"][k] for k in ("model", "effort")}})
+    problems, checked = [], []
+    for route in routes:
+        label = f"{route['profile']} {route['model']}/{route['effort']}"
+        entry = {**route, "in_inventory": (route["model"], route["effort"]) in pairs,
+                 "rolling_alias": route["model"] in CLAUDE_MODEL_ALIASES}
+        try:
+            resolve_variant(config, route["profile"], route)
+            entry["definition"] = "ready"
+        except EvidenceError as exc:
+            entry["definition"] = str(exc)
+            problems.append({"code": str(exc), "route": label})
+        if not entry["in_inventory"]:
+            problems.append({"code": "route_not_in_inventory", "route": label})
+        if entry["rolling_alias"]:
+            problems.append({"code": "rolling_alias_in_definition", "route": label})
+        checked.append(entry)
+    baseline = config["baseline"]
+    fallback = None
+    if baseline:
+        profiles = sorted({v["profile"] for v in config["variants"]})
+        expressible = sorted({v["profile"] for v in config["variants"]
+                              if (v["model"], v["effort"]) == (baseline["model"], baseline["effort"])})
+        fallback = {**baseline, "in_inventory": (baseline["model"], baseline["effort"]) in pairs,
+                    "expressible_profiles": expressible,
+                    "inexpressible_profiles": [p for p in profiles if p not in expressible]}
+        for profile in fallback["inexpressible_profiles"]:
+            problems.append({"code": "baseline_has_no_variant", "route": f"{profile} {baseline['model']}/{baseline['effort']}"})
+        if not fallback["in_inventory"]:
+            problems.append({"code": "baseline_not_in_inventory", "route": f"{baseline['model']}/{baseline['effort']}"})
+    for packet_id, choice in sorted(config["approved_choices"].items()):
+        if (choice["model"], choice["effort"]) not in pairs:
+            problems.append({"code": "approved_choice_not_in_inventory",
+                             "route": f"{packet_id} {choice['model']}/{choice['effort']}"})
+    return {"routes": checked, "baseline": fallback, "problems": problems}
+
+
 def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_names=(), guard=None) -> dict:
     if not config["agents_dir"]:
         raise EvidenceError("claude_agents_dir_required")
@@ -147,7 +208,7 @@ def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_n
         record, data = render_variant(templates[spec["profile"]], spec, config["mcp_server"], guard)
         desired[record["name"]] = (record, data)
     directory.mkdir(parents=True, exist_ok=True)
-    lock = plain_path(directory / ".assay-routing-v2.lock")
+    lock = plain_path(directory / LOCK)
     with source_lock(lock) as acquired:
         if not acquired:
             raise EvidenceError("variant_generation_busy")
@@ -200,18 +261,44 @@ def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_n
             "next_step": "Reconnect if the host has not discovered the agent directory; a native start confirms discovery."}
 
 
+def _discard_lock(lock: Path) -> bool:
+    """Delete the generation lock once nothing owned remains; a held lock stays.
+
+    POSIX unlinks while holding the OS lock. Windows cannot delete an open file,
+    so it deletes after release and keeps the file if another process opened it
+    in between; the next generation simply reuses it.
+    """
+    if not lock.exists():
+        return True
+    try:
+        with source_lock(lock) as acquired:
+            if not acquired:
+                return False
+            if os.name != "nt":
+                lock.unlink()
+                return True
+        lock.unlink()
+        return True
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return False
+
+
 def remove(config: dict, *, active_names=()) -> dict:
     """Remove every owned, unmodified definition no running attempt still uses.
 
     This is the uninstall step for rollback. Modified or active definitions stay
-    recorded as retired; foreign files and the lock file are never touched.
+    recorded as retired and foreign files are never touched. The lock file goes
+    with the manifest, once nothing owned remains in the directory.
     """
     if not config["agents_dir"]:
         raise EvidenceError("claude_agents_dir_required")
     directory = plain_path(Path(config["agents_dir"]))
+    lock = plain_path(directory / LOCK)
     if not (directory / MANIFEST).exists():
-        return {"status": "removed", "removed": [], "kept": [], "root_settings_changed": False}
-    lock = plain_path(directory / ".assay-routing-v2.lock")
+        return {"status": "removed", "removed": [], "kept": [], "lock_removed": _discard_lock(lock),
+                "root_settings_changed": False}
     with source_lock(lock) as acquired:
         if not acquired:
             raise EvidenceError("variant_generation_busy")
@@ -238,4 +325,4 @@ def remove(config: dict, *, active_names=()) -> dict:
                     stream.write(data)
             raise
     return {"status": "removed", "removed": list(removed), "kept": [entry["name"] for entry in kept],
-            "root_settings_changed": False}
+            "lock_removed": False if kept else _discard_lock(lock), "root_settings_changed": False}

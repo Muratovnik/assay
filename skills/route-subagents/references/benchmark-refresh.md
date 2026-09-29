@@ -19,15 +19,30 @@ their exact `claude-*` identifiers. The rule records its source URL. Cursor's
 
 These rules apply only to CursorBench, not every source using similar text.
 Routing recomputes the correspondence instead of trusting an imported annotation.
-A caller's confirmed `evidence_names` can still bind a native runtime alias. If
-literal/caller and reviewed matches point to different runtime models, the row
-is excluded as `ambiguous_model_identity`; neither binding wins silently.
+The table is frozen: a newer model does not get a code entry. Its spellings are
+the owner's confirmed `evidence_names` in the inventory, which also bind a native
+runtime alias. If literal/caller and reviewed matches point to different runtime
+models, the row is excluded as `ambiguous_model_identity`; neither binding wins
+silently.
 
-No fuzzy search, edit distance, rolling-alias resolution, date-suffix removal,
-provider-prefix stripping or version interpolation is performed. An unlisted
-release keeps lexical matching. Fast variants remain separate; GPT-5.6 results
-never become GPT-6 results. Effort is parsed separately and must match a setting
-the caller supplied. Missing effort stays unknown, not `medium` or `max`.
+Matching performs no fuzzy search, edit distance, rolling-alias resolution,
+date-suffix removal, provider-prefix stripping or version interpolation. An
+unlisted release keeps lexical matching. Fast variants remain separate; GPT-5.6
+results never become GPT-6 results. Effort is parsed separately and must match a
+setting the caller supplied. Missing effort stays unknown, not `medium` or `max`.
+
+## Finding a missing spelling
+
+A model that no source names gets `no_matching_model_name`, even when a source
+prints its rows under a different spelling. `doctor`, `routing_status` and
+`inventory-confirm` report, per inventory model, which cached sources name it
+and up to five candidate labels from the sources that do not. A candidate is an
+unbound label sharing a word with the model ID, ranked by fewer foreign words and
+then an equal version sequence. The ranking is advice for the owner, not
+matching: a candidate binds rows only after
+`inventory-confirm --evidence-name MODEL=LABEL` records it. Labels bound to
+another inventory model are never offered, and a source that does not name a
+model may simply not measure it.
 
 ## Inventory-aware lazy refresh
 

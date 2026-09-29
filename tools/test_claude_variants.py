@@ -15,7 +15,7 @@ SCRIPTS = ROOT / "skills/route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import os
 import yaml
-from route_evidence.claude_agents import MANIFEST, generate, guard_command, internal_templates, remove, resolve_variant
+from route_evidence.claude_agents import LOCK, MANIFEST, generate, guard_command, internal_templates, remove, resolve_variant
 from route_evidence.core import EvidenceError, timestamp
 from route_evidence.pipeline_config import settings
 from route_evidence.pipeline_store import PipelineStore
@@ -250,12 +250,34 @@ class VariantTests(unittest.TestCase):
         self.assertEqual(set(report["kept"]), {first["variants"][0]["name"], active})
         report = remove(self.config)
         self.assertEqual(report["removed"], [active])
+        self.assertFalse(report["lock_removed"])
+        self.assertTrue((directory / LOCK).exists())  # a kept definition keeps its lifecycle
         self.assertTrue(modified.exists())
         self.assertEqual(foreign.read_text(), "User-owned reviewer")
         modified.unlink()
-        self.assertEqual(remove(self.config)["kept"], [])
+        report = remove(self.config)
+        self.assertEqual((report["kept"], report["lock_removed"]), ([], True))
         self.assertFalse((directory / MANIFEST).exists())
-        self.assertEqual(sorted(p.name for p in directory.glob("*.md")), ["user-reviewer.md"])
+        self.assertEqual(sorted(p.name for p in directory.iterdir()), ["user-reviewer.md"])
+
+    def test_remove_discards_a_lock_left_without_a_manifest(self):
+        directory = self.root / "agents"
+        directory.mkdir()
+        (directory / LOCK).write_bytes(b"0")
+        self.assertTrue(remove(self.config)["lock_removed"])
+        self.assertEqual(list(directory.iterdir()), [])
+        # Removal never creates a lock where there was none.
+        self.assertTrue(remove(self.config)["lock_removed"])
+        self.assertEqual(list(directory.iterdir()), [])
+
+    def test_a_held_lock_is_kept(self):
+        from route_evidence.cache import source_lock
+        directory = self.root / "agents"
+        directory.mkdir()
+        with source_lock(directory / LOCK) as acquired:
+            self.assertTrue(acquired)
+            self.assertFalse(remove(self.config)["lock_removed"])
+        self.assertTrue((directory / LOCK).exists())
 
     def test_cli_removal_needs_no_runtime_state(self):
         generate(self.config, {})

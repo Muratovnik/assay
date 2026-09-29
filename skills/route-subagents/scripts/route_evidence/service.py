@@ -14,7 +14,7 @@ from .cache import Cache, atomic_write, source_lock
 from .core import EvidenceError, digest, epoch, number, read_document, validate_snapshot
 from .processes import ProcessScope
 from .guides import GUIDES, guide_ids
-from .model_names import inventory_keys
+from .model_names import inventory_keys, spelling_report
 from .providers import SOURCES, needs_browser
 
 # Benchmarks and vendor guides share one registry, one cache mechanism and one
@@ -123,6 +123,16 @@ def load_config(path: Path | None):
         from .pipeline_config import settings as pipeline_settings
         config["pipeline"] = pipeline_settings(config)
     return config
+
+
+def spelling(cache, available):
+    """Name gaps of an inventory in cached benchmark rows; reads no network."""
+    snapshots = []
+    for sid in sorted(SOURCES):
+        snapshot = cache.read(SOURCES[sid]).get("snapshot")
+        if snapshot:
+            snapshots.append((sid, snapshot["rows"]))
+    return spelling_report(snapshots, available)
 
 
 def diagnostics():
@@ -242,6 +252,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                 "guides": brief({"sources": guides})["sources"],
                 "inventory": {"configured": inv is not None, "observed_at": inv["observed_at"] if inv else None,
                               "models": len(inv["available"]) if inv else 0},
+                "model_names": spelling(self.cache, inv["available"]) if inv else {"status": "no_inventory"},
                 "installation": diagnostics(), **brief({"sources": sources})}
 
     @staticmethod

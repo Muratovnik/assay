@@ -153,11 +153,13 @@ def configured_inventory(config: dict) -> dict | None:
     return inventory
 
 
-def confirm_inventory(config: dict, available: list | None = None, *, clock=time.time) -> dict:
+def confirm_inventory(config: dict, available: list | None = None, *, evidence_names=(), clock=time.time) -> dict:
     """The owner's statement that the host offers these models and efforts now.
 
     Only the separate inventory file changes, so running sessions keep their
     configuration binding. Without `available` the recorded list is kept.
+    `evidence_names` pairs add the owner's confirmed source spellings of a
+    listed model; confirmation is the only way a spelling binds benchmark rows.
     """
     path = settings(config)["inventory_file"]
     if path is None:
@@ -166,6 +168,14 @@ def confirm_inventory(config: dict, available: list | None = None, *, clock=time
     if available is None:
         current = configured_inventory(config)
         available = current["available"]
+    available = copy.deepcopy(available)
+    for model, label in evidence_names:
+        entry = next((item for item in available if isinstance(item, dict) and item.get("model") == model), None)
+        if entry is None:
+            raise EvidenceError("evidence_name_model_not_in_inventory")
+        names = entry.setdefault("evidence_names", [])
+        if isinstance(names, list) and label not in names:
+            names.append(label)
     from .routing import validate_request
     validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
                       "available": available})
