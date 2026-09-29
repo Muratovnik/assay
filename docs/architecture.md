@@ -81,13 +81,18 @@ then applies deterministic policy. Native economy resolves a current economical
 client model; Jev is an optional, explicitly consented hosted backend. Profiles
 and the catalog carry neither a permanent economy model nor runtime settings.
 
-Assay owns contracts, policy, local metadata and diagnostic replay. The client
-owns authorization, spawning, cancellation and actual quota accounting. Prepared
-state and an exact decision cache are bounded in memory; optional JSON telemetry
-has its own cache namespace and retention. No new daemon, spawn hook, learned
-router or mandatory model evaluation campaign is introduced. The
-[advisor reference](../skills/route-subagents/references/routing-advisor.md)
-defines failure, configuration migration and rollback behavior.
+Assay owns contracts, policy, local metadata and diagnostic replay. By default
+the client owns authorization, spawning, cancellation and actual quota
+accounting. Prepared state and an exact decision cache are bounded in memory;
+optional JSON telemetry has its own cache namespace and retention. An explicitly
+configured required mode adds a Claude hook guard: it binds routing calls and
+registered launches to the host session through a bounded SQLite rendezvous in a
+private state directory, launches workers through generated model/effort
+definitions and denies unregistered launches without granting any permission.
+No daemon, learned router or mandatory model evaluation campaign is introduced.
+The [advisor reference](../skills/route-subagents/references/routing-advisor.md)
+and the [required routing contract](../skills/route-subagents/references/required-routing.md)
+define failure, configuration migration and rollback behavior.
 
 ## Guarded lifecycle
 

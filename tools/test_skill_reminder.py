@@ -83,23 +83,51 @@ class ReminderTests(unittest.TestCase):
                 self.assertIn(b"invalid or oversized", result.stderr)
                 self.assertNotIn(b"PRIVATE_SENTINEL", result.stderr)
 
-    def test_packaged_matchers_only_cover_reminder_boundaries(self):
+    def test_packaged_matchers_only_cover_reminder_and_guard_boundaries(self):
         hooks = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]
-        self.assertEqual({"SessionStart", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "PostToolUseFailure", "SessionEnd"}, set(hooks))
-        cases = {
-            "SessionStart": (("startup", "resume", "clear", "compact", "fork"), ("shutdown",)),
-            "PreToolUse": (("spawn_agent", "Agent", "Task"), ("Bash", "Skill", "AgentStatus", "send_message", "wait")),
-        }
-        for event, (matching, unrelated) in cases.items():
-            self.assertEqual(1 if event == "SessionStart" else 2, len(hooks[event]))
-            rule = hooks[event][0]
-            for value in matching:
-                self.assertIsNotNone(re.search(rule["matcher"], value))
-            for value in unrelated:
-                self.assertIsNone(re.search(rule["matcher"], value))
-            self.assertEqual(2 if event == "SessionStart" else 1, len(rule["hooks"]))
-            self.assertEqual("command", rule["hooks"][0]["type"])
-            self.assertLessEqual(rule["hooks"][0]["timeout"], 5)
+        self.assertEqual({"SessionStart", "PreToolUse", "PermissionDenied", "SubagentStart", "SubagentStop",
+                          "PostToolUse", "PostToolUseFailure", "SessionEnd"}, set(hooks))
+
+        def commands(event, value):
+            # An omitted matcher matches every value of that event.
+            return [hook["command"] for rule in hooks[event] if re.search(rule.get("matcher") or "", value)
+                    for hook in rule["hooks"]]
+
+        reminder = [h["command"] for h in hooks["SessionStart"][0]["hooks"] if "skill_reminder" in h["command"]]
+        guard = [h["command"] for h in hooks["SessionStart"][0]["hooks"] if "routing_hook" in h["command"]]
+        self.assertEqual((1, 1), (len(reminder), len(guard)))
+        # Ordinary tools must not start any hook process for any plugin user.
+        for tool in ("Bash", "Read", "Edit", "Write", "Skill", "AgentStatus", "send_message", "wait",
+                     "mcp__example__search", "mcp__benchmark-routing__routing_status"):
+            with self.subTest(tool=tool):
+                self.assertEqual([], commands("PreToolUse", tool))
+        self.assertEqual(reminder, commands("PreToolUse", "spawn_agent"))
+        for tool in ("Agent", "Task"):
+            self.assertEqual(reminder + guard, commands("PreToolUse", tool))
+        for tool in ("SubagentHandback", "mcp__benchmark-routing__prepare_routing",
+                     "mcp__plugin_assay_routing__authorize_routing_launch"):
+            self.assertEqual(guard, commands("PreToolUse", tool))
+        for event in ("SubagentStart", "SubagentStop"):
+            self.assertEqual(guard, commands(event, "assay-general-purpose-0123456789abcdef"))
+            for agent_type in ("Explore", "general-purpose", ""):
+                self.assertEqual([], commands(event, agent_type))
+        for source in ("startup", "resume", "clear", "compact", "fork"):
+            self.assertEqual(reminder + guard, commands("SessionStart", source))
+        self.assertEqual([], commands("SessionStart", "shutdown"))
+        for rules in hooks.values():
+            for rule in rules:
+                for hook in rule["hooks"]:
+                    self.assertEqual("command", hook["type"])
+                    self.assertLessEqual(hook["timeout"], 5)
+
+    def test_guard_matcher_names_exactly_the_routing_operations(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        try:
+            from route_evidence.pipeline_config import ROUTING_TOOLS
+            from tools import assay
+        finally:
+            sys.path.remove(str(SCRIPT.parent))
+        self.assertEqual(ROUTING_TOOLS, assay.ROUTING_OPERATIONS)
 
     def test_packaged_command_from_other_cwd_with_space_and_shell_characters(self):
         # A local fixture checks shell/path wiring without trusting a plugin or

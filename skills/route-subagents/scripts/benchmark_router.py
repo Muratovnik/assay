@@ -36,11 +36,18 @@ def make_service(args):
     config = load_config(Path(args.config) if args.config else None)
     if args.client and config.get("client") and args.client != config["client"]:
         raise EvidenceError("client override conflicts with the configured client; use a separate client config")
+    from route_evidence.pipeline_config import configured_inventory, inventory_ttl_seconds
+    try:
+        inventory = configured_inventory(config)
+    except EvidenceError:
+        # routing_status and doctor report an unreadable inventory file; required
+        # preparation rereads it and refuses explicitly instead of guessing.
+        inventory = None
     return RoutingService(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
                           client=args.client or config.get("client", "unconfigured"),
-                          preferences=config.get("preferences"), inventory=config.get("inventory"),
+                          preferences=config.get("preferences"), inventory=inventory,
                           timeout=args.timeout_seconds, browser=args.browser, offline=args.offline, force=args.force,
-                          advisor_config=config)
+                          advisor_config=config, inventory_ttl=inventory_ttl_seconds(config))
 
 
 def request_document(path):
@@ -79,7 +86,12 @@ def main(argv=None):
     mp.add_argument("--source", type=Path, required=True)
     mp.add_argument("--output", type=Path, required=True, help="new file only; never replaces the source")
     mp.add_argument("--enable-advisor", action="store_true")
-    mp.add_argument("--mode", choices=["required", "evidence-only"], default="required")
+    mp.add_argument("--mode", choices=["required", "evidence-only"], default="evidence-only",
+                    help="evidence-only keeps the existing workflow; required is an explicit opt-in")
+    ic = subs.add_parser("inventory-confirm",
+                         help="record that the configured inventory file matches the host now; no model call")
+    ic.add_argument("--available", type=Path,
+                    help="JSON list of {model, efforts} currently offered by the host; replaces the recorded list")
     tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
     tp.add_argument("--file", type=Path, required=True)
     tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
@@ -102,6 +114,13 @@ def main(argv=None):
             from route_evidence.advisor_config import migrate_config
             result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor, mode=args.mode)
             print(json.dumps(result, indent=2))
+            return 0
+        if args.command == "inventory-confirm":
+            from route_evidence.pipeline_config import confirm_inventory
+            if not args.config:
+                raise EvidenceError("inventory-confirm requires --config or ASSAY_ROUTING_CONFIG")
+            available = read_document(args.available) if args.available else None
+            print(json.dumps(confirm_inventory(load_config(Path(args.config)), available), indent=2))
             return 0
         service = make_service(args)
         from route_evidence.pipeline import RoutingPipeline

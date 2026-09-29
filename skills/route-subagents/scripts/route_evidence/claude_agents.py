@@ -17,11 +17,23 @@ def _hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def render_variant(template: bytes, spec: dict, server: str) -> tuple[dict, bytes]:
+def guard_command(script: Path) -> str:
+    """Frontmatter hook command for a routed definition's ordinary tool calls.
+
+    User agent files have no plugin-root variable, so the absolute script path is
+    embedded; hex encoding keeps every shell and Python quoting rule out of it.
+    """
+    encoded_path = str(script.resolve()).encode("utf-8").hex()
+    return ("python -I -B -c \"import runpy, sys; sys.argv = [sys.argv[0], '--scope', 'agent']; "
+            f"runpy.run_path(bytes.fromhex('{encoded_path}').decode('utf-8'), run_name='__main__')\"")
+
+
+def render_variant(template: bytes, spec: dict, server: str, guard: str | None = None) -> tuple[dict, bytes]:
     # Generator-only dependency, already used by the repository's authoring
     # tools. Runtime guards validate immutable bytes against this manifest.
     import yaml
-    text = template.decode("utf-8")
+    # A user's own definition on Windows often has a BOM or CRLF line endings.
+    text = template.decode("utf-8").removeprefix("﻿").replace("\r\n", "\n")
     if not text.startswith("---\n"):
         raise EvidenceError("variant_template_missing_frontmatter")
     head, separator, body = text[4:].partition("\n---\n")
@@ -30,7 +42,8 @@ def render_variant(template: bytes, spec: dict, server: str) -> tuple[dict, byte
     metadata = yaml.safe_load(head)
     if not isinstance(metadata, dict):
         raise EvidenceError("invalid_variant_template")
-    fingerprint = digest({"protocol": PROTOCOL, "template": _hash(template), "spec": spec, "server": server})[:16]
+    fingerprint = digest({"protocol": PROTOCOL, "template": _hash(template), "spec": spec, "server": server,
+                          "guard": guard})[:16]
     name = f"assay-{spec['profile'][:35]}-{fingerprint}"
     metadata.update(name=name, model=spec["model"], effort=spec["effort"])
     metadata["description"] = f"Assay routed {spec['profile']}; use only the registered launch input."
@@ -43,6 +56,16 @@ def render_variant(template: bytes, spec: dict, server: str) -> tuple[dict, byte
     if spec["profile"] == ADVISOR_PROFILE:
         metadata["tools"] = [f"mcp__{server}__get_advisor_input", f"mcp__{server}__complete_routing", "SubagentHandback"]
         metadata["maxTurns"] = 4
+    if guard:
+        # Only this definition's own tool calls pay for the check; the plugin
+        # hook stays limited to spawns, hand-backs and routing operations.
+        hooks = metadata.get("hooks") or {}
+        entries = hooks.get("PreToolUse", []) if isinstance(hooks, dict) else None
+        if not isinstance(entries, list):
+            raise EvidenceError("invalid_variant_template_hooks")
+        hooks["PreToolUse"] = [*entries, {"matcher": ".*", "hooks": [
+            {"type": "command", "command": guard, "timeout": 5}]}]
+        metadata["hooks"] = hooks
     # Scope model and effort here, never in the canonical profile or root settings.
     payload = ("---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n" + body
                + "\nDo not spawn other agents. Follow only the assigned packet's scope.\n").encode("utf-8")
@@ -107,7 +130,7 @@ def resolve_variant(config: dict, profile: str, route: dict, *, environment: dic
     return record
 
 
-def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_names=()) -> dict:
+def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_names=(), guard=None) -> dict:
     if not config["agents_dir"]:
         raise EvidenceError("claude_agents_dir_required")
     directory = plain_path(Path(config["agents_dir"]))
@@ -121,7 +144,7 @@ def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_n
     for spec in specs:
         if spec["profile"] not in templates:
             raise EvidenceError("unknown_canonical_profile")
-        record, data = render_variant(templates[spec["profile"]], spec, config["mcp_server"])
+        record, data = render_variant(templates[spec["profile"]], spec, config["mcp_server"], guard)
         desired[record["name"]] = (record, data)
     directory.mkdir(parents=True, exist_ok=True)
     lock = plain_path(directory / ".assay-routing-v2.lock")
@@ -129,9 +152,12 @@ def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_n
         if not acquired:
             raise EvidenceError("variant_generation_busy")
         old = _manifest(directory)
-        old_by_name = {v["name"]: v for v in old["variants"] + old["retired"]}
-        for entry in old_by_name.values():
-            check_record(directory, entry)
+        old_by_name = {}
+        for entry in old["variants"] + old["retired"]:
+            # A definition deleted outside Assay ends its ownership; a modified
+            # one is user content and still refuses the whole operation.
+            if plain_path(directory / entry["file"]).exists():
+                old_by_name[entry["name"]] = check_record(directory, entry)
         for name, (record, _) in desired.items():
             path = plain_path(directory / record["file"])
             if path.exists() and (name not in old_by_name or _hash(path.read_bytes()) != record["sha256"]):
@@ -172,3 +198,44 @@ def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_n
     return {"status": "generated", "variants": [v for v, _ in desired.values()], "removed": list(removed),
             "root_settings_changed": False, "discovery_verified": False,
             "next_step": "Reconnect if the host has not discovered the agent directory; a native start confirms discovery."}
+
+
+def remove(config: dict, *, active_names=()) -> dict:
+    """Remove every owned, unmodified definition no running attempt still uses.
+
+    This is the uninstall step for rollback. Modified or active definitions stay
+    recorded as retired; foreign files and the lock file are never touched.
+    """
+    if not config["agents_dir"]:
+        raise EvidenceError("claude_agents_dir_required")
+    directory = plain_path(Path(config["agents_dir"]))
+    if not (directory / MANIFEST).exists():
+        return {"status": "removed", "removed": [], "kept": [], "root_settings_changed": False}
+    lock = plain_path(directory / ".assay-routing-v2.lock")
+    with source_lock(lock) as acquired:
+        if not acquired:
+            raise EvidenceError("variant_generation_busy")
+        old = _manifest(directory)
+        kept, removed = [], {}
+        try:
+            for entry in old["variants"] + old["retired"]:
+                path = plain_path(directory / entry["file"])
+                if not path.exists():
+                    continue
+                data = path.read_bytes()
+                if entry["name"] in active_names or _hash(data) != entry["sha256"]:
+                    kept.append(entry)
+                    continue
+                path.unlink()
+                removed[entry["name"]] = (path, data)
+            if kept:
+                atomic_write(directory / MANIFEST, {"schema_version": PROTOCOL, "variants": [], "retired": kept})
+            else:
+                (directory / MANIFEST).unlink()
+        except BaseException:
+            for path, data in removed.values():
+                with path.open("xb") as stream:
+                    stream.write(data)
+            raise
+    return {"status": "removed", "removed": list(removed), "kept": [entry["name"] for entry in kept],
+            "root_settings_changed": False}

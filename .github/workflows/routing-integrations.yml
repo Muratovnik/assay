@@ -6,6 +6,10 @@ on:
       - "skills/route-subagents/**"
       - "tools/test_benchmark*.py"
       - "tools/test_routing*.py"
+      - "tools/test_claude_variants.py"
+      - "tools/test_skill_reminder.py"
+      - "tools/assay.py"
+      - "hooks/**"
       - ".github/workflows/routing-integrations.yml"
   workflow_dispatch:
 

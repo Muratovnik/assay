@@ -11,9 +11,10 @@ SESSION_REMINDER = (
     "authorized subagent launch, including replacements and reviewers, the root "
     "agent must apply route-subagents (possibly named assay:route-subagents). "
     "Reading it earlier is not a routing decision for a new packet. Select the "
-    "child model and supported effort deliberately, use the smallest sufficient "
-    "context, and weigh full-chain cost against quality using available evidence. "
-    "Reuse valid plan evidence. Preserve explicit user choices. This reminder "
+    "child model and supported effort deliberately through its workflow, which "
+    "weighs full-chain cost against quality using available evidence, and use the "
+    "smallest sufficient context. Reuse valid plan evidence. Preserve explicit "
+    "user choices. This reminder "
     "does not authorize delegation; workers must not spawn further agents."
 )
 DELEGATION_REMINDER = (

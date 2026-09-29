@@ -209,7 +209,7 @@ class RetrievalTests(unittest.TestCase):
 
     def test_cli_import_query_forecast_and_opt_out(self):
         config = self.root / "config.json"
-        config.write_text(json.dumps({"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "client": "test", "task_evidence": {"enabled": True}}))
+        config.write_text(json.dumps({"schema_version": 2, "client": "test", "task_evidence": {"enabled": True}}))
         source = self.root / "input.json"
         source.write_text(json.dumps(corpus()))
         argv = [sys.executable, "-B", str(SCRIPTS / "benchmark_router.py"), "--config", str(config), "--cache-dir", str(self.root)]
@@ -223,7 +223,7 @@ class RetrievalTests(unittest.TestCase):
         reply = call(["task-context", "--request", "-"], request)
         self.assertEqual(reply["packets"][0]["neighbors"], 1)
         self.assertEqual(call(["task-forecast", "--request", "-"], {"packets": [PACKET]})["packets"][0]["reports"], [])
-        config.write_text(json.dumps({"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "client": "test"}))
+        config.write_text(json.dumps({"schema_version": 2, "client": "test"}))
         self.assertEqual(call(["task-context", "--request", "-"], request)["status"], "disabled")
 
 
@@ -325,7 +325,7 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
             TaskEvidence(root).install(corpus())
             config = root / "config.json"
             for enabled in (True, False):
-                config.write_text(json.dumps({"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "client": "test", "task_evidence": {"enabled": enabled}}))
+                config.write_text(json.dumps({"schema_version": 2, "client": "test", "task_evidence": {"enabled": enabled}}))
                 params = StdioServerParameters(command=sys.executable, args=["-B", str(SCRIPTS / "benchmark_mcp.py"),
                     "--cache-dir", str(root), "--config", str(config), "--offline"])
                 async with asyncio.timeout(15), Client(params) as client:

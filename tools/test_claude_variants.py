@@ -13,7 +13,9 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "skills/route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from route_evidence.claude_agents import MANIFEST, generate, internal_templates, resolve_variant
+import os
+import yaml
+from route_evidence.claude_agents import MANIFEST, generate, guard_command, internal_templates, remove, resolve_variant
 from route_evidence.core import EvidenceError, timestamp
 from route_evidence.pipeline_config import settings
 from route_evidence.pipeline_store import PipelineStore
@@ -176,15 +178,115 @@ class VariantTests(unittest.TestCase):
         before = source.read_bytes()
         report = migrate_config(source, dest)
         upgraded = load_config(dest)
-        self.assertEqual(report["pipeline_mode"], "required")
+        # The default keeps the existing workflow; required routing is opt-in.
+        self.assertEqual(report["pipeline_mode"], "evidence-only")
+        self.assertEqual(upgraded["pipeline"]["mode"], "evidence-only")
         self.assertFalse(upgraded["advisor"]["enabled"])
         self.assertEqual(upgraded["preferences"], content["preferences"])
         self.assertEqual(source.read_bytes(), before)
         with self.assertRaises(FileExistsError):
             migrate_config(source, dest)
-        legacy = self.root / "legacy.json"
-        migrate_config(source, legacy, mode="evidence-only")
-        self.assertEqual(load_config(legacy)["pipeline"]["mode"], "evidence-only")
+        required = self.root / "required.json"
+        self.assertTrue(migrate_config(source, required, mode="required")["setup_required"])
+        self.assertEqual(load_config(required)["pipeline"]["mode"], "required")
+
+    def frontmatter(self, record):
+        text = (self.root / "agents" / record["file"]).read_text(encoding="utf-8")
+        return yaml.safe_load(text[4:].partition("\n---\n")[0])
+
+    def test_generated_definitions_check_their_own_tool_calls(self):
+        script = SCRIPTS / "routing_hook.py"
+        guarded = generate(self.config, {}, guard=guard_command(script))["variants"][0]
+        hook = self.frontmatter(guarded)["hooks"]["PreToolUse"][-1]
+        self.assertEqual(hook["matcher"], ".*")
+        command = hook["hooks"][0]["command"]
+        self.assertIn("'--scope', 'agent'", command)
+        self.assertIn(str(script.resolve()).encode("utf-8").hex(), command)
+        # The checked hook is part of the immutable identity of the definition.
+        self.assertNotEqual(guarded["name"], generate({**self.config, "agents_dir": str(self.root / "other")}, {})["variants"][0]["name"])
+        # The embedded command runs from any directory through the platform shell.
+        event = b'{"hook_event_name":"PreToolUse","session_id":"s","agent_id":"a","tool_name":"Read","tool_input":{}}'
+        environment = {k: v for k, v in os.environ.items() if k != "ASSAY_ROUTING_CONFIG"}
+        result = subprocess.run(command, shell=True, cwd=self.root, env=environment, input=event,
+                                capture_output=True, timeout=30)
+        self.assertEqual((result.returncode, result.stdout.strip()), (0, b"{}"), result.stderr)
+
+    def test_existing_user_definition_becomes_a_template_and_stays_unchanged(self):
+        source = self.root / "user" / "translator.md"
+        source.parent.mkdir()
+        source.write_text("---\nname: translator\ndescription: Translate one packet.\ntools: Read, Edit\n---\n\nTranslate only the named files.\n", encoding="utf-8")
+        before = source.read_bytes()
+        config = self.root / "config.json"
+        pipeline = {**self.config, "agent_templates": {"translator": str(source)},
+                    "variants": [{"profile": "translator", "model": "fixture-model", "effort": "low"}]}
+        document = {"schema_version": 3, "client": "claude", "pipeline": pipeline,
+                    "inventory": {"available": [{"model": "fixture-model", "efforts": ["low"]}], "observed_at": timestamp(time.time())}}
+        config.write_text(json.dumps(document))
+        proc = subprocess.run([sys.executable, "-B", str(ROOT / "tools/assay.py"), "claude-routes", "--config", str(config)],
+            text=True, capture_output=True, timeout=30)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        record = json.loads(proc.stdout)["variants"][0]
+        metadata = self.frontmatter(record)
+        self.assertTrue(record["name"].startswith("assay-translator-"))
+        self.assertEqual((metadata["model"], metadata["effort"], metadata["tools"]), ("fixture-model", "low", "Read, Edit"))
+        self.assertIn("Translate only the named files.", (self.root / "agents" / record["file"]).read_text(encoding="utf-8"))
+        self.assertEqual(source.read_bytes(), before)
+        document["pipeline"]["agent_templates"] = {"evidence-reviewer": str(source)}
+        config.write_text(json.dumps(document))
+        proc = subprocess.run([sys.executable, "-B", str(ROOT / "tools/assay.py"), "claude-routes", "--config", str(config)],
+            text=True, capture_output=True, timeout=30)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("agent_template_name_conflict", proc.stdout + proc.stderr)
+
+    def test_remove_uninstalls_owned_definitions_and_keeps_modified_or_active_ones(self):
+        first = generate(self.config, {})
+        directory = self.root / "agents"
+        modified, active = (directory / first["variants"][0]["file"]), first["variants"][1]["name"]
+        modified.write_bytes(modified.read_bytes() + b"\nUSER NOTE\n")
+        foreign = directory / "user-reviewer.md"
+        foreign.write_text("User-owned reviewer", encoding="utf-8")
+        report = remove(self.config, active_names={active})
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(set(report["kept"]), {first["variants"][0]["name"], active})
+        report = remove(self.config)
+        self.assertEqual(report["removed"], [active])
+        self.assertTrue(modified.exists())
+        self.assertEqual(foreign.read_text(), "User-owned reviewer")
+        modified.unlink()
+        self.assertEqual(remove(self.config)["kept"], [])
+        self.assertFalse((directory / MANIFEST).exists())
+        self.assertEqual(sorted(p.name for p in directory.glob("*.md")), ["user-reviewer.md"])
+
+    def test_cli_removal_needs_no_runtime_state(self):
+        generate(self.config, {})
+        config = self.root / "config.json"
+        pipeline = {k: v for k, v in self.config.items() if k != "state_dir"}
+        config.write_text(json.dumps({"schema_version": 3, "client": "claude", "pipeline": pipeline}))
+        proc = subprocess.run([sys.executable, "-B", str(ROOT / "tools/assay.py"), "claude-routes", "--config", str(config), "--remove"],
+            text=True, capture_output=True, timeout=30)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(len(json.loads(proc.stdout)["removed"]), 2)
+        self.assertEqual(list((self.root / "agents").glob("*.md")), [])
+
+    def test_deleted_definition_ends_ownership_without_blocking_regeneration(self):
+        first = generate(self.config, {})
+        path = self.root / "agents" / first["variants"][0]["file"]
+        path.unlink()
+        self.assertEqual(generate(self.config, {}), first)
+        self.assertTrue(path.exists())
+
+    @unittest.skipUnless(os.name == "nt", "directory junctions are a Windows reparse point")
+    def test_junction_ancestor_is_rejected_on_the_oldest_supported_python(self):
+        target, link = self.root / "junction-target", self.root / "junction"
+        target.mkdir()
+        created = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)], capture_output=True, timeout=30)
+        if created.returncode != 0:
+            self.skipTest("junction creation unavailable")
+        self.addCleanup(os.rmdir, link)  # removes only the link, never its target
+        config = {**self.config, "agents_dir": str(link / "agents")}
+        with self.assertRaisesRegex(EvidenceError, "linked"):
+            generate(config, {})
+        self.assertEqual(list(target.iterdir()), [])
 
 
 if __name__ == "__main__":

@@ -4,17 +4,22 @@ from __future__ import annotations
 import copy
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
-from .core import EvidenceError
+from .core import EvidenceError, epoch, is_reparse, read_document
 
 PROTOCOL = 2
 ROOT_TOOLS = frozenset({"prepare_routing", "get_routing_decision", "authorize_routing_launch", "record_routing_outcome"})
 ADVISOR_TOOLS = frozenset({"get_advisor_input", "complete_routing"})
 ROUTING_TOOLS = ROOT_TOOLS | ADVISOR_TOOLS
 CLAUDE_EFFORTS = frozenset({"low", "medium", "high", "xhigh", "max"})
+MODES = frozenset({"evidence-only", "required"})
 NAME = re.compile(r"[a-z][a-z0-9-]{0,63}\Z")
+AGENT_TYPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
+DEFAULT_INVENTORY_TTL_HOURS = 24
+MAX_INVENTORY_TTL_HOURS = 720
 
 
 def pair(value: Any) -> dict[str, str]:
@@ -29,23 +34,40 @@ def pair(value: Any) -> dict[str, str]:
     return dict(value)
 
 
+def _absolute(value: Any, code: str) -> str | None:
+    if value is not None and (not isinstance(value, str) or not value or not Path(value).is_absolute()):
+        raise EvidenceError(code)
+    return value
+
+
 def settings(config: dict | None = None) -> dict:
+    """Normalized pipeline settings. Absent configuration is the 0.8.0 workflow.
+
+    Required routing is opt-in: only an explicit `pipeline.mode: "required"`
+    enables the host guard. No configuration, a v1/v2 file or a v3 file without
+    a mode keeps the evidence-only workflow, including the root-mediated advisor.
+    """
     config = config or {}
     raw = config.get("pipeline", {})
-    keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "variants", "baseline", "approved_choices", "profile_capabilities"}
+    keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "variants", "baseline",
+            "approved_choices", "profile_capabilities", "unrouted_agents", "agent_templates",
+            "inventory_file", "inventory_ttl_hours"}
     if not isinstance(raw, dict) or set(raw) - keys:
         raise EvidenceError("unknown_pipeline_configuration")
-    value = {"mode": "required", "state_dir": None, "agents_dir": None,
+    value = {"mode": "evidence-only", "state_dir": None, "agents_dir": None,
              "mcp_server": "assay-benchmark-routing", "advisor_route": None,
-             "variants": [], "baseline": None, "approved_choices": {}, "profile_capabilities": {}, **copy.deepcopy(raw)}
-    if not isinstance(value["mode"], str) or value["mode"] not in {"required", "evidence-only"}:
+             "variants": [], "baseline": None, "approved_choices": {}, "profile_capabilities": {},
+             "unrouted_agents": [], "agent_templates": {}, "inventory_file": None,
+             "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, **copy.deepcopy(raw)}
+    if not isinstance(value["mode"], str) or value["mode"] not in MODES:
         raise EvidenceError("invalid_pipeline_mode")
     if not isinstance(value["mcp_server"], str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value["mcp_server"]):
         raise EvidenceError("invalid_pipeline_mcp_server")
-    for key in ("state_dir", "agents_dir"):
-        path = value[key]
-        if path is not None and (not isinstance(path, str) or not path or not Path(path).is_absolute()):
-            raise EvidenceError("pipeline_paths_must_be_absolute")
+    for key in ("state_dir", "agents_dir", "inventory_file"):
+        _absolute(value[key], "pipeline_paths_must_be_absolute")
+    ttl = value["inventory_ttl_hours"]
+    if type(ttl) not in (int, float) or not 1 <= ttl <= MAX_INVENTORY_TTL_HOURS:
+        raise EvidenceError("invalid_pipeline_inventory_ttl")
     if value["baseline"] is not None:
         value["baseline"] = pair(value["baseline"])
     route = value["advisor_route"]
@@ -87,7 +109,78 @@ def settings(config: dict | None = None) -> dict:
             if (not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}", name)
                     or (supported is not None and type(supported) is not bool)):
                 raise EvidenceError("invalid_pipeline_profile_capability")
+    unrouted = value["unrouted_agents"]
+    if (not isinstance(unrouted, list) or len(unrouted) > 64 or len(set(map(str, unrouted))) != len(unrouted)
+            or any(not isinstance(name, str) or not AGENT_TYPE.fullmatch(name) or name.startswith("assay-")
+                   for name in unrouted)):
+        # Generated routed definitions are never exempt from their own gate.
+        raise EvidenceError("invalid_pipeline_unrouted_agents")
+    templates = value["agent_templates"]
+    if not isinstance(templates, dict) or len(templates) > 32:
+        raise EvidenceError("invalid_pipeline_agent_templates")
+    for profile, path in templates.items():
+        if not isinstance(profile, str) or not NAME.fullmatch(profile):
+            raise EvidenceError("invalid_pipeline_agent_template_profile")
+        if path is None:
+            raise EvidenceError("pipeline_paths_must_be_absolute")
+        _absolute(path, "pipeline_paths_must_be_absolute")
     return value
+
+
+def configured_inventory(config: dict) -> dict | None:
+    """The owner's dated host inventory: a separate file when configured.
+
+    A separate file lets the owner confirm a current inventory without changing
+    the policy configuration that hooks and sessions are bound to.
+    """
+    path = settings(config)["inventory_file"]
+    if path is None:
+        inventory = config.get("inventory")
+        return copy.deepcopy(inventory) if inventory is not None else None
+    if config.get("inventory") is not None:
+        raise EvidenceError("inventory_configured_twice")
+    location = plain_path(Path(path))
+    try:
+        inventory = read_document(location)
+    except FileNotFoundError as exc:
+        raise EvidenceError("configured_inventory_file_missing") from exc
+    if not isinstance(inventory, dict) or set(inventory) != {"available", "observed_at"}:
+        raise EvidenceError("inventory requires available and actual observed_at")
+    from .routing import validate_request
+    validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
+                      "available": inventory["available"]})
+    epoch(inventory["observed_at"])
+    return inventory
+
+
+def confirm_inventory(config: dict, available: list | None = None, *, clock=time.time) -> dict:
+    """The owner's statement that the host offers these models and efforts now.
+
+    Only the separate inventory file changes, so running sessions keep their
+    configuration binding. Without `available` the recorded list is kept.
+    """
+    path = settings(config)["inventory_file"]
+    if path is None:
+        raise EvidenceError("inventory_file_not_configured")
+    location = plain_path(Path(path))
+    if available is None:
+        current = configured_inventory(config)
+        available = current["available"]
+    from .routing import validate_request
+    validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
+                      "available": available})
+    location.parent.mkdir(parents=True, exist_ok=True)
+    from .cache import atomic_write
+    from .core import timestamp
+    inventory = {"available": copy.deepcopy(available), "observed_at": timestamp(clock())}
+    atomic_write(location, inventory)
+    return {"status": "confirmed", "observed_at": inventory["observed_at"],
+            "models": len(inventory["available"]), "configuration_changed": False,
+            "expires_after_hours": settings(config)["inventory_ttl_hours"]}
+
+
+def inventory_ttl_seconds(config: dict | None) -> float:
+    return float(settings(config)["inventory_ttl_hours"]) * 3600
 
 
 def plain_path(path: Path) -> Path:
@@ -95,7 +188,7 @@ def plain_path(path: Path) -> Path:
     if not path.is_absolute():
         raise EvidenceError("pipeline_path_not_absolute")
     for entry in (path, *path.parents):
-        if entry.is_symlink() or getattr(entry, "is_junction", lambda: False)():
+        if is_reparse(entry):
             raise EvidenceError("pipeline_linked_path")
     return path
 

@@ -2,7 +2,9 @@
 
 `route-subagents` 支持可选的路由建议：默认 `native-economy` 使用当前客户端中
 合适的低成本模型；Jev 需要单独启用并同意向外部服务传输结构化数据。
-v1 配置保留原有基准证据流程，v2 迁移创建新文件。原生模式不需要 Jev SDK 或密钥，
+v1 配置保留原有基准证据流程，v2 文件保留建议器设置；迁移创建新的 schema 3 文件，
+默认为 evidence-only 模式。强制路由是 Claude Code 的独立模式，须由所有者显式启用，
+见[契约](../../skills/route-subagents/references/required-routing.md)。原生模式不需要 Jev SDK 或密钥，
 技能链接安装也不会更改 MCP 注册。配置、重新连接、历史记录和回滚见
 [RoutingAdvisor 指南](../../skills/route-subagents/references/routing-advisor.md)。
 本地契约测试不能证明模型质量或配额节省。
@@ -48,6 +50,12 @@ Assay 不修改个人 `AGENTS.md`。其他客户端保留普通技能发现；�
 路径也可能绕过 hooks。处理器不授权委派、不修改参数，也不固定模型。离线测试验证
 事件与命令，不证明客户端发现、技能遵守或配额节省。历史观察不能证明当前客户端
 和包版本的 hooks 正常运行。
+
+同一插件还注册 `route-subagents` 路由守卫。它只在代理启动、建议器交回、路由 MCP
+调用和生成的 `assay-` 定义上运行，不会为普通工具启动。未显式配置 required 模式时，
+它不作任何决定，也不添加上下文。设置 `pipeline.mode: "required"` 并在客户端环境中
+提供 `ASSAY_ROUTING_CONFIG` 后，它按[强制路由契约](../../skills/route-subagents/references/required-routing.md)
+检查启动。这是对常规协议的约束，而不是安全边界。
 
 在 checkout 中无需调用模型即可检查处理器：
 

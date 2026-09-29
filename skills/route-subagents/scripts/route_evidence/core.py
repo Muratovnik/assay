@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import re
+import stat
 from datetime import date, datetime, timezone
 from typing import Any
 
@@ -221,3 +222,19 @@ def read_document(path):
     """Bound reads before JSON decoding (also used for stdin and configuration)."""
     with path.open("rb") as stream:
         return loads(stream.read(MAX_BYTES + 1).decode("utf-8"))
+
+
+def is_reparse(path) -> bool:
+    """A symlink, or on Windows any reparse point such as a junction.
+
+    `Path.is_junction` exists only from Python 3.12; the file attribute also
+    covers 3.11, the oldest supported interpreter and a common hook `python`.
+    """
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return False
+    return path.is_symlink() or bool(
+        getattr(info, "st_file_attributes", 0)
+        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    )

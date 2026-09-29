@@ -181,7 +181,7 @@ def slow(self, source, validators, *, browser):
     code = "import os,sys,time; from pathlib import Path; Path(sys.argv[1]).write_text(str(os.getpid())); time.sleep(20)"
     self.run([sys.executable, "-B", "-S", "-c", code, str(root / "worker.pid")])
 ProcessScope.fetch = slow
-service = RoutingService(Cache(root / "cache"), timeout=25, advisor_config={"pipeline": {"mode": "evidence-only"}})
+service = RoutingService(Cache(root / "cache"), timeout=25)
 build_server(service).run(transport="stdio")
 """, encoding="utf-8")
             params = StdioServerParameters(command=sys.executable,
@@ -221,7 +221,7 @@ build_server(service).run(transport="stdio")
         from mcp import Client, StdioServerParameters
         with tempfile.TemporaryDirectory() as tmp:
             config = Path(tmp) / "routing.json"
-            config.write_text(json.dumps({"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "client": "codex", "preferences": {}}), encoding="utf-8")
+            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
             params = StdioServerParameters(command=sys.executable, args=["-B", str(SCRIPTS / "benchmark_mcp.py"),
                 "--cache-dir", str(Path(tmp) / "cache"), "--offline", "--config", str(config)])
             async with asyncio.timeout(30):
@@ -275,7 +275,7 @@ build_server(service).run(transport="stdio")
             config_path.write_text(json.dumps({"schema_version": 3, "client": "claude",
                 "telemetry": {"mode": "metadata"},
                 "inventory": {"available": available, "observed_at": timestamp(time.time())},
-                "pipeline": {"state_dir": str(root / "state"), "agents_dir": str(root / "agents"),
+                "pipeline": {"mode": "required", "state_dir": str(root / "state"), "agents_dir": str(root / "agents"),
                     "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
                         "source": "client_role", "reason_code": "bounded_ranking"}},
                     "variants": [{"profile": "general-purpose", "model": m["model"], "effort": e}
@@ -320,7 +320,8 @@ build_server(service).run(transport="stdio")
                 self.assertEqual(value["status"], "awaiting_native_advice")
                 self.assertNotIn("result_contract", json.dumps(value))
                 launch = value["handoff"]["input"]
-                self.assertEqual(event("PreToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_input=launch), {})
+                substituted = event("PreToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_input=launch)
+                self.assertIn("get_advisor_input", substituted["hookSpecificOutput"]["updatedInput"]["prompt"])
                 event("SubagentStart", agent_id="wire-advisor", agent_type=launch["subagent_type"])
                 private = await client.call_tool("get_advisor_input", attested("get_advisor_input",
                     {"decision_id": value["decision_id"]}, agent_id="wire-advisor", effort={"level": "max"}))
@@ -344,8 +345,10 @@ build_server(service).run(transport="stdio")
                 authorized = await client.call_tool("authorize_routing_launch", attested("authorize_routing_launch", {
                     "decision_id": value["decision_id"], "packet_id": "local-check"}))
                 self.assertFalse(authorized.is_error)
-                self.assertEqual(event("PreToolUse", tool_name="Agent", tool_use_id="worker-call",
-                    tool_input=authorized.structured_content["input"]), {})
+                worker = event("PreToolUse", tool_name="Agent", tool_use_id="worker-call",
+                    tool_input=authorized.structured_content["input"])
+                self.assertIn("PRIVATE_WORK_SCOPE", worker["hookSpecificOutput"]["updatedInput"]["prompt"])
+                self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(authorized.structured_content))
                 recorded = await client.call_tool("record_routing_outcome", attested("record_routing_outcome", {
                     "decision_id": value["decision_id"], "execution": {"status": "unknown"}}))
                 self.assertFalse(recorded.is_error)

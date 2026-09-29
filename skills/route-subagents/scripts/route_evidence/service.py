@@ -149,17 +149,36 @@ inventory once per connection, or a dated local inventory is configured. Neither
 an unqualified family alias nor the server's own guesses resolve model versions.
 """
     def __init__(self, cache: Cache, *, client="unconfigured", preferences=None, inventory=None,
-                 timeout=30, browser=False, offline=False, force=False, clock=time.time, advisor_config=None):
+                 timeout=30, browser=False, offline=False, force=False, clock=time.time, advisor_config=None,
+                 inventory_ttl=86400):
         number(timeout, "timeout_seconds", upper=300)
+        number(inventory_ttl, "inventory_ttl_seconds", upper=720 * 3600)
+        if inventory_ttl < 3600:
+            raise EvidenceError("inventory_ttl_seconds must be at least one hour")
         if timeout <= 0:
             raise EvidenceError("timeout_seconds must be positive")
         self.cache, self.client, self.timeout = cache, client, timeout
         self.browser, self.offline, self.force, self.clock = browser, offline, force, clock
         self.preferences = copy.deepcopy(preferences or {})
         self._inventory = copy.deepcopy(inventory)
+        self.inventory_ttl = float(inventory_ttl)
         self._lock = threading.Lock()
         self._advisor_config = copy.deepcopy(advisor_config or {})
         self._advisor_workflow = None
+
+    @property
+    def advisor_config(self):
+        return copy.deepcopy(self._advisor_config)
+
+    @property
+    def inventory(self):
+        with self._lock:
+            return copy.deepcopy(self._inventory)
+
+    def use_inventory(self, inventory):
+        """Adopt an owner-confirmed inventory; its observation time is preserved."""
+        with self._lock:
+            self._inventory = copy.deepcopy(inventory)
 
     @property
     def advisor_workflow(self):
@@ -169,10 +188,10 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         return self._advisor_workflow
 
     async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
-                              task_queries=None, cost_objectives=None):
+                              task_queries=None, cost_objectives=None, native_delivery="handoff"):
         return await self.advisor_workflow.prepare_routing(
             packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable,
-            task_queries=task_queries, cost_objectives=cost_objectives)
+            task_queries=task_queries, cost_objectives=cost_objectives, native_delivery=native_delivery)
 
     def complete_routing(self, decision_id, advisor_result, *, envelope=None, cache=True):
         return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope, cache=cache)
@@ -197,7 +216,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                 return {"status": "needs_inventory", "required": ["available"],
                         "message": "Pass the current host's model IDs, exact resolved evidence names, and supported efforts once per MCP connection."}
             age = self.clock() - epoch(inv["observed_at"])
-            if age < -60 or age >= 86400:
+            if age < -60 or age >= self.inventory_ttl:
                 return {"status": "needs_inventory", "required": ["available"],
                         "message": "The client inventory is old or future-dated. Reconfirm it; it is not a model ranking."}
             request = validate_request({"client": self.client, "task_types": list(task_types),

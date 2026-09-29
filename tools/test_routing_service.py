@@ -32,7 +32,7 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.now = 1800000000.0
-        self.config = {"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "telemetry": {"mode": "off"}}
+        self.config = {"schema_version": 2, "telemetry": {"mode": "off"}}
         self.service = self.make_service()
 
     def make_service(self, *, offline=False, config=None):

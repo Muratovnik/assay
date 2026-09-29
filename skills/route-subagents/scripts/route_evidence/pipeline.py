@@ -7,10 +7,11 @@ from pathlib import Path
 
 from .claude_agents import ADVISOR_PROFILE, resolve_variant
 from .core import EvidenceError, digest, epoch
-from .pipeline_config import ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, ROUTING_TOOLS, settings
+from .pipeline_config import ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory, settings
 from .pipeline_store import PipelineStore
 
 MAX_PROMPT_BYTES = 64 * 1024
+RECEIPT_SECONDS = 300
 
 
 def arguments(value: dict) -> dict:
@@ -51,11 +52,23 @@ def launch_requests(value, packet_ids):
     return result
 
 
+def launch_stub(attempt_id: str, native_input: dict) -> dict:
+    """The small Agent input the root sends; the host hook substitutes the rest.
+
+    The root never repeats a registered prompt, so it cannot alter it and does
+    not spend output tokens copying it byte for byte.
+    """
+    stub = {k: copy.deepcopy(v) for k, v in native_input.items() if k != "prompt"}
+    stub["prompt"] = f"Assay registered launch {attempt_id}. The host supplies the registered packet input."
+    return stub
+
+
 class RoutingPipeline:
     def __init__(self, service):
         self.service = service
-        self.config = settings(service._advisor_config)
-        self.config_hash = digest(service._advisor_config)
+        self.raw_config = service.advisor_config
+        self.config = settings(self.raw_config)
+        self.config_hash = digest(self.raw_config)
         self.clock = service.clock
 
     @property
@@ -68,6 +81,19 @@ class RoutingPipeline:
             raise EvidenceError("pipeline_setup_required")
         return PipelineStore(Path(self.config["state_dir"]), clock=self.clock)
 
+    def _inventory_status(self):
+        try:
+            inventory = configured_inventory(self.raw_config)
+        except EvidenceError as exc:
+            return {"configured": False, "error": str(exc)}
+        if inventory is None:
+            return {"configured": False}
+        age = self.clock() - epoch(inventory["observed_at"])
+        return {"configured": True, "source": "file" if self.config["inventory_file"] else "configuration",
+                "observed_at": inventory["observed_at"], "age_hours": round(age / 3600, 2),
+                "ttl_hours": self.config["inventory_ttl_hours"],
+                "expired": not -60 <= age < self.service.inventory_ttl}
+
     def status(self):
         supported = self.service.client == "claude"
         return {"protocol_version": PROTOCOL, "mode": self.config["mode"],
@@ -75,6 +101,8 @@ class RoutingPipeline:
                 "state_configured": bool(self.config["state_dir"]),
                 "definitions_configured": bool(self.config["agents_dir"]),
                 "advisor_route_configured": bool(self.config["advisor_route"]),
+                "unrouted_agents": list(self.config["unrouted_agents"]),
+                "inventory": self._inventory_status(),
                 "guard_installed_verified": False, "discovery_verified": False,
                 "runtime_model_observed": None,
                 "status": ("evidence_only" if not self.required else "requires_host_receipt" if supported
@@ -113,17 +141,28 @@ class RoutingPipeline:
             raise EvidenceError("decision_expired_or_session_mismatch")
         return state
 
+    def _authority_inventory(self):
+        # Reread on every preparation: the owner confirms the file without a
+        # reconnect, while a caller repeating an old list cannot renew it.
+        inventory = configured_inventory(self.raw_config)
+        if not inventory or not inventory.get("available"):
+            raise EvidenceError("configured_host_inventory_required")
+        if not -60 <= self.clock() - epoch(inventory["observed_at"]) < self.service.inventory_ttl:
+            raise EvidenceError("configured_inventory_expired")
+        return inventory
+
     def _capabilities(self, packets, available, requests):
         from .core import effort
         for packet in packets:
             explicit = packet.get("explicit") or {}
-            approved = self.config["approved_choices"].get(packet["packet_id"], {})
-            if explicit and (not approved or any(approved.get(k) != v for k, v in explicit.items())):
-                raise EvidenceError("explicit_choice_requires_configured_authority")
+            approved = self.config["approved_choices"].get(packet["packet_id"])
             if approved:
-                # A trusted explicit choice is binding even if the root omits
-                # its declaration or repeats only the model portion.
+                if explicit and any(approved.get(k) != v for k, v in explicit.items()):
+                    raise EvidenceError("explicit_choice_conflicts_with_configured_choice")
+                # A configured choice is binding even if the root omits it.
                 packet["explicit"] = copy.deepcopy(approved)
+            # A user's own explicit choice stays as supplied. Policy accepts it
+            # only for an inventory pair with a generated, expressible variant.
             baseline = packet.get("baseline")
             if baseline and baseline != self.config["baseline"]:
                 raise EvidenceError("baseline_requires_configured_authority")
@@ -150,15 +189,21 @@ class RoutingPipeline:
         attempt_id = secrets.token_hex(16)
         native_input = copy.deepcopy(native_input)
         native_input["prompt"] += "\n\nAssay attempt: " + attempt_id
+        stub = launch_stub(attempt_id, native_input)
         run = {"attempt_id": attempt_id, "decision_id": state["decision_id"], "packet_id": packet_id,
                "session_id": state["session_id"], "config_hash": self.config_hash, "role": role,
-               "input": native_input, "input_hash": digest(native_input), "route": dict(route),
+               "input": native_input, "input_hash": digest(stub), "route": dict(route),
                "variant": variant, "state": "prepared", "expires": state["expires"],
                "observed_model": None, "observed_effort": None}
         tx.put("attempt", attempt_id, run, state["expires"])
-        return {"attempt_id": attempt_id, "tool": "Agent", "input": copy.deepcopy(native_input),
+        return {"attempt_id": attempt_id, "tool": "Agent", "input": stub,
                 "requested_model": route["model"], "requested_effort": route["effort"],
-                "launch_verified": False}
+                "input_substituted_by_host": True, "launch_verified": False}
+
+    def _reply(self, attempt):
+        stub = launch_stub(attempt["attempt_id"], attempt["input"])
+        return {"attempt_id": attempt["attempt_id"], "tool": "Agent", "input": stub,
+                "input_substituted_by_host": True, "launch_verified": False}
 
     async def prepare(self, supplied):
         host = self.host("prepare_routing", supplied)
@@ -170,24 +215,20 @@ class RoutingPipeline:
             return response
         if self.service.offline:
             raise EvidenceError("offline_cannot_prepare_dispatch")
-        if self.service.advisor_workflow.advisor["backend"] != "native-economy":
+        workflow = self.service.advisor_workflow
+        if workflow.advisor["backend"] != "native-economy":
             raise EvidenceError("required_pipeline_requires_native_advisor")
         from .advice_contracts import validate_packets
         packets = validate_packets(params["packets"])
         requests = launch_requests(requests, [p["packet_id"] for p in packets])
-        authority = self.service._advisor_config.get("inventory") or {}
-        available = authority.get("available")
-        if not available:
-            raise EvidenceError("configured_host_inventory_required")
+        authority = self._authority_inventory()
+        available = authority["available"]
         if params.get("available") is not None and params["available"] != available:
             raise EvidenceError("inventory_must_match_configured_authority")
         params.pop("available", None)
         # Preserve the actual observation timestamp, including its remaining
         # freshness budget; a repeated caller list cannot renew the inventory.
-        if not -60 <= self.clock() - epoch(authority["observed_at"]) < 86400:
-            raise EvidenceError("configured_inventory_expired")
-        with self.service._lock:
-            self.service._inventory = copy.deepcopy(authority)
+        self.service.use_inventory(authority)
         # Validate before iterating or calling any provider.
         self.service.prepare(list(dict.fromkeys(t for p in packets for t in p["task_types"])))
         route = self.config["advisor_route"]
@@ -195,24 +236,23 @@ class RoutingPipeline:
             raise EvidenceError("advisor_route_must_match_configuration")
         params["advisor_route"] = route
         params["packets"] = self._capabilities(packets, available, requests)
-        response = await self.service.prepare_routing(**params)
+        response = await self.service.prepare_routing(**params, native_delivery="private")
         if "decision_id" not in response:
             return compact(response)
-        workflow = self.service.advisor_workflow
-        internal = workflow._states[response["decision_id"]]
-        expires = internal["expires"]
-        if expires <= self.clock():
+        internal = workflow.pending_state(response["decision_id"])
+        if internal is None or internal["expires"] <= self.clock():
             return compact(response)
+        expires = internal["expires"]
         state = {"decision_id": response["decision_id"], "session_id": host["session_id"],
                  "config_hash": self.config_hash, "expires": expires,
-                 "inventory": copy.deepcopy(internal["inventory"]),
+                 "inventory": internal["inventory"],
                  "launch_requests": requests, "response": compact(response)}
         with self.store.transaction() as tx:
             if response["status"] == "awaiting_native_advice":
                 variant = resolve_variant(self.config, ADVISOR_PROFILE, route)
                 native_input = {"subagent_type": variant["name"], "description": "Assay routing advisor", "run_in_background": False,
                                 "prompt": f"Routing decision {state['decision_id']}. Call get_advisor_input, then complete_routing. Return only submission status."}
-                state["envelope"] = workflow._envelope(internal)
+                state["envelope"] = workflow.export_envelope(state["decision_id"])
                 state["response"]["handoff"] = self._put_attempt(tx, state, "advisor", None, native_input, route, variant)
             tx.put("decision", state["decision_id"], state, expires)
         return copy.deepcopy(state["response"])
@@ -281,15 +321,7 @@ class RoutingPipeline:
         # Only advice from a completed, non-conflicting host invocation enters
         # the existing semantic cache. Submission alone is not execution proof.
         if run["state"] == "finished" and state.get("completion_hash"):
-            workflow = self.service.advisor_workflow
-            with workflow._lock:
-                internal = workflow._states.get(state["decision_id"])
-                if internal and internal.get("result") and internal.get("cache_key"):
-                    workflow._cache[internal["cache_key"]] = {
-                        "result": copy.deepcopy(internal["result"]), "expires": state["expires"],
-                        "packet_ids": internal["snapshot"]["packet_ids"]}
-                    while len(workflow._cache) > 64:
-                        workflow._cache.popitem(last=False)
+            self.service.advisor_workflow.remember_completed(state["decision_id"], state["expires"])
         return True
 
     def decision(self, supplied):
@@ -306,12 +338,8 @@ class RoutingPipeline:
                 # The advisor actually ended without submitting. An eligible,
                 # configured baseline is the only possible fallback; never ask
                 # the root to inspect evidence or fabricate an advisor answer.
-                workflow = self.service.advisor_workflow
-                with workflow._lock:
-                    internal = workflow._states.get(state["decision_id"])
-                    if internal is None:
-                        internal = workflow._restore(state["decision_id"], state["envelope"])
-                    result = workflow._finish(internal, reason="advisor_ended_without_result")
+                result = self.service.advisor_workflow.finish_unanswered(
+                    state["decision_id"], state["envelope"], reason="advisor_ended_without_result")
                 state["response"] = compact(result)
                 state.pop("envelope", None)
                 tx.put("decision", state["decision_id"], state, state["expires"])
@@ -328,8 +356,7 @@ class RoutingPipeline:
         prepared = [a for a in tx.values("attempt") if a.get("continuation_of") == previous["attempt_id"]
                     and a["state"] == "prepared"]
         if len(prepared) == 1:
-            a = prepared[0]
-            return {"attempt_id": a["attempt_id"], "tool": "Agent", "input": a["input"], "launch_verified": False}
+            return self._reply(prepared[0])
         if previous.get("route_mismatch"):
             raise EvidenceError("continuation_observed_route_mismatch")
         if previous["state"] != "finished":
@@ -361,7 +388,8 @@ class RoutingPipeline:
             state = self._decision(tx, decision_id, host)
             if not self._advisor_readiness(tx, state):
                 raise EvidenceError("advisor_completion_not_observed")
-            if self.service._inventory and self.service._inventory["available"] != state["inventory"]["available"]:
+            current = self.service.inventory
+            if current and current["available"] != state["inventory"]["available"]:
                 raise EvidenceError("inventory_changed_reprepare_required")
             decisions = state["response"].get("decisions", [])
             selected = next((d.get("selected") for d in decisions if d["packet_id"] == packet_id), None)
@@ -374,8 +402,7 @@ class RoutingPipeline:
             if old and not retry:
                 prepared = [a for a in old if a["state"] == "prepared"]
                 if len(prepared) == 1:
-                    a = prepared[0]
-                    return {"attempt_id": a["attempt_id"], "tool": "Agent", "input": a["input"], "launch_verified": False}
+                    return self._reply(prepared[0])
                 raise EvidenceError("attempt_already_dispatched")
             if retry:
                 if any(a["state"] in {"prepared", "reserved", "started", "running"} for a in old if a["attempt_id"] != retry):

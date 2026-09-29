@@ -4,7 +4,11 @@
 构建有大小限制的快照，经 `native-economy` 或单独启用的 Jev 获取排序后应用策略。
 目录和智能体配置不绑定固定的低成本模型。客户端负责权限、启动及实际配额；
 Assay 负责契约、本地元数据和诊断重放，不引入新守护进程或强制付费评测。
-详见 [RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)。
+显式启用的 `required` 模式增加 Claude 钩子检查：路由调用和已登记的启动经有界
+SQLite 存储绑定到主机会话，工作代理通过生成的模型/effort 定义启动，未登记的
+启动被拒绝，钩子本身不授予任何权限。
+详见 [RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)
+与 [强制路由](../../skills/route-subagents/references/required-routing.md)。
 
 [English](../architecture.md) · [Русский](../ru/architecture.md) · **简体中文**
 

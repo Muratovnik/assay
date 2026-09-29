@@ -1,10 +1,11 @@
 # Benchmark evidence context for model and effort selection
 
-This reference describes explicit **evidence-only** comparison and acquisition
-diagnostics. Live required routing uses the [isolated advisor and host gate](required-routing.md).
-Its root does not call `get_routing_context`; that tool is absent from the
-required-mode MCP surface. No acquisition or advisor failure implicitly changes
-modes. Source refresh remains shared by both workflows.
+This reference describes the default **evidence-only** comparison and its
+acquisition diagnostics. When the owner explicitly selected
+[required routing](required-routing.md), the root does not call
+`get_routing_context`; that tool is absent from the required-mode MCP surface.
+No acquisition or advisor failure changes modes. Source refresh is shared by
+both workflows.
 
 This local tool prepares published measurements for comparison. **It does not
 select a configuration.** It does not run models, launch subagents, measure
@@ -97,7 +98,7 @@ installation; the host's working directory need not be the repository.
 A local JSON config may store preferences, without storing a model matrix:
 
 ```json
-{"schema_version":3,"client":"codex","preferences":{"quality_loss_pp":3,"allow_stale":true},"pipeline":{"mode":"evidence-only"}}
+{"schema_version":1,"client":"codex","preferences":{"quality_loss_pp":3,"allow_stale":true}}
 ```
 
 The value 3 is an example, not a benchmark-derived default. Use separate client
@@ -106,10 +107,11 @@ Optionally add `inventory: {available: [...], observed_at: "...Z"}` with the
 actual confirmation time. Otherwise the agent supplies it on the first call.
 Neither config nor inventory belongs in tracked source.
 
-Older v1/v2 configurations require an explicit [schema-3 migration](required-routing.md#configure-once-outside-task-execution).
-Absent pipeline mode now means required routing, not implicit evidence-only.
-The [advisor policy](routing-advisor.md) reuses the same service/source cache;
-its filtering does not change comparisons returned in explicit evidence-only mode.
+Version 1 keeps evidence-only behavior. The opt-in
+[routing advisor](routing-advisor.md) adds native economy and Jev adapters through
+the same service and source cache. Its separate snapshot/policy does not change
+the comparisons returned by `get_routing_context`. Schema 3 keeps this workflow
+unless it sets the separate [required mode](required-routing.md#one-explicit-mode).
 
 Codex registration template (replace capitalized arguments with real paths):
 

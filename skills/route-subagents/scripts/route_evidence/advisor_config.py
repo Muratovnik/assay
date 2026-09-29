@@ -84,8 +84,11 @@ def settings(config=None):
     return result
 
 
-def migrate_config(source: Path, destination: Path, *, enable_advisor=False, mode="required"):
-    """Create a v3 configuration exclusively; never install or rewrite the source."""
+def migrate_config(source: Path, destination: Path, *, enable_advisor=False, mode="evidence-only"):
+    """Create a v3 configuration exclusively; never install or rewrite the source.
+
+    The default keeps the existing workflow. Required routing is an explicit mode.
+    """
     from .service import load_config
     from .pipeline_config import settings as pipeline_settings
 

@@ -29,7 +29,19 @@
         ]
       },
       {
-        "matcher": ".*",
+        "matcher": "^(Agent|Task|SubagentHandback|mcp__.+__(authorize_routing_launch|complete_routing|get_advisor_input|get_routing_decision|prepare_routing|record_routing_outcome))$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I -B -c \"import os, runpy; runpy.run_path(os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], 'skills/route-subagents/scripts/routing_hook.py'), run_name='__main__')\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "matcher": "^(Agent|Task)$",
         "hooks": [
           {
             "type": "command",
@@ -41,6 +53,7 @@
     ],
     "SubagentStart": [
       {
+        "matcher": "^assay-",
         "hooks": [
           {
             "type": "command",
@@ -52,6 +65,7 @@
     ],
     "SubagentStop": [
       {
+        "matcher": "^assay-",
         "hooks": [
           {
             "type": "command",
