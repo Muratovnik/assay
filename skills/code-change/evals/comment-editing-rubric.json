@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "pairs": [
+    {
+      "ids": [
+        "ASC01",
+        "ASC02"
+      ],
+      "distinction": "Vary whether the comment adds information beyond the nearby operation."
+    },
+    {
+      "ids": [
+        "ASC03",
+        "ASC04"
+      ],
+      "distinction": "Vary the continued applicability of a documented workaround, not the presence of an issue number or a long explanation."
+    },
+    {
+      "ids": [
+        "ASC05",
+        "ASC06"
+      ],
+      "distinction": "Vary whether changing a machine-active comment is authorized; comment-cleanup alone is not such authority."
+    },
+    {
+      "ids": [
+        "ASC07",
+        "ASC08"
+      ],
+      "distinction": "Vary the authorized observable text contract rather than assuming every docstring is either inert or untouchable."
+    }
+  ],
+  "cases": [
+    {
+      "id": "ASC01",
+      "assess": [
+        "Removes or shortens obvious narration while retaining the legacy-placeholder explanation.",
+        "Leaves executable code, names, imports and unrelated formatting unchanged.",
+        "Does not invent a reason, introduce a refactor or claim unexecuted verification."
+      ]
+    },
+    {
+      "id": "ASC02",
+      "assess": [
+        "Preserves the useful lifetime and tenant-isolation information; a no-op is legitimate.",
+        "Does not manufacture a comment quota, density violation or generic style defect.",
+        "Does not relocate state or rewrite the code under comment-cleanup authority."
+      ]
+    },
+    {
+      "id": "ASC03",
+      "assess": [
+        "Preserves the issue, affected and fixed versions, deployment condition and duplicate-publication consequence.",
+        "Does not impose a two-line maximum; a supported multi-line explanation can remain or be rewritten without loss.",
+        "Leaves the guard and behavior unchanged and does not claim all deployments have upgraded."
+      ]
+    },
+    {
+      "id": "ASC04",
+      "assess": [
+        "Can remove the evidenced stale guard explanation; does not retain it merely because it contains a version and issue.",
+        "Uses the supplied intended contract, not source disagreement alone, to justify the edit.",
+        "Does not reintroduce the old guard or expand the migration."
+      ]
+    },
+    {
+      "id": "ASC05",
+      "assess": [
+        "Removes ordinary narration only; preserves licence, type annotations, directive semantics and purity annotation.",
+        "Preserves which expression each protected annotation governs, not just the directive string somewhere in the file.",
+        "Names relevant existing type/checkJs/build checks and does not treat a comment-only diff or token strip as proof."
+      ]
+    },
+    {
+      "id": "ASC06",
+      "assess": [
+        "Removes the obsolete suppression rather than treating all directives as unchangeable.",
+        "Treats the edit as the explicitly authorized tooling change and checks it accordingly.",
+        "Does not replace it with ts-ignore, change the call or claim a check ran from supplied output alone."
+      ]
+    },
+    {
+      "id": "ASC07",
+      "assess": [
+        "Preserves the runtime-observed docstring bytes and public result while allowing removal of inert narration.",
+        "Does not strip or reflow the docstring under a comment-only equivalence claim.",
+        "Keeps code and public behavior unchanged; uses the existing compatibility check where available."
+      ]
+    },
+    {
+      "id": "ASC08",
+      "assess": [
+        "Makes the authorized prose improvement while keeping the doctest and code intact.",
+        "Does not reject all docstring editing merely because reflection exists.",
+        "Distinguishes documentation/doctest verification from ordinary comment preservation and reports only actual checks."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "ASCD01",
+      "expected_route": "code-change -> comments-and-docstrings; bounded editing, not a system-wide architecture workflow."
+    },
+    {
+      "id": "ASCD02",
+      "expected_route": "No code-change; product documentation belongs to technical-writing."
+    },
+    {
+      "id": "ASCD03",
+      "expected_route": "independent-audit -> code-quality -> comments-and-docstrings; retain read-only authority."
+    },
+    {
+      "id": "ASCD04",
+      "expected_route": "No code-change; ordinary prose belongs to text-writing."
+    }
+  ]
+}

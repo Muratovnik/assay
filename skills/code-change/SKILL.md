@@ -1,6 +1,6 @@
 ---
 name: code-change
-description: Implement or refactor code with clear responsibilities, controlled state and effective quality checks. Use for changes affecting code structure, shared logic or tooling; skip prose-only edits and read-only audits.
+description: Implement or refactor code with clear responsibilities, controlled state and effective quality checks. Use for changes affecting code structure, shared logic, tooling or source comments and docstrings; skip standalone prose, product documentation and read-only audits.
 license: MIT
 metadata:
   assay-optional-skills: "evidence-research implementation-planning independent-audit research-driven-change software-architecture test-writing ui-delivery"
@@ -10,6 +10,13 @@ metadata:
 
 Make the requested change easier to understand and safely change again. Assess
 the resulting code and its consumers, not just the patch size or green commands.
+
+For writing, editing or assessing source comments and docstrings, read
+[comments and docstrings](references/comments-and-docstrings.md) before changing
+them. For a comment-only request, use that bounded procedure with the working
+contract and applicable checks; do not turn it into a refactor or require an
+architecture review. Standalone prose and product documentation remain outside
+this method; a read-only audit uses the same criteria without repair authority.
 
 ## Establish the working contract
 

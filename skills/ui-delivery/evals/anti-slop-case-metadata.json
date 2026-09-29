@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "skill_name": "ui-delivery",
+  "cases": [
+    {
+      "id": "ASU01",
+      "group": "AS-UI-status",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether connection styling reflects the authoritative operation, not whether it uses a dot.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU02",
+      "group": "AS-UI-status",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether connection styling reflects the authoritative operation, not whether it uses a dot.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU03",
+      "group": "AS-UI-comparison",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a displayed percentage has a comparable, nonzero baseline.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU04",
+      "group": "AS-UI-comparison",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a displayed percentage has a comparable, nonzero baseline.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU05",
+      "group": "AS-UI-demo",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the presence and persistence of simulation context, not the use of synthetic records.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU06",
+      "group": "AS-UI-demo",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the presence and persistence of simulation context, not the use of synthetic records.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU07",
+      "group": "AS-UI-dashboard",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the user task while preserving an otherwise sound overview layout.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU08",
+      "group": "AS-UI-dashboard",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the user task while preserving an otherwise sound overview layout.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU09",
+      "group": "AS-UI-style",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary a concrete readability defect while keeping familiar visual choices constant.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU10",
+      "group": "AS-UI-style",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary a concrete readability defect while keeping familiar visual choices constant.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU11",
+      "group": "AS-UI-evidence",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a screenshot claim is refuted by supplied source evidence or merely lacks verification.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASU12",
+      "group": "AS-UI-evidence",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a screenshot claim is refuted by supplied source evidence or merely lacks verification.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}
