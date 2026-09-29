@@ -121,27 +121,8 @@ coordinator's existing evidence record.
 
 ## From a pilot to iterative improvement
 
-Use [evaluation design](../skills/skill-evaluation/references/eval-design.md) when
-creating or materially changing a corpus or evaluator. It connects user outcomes
-to criteria, calibrates false acceptance and false rejection, and distinguishes
-judge variability from executor variability. Reuse applicable calibration rather
-than making every minor edit start a new evaluation project.
-
-Use [bounded iterative improvement](../skills/skill-evaluation/references/iterative-improvement.md)
-when the request needs several candidate changes. Fix the objective, baseline,
-authorized surface, budget, guardrails and stopping policy first. Keep working
-cases, candidate-selection evidence and final untouched groups distinct; repeated
-aggregate feedback is selection, not independent final evidence. Tiny pilots
-remain diagnostic instead of being divided into misleading miniature splits.
-
-Deleting a duplicate rule, narrowing a trigger, relocating guidance and retaining
-the current method are legitimate candidates. Preserve valid nearby work and test
-automatic activation in the actual enabled collection. A plateau calls for causal
-diagnosis, not more emphatic instructions or removal of inconvenient failures.
-Correcting the evaluator creates a new measurement version; compare both
-conditions under the same corrected criteria and preserve earlier evidence.
-
-These procedures reuse existing execution, inspection and Git tools. They add no
-runner, model campaign, autonomous self-editing service or requirement to publish
-results. Authored, structurally checked, behaviorally exercised and comparatively
-supported remain separate claims.
+For a new or materially changed corpus or evaluator, use
+[evaluation design](../skills/skill-evaluation/references/eval-design.md). When a
+request needs several candidate changes, use
+[bounded iterative improvement](../skills/skill-evaluation/references/iterative-improvement.md).
+Neither adds a runner, a model campaign or a requirement to publish results.

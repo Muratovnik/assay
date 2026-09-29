@@ -9,9 +9,9 @@ not authority to create a runner, a service, a task store or self-modifying loop
 ## Establish a comparable starting point
 
 Use [evaluation design](eval-design.md) when the task distribution, grader or
-measurement is new, materially changed or untrusted. Reuse applicable calibration
-instead of repeating setup. Without an adequate signal, improve the measurement
-or stop with a diagnostic conclusion; do not optimize against an unreliable score.
+measurement is new, materially changed or untrusted. Without an adequate signal,
+improve the measurement or stop with a diagnostic conclusion; do not optimize
+against an unreliable score.
 
 Before the first change, keep one experiment record in the existing owner notes:
 
@@ -26,10 +26,9 @@ Before the first change, keep one experiment record in the existing owner notes:
 | Stop | Success threshold, regression, unresolved noise, exhausted budget or defined plateau |
 
 For cost reduction, define acceptable quality loss or required parity before the
-runs; do not infer parity from a nonsignificant difference. Use the full accepted-
-delivery cost boundary in [paired pilot](paired-pilot.md#inspect-four-distinct-results),
-including failed attempts and remaining corrections. Keep money, elapsed time and
-subscription usage distinct; unavailable values remain unknown.
+runs; do not infer parity from a nonsignificant difference. Measure cost within
+the full accepted-delivery boundary of the
+[paired pilot](paired-pilot.md#inspect-four-distinct-results).
 
 A request to design the experiment is not permission to execute it. An authorized
 implementation need not invent another approval gate, but unresolved paid usage,
@@ -64,10 +63,8 @@ A shorter file is not evidence of lower cost, and moving mandatory reading does
 not remove it. Keep grading examples, unique incident phrases and expected answers
 out of the candidate; generalize the causal rule rather than pasting failures.
 
-For discovery changes, test the intended invocation route with the actual enabled
-collection and competing entries. Explicit loading can test execution but not
-automatic selection. Preserve should-not-fire cases and distinguish a missing
-entry, an incorrect selection and a selected method that was not followed.
+For discovery changes, keep should-not-fire cases and apply the main method's
+invocation-route checks unchanged.
 
 ## Inspect and decide after each candidate
 
@@ -75,8 +72,8 @@ Run only the predeclared, authorized comparisons in comparable fresh conditions.
 Retain every attempt, failed tool call, trace and artifact; distinguish transport
 or harness failures from subject defects. Vary trial/order conditions only as
 planned, not until a favorable answer appears. Evaluate material guards separately
-from aggregate quality or cost. Use working and selection feedback for selection;
-neither becomes independent final evidence by hiding the transcripts.
+from aggregate quality or cost. Keep working and selection feedback in their
+[roles](eval-design.md#separate-development-selection-and-final-evidence).
 
 Record the patch identity, hypothesis, comparator, measurement identity, outcomes,
 costs, guards and remaining uncertainty, then choose one outcome:
@@ -94,17 +91,15 @@ costs, guards and remaining uncertainty, then choose one outcome:
 An unchanged held-out score alone is not proof of overfitting: check the objective,
 headroom and uncertainty. A cost objective can succeed at maintained quality.
 Improvement on only familiar failures is a transfer warning, not a license to
-keep tuning against final data. Repeated selection introduces bias even when
-individual confidence intervals look convincing.
+keep tuning against final data.
 
 ## When progress stalls
 
 Use the agreed plateau or budget limit, or stop earlier when plausible improvements
 are smaller than the available signal. Before another patch, classify the remaining
-working failures together. Distinguish absent criteria, unread/routing branches,
-read-but-unfollowed instructions, tool/environment failures, unsatisfied task
-requirements and disputed grading. Keep uncertain causes explicit. A recurring
-failure is not automatically an instruction gap.
+working failures together by responsible layer, including unsatisfied task
+requirements. Keep uncertain causes explicit. A recurring failure is not
+automatically an instruction gap.
 
 This diagnostic pass makes no score-improving edits. Seek a distinguishing probe
 for the dominant plausible cause. An impossible or ambiguous task, or a grader
@@ -112,21 +107,17 @@ rejecting a supported answer, must be justified against the original contract
 using [test-audit](../../test-audit/SKILL.md), not removed because it lowers scores.
 Do not require the score to keep rising or weaken protected behavior at a plateau.
 
-For a legitimate measurement repair, retain old task/grader bytes and results,
-record the reason and start a new measurement version. Regrade saved baseline and
-candidate outputs together if only grading changed and those outputs remain
-sufficient. If the task, available inputs or execution contract changed, rerun
-both under the new conditions when authorized. Historical and revised scores are
-not one improvement curve. Unresolved disputes stop promotion, not authorize an
-optimizer to rewrite its own acceptance criteria.
+Version a legitimate measurement repair as in
+[evaluation design](eval-design.md#freeze-a-usable-measurement). Unresolved
+disputes stop promotion; they do not authorize an optimizer to rewrite its own
+acceptance criteria.
 
 ## Freeze, validate transfer and hand back
 
 After selection stops, freeze one candidate and compare it with the fixed baseline
 on untouched final groups under the agreed budget. Do not select another candidate
-or retry until green from these results. If final feedback informs another change,
-that begins a new experiment with new final evidence. Public or already exposed
-cases remain useful regressions but cannot stand in for untouched groups.
+or retry until green from these results; the final role's limits are in
+[evaluation design](eval-design.md#separate-development-selection-and-final-evidence).
 
 For a broader claim, check other relevant task families and client configurations
 in separately identified conditions. A local gain does not establish transfer.

@@ -42,9 +42,8 @@ relevant task families where feasible without breaking those groups. Record
 unrepresented families. Repeats of one task estimate its variability; they do
 not create more independent tasks or broaden coverage.
 
-For a tiny pilot do not manufacture three misleading micro-samples. Use the
-[paired pilot](paired-pilot.md), identify what was exposed and report diagnostic
-limits. A public corpus, or one already read while authoring, is development or
+A tiny pilot uses the [paired pilot](paired-pilot.md) instead of these roles.
+A public corpus, or one already read while authoring, is development or
 regression material, not a secret final set. Once final feedback influences a
 change, retire that set from the final role and obtain new untouched evidence
 before making another independent final claim. Never relabel selection as final.
@@ -62,14 +61,13 @@ Use the cheapest adequate check: existing deterministic assertions for objective
 properties, artifact review or a calibrated model judge for open-ended outcomes.
 Do not replace a working owner check with a bespoke approximate grader.
 
-For claims that checks distinguish wrong from supported behavior, apply
+For claims that a grader distinguishes wrong outputs from supported ones,
+including supported outputs in another wording or format, apply
 [test-audit's discriminating probes](../../test-audit/references/discriminating-probes.md).
 That method owns the false-acceptance, false-rejection and reproducibility criteria;
 this procedure owns selecting and calibrating the evaluation used for comparison.
-Use a known-defective result and a valid alternative that differs in wording,
-format or implementation. Confirm verdicts against independently justified task
-requirements. If that peer is unavailable, disclose the missing audit evidence
-rather than inventing an equivalent policy or silently installing it.
+If that peer is unavailable, disclose the missing audit evidence rather than
+inventing an equivalent policy or silently installing it.
 
 For a model judge, rescore identical frozen outputs and inspect disagreements.
 In pairwise comparisons hide candidate identities, vary presentation order and
@@ -106,10 +104,14 @@ sample cannot distinguish a worthwhile change from noise, limit the claim or
 propose a budgeted extension rather than declaring equivalence or a winner.
 
 Changing tasks, grading requirements, judge settings, population weights or the
-failure-accounting policy changes the measurement. Keep the previous version,
-justify the change from the user contract and re-evaluate baseline and candidate
-under the same revised measurement. Do not erase hard failures to create progress.
-See [iterative improvement](iterative-improvement.md#when-progress-stalls) for
+failure-accounting policy changes the measurement. Keep the previous task/grader
+bytes and results, justify the change from the user contract and start a new
+measurement version. If only grading changed and the saved baseline and candidate
+outputs remain sufficient, regrade both together; if the task, available inputs
+or execution contract changed, rerun both under the new conditions when
+authorized. Historical and revised scores are not one improvement curve. Do not
+erase hard failures to create progress. See
+[iterative improvement](iterative-improvement.md#when-progress-stalls) for
 handling a disputed evaluation discovered during optimization.
 
 ## Sources and transfer limits

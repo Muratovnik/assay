@@ -25,11 +25,10 @@ future inputs. Authorized work copies and frozen evidence packets serve differen
 purposes; use existing isolation controls without claiming a fresh context alone
 isolates the filesystem.
 
-For an untrusted or materially changed evaluation, use the relevant checks in
-[evaluation design](eval-design.md), including an invalid answer and a valid
-alternative. Retain applicable calibration instead of starting over. A pilot's
-few tasks need not be divided into three tiny splits; keep its conclusion
-explicitly diagnostic. Repeats measure stability, not task diversity.
+For an untrusted or materially changed evaluation, use
+[evaluation design](eval-design.md) first. A pilot's few tasks need not be
+divided into working, selection and final splits; identify what was exposed and
+keep the conclusion explicitly diagnostic.
 
 ## Inspect four distinct results
 
@@ -58,11 +57,7 @@ and the legitimate control remain represented.
 ## When a pilot is not enough
 
 Use [bounded iterative improvement](iterative-improvement.md) when the authorized
-task calls for successive candidates. Fix the objective, allowed surface and
-budget before iterating. Its working/selection/final distinction prevents repeated
-selection feedback from being described as independent final evidence. A saturated
-regression set need not become harder; cost reduction with protected quality or
-an independently justified capability set can be a different objective.
+task calls for successive candidates.
 
 ## Prior work and limits of transfer
 
