@@ -36,7 +36,10 @@ def read_json(path):
 
 
 def options(environment):
-    raw = read_json(environment["ASSAY_HOOK_CONFIG"]) if environment.get("ASSAY_HOOK_CONFIG") else {}
+    location = environment.get("ASSAY_HOOK_CONFIG")
+    if location and (not isinstance(location, str) or not Path(location).is_absolute()):
+        raise ValueError("hook configuration path must be absolute")
+    raw = read_json(location) if location else {}
     if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events"}:
         raise ValueError("unknown hook option")
     value = {"disabled_rules": [], "disabled_skills": [], "record_events": False,

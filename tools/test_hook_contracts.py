@@ -71,7 +71,7 @@ class ActivationTests(unittest.TestCase):
             self.assertEqual([], activation.load_rules(root)[0])
 
     def test_unknown_duplicate_and_invalid_patterns_are_errors(self):
-        original = (ROOT/'hooks/activation-rules.toml').read_text()
+        original = (ROOT/'hooks/activation-rules.toml').read_text(encoding='utf-8')
         for replacement in (original.replace('skill/code-change', 'skill/unknown'),
                             original.replace('id = "code-change"', 'id = "audit"'),
                             original.replace("'^(?:implement", "'(?:implement")):
@@ -271,23 +271,23 @@ class RuntimeTests(unittest.TestCase):
 
     def test_bad_advisory_settings_are_nonblocking_and_readonly(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path=Path(tmp)/'settings.json'; raw='{"unknown":true}'; path.write_text(raw)
+            path=Path(tmp)/'settings.json'; raw='{"unknown":true}'; path.write_text(raw, encoding='utf-8')
             result=self.invoke(b'{"hook_event_name":"UserPromptSubmit","prompt":"Implement"}',environment={'ASSAY_HOOK_CONFIG':str(path)})
             self.assertEqual(0,result.returncode)
             self.assertEqual({},json.loads(result.stdout))
-            self.assertEqual(raw,path.read_text())
+            self.assertEqual(raw,path.read_text(encoding='utf-8'))
             self.assertTrue(result.stderr)
 
     def test_doctor_does_not_claim_trust_or_native_execution_and_never_writes(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'settings.json'; raw=json.dumps({'hooks':{'PreToolUse':[{'matcher':'Agent','hooks':[{'type':'command','command':'foreign'}]}]}})
-            path.write_text(raw)
+            path.write_text(raw, encoding='utf-8')
             report=cli.doctor('codex',{},settings_path=path)
             self.assertEqual('unknown',report['hooks_trusted'])
             self.assertEqual('unverified',report['native_execution'])
             self.assertTrue(report['conflicts'])
             self.assertFalse(report['settings_modified'])
-            self.assertEqual(raw,path.read_text())
+            self.assertEqual(raw,path.read_text(encoding='utf-8'))
 
     def test_codex_postcompact_never_emits_unsupported_context(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -327,7 +327,7 @@ class RuntimeTests(unittest.TestCase):
     def test_offline_replay_ignores_installed_environment(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'events.jsonl'
-            path.write_text('{"hook_event_name":"UserPromptSubmit","prompt":"Implement"}\n')
+            path.write_text('{"hook_event_name":"UserPromptSubmit","prompt":"Implement"}\n', encoding='utf-8')
             nonexistent=Path(tmp)/'must-not-exist'
             result=self.invoke(b'',extra=('replay','--input',str(path)),environment={
                 'ASSAY_ROUTING_CONFIG':str(nonexistent),'PLUGIN_DATA':str(nonexistent), 'ASSAY_HOOK_CONFIG':str(nonexistent)})
@@ -338,7 +338,7 @@ class RuntimeTests(unittest.TestCase):
     def test_readonly_codex_preflight_cli(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'input.json'
-            path.write_text(json.dumps({'expected':{'model':'x','effort':'low'},'supplied':{}}))
+            path.write_text(json.dumps({'expected':{'model':'x','effort':'low'},'supplied':{}}), encoding='utf-8')
             result=self.invoke(b'',client='codex',extra=('route-preflight','--input',str(path)))
             self.assertEqual(0,result.returncode,result.stderr)
             self.assertFalse(json.loads(result.stdout)['launch_verified'])
