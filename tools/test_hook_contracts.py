@@ -255,7 +255,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(denied,result); self.assertNotIn('SECRET',error)
         with patch.object(cli,'routing_result',return_value={}), patch.object(cli,'load_rules',side_effect=ImportError()):
             result,error=cli.process(event,'claude',{})
-        self.assertEqual({},result); self.assertTrue(error)
+        self.assertEqual(cli.reminder(event, {}),result); self.assertTrue(error)
 
     def test_codex_required_guard_denies_without_allow_or_rewrite(self):
         config={'client':'codex','pipeline':{'mode':'required'}}
@@ -340,7 +340,8 @@ class RuntimeTests(unittest.TestCase):
             path=Path(tmp)/'input.json'
             path.write_text(json.dumps({'expected':{'model':'x','effort':'low'},'supplied':{}}), encoding='utf-8')
             result=self.invoke(b'',client='codex',extra=('route-preflight','--input',str(path)))
-            self.assertEqual(0,result.returncode,result.stderr)
+            # Missing evidence is not a successful configuration check.
+            self.assertEqual(2,result.returncode,result.stderr)
             self.assertFalse(json.loads(result.stdout)['launch_verified'])
 
 

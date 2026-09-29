@@ -31,12 +31,21 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
     if key is None:
         return decision
     now, name = clock(), event["hook_event_name"]
+    delivery = event_key(event, client)
+    # Native delivery identity is independent of inference and rule revisions.
+    # Check it before changing context, including for prompts with no hint.
+    seen = hashlib.sha256(json.dumps([key, delivery]).encode()).hexdigest() if delivery else None
+    if outcome is not None:
+        decision = {"rule_ids": [], "context": ""}
     with PipelineStore(Path(directory), clock=clock).transaction() as tx:
-        if name == "SessionEnd":
+        duplicate = bool(seen and tx.get("hook-seen", seen))
+        if duplicate:
+            decision = {"rule_ids": [], "context": ""}
+        elif name == "SessionEnd":
             # Deduplication expires independently; no broad delete by parent
             # session, which would destroy a different agent's current context.
             tx.delete("hook-context", key)
-        elif name == "UserPromptSubmit":
+        elif name == "UserPromptSubmit" and outcome is None:
             _put(tx, "hook-context", key, {"rules": decision["rule_ids"], "fingerprint": fingerprint}, now)
         elif name == "PostCompact":
             # Codex accepts common output only, not additionalContext here.
@@ -44,7 +53,7 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
             if previous and previous["fingerprint"] == fingerprint:
                 _put(tx, "hook-context", key, {**previous, "pending_restore": True}, now)
             decision = {"rule_ids": [], "context": ""}
-        elif name == "PreToolUse" and outcome != "deny":
+        elif name == "PreToolUse" and outcome is None:
             previous = tx.get("hook-context", key)
             if previous and previous["fingerprint"] == fingerprint and previous.get("pending_restore"):
                 names = ", ".join(r["skill"].split("/", 1)[1] for r in rules if r["id"] in previous["rules"])
@@ -52,24 +61,21 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
                     decision = {"rule_ids": previous["rules"], "context": decision["context"] +
                         f" Previous request suggested {names}; recheck relevance after compaction."}
                 _put(tx, "hook-context", key, {**previous, "pending_restore": False}, now)
-        elif name == "SessionStart" and event.get("source") in {"resume", "compact"}:
+        elif name == "SessionStart" and outcome is None and event.get("source") in {"resume", "compact"}:
             previous = tx.get("hook-context", key)
             if previous and previous["fingerprint"] == fingerprint:
                 decision = {"rule_ids": previous["rules"], "context": context(previous["rules"], rules, restored=True)}
         elif name == "SessionStart" and event.get("source") in {"startup", "clear", "fork"}:
             tx.delete("hook-context", key)
-        delivery = event_key(event, client)
-        if delivery and decision["context"]:
-            seen = hashlib.sha256(json.dumps([key, fingerprint, delivery, decision["rule_ids"]]).encode()).hexdigest()
-            if tx.get("hook-seen", seen):
-                decision = {"rule_ids": [], "context": ""}
-            else:
-                _put(tx, "hook-seen", seen, {}, now)
+        # A guard response takes precedence over context. Do not consume an
+        # undelivered hint (or its deduplication key) when a guard owns the reply.
+        if seen and not duplicate and outcome is None and (name == "UserPromptSubmit" or decision["context"]):
+            _put(tx, "hook-seen", seen, {}, now)
         if record:
             # This records receipt of command input, not authenticated client
             # execution and certainly not compliance with a skill.
             eid = hashlib.sha256(json.dumps([key, delivery, name, now]).encode()).hexdigest()
             _put(tx, "hook-event", eid, {"client": client, "event": name,
-                 "rule_ids": decision["rule_ids"], "decision": outcome or ("hint" if decision["context"] else "silent"),
+                 "rule_ids": decision["rule_ids"], "decision": outcome or ("duplicate" if duplicate else "hint" if decision["context"] else "silent"),
                  "evidence": "command_input_unattested"}, now)
     return decision

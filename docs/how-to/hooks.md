@@ -18,6 +18,8 @@ environment used by that command. Repository contributors already get this from
 `requirements-tools.txt`. Assay never installs it automatically. A missing parser
 makes prompt hints unavailable, not permission to bypass a required routing check;
 session/delegation reminders and the guard do not need the Markdown parser.
+Optional rule/configuration/state failures retain the basic reminders and never
+replace a routing guard response.
 
 After installing/updating the full plugin, inspect the client's hook UI and
 execution diagnostics. Codex requires trust of the current definition; updates
@@ -45,6 +47,20 @@ Keep foreign settings unchanged. Do not copy the hook into user settings in addi
 to enabling the plugin. After rollback, review trust again. `claude-routes --remove`
 and the existing ownership manifest govern generated definitions, not plugin removal.
 Persistent plugin data has its own lifetime and is not an install-state database.
+
+## Input language and model-facing language
+
+All Assay-authored hook instructions, restored reminders and diagnostics are in
+English, matching the skills. English/Russian patterns only recognize **user
+input**; they are not translated prompts sent to a model. Equivalent requests
+selecting the same skill produce the same English context. Do not localize hook
+output based on the detected input language or force user-facing replies into
+English. The user's reply-language preference is unchanged.
+
+Explicit selections accept forms such as `Use the skill code-change`,
+`Apply the skills independent-audit and code-change` and inline-code native names
+such as `assay:code-change`, `$code-change` or `/assay:code-change`. Unknown names
+are not installed or guessed. These input aliases do not change canonical names.
 
 ## Hints do not grant authority
 
@@ -100,7 +116,11 @@ Scope includes client, session, working directory and agent identity. Codex also
 uses transcript *identity* without opening that file; absent both agent and
 transcript identity, it abstains from stateful behavior rather than merging all
 workers under their parent's session. Codex turn/tool IDs deduplicate replayed
-delivery. Claude prompt text is never hashed to invent a turn ID: identical words
+delivery. Delivery is checked transactionally **before** changing active context,
+including silent prompts. An old duplicate cannot overwrite a newer task or
+cancel pending restoration; changing rule versions does not create a new native
+delivery. This protection lasts only while its bounded record remains retained,
+not forever and not across unidentified deliveries. Claude prompt text is never hashed to invent a turn ID: identical words
 can be a legitimate new task. Consequently duplicate Claude prompt deliveries
 without IDs cannot be reliably suppressed.
 
@@ -108,7 +128,9 @@ A new user prompt replaces the active suggestion, even when no rule matches.
 Changed rules/skill bytes invalidate restoration. Clear/end/expiry retire context.
 Claude can restore on supported session resume/compact events. Codex PostCompact
 accepts no additionalContext: it only marks restoration pending; the next supported
-pre-tool event can include a brief reminder. A new prompt cancels stale restoration.
+pre-tool event can include a brief reminder. If a routing reply owns that event,
+the undelivered reminder remains pending, whether the routing reply denies or
+rewrites the operation. A genuinely new prompt cancels stale restoration.
 Without usable identity/data storage, no restoration is claimed. Cross-plugin
 content duplication cannot be deduplicated by this runtime.
 
@@ -192,6 +214,11 @@ Custom-agent values take precedence; selecting a model without a supplied/defaul
 effort leaves that model's default unresolved, not inherited by assumption. A
 custom definition setting only model preserves the previously resolved effort.
 
+`route-preflight` exits 0 only when the supplied routing fields match without
+unresolved evidence, 1 for a demonstrated configuration conflict, and 2 for
+missing or invalid evidence. A conflict dominates concurrent uncertainty. Even
+exit 0 does not verify a native launch; `launch_verified` remains false.
+
 Hosted WebSearch, write_stdin continuation and documented specialized opt-outs
 are not covered by these pre-tool hooks. Matcher aliases do not rename native
 payloads: `spawn_agent` remains `spawn_agent`, not Claude's `Agent` envelope.
@@ -199,7 +226,7 @@ payloads: `spawn_agent` remains `spawn_agent`, not Claude's `Agent` envelope.
 ## Offline checks and evidence levels
 
 ```text
-python -B -m unittest tools.test_hook_contracts tools.test_skill_reminder tools.test_routing_pipeline tools.test_claude_variants
+python -B -m unittest tools.test_hook_contracts tools.test_hook_regressions tools.test_skill_reminder tools.test_routing_pipeline tools.test_claude_variants
 python -B tools/check.py --all
 python -I -B hooks/runtime/cli.py replay --client codex --input sanitized-events.jsonl
 ```
@@ -208,6 +235,12 @@ Replay processes up to 1,000 bounded JSONL events with no installed configuratio
 receipts or state. It cannot spend quota or replay a launch. Its result is labelled
 `synthetic_replay`; a saved real event is still only a replay of input, not a fresh
 client run. The prompt fixtures and expected results are independently authored.
+Replay exits 0 only after processing at least one supported event without a
+processing error. A valid event with no applicable hint is a successful check;
+an empty input, unsupported event, invalid JSON or failed processing exits 2.
+JSON inputs reuse the routing decoder, rejecting duplicate keys and non-finite
+numbers rather than silently choosing a conflicting option. Live hook input
+errors still exit 1 (non-blocking), not the diagnostic command's exit 2.
 
 Fixtures test routing decisions, state transitions and generated shell commands.
 They do not measure skill usefulness, actual client load, sandbox effectiveness,

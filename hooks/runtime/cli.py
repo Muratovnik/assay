@@ -17,6 +17,7 @@ from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
 from runtime import state
 from route_evidence.client_capabilities import contract, codex_route_check
+from route_evidence.core import loads
 from route_evidence.service import load_config
 from routing_hook import handle as route, failure, deny, routing_operation
 from skill_reminder import reminder
@@ -29,7 +30,7 @@ def read_json(path):
         raw = stream.read(MAX_INPUT + 1)
     if len(raw) > MAX_INPUT:
         raise ValueError("oversized configuration")
-    value = json.loads(raw)
+    value = loads(raw.decode("utf-8"))
     if not isinstance(value, dict):
         raise ValueError("configuration must be an object")
     return value
@@ -88,17 +89,22 @@ def process(event, client, environment, *, root=ROOT, clock=None):
         return {}, None
     protected = routing_result(event, client, environment)
     denied = protected.get("hookSpecificOutput", {}).get("permissionDecision") == "deny"
+    outcome = "deny" if denied else "guard" if protected else None
+    legacy = {}
     try:
+        # Basic reminders do not depend on prompt rules, the parser or state.
+        # Keep them as a fallback; a routing reply always remains authoritative.
+        if not protected and event["hook_event_name"] in {"SessionStart", "PreToolUse"}:
+            legacy = reminder(event, environment)
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
-        decision = {"rule_ids": [], "context": ""} if denied else evaluate(event, rules)
-        if not denied and event["hook_event_name"] in {"SessionStart", "PreToolUse"}:
-            legacy = reminder(event, environment)
-            decision["context"] = legacy.get("hookSpecificOutput", {}).get("additionalContext", "")
+        decision = {"rule_ids": [], "context": ""} if protected else evaluate(event, rules)
+        if legacy:
+            decision["context"] = legacy["hookSpecificOutput"]["additionalContext"]
         if settings["state_dir"]:
             kwargs = {"clock": clock} if clock else {}
             decision = state.apply(event, client, decision, rules, fingerprint, settings["state_dir"],
-                                   record=settings["record_events"], outcome="deny" if denied else None, **kwargs)
+                                   record=settings["record_events"], outcome=outcome, **kwargs)
         if protected:
             return protected, None  # One voice; no competing permission/argument writers.
         if decision["context"]:
@@ -106,7 +112,7 @@ def process(event, client, environment, *, root=ROOT, clock=None):
                                           "additionalContext": decision["context"]}}, None
         return {}, None
     except Exception:
-        return protected, "Assay: advisory hook unavailable; routing decision retained. Run hooks doctor."
+        return protected or legacy, "Assay: optional hints unavailable; routing decision and basic reminders retained. Run hooks doctor."
 
 
 def doctor(client, environment, *, root=ROOT, settings_path=None):
@@ -152,27 +158,33 @@ def main(argv=None):
             if args.client != "codex" or not args.input:
                 parser.error("route-preflight requires --client codex and --input")
             raw = read_json(args.input)
-            print(json.dumps(codex_route_check(**raw)))
-            return 0
+            report = codex_route_check(**raw)
+            print(json.dumps(report))
+            # This checks supplied configuration, not native launch/compliance.
+            return 1 if report["conflicts"] else 2 if report["unverified"] else 0
         if args.command == "replay":
             if not args.input:
                 parser.error("replay requires --input")
             # Offline replay never consumes real receipts or mutates installed
             # runtime state, even when a developer has those env vars set.
             with args.input.open("rb") as stream:
-                index = 0
+                index, failed = 0, False
                 while raw := stream.readline(MAX_INPUT + 1):
                     if index >= 1000 or len(raw) > MAX_INPUT:
                         raise ValueError("replay bound exceeded")
-                    result, error = process(json.loads(raw), args.client, {})
+                    event = loads(raw.decode("utf-8"))
+                    if normalize(event, args.client) is None:
+                        raise ValueError("unsupported replay event")
+                    result, error = process(event, args.client, {})
+                    failed = failed or error is not None
                     print(json.dumps({"index": index, "result": result, "error": error,
                                       "evidence": "synthetic_replay"}))
                     index += 1
-            return 0
+            return 2 if index == 0 or failed else 0
         raw = sys.stdin.buffer.read(MAX_INPUT + 1)
         if len(raw) > MAX_INPUT:
             raise ValueError("oversized event")
-        event = json.loads(raw)
+        event = loads(raw.decode("utf-8"))
         result, error = process(event, args.client, os.environ)
         print(json.dumps(result))
         if error:
@@ -182,7 +194,7 @@ def main(argv=None):
         print("Assay: invalid or unavailable hook input/configuration; no payload was recorded.", file=sys.stderr)
         # Event type is unknown. A missing/disabled/broken hook is not an
         # enforcement boundary; never claim a protected action was prevented.
-        return 1
+        return 1 if args.command == "event" else 2
 
 
 if __name__ == "__main__":

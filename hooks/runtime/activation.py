@@ -1,4 +1,8 @@
-"""Bounded, abstaining prompt hints. No model calls, tool calls or permissions."""
+"""English model-facing hints selected from multilingual user input.
+
+Matching a request language never localizes the instruction or the user reply.
+No model calls, tool calls or permissions.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -9,6 +13,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
+SKILL_NAME = re.compile(r"(?:\$|/assay:|assay:)?([a-z][a-z0-9-]{0,63})(?![\w-])")
 EXPLAIN = re.compile(r"^(?:what|how|why|explain|что|как|почему|объясни|расскажи|не\b|do not\b|don't\b)", re.I)
 
 
@@ -74,11 +79,10 @@ def request_text(prompt, known_names):
         for child in token.children or []:
             if child.type == "text":
                 parts.append(child.content)
-            elif child.type == "code_inline" and child.content in known_names:
-                parts.append(child.content)
-            elif child.type in {"softbreak", "hardbreak"}:
-                parts.append(" ")
             elif child.type == "code_inline":
+                name = SKILL_NAME.fullmatch(child.content)
+                parts.append(child.content if name and name[1] in known_names else " ")
+            elif child.type in {"softbreak", "hardbreak"}:
                 parts.append(" ")
         # Only the first actual request paragraph; a pasted second document
         # cannot activate another workflow after an explanatory first paragraph.
@@ -92,14 +96,16 @@ def select(prompt, rules):
     if not text or EXPLAIN.match(text) or text.startswith(('"', "'", "«", "“")):
         return []
     # An explicit selection takes precedence over heuristic classification.
-    explicit = re.match(r"^(?:use|apply|используй|примени)\s+(?:навык[и]?\s+)?(.+)$", text, re.I)
+    explicit = re.match(
+        r"^(?:use|apply|используй|примени)\s+(?:(?:the\s+)?skills?\s+|the\s+|навык[и]?\s+)?(.+)$",
+        text, re.I)
     if explicit or text.startswith(("$", "/assay:")):
         selection = explicit[1] if explicit else text
         found = []
         # Only a leading sequence of explicitly named methods. Do not scan
         # the rest of a paragraph (which may say "not X" or quote another task).
         for segment in re.split(r"\s*(?:,|\band\b|\bи\b)\s*", selection, flags=re.I):
-            match = re.match(r"(?:\$|/assay:|assay:)?([a-z][a-z-]+)(?![\w-])", segment)
+            match = SKILL_NAME.match(segment)
             rule = next((r for r in rules if match and r["skill"] == "skill/" + match[1]), None)
             if not rule:
                 break
