@@ -5,8 +5,8 @@
 目录和智能体配置不绑定固定的低成本模型。客户端负责权限、启动及实际配额；
 Assay 负责契约、本地元数据和诊断重放，不引入新守护进程或强制付费评测。
 显式启用的 `required` 模式增加 Claude 钩子检查：路由调用和已登记的启动经有界
-SQLite 存储绑定到主机会话，工作代理通过生成的模型/effort 定义启动，未登记的
-启动被拒绝，钩子本身不授予任何权限。
+SQLite 存储绑定到主机会话。工作代理的模型在 Agent 调用中传递，effort 由生成的定义
+提供；所有者豁免的内置代理获得配置的模型；未登记的启动被拒绝，钩子本身不授予任何权限。
 详见 [RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)
 与 [强制路由](../../skills/route-subagents/references/required-routing.md)。
 

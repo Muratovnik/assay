@@ -5,8 +5,9 @@ import copy
 import secrets
 from pathlib import Path
 
-from .claude_agents import ADVISOR_PROFILE, resolve_variant
-from .core import EvidenceError, digest, epoch
+from .claude_agents import (ADAPTER, ADVISOR_PROFILE, ALIAS_KIND, launch_model, resolve_variant,
+                            unconfirmed_changes)
+from .core import EvidenceError, digest, epoch, timestamp
 from .pipeline_config import ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory, settings
 from .pipeline_store import PipelineStore
 
@@ -21,7 +22,8 @@ def arguments(value: dict) -> dict:
 
 def compact(response: dict) -> dict:
     keep = {"schema_version", "status", "usage", "decision_id", "snapshot_id", "expires_at",
-            "cache_hit", "launch_verified", "task_evidence_status", "telemetry_status", "reason"}
+            "cache_hit", "launch_verified", "task_evidence_status", "telemetry_status", "reason",
+            "inventory_warnings"}
     result = {k: copy.deepcopy(v) for k, v in response.items() if k in keep}
     result["schema_version"] = PROTOCOL
     if "decisions" in response:
@@ -61,6 +63,17 @@ def launch_stub(attempt_id: str, native_input: dict) -> dict:
     stub = {k: copy.deepcopy(v) for k, v in native_input.items() if k != "prompt"}
     stub["prompt"] = f"Assay registered launch {attempt_id}. The host supplies the registered packet input."
     return stub
+
+
+def with_model(native_input: dict, variant: dict, route: dict) -> dict:
+    """Name the route's model in the Agent call unless the definition pins one.
+
+    An effort definition carries no model; the stub the root sends shows it.
+    """
+    model = launch_model(variant, route)
+    if model:
+        native_input["model"] = model
+    return native_input
 
 
 class RoutingPipeline:
@@ -103,11 +116,35 @@ class RoutingPipeline:
         # packet without a route, so required mode is not set up without one.
         return gaps + [key for key in ("state_dir", "agents_dir", "baseline") if not self.config[key]]
 
+    def alias_observations(self):
+        """What the host resolved each alias to, and changes the owner has not confirmed."""
+        if not self.config["state_dir"]:
+            return []
+        with self.store.transaction() as tx:
+            records = sorted(tx.values(ALIAS_KIND), key=lambda r: r["alias"])
+        try:
+            inventory = configured_inventory(self.raw_config)
+            confirmed = epoch(inventory["observed_at"]) if inventory else None
+        except EvidenceError:
+            confirmed = None
+        report = []
+        for record in records:
+            entry = {"alias": record["alias"], "model": record["model"],
+                     "observed_at": timestamp(record["observed_at"])}
+            if record.get("change"):
+                change = record["change"]
+                entry["change"] = {"from": change["from"], "to": change["to"],
+                                   "changed_at": timestamp(change["changed_at"]),
+                                   "confirmed": confirmed is not None and change["changed_at"] <= confirmed}
+            report.append(entry)
+        return report
+
     def status(self):
         supported = self.service.client == "claude"
         gaps = self.setup_gaps()
         result = {"protocol_version": PROTOCOL, "mode": self.config["mode"],
                   "host_adapter": "claude" if supported else None,
+                  "adapter_capabilities": dict(ADAPTER) if supported else None,
                   "state_configured": bool(self.config["state_dir"]),
                   "definitions_configured": bool(self.config["agents_dir"]),
                   "advisor_route_configured": bool(self.config["advisor_route"]),
@@ -123,6 +160,10 @@ class RoutingPipeline:
         if self.required:
             from .claude_agents import route_checks
             result["route_checks"] = route_checks(self.raw_config)
+            try:
+                result["alias_observations"] = self.alias_observations()
+            except EvidenceError as exc:
+                result["alias_observations"] = {"error": str(exc)}
         return result
 
     def host(self, tool: str, supplied: dict):
@@ -171,6 +212,23 @@ class RoutingPipeline:
         if not -60 <= self.clock() - epoch(inventory["observed_at"]) < self.service.inventory_ttl:
             raise EvidenceError("configured_inventory_expired")
         return inventory
+
+    def _confirmed_names(self, authority):
+        """Suspend an alias's confirmed spellings once its resolution changed.
+
+        Until the owner confirms the inventory again, those spellings describe
+        the model the alias used to resolve to, not the one it launches now.
+        """
+        with self.store.transaction() as tx:
+            changes = unconfirmed_changes(tx.values(ALIAS_KIND), epoch(authority["observed_at"]))
+        if not changes:
+            return authority, []
+        authority = copy.deepcopy(authority)
+        for item in authority["available"]:
+            if item["model"] in changes:
+                item.pop("evidence_names", None)
+        return authority, [{"code": "alias_resolution_changed", "alias": alias, "from": change["from"],
+                            "to": change["to"]} for alias, change in sorted(changes.items())]
 
     def _capabilities(self, packets, available, requests):
         from .core import effort
@@ -247,6 +305,8 @@ class RoutingPipeline:
         if params.get("available") is not None and params["available"] != available:
             raise EvidenceError("inventory_must_match_configured_authority")
         params.pop("available", None)
+        authority, warnings = self._confirmed_names(authority)
+        available = authority["available"]
         # Preserve the actual observation timestamp, including its remaining
         # freshness budget; a repeated caller list cannot renew the inventory.
         self.service.use_inventory(authority)
@@ -258,6 +318,8 @@ class RoutingPipeline:
         params["advisor_route"] = route
         params["packets"] = self._capabilities(packets, available, requests)
         response = await self.service.prepare_routing(**params, native_delivery="private")
+        if warnings:
+            response["inventory_warnings"] = warnings
         if "decision_id" not in response:
             return compact(response)
         internal = workflow.pending_state(response["decision_id"])
@@ -273,6 +335,7 @@ class RoutingPipeline:
                 variant = resolve_variant(self.config, ADVISOR_PROFILE, route)
                 native_input = {"subagent_type": variant["name"], "description": "Assay routing advisor", "run_in_background": False,
                                 "prompt": f"Routing decision {state['decision_id']}. Call get_advisor_input, then complete_routing. Return only submission status."}
+                with_model(native_input, variant, route)
                 state["envelope"] = workflow.export_envelope(state["decision_id"])
                 state["response"]["handoff"] = self._put_attempt(tx, state, "advisor", None, native_input, route, variant)
             tx.put("decision", state["decision_id"], state, expires)
@@ -392,6 +455,7 @@ class RoutingPipeline:
         native_input = {"resume": agent_id, "subagent_type": variant["name"],
                         "description": "Continue registered Assay packet", "run_in_background": False,
                         "prompt": "Continue only the original assigned packet from its current progress. Do not repeat completed changes or expand the scope. If complete, report that status."}
+        with_model(native_input, variant, previous["route"])
         reply = self._put_attempt(tx, state, "worker", previous["packet_id"], native_input, previous["route"], variant)
         attempt = tx.get("attempt", reply["attempt_id"])
         attempt["continuation_of"] = previous["attempt_id"]
@@ -435,6 +499,7 @@ class RoutingPipeline:
                 tx.put("attempt", retry, previous, previous["expires"])
             native_input = {k: copy.deepcopy(v) for k, v in request.items() if k != "profile"}
             native_input["subagent_type"] = variant["name"]
+            with_model(native_input, variant, selected)
             native_input.setdefault("description", "Assay routed packet")
             native_input.setdefault("run_in_background", False)
             native_input["prompt"] += "\n\nDo not spawn additional agents. Return evidence against the packet's acceptance criteria."

@@ -1539,7 +1539,7 @@ def generate_claude_routes(root: Path, config_path: Path, *, prune=False, remove
     """Explicit client-artifact generation; never mutate root agent settings."""
     scripts = root / "skills" / "route-subagents" / "scripts"
     sys.path.insert(0, str(scripts))
-    from route_evidence.claude_agents import generate, guard_command, internal_templates
+    from route_evidence.claude_agents import alias_efforts, generate, internal_templates
     from route_evidence.claude_agents import remove as remove_variants
     from route_evidence.core import EvidenceError
     from route_evidence.pipeline_config import configured_inventory, plain_path
@@ -1571,6 +1571,11 @@ def generate_claude_routes(root: Path, config_path: Path, *, prune=False, remove
         routes = list(pipeline["variants"]) + ([pipeline["advisor_route"]] if pipeline["advisor_route"] else [])
         if not pairs or any((r["model"], r["effort"]) not in pairs for r in routes):
             raise EvidenceError("generated_routes_require_confirmed_inventory_pairs")
+        # Routed profiles get one definition per effort the inventory offers for
+        # a model the Agent call accepts; the call itself carries that model.
+        efforts = alias_efforts(inventory)
+        if pipeline["profiles"] and not efforts:
+            raise EvidenceError("routed_profiles_require_an_alias_model_in_inventory")
         catalog = load_catalog(root)
         templates = {asset.name: render_profile((root / asset.path).read_bytes(), asset, "claude")
                      for asset in profile_assets(catalog)}
@@ -1583,13 +1588,12 @@ def generate_claude_routes(root: Path, config_path: Path, *, prune=False, remove
             if not path.is_file() or path.stat().st_size > MAX_AGENT_TEMPLATE_BYTES:
                 raise EvidenceError("agent_template_unreadable")
             templates[name] = path.read_bytes()
-        guard = guard_command(scripts / "routing_hook.py")
         if prune:
             with active_names(pipeline) as tx:
                 active = [a["variant"]["name"] for a in tx.values("attempt")
                           if a["state"] not in {"failed", "finished"}]
-                return generate(pipeline, templates, prune=True, active_names=active, guard=guard)
-        return generate(pipeline, templates, guard=guard)
+                return generate(pipeline, templates, efforts=efforts, prune=True, active_names=active)
+        return generate(pipeline, templates, efforts=efforts)
     except EvidenceError as error:
         raise ContractError(str(error)) from error
     finally:

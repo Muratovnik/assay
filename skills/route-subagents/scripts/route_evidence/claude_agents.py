@@ -1,4 +1,8 @@
-"""Immutable, on-demand Claude model/effort variants of existing profiles."""
+"""Claude adapter: immutable effort definitions and model-pinned variants of profiles.
+
+The Agent call carries the model when it is one of the host's aliases; only the
+effort needs a generated definition, because the call has no effort field.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -8,33 +12,29 @@ from pathlib import Path
 
 from .cache import atomic_write, source_lock
 from .core import EvidenceError, digest, read_document
-from .pipeline_config import PROTOCOL, plain_path, runtime_overrides
+from .pipeline_config import EFFORT_ORDER, MAX_INVENTORY_TTL_HOURS, PROTOCOL, plain_path, runtime_overrides
 
+# The file names predate manifest schema 3; the schema version lives inside.
 MANIFEST = ".assay-routing-v2.json"
 LOCK = ".assay-routing-v2.lock"
+LEGACY_SCHEMA = 2
 ADVISOR_PROFILE = "routing-advisor"
-# Rolling model aliases that Claude Code accepts for subagents
-# (https://code.claude.com/docs/en/sub-agents). The host resolves one to a full
-# model ID at launch and reports that ID, never the alias.
+# The only model values an Agent call accepts: the host rejects any other value,
+# including a full ID supplied by a hook, before launch. Each is a rolling alias
+# that the host resolves at launch and reports as the resolved full ID.
 CLAUDE_MODEL_ALIASES = frozenset({"sonnet", "opus", "haiku", "fable"})
+ADAPTER = {"host": "claude", "per_call_model": sorted(CLAUDE_MODEL_ALIASES), "per_call_effort": False}
+# Host observations of what an alias resolved to; they outlive sessions and are
+# bounded by the longest inventory confirmation.
+ALIAS_KIND = "alias"
+ALIAS_SECONDS = MAX_INVENTORY_TTL_HOURS * 3600
 
 
 def _hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def guard_command(script: Path) -> str:
-    """Frontmatter hook command for a routed definition's ordinary tool calls.
-
-    User agent files have no plugin-root variable, so the absolute script path is
-    embedded; hex encoding keeps every shell and Python quoting rule out of it.
-    """
-    encoded_path = str(script.resolve()).encode("utf-8").hex()
-    return ("python -I -B -c \"import runpy, sys; sys.argv = [sys.argv[0], '--scope', 'agent']; "
-            f"runpy.run_path(bytes.fromhex('{encoded_path}').decode('utf-8'), run_name='__main__')\"")
-
-
-def render_variant(template: bytes, spec: dict, server: str, guard: str | None = None) -> tuple[dict, bytes]:
+def render_variant(template: bytes, spec: dict, server: str) -> tuple[dict, bytes]:
     # Generator-only dependency, already used by the repository's authoring
     # tools. Runtime guards validate immutable bytes against this manifest.
     import yaml
@@ -48,10 +48,15 @@ def render_variant(template: bytes, spec: dict, server: str, guard: str | None =
     metadata = yaml.safe_load(head)
     if not isinstance(metadata, dict):
         raise EvidenceError("invalid_variant_template")
-    fingerprint = digest({"protocol": PROTOCOL, "template": _hash(template), "spec": spec, "server": server,
-                          "guard": guard})[:16]
-    name = f"assay-{spec['profile'][:35]}-{fingerprint}"
-    metadata.update(name=name, model=spec["model"], effort=spec["effort"])
+    fingerprint = digest({"protocol": PROTOCOL, "template": _hash(template), "spec": spec, "server": server})[:16]
+    name = f"assay-{spec['profile'][:30]}-{spec['effort']}-{fingerprint}"
+    metadata.update(name=name, effort=spec["effort"])
+    if spec["model"] is None:
+        # The Agent call supplies the model. A template's own model would apply
+        # silently to a launch that arrived without one.
+        metadata.pop("model", None)
+    else:
+        metadata["model"] = spec["model"]
     metadata["description"] = f"Assay routed {spec['profile']}; use only the registered launch input."
     # A routed profile is not allowed to recursively delegate. Existing native
     # capability allowlists and permission modes remain intact.
@@ -60,19 +65,11 @@ def render_variant(template: bytes, spec: dict, server: str, guard: str | None =
         denied = [item.strip() for item in denied.split(",") if item.strip()]
     metadata["disallowedTools"] = list(dict.fromkeys([*denied, "Agent", "Task"]))
     if spec["profile"] == ADVISOR_PROFILE:
+        # The host enforces this allowlist: an unlisted tool is not available to
+        # the advisor at all, so no hook of its own is needed.
         metadata["tools"] = [f"mcp__{server}__get_advisor_input", f"mcp__{server}__complete_routing", "SubagentHandback"]
         metadata["maxTurns"] = 4
-    if guard:
-        # Only this definition's own tool calls pay for the check; the plugin
-        # hook stays limited to spawns, hand-backs and routing operations.
-        hooks = metadata.get("hooks") or {}
-        entries = hooks.get("PreToolUse", []) if isinstance(hooks, dict) else None
-        if not isinstance(entries, list):
-            raise EvidenceError("invalid_variant_template_hooks")
-        hooks["PreToolUse"] = [*entries, {"matcher": ".*", "hooks": [
-            {"type": "command", "command": guard, "timeout": 5}]}]
-        metadata["hooks"] = hooks
-    # Scope model and effort here, never in the canonical profile or root settings.
+    # Scope effort, and a pinned model, here, never in the canonical profile or root settings.
     payload = ("---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n" + body
                + "\nDo not spawn other agents. Follow only the assigned packet's scope.\n").encode("utf-8")
     record = {**spec, "name": name, "file": name + ".md", "sha256": _hash(payload),
@@ -93,7 +90,7 @@ def _manifest(directory: Path) -> dict:
         return {"schema_version": PROTOCOL, "variants": [], "retired": []}
     value = read_document(path)
     if (not isinstance(value, dict) or set(value) != {"schema_version", "variants", "retired"}
-            or value["schema_version"] != PROTOCOL or not isinstance(value["variants"], list)
+            or value["schema_version"] not in (LEGACY_SCHEMA, PROTOCOL) or not isinstance(value["variants"], list)
             or not isinstance(value["retired"], list)):
         raise EvidenceError("invalid_variant_manifest")
     seen = set()
@@ -101,9 +98,15 @@ def _manifest(directory: Path) -> dict:
         if (not isinstance(entry, dict) or set(entry) != {"profile", "model", "effort", "name", "file", "sha256", "source_sha256"}
                 or not isinstance(entry["name"], str) or not entry["name"].startswith("assay-")
                 or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789-" for c in entry["name"])
-                or entry["file"] != entry["name"] + ".md" or entry["name"] in seen):
+                or entry["file"] != entry["name"] + ".md" or entry["name"] in seen
+                or not (isinstance(entry["model"], str)
+                        or (entry["model"] is None and value["schema_version"] == PROTOCOL))):
             raise EvidenceError("invalid_variant_manifest_entry")
         seen.add(entry["name"])
+    if value["schema_version"] == LEGACY_SCHEMA:
+        # Earlier definitions pin a model and carry their own guard hook. No
+        # route selects them any more; they stay owned until pruned or removed.
+        value = {"schema_version": PROTOCOL, "variants": [], "retired": value["variants"] + value["retired"]}
     return value
 
 
@@ -114,17 +117,37 @@ def check_record(directory: Path, record: dict) -> dict:
     return dict(record)
 
 
-def resolve_variant(config: dict, profile: str, route: dict, *, environment: dict | None = None) -> dict:
-    if not config["agents_dir"]:
-        raise EvidenceError("claude_variants_not_configured")
-    directory = plain_path(Path(config["agents_dir"]))
-    spec = {"profile": profile, "model": route["model"], "effort": route["effort"]}
+def definition_spec(config: dict, profile: str, route: dict) -> dict:
+    """The definition a route launches through: a pinned variant, else an effort definition.
+
+    A configured variant keeps its model in the definition. Otherwise a routed
+    profile and a model the Agent call accepts use the profile's definition for
+    that effort, and the call carries the model.
+    """
     if profile == ADVISOR_PROFILE:
         configured = config["advisor_route"]
         if not configured or any(configured[k] != route[k] for k in ("model", "effort")):
             raise EvidenceError("advisor_route_not_configured")
-    elif spec not in config["variants"]:
-        raise EvidenceError("variant_not_configured")
+        return {"profile": profile, "model": None if route["model"] in CLAUDE_MODEL_ALIASES else route["model"],
+                "effort": route["effort"]}
+    pinned = {"profile": profile, "model": route["model"], "effort": route["effort"]}
+    if pinned in config["variants"]:
+        return pinned
+    if profile in config["profiles"] and route["model"] in CLAUDE_MODEL_ALIASES:
+        return {"profile": profile, "model": None, "effort": route["effort"]}
+    raise EvidenceError("variant_not_configured")
+
+
+def launch_model(record: dict, route: dict) -> str | None:
+    """The Agent call's `model`: the route's alias, unless the definition pins a model."""
+    return route["model"] if record["model"] is None else None
+
+
+def resolve_variant(config: dict, profile: str, route: dict, *, environment: dict | None = None) -> dict:
+    if not config["agents_dir"]:
+        raise EvidenceError("claude_variants_not_configured")
+    directory = plain_path(Path(config["agents_dir"]))
+    spec = definition_spec(config, profile, route)
     matches = [v for v in _manifest(directory)["variants"] if all(v[k] == spec[k] for k in spec)]
     # A source revision change produces a new name. Generation replaces the
     # manifest selection, while active retired files remain untouched on disk.
@@ -136,13 +159,60 @@ def resolve_variant(config: dict, profile: str, route: dict, *, environment: dic
     return record
 
 
+def alias_efforts(available: list) -> list[str]:
+    """Effort levels the confirmed inventory offers for models an Agent call accepts."""
+    levels = {level for item in available if item["model"] in CLAUDE_MODEL_ALIASES for level in item["efforts"]}
+    return [level for level in EFFORT_ORDER if level in levels]
+
+
+def unrouted_model(config: dict, spec) -> str | None:
+    """The model an exempt agent type launches with, or None for the parent's model.
+
+    Only an explicit "inherit" keeps the parent's model. A type without its own
+    model uses the baseline's; either must be a model the Agent call accepts.
+    """
+    if spec == "inherit":
+        return None
+    model = (config["baseline"] or {}).get("model") if spec == "baseline" else spec["model"]
+    if not model:
+        raise EvidenceError("unrouted_agent_needs_baseline")
+    if model not in CLAUDE_MODEL_ALIASES:
+        raise EvidenceError("unrouted_model_not_accepted_per_call")
+    return model
+
+
+def observe_alias(tx, alias: str, resolved: str, now: float) -> dict | None:
+    """Record what the host resolved an alias to; return the change, if it is one.
+
+    The first observation establishes the resolution. A different later one is
+    an inventory event that stays visible until the owner confirms the
+    inventory again; it is never a route mismatch.
+    """
+    current = tx.get(ALIAS_KIND, alias)
+    record = {"alias": alias, "model": resolved, "observed_at": now}
+    change = None
+    if current and current["model"] != resolved:
+        change = {"alias": alias, "from": current["model"], "to": resolved, "changed_at": now}
+        record["change"] = change
+    elif current and current.get("change"):
+        record["change"] = current["change"]
+    tx.put(ALIAS_KIND, alias, record, now + ALIAS_SECONDS)
+    return change
+
+
+def unconfirmed_changes(records, confirmed_at: float) -> dict:
+    """Alias resolution changes observed after the owner last confirmed the inventory."""
+    return {r["alias"]: r["change"] for r in records
+            if r.get("change") and r["change"]["changed_at"] > confirmed_at}
+
+
 def route_checks(raw_config: dict) -> dict:
     """Pre-launch checks of configured routes; no launch, discovery or model call.
 
-    Each route is checked against the confirmed inventory, the generated
-    definition and the process environment. A rolling alias in a definition is
-    reported because the host observes the resolved ID, so the check after the
-    worker fails; the configured route needs the confirmed full ID instead.
+    Every route the configuration can select is checked against the confirmed
+    inventory, its generated definition and the process environment: pinned
+    variants, each alias pair of a routed profile and the advisor. The baseline
+    is checked for every profile and each exempt agent type for its model.
     """
     from .pipeline_config import configured_inventory, settings
     config = settings(raw_config)
@@ -150,62 +220,85 @@ def route_checks(raw_config: dict) -> dict:
         inventory = configured_inventory(raw_config) or {}
     except EvidenceError:
         inventory = {}  # Reported by the inventory status; every pair is then absent.
-    pairs = {(item["model"], level) for item in inventory.get("available", []) for level in item["efforts"]}
-    routes = [{"role": "worker", **variant} for variant in config["variants"]]
+    available = inventory.get("available", [])
+    pairs = {(item["model"], level) for item in available for level in item["efforts"]}
+    candidates = [("worker", v["profile"], {"model": v["model"], "effort": v["effort"]}) for v in config["variants"]]
+    candidates += [("worker", profile, {"model": item["model"], "effort": level})
+                   for profile in config["profiles"] for item in available
+                   if item["model"] in CLAUDE_MODEL_ALIASES for level in item["efforts"]]
     if config["advisor_route"]:
-        routes.append({"role": "advisor", "profile": ADVISOR_PROFILE,
-                       **{k: config["advisor_route"][k] for k in ("model", "effort")}})
-    problems, checked = [], []
-    for route in routes:
-        label = f"{route['profile']} {route['model']}/{route['effort']}"
-        entry = {**route, "in_inventory": (route["model"], route["effort"]) in pairs,
-                 "rolling_alias": route["model"] in CLAUDE_MODEL_ALIASES}
+        candidates.append(("advisor", ADVISOR_PROFILE,
+                           {k: config["advisor_route"][k] for k in ("model", "effort")}))
+    problems, routes, seen = [], [], set()
+    for role, profile, route in candidates:
+        if (profile, route["model"], route["effort"]) in seen:
+            continue
+        seen.add((profile, route["model"], route["effort"]))
+        label = f"{profile} {route['model']}/{route['effort']}"
+        entry = {"role": role, "profile": profile, **route, "in_inventory": (route["model"], route["effort"]) in pairs}
         try:
-            resolve_variant(config, route["profile"], route)
+            entry["per_call_model"] = launch_model(resolve_variant(config, profile, route), route)
             entry["definition"] = "ready"
         except EvidenceError as exc:
             entry["definition"] = str(exc)
             problems.append({"code": str(exc), "route": label})
         if not entry["in_inventory"]:
             problems.append({"code": "route_not_in_inventory", "route": label})
-        if entry["rolling_alias"]:
-            problems.append({"code": "rolling_alias_in_definition", "route": label})
-        checked.append(entry)
+        routes.append(entry)
     baseline = config["baseline"]
     fallback = None
     if baseline:
-        profiles = sorted({v["profile"] for v in config["variants"]})
-        expressible = sorted({v["profile"] for v in config["variants"]
-                              if (v["model"], v["effort"]) == (baseline["model"], baseline["effort"])})
+        label = f"{baseline['model']}/{baseline['effort']}"
+        expressible, inexpressible = [], []
+        for profile in sorted(set(config["profiles"]) | {v["profile"] for v in config["variants"]}):
+            try:
+                resolve_variant(config, profile, baseline)
+                expressible.append(profile)
+            except EvidenceError:
+                inexpressible.append(profile)
+                problems.append({"code": "baseline_not_expressible", "route": f"{profile} {label}"})
         fallback = {**baseline, "in_inventory": (baseline["model"], baseline["effort"]) in pairs,
-                    "expressible_profiles": expressible,
-                    "inexpressible_profiles": [p for p in profiles if p not in expressible]}
-        for profile in fallback["inexpressible_profiles"]:
-            problems.append({"code": "baseline_has_no_variant", "route": f"{profile} {baseline['model']}/{baseline['effort']}"})
+                    "expressible_profiles": expressible, "inexpressible_profiles": inexpressible}
         if not fallback["in_inventory"]:
-            problems.append({"code": "baseline_not_in_inventory", "route": f"{baseline['model']}/{baseline['effort']}"})
+            problems.append({"code": "baseline_not_in_inventory", "route": label})
+    unrouted = {}
+    for name, spec in sorted(config["unrouted_agents"].items()):
+        try:
+            unrouted[name] = {"model": unrouted_model(config, spec) or "inherit"}
+        except EvidenceError as exc:
+            unrouted[name] = {"error": str(exc)}
+            problems.append({"code": str(exc), "route": name})
     for packet_id, choice in sorted(config["approved_choices"].items()):
         if (choice["model"], choice["effort"]) not in pairs:
             problems.append({"code": "approved_choice_not_in_inventory",
                              "route": f"{packet_id} {choice['model']}/{choice['effort']}"})
-    return {"routes": checked, "baseline": fallback, "problems": problems}
+    return {"routes": routes, "baseline": fallback, "unrouted_agents": unrouted, "problems": problems}
 
 
-def generate(config: dict, templates: dict[str, bytes], *, prune=False, active_names=(), guard=None) -> dict:
+def definition_specs(config: dict, efforts=()) -> list[dict]:
+    """Every definition the configuration can launch through, without duplicates."""
+    specs = [dict(variant) for variant in config["variants"]]
+    specs += [{"profile": profile, "model": None, "effort": level}
+              for profile in config["profiles"] for level in efforts]
+    if config["advisor_route"]:
+        specs.append(definition_spec(config, ADVISOR_PROFILE, config["advisor_route"]))
+    return [spec for index, spec in enumerate(specs) if spec not in specs[:index]]
+
+
+def generate(config: dict, templates: dict[str, bytes], *, efforts=(), prune=False, active_names=()) -> dict:
+    """Write the definitions this configuration needs; `efforts` are the inventory's alias efforts."""
     if not config["agents_dir"]:
         raise EvidenceError("claude_agents_dir_required")
     directory = plain_path(Path(config["agents_dir"]))
     templates = {**internal_templates(), **templates}
-    specs = list(config["variants"])
-    if config["advisor_route"]:
-        specs.append({"profile": ADVISOR_PROFILE, **{k: config["advisor_route"][k] for k in ("model", "effort")}})
+    specs = definition_specs(config, efforts)
     if not specs:
         raise EvidenceError("no_variants_requested")
     desired = {}
     for spec in specs:
         if spec["profile"] not in templates:
             raise EvidenceError("unknown_canonical_profile")
-        record, data = render_variant(templates[spec["profile"]], spec, config["mcp_server"], guard)
+        record, data = render_variant(templates[spec["profile"]], spec, config["mcp_server"])
         desired[record["name"]] = (record, data)
     directory.mkdir(parents=True, exist_ok=True)
     lock = plain_path(directory / LOCK)

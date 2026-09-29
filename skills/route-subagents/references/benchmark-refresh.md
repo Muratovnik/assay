@@ -31,6 +31,12 @@ unlisted release keeps lexical matching. Fast variants remain separate; GPT-5.6
 results never become GPT-6 results. Effort is parsed separately and must match a
 setting the caller supplied. Missing effort stays unknown, not `medium` or `max`.
 
+What a rolling alias currently means is not inferred here either. In required
+routing the host itself reports the model an alias resolved to, and a change of
+that resolution suspends the alias's confirmed spellings until the owner confirms
+the inventory again; see [required routing](required-routing.md#observations-failure-and-privacy-boundaries).
+That is a host observation feeding the inventory, not a matching rule.
+
 ## Finding a missing spelling
 
 A model that no source names gets `no_matching_model_name`, even when a source

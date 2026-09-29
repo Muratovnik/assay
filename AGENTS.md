@@ -54,9 +54,10 @@ Never manage Codex's `.system` directory.
 The link lifecycle may create or remove only exact catalogued targets. It refuses
 real directories, foreign links, modified adapters and reparse-point ancestors.
 It does not package anything or keep install state.
-Model/effort variants for opt-in required routing are runtime artifacts:
-`tools/assay.py claude-routes` writes them from a user's configuration into that
-user's agent directory with an ownership manifest, never into canonical source.
+Effort definitions and model-pinned variants for opt-in required routing are
+runtime artifacts: `tools/assay.py claude-routes` writes them from a user's
+configuration into that user's agent directory with an ownership manifest, never
+into canonical source.
 
 ## Gates
 
