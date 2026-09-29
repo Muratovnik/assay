@@ -853,15 +853,22 @@ def reminder_hooks() -> bytes:
         "'skills/route-subagents/scripts/skill_reminder.py'), "
         "run_name='__main__')\""
     )
+    guard = command.replace("skill_reminder.py", "routing_hook.py")
+    guard_hook = {"type": "command", "command": guard, "timeout": 5}
     return json_document({"hooks": {
         "SessionStart": [{
             "matcher": "^(startup|resume|clear|compact|fork)$",
-            "hooks": [{"type": "command", "command": command, "timeout": 5}],
+            "hooks": [{"type": "command", "command": command, "timeout": 5}, guard_hook],
         }],
         "PreToolUse": [{
             "matcher": "^(spawn_agent|Agent|Task)$",
             "hooks": [{"type": "command", "command": command, "timeout": 5}],
-        }],
+        }, {"matcher": ".*", "hooks": [guard_hook]}],
+        "SubagentStart": [{"hooks": [guard_hook]}],
+        "SubagentStop": [{"hooks": [guard_hook]}],
+        "PostToolUse": [{"matcher": "^(Agent|Task)$", "hooks": [guard_hook]}],
+        "PostToolUseFailure": [{"matcher": "^(Agent|Task)$", "hooks": [guard_hook]}],
+        "SessionEnd": [{"hooks": [guard_hook]}],
     }})
 
 
@@ -1514,11 +1521,52 @@ def uninstall_links(
     ]
 
 
+def generate_claude_routes(root: Path, config_path: Path, *, prune=False) -> dict:
+    """Explicit client-artifact generation; never mutate root agent settings."""
+    scripts = root / "skills" / "route-subagents" / "scripts"
+    sys.path.insert(0, str(scripts))
+    from route_evidence.claude_agents import generate
+    from route_evidence.core import EvidenceError
+    from route_evidence.pipeline_config import settings as pipeline_settings
+    from route_evidence.pipeline_store import PipelineStore
+    from route_evidence.service import load_config
+    try:
+        config = load_config(config_path)
+        if config.get("client") != "claude":
+            raise EvidenceError("variant_generation_requires_claude_configuration")
+        pipeline = pipeline_settings(config)
+        inventory = (config.get("inventory") or {}).get("available", [])
+        pairs = {(m["model"], e) for m in inventory for e in m["efforts"]}
+        routes = list(pipeline["variants"]) + ([pipeline["advisor_route"]] if pipeline["advisor_route"] else [])
+        if not pairs or any((r["model"], r["effort"]) not in pairs for r in routes):
+            raise EvidenceError("generated_routes_require_confirmed_inventory_pairs")
+        catalog = load_catalog(root)
+        templates = {asset.name: render_profile((root / asset.path).read_bytes(), asset, "claude")
+                     for asset in profile_assets(catalog)}
+        if prune:
+            if not pipeline["state_dir"]:
+                raise EvidenceError("pruning_requires_shared_runtime_state")
+            # Hold the state transaction while pruning so a concurrently
+            # authorized launch cannot lose its immutable definition.
+            with PipelineStore(Path(pipeline["state_dir"])).transaction() as tx:
+                active = [a["variant"]["name"] for a in tx.values("attempt")
+                          if a["state"] not in {"failed", "finished"}]
+                return generate(pipeline, templates, prune=True, active_names=active)
+        return generate(pipeline, templates)
+    except EvidenceError as error:
+        raise ContractError(str(error)) from error
+    finally:
+        sys.path.remove(str(scripts))
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     commands = result.add_subparsers(dest="command", required=True)
     commands.add_parser("check")
+    variants = commands.add_parser("claude-routes", help="generate configured model/effort variants without changing root settings")
+    variants.add_argument("--config", type=Path, required=True)
+    variants.add_argument("--prune", action="store_true", help="remove only unmodified inactive owned variants")
     plan = commands.add_parser("plan")
     plan.add_argument("--json", action="store_true")
     install = commands.add_parser("install-links")
@@ -1541,6 +1589,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
     options = parser().parse_args(arguments)
     root = options.root.resolve()
     try:
+        if options.command == "claude-routes":
+            print(json.dumps(generate_claude_routes(root, options.config, prune=options.prune), indent=2))
+            return 0
         if options.command == "render":
             if options.check:
                 drift = render_drift(root)

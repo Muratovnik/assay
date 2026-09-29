@@ -11,6 +11,13 @@ does not.
 [![release](https://img.shields.io/github/v/release/Muratovnik/assay?style=flat-square)](https://github.com/Muratovnik/assay/releases)
 [![license](https://img.shields.io/github/license/Muratovnik/assay?style=flat-square)](LICENSE)
 
+
+Delegation through the updated Claude plugin requires explicit routing setup:
+[schema-3 configuration, immutable agent variants and host hooks](skills/route-subagents/references/required-routing.md).
+Older configurations do not silently fall back to root-side ranking. An owner
+may explicitly choose `evidence-only`; other hosts must not claim Claude's
+mandatory routing guarantee. Installing skills alone does not install hooks.
+
 ## What you can do
 
 Skills are eligible for discovery when a task matches their descriptions.

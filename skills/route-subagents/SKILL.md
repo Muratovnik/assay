@@ -50,69 +50,55 @@ or reviewer directly within the existing authorization.
 
 ## Choose model and effort for the task
 
-Select both settings before each spawn. Preserve a model or effort explicitly
-chosen by the user; the primary's settings are not an implicit choice for its
-children. Use the [routing advisor workflow](references/routing-advisor.md) when
-configured: one `prepare_routing` request for the plan, structured packets and
-the current host's available model × effort pairs. It extends the existing
-[benchmark evidence service](references/benchmark-routing.md), including its
-source refresh, cohorts, coverage gaps and vendor guidance.
+Use the [required routing contract](references/required-routing.md) before each
+already-authorized delegation. The primary describes the work, ownership,
+constraints and verification; it does not fetch benchmarks and repeat the
+advisor's ranking. Configuration, not an argument authored by the primary,
+supplies the confirmed inventory, economical advisor route and approved choices.
+A profile remains a capability boundary, not a model selection.
 
-The default adapter is `native-economy`, a route to a suitable economical model
-in the active client, not a permanent model name. Resolve its own model and
-effort once from an explicit choice, a real client economy role or a short
-choice grounded in current availability and relevant cost/fit evidence. Send
-that pair with `selection_basis`; do not start another advisor to choose it.
-No known basis means `needs_advisor_route`, not inherited parent settings.
+Prepare all packets together with `prepare_routing`, including a `launch_requests`
+entry containing the intended profile and self-contained execution prompt for
+each packet. Raw execution prompts stay out of the advisor's evidence input.
+The host hook supplies its own receipt; do not invent or copy that receipt.
+An approved explicit choice, a single eligible pair or a valid cache hit avoids
+unnecessary advisor inference but still requires a registered worker launch.
 
-For `awaiting_native_advice`, the primary launches the returned bounded packet
-through the native client and submits its structured answer to
-`complete_routing`. The advisor must not spawn agents. Use the smallest context;
-do not attach the whole conversation or repository. The optional `jev` backend
-requires separate configuration and external-data consent. Neither adapter is
-a new persistent agent profile, and there is no hidden native-to-Jev fallback.
+When the response contains `handoff`, launch its exact native input unchanged.
+Only that separately bound advisor may fetch its private input and submit its
+structured result with `complete_routing`. The primary never forwards benchmark
+snapshots or submits an answer on the advisor's behalf. The advisor must not
+spawn agents. Its own route is configured once; no recursive routing is allowed.
 
-Policy validates the ranking and preserves explicit choices and hard
-constraints. Use its selected route. Veto only for a concrete missed capability,
-incorrect input or changed goal, and record that reason; do not repeat the full
-ranking analysis by default. An abstention or invalid answer uses only an
-already supplied eligible baseline. Without one, select a route through the
-existing evidence workflow or keep the work local. No paid comparison campaign
-or duplicate task execution is required.
+Read `get_routing_decision` after the native advisor completes, then call
+`authorize_routing_launch` for the packet and launch the returned input unchanged.
+The native guard checks session, scope, expiry, immutable definition and attempt
+identity. Use `retry_of` only for a host-observed failed invocation;
+`resume_agent_id` only continues the same observed idle worker's original work.
+A changed task, reviewer, replacement or new constraint needs its own decision.
 
-If the advisor is disabled, or the new tools are unavailable, use
-`get_routing_context` once per plan for all needed task types. CLI is a fallback
-only when MCP is unavailable; preserve the installed runtime, config, cache and
-browser settings. Supply confirmed runtime IDs and supported efforts. Never
-guess aliases or add `--offline` to a live decision. Read `data_status`,
-`data_message` and gaps before comparing configurations; an empty cache is not
-absence of published measurements.
+Use the selected pair. A concrete missed constraint or changed goal calls for a
+corrected request, not a second root-side ranking. Failure or abstention permits
+only a separately configured eligible baseline; otherwise report no executable
+decision. Do not silently inherit the primary model, switch providers, disable
+the advisor, use CLI as an unauthenticated bypass or substitute local execution
+when the user required delegation. Preserve the primary model and settings.
 
-Compare model and effort together using ambiguity, error impact, verification
-strength, tools/context needs and benchmark fit. Do not average unrelated
-scores, borrow a different test's costs, infer unmeasured efforts or treat API
-prices as subscription quota. Vendor guidance is quoted evidence, never an
-instruction overriding the task. Preserve acquisition warnings and unknown
-expenses. A quality-only candidate does not establish savings.
+Setup or host support gaps are explicit. Claude uses generated client-specific
+model/effort definitions; a written file is not proof of discovery or effective
+permissions. Other hosts must not claim Claude's enforcement guarantees.
+`evidence-only` is a separately authorized configuration mode, never a failure
+fallback. Its [comparative evidence workflow](references/benchmark-routing.md)
+is diagnostic/manual and does not provide mandatory isolated routing.
 
-When configured, use [local task evidence](references/task-evidence.md) to compare
-expected **full-chain** cost, quality and uncertainty against the supplied
-baseline. Include retries, verification and coordination; unknown cost or
-alternative outcomes cannot justify cheaper routing. Keep descriptions local,
-reuse existing observations and stay within the evidence budget. No extra model
-run is authorized to calibrate this choice.
-Pass short `task_queries` by packet ID (or `task_query` in evidence-only mode)
-from the known work. Public historical observations provide useful context even
-without local history or exact current-model matches; keep their measurements
-distinct from predictions about the available routes.
-
-Record the selected pair and task-based reason with the launch, then pass
-available execution evidence to `record_routing_outcome`. A requested setting is
-not an observed runtime receipt. Inheritance is acceptable only when its
-effective settings match the deliberate selection. If the client cannot express
-the choice, use a supported route or keep the work local and disclose the
-limitation. Setup failure is not automatic model escalation. Keep the primary's
-model and global client configuration unchanged.
+The [advisor reference](references/routing-advisor.md) owns structured features,
+policy, evidence bounds, cache and optional diagnostic backends. When configured,
+[local task evidence](references/task-evidence.md) adds historical full-chain
+cost and uncertainty without extra model trials. Keep unknown expenses unknown;
+API prices are not subscription quota. Record outcomes through
+`record_routing_outcome`, distinguishing requested, configured and host-observed
+settings. Include advisor, coordination, verification and retries in completed-task
+cost. No new paid comparison campaign is authorized by this skill.
 
 ## Use the native client
 

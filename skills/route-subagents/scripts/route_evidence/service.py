@@ -94,11 +94,13 @@ def load_config(path: Path | None):
     if path is None:
         return {}
     config = read_document(path)
-    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2):
-        raise EvidenceError("configuration requires schema_version=1 or 2")
+    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2, 3):
+        raise EvidenceError("configuration requires schema_version=1, 2 or 3")
     allowed = {"schema_version", "client", "preferences", "inventory"}
-    if config["schema_version"] == 2:
+    if config["schema_version"] >= 2:
         allowed.update({"advisor", "policy", "telemetry", "task_evidence"})
+    if config["schema_version"] == 3:
+        allowed.add("pipeline")
     if set(config) - allowed:
         raise EvidenceError("unknown configuration field")
     preferences = config.get("preferences", {})
@@ -114,9 +116,12 @@ def load_config(path: Path | None):
                       **preferences})
     if inventory:
         epoch(inventory["observed_at"])
-    if config["schema_version"] == 2:
+    if config["schema_version"] >= 2:
         from .advisor_config import settings
         config.update(settings(config))
+    if config["schema_version"] == 3:
+        from .pipeline_config import settings as pipeline_settings
+        config["pipeline"] = pipeline_settings(config)
     return config
 
 
@@ -169,8 +174,8 @@ an unqualified family alias nor the server's own guesses resolve model versions.
             packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable,
             task_queries=task_queries, cost_objectives=cost_objectives)
 
-    def complete_routing(self, decision_id, advisor_result, *, envelope=None):
-        return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope)
+    def complete_routing(self, decision_id, advisor_result, *, envelope=None, cache=True):
+        return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope, cache=cache)
 
     def record_routing_outcome(self, decision_id, execution):
         return self.advisor_workflow.record_routing_outcome(decision_id, execution)

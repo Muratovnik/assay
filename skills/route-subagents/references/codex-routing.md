@@ -20,15 +20,14 @@ Use full inheritance only when full continuity is material and the inherited
 settings also fit the task and budget. Do not discard a cheaper sufficient
 selection just to copy history. Recheck the callable schema if that changes.
 
-For a [native economy advisor](routing-advisor.md), the primary passes the
-handoff's model and effort through `model` and `reasoning_effort`, with
-`fork_turns="none"` and the self-contained prompt. The advisor ranks only the
-provided snapshot and must not spawn. Submit the returned object to
-`complete_routing` before launching the actual worker. A no-tools instruction
-is not an enforced sandbox: use a real tool restriction only when the active
-schema exposes it. No fixed model or per-child token cap is implied. Snapshot
-expiry rejects a late answer; interrupting the running advisor still belongs
-to the native client.
+The required host-attested adapter currently supports Claude Code, not Codex.
+Do not pass a compact Claude handoff to Codex or claim that its reminder enforces
+a launch gate. Required mode reports the unsupported host instead of silently
+returning benchmarks for the root to rank. A Codex-specific hook/identity adapter
+needs separately verified client contracts; matching tool names are insufficient.
+The mechanics here apply only to explicitly authorized evidence-only/manual use
+and remain subject to the active tool schema. See the
+[mode and capability boundary](required-routing.md#one-explicit-mode).
 
 A spawned worker shares the filesystem unless an isolated checkout has been
 prepared. Set its actual root and owned scope; a prompt saying "isolated" does

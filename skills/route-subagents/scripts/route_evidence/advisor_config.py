@@ -21,7 +21,7 @@ def settings(config=None):
         "enabled", "backend", "native", "jev", "max_packets",
         "max_candidates_per_packet", "max_snapshot_bytes", "max_pending", "pending_seconds",
     }, "advisor")
-    advisor.setdefault("enabled", config.get("schema_version") == 2)
+    advisor.setdefault("enabled", config.get("schema_version") in (2, 3))
     advisor.setdefault("backend", "native-economy")
     if type(advisor["enabled"]) is not bool or advisor["backend"] not in ("native-economy", "jev"):
         raise EvidenceError("invalid advisor enabled/backend")
@@ -84,17 +84,22 @@ def settings(config=None):
     return result
 
 
-def migrate_config(source: Path, destination: Path, *, enable_advisor=False):
-    """Create a new v2 file exclusively. Source bytes and launch arguments stay intact."""
+def migrate_config(source: Path, destination: Path, *, enable_advisor=False, mode="required"):
+    """Create a v3 configuration exclusively; never install or rewrite the source."""
     from .service import load_config
+    from .pipeline_config import settings as pipeline_settings
 
     config = load_config(source)
-    if config.get("schema_version") != 1:
-        raise EvidenceError("migration requires a v1 source")
-    config["schema_version"] = 2
-    config.update(settings({"schema_version": 2, "advisor": {"enabled": enable_advisor}}))
-    # Never replace a user's file, even when --output equals the source.
+    if config.get("schema_version") not in (1, 2):
+        raise EvidenceError("migration requires a v1 or v2 source")
+    legacy = config["schema_version"]
+    config["schema_version"] = 3
+    if legacy == 1:
+        config["advisor"] = {"enabled": enable_advisor or mode == "required"}
+    config.update(settings(config))
+    config["pipeline"] = pipeline_settings({"pipeline": {"mode": mode}})
     with destination.open("xb") as stream:
         stream.write(encoded(config))
-    return {"status": "migrated", "schema_version": 2, "advisor_enabled": enable_advisor,
+    return {"status": "migrated", "schema_version": 3, "advisor_enabled": config["advisor"]["enabled"],
+            "pipeline_mode": mode, "setup_required": mode == "required",
             "registration_changed": False, "launch_arguments_changed": False}

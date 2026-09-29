@@ -1,26 +1,23 @@
 # Claude Code mechanics
 
-Use native Agent/subagent mechanisms and the active client's supported fields.
-Select the child model and effort from the task and quota criteria in the
-entrypoint; request them through the supported per-child controls. Inheritance
-is suitable only when its effective settings match that selection. If an effort
-control is unavailable, report the limitation instead of claiming it was set.
-Do not persist dated aliases or model rankings or change global configuration
-to route one child.
+Use the [required routing contract](required-routing.md) for actual setup and
+calls. Claude's Agent schema has no per-invocation effort field in this adapter.
+Generate an immutable definition for each requested profile/model/effort pair
+using `tools/assay.py claude-routes`; route via the returned `subagent_type`, not
+an invented Agent argument or changed root/global effort. Generation is explicit,
+conflict-safe and separate from discovery. Canonical profiles remain neutral.
 
-For a [native economy advisor](routing-advisor.md), use the active Claude model
-inventory and a supported native Agent route for the returned handoff. Do not
-launch another provider's CLI to obtain its economical model. Send only the
-bounded snapshot, request the explicit supported effort and return the object
-to `complete_routing`. If the client cannot express the route, report that
-limitation and use the eligible caller baseline or keep the task local. A prompt
-forbidding tools or delegation is not proof of an enforced permission boundary.
+The separately bound native advisor fetches its private snapshot directly and
+submits the structured answer itself. The primary uses only the compact handoff,
+decision and exact authorized worker input. It does not copy benchmarks, forge
+results, start another provider's CLI or select a fallback. Only a separately
+configured eligible baseline can recover a failed advisor; otherwise no launch.
 
-Choose a built-in or semantic role by purpose and effective permissions.
-Explore can fit codebase lookup, but its role name does not identify its model;
-current releases inherit it subject to provider-specific limits. Verify the
-actual binding when it matters. Custom profiles should describe stable
-capabilities and omit model/effort defaults unless the owner deliberately pins them.
+Requested settings and model/effort fields in frontmatter are not observations.
+The hook observes the `effort.level` object and structured Agent `resolvedModel`
+and `modelsUsed` when available. Conflicting environment overrides and observed
+mismatches are rejected rather than silently treated as the requested route.
+Unknown remains unknown. Parent permissions and actual tool access still govern.
 
 Ordinary Agent calls do not imply filesystem isolation. Use native worktree
 isolation where supported for parallel writers and verify the resulting root.
@@ -33,7 +30,10 @@ CLAUDE_PROJECT_DIR at the launching project while hook input cwd follows the
 worktree. A hook may therefore still touch the main checkout or shared state;
 inspect its actual paths and ownership without changing unrelated registrations.
 
-Use native progress, waiting and resume mechanisms with returned identities.
+Use native progress and waiting with returned identities. For an existing routed
+worker, request `authorize_routing_launch` with its `resume_agent_id`; the host
+checks the same idle worker, original packet and unchanged definition. A direct
+unregistered resume or new task under an old identity is not permitted.
 Keep the packet self-contained where independence matters. Do not assume
 Codex context-inheritance parameters, effort values or role names work here.
 Parent permissions, tool restrictions, environment overrides and MCP exposure

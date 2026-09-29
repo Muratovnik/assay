@@ -32,7 +32,7 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.now = 1800000000.0
-        self.config = {"schema_version": 2, "telemetry": {"mode": "off"}}
+        self.config = {"schema_version": 3, "pipeline": {"mode": "evidence-only"}, "telemetry": {"mode": "off"}}
         self.service = self.make_service()
 
     def make_service(self, *, offline=False, config=None):
@@ -57,6 +57,24 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
                 "rankings": [{"packet_id": p["packet_id"], "ranking": list(p["eligible"]),
                               "abstained": False, "reason_codes": [], "probabilities": None, "confidence": None}
                              for p in snap["packets"]], "metadata": {}}
+
+    async def test_successful_hosted_diagnostic_answer_uses_existing_semantic_cache(self):
+        from route_evidence.advisors.jev import JevAdapter
+        service = self.make_service(config={"schema_version": 3, "pipeline": {"mode": "evidence-only"},
+            "advisor": {"enabled": True, "backend": "jev"}, "telemetry": {"mode": "off"}})
+        adapter = JevAdapter(service.advisor_workflow.advisor["jev"])
+        service.advisor_workflow._jev = adapter
+        async def reply(snapshot):
+            return {"schema_version": 1, "snapshot_id": snapshot["snapshot_id"], "backend": "jev",
+                    "requested_model": "jev-1.13.0", "resolved_model": "jev-1.13.0", "effort": None,
+                    "rankings": [{"packet_id": p["packet_id"], "ranking": list(p["eligible"]),
+                        "abstained": False, "reason_codes": [], "probabilities": None, "confidence": None}
+                        for p in snapshot["packets"]], "metadata": {}}
+        with patch.object(adapter, "recommend", side_effect=reply) as recommend:
+            first = await self.prepare(service)
+            self.assertEqual(first["status"], "decided")
+            self.assertTrue((await self.prepare(service))["cache_hit"])
+            recommend.assert_awaited_once()
 
     async def test_prepare_complete_and_idempotence(self):
         prepared = await self.prepare()

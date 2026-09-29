@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from route_evidence.service import REGISTRY, RoutingService, default_cache, inge
 
 def add_options(parser):
     parser.add_argument("--cache-dir", type=Path, default=default_cache())
-    parser.add_argument("--config", type=Path, help="local preferences and optional dated inventory")
+    parser.add_argument("--config", type=Path, default=os.environ.get("ASSAY_ROUTING_CONFIG"), help="local preferences and optional dated inventory")
     parser.add_argument("--client", help="native host label, not an automatic inventory detector")
     parser.add_argument("--ttl-hours", type=float, default=24)
     parser.add_argument("--timeout-seconds", type=float, default=30, help="total refresh deadline, not per-source")
@@ -29,7 +30,10 @@ def add_options(parser):
 
 
 def make_service(args):
-    config = load_config(args.config)
+    inherited = os.environ.get("ASSAY_ROUTING_CONFIG")
+    if inherited and args.config and Path(inherited).absolute() != Path(args.config).absolute():
+        raise EvidenceError("MCP and hooks must use the same ASSAY_ROUTING_CONFIG")
+    config = load_config(Path(args.config) if args.config else None)
     if args.client and config.get("client") and args.client != config["client"]:
         raise EvidenceError("client override conflicts with the configured client; use a separate client config")
     return RoutingService(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
@@ -75,6 +79,7 @@ def main(argv=None):
     mp.add_argument("--source", type=Path, required=True)
     mp.add_argument("--output", type=Path, required=True, help="new file only; never replaces the source")
     mp.add_argument("--enable-advisor", action="store_true")
+    mp.add_argument("--mode", choices=["required", "evidence-only"], default="required")
     tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
     tp.add_argument("--file", type=Path, required=True)
     tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
@@ -95,10 +100,14 @@ def main(argv=None):
             raise EvidenceError("smoke requires --force and online mode")
         if args.command == "migrate-config":
             from route_evidence.advisor_config import migrate_config
-            result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor)
+            result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor, mode=args.mode)
             print(json.dumps(result, indent=2))
             return 0
         service = make_service(args)
+        from route_evidence.pipeline import RoutingPipeline
+        pipeline = RoutingPipeline(service)
+        if pipeline.required and not args.offline and args.command in {"prepare", "complete", "record", "context", "task-context"}:
+            raise EvidenceError("required routing uses host-attested MCP operations; legacy CLI needs explicit evidence-only configuration")
         if args.command in {"prepare", "context", "task-context"}:
             service.advisor_workflow.task_evidence.provisioner.wait = True
         code = 0
@@ -188,7 +197,7 @@ def main(argv=None):
             else:
                 result = asyncio.run(service.get_routing_context(args.task_type, details=True))
         elif args.command in ("status", "doctor"):
-            result = service.status(getattr(args, "source", None))
+            result = {**service.status(getattr(args, "source", None)), "pipeline": pipeline.status()}
             if args.command == "doctor" and args.check_browser:
                 from route_evidence.processes import ProcessScope
                 from route_evidence.core import encoded

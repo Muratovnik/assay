@@ -306,7 +306,7 @@ class AdvisorWorkflow:
         self._states[decision_id] = payload
         return payload
 
-    def complete_routing(self, decision_id, advisor_result, *, envelope=None):
+    def complete_routing(self, decision_id, advisor_result, *, envelope=None, cache=True):
         if not isinstance(decision_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}", decision_id):
             raise EvidenceError("invalid decision_id")
         if not isinstance(advisor_result, dict):
@@ -332,14 +332,11 @@ class AdvisorWorkflow:
             if self.service._inventory and self.service._inventory["available"] != state["inventory"]["available"]:
                 return self._finish(state, reason="inventory_changed")
             try:
-                result = validate_result(state["snapshot"], advisor_result)
-                route = state["advisor_route"]
-                if (result["backend"] != "native-economy" or result["requested_model"] != route["model"]
-                        or result["resolved_model"] != route["model"] or result["effort"] != route["effort"]):
-                    raise EvidenceError("advisor route mismatch")
+                from .advisors.native import parse_native
+                result = parse_native(state["snapshot"], advisor_result, advisor_route=state["advisor_route"])
             except EvidenceError:
                 return self._finish(state, reason="invalid_advisor_result")
-            return self._finish(state, result, cache=True)
+            return self._finish(state, result, cache=cache)
 
     def record_routing_outcome(self, decision_id, execution):
         if self.service.offline:

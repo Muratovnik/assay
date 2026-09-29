@@ -24,7 +24,7 @@ from route_evidence.advisors.jev import (  # noqa: E402
     JevAdapter,
     RetryAfter,
 )
-from route_evidence.advisors.native import parse_native, prepare_native  # noqa: E402
+from route_evidence.advisors.native import advisor_input, parse_native, prepare_native  # noqa: E402
 from route_evidence.advice import build_snapshot, semantic_projection
 from route_evidence.core import EvidenceError, digest, encoded  # noqa: E402
 
@@ -113,8 +113,11 @@ class NativeAdapterTests(unittest.TestCase):
                          ("model-00", "low", "none"))
         self.assertEqual(result["descriptor"]["privacy_profile"], "native-structured")
         self.assertFalse(result["tool_disable_enforced"])
+        self.assertNotIn("prompt", result)
+        self.assertNotIn("result_contract", result)
+        result = advisor_input(self.snapshot, self.route)
         self.assertIn("untrusted data", result["prompt"])
-        self.assertIn("Do not use tools, delegate", result["prompt"])
+        self.assertIn("Do not delegate", result["prompt"])
         self.assertIn("Never average scores across cohorts", result["prompt"])
         self.assertIn("subscription quota usage", result["prompt"])
         self.assertNotIn("Luna", result["prompt"])

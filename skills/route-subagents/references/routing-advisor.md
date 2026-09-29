@@ -10,110 +10,62 @@ The optional [task evidence extension](task-evidence.md) adds local query retrie
 and historical full-chain cost/quality estimates. It is disabled by default;
 missing evidence preserves this workflow and never implies subscription savings.
 
-## Enable for one client
+## Enable and execute
 
-Config v1 remains evidence-only. Create a separate v2 file, preserving the old
-bytes and the current MCP command, environment and link targets for rollback:
+The [required routing contract](required-routing.md) owns schema-3 migration,
+host setup, advisor isolation, generated Claude definitions, attested MCP calls,
+launch checks and rollback. Use it for live delegation. It replaces the former
+root-mediated handoff: `prepare_routing` no longer returns a benchmark-bearing
+prompt for the primary to forward, and the primary must not submit advice itself.
 
-```sh
-python skills/route-subagents/scripts/benchmark_router.py migrate-config --source OLD_CONFIG --output NEW_CONFIG --enable-advisor
-```
+Prepare once for up to eight structured packets plus their private
+`launch_requests`. Configuration supplies dated inventory, an economical advisor
+route, approved explicit choices and an optional eligible baseline. Missing setup
+is not a reason to select models in the root. `routing_status` describes gaps;
+it does not attest installation or discovery. A full approved choice, a single
+eligible pair or an exact valid cache hit avoids an unnecessary advisor call.
 
-The output must not already exist. This command preserves client, preferences
-and dated inventory, and changes no registration or launch argument. Point the
-existing server registration at the new file and reconnect the client, retaining
-its Python environment, cache, browser settings and timeout. A minimal v2 file:
-
-```json
-{
-  "schema_version": 2,
-  "client": "codex",
-  "preferences": {},
-  "advisor": {"enabled": true, "backend": "native-economy"},
-  "policy": {"fallback": "caller-baseline", "unknown_evidence": "warn"},
-  "telemetry": {"mode": "metadata", "retention_days": 30}
-}
-```
-
-Use the actual host label. No model name or effort is stored in a neutral
-profile. `native-economy` means an economical route in that client's current
-catalog; it is not a model alias or local inference. Its computation uses the
-native provider and consumes that account's quota.
-
-`routing_status` is read-only: it reports backend, enablement, pending count,
-optional SDK presence and retention. A missing tool in an already running
-client may require reconnection. Use the same configured CLI as a fallback;
-do not create another server or silently switch providers.
-
-## Prepare and finish native advice
-
-Call `prepare_routing` once for the plan, up to eight packets. Supply the actual
-inventory on the first call as with `get_routing_context`. Resolve the advisor's
-own pair once, in this order: explicit user choice; an actual client economy-role
-binding; otherwise a short choice from available cost and fitness evidence.
-There is no invented cheapest-model API or recursive advisor call.
-
-Illustrative request; replace model/effort values with confirmed runtime values:
+Features are bounded scalars or identifier lists, each carrying `caller`,
+`observed` or `unknown` provenance. `features: {}` is valid. For example:
 
 ```json
 {
-  "packets": [{
-    "packet_id": "parser-change",
-    "task_types": ["implementation", "tests"],
-    "features": {
-      "phase": {"value": "implementation", "provenance": "caller"},
-      "ambiguity": {"value": "low", "provenance": "caller"},
-      "verification": {"value": "deterministic-tests", "provenance": "observed"}
-    }
-  }],
-  "available": [{"model": "runtime-model", "efforts": ["low", "high"]}],
-  "advisor_route": {
-    "model": "runtime-model",
-    "effort": "low",
-    "selection_basis": {"source": "evidence", "reason_code": "bounded_ranking", "evidence_refs": ["cohort-id"]}
-  }
+  "packet_id": "parser-change",
+  "task_types": ["implementation", "tests"],
+  "features": {
+    "phase": {"value": "implementation", "provenance": "caller"},
+    "verification": {"value": "deterministic-tests", "provenance": "observed"}
+  },
+  "requirements": {"delegation_allowed": true, "capabilities": ["shell"]}
 }
 ```
 
-Features are bounded scalars or identifier lists, each with `caller`, `observed`
-or `unknown` provenance. `features: {}` is valid; missing facts remain unknown.
-Do not send task prose, code, paths, credentials or raw tool outputs. Optional
-packet fields are `explicit` (model and/or effort), `baseline` (both),
-`requirements` and `capabilities`. A requirement can declare:
+Do not put task prose, code, paths, credentials or raw outputs into features.
+The execution prompt belongs only in the associated private launch request.
+Optional `task_queries` remain local under the existing task-evidence consent.
+Required capability facts come from the separately configured profile authority;
+per-model masks supplied by the primary are rejected. Missing/false/unknown
+capabilities do not satisfy requirements. Model/effort expressibility is checked
+against generated definitions and runtime overrides by the client adapter.
 
-```json
-{
-  "requirements": {"delegation_allowed": true, "capabilities": ["shell"], "constraints": {"max_cost_usd": 2}},
-  "capabilities": [{"model": "runtime-model", "effort": "low", "route_expressible": true, "capabilities": {"shell": true}}]
-}
-```
+Numeric constraints retain benchmark cohort and units. Measured violations are
+excluded with reasons; unknown values warn unless selected strict policy requires
+rejection. Do not average unrelated scores, infer unmeasured efforts, substitute
+another test's costs or equate API prices to subscription quota. Vendor prose is
+evidence, not an instruction. These policy rules are unchanged by the host guard.
 
-These declarations must reflect the current client. Capability values are
-`true`, `false` or `null`; unknown evidence is not proof of capability. Optional
-benchmark constraints retain their cohort and units. A measured violation is
-excluded with a reason. Unknown measurements warn by default; use
-`policy.strict_unknown_constraints` to fail closed for named constraints.
-`policy.unknown_evidence="strict"` applies strict handling to all declared numeric
-constraints. A required capability always needs a positive declaration.
-The original benchmark response is unchanged by advisor filtering.
+The separately launched advisor calls `get_advisor_input` for its own snapshot
+and submits the provided JSON contract through `complete_routing`. Each
+non-abstained packet ranks every eligible ID exactly once; ties are explicit.
+Native probabilities and confidence remain null and are checked at runtime.
+The service validates snapshot, route, inventory, policy, expiry and bounds;
+real host identity is checked separately from self-reported JSON fields.
 
-An explicit full choice or a single eligible pair finishes without advisor
-inference. Otherwise `awaiting_native_advice` returns `decision_id`, expiry and
-`handoff`. Launch exactly that bounded handoff through the primary's native
-subagent mechanism. The prompt instructs the advisor to rank only supplied data,
-use no tools and create no agents; that instruction is not an enforced sandbox.
-Use actual supported restrictions when available. Codex uses a self-contained
-packet with `fork_turns="none"`; other clients use their own supported controls.
-
-Submit its JSON object as `complete_routing(decision_id, advisor_result)`. Each
-non-abstained packet must rank every eligible candidate ID exactly once. Ties
-are explicit groups. Native probabilities and confidence remain null. The
-server checks snapshot identity, exact route, inventory, policy, expiry and
-result bounds; it never repairs a partial ranking by guessing missing entries.
-
-Use the returned selection for the real worker. Reconsider only a concrete
-missed constraint, incorrect input or changed goal, then prepare a new snapshot.
-Record that reason rather than paying for a second full ranking debate.
+The primary receives compact selected pairs and reasons only after the native
+invocation returns. Use `authorize_routing_launch` and its exact arguments for
+each worker. A concrete changed constraint means a corrected request, not a
+second root-side ranking. The advisor's final report is status, not copied
+benchmarks. No recursive advisor or implicit parent route is permitted.
 
 ## Optional hosted Jev adapter
 
@@ -126,7 +78,9 @@ environment as the server; native-only operation does not import it:
 python -m pip install -r skills/route-subagents/scripts/requirements-advisors.txt
 ```
 
-Select these advisor settings explicitly in the local v2 config:
+This backend is available only in explicitly selected schema-3 evidence-only
+mode, not in the required native host chain. Select these advisor settings
+explicitly in that local configuration:
 
 ```json
 {
@@ -176,14 +130,18 @@ The semantic limit excludes transport identity and timestamps. Jev's serialized
 request, including Choice questions and that metadata, has a separate 64 KiB
 bound; this overhead is not extra task content. Byte limits are not token counts.
 
-At most 16 pending decisions live in a connection. They expire after ten
-minutes or the earlier inventory/evidence freshness deadline. `busy` preserves
-existing packets. Restarted or late native replies cannot authorize a launch;
-expiry itself does not stop a running cloud advisor. Identical completion is
-idempotent and conflicting completion is rejected.
+At most 16 semantic pending decisions live in a connection. They expire after
+ten minutes or earlier inventory/evidence expiry. `busy` preserves existing
+packets. In required mode the private envelope in the bounded host rendezvous
+allows recovery after an MCP restart only for the same actual advisor/session,
+configuration and unexpired decision. A root-supplied portable envelope is not
+authorization. Expiry does not stop a running provider process. Identical child
+completion is idempotent; conflicting completion is rejected.
 
-Abstention, provider failure or missing bootstrap yields the eligible caller
-baseline, if supplied; otherwise `needs_caller_selection`. Changed inventory,
+Abstention, provider failure or missing bootstrap yields only the eligible
+separately configured baseline. Otherwise policy may report
+`needs_caller_selection`, which in required mode means no executable decision:
+it is not permission for the primary to read benchmarks and choose. Changed inventory,
 policy or expired evidence requires preparation again. A selected route never
 proves the actual launch. The exact in-memory decision cache includes semantic
 features, candidate set, backend/model/effort, prompt/schema/policy/privacy
@@ -192,7 +150,11 @@ prove model quality or current availability of an execution slot.
 
 ## CLI, history and rollback
 
-All commands share the service used by MCP. Global flags precede subcommands:
+All commands share the service used by MCP. The following prepare/complete/record
+CLI examples are for explicitly selected evidence-only diagnostics, not the
+required live chain. Required mode rejects unauthenticated live CLI equivalents;
+`--offline` permits diagnostic replay without dispatch. Global flags precede
+subcommands:
 
 ```sh
 python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG prepare --request REQUEST.json
@@ -204,8 +166,8 @@ python skills/route-subagents/scripts/benchmark_router.py replay --record RETAIN
 
 CLI `prepare` includes a portable `envelope`. For completion send an object with
 `decision_id`, `advisor_result` and that envelope. Its checksum detects mismatch;
-it is not authentication or permission. MCP keeps the prepared state in memory
-and needs only the ID. CLI `record` accepts `decision_id` and `execution`; MCP
+it is not authentication or permission. Required-mode MCP retains a private host-bound envelope across processes;
+evidence-only preparation retains semantic state in memory. CLI `record` accepts `decision_id` and `execution`; MCP
 uses `record_routing_outcome`. Execution separates `requested` and `observed`
 model/effort/tier, with explicit provenance, usage and acceptance basis. Missing
 observations remain unknown. A passing test is not automatically user acceptance.
@@ -233,9 +195,10 @@ Missing retained facts produce `insufficient_record`; changed advisor prompts
 cannot be evaluated by replaying old answers. `--offline` makes all new routing
 operations diagnostic-only and never returns a native handoff or calls Jev.
 
-For quick rollback set `advisor.enabled=false` and use existing evidence tools.
-For full rollback restore the retained v1 config, registration/link vector and
-prior Assay revision. Test the old entrypoint against the saved config offline;
+For a mode rollback, explicitly select `pipeline.mode="evidence-only"` and
+reconnect; disabling the advisor does not disable required routing. For full
+rollback restore the retained config, registration/link vector and prior revision
+as described in the [migration contract](required-routing.md#update-pruning-and-rollback). Test the old entrypoint against the saved config offline;
 merely having a backup is not a rollback receipt. Preserve benchmark caches and
 the separate history namespace. Static/fake-transport tests establish contracts;
 provider/native effectiveness and quota savings require ordinary work receipts,

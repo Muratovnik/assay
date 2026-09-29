@@ -85,19 +85,19 @@ class ReminderTests(unittest.TestCase):
 
     def test_packaged_matchers_only_cover_reminder_boundaries(self):
         hooks = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]
-        self.assertEqual({"SessionStart", "PreToolUse"}, set(hooks))
+        self.assertEqual({"SessionStart", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "PostToolUseFailure", "SessionEnd"}, set(hooks))
         cases = {
             "SessionStart": (("startup", "resume", "clear", "compact", "fork"), ("shutdown",)),
             "PreToolUse": (("spawn_agent", "Agent", "Task"), ("Bash", "Skill", "AgentStatus", "send_message", "wait")),
         }
         for event, (matching, unrelated) in cases.items():
-            self.assertEqual(1, len(hooks[event]))
+            self.assertEqual(1 if event == "SessionStart" else 2, len(hooks[event]))
             rule = hooks[event][0]
             for value in matching:
                 self.assertIsNotNone(re.search(rule["matcher"], value))
             for value in unrelated:
                 self.assertIsNone(re.search(rule["matcher"], value))
-            self.assertEqual(1, len(rule["hooks"]))
+            self.assertEqual(2 if event == "SessionStart" else 1, len(rule["hooks"]))
             self.assertEqual("command", rule["hooks"][0]["type"])
             self.assertLessEqual(rule["hooks"][0]["timeout"], 5)
 
