@@ -30,6 +30,13 @@ schema exposes it. No fixed model or per-child token cap is implied. Snapshot
 expiry rejects a late answer; interrupting the running advisor still belongs
 to the native client.
 
+[Required routing](required-routing.md#one-explicit-mode) has no Codex adapter.
+A Codex configuration that selects it reports the unsupported host, and the
+routing hook leaves Codex launches alone; keep Codex on the evidence-only
+workflow. Do not claim that the reminder enforces a launch gate. A Codex hook and
+identity adapter needs separately verified client contracts; matching tool names
+are insufficient.
+
 A spawned worker shares the filesystem unless an isolated checkout has been
 prepared. Set its actual root and owned scope; a prompt saying "isolated" does
 not create a worktree or isolate services.

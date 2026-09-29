@@ -10,13 +10,12 @@ import copy
 import hashlib
 import math
 import re
-import stat
 import time
 from pathlib import Path
 from typing import Any, Callable
 
 from .cache import atomic_write, source_lock
-from .core import EvidenceError, encoded, epoch, loads, timestamp
+from .core import EvidenceError, encoded, epoch, is_reparse, loads, timestamp
 
 
 HISTORY_SCHEMA = 1
@@ -78,15 +77,7 @@ def _codes(values: Any, field: str) -> list[str]:
     return [_identifier(value, field) for value in values]
 
 
-def _is_reparse(path: Path) -> bool:
-    try:
-        info = path.lstat()
-    except FileNotFoundError:
-        return False
-    return path.is_symlink() or bool(
-        getattr(info, "st_file_attributes", 0)
-        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
-    )
+_is_reparse = is_reparse
 
 
 def _refuse_link_ancestors(path: Path) -> None:

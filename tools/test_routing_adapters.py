@@ -24,7 +24,7 @@ from route_evidence.advisors.jev import (  # noqa: E402
     JevAdapter,
     RetryAfter,
 )
-from route_evidence.advisors.native import parse_native, prepare_native  # noqa: E402
+from route_evidence.advisors.native import advisor_input, parse_native, prepare_native  # noqa: E402
 from route_evidence.advice import build_snapshot, semantic_projection
 from route_evidence.core import EvidenceError, digest, encoded  # noqa: E402
 
@@ -113,8 +113,21 @@ class NativeAdapterTests(unittest.TestCase):
                          ("model-00", "low", "none"))
         self.assertEqual(result["descriptor"]["privacy_profile"], "native-structured")
         self.assertFalse(result["tool_disable_enforced"])
-        self.assertIn("untrusted data", result["prompt"])
+        # Evidence-only keeps the 0.8.0 root handoff: prompt and contract travel
+        # with it and the advisor answers in its final message.
         self.assertIn("Do not use tools, delegate", result["prompt"])
+        self.assertIn("Return one JSON object and no prose", result["prompt"])
+        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v3")
+        private = prepare_native(self.snapshot, self.route, available=self.available, delivery="private")
+        self.assertNotIn("prompt", private)
+        self.assertNotIn("result_contract", private)
+        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v4")
+        with self.assertRaises(EvidenceError):
+            prepare_native(self.snapshot, self.route, available=self.available, delivery="elsewhere")
+        result = advisor_input(self.snapshot, self.route)
+        self.assertIn("untrusted data", result["prompt"])
+        self.assertIn("Do not delegate", result["prompt"])
+        self.assertIn("complete_routing", result["prompt"])
         self.assertIn("Never average scores across cohorts", result["prompt"])
         self.assertIn("subscription quota usage", result["prompt"])
         self.assertNotIn("Luna", result["prompt"])

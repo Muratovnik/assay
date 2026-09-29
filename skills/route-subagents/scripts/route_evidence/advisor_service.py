@@ -99,14 +99,17 @@ class AdvisorWorkflow:
             except (EvidenceError, OSError):
                 response["telemetry_status"] = "write_failed"
         if cache and result is not None and state.get("cache_key"):
-            self._cache[state["cache_key"]] = {"result": copy.deepcopy(result), "expires": state["expires"],
-                                               "packet_ids": snapshot["packet_ids"]}
-            while len(self._cache) > 64:
-                self._cache.popitem(last=False)
+            self._remember(state, state["expires"])
         return copy.deepcopy(response)
 
+    def _remember(self, state, expires):
+        self._cache[state["cache_key"]] = {"result": copy.deepcopy(state["result"]), "expires": expires,
+                                           "packet_ids": state["snapshot"]["packet_ids"]}
+        while len(self._cache) > 64:
+            self._cache.popitem(last=False)
+
     async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
-                              task_queries=None, cost_objectives=None):
+                              task_queries=None, cost_objectives=None, native_delivery="handoff"):
         packets = validate_packets(packets)
         from .task_evidence import validate_queries
         task_queries = validate_queries(task_queries, [p["packet_id"] for p in packets])
@@ -129,7 +132,7 @@ class AdvisorWorkflow:
         try:
             context = brief(await self.service.context(request))
             now = self.clock()
-            deadlines = [state["expires"], epoch(state["inventory"]["observed_at"]) + 86400]
+            deadlines = [state["expires"], epoch(state["inventory"]["observed_at"]) + self.service.inventory_ttl]
             # Only known source freshness has a deadline. Missing measurements
             # remain unknown and cannot manufacture a freshness guarantee.
             deadlines.extend(epoch(source["last_success_at"]) + self.service.cache.ttl
@@ -178,7 +181,8 @@ class AdvisorWorkflow:
             if self.advisor["backend"] == "native-economy":
                 from .advisors.native import prepare_native
                 try:
-                    handoff = prepare_native(snapshot, advisor_route, available=request["available"])
+                    handoff = prepare_native(snapshot, advisor_route, available=request["available"],
+                                             delivery=native_delivery)
                 except EvidenceError:
                     return self._finish(state, reason="invalid_advisor_route_or_payload")
                 if handoff.get("status") == "needs_advisor_route":
@@ -294,7 +298,7 @@ class AdvisorWorkflow:
         if self.service._inventory and self.service._inventory["available"] != payload["inventory"]["available"]:
             raise EvidenceError("current inventory changed")
         now = self.clock()
-        if not -60 <= now - epoch(payload["inventory"]["observed_at"]) < 86400:
+        if not -60 <= now - epoch(payload["inventory"]["observed_at"]) < self.service.inventory_ttl:
             raise EvidenceError("portable inventory expired")
         if snapshot["policy"] != self.policy or semantic_key(snapshot, payload["descriptor"]) != payload["cache_key"]:
             raise EvidenceError("portable envelope semantic mismatch")
@@ -306,7 +310,35 @@ class AdvisorWorkflow:
         self._states[decision_id] = payload
         return payload
 
-    def complete_routing(self, decision_id, advisor_result, *, envelope=None):
+    def pending_state(self, decision_id):
+        """Expiry and inventory of a pending decision, or None once it is gone."""
+        with self._lock:
+            state = self._states.get(decision_id)
+            if state is None:
+                return None
+            return {"expires": state["expires"], "inventory": copy.deepcopy(state["inventory"])}
+
+    def export_envelope(self, decision_id):
+        """The private, integrity-checked state a restarted server may restore."""
+        with self._lock:
+            return self._envelope(self._states[decision_id])
+
+    def finish_unanswered(self, decision_id, envelope, *, reason):
+        """Close a decision whose advisor ended without a valid submission."""
+        with self._lock:
+            state = self._states.get(decision_id)
+            if state is None:
+                state = self._restore(decision_id, envelope)
+            return self._finish(state, reason=reason)
+
+    def remember_completed(self, decision_id, expires):
+        """Seed the semantic cache only after the host observed a clean return."""
+        with self._lock:
+            state = self._states.get(decision_id)
+            if state and state.get("result") and state.get("cache_key"):
+                self._remember(state, expires)
+
+    def complete_routing(self, decision_id, advisor_result, *, envelope=None, cache=True):
         if not isinstance(decision_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}", decision_id):
             raise EvidenceError("invalid decision_id")
         if not isinstance(advisor_result, dict):
@@ -332,14 +364,11 @@ class AdvisorWorkflow:
             if self.service._inventory and self.service._inventory["available"] != state["inventory"]["available"]:
                 return self._finish(state, reason="inventory_changed")
             try:
-                result = validate_result(state["snapshot"], advisor_result)
-                route = state["advisor_route"]
-                if (result["backend"] != "native-economy" or result["requested_model"] != route["model"]
-                        or result["resolved_model"] != route["model"] or result["effort"] != route["effort"]):
-                    raise EvidenceError("advisor route mismatch")
+                from .advisors.native import parse_native
+                result = parse_native(state["snapshot"], advisor_result, advisor_route=state["advisor_route"])
             except EvidenceError:
                 return self._finish(state, reason="invalid_advisor_result")
-            return self._finish(state, result, cache=True)
+            return self._finish(state, result, cache=cache)
 
     def record_routing_outcome(self, decision_id, execution):
         if self.service.offline:

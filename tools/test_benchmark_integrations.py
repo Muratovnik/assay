@@ -228,7 +228,7 @@ build_server(service).run(transport="stdio")
                 async with Client(params) as client:
                     tools = await client.list_tools()
                     self.assertEqual({t.name for t in tools.tools}, {"get_routing_context", "routing_status",
-                        "prepare_routing", "complete_routing", "record_routing_outcome"})
+                        "prepare_routing", "complete_routing", "record_routing_outcome", "get_advisor_input", "get_routing_decision", "authorize_routing_launch"})
                     status = await client.call_tool("routing_status", {})
                     self.assertFalse(status.is_error)
                     self.assertFalse(status.structured_content["inventory"]["configured"])
@@ -263,49 +263,96 @@ build_server(service).run(transport="stdio")
 
     async def test_native_advisor_protocol_roundtrip_without_inference(self):
         from mcp import Client, StdioServerParameters
+        from route_evidence.claude_agents import generate
+        from route_evidence.core import timestamp
+        from route_evidence.pipeline_config import settings
+        from route_evidence.service import load_config
+        from routing_hook import handle
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            config_path = root / "config.json"
+            available = request()["available"]
+            config_path.write_text(json.dumps({"schema_version": 3, "client": "claude",
+                "telemetry": {"mode": "metadata"},
+                "inventory": {"available": available, "observed_at": timestamp(time.time())},
+                "pipeline": {"mode": "required", "state_dir": str(root / "state"), "agents_dir": str(root / "agents"),
+                    "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
+                        "source": "client_role", "reason_code": "bounded_ranking"}},
+                    "variants": [{"profile": "general-purpose", "model": m["model"], "effort": e}
+                                 for m in available for e in m["efforts"]]}}), encoding="utf-8")
+            config = load_config(config_path)
+            generate(settings(config), {})
+            def event(name, **fields):
+                return handle({"hook_event_name": name, "session_id": "wire-session", **fields}, config, environment={})
+            def attested(tool, arguments, **fields):
+                return event("PreToolUse", tool_name="mcp__assay-benchmark-routing__" + tool,
+                    tool_input=arguments, **fields)["hookSpecificOutput"]["updatedInput"]
+            event("SessionStart")
             bootstrap = root / "advisor_server.py"
-            bootstrap.write_text('''import sys
+            bootstrap.write_text("""import sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from route_evidence.cache import Cache
 from route_evidence.routing import build_context
-from route_evidence.service import RoutingService
+from route_evidence.service import RoutingService, load_config
 from benchmark_mcp import build_server
-service = RoutingService(Cache(Path(sys.argv[2]) / "cache"), client="codex",
-    advisor_config={"schema_version": 2, "telemetry": {"mode": "metadata"}})
+root = Path(sys.argv[2])
+config = load_config(root / "config.json")
+service = RoutingService(Cache(root / "cache"), client="claude",
+    advisor_config=config, inventory=config["inventory"])
 async def context(request):
     return {**build_context(request, []), "sources": [], "data_status": "unavailable", "usage": "routing"}
 service.context = context
 build_server(service).run(transport="stdio")
-''', encoding="utf-8")
+""", encoding="utf-8")
             params = StdioServerParameters(command=sys.executable,
                 args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
-            async with asyncio.timeout(30):
-                async with Client(params) as client:
-                    prepared = await client.call_tool("prepare_routing", {
-                        "packets": [{"packet_id": "local-check", "task_types": ["implementation"], "features": {}}],
-                        "available": request()["available"],
-                        "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
-                            "source": "caller", "reason_code": "bounded_ranking"}}})
-                    self.assertFalse(prepared.is_error)
-                    value = prepared.structured_content
-                    self.assertEqual(value["status"], "awaiting_native_advice")
-                    # A deterministic fixture fulfills the wire contract. No
-                    # native model is started and no model quality is measured.
-                    answer = value["handoff"]["result_contract"]
-                    arguments = {"decision_id": value["decision_id"], "advisor_result": answer}
-                    completed = await client.call_tool("complete_routing", arguments)
-                    self.assertFalse(completed.is_error)
-                    self.assertEqual(completed.structured_content["status"], "decided")
-                    self.assertNotEqual(completed.structured_content.get("telemetry_status"), "write_failed")
-                    repeated = await client.call_tool("complete_routing", arguments)
-                    self.assertEqual(completed.structured_content, repeated.structured_content)
-                    recorded = await client.call_tool("record_routing_outcome", {
-                        "decision_id": value["decision_id"], "execution": {"status": "unknown"}})
-                    self.assertFalse(recorded.is_error)
-                    self.assertEqual(recorded.structured_content["execution"]["observed"], {})
+            async with asyncio.timeout(30), Client(params) as client:
+                tools = await client.list_tools()
+                self.assertNotIn("get_routing_context", {t.name for t in tools.tools})
+                args = {"packets": [{"packet_id": "local-check", "task_types": ["implementation"], "features": {}}],
+                    "launch_requests": {"local-check": {"profile": "general-purpose", "prompt": "PRIVATE_WORK_SCOPE"}}}
+                refused = await client.call_tool("prepare_routing", args)
+                self.assertTrue(refused.is_error)
+                prepared = await client.call_tool("prepare_routing", attested("prepare_routing", args))
+                self.assertFalse(prepared.is_error)
+                value = prepared.structured_content
+                self.assertEqual(value["status"], "awaiting_native_advice")
+                self.assertNotIn("result_contract", json.dumps(value))
+                launch = value["handoff"]["input"]
+                substituted = event("PreToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_input=launch)
+                self.assertIn("get_advisor_input", substituted["hookSpecificOutput"]["updatedInput"]["prompt"])
+                event("SubagentStart", agent_id="wire-advisor", agent_type=launch["subagent_type"])
+                private = await client.call_tool("get_advisor_input", attested("get_advisor_input",
+                    {"decision_id": value["decision_id"]}, agent_id="wire-advisor", effort={"level": "max"}))
+                self.assertFalse(private.is_error)
+                self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(private.structured_content))
+                answer = private.structured_content["result_contract"]
+                arguments = {"decision_id": value["decision_id"], "advisor_result": answer}
+                forged = await client.call_tool("complete_routing", arguments)
+                self.assertTrue(forged.is_error)
+                completed = await client.call_tool("complete_routing", attested("complete_routing", arguments, agent_id="wire-advisor"))
+                self.assertFalse(completed.is_error)
+                self.assertEqual(completed.structured_content["status"], "submitted")
+                sanitized = event("PostToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_response={
+                    "status": "completed", "agentId": "wire-advisor", "resolvedModel": "economy-b",
+                    "content": [{"type": "text", "text": "PRIVATE_BENCHMARK_ECHO"}]})
+                self.assertNotIn("PRIVATE_BENCHMARK_ECHO", json.dumps(sanitized))
+                result = await client.call_tool("get_routing_decision", attested("get_routing_decision", {"decision_id": value["decision_id"]}))
+                self.assertEqual(result.structured_content["status"], "decided")
+                self.assertEqual(result.structured_content["advisor_provenance"]["observed_model"], "economy-b")
+                self.assertNotIn('"ranking"', json.dumps(result.structured_content))
+                authorized = await client.call_tool("authorize_routing_launch", attested("authorize_routing_launch", {
+                    "decision_id": value["decision_id"], "packet_id": "local-check"}))
+                self.assertFalse(authorized.is_error)
+                worker = event("PreToolUse", tool_name="Agent", tool_use_id="worker-call",
+                    tool_input=authorized.structured_content["input"])
+                self.assertIn("PRIVATE_WORK_SCOPE", worker["hookSpecificOutput"]["updatedInput"]["prompt"])
+                self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(authorized.structured_content))
+                recorded = await client.call_tool("record_routing_outcome", attested("record_routing_outcome", {
+                    "decision_id": value["decision_id"], "execution": {"status": "unknown"}}))
+                self.assertFalse(recorded.is_error)
+                self.assertEqual(recorded.structured_content["execution"]["observed"], {})
 
 
 if __name__ == "__main__":

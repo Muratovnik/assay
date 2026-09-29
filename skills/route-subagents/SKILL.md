@@ -52,7 +52,13 @@ or reviewer directly within the existing authorization.
 
 Select both settings before each spawn. Preserve a model or effort explicitly
 chosen by the user; the primary's settings are not an implicit choice for its
-children. Use the [routing advisor workflow](references/routing-advisor.md) when
+children. A profile remains a capability boundary, not a model selection.
+`routing_status` reports the configured `pipeline.mode`. Without a mode, and for
+older configurations, the evidence-only workflow applies.
+
+### Evidence-only workflow (default)
+
+Use the [routing advisor workflow](references/routing-advisor.md) when
 configured: one `prepare_routing` request for the plan, structured packets and
 the current host's available model × effort pairs. It extends the existing
 [benchmark evidence service](references/benchmark-routing.md), including its
@@ -101,18 +107,52 @@ baseline. Include retries, verification and coordination; unknown cost or
 alternative outcomes cannot justify cheaper routing. Keep descriptions local,
 reuse existing observations and stay within the evidence budget. No extra model
 run is authorized to calibrate this choice.
-Pass short `task_queries` by packet ID (or `task_query` in evidence-only mode)
+Pass short `task_queries` by packet ID (or `task_query` to `get_routing_context`)
 from the known work. Public historical observations provide useful context even
 without local history or exact current-model matches; keep their measurements
 distinct from predictions about the available routes.
 
+### Required routing (explicit opt-in)
+
+When the owner configured `pipeline.mode: "required"`, follow the
+[required routing contract](references/required-routing.md) before each
+already-authorized delegation instead. Configuration supplies the confirmed
+inventory, economical advisor route, approved choices and any native agent types
+the owner exempted from routing. The primary describes the work, ownership,
+constraints and verification; it does not fetch benchmarks or repeat the
+advisor's ranking.
+
+Prepare all packets together with `prepare_routing`, each with a `launch_requests`
+entry holding the intended profile and self-contained execution prompt. Pass a
+model or effort the user explicitly chose as the packet's `explicit`; it is honored
+only for a confirmed inventory pair with a generated definition. When the
+response contains `handoff`, launch its exact native input unchanged; only that
+separately bound advisor fetches its private input and submits its result. Then
+read `get_routing_decision`, call `authorize_routing_launch` for the packet and
+launch the returned input unchanged: it is a stub the host completes with the
+registered prompt. Never invent or copy a host receipt.
+
+Use `retry_of` only for a host-observed failed invocation and `resume_agent_id`
+only to continue the same observed idle worker's original work. A changed task,
+reviewer, replacement or new constraint needs its own decision. Failure or
+abstention permits only a separately configured eligible baseline; otherwise
+report no executable decision. Do not silently inherit the primary model, switch
+providers, disable the advisor, bypass the host gate through CLI or substitute
+local execution when the user required delegation. Setup or host support gaps
+are explicit: Claude uses generated client-specific definitions, other hosts have
+no required-mode adapter, and a written file is not proof of discovery.
+
+### Record the outcome
+
 Record the selected pair and task-based reason with the launch, then pass
-available execution evidence to `record_routing_outcome`. A requested setting is
-not an observed runtime receipt. Inheritance is acceptable only when its
-effective settings match the deliberate selection. If the client cannot express
-the choice, use a supported route or keep the work local and disclose the
-limitation. Setup failure is not automatic model escalation. Keep the primary's
-model and global client configuration unchanged.
+available execution evidence to `record_routing_outcome`, distinguishing
+requested, configured and host-observed settings. A requested setting is not an
+observed runtime receipt. Inheritance is acceptable only when its effective
+settings match the deliberate selection. If the client cannot express the choice,
+use a supported route or keep the work local and disclose the limitation. Setup
+failure is not automatic model escalation. Include advisor, coordination,
+verification and retries in completed-task cost. Keep the primary's model and
+global client configuration unchanged.
 
 ## Use the native client
 

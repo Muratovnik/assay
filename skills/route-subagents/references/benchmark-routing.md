@@ -1,5 +1,12 @@
 # Benchmark evidence context for model and effort selection
 
+This reference describes the default **evidence-only** comparison and its
+acquisition diagnostics. When the owner explicitly selected
+[required routing](required-routing.md), the root does not call
+`get_routing_context`; that tool is absent from the required-mode MCP surface.
+No acquisition or advisor failure changes modes. Source refresh is shared by
+both workflows.
+
 This local tool prepares published measurements for comparison. **It does not
 select a configuration.** It does not run models, launch subagents, measure
 subscription quota or change native client settings. The same application
@@ -103,7 +110,8 @@ Neither config nor inventory belongs in tracked source.
 Version 1 keeps evidence-only behavior. The opt-in
 [routing advisor](routing-advisor.md) adds native economy and Jev adapters through
 the same service and source cache. Its separate snapshot/policy does not change
-the comparisons returned by `get_routing_context`.
+the comparisons returned by `get_routing_context`. Schema 3 keeps this workflow
+unless it sets the separate [required mode](required-routing.md#one-explicit-mode).
 
 Codex registration template (replace capitalized arguments with real paths):
 

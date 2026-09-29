@@ -6,6 +6,10 @@ on:
       - "skills/route-subagents/**"
       - "tools/test_benchmark*.py"
       - "tools/test_routing*.py"
+      - "tools/test_claude_variants.py"
+      - "tools/test_skill_reminder.py"
+      - "tools/assay.py"
+      - "hooks/**"
       - ".github/workflows/routing-integrations.yml"
   workflow_dispatch:
 
@@ -34,7 +38,7 @@ jobs:
           else
             echo "$PWD/.cache/routing-env/bin" >> "$GITHUB_PATH"
           fi
-      - run: python -m pip install -r skills/route-subagents/scripts/requirements-mcp.txt -r skills/route-subagents/scripts/requirements-browser.txt -r skills/route-subagents/scripts/requirements-advisors.txt
+      - run: python -m pip install -r requirements-tools.txt -r skills/route-subagents/scripts/requirements-mcp.txt -r skills/route-subagents/scripts/requirements-browser.txt -r skills/route-subagents/scripts/requirements-advisors.txt
       - run: python -m playwright install --with-deps chromium
       - name: Require real SDK and Chromium tests
         env:

@@ -12,17 +12,20 @@ missing evidence preserves this workflow and never implies subscription savings.
 
 ## Enable for one client
 
-Config v1 remains evidence-only. Create a separate v2 file, preserving the old
-bytes and the current MCP command, environment and link targets for rollback:
+Config v1 remains evidence-only and a v2 file keeps its advisor settings. To
+enable the advisor, create a separate file, preserving the old bytes and the
+current MCP command, environment and link targets for rollback:
 
 ```sh
 python skills/route-subagents/scripts/benchmark_router.py migrate-config --source OLD_CONFIG --output NEW_CONFIG --enable-advisor
 ```
 
-The output must not already exist. This command preserves client, preferences
-and dated inventory, and changes no registration or launch argument. Point the
+The output must not already exist. It is a schema-3 file in evidence-only mode,
+which behaves like v2. The command preserves client, preferences and dated
+inventory, and changes no registration or launch argument. Point the
 existing server registration at the new file and reconnect the client, retaining
-its Python environment, cache, browser settings and timeout. A minimal v2 file:
+its Python environment, cache, browser settings and timeout. A minimal v2 file,
+equivalent to schema 3 without a required mode:
 
 ```json
 {
@@ -115,6 +118,18 @@ Use the returned selection for the real worker. Reconsider only a concrete
 missed constraint, incorrect input or changed goal, then prepare a new snapshot.
 Record that reason rather than paying for a second full ranking debate.
 
+## Required routing instead of the root handoff
+
+With an explicit `pipeline.mode: "required"`, the root no longer forwards this
+handoff or submits advice. The [required routing contract](required-routing.md)
+owns schema-3 setup, advisor isolation, generated Claude definitions, attested MCP
+calls, launch checks and rollback. There `prepare_routing` takes private
+`launch_requests`, returns an advisor launch without benchmark text, and only the
+host-bound advisor calls `get_advisor_input` and `complete_routing`. Inventory,
+advisor route, approved choices and baseline come from configuration; a user's
+explicit pair stays binding within that inventory. The feature, requirement and
+policy rules in this reference apply unchanged in both modes.
+
 ## Optional hosted Jev adapter
 
 The [official SDK](https://github.com/typesafe-ai/typesafe-sdk-python) is MIT
@@ -126,7 +141,8 @@ environment as the server; native-only operation does not import it:
 python -m pip install -r skills/route-subagents/scripts/requirements-advisors.txt
 ```
 
-Select these advisor settings explicitly in the local v2 config:
+This backend belongs to the evidence-only workflow, not to the required native
+host chain. Select these advisor settings explicitly in the local configuration:
 
 ```json
 {
@@ -176,14 +192,19 @@ The semantic limit excludes transport identity and timestamps. Jev's serialized
 request, including Choice questions and that metadata, has a separate 64 KiB
 bound; this overhead is not extra task content. Byte limits are not token counts.
 
-At most 16 pending decisions live in a connection. They expire after ten
-minutes or the earlier inventory/evidence freshness deadline. `busy` preserves
-existing packets. Restarted or late native replies cannot authorize a launch;
-expiry itself does not stop a running cloud advisor. Identical completion is
-idempotent and conflicting completion is rejected.
+At most 16 semantic pending decisions live in a connection. They expire after
+ten minutes or earlier inventory/evidence expiry. `busy` preserves existing
+packets. In required mode the private envelope in the bounded host rendezvous
+allows recovery after an MCP restart only for the same actual advisor/session,
+configuration and unexpired decision. A root-supplied portable envelope is not
+authorization. Expiry does not stop a running provider process. Identical child
+completion is idempotent; conflicting completion is rejected.
 
-Abstention, provider failure or missing bootstrap yields the eligible caller
-baseline, if supplied; otherwise `needs_caller_selection`. Changed inventory,
+Abstention, provider failure or missing bootstrap yields the eligible baseline:
+the caller's in evidence-only mode, only the configured one in required mode.
+Otherwise policy reports `needs_caller_selection`. In required mode that means no
+executable decision; it is not permission for the primary to read benchmarks and
+choose. Changed inventory,
 policy or expired evidence requires preparation again. A selected route never
 proves the actual launch. The exact in-memory decision cache includes semantic
 features, candidate set, backend/model/effort, prompt/schema/policy/privacy
@@ -192,7 +213,10 @@ prove model quality or current availability of an execution slot.
 
 ## CLI, history and rollback
 
-All commands share the service used by MCP. Global flags precede subcommands:
+All commands share the service used by MCP. The following prepare/complete/record
+CLI examples belong to the evidence-only workflow, not the required live chain. Required mode rejects unauthenticated live CLI equivalents;
+`--offline` permits diagnostic replay without dispatch. Global flags precede
+subcommands:
 
 ```sh
 python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG prepare --request REQUEST.json
@@ -204,8 +228,8 @@ python skills/route-subagents/scripts/benchmark_router.py replay --record RETAIN
 
 CLI `prepare` includes a portable `envelope`. For completion send an object with
 `decision_id`, `advisor_result` and that envelope. Its checksum detects mismatch;
-it is not authentication or permission. MCP keeps the prepared state in memory
-and needs only the ID. CLI `record` accepts `decision_id` and `execution`; MCP
+it is not authentication or permission. Required-mode MCP retains a private host-bound envelope across processes;
+evidence-only preparation retains semantic state in memory. CLI `record` accepts `decision_id` and `execution`; MCP
 uses `record_routing_outcome`. Execution separates `requested` and `observed`
 model/effort/tier, with explicit provenance, usage and acceptance basis. Missing
 observations remain unknown. A passing test is not automatically user acceptance.
@@ -233,9 +257,12 @@ Missing retained facts produce `insufficient_record`; changed advisor prompts
 cannot be evaluated by replaying old answers. `--offline` makes all new routing
 operations diagnostic-only and never returns a native handoff or calls Jev.
 
-For quick rollback set `advisor.enabled=false` and use existing evidence tools.
-For full rollback restore the retained v1 config, registration/link vector and
-prior Assay revision. Test the old entrypoint against the saved config offline;
+In evidence-only mode, a quick rollback sets `advisor.enabled=false` and uses
+the existing evidence tools. For a required-mode rollback, explicitly select
+`pipeline.mode="evidence-only"` and reconnect; disabling the advisor does not
+disable required routing. For full
+rollback restore the retained config, registration/link vector and prior revision
+as described in the [migration contract](required-routing.md#update-pruning-removal-and-rollback). Test the old entrypoint against the saved config offline;
 merely having a backup is not a rollback receipt. Preserve benchmark caches and
 the separate history namespace. Static/fake-transport tests establish contracts;
 provider/native effectiveness and quota savings require ordinary work receipts,
