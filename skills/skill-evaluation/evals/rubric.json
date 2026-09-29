@@ -302,37 +302,45 @@
     {
       "id": "SD05",
       "required": [
-        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+        "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
+        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
       ],
       "reject": [
-        "Activate skill-evaluation solely because the request mentions a skill or a review."
+        "Activate skill-evaluation solely because the request mentions a skill or a review.",
+        "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
       ]
     },
     {
       "id": "SD06",
       "required": [
-        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+        "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
+        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
       ],
       "reject": [
-        "Activate skill-evaluation solely because the request mentions a skill or a review."
+        "Activate skill-evaluation solely because the request mentions a skill or a review.",
+        "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
       ]
     },
     {
       "id": "SD07",
       "required": [
-        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+        "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
+        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
       ],
       "reject": [
-        "Activate skill-evaluation solely because the request mentions a skill or a review."
+        "Activate skill-evaluation solely because the request mentions a skill or a review.",
+        "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
       ]
     },
     {
       "id": "SD08",
       "required": [
-        "Complete or route the ordinary task without loading skill-evaluation or adding an evaluation campaign."
+        "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
+        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
       ],
       "reject": [
-        "Activate skill-evaluation solely because the request mentions a skill or a review."
+        "Activate skill-evaluation solely because the request mentions a skill or a review.",
+        "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
       ]
     }
   ]

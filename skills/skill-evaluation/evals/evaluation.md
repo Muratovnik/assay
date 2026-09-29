@@ -57,6 +57,40 @@ negative invocation boundaries. All shipped examples are public working material
 not a hidden final set. A generalization claim needs separately reserved groups;
 rephrasing these examples or rerunning them does not supply independence.
 
+## Invocation is not task completion
+
+For discovery cases record invocation and ordinary-task handling separately.
+`SD05`, `SD06` and `SD08` do not supply the target description, metadata file or
+Python function. Keep these inputs unchanged as incomplete-request controls:
+asking for essential missing material is a valid response, not an activation
+failure. A textual correction can also be useful without claiming a file was
+edited. `SD07` is self-contained and remains the direct-answer control.
+
+Do not require task completion to establish nonactivation. A usable trace must
+cover the intended route for the observed task; a good answer, a self-report or
+an incomplete trace does not establish absence of loading. Conversely, confirmed
+unnecessary loading is a routing failure even when the eventual clarification
+is appropriate. Never count a fabricated edit or review as successful task work
+merely because the skill stayed unloaded.
+
+Use these coordinator-side controls when calibrating the discovery grader; they
+are expectations for constructed evidence, not claims about executed model runs:
+
+| Controlled observation | Invocation judgment | Ordinary-task handling |
+| --- | --- | --- |
+| `SD08`: requests the function; full trace confirms no load or campaign | Supported nonactivation | Appropriate clarification; review not performed |
+| Same clarification, but route evidence is missing | Unverified | Appropriate clarification; review not performed |
+| Same clarification, but trace shows unnecessary skill loading | Refuted nonactivation | Clarification does not erase the routing failure |
+| `SD08`: claims a completed review without the function; full trace confirms no load or campaign | Supported nonactivation | Refuted completion claim |
+| `SD07`: correct one-sentence answer; full trace confirms no load or campaign | Supported nonactivation | Completed task |
+
+The revised negative rubric repairs the earlier completion-or-routing condition.
+Retain earlier scores under their original revision and regrade both compared
+conditions consistently; a changed judgment is not a measured skill improvement.
+An end-to-end completion experiment instead needs versioned, complete inputs and
+an authorized working copy outside the frozen packet, not silent additions to
+these discovery inputs.
+
 ## Metadata and limits
 
 The adjacent metadata records case provenance, group, purpose, split and exposure

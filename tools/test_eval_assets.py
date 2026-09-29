@@ -182,9 +182,34 @@ class CorpusAndPacketTests(unittest.TestCase):
                     observed = {p.relative_to(packet).as_posix() for p in packet.rglob("*") if p.is_file()}
                     self.assertEqual(expected, observed)
                     self.assertEqual(case["prompt"] + "\n", (packet / "prompt.txt").read_text(encoding="utf-8"))
+                    if "context" in case:
+                        self.assertEqual(case["context"].encode("utf-8") + b"\n",
+                                         (packet / "context.txt").read_bytes())
                     for name, text in case.get("files", {}).items():
                         self.assertEqual(text.encode("utf-8"), (packet / "inputs" / name).read_bytes())
                     self.assertEqual("pass", verifier.verify_packet(packet, digest)["byte_integrity"])
+
+    def test_context_bytes_are_preserved(self) -> None:
+        cases = self.directory / "source" / "evals" / "cases.json"
+        verifier = ea.audit_tools()
+        contexts = ("Первая строка — café\n\n\t第二行  ", "Уже с переводом строки\n",
+                    "CRLF\r\nСтрока  \r\n", "")
+        for context in contexts:
+            with self.subTest(context=context):
+                source = inputs()
+                source["cases"][0]["context"] = context
+                write_json(cases, source)
+                packet, digest = ea.prepare(cases_path=cases, case_id="one",
+                                            output_parent=self.outputs)
+                context_path = packet / "context.txt"
+                self.assertTrue(context_path.is_file(), "Supplied context must be packaged")
+                # The packet contract appends one LF; it does not normalize input text.
+                self.assertEqual(context.encode("utf-8") + b"\n", context_path.read_bytes())
+                self.assertIn("context.txt", ea.load(packet / "manifest.json")["files"])
+                self.assertEqual("pass", verifier.verify_packet(packet, digest)["byte_integrity"])
+                context_path.write_bytes(b"changed\n")
+                with self.assertRaisesRegex(ValueError, "drift"):
+                    verifier.verify_packet(packet, digest)
 
     def test_method_snapshot_excludes_keys_even_when_coordinator_files_are_invalid(self) -> None:
         method = self.directory / "skill-evaluation"
