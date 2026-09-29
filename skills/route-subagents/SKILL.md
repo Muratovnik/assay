@@ -125,22 +125,25 @@ advisor's ranking.
 Prepare all packets together with `prepare_routing`, each with a `launch_requests`
 entry holding the intended profile and self-contained execution prompt. Pass a
 model or effort the user explicitly chose as the packet's `explicit`; it is honored
-only for a confirmed inventory pair with a generated definition. When the
+only for a confirmed inventory pair the host adapter can express. When the
 response contains `handoff`, launch its exact native input unchanged; only that
 separately bound advisor fetches its private input and submits its result. Then
 read `get_routing_decision`, call `authorize_routing_launch` for the packet and
-launch the returned input unchanged: it is a stub the host completes with the
-registered prompt. Never invent or copy a host receipt.
+launch the returned input unchanged, including any `model` it names: it is a
+stub the host completes with the registered prompt. Never invent or copy a host
+receipt.
 
 Use `retry_of` only for a host-observed failed invocation and `resume_agent_id`
 only to continue the same observed idle worker's original work. A changed task,
 reviewer, replacement or new constraint needs its own decision. Failure or
-abstention permits only a separately configured eligible baseline; otherwise
-report no executable decision. Do not silently inherit the primary model, switch
+abstention selects the configured baseline, which required mode cannot run
+without; if the packet's hard constraints exclude it, report no executable
+decision. Do not silently inherit the primary model, switch
 providers, disable the advisor, bypass the host gate through CLI or substitute
 local execution when the user required delegation. Setup or host support gaps
-are explicit: Claude uses generated client-specific definitions, other hosts have
-no required-mode adapter, and a written file is not proof of discovery.
+are explicit: Claude takes the model in the Agent call and the effort from a
+generated client-specific definition, other hosts have no required-mode adapter,
+and a written file is not proof of discovery.
 
 ### Record the outcome
 

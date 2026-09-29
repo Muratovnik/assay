@@ -10,11 +10,12 @@ from typing import Any
 
 from .core import EvidenceError, epoch, is_reparse, read_document
 
-PROTOCOL = 2
+PROTOCOL = 3
 ROOT_TOOLS = frozenset({"prepare_routing", "get_routing_decision", "authorize_routing_launch", "record_routing_outcome"})
 ADVISOR_TOOLS = frozenset({"get_advisor_input", "complete_routing"})
 ROUTING_TOOLS = ROOT_TOOLS | ADVISOR_TOOLS
-CLAUDE_EFFORTS = frozenset({"low", "medium", "high", "xhigh", "max"})
+EFFORT_ORDER = ("low", "medium", "high", "xhigh", "max")
+CLAUDE_EFFORTS = frozenset(EFFORT_ORDER)
 MODES = frozenset({"evidence-only", "required"})
 NAME = re.compile(r"[a-z][a-z0-9-]{0,63}\Z")
 AGENT_TYPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
@@ -40,6 +41,37 @@ def _absolute(value: Any, code: str) -> str | None:
     return value
 
 
+def _unrouted(value: Any) -> dict:
+    """Owner-exempt native agent types and the model each one launches with.
+
+    A list names types that use the baseline model. An object maps a type to
+    "baseline", "inherit" (the parent's model, as an explicit choice) or
+    {"model": ID}. Generated routed definitions are never exempt.
+    """
+    if isinstance(value, list):
+        if any(not isinstance(name, str) for name in value) or len(set(value)) != len(value):
+            raise EvidenceError("invalid_pipeline_unrouted_agents")
+        value = {name: "baseline" for name in value}
+    if not isinstance(value, dict) or len(value) > 64:
+        raise EvidenceError("invalid_pipeline_unrouted_agents")
+    result = {}
+    for name, spec in value.items():
+        if not isinstance(name, str) or not AGENT_TYPE.fullmatch(name) or name.startswith("assay-"):
+            raise EvidenceError("invalid_pipeline_unrouted_agents")
+        if isinstance(spec, dict):
+            if set(spec) != {"model"}:
+                raise EvidenceError("invalid_pipeline_unrouted_agent_model")
+            model = spec["model"]
+            if (not isinstance(model, str) or not model or model != model.strip() or len(model) > 200
+                    or any(ord(c) < 32 for c in model) or model == "inherit"):
+                raise EvidenceError("invalid_pipeline_unrouted_agent_model")
+            spec = {"model": model}
+        elif spec not in ("baseline", "inherit"):
+            raise EvidenceError("invalid_pipeline_unrouted_agent_model")
+        result[name] = spec
+    return result
+
+
 def settings(config: dict | None = None) -> dict:
     """Normalized pipeline settings. Absent configuration is the 0.8.0 workflow.
 
@@ -49,15 +81,15 @@ def settings(config: dict | None = None) -> dict:
     """
     config = config or {}
     raw = config.get("pipeline", {})
-    keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "variants", "baseline",
+    keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "profiles", "variants", "baseline",
             "approved_choices", "profile_capabilities", "unrouted_agents", "agent_templates",
             "inventory_file", "inventory_ttl_hours"}
     if not isinstance(raw, dict) or set(raw) - keys:
         raise EvidenceError("unknown_pipeline_configuration")
     value = {"mode": "evidence-only", "state_dir": None, "agents_dir": None,
-             "mcp_server": "assay-benchmark-routing", "advisor_route": None,
+             "mcp_server": "assay-benchmark-routing", "advisor_route": None, "profiles": [],
              "variants": [], "baseline": None, "approved_choices": {}, "profile_capabilities": {},
-             "unrouted_agents": [], "agent_templates": {}, "inventory_file": None,
+             "unrouted_agents": {}, "agent_templates": {}, "inventory_file": None,
              "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, **copy.deepcopy(raw)}
     if not isinstance(value["mode"], str) or value["mode"] not in MODES:
         raise EvidenceError("invalid_pipeline_mode")
@@ -77,6 +109,12 @@ def settings(config: dict | None = None) -> dict:
             raise EvidenceError("invalid_pipeline_advisor_route")
         pair({k: route[k] for k in ("model", "effort")})
         _validate_basis(route["selection_basis"])
+    profiles = value["profiles"]
+    # Profiles routed with the model in the Agent call and effort in a
+    # generated definition; `variants` pin a model the call cannot express.
+    if (not isinstance(profiles, list) or len(profiles) > 32 or len(set(map(str, profiles))) != len(profiles)
+            or any(not isinstance(p, str) or not NAME.fullmatch(p) for p in profiles)):
+        raise EvidenceError("invalid_pipeline_profiles")
     variants = value["variants"]
     if not isinstance(variants, list) or len(variants) > 100:
         raise EvidenceError("invalid_pipeline_variants")
@@ -109,12 +147,7 @@ def settings(config: dict | None = None) -> dict:
             if (not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}", name)
                     or (supported is not None and type(supported) is not bool)):
                 raise EvidenceError("invalid_pipeline_profile_capability")
-    unrouted = value["unrouted_agents"]
-    if (not isinstance(unrouted, list) or len(unrouted) > 64 or len(set(map(str, unrouted))) != len(unrouted)
-            or any(not isinstance(name, str) or not AGENT_TYPE.fullmatch(name) or name.startswith("assay-")
-                   for name in unrouted)):
-        # Generated routed definitions are never exempt from their own gate.
-        raise EvidenceError("invalid_pipeline_unrouted_agents")
+    value["unrouted_agents"] = _unrouted(value["unrouted_agents"])
     templates = value["agent_templates"]
     if not isinstance(templates, dict) or len(templates) > 32:
         raise EvidenceError("invalid_pipeline_agent_templates")
@@ -153,11 +186,13 @@ def configured_inventory(config: dict) -> dict | None:
     return inventory
 
 
-def confirm_inventory(config: dict, available: list | None = None, *, clock=time.time) -> dict:
+def confirm_inventory(config: dict, available: list | None = None, *, evidence_names=(), clock=time.time) -> dict:
     """The owner's statement that the host offers these models and efforts now.
 
     Only the separate inventory file changes, so running sessions keep their
     configuration binding. Without `available` the recorded list is kept.
+    `evidence_names` pairs add the owner's confirmed source spellings of a
+    listed model; confirmation is the only way a spelling binds benchmark rows.
     """
     path = settings(config)["inventory_file"]
     if path is None:
@@ -166,6 +201,14 @@ def confirm_inventory(config: dict, available: list | None = None, *, clock=time
     if available is None:
         current = configured_inventory(config)
         available = current["available"]
+    available = copy.deepcopy(available)
+    for model, label in evidence_names:
+        entry = next((item for item in available if isinstance(item, dict) and item.get("model") == model), None)
+        if entry is None:
+            raise EvidenceError("evidence_name_model_not_in_inventory")
+        names = entry.setdefault("evidence_names", [])
+        if isinstance(names, list) and label not in names:
+            names.append(label)
     from .routing import validate_request
     validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
                       "available": available})

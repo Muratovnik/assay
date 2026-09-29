@@ -13,7 +13,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "
 sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, source_lock
 from route_evidence.core import EvidenceError, encoded, identity, timestamp
-from route_evidence.model_names import inventory_keys, matching_diagnostics, model_identity, resolve_model
+from route_evidence.model_names import inventory_keys, matching_diagnostics, model_identity, resolve_model, spelling_report
 from route_evidence.providers import Fetcher, SOURCES, parse_tables, snapshot
 from route_evidence.routing import brief, build_context
 from route_evidence import terminal_hub as hub
@@ -110,6 +110,27 @@ class NameMatchingTests(unittest.TestCase):
     def test_normalization_cannot_duplicate_measurements(self):
         with self.assertRaisesRegex(EvidenceError, "multiple evidence labels"):
             context([row("Opus 5.5"), row("claude-opus-5-5")], inventory("claude-opus-5-5"))
+
+    def test_spelling_candidates_are_advice_and_only_confirmation_binds(self):
+        rows = [row("Sonnet 5"), row("Sonnet 5.5"), row("Claude Opus 5.5"), row("Opus 5.5 fast"), row("unrelated-model")]
+        available = [*inventory("claude-sonnet-5-5"),
+                     {"model": "claude-opus-5-5", "evidence_names": ["Claude Opus 5.5"], "efforts": ["medium"]}]
+        report = spelling_report([("frontiercode", rows)], available)
+        opus, sonnet = report["models"]
+        self.assertEqual((opus["named_in"], opus["candidates"]), (["frontiercode"], []))
+        self.assertEqual(sonnet["unnamed_in"], ["frontiercode"])
+        # The equal version ranks first; a label bound to another model and
+        # labels without a shared word are never offered.
+        self.assertEqual([c["label"] for c in sonnet["candidates"]], ["Sonnet 5.5", "Sonnet 5"])
+        # A candidate changes no matching: the rows stay unnamed until confirmed.
+        status = context(rows, available, source="frontiercode")["sources"][0]["model_matching"]["models"]
+        self.assertEqual({m["model"]: m["status"] for m in status}["claude-sonnet-5-5"], "no_matching_model_name")
+        available[0]["evidence_names"] = ["Sonnet 5.5"]
+        confirmed = spelling_report([("frontiercode", rows)], available)["models"][1]
+        self.assertEqual((confirmed["named_in"], confirmed["candidates"]), (["frontiercode"], []))
+        status = context(rows, available, source="frontiercode")["sources"][0]["model_matching"]["models"]
+        self.assertEqual({m["model"]: m["status"] for m in status}["claude-sonnet-5-5"], "matched")
+        self.assertEqual(spelling_report([], available)["status"], "no_cached_rows")
 
 
 class InventoryRefreshTests(unittest.TestCase):

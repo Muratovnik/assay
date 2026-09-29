@@ -87,8 +87,9 @@ accounting. Prepared state and an exact decision cache are bounded in memory;
 optional JSON telemetry has its own cache namespace and retention. An explicitly
 configured required mode adds a Claude hook guard: it binds routing calls and
 registered launches to the host session through a bounded SQLite rendezvous in a
-private state directory, launches workers through generated model/effort
-definitions and denies unregistered launches without granting any permission.
+private state directory, launches workers with the model in the Agent call and
+the effort in a generated definition, gives owner-exempt native agents their
+configured model and denies unregistered launches without granting any permission.
 No daemon, learned router or mandatory model evaluation campaign is introduced.
 The [advisor reference](../skills/route-subagents/references/routing-advisor.md)
 and the [required routing contract](../skills/route-subagents/references/required-routing.md)

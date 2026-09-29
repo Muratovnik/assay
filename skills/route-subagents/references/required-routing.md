@@ -1,6 +1,6 @@
 # Required routing: configuration, execution and migration
 
-This is the opt-in routing contract, protocol 2 in configuration schema 3. It
+This is the opt-in routing contract, protocol 3 in configuration schema 3. It
 extends the existing evidence service and policy, not the native agent launcher.
 Delegation must already be authorized. The primary owns task scope and acceptance;
 a separate economical advisor owns ranking when inference is needed.
@@ -24,7 +24,8 @@ is a visible owner decision, not an agent's recovery action.
 The implemented host adapter is Claude Code. Codex and other hosts report
 `required_routing_host_adapter_unavailable` from the MCP server, and the hook
 leaves their launches alone; familiar tool names do not make Claude's hook
-payloads portable. The optional hosted Jev backend remains available for the
+payloads portable. What a Codex adapter must establish first is recorded in the
+[Codex mechanics](codex-routing.md#required-mode-adapter-requirements). The optional hosted Jev backend remains available for the
 evidence-only diagnostic workflow and its consent, not as a hidden required-mode
 or native-advisor fallback.
 
@@ -60,32 +61,42 @@ observed supported combinations, not these names or the date verbatim.
     "inventory_file": "/ABSOLUTE/PRIVATE/assay-routing-inventory.json",
     "inventory_ttl_hours": 24,
     "advisor_route": {
-      "model": "confirmed-economy-id",
+      "model": "economy-alias",
       "effort": "low",
       "selection_basis": {"source": "caller", "reason_code": "bounded_ranking"}
     },
+    "profiles": ["general-purpose"],
     "variants": [
-      {"profile": "general-purpose", "model": "confirmed-worker-id", "effort": "medium"},
-      {"profile": "general-purpose", "model": "confirmed-worker-id", "effort": "high"}
+      {"profile": "general-purpose", "model": "confirmed-full-id", "effort": "high"}
     ],
-    "unrouted_agents": ["Explore"],
+    "unrouted_agents": {"Explore": "baseline", "Plan": "inherit"},
     "agent_templates": {},
     "profile_capabilities": {},
     "approved_choices": {},
-    "baseline": null
+    "baseline": {"model": "worker-alias", "effort": "medium"}
   }
 }
 ```
 
-The inventory file holds `{"available": [{"model": "confirmed-economy-id",
-"efforts": ["low"]}, ...], "observed_at": "2026-09-29T00:00:00Z"}`. It is kept
-outside the policy file on purpose: sessions and the MCP server are bound to the
-policy configuration, and confirming the inventory must not require a reconnect.
-Record that the host still offers the listed models, or replace the list, with:
+The inventory file holds `{"available": [{"model": "worker-alias",
+"evidence_names": ["Confirmed spelling"], "efforts": ["low", "medium"]}, ...],
+"observed_at": "2026-09-29T00:00:00Z"}`. An inventory model is either one of the
+model aliases the host's Agent call accepts or a full ID; see the routes below.
+The file is kept outside the policy file on purpose: sessions and the MCP server
+are bound to the policy configuration, and confirming the inventory must not
+require a reconnect. Record that the host still offers the listed models, or
+replace the list, with:
 
 ```sh
-python skills/route-subagents/scripts/benchmark_router.py --config NEW_CONFIG inventory-confirm [--available FILE]
+python skills/route-subagents/scripts/benchmark_router.py --config NEW_CONFIG inventory-confirm [--available FILE] [--evidence-name MODEL=LABEL ...]
 ```
+
+`--evidence-name` records the owner's confirmation that a benchmark source spells
+a listed model as `LABEL`, for example a full ID that a source prints as a short
+display name. The command then reports, for every inventory model, which cached
+sources name it and up to five candidate spellings from sources that do not.
+Candidates are advice for the owner: nothing binds a benchmark row until it is
+confirmed, and a source that does not name a model may simply not measure it.
 
 Preparation rereads the file. An observation older than `inventory_ttl_hours`
 (1 to 720, default 24) refuses preparation; a caller repeating an old list cannot
@@ -98,21 +109,42 @@ current evidence. `selection_basis.source` records `caller`, `client_role` or
 `evidence`; the last can include bounded `evidence_refs`. No fixed model name is
 shipped, no advisor chooses itself and no parent route is inherited silently.
 
+### Routes: the model in the call, the effort in a definition
+
+The Claude Agent call accepts a `model` but no effort, and only the four aliases
+`sonnet`, `opus`, `haiku` and `fable`: a full ID supplied by a hook fails the
+call's schema validation before anything launches. So a route travels in two
+parts. For a profile listed in `profiles` and an alias model, the call carries
+the alias and a generated definition for that profile and effort carries the
+effort; one definition serves every alias with that effort. A model the call
+cannot carry, such as a full ID, needs a `variants` entry: a definition for that
+profile, model and effort, which pins the model in its own file. A variant also
+takes precedence over a routed profile for its exact pair. A model without effort
+support launches with any effort definition and reports no effort; list it with
+one nominal effort, and its absent effort observation stays unknown.
+
 A user's explicit model and effort for a packet travel as its `explicit` pair.
-Policy honors it only for a confirmed inventory pair with a generated definition
-and otherwise reports `invalid_explicit_choice`; it never substitutes another
+Policy honors it only for a confirmed inventory pair the adapter can express and
+otherwise reports `invalid_explicit_choice`; it never substitutes another
 pair. `approved_choices` maps packet IDs to owner-approved pairs that bind even
 when the primary omits `explicit`; a request that contradicts one is refused.
 `baseline` is a complete, separately authorized fallback pair, subject to all
-packet constraints; absent or ineligible means no fallback. The primary cannot
-narrow the configured inventory or supply per-candidate capability masks to
-manufacture a single-candidate shortcut.
+packet constraints, and required mode needs one; see the failure boundaries
+below. The primary cannot narrow the configured inventory or supply
+per-candidate capability masks to manufacture a single-candidate shortcut.
 
-`unrouted_agents` lists native agent types, such as `Explore`, that the root may
-launch without routing; they keep the client's ordinary permission flow and
-their own model settings. Generated `assay-` definitions cannot be listed, and
-a worker or advisor may not launch any agent. Every other launch in a registered
-session must be a registered one.
+`unrouted_agents` names native agent types, such as `Explore`, that the root may
+launch without routing. They keep the client's ordinary permission flow, but not
+the parent's model: the hook sets the call's `model` and leaves every other
+field, including `run_in_background`, as the root sent it. A list gives each
+type the baseline's model. An object maps a type to `"baseline"`, to
+`{"model": ALIAS}` or to `"inherit"`, which keeps the parent's model as an
+explicit choice. That model must be an alias the call accepts; a root call naming
+a different model is refused, because an explicit choice goes through
+`prepare_routing` for a routed profile. The effort of a native type stays the
+session's. Generated `assay-` definitions cannot be listed, and a worker or
+advisor may not launch any agent. Every other launch in a registered session
+must be a registered one.
 
 Optional `profile_capabilities` maps a profile to confirmed capability booleans,
 for example `{"general-purpose":{"shell":true,"network":null}}`. Record only
@@ -131,24 +163,33 @@ python skills/route-subagents/scripts/benchmark_router.py --config NEW_CONFIG do
 ```
 
 `agents_dir` must be a project or user agent directory actually discovered by the
-client. Do not use the plugin's bundled agent directory to assume support for
-fields ignored on plugin agents. Names are immutable
-`assay-<profile>-<configuration-fingerprint>.md`. Only requested combinations and
-the configured advisor are generated, not a Cartesian product of all models.
-Canonical templates keep their capability restrictions; canonical JSON profiles
-still contain no model, effort or runtime state. `agent_templates` maps a new
-profile name to an existing user or project definition file, which is read, never
-changed, and cannot shadow a catalogued or internal name. Internal routing-advisor
-and general-purpose templates are execution adapters, not new neutral personas.
+client. Plugin agents apply `effort`, but they ignore `permissionMode`, so the
+plugin's bundled agent directory would drop a catalogued profile's restrictions;
+generated definitions stay in the owner's directory. Names are immutable
+`assay-<profile>-<effort>-<configuration-fingerprint>.md`. Generation writes one
+definition per routed profile and per effort that the confirmed inventory offers
+for an alias, each requested variant and the configured advisor, never a
+Cartesian product of all models. A new alias model therefore needs no
+regeneration unless it brings an effort nobody generated; doctor reports that
+gap. An effort definition drops a template's own `model`, so a launch that
+arrived without one could not silently use it. Canonical templates keep their
+capability restrictions; canonical JSON profiles still contain no model, effort
+or runtime state. `agent_templates` maps a new profile name to an existing user
+or project definition file, which is read, never changed, and cannot shadow a
+catalogued or internal name. Internal routing-advisor and general-purpose
+templates are execution adapters, not new neutral personas.
 
-Each generated definition carries its own `PreToolUse` hook that checks only that
-agent's ordinary tool calls; the plugin hook sees launches, advisor hand-backs and
-routing calls, so other sessions and tools start no guard process. The hook
-command embeds the absolute path of the generating checkout's `routing_hook.py`:
-regenerate after moving that checkout. Claude Code runs frontmatter hooks of user
-definitions directly, but those of a project definition only after the folder's
-workspace trust and never in a `-p` session; there the agent still runs unchecked
-by its own hook, while the plugin-level launch guard still applies.
+Generated definitions carry no hook of their own. The advisor's definition lists
+only its two routing tools and the native handback, and the host enforces that
+list: an unlisted tool is not available to the advisor at all. A worker keeps
+its profile's tools; its observed effort is checked when it stops, not midway,
+because stopping it mid-task would leave partial changes. Definitions generated
+by earlier releases still call the hook with `--scope agent`; that scope now
+answers nothing, and `claude-routes --prune` removes those files.
+
+In this mode the plugin's delegation reminder stays silent on Claude launches:
+the registered protocol and the guard's refusals already speak for them. The
+session reminder and Codex launches keep their reminders.
 
 Set `ASSAY_ROUTING_CONFIG` to the absolute new configuration path in the environment
 that launches **both Claude Code and its MCP child**. For example on POSIX:
@@ -167,10 +208,20 @@ updated generated plugin hooks and reconnect. A skill-only install does not
 supply those hooks. Do not silently edit global permissions or root effort.
 
 Doctor/status reports configuration, inventory age and support gaps, not
-fabricated discovery or effective permissions. It deliberately leaves
-installation/discovery unverified until there is real client evidence. Verify with
-one authorized bounded task in the intended client/version before asserting native
-behavior or quota savings.
+fabricated discovery or effective permissions. `setup_gaps` names what required
+mode still lacks. `route_checks` examines every route the configuration can
+select before any launch: each variant, each alias pair of a routed profile and
+the advisor. It reports whether the pair is in the confirmed inventory, whether
+its definition is generated and unmodified without a conflicting environment
+override, whether the call carries the model, for which profiles the baseline is
+expressible and which model each exempt agent type launches with.
+`adapter_capabilities` states what the Agent call can carry, and
+`alias_observations` lists what the host resolved each alias to and any change
+the owner has not confirmed yet. `model_names` is the spelling report described
+with `inventory-confirm`. Doctor
+deliberately leaves installation/discovery unverified until there is real client
+evidence. Verify with one authorized bounded task in the intended client/version
+before asserting native behavior or quota savings.
 
 ## Execute the registered chain
 
@@ -217,15 +268,16 @@ after the host returns the advisor invocation; submission alone cannot authorize
 workers or seed the shared semantic cache.
 
 Then call `authorize_routing_launch(decision_id, packet_id)` and send the exact
-returned Agent input. It is a stub without the prompt: the hook recognizes it and
-substitutes the registered input, so the root neither repeats nor alters a
-prompt. The gate binds the packet prompt, profile, model/effort variant, current
-configuration, session, expiry and individual attempt. Altered stubs, another
-packet's record, model overrides, expired records and reused attempts are
-rejected. It returns no automatic permission grant: normal client approval and
-permission checks evaluate the substituted input. Explicitly generated
-definitions and foreground defaults avoid relying on per-call effort, which the
-Agent tool does not accept ([open feature request](https://github.com/anthropics/claude-code/issues/77298)).
+returned Agent input. It is a stub without the prompt, and for an alias route it
+already names the `model`: the hook recognizes the stub and substitutes the
+registered input, so the root neither repeats nor alters a prompt. The gate binds
+the packet prompt, profile, definition, model, current configuration, session,
+expiry and individual attempt. Altered stubs, another packet's record, model
+overrides, expired records and reused attempts are rejected. It returns no
+automatic permission grant: normal client approval and permission checks evaluate
+the substituted input. Effort stays in the generated definition until the Agent
+tool accepts it per call ([open feature request](https://github.com/anthropics/claude-code/issues/77298));
+foreground defaults avoid relying on anything else.
 
 Several packets may use the same definition and start in one message. The start
 event does not name the parent's tool call, so start order binds provisionally
@@ -246,18 +298,32 @@ continuation of an existing worker is not a new model-selection decision.
 ## Observations, failure and privacy boundaries
 
 Requested settings, configured definition bytes and host observations are separate.
-The documented hook effort value is an object with a `level`; Agent's structured
-`resolvedModel` and `modelsUsed` provide model observations. An observed mismatch
-invalidates advice and blocks further guarded work, including the agent's own
-tool calls through its definition's hook. Unknown model/effort remains null; a
-self-reported `resolved_model` in the advisor JSON is not host evidence. An early
-stop event does not skip the later Agent result check. Late discovery of a
-mismatch cannot undo a tool action already performed by the native client.
-Conflicting effort/subagent-model environment overrides are rejected, not changed.
-Use confirmed runtime IDs: unresolved rolling aliases may not match observed IDs.
+The documented hook effort value is an object with a `level`; `SubagentStop`
+carries it, `SubagentStart` does not. Agent's structured `resolvedModel` and
+`modelsUsed` provide model observations. An observed mismatch invalidates advice
+and blocks continuation and further routing calls of that agent; it cannot undo a
+tool action the native client already performed. Unknown model/effort remains
+null; a self-reported `resolved_model` in the advisor JSON is not host evidence.
+An early stop event does not skip the later Agent result check. Conflicting
+effort/subagent-model environment overrides are rejected, not changed.
 
-Abstention, bad output or observed advisor failure allows only the eligible
-configured baseline. No baseline means no decision, not root-side selection.
+A full ID must be the model the host reports. An alias is resolved by the host,
+never guessed: the hook records what `resolvedModel` reported for it, outside any
+session, and the first observation establishes that resolution. A different
+resolution later is an inventory event, not a mismatch. It is recorded with the
+attempt and in `alias_observations`, and until the owner runs `inventory-confirm`
+again, preparation drops that alias's confirmed `evidence_names`, because they
+describe the model it used to resolve to, and returns an
+`alias_resolution_changed` warning. A switch of models inside one run is still a
+mismatch.
+
+Required mode is not set up without a configured baseline. Status and doctor
+report `setup_required` with the `baseline` gap, routing operations fail with
+`required_routing_setup_incomplete`, and the hook refuses every launch except an
+exempt type with its own model or `inherit`. Abstention, invalid advice, an advisor that ends without a
+result and a disabled advisor select the eligible baseline as a `fallback`
+decision whose reason codes name the cause. A baseline that a packet's hard
+constraints exclude still means no decision, not root-side selection.
 Expiry or configuration/inventory change requires preparation again.
 
 The guard fails closed only where it is the gate. When it cannot load the
@@ -275,7 +341,8 @@ input is removed when the host observes start/return; decision execution prompts
 remain only for the decision lifetime. Minimal observed attempt metadata remains
 for up to 24 hours to support outcomes and same-worker continuation. A session's
 registration lasts a day after its last routing activity. SessionEnd removes that
-session's records. Expired data is deleted on the next transaction, not by a
+session's records. Alias observations belong to no session: each lasts 30 days
+after its latest observation. Expired data is deleted on the next transaction, not by a
 background scheduler; SQLite secure deletion is enabled. Use a private local state
 directory and OS access controls, including appropriate Windows ACLs.
 
@@ -295,13 +362,17 @@ tests are labeled separately from those claims.
 ## Update, pruning, removal and rollback
 
 Re-run `claude-routes` after changing profiles, templates or configured
-combinations. Generation is idempotent; foreign files, modified owned files and
+combinations, or when the inventory offers an alias effort that has no definition
+yet. Generation is idempotent; foreign files, modified owned files and
 linked/reparse ancestors are refused. A definition deleted outside Assay simply
 ends its ownership and is recreated when still configured. Superseded definitions
-remain recorded as retired, never selected. `--prune` removes only unchanged owned
+remain recorded as retired, never selected. Definitions of an earlier release,
+listed in a schema-2 manifest, become retired entries of the current one: no route
+selects them, and they stay owned until pruned. `--prune` removes only unchanged owned
 inactive variants and retains variants referenced by active runtime records.
 `--remove` uninstalls every unchanged owned inactive definition and the manifest,
-keeping modified or active ones recorded. Creation, deletion and final manifest
+keeping modified or active ones recorded; once nothing owned remains it deletes
+the generation lock file as well. Creation, deletion and final manifest
 writes have rollback for recoverable I/O errors; user-authored files are not
 overwritten. Do not manually rename a managed definition or edit its file.
 
@@ -310,10 +381,13 @@ both host and MCP; the hooks then return no decision. For revision rollback run
 `claude-routes --remove` with the current revision first, then restore the retained
 old config, old registration/link vector and old revision together; use the old
 revision for its own uninstall operation. Preserve user files and separately
-retained history. Protocol-2 runtime records and v4 prompt answers cannot be
+retained history. Protocol-3 runtime records and v4 prompt answers cannot be
 reused as old live permissions. Rehearse rollback in an isolated directory, not
 against running work.
 
 Primary contracts (verified 2026-09-29):
 [Claude hooks](https://code.claude.com/docs/en/hooks) and
-[Claude subagents](https://code.claude.com/docs/en/sub-agents).
+[Claude subagents](https://code.claude.com/docs/en/sub-agents). The per-call
+model's precedence over a definition, the four accepted aliases, the refusal of
+a hook-supplied full ID and effort taken from the definition were observed in
+Claude Code 2.1.284; recheck them after a client upgrade.

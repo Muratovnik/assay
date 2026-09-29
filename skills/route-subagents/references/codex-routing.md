@@ -37,6 +37,34 @@ workflow. Do not claim that the reminder enforces a launch gate. A Codex hook an
 identity adapter needs separately verified client contracts; matching tool names
 are insufficient.
 
+### Required-mode adapter requirements
+
+These are the conditions a future Codex adapter must meet, from observations on
+Codex 0.147.0; none of it is implemented. The spawn call already carries `model`
+and `reasoning_effort`, so Codex needs no generated definitions for routing.
+
+- **Advisor confinement comes from agent configuration.** There is no tool
+  allowlist, only switches that remove capabilities. In the advisor's agent
+  file, disabling the shell, apps and goals features, a read-only sandbox and
+  `enabled_tools` limited to the two routing tools of the benchmark server took
+  effect; `approval_mode = "approve"` on those two tools was needed, or a
+  non-interactive run cancels the call.
+- **A residual set stays available.** Per-agent `view_image` and code-mode
+  switches had no effect, and image generation, plan updates and MCP resource
+  reading have no switch; `apply_patch` remains but the read-only sandbox blocks
+  its writes. Document that set, and repeat a native probe of the advisor's
+  actual tools at adapter acceptance and after every Codex upgrade, because new
+  tools arrive enabled.
+- **A hook-based guard needs proof first.** Subagents call their tools from
+  code mode's `exec` tool. Whether `PreToolUse` sees the calls inside it is not
+  established, and a guard that sees only `exec` would block the routing tools
+  too. An untrusted hook is skipped without an error.
+- **Output sanitizing needs another route.** Codex `PostToolUse` cannot rewrite
+  a tool's output, only block it with feedback, so the advisor's report cannot be
+  reduced to a status the way the Claude adapter does it.
+- **The inventory comes from the host.** The client's local model cache can be
+  stale; the owner confirms what the host actually offers.
+
 A spawned worker shares the filesystem unless an isolated checkout has been
 prepared. Set its actual root and owned scope; a prompt saying "isolated" does
 not create a worktree or isolate services.
@@ -63,6 +91,8 @@ establish a failure or supported override in the active native Codex client.
 Check the adapter and endpoint in use before prescribing a migration. Routing
 one native child does not authorize editing an API adapter or global settings.
 
-Primary reference: [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents).
+Primary references: [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents),
+[Codex hooks](https://learn.chatgpt.com/docs/hooks) and the
+[configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
 Consult current documentation and the active schema when a capability is
 unclear; this reference records mechanics, not persistent model recommendations.

@@ -20,17 +20,45 @@ SHELL_WIRING_TIMEOUT = 30
 
 
 class ReminderTests(unittest.TestCase):
-    def invoke(self, payload):
+    def invoke(self, payload, config=None):
+        # The developer's own routing configuration must not decide the result.
+        env = {k: v for k, v in os.environ.items() if k != "ASSAY_ROUTING_CONFIG"}
+        if config is not None:
+            env["ASSAY_ROUTING_CONFIG"] = str(config)
         return subprocess.run(
             [sys.executable, "-I", "-B", str(SCRIPT)],
-            input=payload, capture_output=True, timeout=5,
+            input=payload, capture_output=True, timeout=5, env=env,
         )
 
-    def output(self, event):
-        result = self.invoke(json.dumps(event).encode())
+    def output(self, event, config=None):
+        result = self.invoke(json.dumps(event).encode(), config)
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual(b"", result.stderr)
         return json.loads(result.stdout)
+
+    def test_required_claude_routing_leaves_claude_launches_to_the_guard(self):
+        spawn = {"hook_event_name": "PreToolUse", "tool_input": {"prompt": "work"}}
+        start = {"hook_event_name": "SessionStart", "source": "startup"}
+        with tempfile.TemporaryDirectory() as tmp:
+            def config(name, value):
+                path = Path(tmp) / name
+                path.write_text(value if isinstance(value, str) else json.dumps(value), encoding="utf-8")
+                return path
+            required = {"schema_version": 3, "client": "claude", "pipeline": {"mode": "required"}}
+            silent = config("required.json", required)
+            for tool in ("Agent", "Task"):
+                with self.subTest(tool=tool):
+                    self.assertEqual({}, self.output({**spawn, "tool_name": tool}, silent))
+            # Codex launches and the session reminder are not the guard's to answer.
+            self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "spawn_agent"}, silent))
+            self.assertIn("hookSpecificOutput", self.output(start, silent))
+            for name, value in (("evidence.json", {**required, "pipeline": {"mode": "evidence-only"}}),
+                                ("codex.json", {**required, "client": "codex"}),
+                                ("v2.json", {**required, "schema_version": 2}),
+                                ("broken.json", "{not json")):
+                with self.subTest(config=name):
+                    self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "Agent"}, config(name, value)))
+            self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "Agent"}, Path(tmp) / "missing.json"))
 
     def test_session_reminder_survives_every_supported_restart(self):
         for source in ("startup", "resume", "clear", "compact", "fork"):

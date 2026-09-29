@@ -68,8 +68,10 @@ primary supplies a confirmed inventory once, not a permanent model ranking.
 
 `evidence_names` may list verified publisher spellings for an exact runtime
 model. Matching uses lexical spelling plus reviewed source-local correspondences;
-see [model matching and refresh](benchmark-refresh.md) for their provenance and
-conflict rules. Never guess which concrete version a rolling alias represents. Unknown effort is not low, adaptive or the default;
+see [model matching and refresh](benchmark-refresh.md) for their provenance,
+conflict rules and the candidate spellings that doctor reports for an unnamed
+model. Never guess which concrete version a rolling alias represents; required
+routing records the host's own report of it instead. Unknown effort is not low, adaptive or the default;
 unmeasured efforts are not interpolated. Missing matches remain explicit.
 
 Preserve the user's explicit model/effort choice. This tool never overrides

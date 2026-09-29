@@ -67,12 +67,14 @@ or quota savings. Historical installation observations do not verify these hooks
 on the current client and package revision.
 
 The same package registers the `route-subagents` routing guard. It runs only for
-agent launches, advisor hand-backs, routing MCP calls and routed `assay-`
-definitions, never for ordinary tools. Without an explicitly configured required
+agent launches, advisor hand-backs, routing MCP calls and the lifecycle of routed
+`assay-` agents, never for ordinary tools. Without an explicitly configured required
 mode it returns no decision and adds no context. With `pipeline.mode: "required"`
 and `ASSAY_ROUTING_CONFIG` in the client's environment it gates launches as the
 [required routing contract](../skills/route-subagents/references/required-routing.md)
 describes. That is enforcement of the ordinary protocol, not a security boundary.
+In that mode the launch reminder stays silent on Claude launches, which the guard
+answers; the session reminder and Codex launches are unchanged.
 
 To check the handler without starting a model, run from the checkout:
 

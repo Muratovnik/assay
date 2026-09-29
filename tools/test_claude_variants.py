@@ -13,9 +13,11 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "skills/route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
+import hashlib
 import os
 import yaml
-from route_evidence.claude_agents import MANIFEST, generate, guard_command, internal_templates, remove, resolve_variant
+from route_evidence.claude_agents import (ALIAS_KIND, LOCK, MANIFEST, alias_efforts, generate, internal_templates,
+                                          launch_model, observe_alias, remove, resolve_variant, unconfirmed_changes)
 from route_evidence.core import EvidenceError, timestamp
 from route_evidence.pipeline_config import settings
 from route_evidence.pipeline_store import PipelineStore
@@ -130,6 +132,22 @@ class VariantTests(unittest.TestCase):
         self.assertIn("source-sha256:", text)
         self.assertIn("effort: low", text)
 
+    def test_generator_cli_derives_effort_definitions_from_alias_efforts(self):
+        config = self.root / "config.json"
+        def run(available):
+            config.write_text(json.dumps({"schema_version": 3, "client": "claude", "pipeline": self.effort_config(),
+                "inventory": {"available": available, "observed_at": timestamp(time.time())}}))
+            return subprocess.run([sys.executable, "-B", str(ROOT / "tools/assay.py"), "claude-routes", "--config", str(config)],
+                                  text=True, capture_output=True, timeout=30)
+        proc = run([{"model": "sonnet", "efforts": ["low", "high"]}, {"model": "fixture-model", "efforts": ["max"]}])
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        variants = json.loads(proc.stdout)["variants"]
+        self.assertEqual(sorted((v["profile"], v["model"], v["effort"]) for v in variants),
+                         [("general-purpose", None, "high"), ("general-purpose", None, "low")])
+        proc = run([{"model": "fixture-model", "efforts": ["max"]}])
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("routed_profiles_require_an_alias_model_in_inventory", proc.stdout + proc.stderr)
+
     def test_database_expiry_bound_and_link_guards(self):
         clock = [time.time()]
         store = PipelineStore(self.root / "state", clock=lambda: clock[0])
@@ -194,22 +212,107 @@ class VariantTests(unittest.TestCase):
         text = (self.root / "agents" / record["file"]).read_text(encoding="utf-8")
         return yaml.safe_load(text[4:].partition("\n---\n")[0])
 
-    def test_generated_definitions_check_their_own_tool_calls(self):
-        script = SCRIPTS / "routing_hook.py"
-        guarded = generate(self.config, {}, guard=guard_command(script))["variants"][0]
-        hook = self.frontmatter(guarded)["hooks"]["PreToolUse"][-1]
-        self.assertEqual(hook["matcher"], ".*")
-        command = hook["hooks"][0]["command"]
-        self.assertIn("'--scope', 'agent'", command)
-        self.assertIn(str(script.resolve()).encode("utf-8").hex(), command)
-        # The checked hook is part of the immutable identity of the definition.
-        self.assertNotEqual(guarded["name"], generate({**self.config, "agents_dir": str(self.root / "other")}, {})["variants"][0]["name"])
-        # The embedded command runs from any directory through the platform shell.
-        event = b'{"hook_event_name":"PreToolUse","session_id":"s","agent_id":"a","tool_name":"Read","tool_input":{}}'
-        environment = {k: v for k, v in os.environ.items() if k != "ASSAY_ROUTING_CONFIG"}
-        result = subprocess.run(command, shell=True, cwd=self.root, env=environment, input=event,
-                                capture_output=True, timeout=30)
-        self.assertEqual((result.returncode, result.stdout.strip()), (0, b"{}"), result.stderr)
+    def effort_config(self, **changes):
+        return settings({"pipeline": {"agents_dir": str(self.root / "agents"), "state_dir": str(self.root / "state"),
+                                      "profiles": ["general-purpose"], **changes}})
+
+    def test_effort_definitions_leave_the_model_to_the_agent_call(self):
+        config = self.effort_config()
+        template = b"---\nname: general-purpose\ndescription: Worker.\nmodel: opus\n---\n\nWork the packet.\n"
+        report = generate(config, {"general-purpose": template}, efforts=["low", "high"])
+        self.assertEqual(sorted(v["effort"] for v in report["variants"]), ["high", "low"])
+        for record in report["variants"]:
+            metadata = self.frontmatter(record)
+            # A template's own model would silently apply to a launch without one.
+            self.assertIsNone(record["model"])
+            self.assertNotIn("model", metadata)
+            self.assertNotIn("hooks", metadata)
+            self.assertEqual(metadata["effort"], record["effort"])
+            self.assertIn(f"-{record['effort']}-", record["name"])
+        # Every alias the call accepts reuses the effort's definition.
+        for model in ("sonnet", "haiku"):
+            route = {"model": model, "effort": "high"}
+            self.assertEqual(launch_model(resolve_variant(config, "general-purpose", route, environment={}), route), model)
+        # A full ID cannot travel in the call, and an effort nobody generated has no definition.
+        with self.assertRaisesRegex(EvidenceError, "variant_not_configured"):
+            resolve_variant(config, "general-purpose", {"model": "fixture-model", "effort": "high"}, environment={})
+        with self.assertRaisesRegex(EvidenceError, "variant_not_generated"):
+            resolve_variant(config, "general-purpose", {"model": "sonnet", "effort": "max"}, environment={})
+
+    def test_a_pinned_variant_keeps_its_model_in_the_definition(self):
+        pinned = {"profile": "general-purpose", "model": "fixture-model", "effort": "low"}
+        config = self.effort_config(variants=[pinned])
+        generate(config, {}, efforts=["low"])
+        route = {"model": "fixture-model", "effort": "low"}
+        record = resolve_variant(config, "general-purpose", route, environment={})
+        self.assertEqual(self.frontmatter(record)["model"], "fixture-model")
+        self.assertIsNone(launch_model(record, route))
+        alias = resolve_variant(config, "general-purpose", {"model": "sonnet", "effort": "low"}, environment={})
+        self.assertIsNone(alias["model"])
+
+    def test_the_advisor_is_confined_by_the_host_allowlist_alone(self):
+        route = {"model": "haiku", "effort": "low", "selection_basis": {"source": "caller", "reason_code": "bounded_ranking"}}
+        record = generate(self.effort_config(profiles=[], advisor_route=route), {})["variants"][0]
+        metadata = self.frontmatter(record)
+        self.assertEqual(metadata["tools"], ["mcp__assay-benchmark-routing__get_advisor_input",
+                                             "mcp__assay-benchmark-routing__complete_routing", "SubagentHandback"])
+        self.assertEqual((metadata["maxTurns"], record["model"]), (4, None))
+        self.assertNotIn("hooks", metadata)
+
+    def test_exempt_agent_configuration_is_validated_and_normalized(self):
+        for value, code in ((["Explore", "Explore"], "unrouted_agents"), ([{"name": "Explore"}], "unrouted_agents"),
+                            (["assay-general-purpose-low-x"], "unrouted_agents"),
+                            ({"Explore": "sometimes"}, "unrouted_agent_model"),
+                            ({"Explore": {"model": ""}}, "unrouted_agent_model"),
+                            ({"Explore": {"model": "haiku", "effort": "low"}}, "unrouted_agent_model")):
+            with self.subTest(value=value), self.assertRaisesRegex(EvidenceError, code):
+                settings({"pipeline": {"unrouted_agents": value}})
+        listed = settings({"pipeline": {"unrouted_agents": ["Explore"]}})
+        self.assertEqual(listed["unrouted_agents"], {"Explore": "baseline"})
+        # Normalization is stable, so the hook and the server hash the same policy.
+        self.assertEqual(settings({"pipeline": listed}), listed)
+
+    def test_alias_efforts_come_only_from_models_the_call_accepts(self):
+        available = [{"model": "sonnet", "efforts": ["high", "low"]}, {"model": "fixture-model", "efforts": ["max"]},
+                     {"model": "haiku", "efforts": ["low"]}]
+        self.assertEqual(alias_efforts(available), ["low", "high"])
+
+    def test_earlier_definitions_stay_owned_until_pruned_or_removed(self):
+        directory = self.root / "agents"
+        directory.mkdir()
+        legacy = directory / "assay-general-purpose-0123456789abcdef.md"
+        data = b"---\nname: assay-general-purpose-0123456789abcdef\nmodel: fixture-model\neffort: low\n---\n\nOld.\n"
+        legacy.write_bytes(data)
+        entry = {"profile": "general-purpose", "model": "fixture-model", "effort": "low", "name": legacy.stem,
+                 "file": legacy.name, "sha256": hashlib.sha256(data).hexdigest(), "source_sha256": "0" * 64}
+        (directory / MANIFEST).write_text(json.dumps({"schema_version": 2, "variants": [entry], "retired": []}))
+        pinned = self.effort_config(variants=[{k: entry[k] for k in ("profile", "model", "effort")}])
+        # Nothing selects an earlier definition any more.
+        with self.assertRaisesRegex(EvidenceError, "variant_not_generated"):
+            resolve_variant(pinned, "general-purpose", {"model": "fixture-model", "effort": "low"}, environment={})
+        config = self.effort_config()
+        generate(config, {}, efforts=["low"])
+        manifest = json.loads((directory / MANIFEST).read_text())
+        self.assertEqual((manifest["schema_version"], manifest["retired"]), (3, [entry]))
+        self.assertTrue(legacy.exists())
+        self.assertIn(legacy.stem, generate(config, {}, efforts=["low"], prune=True)["removed"])
+        self.assertFalse(legacy.exists())
+        legacy.write_bytes(data)
+        (directory / MANIFEST).write_text(json.dumps({"schema_version": 2, "variants": [entry], "retired": []}))
+        self.assertEqual(remove(config)["removed"], [legacy.stem])
+
+    def test_alias_resolution_is_an_observation_and_a_change_an_event(self):
+        clock = [1000.0]
+        store = PipelineStore(self.root / "state", clock=lambda: clock[0])
+        with store.transaction() as tx:
+            self.assertIsNone(observe_alias(tx, "sonnet", "model-a", 1000.0))
+            self.assertIsNone(observe_alias(tx, "sonnet", "model-a", 1001.0))
+            change = observe_alias(tx, "sonnet", "model-b", 1002.0)
+            self.assertEqual((change["from"], change["to"]), ("model-a", "model-b"))
+            self.assertIsNone(observe_alias(tx, "sonnet", "model-b", 1003.0))  # the event stays recorded
+            records = tx.values(ALIAS_KIND)
+        self.assertEqual(unconfirmed_changes(records, 1001.0), {"sonnet": change})
+        self.assertEqual(unconfirmed_changes(records, 1005.0), {})  # confirmed after the change
 
     def test_existing_user_definition_becomes_a_template_and_stays_unchanged(self):
         source = self.root / "user" / "translator.md"
@@ -250,12 +353,34 @@ class VariantTests(unittest.TestCase):
         self.assertEqual(set(report["kept"]), {first["variants"][0]["name"], active})
         report = remove(self.config)
         self.assertEqual(report["removed"], [active])
+        self.assertFalse(report["lock_removed"])
+        self.assertTrue((directory / LOCK).exists())  # a kept definition keeps its lifecycle
         self.assertTrue(modified.exists())
         self.assertEqual(foreign.read_text(), "User-owned reviewer")
         modified.unlink()
-        self.assertEqual(remove(self.config)["kept"], [])
+        report = remove(self.config)
+        self.assertEqual((report["kept"], report["lock_removed"]), ([], True))
         self.assertFalse((directory / MANIFEST).exists())
-        self.assertEqual(sorted(p.name for p in directory.glob("*.md")), ["user-reviewer.md"])
+        self.assertEqual(sorted(p.name for p in directory.iterdir()), ["user-reviewer.md"])
+
+    def test_remove_discards_a_lock_left_without_a_manifest(self):
+        directory = self.root / "agents"
+        directory.mkdir()
+        (directory / LOCK).write_bytes(b"0")
+        self.assertTrue(remove(self.config)["lock_removed"])
+        self.assertEqual(list(directory.iterdir()), [])
+        # Removal never creates a lock where there was none.
+        self.assertTrue(remove(self.config)["lock_removed"])
+        self.assertEqual(list(directory.iterdir()), [])
+
+    def test_a_held_lock_is_kept(self):
+        from route_evidence.cache import source_lock
+        directory = self.root / "agents"
+        directory.mkdir()
+        with source_lock(directory / LOCK) as acquired:
+            self.assertTrue(acquired)
+            self.assertFalse(remove(self.config)["lock_removed"])
+        self.assertTrue((directory / LOCK).exists())
 
     def test_cli_removal_needs_no_runtime_state(self):
         generate(self.config, {})

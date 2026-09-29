@@ -278,6 +278,7 @@ build_server(service).run(transport="stdio")
                 "pipeline": {"mode": "required", "state_dir": str(root / "state"), "agents_dir": str(root / "agents"),
                     "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
                         "source": "client_role", "reason_code": "bounded_ranking"}},
+                    "baseline": {"model": available[0]["model"], "effort": available[0]["efforts"][0]},
                     "variants": [{"profile": "general-purpose", "model": m["model"], "effort": e}
                                  for m in available for e in m["efforts"]]}}), encoding="utf-8")
             config = load_config(config_path)

@@ -1,11 +1,14 @@
 """Reviewed publisher spellings, not fuzzy model/version inference."""
 from __future__ import annotations
 
+from collections import Counter
+
 from .core import digest, effort, identity
 
 # Cursor's own model pages identify these exact releases. The benchmark omits
 # "Claude"; this does not license stripping arbitrary providers or date suffixes.
-# Extend this source-local table only with a checked publisher correspondence.
+# The table is frozen: a new model's spelling is the owner's confirmed
+# `evidence_names`, which the spelling report below helps to find.
 CURSOR_ALIASES = {
     "opus-5-5": ("claude-opus-5-5", "https://cursor.com/docs/models/claude-opus-5-5"),
     "opus-5": ("claude-opus-5", "https://cursor.com/docs/models/claude-opus-5"),
@@ -86,3 +89,67 @@ def matching_diagnostics(source_id, rows, available, *, state="loaded", harness=
             "unmatched_names_truncated": len(names) > 12,
             "ambiguous_names": sorted(ambiguous),
             "note": "Name gaps describe this snapshot and inventory, not absence of published measurements."}
+
+
+MAX_SPELLING_CANDIDATES = 5
+
+
+def _tokens(value):
+    key = identity(value)
+    return key.split("-") if key else []
+
+
+def _candidate_rank(model, label):
+    """Sort key for a label an owner may confirm, or None without a shared word.
+
+    Fewer foreign words, then an equal version sequence, rank first. This orders
+    advice for a person; it is not a match and never binds a row.
+    """
+    mine, theirs = _tokens(model), _tokens(label)
+    my_words = {t for t in mine if not t.isdigit()}
+    their_words = {t for t in theirs if not t.isdigit()}
+    if not my_words & their_words:
+        return None
+    shared = sum((Counter(mine) & Counter(theirs)).values())
+    same_version = [t for t in mine if t.isdigit()] == [t for t in theirs if t.isdigit()]
+    return (len(their_words - my_words), not same_version, -len(my_words & their_words),
+            -shared, len(theirs) - shared, label)
+
+
+def spelling_report(snapshots, available, *, limit=MAX_SPELLING_CANDIDATES):
+    """Which cached sources name each inventory model, and spellings to review.
+
+    `snapshots` lists (source_id, rows). Candidates are unbound labels of the
+    sources that name none of a model's rows. The owner confirms one as
+    `evidence_names` or ignores it; this report changes no matching.
+    """
+    inventory = {identity(name): item for item in available
+                 for name in [item["model"], *item.get("evidence_names", [])]}
+    models = {item["model"]: {"named_in": [], "unnamed_in": [], "candidates": {}} for item in available}
+    for source_id, rows in snapshots:
+        named, unbound = set(), set()
+        for label in {row["model"] for row in rows}:
+            candidate, _, error = resolve_model(source_id, label, inventory)
+            if candidate:
+                named.add(candidate["model"])
+            elif error == "unmatched_model_name":
+                unbound.add(label)
+        for model, entry in models.items():
+            if model in named:
+                entry["named_in"].append(source_id)
+                continue
+            entry["unnamed_in"].append(source_id)
+            for label in unbound:
+                rank = _candidate_rank(model, label)
+                if rank is not None:
+                    entry["candidates"].setdefault(label, (rank, []))[1].append(source_id)
+    report = []
+    for model in sorted(models):
+        entry = models[model]
+        ranked = sorted(entry["candidates"].items(), key=lambda item: item[1][0])[:limit]
+        report.append({"model": model, "named_in": entry["named_in"], "unnamed_in": entry["unnamed_in"],
+                       "candidates": [{"label": label, "sources": sources} for label, (_, sources) in ranked]})
+    return {"status": "checked" if snapshots else "no_cached_rows",
+            "sources": [source_id for source_id, _ in snapshots], "models": report,
+            "note": ("Candidates are spellings to confirm with inventory-confirm --evidence-name; "
+                     "they never bind rows. A source that does not name a model may not measure it.")}

@@ -92,6 +92,8 @@ def main(argv=None):
                          help="record that the configured inventory file matches the host now; no model call")
     ic.add_argument("--available", type=Path,
                     help="JSON list of {model, efforts} currently offered by the host; replaces the recorded list")
+    ic.add_argument("--evidence-name", action="append", default=[], metavar="MODEL=LABEL",
+                    help="confirm a benchmark spelling of a listed model; repeatable; see doctor's model_names")
     tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
     tp.add_argument("--file", type=Path, required=True)
     tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
@@ -116,11 +118,23 @@ def main(argv=None):
             print(json.dumps(result, indent=2))
             return 0
         if args.command == "inventory-confirm":
-            from route_evidence.pipeline_config import confirm_inventory
+            from route_evidence.pipeline_config import configured_inventory, confirm_inventory
+            from route_evidence.service import spelling
             if not args.config:
                 raise EvidenceError("inventory-confirm requires --config or ASSAY_ROUTING_CONFIG")
+            names = []
+            for value in args.evidence_name:
+                model, separator, label = value.partition("=")
+                if not separator or not model or not label.strip():
+                    raise EvidenceError("--evidence-name expects MODEL=LABEL")
+                names.append((model, label.strip()))
+            config = load_config(Path(args.config))
             available = read_document(args.available) if args.available else None
-            print(json.dumps(confirm_inventory(load_config(Path(args.config)), available), indent=2))
+            result = confirm_inventory(config, available, evidence_names=names)
+            # Show what the confirmed spellings now name, and what is still unnamed.
+            result["model_names"] = spelling(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
+                                             configured_inventory(config)["available"])
+            print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0
         service = make_service(args)
         from route_evidence.pipeline import RoutingPipeline
