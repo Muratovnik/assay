@@ -6,6 +6,22 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.10.0](https://github.com/Muratovnik/assay/compare/v0.9.0...v0.10.0) (2026-09-29)
+
+Required routing now passes the routed model in the Agent call and generates
+definitions only for effort, which the call cannot carry. A rolling alias is
+resolved by the host rather than guessed, a configured baseline answers when the
+advisor cannot, and every route is checked before the first launch.
+Evidence-only configurations keep their behavior.
+
+### ⚠ BREAKING CHANGES
+
+* **route-subagents:** required mode needs a `baseline`, and without one launches outside `unrouted_agents` are refused; agent types in `unrouted_agents` no longer inherit the parent's model but launch with the baseline model unless the configuration gives them a model or `"inherit"`, and a different model from the caller must be routed; generated definitions no longer stop a worker whose observed effort differs from its route, the mismatch blocks continuation once it stops; run `tools/assay.py claude-routes` again after upgrading, then `claude-routes --prune` to remove the definitions of 0.9.0 ([e4521bb](https://github.com/Muratovnik/assay/commit/e4521bb985eb615c4308d8f3ec247b5c4a21204b))
+
+### Features
+
+* **route-subagents:** route a profile listed in `pipeline.profiles` with the model alias in the Agent call and one generated definition per profile and effort, keeping model-pinned variants for full model IDs, which the call does not accept; record what the host resolves each alias to, so a changed resolution becomes an inventory event that suspends the alias's confirmed evidence names until `inventory-confirm` runs again; select the baseline as a fallback when the advisor abstains, gives invalid advice, ends without a result or is disabled; report which cached benchmark sources name each inventory model with up to five candidate spellings, and confirm one with `inventory-confirm --evidence-name`; check every selectable route, the baseline per profile and the model of each exempt type in `doctor` and `routing_status`; keep the launch reminder silent on Claude launches in required mode, and delete the generation lock with `claude-routes --remove` ([e4521bb](https://github.com/Muratovnik/assay/commit/e4521bb985eb615c4308d8f3ec247b5c4a21204b))
+
 ## [0.9.0](https://github.com/Muratovnik/assay/compare/v0.8.0...v0.9.0) (2026-09-29)
 
 Skill evaluation adds evaluation design and bounded iterative improvement, and
