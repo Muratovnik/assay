@@ -203,6 +203,10 @@
     {
       "id": "SD08",
       "prompt": "Review this ordinary Python function for an off-by-one bug; do not change it."
+    },
+    {
+      "id": "SD09",
+      "prompt": "Our checker's test suite passes, but I suspect it would still accept a known bug. Evaluate whether these tests actually detect the regression and would not reject a correct refactor."
     }
   ]
 }

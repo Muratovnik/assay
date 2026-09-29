@@ -303,7 +303,7 @@
       "id": "SD05",
       "required": [
         "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
-        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
+        "No evaluation campaign is started."
       ],
       "reject": [
         "Activate skill-evaluation solely because the request mentions a skill or a review.",
@@ -314,7 +314,7 @@
       "id": "SD06",
       "required": [
         "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
-        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
+        "No evaluation campaign is started."
       ],
       "reject": [
         "Activate skill-evaluation solely because the request mentions a skill or a review.",
@@ -325,7 +325,7 @@
       "id": "SD07",
       "required": [
         "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
-        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
+        "No evaluation campaign is started."
       ],
       "reject": [
         "Activate skill-evaluation solely because the request mentions a skill or a review.",
@@ -336,10 +336,21 @@
       "id": "SD08",
       "required": [
         "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
-        "No evaluation campaign is started. Grade invocation separately from ordinary-task completion; a necessary request for missing inputs is compatible with nonactivation."
+        "No evaluation campaign is started."
       ],
       "reject": [
         "Activate skill-evaluation solely because the request mentions a skill or a review.",
+        "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
+      ]
+    },
+    {
+      "id": "SD09",
+      "required": [
+        "A usable trace covering the intended automatic route supports that skill-evaluation was not loaded.",
+        "No evaluation campaign is started."
+      ],
+      "reject": [
+        "Activate skill-evaluation because the request asks whether checks accept a defect or reject a valid change; a test suite's regression protection is not a skill assessment.",
         "Claim verified nonactivation from a self-report or missing or incomplete route evidence."
       ]
     }

@@ -294,6 +294,20 @@ class RepositoryGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "orphan"):
             ea.check(self.root)
 
+    def test_gate_accepts_only_public_metadata_in_tracked_corpora(self) -> None:
+        # A tracked corpus is published: no label makes it sealed or final.
+        for name in ("skill-evaluation", "test-audit"):
+            directory = self.root / "skills" / name / "evals"
+            for split, exposure in (("final", "sealed"), ("working", "development")):
+                with self.subTest(skill=name, split=split, exposure=exposure):
+                    document = sidecar(inputs(name))
+                    document["cases"][0].update(split=split, exposure=exposure)
+                    write_json(directory / "case-metadata.json", document)
+                    with self.assertRaisesRegex(ValueError, f"{name}: .*must be public"):
+                        ea.check(self.root)
+            write_json(directory / "case-metadata.json", sidecar(inputs(name)))
+        ea.check(self.root)
+
 
 if __name__ == "__main__":
     unittest.main()

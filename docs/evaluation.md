@@ -97,7 +97,7 @@ Every record contains the following nonempty, trimmed string fields:
 | Field | Meaning |
 | --- | --- |
 | `id` | Matching case ID within its collection. |
-| `group` | Related incident, template, project or answer family. |
+| `group` | Cases sharing an incident, template, project or expected answer; unrelated cases use distinct groups. |
 | `purpose` | `routine`, `regression`, `challenge` or `should-not-fire`. |
 | `source` | Provenance, including whether the case is synthetic. |
 | `rationale` | Why this case belongs in the intended task population. |
@@ -108,9 +108,11 @@ The checker rejects unknown or missing fields, invalid classifications, unmatche
 IDs, orphan sidecars and declared groups crossing splits within one skill's main
 and auxiliary corpora. A final case must be declared sealed. This declaration
 is not proof of access restrictions: a public file does not become secret by
-changing a label. The checker cannot discover undeclared semantic relatedness or
-verify representativeness. All shipped `skill-evaluation` cases are explicitly
-public working material, never a private final set.
+changing a label. The repository check therefore accepts only `public` records;
+the other exposures and the final role describe evaluator-side corpora kept
+outside the repository. The checker cannot discover undeclared semantic
+relatedness or verify representativeness. All shipped `skill-evaluation` cases
+are explicitly public working material, never a private final set.
 
 `prepare` does not load or copy sidecars or rubrics. It still accepts only `id`,
 `prompt`, `context` and `files` on the input side. This is a packaging boundary,

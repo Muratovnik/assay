@@ -52,16 +52,19 @@ execution. A reviewer who authored the change is performing self-review.
 
 `SE01`–`SE24` cover attribution, calibration, adaptive selection, grouping, full
 cost, routing, plateau diagnosis, subtraction, coverage, leakage, noise and hard
-constraints, including legitimate controls. `SD01`–`SD08` cover positive and
-negative invocation boundaries. All shipped examples are public working material,
+constraints, including legitimate controls. `SD01`–`SD09` cover positive and
+negative invocation boundaries; `SD09` is a near miss on the test-audit boundary.
+All shipped examples are public working material,
 not a hidden final set. A generalization claim needs separately reserved groups;
 rephrasing these examples or rerunning them does not supply independence.
 
 ## Invocation is not task completion
 
 For discovery cases record invocation and ordinary-task handling separately.
-`SD05`, `SD06` and `SD08` do not supply the target description, metadata file or
-Python function. Keep these inputs unchanged as incomplete-request controls:
+Their rubric entries grade invocation only; judge ordinary-task handling against
+the controls below. `SD05`, `SD06`, `SD08` and `SD09` do not supply the target
+description, metadata file, Python function or test suite. Keep these inputs
+unchanged as incomplete-request controls:
 asking for essential missing material is a valid response, not an activation
 failure. A textual correction can also be useful without claiming a file was
 edited. `SD07` is self-contained and remains the direct-answer control.

@@ -107,8 +107,12 @@ def metadata_path(cases_path: Path) -> Path:
 
 
 def check_metadata(path: Path, cases: dict[str, Any], name: str, *,
-                   group_splits: dict[str, str] | None = None) -> None:
-    """Validate declared membership, not semantic independence or actual secrecy."""
+                   group_splits: dict[str, str] | None = None, tracked: bool = False) -> None:
+    """Validate declared membership, not semantic independence or actual secrecy.
+
+    A tracked corpus is published, so it can hold neither sealed material nor a
+    final case; the other exposures describe evaluator-side corpora.
+    """
     metadata = load(path)
     if (set(metadata) - {"schema_version", "skill_name", *COLLECTIONS}
             or type(metadata.get("schema_version")) is not int
@@ -130,6 +134,8 @@ def check_metadata(path: Path, cases: dict[str, Any], name: str, *,
             if (record["purpose"] not in PURPOSES or record["split"] not in SPLITS
                     or record["exposure"] not in EXPOSURES):
                 raise ValueError(f"{name}: unsupported metadata classification")
+            if tracked and record["exposure"] != "public":
+                raise ValueError(f"{name}: tracked metadata is published and must be public")
             if record["split"] == "final" and record["exposure"] != "sealed":
                 raise ValueError(f"{name}: final cases must be declared sealed, not exposed")
             group = record["group"]
@@ -138,7 +144,7 @@ def check_metadata(path: Path, cases: dict[str, Any], name: str, *,
 
 
 def check_pair(cases_path: Path, rubric_path: Path, name: str, *,
-               group_splits: dict[str, str] | None = None) -> None:
+               group_splits: dict[str, str] | None = None, tracked: bool = False) -> None:
     cases, rubric = load(cases_path), load(rubric_path)
     for document in (cases, rubric):
         if type(document.get("schema_version")) is not int or document["schema_version"] != 1 or document.get("skill_name") != name:
@@ -153,7 +159,7 @@ def check_pair(cases_path: Path, rubric_path: Path, name: str, *,
             input_case(record)
     metadata = metadata_path(cases_path)
     if metadata.exists() or metadata.is_symlink():
-        check_metadata(metadata, cases, name, group_splits=group_splits)
+        check_metadata(metadata, cases, name, group_splits=group_splits, tracked=tracked)
 
 
 def audit_tools(root: Path = ROOT) -> Any:
@@ -169,15 +175,13 @@ def check(root: Path = ROOT) -> dict[str, str]:
         case_paths = [directory / "cases.json", *sorted(directory.glob("*-cases.json"))]
         expected_metadata = {metadata_path(path) for path in case_paths}
         observed_metadata = set(directory.glob("*-case-metadata.json"))
-        if (directory / "case-metadata.json").exists():
-            observed_metadata.add(directory / "case-metadata.json")
         if observed_metadata - expected_metadata:
             raise ValueError(f"{name}: orphan case metadata")
         group_splits: dict[str, str] = {}
         for cases in case_paths:
             rubric = cases.with_name("rubric.json" if cases.name == "cases.json"
                                      else cases.name.removesuffix("-cases.json") + "-rubric.json")
-            check_pair(cases, rubric, name, group_splits=group_splits)
+            check_pair(cases, rubric, name, group_splits=group_splits, tracked=True)
         report[name] = "input/rubric structure checked, no model run"
     # Keep the existing, separately tested fixture/file validation path.
     audit_tools(root).load_cases(root / "skills/independent-audit/evals")
