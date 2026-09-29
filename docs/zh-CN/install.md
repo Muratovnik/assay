@@ -26,47 +26,20 @@ skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配
 
 ## 自动技能提醒
 
-Codex 和 Claude Code 的完整插件包含由 `tools/assay.py render` 生成的
-[`hooks/hooks.json`](../../hooks/hooks.json)。会话开始、恢复及上下文压缩后，
-它提醒使用匹配的技能；启动子智能体时，提醒必须应用 `route-subagents`，
-明确选择模型和 effort，并使用最小必要上下文。替换执行者和审查者同样适用。
+完整插件为 Claude Code 和 Codex 分别生成 `hooks/hooks.json` 与
+`hooks/codex.json`。`UserPromptSubmit` 根据英文或俄文请求提供简短的技能建议，
+技能名称来自现有目录。会话和委派提醒仍然保留；建议不授权修改或委派，也不证明遵守。
 
-客户端执行环境必须提供名为 `python` 的 Python 3.11+。处理器仅使用标准库，
-不调用模型或网络，不读取会话记录，不修改设置。每个事件添加少于 1,000 个字符，
-仍有少量上下文成本；超时为五秒。禁用或卸载插件会移除其提醒。
+客户端需提供 Python 3.11+ 的 `python` 命令。请求分类还需要在该解释器的隔离环境中
+安装 `hooks/requirements.txt`；插件不会自动安装依赖或调用模型、网络。
+Claude 强制路由守卫不依赖 Markdown 解析器，优先于建议。
 
-安装或更新后启动新会话。在 **Codex** 中，通过客户端的 hooks 信任流程审阅并
-信任当前 Assay 定义；安装本身不代表信任。禁用 hooks 或仅允许托管 hooks 的策略
-会阻止插件提醒。在 **Claude Code** 的 `/hooks` 中检查 Assay 的 `SessionStart`
-和 `PreToolUse` 条目，执行失败时查看 hooks 诊断。参见
-[Codex 文档](https://learn.chatgpt.com/docs/hooks) 和
-[Claude Code 文档](https://code.claude.com/docs/en/hooks)。
+更新后通过客户端界面检查插件启用和 hooks 信任。技能 CLI 与 `install-links`
+不安装 hooks，也不修改个人 AGENTS.md。强制路由协议仍仅适用于 Claude；在 Codex
+中明确选择 required 会阻止受保护操作，不会静默退化为建议。
 
-**技能 CLI 和 `install-links` 不会安装插件 hooks。** 需要提醒时使用完整插件。
-Assay 不修改个人 `AGENTS.md`。其他客户端保留普通技能发现；这些提醒事件仅针对
-支持相应 hooks 的 Codex 和 Claude Code。
-
-提醒不是强制门禁：pre-tool 上下文不会暂停已选择的调用让模型重新决策，部分工具
-路径也可能绕过 hooks。处理器不授权委派、不修改参数，也不固定模型。离线测试验证
-事件与命令，不证明客户端发现、技能遵守或配额节省。历史观察不能证明当前客户端
-和包版本的 hooks 正常运行。
-
-同一插件还注册 `route-subagents` 路由守卫。它只在代理启动、建议器交回、路由 MCP
-调用和 `assay-` 代理的生命周期事件上运行，不会为普通工具启动。未显式配置 required 模式时，
-它不作任何决定，也不添加上下文。设置 `pipeline.mode: "required"` 并在客户端环境中
-提供 `ASSAY_ROUTING_CONFIG` 后，它按[强制路由契约](../../skills/route-subagents/references/required-routing.md)
-检查启动。这是对常规协议的约束，而不是安全边界。在该模式下，Claude 启动由路由守卫
-回应，启动提醒保持静默；会话提醒和 Codex 启动不变。
-
-在 checkout 中无需调用模型即可检查处理器：
-
-```text
-python -B -m unittest tools.test_skill_reminder
-```
-
-若没有条目，确认启用的是包含此改动的完整插件，而不只是技能链接。若执行失败，
-检查客户端环境中的 `python --version` 和 hooks 诊断。处理器测试通过不等于插件
-已在该客户端启用并获得信任。
+详见[配置、doctor、客户端限制及离线 replay](../how-to/hooks.md)。该指南区分文件存在、
+配置和运行观察，说明可选状态、回滚、重复 hooks 与 custom effort 限制。
 
 ## Claude Code
 

@@ -1,0 +1,2 @@
+# Optional prompt classification only; strict routing remains standard-library-only.
+markdown-it-py==4.2.0

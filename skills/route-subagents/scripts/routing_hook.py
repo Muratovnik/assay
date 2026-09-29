@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import copy
 import json
+import re
+import math
 import os
 from pathlib import Path
 import secrets
@@ -23,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from route_evidence.claude_agents import CLAUDE_MODEL_ALIASES, check_record, observe_alias, resolve_variant, unrouted_model
 from route_evidence.core import EvidenceError, digest
 from route_evidence.pipeline import RECEIPT_SECONDS, arguments
-from route_evidence.pipeline_config import ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings
+from route_evidence.pipeline_config import ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings, runtime_overrides
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.service import load_config
 
@@ -33,7 +35,7 @@ HANDBACK = "SubagentHandback"
 DAY = 86400
 # Fields that describe what the host actually ran, as opposed to what was
 # authorized. They move with an agent when its attribution is corrected.
-RUNTIME_FIELDS = ("agent_id", "state", "observed_model", "observed_effort", "route_mismatch", "binding")
+RUNTIME_FIELDS = ("agent_id", "state", "observed_model", "observed_effort", "efforts_used", "models_used", "binding")
 
 
 def output(event, **fields):
@@ -57,7 +59,7 @@ def routing_operation(tool, server=None):
 def guarded(event):
     """Operations that must be refused when the guard cannot validate them."""
     return event.get("hook_event_name") == "PreToolUse" and (
-        event.get("tool_name") in SPAWN_TOOLS or routing_operation(event.get("tool_name")) is not None)
+        event.get("tool_name") in SPAWN_TOOLS | {HANDBACK} or routing_operation(event.get("tool_name")) is not None)
 
 
 def _identity(event):
@@ -77,8 +79,9 @@ def observe_effort(run, event):
     level = raw.get("level") if isinstance(raw, dict) else None
     if not isinstance(level, str) or level not in {"low", "medium", "high", "xhigh", "max"}:
         raise EvidenceError("invalid_observed_effort_object")
+    run["efforts_used"] = sorted(set(run.get("efforts_used", [])) | {level})
     run["observed_effort"] = level
-    if level != run["route"]["effort"]:
+    if run.get("binding") != "start_order" and level != run["route"]["effort"]:
         run["route_mismatch"] = True
 
 
@@ -90,7 +93,7 @@ def _unrouted(event, mode):
     return mode["unrouted_agents"].get(supplied.get("subagent_type") or "general-purpose")
 
 
-def _unrouted_launch(event, mode, spec):
+def _unrouted_launch(event, mode, spec, environment=None):
     """Launch an exempt type with its configured model instead of the parent's.
 
     Only the model changes; every other field, including run_in_background,
@@ -101,6 +104,10 @@ def _unrouted_launch(event, mode, spec):
         model = unrouted_model(mode, spec)
     except EvidenceError as exc:
         return deny(f"exempt agent type has no model the Agent call accepts ({exc}); run the routing doctor")
+    if model is not None:
+        overrides = runtime_overrides({"model": model, "effort": "low"}, environment, host=mode.get("host"))
+        if "model_environment_override" in overrides["conflicts"] or "forced_model_unresolved" in overrides["unverified"]:
+            return deny("exempt agent model conflicts with the client's environment precedence; run the routing doctor")
     supplied = event["tool_input"]
     if model is None or supplied.get("model") == model:
         return {}
@@ -133,10 +140,16 @@ def _bind_start(tx, session, config_hash, agent, agent_type, clock):
     if not candidates:
         return
     # SubagentStart carries no parent tool-use ID. Launches of one definition
-    # share model, effort and permissions, so bind them in reservation order;
-    # the Agent result, which names both IDs, corrects the packet attribution.
+    # can share effort/permissions but NOT the per-call model. Reservation order
+    # is provisional only; do not validate the route against this attribution.
+    # A last remaining reservation is still ambiguous when an earlier start
+    # could belong to it. The result naming both IDs resolves attribution.
+    ambiguous = len(candidates) > 1 or any(
+        r["session_id"] == session and r["config_hash"] == config_hash
+        and r["variant"]["name"] == agent_type and r.get("binding") == "start_order"
+        for r in tx.values("attempt"))
     run = min(candidates, key=lambda r: (r.get("reserved_at", 0), r["attempt_id"]))
-    run.update(state="started", agent_id=agent, binding="unique" if len(candidates) == 1 else "start_order")
+    run.update(state="started", agent_id=agent, binding="start_order" if ambiguous else "unique")
     run.pop("input", None)
     _save(tx, session, run, clock)
 
@@ -158,6 +171,8 @@ def _rebind(tx, session, dispatched, observed_id, clock):
     other = tx.get("agent", session + ":" + observed_id)
     if other and other["attempt_id"] != dispatched["attempt_id"]:
         sibling = tx.get("attempt", other["attempt_id"])
+        if sibling and (sibling["variant"]["name"] != dispatched["variant"]["name"] or sibling.get("binding") == "host_result"):
+            raise EvidenceError("host_agent_binding_conflict")
         if sibling and sibling["variant"]["name"] == dispatched["variant"]["name"]:
             # Start order gave this agent to a sibling launch of the same
             # definition. Exchange what each actually ran; a sibling left
@@ -165,13 +180,32 @@ def _rebind(tx, session, dispatched, observed_id, clock):
             _swap_runtime(dispatched, sibling)
             if "agent_id" not in sibling:
                 sibling["state"] = "reserved"
+            _recheck_observed(sibling)
             _save(tx, session, sibling, clock)
     if dispatched.get("agent_id") != observed_id:
         dispatched["agent_id"] = observed_id
     if dispatched["state"] in {"prepared", "reserved"}:
         dispatched["state"] = "started"
     dispatched["binding"] = "host_result"
+    _recheck_observed(dispatched)
     return dispatched
+
+
+def _recheck_observed(run):
+    """Mismatch is derived from evidence and the final route, never swapped."""
+    run.pop("route_mismatch", None)
+    if run.get("binding") == "start_order":
+        return
+    level = run.get("observed_effort")
+    expected = run["route"]["model"]
+    model = run.get("observed_model")
+    used = run.get("models_used", [])
+    levels = run.get("efforts_used", [level] if level else [])
+    if (any(value != run["route"]["effort"] for value in levels)
+            or (expected not in CLAUDE_MODEL_ALIASES and
+                ((model is not None and model != expected) or any(m != expected for m in used)))
+            or (expected in CLAUDE_MODEL_ALIASES and model and any(m != model for m in used))):
+        run["route_mismatch"] = True
 
 
 def _observe_model(tx, run, response, clock):
@@ -185,8 +219,16 @@ def _observe_model(tx, run, response, clock):
     model = response.get("resolvedModel")
     used = response.get("modelsUsed")
     used = [m for m in used if isinstance(m, str) and m] if isinstance(used, list) else []
+    previous_model = run.get("observed_model")
+    used = list(dict.fromkeys([*run.get("models_used", []), *([previous_model] if previous_model else []), *used,
+                              *([model] if isinstance(model, str) and model else [])]))
+    if len(used) > 64 or any(len(item) > 200 for item in used):
+        raise EvidenceError("observed_model_history_exceeds_bound")
     if isinstance(model, str) and model:
         run["observed_model"] = model
+    run["models_used"] = used
+    if run.get("binding") == "start_order":
+        return
     if expected not in CLAUDE_MODEL_ALIASES:
         if run.get("observed_model") not in (None, expected) or any(m != expected for m in used):
             run["route_mismatch"] = True
@@ -213,7 +255,7 @@ def _observe_return(tx, event, session, config_hash, name, clock):
     dispatched = matches[0]
     response = event.get("tool_response")
     observed_id = response.get("agentId", response.get("agent_id")) if isinstance(response, dict) else None
-    if isinstance(observed_id, str) and observed_id and dispatched.get("agent_id") != observed_id:
+    if isinstance(observed_id, str) and observed_id:
         dispatched = _rebind(tx, session, dispatched, observed_id, clock)
     dispatched["host_returned"] = True
     dispatched.pop("input", None)
@@ -231,13 +273,29 @@ def _observe_return(tx, event, session, config_hash, name, clock):
             _observe_model(tx, dispatched, response, clock)
     _save(tx, session, dispatched, clock)
     if dispatched["role"] == "advisor" and name == "PostToolUse" and tool in SPAWN_TOOLS:
-        if isinstance(response, dict) and isinstance(response.get("content"), list):
-            # Preserve the documented Agent output shape and its telemetry,
-            # replacing only the advisor's report blocks.
-            safe = copy.deepcopy(response)
-            safe["content"] = [{"type": "text", "text": json.dumps({
-                "decision_id": dispatched["decision_id"], "status": "read_registered_decision"})}]
-            return output(name, updatedToolOutput=safe)
+        # Unknown output layouts must not create an unfiltered report
+        # channel. Rebuild the documented text envelope; copy only numeric
+        # telemetry, never arbitrary nested fields or error messages.
+        safe = {"content": [{"type": "text", "text": json.dumps({
+            "decision_id": dispatched["decision_id"], "status": "read_registered_decision"})}]}
+        if dispatched.get("agent_id"):
+            safe["agentId"] = dispatched["agent_id"]
+        if isinstance(response, dict):
+            if response.get("status") in {"completed", "async_launched"}:
+                safe["status"] = response["status"]
+            # Preserve bounded native routing telemetry, never arbitrary text
+            # or nested report/error fields from an advisor.
+            model_token = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}\Z")
+            model = response.get("resolvedModel")
+            if isinstance(model, str) and model_token.fullmatch(model):
+                safe["resolvedModel"] = model
+            used = response.get("modelsUsed")
+            if isinstance(used, list) and len(used) <= 16 and all(isinstance(v, str) and model_token.fullmatch(v) for v in used):
+                safe["modelsUsed"] = used
+            for key in ("totalDurationMs", "totalTokens", "totalToolUseCount"):
+                if type(response.get(key)) in (int, float) and 0 <= response[key] < 10**15 and math.isfinite(response[key]):
+                    safe[key] = response[key]
+        return output(name, updatedToolOutput=safe)
     return {}
 
 
@@ -261,6 +319,12 @@ def _dispatch(tx, event, session, config_hash, mode, clock, environment):
     if len(candidates) != 1:
         return deny("no valid registered launch matches these exact arguments; call authorize_routing_launch")
     dispatched = candidates[0]
+    if dispatched["role"] == "advisor" and any(
+            r["attempt_id"] != dispatched["attempt_id"] and r["session_id"] == session
+            and r["config_hash"] == config_hash and r["variant"]["name"] == dispatched["variant"]["name"]
+            and r["state"] in {"reserved", "started", "running"} and not r.get("host_returned")
+            for r in tx.values("attempt")):
+        return deny("another advisor with this definition awaits authoritative host binding; finish it before launching another")
     tool_id = event.get("tool_use_id")
     if not isinstance(tool_id, str) or not tool_id:
         return deny("host tool-use identity missing")
@@ -301,10 +365,19 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
         # adapter keep the client's ordinary behavior and receive no context.
         return {}
     name, tool = event.get("hook_event_name"), event.get("tool_name")
+    if mode["host"]["surface"] not in {"cli", "unknown"}:
+        if guarded(event):
+            return deny("required routing is not qualified for this declared client surface")
+        if name == "SessionStart":
+            return output(name, additionalContext="Assay: required routing has no qualified adapter for this declared client surface. Protected operations are blocked; ordinary work is unaffected.")
+        return {}
     if name == "PreToolUse" and tool in SPAWN_TOOLS:
+        supplied = event.get("tool_input")
+        if isinstance(supplied, dict) and {"effort", "model_reasoning_effort", "reasoning_effort"} & set(supplied):
+            return deny("Claude Agent has no per-call effort field; use the registered generated definition")
         spec = _unrouted(event, mode)
         if spec is not None:
-            return _unrouted_launch(event, mode, spec)
+            return _unrouted_launch(event, mode, spec, environment)
     # A baseline is part of the setup: without it an abstaining or failed
     # advisor would leave every packet without a route.
     if not mode["state_dir"] or not mode["agents_dir"] or not mode["baseline"]:
@@ -370,6 +443,8 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
                 state = tx.get("decision", run["decision_id"])
                 submitted = bool(state and state.get("completion_hash"))
                 message = json.dumps({"decision_id": run["decision_id"], "status": "submitted" if submitted else "not_submitted"})
+                if set(supplied) - {"message", "summary"}:
+                    return deny("unknown advisor handback fields; use only the registered decision status")
                 safe = {**supplied, "message": message}
                 # Avoid a second free-text report channel in newer clients.
                 if "summary" in safe:
@@ -389,7 +464,7 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
             return _dispatch(tx, event, session, config_hash, mode, clock, environment)
         if operation in ROOT_TOOLS and agent:
             return deny("root-only routing operation")
-        if operation in ADVISOR_TOOLS and (not run or run["role"] != "advisor"
+        if operation in ADVISOR_TOOLS and (not run or run.get("binding") == "start_order" or run["role"] != "advisor"
                                            or run["decision_id"] != supplied.get("decision_id")):
             return deny("advisor identity is not bound to this decision")
         token = secrets.token_urlsafe(32)
@@ -403,6 +478,11 @@ def failure(event, scope, configured):
     """Fail closed only where the guard is the gate; never stall anything else."""
     if scope == "plugin" and guarded(event):
         return deny("routing guard could not validate this operation; run the routing doctor")
+    if scope == "plugin" and configured and event.get("hook_event_name") == "PostToolUse" and event.get("tool_name") in SPAWN_TOOLS:
+        # On an internal error the role is not trustworthy. Redact even a worker
+        # result instead of accidentally leaking an advisor's private report.
+        return output("PostToolUse", updatedToolOutput={"content": [{"type": "text", "text":
+            "Assay could not validate this agent return. Its contents were withheld; diagnose the routing guard before retrying."}]})
     if scope == "plugin" and configured and event.get("hook_event_name") == "SessionStart":
         return output("SessionStart", additionalContext="Assay routing configuration is invalid or unavailable. Registered delegation stays blocked until the routing doctor passes.")
     return {}

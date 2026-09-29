@@ -83,14 +83,16 @@ def settings(config: dict | None = None) -> dict:
     raw = config.get("pipeline", {})
     keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "profiles", "variants", "baseline",
             "approved_choices", "profile_capabilities", "unrouted_agents", "agent_templates",
-            "inventory_file", "inventory_ttl_hours"}
+            "inventory_file", "inventory_ttl_hours", "host"}
     if not isinstance(raw, dict) or set(raw) - keys:
         raise EvidenceError("unknown_pipeline_configuration")
     value = {"mode": "evidence-only", "state_dir": None, "agents_dir": None,
              "mcp_server": "assay-benchmark-routing", "advisor_route": None, "profiles": [],
              "variants": [], "baseline": None, "approved_choices": {}, "profile_capabilities": {},
              "unrouted_agents": {}, "agent_templates": {}, "inventory_file": None,
-             "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, **copy.deepcopy(raw)}
+             "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, "host": None, **copy.deepcopy(raw)}
+    from .client_capabilities import host_settings
+    value["host"] = host_settings(value["host"])
     if not isinstance(value["mode"], str) or value["mode"] not in MODES:
         raise EvidenceError("invalid_pipeline_mode")
     if not isinstance(value["mcp_server"], str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value["mcp_server"]):
@@ -236,17 +238,7 @@ def plain_path(path: Path) -> Path:
     return path
 
 
-def runtime_overrides(expected: dict, environment: dict | None = None) -> dict:
-    """Inspect, never change, the host process environment. Unknown stays unknown."""
-    env = os.environ if environment is None else environment
-    problems = []
-    effort = env.get("CLAUDE_CODE_EFFORT_LEVEL")
-    if effort and effort != expected["effort"]:
-        problems.append("effort_environment_override")
-    # Older clients applied SUBAGENT_MODEL more broadly. Conservatively refuse
-    # a conflicting value instead of guessing which precedence the host uses.
-    model = env.get("CLAUDE_CODE_SUBAGENT_MODEL")
-    force = env.get("CLAUDE_CODE_SUBAGENT_MODEL_FORCE", "").lower() in {"1", "true", "yes"}
-    if (model and model != expected["model"]) or (force and not model):
-        problems.append("model_environment_override")
-    return {"conflicts": problems, "observed_model": None, "observed_effort": None}
+def runtime_overrides(expected: dict, environment: dict | None = None, *, host=None) -> dict:
+    """Inspect the environment under a declared client contract; never mutate it."""
+    from .client_capabilities import claude_overrides
+    return claude_overrides(expected, os.environ if environment is None else environment, host)
