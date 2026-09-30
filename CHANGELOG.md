@@ -6,6 +6,26 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.11.0](https://github.com/Muratovnik/assay/compare/v0.10.0...v0.11.0) (2026-09-30)
+
+Assay now gives bounded skill hints for the current prompt and client, and
+preserves required routing decisions when optional hints are unavailable.
+UI delivery and comment cleanup retain the evidence needed to verify a change.
+Existing evidence-only routing configurations keep their behavior.
+
+### ⚠ BREAKING CHANGES
+
+* **route-subagents:** private advisor launches in Claude required mode now need `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` in the environment that starts Claude; without it the guard refuses the launch, because background completion notifications can expose the private advisor result; this native switch disables all background tasks for that Claude session, including worker and Bash tasks; Assay does not change client settings automatically ([9ef9a84](https://github.com/Muratovnik/assay/commit/9ef9a84f0036b571724cb7560dcaf8e683c64c15))
+
+### Features
+
+* **hooks:** add client-specific manifests, prompt hints, bounded optional session state, diagnostics and read-only routing preflight; reintroduce skill reminders after resume and compaction, omit quoted examples and code from prompt matching, and keep basic reminders and required routing guards available without the optional parser ([9ef9a84](https://github.com/Muratovnik/assay/commit/9ef9a84f0036b571724cb7560dcaf8e683c64c15))
+* **skills:** preserve UI evidence through implementation and handoff, and keep unresolved feedback and essential evidence when cleaning up comments ([2394b5a](https://github.com/Muratovnik/assay/commit/2394b5a05afaf33f07920929a374d2dd29faa237))
+
+### Bug Fixes
+
+* **route-subagents:** replace private Claude advisor returns with schema-valid neutral results, preflight every selectable advisor route against its generated definition, and refuse protected launches on unsupported required-mode adapters ([9ef9a84](https://github.com/Muratovnik/assay/commit/9ef9a84f0036b571724cb7560dcaf8e683c64c15))
+
 ## [0.10.0](https://github.com/Muratovnik/assay/compare/v0.9.0...v0.10.0) (2026-09-29)
 
 Required routing now passes the routed model in the Agent call and generates
