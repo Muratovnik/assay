@@ -23,13 +23,31 @@ is a visible owner decision, not an agent's recovery action.
 
 The implemented host adapter is Claude Code. Codex and other hosts report
 `required_routing_host_adapter_unavailable` from the MCP server, and the hook
-leaves their launches alone; familiar tool names do not make Claude's hook
+runtime denies protected Codex spawns and routing operations when required mode
+is selected. Familiar tool names do not make Claude's hook
 payloads portable. What a Codex adapter must establish first is recorded in the
 [Codex mechanics](codex-routing.md#required-mode-adapter-requirements). The optional hosted Jev backend remains available for the
 evidence-only diagnostic workflow and its consent, not as a hidden required-mode
 or native-advisor fallback.
 
 ## Configure once, outside task execution
+
+For private native advisors, start Claude with
+`CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`. The guard refuses an advisor launch
+without that setting before releasing its private input. Claude's
+[native switch](https://code.claude.com/docs/en/env-vars) disables background
+launches, auto-backgrounding and Ctrl+B for the whole session, including worker
+and Bash tasks. Assay does not set it or change client configuration. Foreground
+advisor input alone is insufficient: background completion notifications can
+carry the raw report outside the PostToolUse replacement. Sessions that need
+background workers can use approved routes without an advisor, or explicitly
+choose evidence-only mode without the private-return guarantee.
+
+Advisor replacements preserve the mandatory Claude `AgentOutput` fields and
+bounded numeric usage. Prompts, citations, report fields and output-file paths are
+removed. The guard-failure replacement uses the same native schema; a malformed
+or unknown return receives an unverified identity and neutral telemetry, which
+must not be treated as execution evidence.
 
 Keep the old configuration bytes, MCP registration/environment, link vector and
 revision outside managed roots. Migration creates a new file exclusively:

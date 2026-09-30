@@ -183,6 +183,36 @@ class HookCommandTests(unittest.TestCase):
             self.assertEqual(raw, path.read_text(encoding="utf-8"))
             return code, stdout.getvalue(), stderr.getvalue()
 
+    def test_session_restore_keeps_baseline_with_or_without_a_matching_prompt(self):
+        for client in ("claude", "codex"):
+            for source in ("resume", "compact"):
+                for prompt, suggested in (("Explain this text", False), ("Implement the change", True)):
+                    with self.subTest(client=client, source=source, prompt=prompt), tempfile.TemporaryDirectory() as temporary:
+                        env = {"PLUGIN_DATA": temporary}
+                        base = {"session_id": "s", "cwd": "work", "transcript_path": "parent"}
+                        self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "prompt": prompt}, client, env)
+                        result, error = self.cli.process({**base, "hook_event_name": "SessionStart", "source": source}, client, env)
+                        self.assertIsNone(error)
+                        context = result["hookSpecificOutput"]["additionalContext"]
+                        self.assertIn("Assay is installed.", context)
+                        self.assertIn("route-subagents", context)
+                        self.assertEqual(suggested, "Previous request suggested code-change" in context)
+
+    def test_session_compact_restore_consumes_pending_hint_once(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            env = {"PLUGIN_DATA": temporary}
+            base = {"session_id": "s", "cwd": "work", "transcript_path": "parent"}
+            self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "prompt": "Implement the change"}, "codex", env)
+            self.cli.process({**base, "hook_event_name": "PostCompact"}, "codex", env)
+            result, error = self.cli.process({**base, "hook_event_name": "SessionStart", "source": "compact"}, "codex", env)
+            self.assertIsNone(error)
+            self.assertIn("Previous request suggested code-change", result["hookSpecificOutput"]["additionalContext"])
+            result, error = self.cli.process({**base, "hook_event_name": "PreToolUse", "tool_name": "spawn_agent",
+                                             "tool_use_id": "next"}, "codex", env)
+            self.assertIsNone(error)
+            self.assertIn("route-subagents", result["hookSpecificOutput"]["additionalContext"])
+            self.assertNotIn("Previous request", result["hookSpecificOutput"]["additionalContext"])
+
     def test_optional_rule_failure_preserves_session_and_launch_reminders(self):
         for event in (
             {"hook_event_name": "SessionStart", "source": "startup"},

@@ -24,6 +24,7 @@ from route_evidence.pipeline_store import PipelineStore
 from route_evidence.routing import build_context
 from route_evidence.service import RoutingService, load_config
 from routing_hook import handle
+from claude_output_fixture import assert_agent_output, completed_output
 
 AVAILABLE = [{"model": "worker-alpha", "efforts": ["low", "high"]},
              {"model": "worker-beta", "efforts": ["medium"]}]
@@ -71,7 +72,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         event = {"hook_event_name": name, "session_id": session, **fields}
         if agent is not None:
             event["agent_id"] = agent
-        return handle(event, self.config, scope=scope, clock=lambda: self.now, environment={})
+        return handle(event, self.config, scope=scope, clock=lambda: self.now,
+                      environment={"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"})
 
     def rpc(self, tool, arguments, *, agent=None, session="session-a", **fields):
         result = self.event("PreToolUse", agent=agent, session=session,
@@ -527,15 +529,27 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
-        raw = {"status": "completed", "agentId": "advisor-a", "resolvedModel": ROUTE["model"],
-               "modelsUsed": [ROUTE["model"]], "totalTokens": 42,
-               "content": [{"type": "text", "text": "RAW_BENCHMARK_SENTINEL"}]}
+        raw = completed_output(resolvedModel=ROUTE["model"], modelsUsed=[ROUTE["model"]])
         event = self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response=raw)
         safe = event["hookSpecificOutput"]["updatedToolOutput"]
-        self.assertEqual(set(raw), set(safe))
+        assert_agent_output(self, safe)
         self.assertEqual(safe["totalTokens"], 42)
-        self.assertNotIn("RAW_BENCHMARK_SENTINEL", json.dumps(safe))
+        self.assertNotIn("PRIVATE_", json.dumps(safe))
+        self.assertEqual(raw["usage"]["input_tokens"], safe["usage"]["input_tokens"])
         self.assertEqual(self.decision(prepared["decision_id"])["advisor_provenance"]["observed_model"], ROUTE["model"])
+
+    async def test_private_advisor_requires_native_background_protection_before_reserving(self):
+        prepared = await self.prepare()
+        launch = prepared["handoff"]
+        event = {"hook_event_name": "PreToolUse", "session_id": "session-a", "tool_name": "Agent",
+                 "tool_use_id": "call-a", "tool_input": launch["input"]}
+        for environment in ({}, {"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "0"}):
+            result = handle(event, self.config, clock=lambda: self.now, environment=environment)
+            self.assertEqual("deny", result["hookSpecificOutput"]["permissionDecision"])
+            self.assertNotIn("updatedInput", result["hookSpecificOutput"])
+            with self.pipeline.store.transaction() as tx:
+                self.assertEqual("prepared", tx.get("attempt", launch["attempt_id"])["state"])
+        self.assertFalse(self.dispatched(launch, "call-a")["run_in_background"])
 
     async def test_advisor_handback_is_status_only_and_no_submission_is_forged(self):
         prepared = await self.prepare()
@@ -737,7 +751,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
             "status":"completed","agentId":"advisor-a","report":{"text":"PRIVATE_SENTINEL"},
             "error":"PRIVATE_SENTINEL", "summary":"PRIVATE_SENTINEL"})
         safe=event["hookSpecificOutput"]["updatedToolOutput"]
-        self.assertEqual({"content","agentId","status"},set(safe))
+        assert_agent_output(self, safe)
         self.assertNotIn("PRIVATE_SENTINEL",json.dumps(safe))
 
     async def test_later_return_does_not_clear_prior_model_switch(self):
@@ -977,7 +991,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
                     if expected is None:
                         self.assertEqual(reply, {})
                     elif expected == "redact":
-                        self.assertIn("updatedToolOutput", reply["hookSpecificOutput"])
+                        assert_agent_output(self, reply["hookSpecificOutput"]["updatedToolOutput"])
                     else:
                         self.assertEqual(reply["hookSpecificOutput"]["permissionDecision"], expected)
 

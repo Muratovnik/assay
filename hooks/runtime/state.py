@@ -64,7 +64,13 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
         elif name == "SessionStart" and outcome is None and event.get("source") in {"resume", "compact"}:
             previous = tx.get("hook-context", key)
             if previous and previous["fingerprint"] == fingerprint:
-                decision = {"rule_ids": previous["rules"], "context": context(previous["rules"], rules, restored=True)}
+                restored = context(previous["rules"], rules, restored=True)
+                decision = {"rule_ids": previous["rules"], "context":
+                            "\n".join(part for part in (decision["context"], restored) if part)}
+                # SessionStart(compact) can deliver the hint before the next
+                # tool. Do not replay it again through the PostCompact fallback.
+                if previous.get("pending_restore"):
+                    _put(tx, "hook-context", key, {**previous, "pending_restore": False}, now)
         elif name == "SessionStart" and event.get("source") in {"startup", "clear", "fork"}:
             tx.delete("hook-context", key)
         # A guard response takes precedence over context. Do not consume an

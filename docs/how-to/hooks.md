@@ -179,9 +179,15 @@ recomputed rather than copied to the wrong packet. Concurrent unbound advisors
 of one definition are refused because private input needs an unambiguous identity.
 
 Advisor handbacks accept only status fields. Unknown successful output envelopes
-are rebuilt from a minimal decision reference plus bounded native telemetry, never
-arbitrary report/error/summary fields. On an internal return-processing failure,
-protected successful Agent output is withheld rather than accidentally forwarded.
+are rebuilt as a valid native `AgentOutput` with a decision reference and bounded
+numeric telemetry, never arbitrary report/error/summary fields. Mandatory prompt
+and usage fields remain present with sanitized values, so the client accepts the
+replacement. Internal return-processing failures use the same schema.
+Private advisor launches require `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` in the
+environment that starts Claude. Otherwise the guard denies the launch: background
+completion notifications bypass this replacement. See the
+[required-routing setup](../../skills/route-subagents/references/required-routing.md#configure-once-outside-task-execution)
+for the session-wide effect and alternatives.
 Failure notifications, missing hooks and input too large to parse are not a proven
 redaction boundary. Hooks are workflow checks, not isolation against a hostile
 client/process. PostToolUse cannot undo work already performed.

@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import copy
 import json
-import re
-import math
 import os
 from pathlib import Path
 import secrets
@@ -23,6 +21,7 @@ import time
 # only this installed script's sibling package, not files from the user's cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from route_evidence.claude_agents import CLAUDE_MODEL_ALIASES, check_record, observe_alias, resolve_variant, unrouted_model
+from route_evidence.claude_output import redact_agent_output
 from route_evidence.core import EvidenceError, digest
 from route_evidence.pipeline import RECEIPT_SECONDS, arguments
 from route_evidence.pipeline_config import ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings, runtime_overrides
@@ -273,28 +272,8 @@ def _observe_return(tx, event, session, config_hash, name, clock):
             _observe_model(tx, dispatched, response, clock)
     _save(tx, session, dispatched, clock)
     if dispatched["role"] == "advisor" and name == "PostToolUse" and tool in SPAWN_TOOLS:
-        # Unknown output layouts must not create an unfiltered report
-        # channel. Rebuild the documented text envelope; copy only numeric
-        # telemetry, never arbitrary nested fields or error messages.
-        safe = {"content": [{"type": "text", "text": json.dumps({
-            "decision_id": dispatched["decision_id"], "status": "read_registered_decision"})}]}
-        if dispatched.get("agent_id"):
-            safe["agentId"] = dispatched["agent_id"]
-        if isinstance(response, dict):
-            if response.get("status") in {"completed", "async_launched"}:
-                safe["status"] = response["status"]
-            # Preserve bounded native routing telemetry, never arbitrary text
-            # or nested report/error fields from an advisor.
-            model_token = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}\Z")
-            model = response.get("resolvedModel")
-            if isinstance(model, str) and model_token.fullmatch(model):
-                safe["resolvedModel"] = model
-            used = response.get("modelsUsed")
-            if isinstance(used, list) and len(used) <= 16 and all(isinstance(v, str) and model_token.fullmatch(v) for v in used):
-                safe["modelsUsed"] = used
-            for key in ("totalDurationMs", "totalTokens", "totalToolUseCount"):
-                if type(response.get(key)) in (int, float) and 0 <= response[key] < 10**15 and math.isfinite(response[key]):
-                    safe[key] = response[key]
+        safe = redact_agent_output(response, json.dumps({
+            "decision_id": dispatched["decision_id"], "status": "read_registered_decision"}))
         return output(name, updatedToolOutput=safe)
     return {}
 
@@ -319,6 +298,13 @@ def _dispatch(tx, event, session, config_hash, mode, clock, environment):
     if len(candidates) != 1:
         return deny("no valid registered launch matches these exact arguments; call authorize_routing_launch")
     dispatched = candidates[0]
+    if dispatched["role"] == "advisor":
+        effective = os.environ if environment is None else environment
+        # Background completion notifications bypass PostToolUse replacement.
+        # Require the native switch that also disables Ctrl+B/auto-backgrounding
+        # before exposing private advisor input; do not change the host's env.
+        if effective.get("CLAUDE_CODE_DISABLE_BACKGROUND_TASKS") != "1":
+            return deny("private advisors require CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1 in the environment that starts Claude; restart it with background tasks disabled")
     if dispatched["role"] == "advisor" and any(
             r["attempt_id"] != dispatched["attempt_id"] and r["session_id"] == session
             and r["config_hash"] == config_hash and r["variant"]["name"] == dispatched["variant"]["name"]
@@ -481,8 +467,8 @@ def failure(event, scope, configured):
     if scope == "plugin" and configured and event.get("hook_event_name") == "PostToolUse" and event.get("tool_name") in SPAWN_TOOLS:
         # On an internal error the role is not trustworthy. Redact even a worker
         # result instead of accidentally leaking an advisor's private report.
-        return output("PostToolUse", updatedToolOutput={"content": [{"type": "text", "text":
-            "Assay could not validate this agent return. Its contents were withheld; diagnose the routing guard before retrying."}]})
+        return output("PostToolUse", updatedToolOutput=redact_agent_output(event.get("tool_response"),
+            "Assay could not validate this agent return. Its contents were withheld; diagnose the routing guard before retrying."))
     if scope == "plugin" and configured and event.get("hook_event_name") == "SessionStart":
         return output("SessionStart", additionalContext="Assay routing configuration is invalid or unavailable. Registered delegation stays blocked until the routing doctor passes.")
     return {}
