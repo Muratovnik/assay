@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "ASC01",
+      "group": "AS-CODE-value",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether the comment adds information beyond the nearby operation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC02",
+      "group": "AS-CODE-value",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether the comment adds information beyond the nearby operation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC03",
+      "group": "AS-CODE-workaround",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the continued applicability of a documented workaround, not the presence of an issue number or a long explanation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC04",
+      "group": "AS-CODE-workaround",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the continued applicability of a documented workaround, not the presence of an issue number or a long explanation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC05",
+      "group": "AS-CODE-semantics",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether changing a machine-active comment is authorized; comment-cleanup alone is not such authority.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC06",
+      "group": "AS-CODE-semantics",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether changing a machine-active comment is authorized; comment-cleanup alone is not such authority.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC07",
+      "group": "AS-CODE-docstrings",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the authorized observable text contract rather than assuming every docstring is either inert or untouchable.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASC08",
+      "group": "AS-CODE-docstrings",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary the authorized observable text contract rather than assuming every docstring is either inert or untouchable.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "ASCD01",
+      "group": "code-change-ASCD01",
+      "purpose": "routine",
+      "source": "Synthetic collection-level discovery fixture, 2026-09-30.",
+      "rationale": "code-change -> comments-and-docstrings; bounded editing, not a system-wide architecture workflow.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASCD02",
+      "group": "code-change-ASCD02",
+      "purpose": "should-not-fire",
+      "source": "Synthetic collection-level discovery fixture, 2026-09-30.",
+      "rationale": "No code-change; product documentation belongs to technical-writing.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASCD03",
+      "group": "code-change-ASCD03",
+      "purpose": "routine",
+      "source": "Synthetic collection-level discovery fixture, 2026-09-30.",
+      "rationale": "independent-audit -> code-quality -> comments-and-docstrings; retain read-only authority.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "ASCD04",
+      "group": "code-change-ASCD04",
+      "purpose": "should-not-fire",
+      "source": "Synthetic collection-level discovery fixture, 2026-09-30.",
+      "rationale": "No code-change; ordinary prose belongs to text-writing.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

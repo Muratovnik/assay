@@ -1,6 +1,7 @@
 # Content and recovery
 
-Use when choosing names, explanatory copy, status vocabulary or error handling.
+Use when choosing names, explanatory copy, status vocabulary or error handling,
+or when a visual cue, number, comparison or activity display implies a fact.
 
 ## Let the control carry its meaning
 
@@ -84,6 +85,43 @@ reason and supported next step in the working context. Verify that completing
 that step can reach the result; use the data-lifecycle check for the actual
 calculation path. A clearer message alone does not repair a permanently blocked
 calculation. Do not invent a repair action when no user action can resolve it.
+
+## Verify what the presentation implies
+
+A status dot, trend arrow, badge, event stream or chart can assert a state,
+comparison or event without stating it in a sentence. Identify what the audience
+can reasonably infer in this context and connect material claims to their
+available basis: source, object/population, measurement or event time and relevant
+freshness. A connected indicator must mean what the product contract says was
+checked, not merely that the screen mounted. Decorative animation must not pose
+as live activity. Keep this check scoped to the affected display; no new global
+claims register or analytics backend is required.
+
+For a comparison, establish the measure, unit, population, period and baseline.
+Do not invent a growth percentage when a baseline is absent, or substitute zero
+for unknown data. A zero baseline needs an appropriate non-percentage treatment;
+it is not evidence of zero growth. Explain the basis where it changes the user's
+interpretation, without putting a methodology paragraph on every card.
+
+- Failure: success styling is fixed while the operation is pending or failed;
+  generated events appear to be actual account activity; a trend claims change
+  against a period the source does not contain.
+- Decision: retain a supported claim, correct an evidenced mismatch, and mark an
+  unavailable basis as unverified rather than declaring the display fabricated.
+  Do not delete existing content merely because a screenshot cannot prove it.
+  For a new design, use known facts or distinguish illustrative content instead
+  of filling evidence gaps with invented achievements.
+- Valid control: a clearly identified demo, simulation or prototype may use
+  synthetic data. Keep that context in any independently delivered screen or
+  export where its loss would mislead; a sufficient shared label need not be
+  repeated on every cell. Ordinary loading skeletons need no sample-data label
+  when they do not imply a measured result.
+- Check: trace a representative claim to its actual source and compare the
+  rendered and accessible meaning during success, pending, unavailable and stale
+  states relevant to the change. Include a genuine supported claim and a clearly
+  identified simulation as controls. Source inspection, supplied facts and an
+  executed transition are different evidence; a static artifact cannot prove
+  runtime propagation. Use [Data lifecycle](data-lifecycle.md) for that check.
 
 ## Announce meaningful updates
 

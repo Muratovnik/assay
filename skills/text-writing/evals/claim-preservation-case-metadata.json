@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "AST01",
+      "group": "AS-TEXT-effect",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a measured benefit is supported; specificity must not manufacture evidence.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "AST02",
+      "group": "AS-TEXT-effect",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether a measured benefit is supported; specificity must not manufacture evidence.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "AST03",
+      "group": "AS-TEXT-pricing",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether the specific plan terms exist in the supplied source.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "AST04",
+      "group": "AS-TEXT-pricing",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary whether the specific plan terms exist in the supplied source.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "AST05",
+      "group": "AS-TEXT-style",
+      "purpose": "regression",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary a real preservation problem, not the presence of a dash or familiar expression.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "AST06",
+      "group": "AS-TEXT-style",
+      "purpose": "routine",
+      "source": "Synthetic anti-slop transfer fixture, 2026-09-30; not a captured product incident.",
+      "rationale": "Vary a real preservation problem, not the presence of a dash or familiar expression.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

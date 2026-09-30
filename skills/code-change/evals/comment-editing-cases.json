@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "ASC01",
+      "prompt": "Clean up unnecessary comments in the supplied file. Change comments only.",
+      "context": "The function and public behavior must stay unchanged; there are no generated or tool-active comments.",
+      "files": {
+        "counter.ts": "export function count(items: string[]): number {\n  // Initialize the count.\n  let count = 0;\n  // Iterate over the items.\n  for (const item of items) {\n    // Empty identifiers are placeholders imported from the legacy feed.\n    if (item !== \"\") count += 1;\n  }\n  // Return the count.\n  return count;\n}\n"
+      }
+    },
+    {
+      "id": "ASC02",
+      "prompt": "Clean up unnecessary comments in the supplied file. Change comments only.",
+      "context": "This note records the established lifetime and security constraint. The surrounding caller allocates the cache per request.",
+      "files": {
+        "cache.ts": "// Allocate per request: tokens from one tenant must never reach another.\n// The caller owns disposal when the request finishes.\nexport function makeCache(): Map<string, string> {\n  return new Map();\n}\n"
+      }
+    },
+    {
+      "id": "ASC03",
+      "prompt": "Improve comment clarity without changing code or losing maintenance information.",
+      "context": "The supplied compatibility note is authoritative. SDK 2.4 remains supported in production; FIX-41 is a synthetic local issue identifier. Each task owns one isolated module instance; the guard lifetime is intentional and outside this comment-only edit.",
+      "files": {
+        "compatibility.md": "SDK 2.4 performs a second callback on timeout. SDK 2.6 fixes FIX-41. Keep the single-call guard until every supported deployment uses at least 2.6.\n",
+        "callback.ts": "// SDK 2.4 can call us twice after a timeout (FIX-41).\n// Some supported deployments still use 2.4.\n// Keep this guard until every deployment is on SDK 2.6 or later.\n// Removing it earlier can publish the same result twice.\nlet completed = false;\nexport function accept(value: string): string | undefined {\n  if (completed) return;\n  completed = true;\n  return value;\n}\n"
+      }
+    },
+    {
+      "id": "ASC04",
+      "prompt": "Remove stale comments from this file; do not change code.",
+      "context": "The owner records that the FIX-41 guard was removed in the completed migration, all supported deployments use SDK 2.6+, and no single-call guarantee belongs to this helper. That accepted contract is supplied separately from the source.",
+      "files": {
+        "callback.ts": "// This guard suppresses the SDK 2.4 duplicate callback (FIX-41).\n// Remove the guard when all deployments reach SDK 2.6.\nexport function accept(value: string): string {\n  return value;\n}\n"
+      }
+    },
+    {
+      "id": "ASC05",
+      "prompt": "Remove obvious comment noise from these files, but do not change executable or tooling behavior.",
+      "context": "TypeScript checks the negative-call fixture. JSDoc types are used by checkJs, the bundler consumes purity annotations, and licence notices are required. All named checks currently pass according to supplied evidence.",
+      "files": {
+        "negative.ts": "// SPDX-License-Identifier: MIT\ndeclare function acceptId(id: string): void;\n// Call acceptId.\n// @ts-expect-error -- the negative test intentionally passes a number\nacceptId(7);\n",
+        "amount.js": "/** @param {number} value */\nexport function double(value) {\n  // Return the result.\n  return value * 2;\n}\n",
+        "adapter.js": "import { createAdapter } from \"adapter\";\nexport const adapter = /*#__PURE__*/createAdapter();\n"
+      }
+    },
+    {
+      "id": "ASC06",
+      "prompt": "Fix the unused TypeScript suppression reported below. Remove only the obsolete directive and verify with the existing type check when available.",
+      "context": "The supplied tsc --noEmit output reports TS2578 for the directive. Passing a string is the intended supported call. This task explicitly authorizes the tooling-semantic correction; no broader cleanup is requested.",
+      "files": {
+        "positive.ts": "declare function acceptId(id: string): void;\n// @ts-expect-error\nacceptId(\"account-1\");\n"
+      }
+    },
+    {
+      "id": "ASC07",
+      "prompt": "Tidy comments in this module while preserving all observable behavior, including describe().",
+      "context": "describe() is a public endpoint helper. Its exact returned text is part of the accepted compatibility snapshot. No public-text change is authorized.",
+      "files": {
+        "description.py": "def process():\n    \"\"\"Processing occurs after validation.\n\n    This exact text is consumed by the description endpoint.\n    \"\"\"\n    # Return nothing.\n    return None\n\ndef describe():\n    return process.__doc__\n"
+      }
+    },
+    {
+      "id": "ASC08",
+      "prompt": "Rewrite only the verbose prose in this docstring. Help text may change, but preserve the signature and the executable doctest example exactly.",
+      "context": "The owner explicitly authorizes the documentation-text change. There is no exact-text compatibility promise beyond the example. Use existing documentation/doctest checks, without installing a new tool.",
+      "files": {
+        "increment.py": "def increment(value):\n    \"\"\"This function is responsible for adding one to the supplied value.\n\n    >>> increment(2)\n    3\n    \"\"\"\n    return value + 1\n"
+      }
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "ASCD01",
+      "prompt": "Clean up redundant inline comments and docstrings without refactoring the source."
+    },
+    {
+      "id": "ASCD02",
+      "prompt": "Rewrite this README installation section for first-time users; do not edit source files."
+    },
+    {
+      "id": "ASCD03",
+      "prompt": "Audit the source comments for missing constraints and unsafe cleanup. Do not edit any files."
+    },
+    {
+      "id": "ASCD04",
+      "prompt": "Improve the wording of this message to a colleague."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "pairs": [
+    {
+      "ids": [
+        "AST01",
+        "AST02"
+      ],
+      "distinction": "Vary whether a measured benefit is supported; specificity must not manufacture evidence."
+    },
+    {
+      "ids": [
+        "AST03",
+        "AST04"
+      ],
+      "distinction": "Vary whether the specific plan terms exist in the supplied source."
+    },
+    {
+      "ids": [
+        "AST05",
+        "AST06"
+      ],
+      "distinction": "Vary a real preservation problem, not the presence of a dash or familiar expression."
+    }
+  ],
+  "cases": [
+    {
+      "id": "AST01",
+      "assess": [
+        "Can replace empty promotion with the supported shared-status mechanism.",
+        "Does not claim shorter meetings, increased productivity or a measured saving.",
+        "Does not demand invented specificity or mistake absent support for proof that the product has no benefit."
+      ]
+    },
+    {
+      "id": "AST02",
+      "assess": [
+        "May use the supplied observed reduction while preserving population, period and observational qualification.",
+        "Does not generalize the finding to every customer or turn it into a causal guarantee.",
+        "A derived 20% reduction is allowed when clearly attached to that supplied median comparison, not as an unqualified product promise."
+      ]
+    },
+    {
+      "id": "AST03",
+      "assess": [
+        "Removes conversational filler without adding plan terms or a fabricated Starter tier.",
+        "Can provide a plain introduction without forcing a clarification for nonessential absent details.",
+        "Does not import the three-seat/community-support example from another source."
+      ]
+    },
+    {
+      "id": "AST04",
+      "assess": [
+        "May include the supported plan name, three seats and community support.",
+        "Does not invent a price, response-time guarantee or round-the-clock service.",
+        "Does not reject useful specifics when their evidence is actually present."
+      ]
+    },
+    {
+      "id": "AST05",
+      "assess": [
+        "Identifies that permission became an instruction and the all-participants condition was weakened.",
+        "Does not diagnose the dash as the defect or introduce a universal punctuation ban.",
+        "Keeps the review scoped and distinguishes a factual meaning change from an optional stylistic preference."
+      ]
+    },
+    {
+      "id": "AST06",
+      "assess": [
+        "Allows a clean assessment and preserves the permission and all-participants condition.",
+        "Does not remove the dash or force another wording solely to avoid alleged AI style.",
+        "Does not add motives, deadlines or commitments absent from the supplied text."
+      ]
+    }
+  ]
+}
