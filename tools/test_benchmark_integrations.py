@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import unittest
+from claude_output_fixture import assert_agent_output, completed_output
 from pathlib import Path
 
 from test_benchmark_router import SCRIPTS, request
@@ -284,7 +285,8 @@ build_server(service).run(transport="stdio")
             config = load_config(config_path)
             generate(settings(config), {})
             def event(name, **fields):
-                return handle({"hook_event_name": name, "session_id": "wire-session", **fields}, config, environment={})
+                return handle({"hook_event_name": name, "session_id": "wire-session", **fields}, config,
+                              environment={"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"})
             def attested(tool, arguments, **fields):
                 return event("PreToolUse", tool_name="mcp__assay-benchmark-routing__" + tool,
                     tool_input=arguments, **fields)["hookSpecificOutput"]["updatedInput"]
@@ -335,10 +337,10 @@ build_server(service).run(transport="stdio")
                 completed = await client.call_tool("complete_routing", attested("complete_routing", arguments, agent_id="wire-advisor"))
                 self.assertFalse(completed.is_error)
                 self.assertEqual(completed.structured_content["status"], "submitted")
-                sanitized = event("PostToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_response={
-                    "status": "completed", "agentId": "wire-advisor", "resolvedModel": "economy-b",
-                    "content": [{"type": "text", "text": "PRIVATE_BENCHMARK_ECHO"}]})
-                self.assertNotIn("PRIVATE_BENCHMARK_ECHO", json.dumps(sanitized))
+                sanitized = event("PostToolUse", tool_name="Agent", tool_use_id="advisor-call",
+                    tool_response=completed_output(agentId="wire-advisor", resolvedModel="economy-b"))
+                assert_agent_output(self, sanitized["hookSpecificOutput"]["updatedToolOutput"])
+                self.assertNotIn("PRIVATE_", json.dumps(sanitized))
                 result = await client.call_tool("get_routing_decision", attested("get_routing_decision", {"decision_id": value["decision_id"]}))
                 self.assertEqual(result.structured_content["status"], "decided")
                 self.assertEqual(result.structured_content["advisor_provenance"]["observed_model"], "economy-b")

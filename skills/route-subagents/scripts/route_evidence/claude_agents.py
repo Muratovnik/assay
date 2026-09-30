@@ -154,7 +154,8 @@ def resolve_variant(config: dict, profile: str, route: dict, *, environment: dic
     if len(matches) != 1:
         raise EvidenceError("variant_not_generated")
     record = check_record(directory, matches[0])
-    if runtime_overrides(route, environment)["conflicts"]:
+    overrides = runtime_overrides(route, environment, host=config.get("host"))
+    if overrides["conflicts"] or overrides["unverified"]:
         raise EvidenceError("runtime_route_override")
     return record
 
@@ -239,6 +240,10 @@ def route_checks(raw_config: dict) -> dict:
         try:
             entry["per_call_model"] = launch_model(resolve_variant(config, profile, route), route)
             entry["definition"] = "ready"
+            entry["configured"] = True
+            entry["discovery"] = "unverified"
+            entry["observed_model"] = None
+            entry["observed_effort"] = None
         except EvidenceError as exc:
             entry["definition"] = str(exc)
             problems.append({"code": str(exc), "route": label})
@@ -290,6 +295,8 @@ def generate(config: dict, templates: dict[str, bytes], *, efforts=(), prune=Fal
     if not config["agents_dir"]:
         raise EvidenceError("claude_agents_dir_required")
     directory = plain_path(Path(config["agents_dir"]))
+    if config.get("host", {}).get("agent_scope") == "plugin":
+        raise EvidenceError("routed_definitions_require_user_or_project_scope")
     templates = {**internal_templates(), **templates}
     specs = definition_specs(config, efforts)
     if not specs:

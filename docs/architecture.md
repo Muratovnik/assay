@@ -151,3 +151,12 @@ These prove source structure, plan determinism, guarded install and uninstall
 semantics, and adapter capabilities. They cannot prove that a client discovered a
 skill or that a sandbox was effective; that needs a run in a fresh client, and the
 evaluation notes say what such a run does and does not establish.
+
+## Plugin hook ownership
+
+`hooks/runtime/` owns bounded prompt suggestions, client event normalization and
+optional hook state; `route-subagents` still owns all mandatory routing decisions,
+client capability facts and the existing transactional store. Declarative
+`hooks/activation-rules.toml` references catalogue IDs, not duplicate methods.
+`tools/assay.py render` generates both native manifests with one command per event.
+See [the hook contract](how-to/hooks.md) for boundaries and evidence limitations.

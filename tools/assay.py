@@ -693,6 +693,17 @@ def check(root: Path = ROOT) -> list[str]:
     bridge = root / "CLAUDE.md"
     if bridge.is_file() and bridge.read_bytes() != b"@AGENTS.md\n":
         problems.append("CLAUDE.md: expected the one-line @AGENTS.md bridge")
+    rule_path = root / "hooks/activation-rules.toml"
+    if rule_path.exists():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("assay_activation_check", ROOT / "hooks/runtime/activation.py")
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        try:
+            module.load_rules(root)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            problems.append(f"hooks/activation-rules.toml: {error}")
     problems.extend(render_drift(root))
     return sorted(set(problems))
 
@@ -785,6 +796,7 @@ def codex_plugin(version: str) -> bytes:
             "description": f"{SUMMARY}.",
             "author": AUTHOR,
             "skills": "./skills/",
+            "hooks": "./hooks/codex.json",
             "interface": {
                 "displayName": "Assay",
                 "shortDescription": SUMMARY,
@@ -850,37 +862,40 @@ ROUTING_OPERATIONS = frozenset({
 })
 
 
-def reminder_hooks() -> bytes:
-    # Both clients expose CLAUDE_PLUGIN_ROOT. Resolve it inside Python, not the
-    # shell: spaces and shell metacharacters in an install path stay data.
+def reminder_hooks(client: str = "claude") -> bytes:
+    # Resolve roots in Python, never interpolate installation paths in a shell.
+    # Native manifests contain only supported fields. One command owns the
+    # decision; the runtime composes hints and the existing routing guard.
+    if client not in {"claude", "codex"}:
+        raise ValueError("unsupported hook client")
+    primary, fallback = (("CLAUDE_PLUGIN_ROOT", "PLUGIN_ROOT") if client == "claude" else ("PLUGIN_ROOT", "CLAUDE_PLUGIN_ROOT"))
     command = (
-        'python -I -B -c "import os, runpy; '
-        "runpy.run_path(os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], "
-        "'skills/route-subagents/scripts/skill_reminder.py'), "
-        "run_name='__main__')\""
+        'python -I -B -c "import os, runpy, sys; '
+        f"sys.argv=['assay-hooks','--client','{client}']; "
+        f"runpy.run_path(os.path.join(os.environ.get('{primary}') "
+        f"or os.environ['{fallback}'], 'hooks/runtime/cli.py'), run_name='__main__')\""
     )
-    guard = command.replace("skill_reminder.py", "routing_hook.py")
-    guard_hook = {"type": "command", "command": guard, "timeout": 5}
-    # The guard sees only what it gates: launches, advisor hand-backs, routing
-    # MCP calls and routed definitions. Ordinary tools start no process; routed
-    # workers check their own tools through their generated definitions.
+    hook = {"type": "command", "command": command, "timeout": 5}
     operations = "|".join(sorted(ROUTING_OPERATIONS))
-    return json_document({"hooks": {
-        "SessionStart": [{
-            "matcher": "^(startup|resume|clear|compact|fork)$",
-            "hooks": [{"type": "command", "command": command, "timeout": 5}, guard_hook],
-        }],
-        "PreToolUse": [{
-            "matcher": "^(spawn_agent|Agent|Task)$",
-            "hooks": [{"type": "command", "command": command, "timeout": 5}],
-        }, {"matcher": f"^(Agent|Task|SubagentHandback|mcp__.+__({operations}))$", "hooks": [guard_hook]}],
-        "PermissionDenied": [{"matcher": "^(Agent|Task)$", "hooks": [guard_hook]}],
-        "SubagentStart": [{"matcher": "^assay-", "hooks": [guard_hook]}],
-        "SubagentStop": [{"matcher": "^assay-", "hooks": [guard_hook]}],
-        "PostToolUse": [{"matcher": "^(Agent|Task)$", "hooks": [guard_hook]}],
-        "PostToolUseFailure": [{"matcher": "^(Agent|Task)$", "hooks": [guard_hook]}],
-        "SessionEnd": [{"hooks": [guard_hook]}],
-    }})
+    spawn = "Agent|Task" if client == "claude" else "spawn_agent|Agent"
+    pre = f"{spawn}|mcp__.+__({operations})"
+    if client == "claude":
+        pre += "|SubagentHandback"
+    hooks = {
+        "SessionStart": [{"matcher": "^(startup|resume|clear|compact" + ("|fork" if client == "claude" else "") + ")$", "hooks": [hook]}],
+        "UserPromptSubmit": [{"hooks": [hook]}],
+        "PreToolUse": [{"matcher": f"^({pre})$", "hooks": [hook]}],
+        "SubagentStart": [{"matcher": "^assay-", "hooks": [hook]}],
+        "SubagentStop": [{"matcher": "^assay-", "hooks": [hook]}],
+        "PostToolUse": [{"matcher": f"^({spawn})$", "hooks": [hook]}],
+        "SessionEnd": [{"hooks": [hook]}],
+    }
+    if client == "claude":
+        hooks["PermissionDenied"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
+        hooks["PostToolUseFailure"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
+    else:
+        hooks["PostCompact"] = [{"hooks": [hook]}]
+    return json_document({"hooks": hooks})
 
 
 def skills_index(root: Path, catalog: Catalog) -> bytes:
@@ -931,7 +946,8 @@ def rendered_documents(root: Path = ROOT) -> dict[str, bytes]:
         ".agents/plugins/marketplace.json": codex_marketplace(),
         ".cursor-plugin/plugin.json": cursor_plugin(version),
         "gemini-extension.json": gemini_extension(version),
-        "hooks/hooks.json": reminder_hooks(),
+        "hooks/hooks.json": reminder_hooks("claude"),
+        "hooks/codex.json": reminder_hooks("codex"),
         "skills/README.md": skills_index(root, catalog),
     }
     for asset in profile_assets(catalog):

@@ -5,7 +5,7 @@ import copy
 import secrets
 from pathlib import Path
 
-from .claude_agents import (ADAPTER, ADVISOR_PROFILE, ALIAS_KIND, launch_model, resolve_variant,
+from .claude_agents import (ADVISOR_PROFILE, ALIAS_KIND, launch_model, resolve_variant,
                             unconfirmed_changes)
 from .core import EvidenceError, digest, epoch, timestamp
 from .pipeline_config import ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory, settings
@@ -111,7 +111,8 @@ class RoutingPipeline:
         """What required mode still lacks; each gap blocks registered delegation."""
         if not self.required:
             return []
-        gaps = [] if self.service.client == "claude" else ["host_adapter"]
+        from .client_capabilities import contract
+        gaps = [] if contract(self.service.client, self.config.get("host"))["strict_adapter"] else ["host_adapter"]
         # Without a baseline an abstaining or failed advisor would leave the
         # packet without a route, so required mode is not set up without one.
         return gaps + [key for key in ("state_dir", "agents_dir", "baseline") if not self.config[key]]
@@ -140,11 +141,12 @@ class RoutingPipeline:
         return report
 
     def status(self):
-        supported = self.service.client == "claude"
+        from .client_capabilities import contract
+        supported = contract(self.service.client, self.config.get("host"))["strict_adapter"] is not None
         gaps = self.setup_gaps()
         result = {"protocol_version": PROTOCOL, "mode": self.config["mode"],
                   "host_adapter": "claude" if supported else None,
-                  "adapter_capabilities": dict(ADAPTER) if supported else None,
+                  "adapter_capabilities": contract(self.service.client, self.config.get("host")),
                   "state_configured": bool(self.config["state_dir"]),
                   "definitions_configured": bool(self.config["agents_dir"]),
                   "advisor_route_configured": bool(self.config["advisor_route"]),
@@ -157,7 +159,7 @@ class RoutingPipeline:
                              else "requires_host_receipt"),
                   "setup_gaps": gaps,
                   "no_implicit_root_ranking": self.required}
-        if self.required:
+        if self.required and supported:
             from .claude_agents import route_checks
             result["route_checks"] = route_checks(self.raw_config)
             try:

@@ -8,6 +8,7 @@
     "url": "https://github.com/Muratovnik"
   },
   "skills": "./skills/",
+  "hooks": "./hooks/codex.json",
   "interface": {
     "displayName": "Assay",
     "shortDescription": "Evidence-grounded methods for coding agents",

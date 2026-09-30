@@ -112,41 +112,45 @@ class ReminderTests(unittest.TestCase):
                 self.assertNotIn(b"PRIVATE_SENTINEL", result.stderr)
 
     def test_packaged_matchers_only_cover_reminder_and_guard_boundaries(self):
-        hooks = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]
-        self.assertEqual({"SessionStart", "PreToolUse", "PermissionDenied", "SubagentStart", "SubagentStop",
-                          "PostToolUse", "PostToolUseFailure", "SessionEnd"}, set(hooks))
+        for client, filename in (("claude", "hooks.json"), ("codex", "codex.json")):
+            hooks = json.loads((ROOT / "hooks" / filename).read_text())["hooks"]
+            common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "SessionEnd"}
+            extra = {"PermissionDenied", "PostToolUseFailure"} if client == "claude" else {"PostCompact"}
+            self.assertEqual(common | extra, set(hooks))
 
-        def commands(event, value):
-            # An omitted matcher matches every value of that event.
-            return [hook["command"] for rule in hooks[event] if re.search(rule.get("matcher") or "", value)
-                    for hook in rule["hooks"]]
+            def commands(event, value):
+                return [hook["command"] for rule in hooks[event] if re.search(rule.get("matcher") or "", value)
+                        for hook in rule["hooks"]]
 
-        reminder = [h["command"] for h in hooks["SessionStart"][0]["hooks"] if "skill_reminder" in h["command"]]
-        guard = [h["command"] for h in hooks["SessionStart"][0]["hooks"] if "routing_hook" in h["command"]]
-        self.assertEqual((1, 1), (len(reminder), len(guard)))
-        # Ordinary tools must not start any hook process for any plugin user.
-        for tool in ("Bash", "Read", "Edit", "Write", "Skill", "AgentStatus", "send_message", "wait",
-                     "mcp__example__search", "mcp__benchmark-routing__routing_status"):
-            with self.subTest(tool=tool):
-                self.assertEqual([], commands("PreToolUse", tool))
-        self.assertEqual(reminder, commands("PreToolUse", "spawn_agent"))
-        for tool in ("Agent", "Task"):
-            self.assertEqual(reminder + guard, commands("PreToolUse", tool))
-        for tool in ("SubagentHandback", "mcp__benchmark-routing__prepare_routing",
-                     "mcp__plugin_assay_routing__authorize_routing_launch"):
-            self.assertEqual(guard, commands("PreToolUse", tool))
-        for event in ("SubagentStart", "SubagentStop"):
-            self.assertEqual(guard, commands(event, "assay-general-purpose-0123456789abcdef"))
-            for agent_type in ("Explore", "general-purpose", ""):
-                self.assertEqual([], commands(event, agent_type))
-        for source in ("startup", "resume", "clear", "compact", "fork"):
-            self.assertEqual(reminder + guard, commands("SessionStart", source))
-        self.assertEqual([], commands("SessionStart", "shutdown"))
-        for rules in hooks.values():
-            for rule in rules:
-                for hook in rule["hooks"]:
-                    self.assertEqual("command", hook["type"])
-                    self.assertLessEqual(hook["timeout"], 5)
+            unified = commands("SessionStart", "startup")
+            self.assertEqual(1, len(unified))
+            self.assertIn("hooks/runtime/cli.py", unified[0])
+            self.assertIn("'" + client + "'", unified[0])
+            self.assertEqual(unified, commands("UserPromptSubmit", ""))
+            # Neither client starts a process for ordinary tool invocations.
+            for tool in ("Bash", "Read", "Edit", "Write", "Skill", "AgentStatus", "send_message", "wait",
+                         "mcp__example__search", "mcp__benchmark-routing__routing_status"):
+                with self.subTest(client=client, tool=tool):
+                    self.assertEqual([], commands("PreToolUse", tool))
+            for tool in (("Agent", "Task") if client == "claude" else ("Agent", "spawn_agent")):
+                self.assertEqual(unified, commands("PreToolUse", tool))
+            self.assertEqual(unified if client == "claude" else [], commands("PreToolUse", "SubagentHandback"))
+            for tool in ("mcp__benchmark-routing__prepare_routing", "mcp__plugin_assay_routing__authorize_routing_launch"):
+                self.assertEqual(unified, commands("PreToolUse", tool))
+            for event in ("SubagentStart", "SubagentStop"):
+                self.assertEqual(unified, commands(event, "assay-general-purpose-0123456789abcdef"))
+                for agent_type in ("Explore", "general-purpose", ""):
+                    self.assertEqual([], commands(event, agent_type))
+            for source in ("startup", "resume", "clear", "compact"):
+                self.assertEqual(unified, commands("SessionStart", source))
+            self.assertEqual(unified if client == "claude" else [], commands("SessionStart", "fork"))
+            self.assertEqual([], commands("SessionStart", "shutdown"))
+            for rules in hooks.values():
+                for rule in rules:
+                    self.assertEqual(1, len(rule["hooks"]))
+                    for hook in rule["hooks"]:
+                        self.assertEqual("command", hook["type"])
+                        self.assertLessEqual(hook["timeout"], 5)
 
     def test_guard_matcher_names_exactly_the_routing_operations(self):
         sys.path.insert(0, str(SCRIPT.parent))
@@ -166,9 +170,11 @@ class ReminderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="reminder-", dir=scratch) as directory:
             base = Path(directory)
             plugin = base / "plugin space & apostrophe'"
-            target = plugin / SCRIPT.relative_to(ROOT)
-            target.parent.mkdir(parents=True)
-            shutil.copyfile(SCRIPT, target)
+            # Package the actual installed runtime and its existing owner, not
+            # a stand-in that accidentally lets a broken command look correct.
+            shutil.copytree(ROOT / "hooks", plugin / "hooks", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / "skills", plugin / "skills", ignore=shutil.ignore_patterns("__pycache__", "evals"))
+            shutil.copyfile(ROOT / "catalog.toml", plugin / "catalog.toml")
             before = sorted(str(path.relative_to(base)) for path in base.rglob("*"))
             command = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]["SessionStart"][0]["hooks"][0]["command"]
             shells = (
@@ -180,7 +186,8 @@ class ReminderTests(unittest.TestCase):
                     result = subprocess.run(
                         command if shell is None else [*shell, command],
                         shell=shell is None, cwd=base,
-                        env=dict(os.environ, CLAUDE_PLUGIN_ROOT=str(plugin)),
+                        env={**{k: v for k, v in os.environ.items() if not k.startswith("ASSAY_") and k not in {"PLUGIN_DATA", "CLAUDE_PLUGIN_DATA"}},
+                             "CLAUDE_PLUGIN_ROOT": str(plugin)},
                         input=b'{"hook_event_name":"SessionStart","source":"compact"}',
                         capture_output=True, timeout=SHELL_WIRING_TIMEOUT,
                     )

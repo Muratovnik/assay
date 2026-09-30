@@ -1,0 +1,44 @@
+schema = 1
+# Match an imperative in the first top-level paragraph, not words anywhere in a
+# pasted document. These are hints, never authorization or required-mode gates.
+[[rules]]
+id = "test-audit"
+skill = "skill/test-audit"
+priority = 100
+patterns = ['^(?:audit|review)\s+(?:the\s+)?tests?\b', '^(?:проведи\s+)?(?:ревью|аудит|проверь)\s+тест']
+
+[[rules]]
+id = "test-writing"
+skill = "skill/test-writing"
+priority = 100
+patterns = ['^(?:write|add|repair|fix)\s+(?:the\s+)?tests?\b', '^(?:напиши|добавь|исправь)\s+тест']
+
+[[rules]]
+id = "research"
+skill = "skill/evidence-research"
+priority = 90
+patterns = ['^(?:research|compare|investigate alternatives)\b', '^find\s+(?:existing|alternative)\b', '^(?:исследуй|сравни|изучи\s+(?:аналоги|существующие)|найди\s+(?:аналоги|готовые))\b', '^проведи\s+исследование\b']
+
+[[rules]]
+id = "planning"
+skill = "skill/implementation-planning"
+priority = 80
+patterns = ['^(?:plan\s+(?:the\s+)?(?:implementation|migration|changes)|(?:write|create|update)\s+(?:an?\s+|the\s+)?(?:implementation\s+)?plan)\b', '^(?:составь|подготовь|обнови|пересмотри)\s+(?:подробный\s+)?план\b']
+
+[[rules]]
+id = "audit"
+skill = "skill/independent-audit"
+priority = 70
+patterns = ['^(?:audit|review)\b', '^(?:проведи\s+(?:(?:полное|полный)\s+)?)?(?:ревью|аудит)\b', '^проверь\s+(?:реализацию|изменения|репозиторий)\b']
+
+[[rules]]
+id = "ui-delivery"
+skill = "skill/ui-delivery"
+priority = 60
+patterns = ['^(?:build|redesign|implement)\s+(?:(?:a|an|the)\s+)?(?:interface|screen|dashboard|website)\b', '^(?:сделай|реализуй|создай)\s+(?:редизайн|интерфейс|экран|сайт)\b']
+
+[[rules]]
+id = "code-change"
+skill = "skill/code-change"
+priority = 40
+patterns = ['^(?:implement|refactor|fix the bug)\b', '^(?:реализуй|отрефактори|исправь\s+(?:код|ошибку)|внеси\s+(?:правки|изменения))\b']

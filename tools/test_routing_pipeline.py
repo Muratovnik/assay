@@ -24,6 +24,7 @@ from route_evidence.pipeline_store import PipelineStore
 from route_evidence.routing import build_context
 from route_evidence.service import RoutingService, load_config
 from routing_hook import handle
+from claude_output_fixture import assert_agent_output, completed_output
 
 AVAILABLE = [{"model": "worker-alpha", "efforts": ["low", "high"]},
              {"model": "worker-beta", "efforts": ["medium"]}]
@@ -71,7 +72,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         event = {"hook_event_name": name, "session_id": session, **fields}
         if agent is not None:
             event["agent_id"] = agent
-        return handle(event, self.config, scope=scope, clock=lambda: self.now, environment={})
+        return handle(event, self.config, scope=scope, clock=lambda: self.now,
+                      environment={"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"})
 
     def rpc(self, tool, arguments, *, agent=None, session="session-a", **fields):
         result = self.event("PreToolUse", agent=agent, session=session,
@@ -527,15 +529,27 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
-        raw = {"status": "completed", "agentId": "advisor-a", "resolvedModel": ROUTE["model"],
-               "modelsUsed": [ROUTE["model"]], "totalTokens": 42,
-               "content": [{"type": "text", "text": "RAW_BENCHMARK_SENTINEL"}]}
+        raw = completed_output(resolvedModel=ROUTE["model"], modelsUsed=[ROUTE["model"]])
         event = self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response=raw)
         safe = event["hookSpecificOutput"]["updatedToolOutput"]
-        self.assertEqual(set(raw), set(safe))
+        assert_agent_output(self, safe)
         self.assertEqual(safe["totalTokens"], 42)
-        self.assertNotIn("RAW_BENCHMARK_SENTINEL", json.dumps(safe))
+        self.assertNotIn("PRIVATE_", json.dumps(safe))
+        self.assertEqual(raw["usage"]["input_tokens"], safe["usage"]["input_tokens"])
         self.assertEqual(self.decision(prepared["decision_id"])["advisor_provenance"]["observed_model"], ROUTE["model"])
+
+    async def test_private_advisor_requires_native_background_protection_before_reserving(self):
+        prepared = await self.prepare()
+        launch = prepared["handoff"]
+        event = {"hook_event_name": "PreToolUse", "session_id": "session-a", "tool_name": "Agent",
+                 "tool_use_id": "call-a", "tool_input": launch["input"]}
+        for environment in ({}, {"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "0"}):
+            result = handle(event, self.config, clock=lambda: self.now, environment=environment)
+            self.assertEqual("deny", result["hookSpecificOutput"]["permissionDecision"])
+            self.assertNotIn("updatedInput", result["hookSpecificOutput"])
+            with self.pipeline.store.transaction() as tx:
+                self.assertEqual("prepared", tx.get("attempt", launch["attempt_id"])["state"])
+        self.assertFalse(self.dispatched(launch, "call-a")["run_in_background"])
 
     async def test_advisor_handback_is_status_only_and_no_submission_is_forged(self):
         prepared = await self.prepare()
@@ -698,6 +712,78 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.event("SubagentStart", agent="agent-1", agent_type=first["input"]["subagent_type"])
         with self.pipeline.store.transaction() as tx:
             self.assertEqual(tx.get("attempt", first["attempt_id"])["agent_id"], "agent-1")
+
+    async def test_parallel_same_definition_different_models_are_not_prejudged(self):
+        self.use_aliases(approved_choices={"p1":{"model":"sonnet","effort":"low"},
+                                          "p2":{"model":"haiku","effort":"low"}})
+        packets=[{**PACKETS[0],"packet_id":p} for p in ("p1","p2")]
+        prepared=await self.prepare(packets=packets,launch_requests={
+            p:{"profile":"general-purpose","prompt":"bounded "+p} for p in ("p1","p2")})
+        first,second=(self.pipeline.authorize(self.rpc("authorize_routing_launch",{
+            "decision_id":prepared["decision_id"],"packet_id":p})) for p in ("p1","p2"))
+        self.dispatched(first,"c1"); self.now+=1; self.dispatched(second,"c2")
+        name=first["input"]["subagent_type"]
+        self.assertEqual(name,second["input"]["subagent_type"])
+        self.event("SubagentStart",agent="agent-2",agent_type=name)
+        self.event("SubagentStart",agent="agent-1",agent_type=name)
+        # Wrong effort on agent-2 must follow that agent, not its provisional
+        # packet association. Both starts remain ambiguous until native returns.
+        self.event("SubagentStop",agent="agent-2",effort={"level":"high"})
+        self.event("SubagentStop",agent="agent-1",effort={"level":"low"})
+        with self.pipeline.store.transaction() as tx:
+            for launch in (first,second):
+                provisional=tx.get("attempt",launch["attempt_id"])
+                self.assertEqual("start_order",provisional["binding"])
+                self.assertNotIn("route_mismatch",provisional)
+        self.returned("c2","agent-2","haiku-resolved",modelsUsed=["haiku-resolved"])
+        self.returned("c1","agent-1","sonnet-resolved",modelsUsed=["sonnet-resolved"])
+        with self.pipeline.store.transaction() as tx:
+            one,two=(tx.get("attempt",l["attempt_id"]) for l in (first,second))
+            self.assertEqual(("agent-1","sonnet-resolved","low"),(one["agent_id"],one["observed_model"],one["observed_effort"]))
+            self.assertNotIn("route_mismatch",one)
+            self.assertTrue(two["route_mismatch"])
+            self.assertEqual("host_result",two["binding"])
+
+    async def test_unknown_advisor_envelopes_cannot_add_report_channels(self):
+        prepared=await self.prepare()
+        self.launch(prepared["handoff"])
+        event=self.event("PostToolUse",tool_name="Agent",tool_use_id="call-a",tool_response={
+            "status":"completed","agentId":"advisor-a","report":{"text":"PRIVATE_SENTINEL"},
+            "error":"PRIVATE_SENTINEL", "summary":"PRIVATE_SENTINEL"})
+        safe=event["hookSpecificOutput"]["updatedToolOutput"]
+        assert_agent_output(self, safe)
+        self.assertNotIn("PRIVATE_SENTINEL",json.dumps(safe))
+
+    async def test_later_return_does_not_clear_prior_model_switch(self):
+        self.use_aliases(approved_choices={"work":{"model":"sonnet","effort":"low"}})
+        prepared=await self.prepare()
+        worker=self.authorize(prepared["decision_id"])
+        self.launch(worker,agent="worker-a",tool_id="w")
+        self.returned("w","worker-a","resolved-sonnet",modelsUsed=["other-model","resolved-sonnet"])
+        self.returned("w","worker-a","resolved-sonnet",modelsUsed=["resolved-sonnet"])
+        self.returned("w","worker-a","resolved-sonnet")
+        with self.pipeline.store.transaction() as tx:
+            self.assertTrue(tx.get("attempt",worker["attempt_id"])["route_mismatch"])
+
+    async def test_custom_effort_field_is_denied_even_on_exempt_agent(self):
+        self.use_aliases(unrouted_agents={"Explore":{"model":"haiku"}})
+        for field in ("effort","model_reasoning_effort","reasoning_effort"):
+            event=self.event("PreToolUse",tool_name="Agent",tool_input={
+                "subagent_type":"Explore","prompt":"find",field:"low"})
+            self.assertEqual("deny",event["hookSpecificOutput"]["permissionDecision"])
+
+    async def test_exempt_model_checks_versioned_environment_override(self):
+        self.use_aliases(unrouted_agents={"Explore":{"model":"haiku"}})
+        event={"hook_event_name":"PreToolUse","tool_name":"Agent","tool_input":{
+            "subagent_type":"Explore","prompt":"find","run_in_background":True}}
+        env={"CLAUDE_CODE_SUBAGENT_MODEL":"opus"}
+        result=handle(event,self.config,environment=env)
+        self.assertEqual("deny",result["hookSpecificOutput"]["permissionDecision"])
+        self.config["pipeline"]["host"]={"surface":"cli","version":"2.1.251"}
+        result=handle(event,self.config,environment=env)
+        self.assertEqual("haiku",result["hookSpecificOutput"]["updatedInput"]["model"])
+        self.assertTrue(result["hookSpecificOutput"]["updatedInput"]["run_in_background"])
+        self.assertNotIn("permissionDecision",result["hookSpecificOutput"])
 
     async def test_auto_mode_denial_releases_a_reserved_launch(self):
         decision = await self.decided()
@@ -896,7 +982,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
                 ({"hook_event_name": "PreToolUse", "tool_name": "mcp__assay-benchmark-routing__prepare_routing", **base}, (), "deny"),
                 ({"hook_event_name": "PreToolUse", "tool_name": "Read", "agent_id": "a", **base}, ("--scope", "agent"), None),
                 ({"hook_event_name": "SubagentStop", "agent_id": "a", "agent_type": "assay-x", "session_id": "session-a"}, (), None),
-                ({"hook_event_name": "PostToolUse", "tool_name": "Agent", **base}, (), None),
+                ({"hook_event_name": "PostToolUse", "tool_name": "Agent", **base}, (), "redact"),
             ):
                 with self.subTest(config=config.name, event=event["hook_event_name"], tool=event.get("tool_name")):
                     code, stdout = self.run_hook(event, *args, config=config)
@@ -904,6 +990,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
                     reply = json.loads(stdout)
                     if expected is None:
                         self.assertEqual(reply, {})
+                    elif expected == "redact":
+                        assert_agent_output(self, reply["hookSpecificOutput"]["updatedToolOutput"])
                     else:
                         self.assertEqual(reply["hookSpecificOutput"]["permissionDecision"], expected)
 
