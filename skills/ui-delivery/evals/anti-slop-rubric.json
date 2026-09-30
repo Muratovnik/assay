@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "skill_name": "ui-delivery",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "pairs": [
+    {
+      "ids": [
+        "ASU01",
+        "ASU02"
+      ],
+      "distinction": "Vary whether connection styling reflects the authoritative operation, not whether it uses a dot."
+    },
+    {
+      "ids": [
+        "ASU03",
+        "ASU04"
+      ],
+      "distinction": "Vary whether a displayed percentage has a comparable, nonzero baseline."
+    },
+    {
+      "ids": [
+        "ASU05",
+        "ASU06"
+      ],
+      "distinction": "Vary the presence and persistence of simulation context, not the use of synthetic records."
+    },
+    {
+      "ids": [
+        "ASU07",
+        "ASU08"
+      ],
+      "distinction": "Vary the user task while preserving an otherwise sound overview layout."
+    },
+    {
+      "ids": [
+        "ASU09",
+        "ASU10"
+      ],
+      "distinction": "Vary a concrete readability defect while keeping familiar visual choices constant."
+    },
+    {
+      "ids": [
+        "ASU11",
+        "ASU12"
+      ],
+      "distinction": "Vary whether a screenshot claim is refuted by supplied source evidence or merely lacks verification."
+    }
+  ],
+  "cases": [
+    {
+      "id": "ASU01",
+      "assess": [
+        "Identifies the evidenced false connection claim, including the pending/failed states.",
+        "Connects the cue to the actual account and operation state; checks a successful connection as the valid control.",
+        "Does not ban dots, add a new backend or turn supplied source evidence into an executed transition."
+      ]
+    },
+    {
+      "id": "ASU02",
+      "assess": [
+        "Preserves the useful indicator; a familiar dot does not establish a defect.",
+        "Accepts the supplied state evidence within its scope without certifying unrelated runtime behavior.",
+        "Does not require removal of all dots or a decorative redesign."
+      ]
+    },
+    {
+      "id": "ASU03",
+      "assess": [
+        "Rejects the unsupported percentage without rejecting the supported current amount.",
+        "Distinguishes missing and zero baselines; does not replace either with zero growth.",
+        "Proposes an honest unavailable/non-percentage treatment and checks a known nonzero comparable baseline."
+      ]
+    },
+    {
+      "id": "ASU04",
+      "assess": [
+        "Preserves the supported +20% comparison and its period/population meaning.",
+        "Does not demand that valid comparison data or the chart be deleted.",
+        "Avoids a universal method paragraph on every card or a new analytics pipeline."
+      ]
+    },
+    {
+      "id": "ASU05",
+      "assess": [
+        "Identifies that the presentation wrongly attributes synthetic events to the user account.",
+        "Keeps a useful preview by making its simulation context clear rather than requiring real transactions.",
+        "Carries that context into an independently delivered export and checks a labelled demo as the control."
+      ]
+    },
+    {
+      "id": "ASU06",
+      "assess": [
+        "Keeps the clearly identified synthetic data and useful composition.",
+        "Does not require real data, delete the demo, or repeat the label on every row.",
+        "Does not call the prototype a verified live payment implementation."
+      ]
+    },
+    {
+      "id": "ASU07",
+      "assess": [
+        "Locates the task-priority and space-allocation mismatch, not an invented data defect.",
+        "Prioritizes the queue or an equally useful way to reach and act on overdue tickets without mandating a new template.",
+        "Checks the composed task at the supported viewport and preserves useful overview information at an appropriate priority."
+      ]
+    },
+    {
+      "id": "ASU08",
+      "assess": [
+        "Recognizes analysis and monitoring as sufficient purposes without immediate action buttons.",
+        "Preserves justified repeated cards and charts rather than forcing a queue-first redesign.",
+        "Does not invent an operational workflow or a one-button-per-chart requirement."
+      ]
+    },
+    {
+      "id": "ASU09",
+      "assess": [
+        "Identifies the evidenced identity/readability defect and a scoped layout or disclosure repair.",
+        "Preserves the accepted palette and font unless evidence establishes a related problem.",
+        "Does not infer AI authorship or ban cards and gradients."
+      ]
+    },
+    {
+      "id": "ASU10",
+      "assess": [
+        "Allows a clean scoped assessment instead of inventing novelty requirements.",
+        "Does not reject familiar typography, cards or gradients by syntax or alleged authorship.",
+        "Qualifies the conclusion to the supplied evidence rather than claiming new visual or assistive tests."
+      ]
+    },
+    {
+      "id": "ASU11",
+      "assess": [
+        "Identifies the evidence-backed mismatch between popularity wording and recommendation meaning.",
+        "Suggests truthful recommendation wording or another appropriately scoped correction without inventing usage statistics.",
+        "Does not demand removal of a useful recommendation or a new usage-tracking service."
+      ]
+    },
+    {
+      "id": "ASU12",
+      "assess": [
+        "Marks the basis unverified and names the evidence needed to check population and measurement period.",
+        "Does not call the badge fabricated or delete it because the screenshot cannot prove its claim.",
+        "Separates visible meaning from unavailable factual and runtime verification."
+      ]
+    }
+  ]
+}

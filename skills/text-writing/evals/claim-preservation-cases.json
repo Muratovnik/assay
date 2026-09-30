@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "AST01",
+      "prompt": "Rewrite the supplied product copy using only the supplied facts. Return finished copy, preserve material qualifications and do not invent an outcome or plan feature.",
+      "context": "Draft: \"A new era of team productivity.\" Supplied facts: the product shows team status updates in one shared workspace. No measured time saving, meeting reduction or causal study is available."
+    },
+    {
+      "id": "AST02",
+      "prompt": "Rewrite the supplied product copy using only the supplied facts. Return finished copy, preserve material qualifications and do not invent an outcome or plan feature.",
+      "context": "Draft: \"A new era of team productivity.\" Supplied facts: the product shows team status updates in one shared workspace. In a four-week observational pilot with 12 teams, median weekly time spent in status meetings fell from 30 to 24 minutes. There was no control group and no causal effect was established."
+    },
+    {
+      "id": "AST03",
+      "prompt": "Rewrite the supplied product copy using only the supplied facts. Return finished copy, preserve material qualifications and do not invent an outcome or plan feature.",
+      "context": "Draft: \"Here is an overview of our pricing. Let us know which tier you would like explained.\" No seat allowance, price, support channel or plan name is supplied. The copy is an introduction above the existing pricing table, not a standalone plan specification."
+    },
+    {
+      "id": "AST04",
+      "prompt": "Rewrite the supplied product copy using only the supplied facts. Return finished copy, preserve material qualifications and do not invent an outcome or plan feature.",
+      "context": "Draft: \"Here is an overview of our pricing. Let us know which tier you would like explained.\" The owner also supplies: the Starter plan includes three seats and community support. No response-time commitment or price is supplied."
+    },
+    {
+      "id": "AST05",
+      "prompt": "Проверь редактуру: сохранён ли смысл? Не переписывай текст без необходимости.",
+      "context": "Исходник: «Можно перенести встречу — но только после подтверждения всех участников». Редактура: «Перенесите встречу после подтверждения участников». Никакого поручения переносить встречу автор не давал."
+    },
+    {
+      "id": "AST06",
+      "prompt": "Проверь этот текст: есть ли реальная проблема с ясностью или смыслом? Не переписывай его ради другого стиля.",
+      "context": "Текст: «Можно перенести встречу — но только после подтверждения всех участников». Автор намеренно разрешает, а не предписывает перенос; согласие каждого участника обязательно. Голос и пунктуация соответствуют согласованному стилю."
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "skill_name": "ui-delivery",
+  "cases": [
+    {
+      "id": "ASU01",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The production account panel says Connected with a green dot as soon as it mounts. The supplied source sets this badge independently of connectionState. That state is pending initially and failed in the captured scenario. Connected means that this account passed its current connection check."
+    },
+    {
+      "id": "ASU02",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The same panel derives its dot and accessible status text from the current account connection check. Supplied observations cover checking, connected, failed and stale-after-expiry states. A green dot is used only for connected, and the agreed contract is satisfied."
+    },
+    {
+      "id": "ASU03",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "A revenue card displays EUR 120,000 and an upward +20% badge labelled versus previous month. The supplied API record has current_month=120000 and previous_month=null. The badge is a static template value. When the baseline is zero, the same code also displays +20%."
+    },
+    {
+      "id": "ASU04",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The card uses complete September and August periods in the same timezone, EUR units and account population. Source totals are 120000 and 100000. The +20% calculation, period label and accessible text are supported. Missing and zero baselines have explicit non-percentage presentations."
+    },
+    {
+      "id": "ASU05",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "An onboarding preview generates invented payments and labels them Recent payments from your account. No account has been connected. Neither the panel nor its exported screenshot identifies the content as a demo. The brief authorizes a preview, not a fabricated account history."
+    },
+    {
+      "id": "ASU06",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The same preview has a visible, accessible Demo - simulated data label enclosing the example payment list. The independently exported screenshot includes that label. No live-account claim is made. The brief requests this prototype to explain the future workflow."
+    },
+    {
+      "id": "ASU07",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "Support agents must locate overdue tickets and assign one at the start of each shift. At the supported 1280x720 viewport, four large aggregate cards and an unrelated historical chart consume the first screen; the actionable overdue queue is below them. The figures and chart are accurate. The queue is the agreed primary task."
+    },
+    {
+      "id": "ASU08",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "Analysts use the same overview layout to compare seasonal demand and inspect monthly trends. Comparable labelled cards and the historical chart answer that question with accurate data. No operational ticket queue or immediate action is required; the brief is exploratory analysis."
+    },
+    {
+      "id": "ASU09",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The accepted UI system uses a system font, repeated cards and a blue-purple gradient. At the supported narrow viewport, the cards clip the last characters of resource names, making otherwise distinct resources indistinguishable. Supplied layout observations establish the clipping. The palette and font do not cause it."
+    },
+    {
+      "id": "ASU10",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "The same accepted system font, repeated cards and blue-purple gradient are used in a clear comparison screen. Full resource identities are available at all supplied supported widths, priority follows the task, and supplied contrast and keyboard checks satisfy the adopted requirements. No other issue is reported."
+    },
+    {
+      "id": "ASU11",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "A screenshot shows a Most used export format badge. The available source sets that text permanently on CSV and contains no usage measurement. The product owner confirms that this is a recommendation for compatibility, not a measured popularity claim."
+    },
+    {
+      "id": "ASU12",
+      "prompt": "Review this UI from the supplied facts only. Identify any material issue, the smallest appropriate correction and a distinguishing check. Do not edit the product or claim a browser run.",
+      "context": "Only a screenshot with a Most used export format badge is supplied. There is no source, usage data, measurement definition or owner explanation. No evidence establishes that the badge is false. The task is review, not redesign or deletion."
+    }
+  ]
+}

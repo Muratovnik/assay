@@ -55,6 +55,40 @@ brief. Show a useful preview without turning it into an automatic stop. Separate
 what was observed, checked automatically and actually approved by the user.
 If the design already serves the task well, a clean assessment is valid.
 
+## Judge information displays by their question
+
+For a dashboard, chart, metric group or operational table, identify the user's
+question and how the displayed information supports understanding, comparison,
+monitoring or a decision. Judge selection and prominence of measures, comparison
+basis, units, labels and table columns against that purpose, not a familiar
+sidebar/cards/chart/table template. Keep object identity and information needed
+for the task; do not add conventional columns with no useful role.
+
+For claims made by a badge, color, motion, event stream or numerical encoding,
+read [implied claims](content-and-recovery.md#verify-what-the-presentation-implies).
+That procedure owns truthfulness and the demo/unverified boundary; this one owns
+whether the encoding and composition make the intended interpretation clear.
+
+- Failure: large overview cards displace the overdue queue an operator must work;
+  a graph occupies the primary region but does not help answer the stated
+  question, distinguish relevant cases or understand a trend.
+- Decision: adjust grouping, prominence or representation to the task using the
+  available data. Do not invent measurements or new product features to justify
+  a more impressive layout.
+- Valid control: exploratory analysis and trend monitoring are legitimate goals
+  without an immediate action button. Repeated cards can support comparison of
+  homogeneous measures; a familiar chart, system font or gradient is not itself
+  a defect. Preserve an already useful composition and the accepted system.
+- Check: walk through the actual question at representative viewport and content
+  conditions, including a relevant empty or unavailable state. Can the audience
+  identify, compare or locate what the task requires? Inspect the composed result
+  where available; supplied layout facts do not establish a browser execution.
+
+This is a scoped diagnostic, not a mandatory dashboard redesign or a requirement
+for an action button on every chart. It needs no new planning document. A local
+repair need not inventory unrelated screens, and an audit still returns findings
+without editing the product.
+
 ## Establish which source governs each decision
 
 When several sources exist, assign authority by question: the product's behavior
