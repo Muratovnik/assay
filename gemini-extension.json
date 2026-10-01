@@ -1,6 +1,6 @@
 {
   "name": "assay",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Evidence-grounded methods for coding agents.",
   "contextFileName": "GEMINI.md"
 }

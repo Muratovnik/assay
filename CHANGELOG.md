@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.12.0](https://github.com/Muratovnik/assay/compare/v0.11.0...v0.12.0) (2026-10-01)
+
+Subagent routing now starts by identifying useful, bounded work before substantial
+solo work begins. Delegation hints preserve the requested primary workflow when
+the optional routing skill is unavailable or disabled.
+
+### Features
+
+* **route-subagents:** plan useful delegation around a concrete outcome, its consumer, launch timing and full cost; defer a packet only with a specific trigger, and check and use its return before integrating it; session reminders introduce this planning step early, with bounded English and Russian hints for direct delegation requests ([96096c1](https://github.com/Muratovnik/assay/commit/96096c16e35d93788352e9f6db869058c0b47d89))
+
+### Bug Fixes
+
+* **hooks:** preserve implementation, review or research as the primary workflow when the delegation hint is disabled, missing or explicitly negated; recognise file paths, dotted identifiers and URLs inside delegation arguments without crossing sentence boundaries, and invalidate saved intent when the delegation grammar changes ([96096c1](https://github.com/Muratovnik/assay/commit/96096c16e35d93788352e9f6db869058c0b47d89))
+
 ## [0.11.0](https://github.com/Muratovnik/assay/compare/v0.10.0...v0.11.0) (2026-09-30)
 
 Assay now gives bounded skill hints for the current prompt and client, and
