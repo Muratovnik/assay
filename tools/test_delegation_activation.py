@@ -113,6 +113,111 @@ class DelegationActivationTests(unittest.TestCase):
         self.assertNotEqual(self.fingerprint, activation.load_rules(self.root)[1])
 
 
+    def test_descriptions_and_reported_commands_do_not_request_workers(self):
+        for text in (
+            "Documentation about working with subagents",
+            "The report describes work with subagents",
+            "Документ описывает работу с субагентами",
+            "Read this example and use subagents as a phrase in it",
+            "Document the instruction and use subagents as an example",
+            "Write a guide about working with subagents",
+            "Write a note on using subagents",
+            "Напиши руководство о работе с субагентами",
+        ):
+            with self.subTest(text=text):
+                self.assertEqual([], self.decide(text)["rule_ids"])
+                self.assertEqual(["code-change"], self.decide("Implement the parser. " + text)["rule_ids"])
+
+    def test_reviewing_a_delegation_guide_does_not_request_delegation(self):
+        for text in (
+            "Review documentation about using subagents",
+            "Review examples of working with subagents",
+            "Review how to work with subagents",
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(["audit"], self.decide(text)["rule_ids"])
+        for text in ("Use subagents as an example", "Используй субагентов как пример"):
+            with self.subTest(text=text):
+                self.assertEqual([], self.decide(text)["rule_ids"])
+        self.assertEqual(["delegation"], self.decide("Use subagents as reviewers")["rule_ids"])
+
+    def test_opaque_data_cannot_join_a_delegation_command(self):
+        for opening, closing in (("`", "`"), ('"', '"'), ("«", "»"), ("“", "”"), ("‘", "’")):
+            with self.subTest(opening=opening):
+                self.assertEqual([], self.decide(f"Use {opening}not{closing} subagents")["rule_ids"])
+                self.assertEqual([], self.decide(f"Используй {opening}не{closing} субагентов")["rule_ids"])
+                result = self.decide(f"Research {opening}Package A{closing} using subagents")
+                self.assertEqual(["research", "delegation"], result["rule_ids"])
+        # Excluding a payload must not reveal a second command inside that payload.
+        result = self.decide('Implement the parser; “example and use subagents” is data')
+        self.assertEqual(["code-change"], result["rule_ids"])
+
+    def test_conflicting_prohibitions_suppress_only_the_delegation_hint(self):
+        prohibitions = (
+            "Don't launch any subagents yet",
+            "Don’t launch any subagents yet",
+            "Do not use the subagents",
+            "Never spawn any more agents",
+            "Do not delegate verification to subagents",
+            "Without the help of subagents",
+            "Не нужно запускать субагентов",
+            "Не надо использовать субагентов",
+            "Не следует делегировать проверку субагентам",
+            "Не используйте субагентов",
+            "Без использования субагентов",
+        )
+        for prohibition in prohibitions:
+            with self.subTest(prohibition=prohibition):
+                self.assertEqual([], self.decide("Use subagents. " + prohibition)["rule_ids"])
+                self.assertEqual(["research"], self.decide("Research alternatives using subagents. " + prohibition)["rule_ids"])
+        for restriction in ("Don't modify files", "Do not repeat the workers' research", "Не меняй файлы"):
+            with self.subTest(restriction=restriction):
+                self.assertEqual(["research", "delegation"],
+                                 self.decide("Research alternatives using subagents. " + restriction)["rule_ids"])
+
+    def test_possessives_are_not_unmatched_quotations(self):
+        for text in (
+            "Research alternatives with subagents; preserve workers' budgets",
+            "Research alternatives with subagents; preserve workers’ budgets",
+            "Research the client's options using subagents",
+            "Research the client’s options using subagents",
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(["research", "delegation"], self.decide(text)["rule_ids"])
+        for opening in ('"', "«", "“", "‘"):
+            self.assertEqual(["research"],
+                             self.decide("Research alternatives; " + opening + "use subagents")["rule_ids"])
+
+    def test_leading_delegation_preserves_the_first_workflow(self):
+        for text, expected in (
+            ("Use subagents; research alternatives; implement the result", ["research", "delegation"]),
+            ("Use subagents to research alternatives", ["research", "delegation"]),
+            ("Используй субагентов и составь план", ["planning", "delegation"]),
+            ("Use subagents. Use code-change", ["code-change", "delegation"]),
+            ("Use subagents; explain the tradeoffs; implement later", ["delegation"]),
+            ("Use subagents; 'research alternatives' is an example", ["delegation"]),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(expected, self.decide(text)["rule_ids"])
+
+    def test_other_rules_for_the_same_skill_do_not_mask_a_match(self):
+        extra = {"id": "other-delegation", "skill": "skill/route-subagents",
+                 "priority": 1000, "patterns": [r"^Dispatch workers$"]}
+        rules = [extra, *self.rules]
+        self.assertEqual(["delegation"], self.decide("Use subagents", rules)["rule_ids"])
+        self.assertEqual(["other-delegation"], self.decide("Dispatch workers", rules)["rule_ids"])
+
+    def test_subject_conjunctions_do_not_hide_the_workflow_modifier(self):
+        for text in (
+            "Research X and Y using subagents",
+            "Research alternatives and use subagents",
+            "Сравни X и Y с помощью субагентов",
+            "Сравни варианты и используй субагентов",
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(["research", "delegation"], self.decide(text)["rule_ids"])
+
+
 class DelegationReminderTests(unittest.TestCase):
     def test_session_reminder_reaches_planning_before_launch(self):
         for source in ("startup", "resume", "clear", "compact", "fork"):

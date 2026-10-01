@@ -14,6 +14,7 @@ import tomllib
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
 DELEGATION_SKILL = "skill/route-subagents"
+OPAQUE_TEXT = " [data] "
 SKILL_NAME = re.compile(r"(?:\$|/assay:|assay:)?([a-z][a-z0-9-]{0,63})(?![\w-])")
 EXPLAIN = re.compile(r"^(?:what|how|why|explain|что|как|почему|объясни|расскажи|не\b|do not\b|don't\b)", re.I)
 
@@ -82,7 +83,10 @@ def request_text(prompt, known_names):
                 parts.append(child.content)
             elif child.type == "code_inline":
                 name = SKILL_NAME.fullmatch(child.content)
-                parts.append(child.content if name and name[1] in known_names else " ")
+                # Preserve a barrier: dropping data could manufacture "use subagents".
+                parts.append(child.content if name and name[1] in known_names else OPAQUE_TEXT)
+            elif child.type in {"html_inline", "image"}:
+                parts.append(OPAQUE_TEXT)
             elif child.type in {"softbreak", "hardbreak"}:
                 parts.append(" ")
         # Only the first actual request paragraph; a pasted second document
@@ -112,29 +116,78 @@ def explicit_selection(text, rules):
     return found
 
 
+def workflow_selection(text, rules):
+    return next(([rule] for rule in rules if rule["skill"] != DELEGATION_SKILL
+                 and any(re.search(pattern, text, re.I) for pattern in rule["patterns"])), [])
+
+
+def delegation_text(text):
+    # Opaque spans keep surrounding words apart. Apostrophes within words or
+    # after possessives are not opening quotations.
+    quoted = r"\"[^\"]*\"|«[^»]*»|“[^”]*”|‘[^’]*’|(?<!\w)'[^']*'(?!\w)"
+    text = re.sub(quoted, OPAQUE_TEXT, text)
+    if re.search(r"[\"«»“”‘]|(?<!\w)'", text):
+        return ""
+    return text
+
+
 def delegation_hint(text, rules):
-    """Recognize a request modifier, not a downstream workflow or permission."""
-    # CommonMark has already removed code and block quotations. Mask prose
-    # quotations as well; an unmatched quote is too ambiguous for this hint.
-    quoted = r"\"[^\"]*\"|«[^»]*»|“[^”]*”|(?<!\w)'[^']*'(?!\w)"
-    text = re.sub(quoted, " ", text)
-    if re.search(r"[\"«»“”]|(?<!\w)'|'(?!\w)", text):
-        return None
+    """Recognize a bounded request modifier, not arbitrary mentions or permission."""
+    text = delegation_text(text)
     negative = (
-        r"\b(?:do not|don't|never|avoid|without|no)\s+"
-        r"(?:(?:use|using|spawn|spawning|launch|launching)\s+)?"
-        r"(?:(?:any|more|new)\s+)?(?:sub[- ]?)?agents?\b|"
-        r"\b(?:не\s+(?:используй|запускай|подключай)|без)\s+(?:суб)?агент\w*\b"
+        r"\b(?:do\s+not|don['’]t|never)\s+(?:use|spawn|launch|delegate)\b"
+        r"[^.;!?]{0,160}\b(?:sub[- ]?)?agents?\b|"
+        r"\b(?:avoid|without|no)\s+"
+        r"(?:(?:using|spawning|launching|delegating|the|help|of|any|more|new)\s+){0,5}"
+        r"(?:sub[- ]?)?agents?\b|"
+        r"\b(?:не\s+(?:(?:нужно|надо|следует|стоит)\s+)?|нельзя\s+)"
+        r"(?:использ\w*|запус\w*|подключ\w*|делегир\w*)\b"
+        r"[^.;!?]{0,160}\b(?:суб)?агент\w*\b|"
+        r"\bбез\s+(?:(?:помощи|использования)\s+)?(?:суб)?агент\w*\b"
     )
-    if re.search(negative, text, re.I):
+    if not text or re.search(negative, text, re.I):
         return None
-    # Only direct clauses in the first request paragraph are eligible. Do not
-    # search arbitrary words in a pasted example or a subsequent document.
-    clauses = re.split(r"[.;!?]\s+|\s+(?:and|и)\s+", text, flags=re.I)
+    # Obvious discussion/literal forms are data, even inside an imperative.
+    # This remains a conservative hint grammar, not a general intent parser.
+    mention = (
+        r"\b(?:about|of|on|for)\s+(?:using|working\s+with)\s+sub[- ]?agents?\b|"
+        r"\b(?:how|when|why)\s+(?:to\s+)?(?:use|work\s+with)\s+sub[- ]?agents?\b|"
+        r"\b(?:о|об|про)\s+(?:работ\w*\s+с|использован\w*)\s+субагент\w*\b|"
+        r"\bsub[- ]?agents?\s+as\s+(?:an?\s+)?(?:example|phrase|literal|text|string)\b|"
+        r"\bсубагент\w*\s+как\s+(?:пример|текст|строк\w*)\b"
+    )
+    candidates = []
+    for sentence in re.split(r"[.;!?]\s+", text):
+        sentence = sentence.strip()
+        if EXPLAIN.match(sentence):
+            continue
+        clauses = [sentence]
+        # Test the whole imperative before splitting: "X and Y using subagents"
+        # modifies a subject list. Only recognized workflow requests admit
+        # extra imperatives; a reported command is not a new request.
+        if workflow_selection(sentence, rules) or explicit_selection(sentence, rules):
+            clauses += re.split(r"\s+(?:and|и)\s+", sentence, flags=re.I)[1:]
+        candidates.extend(clause.strip() for clause in clauses
+                          if not EXPLAIN.match(clause.strip()) and not re.search(mention, clause, re.I))
     return next((rule for rule in rules if rule["skill"] == DELEGATION_SKILL
-                 and any(not EXPLAIN.match(clause.strip())
-                         and re.search(pattern, clause.strip(), re.I)
-                         for clause in clauses for pattern in rule["patterns"])), None)
+                 and any(re.search(pattern, clause, re.I)
+                         for clause in candidates for pattern in rule["patterns"])), None)
+
+
+def following_workflow(text, modifier, rules):
+    """Retain the first task after a leading delegation directive, not later stages."""
+    text = delegation_text(text)
+    for pattern in modifier["patterns"]:
+        match = re.match(pattern, text, re.I)
+        if not match:
+            continue
+        tail = text[match.end():]
+        separator = re.match(r"(?:\s*[,.;!?]\s*(?:(?:and|и)\s+)?|\s+(?:to|and|и)\s+)", tail, re.I)
+        if separator:
+            task = tail[separator.end():]
+            return explicit_selection(task, rules) or workflow_selection(task, rules)
+        break
+    return []
 
 
 def select(prompt, rules):
@@ -146,11 +199,12 @@ def select(prompt, rules):
     # request is not an unknown skill name and must reach modifier selection.
     selected = explicit_selection(text, rules)
     if not selected:
-        selected = next(([rule] for rule in rules if rule["skill"] != DELEGATION_SKILL
-                         and any(re.search(pattern, text, re.I) for pattern in rule["patterns"])), [])
+        selected = workflow_selection(text, rules)
     # Keep the first applicable workflow; delegation complements it rather than
     # injecting implementation/review stages that are not ready yet.
     modifier = delegation_hint(text, rules)
+    if not selected and modifier:
+        selected = following_workflow(text, modifier, rules)
     if modifier and modifier not in selected and len(selected) < 2:
         selected.append(modifier)
     return selected
