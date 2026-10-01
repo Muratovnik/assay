@@ -66,7 +66,11 @@ are not installed or guessed. These input aliases do not change canonical names.
 
 `UserPromptSubmit` chooses a method from anchored English/Russian request patterns
 or a leading explicit skill selection. Heuristics select one initial method;
-explicit selections are capped at two. The catalogue supplies identifiers and
+a direct delegation request can add `route-subagents` in the second slot.
+After a leading `Use subagents`, the first immediate task still selects its
+method when the delegation hint is disabled, unavailable or negated. Filenames,
+URLs and versions can contain periods without ending that request. Two explicit
+skill selections fill both slots. The catalogue supplies identifiers and
 installed paths. Missing/disabled skills are not installed or advertised.
 
 The CommonMark parser excludes blockquotes, fenced/indented code, lists and
