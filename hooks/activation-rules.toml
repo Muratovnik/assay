@@ -42,3 +42,19 @@ id = "code-change"
 skill = "skill/code-change"
 priority = 40
 patterns = ['^(?:implement|refactor|fix the bug)\b', '^(?:реализуй|отрефактори|исправь\s+(?:код|ошибку)|внеси\s+(?:правки|изменения))\b']
+
+# Supplemental to the first workflow; selection never grants spawn authority.
+# Suffix modifiers still require an imperative, not a descriptive sentence.
+# A period inside a token is data; a period followed by whitespace ends a clause.
+[[rules]]
+id = "delegation"
+skill = "skill/route-subagents"
+priority = 0
+patterns = [
+  '^(?:please[ ,]+)?(?:use|launch|spawn)\s+(?:(?:some|the)\s+)?sub[- ]?agents?\b',
+  '^(?:пожалуйста[, ]+)?(?:используй|запусти|подключи)\s+субагент(?:а|ов)?\b',
+  '^delegate\s+(?:[^.;!?]|\.(?!\s)){0,200}\bto\s+(?:a\s+)?sub[- ]?agents?\b',
+  '^делегируй\s+(?:(?:[^.;!?]|\.(?!\s)){0,200}\s+)?субагент(?:у|ам)\b',
+  '^(?:research|compare|investigate|find|plan|create|update|implement|refactor|fix|audit|review|build|redesign|write|add|repair|use|apply)\b(?:[^.;!?]|\.(?!\s))+?\b(?:using|with)\s+sub[- ]?agents?[.!]?$',
+  '^(?:исследуй|сравни|изучи|найди|составь|подготовь|обнови|пересмотри|реализуй|исправь|проверь|проведи|сделай|создай|напиши|добавь|используй|примени)\b(?:[^.;!?]|\.(?!\s))+?\s+(?:с\s+помощью\s+субагентов|через\s+субагентов|с\s+субагентами)[.!]?$',
+]

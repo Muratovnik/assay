@@ -70,6 +70,31 @@ class ActivationTests(unittest.TestCase):
             target.unlink()
             self.assertEqual([], activation.load_rules(root)[0])
 
+    def test_delegation_modifiers_preserve_workflow_through_both_clients(self):
+        cases = (
+            ("Use subagents; review this PR", {"disabled_rules": ["delegation"]}, False),
+            ("Use subagents; review this PR", {"disabled_skills": ["skill/route-subagents"]}, False),
+            ("Use subagents; review this PR. Without any subagents", {}, False),
+            ("Review activation.py with subagents", {}, True),
+            ("Review activation.py with subagents. Do not delegate verification of activation.py to subagents", {}, False),
+            ("Review https://github.com/Muratovnik/assay/pull/15 with subagents", {}, True),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            config = Path(temporary) / "hooks.json"
+            for client in ("codex", "claude"):
+                for prompt, settings, delegated in cases:
+                    with self.subTest(client=client, prompt=prompt, settings=settings):
+                        config.write_text(json.dumps(settings), encoding="utf-8")
+                        event = {"hook_event_name": "UserPromptSubmit", "prompt": prompt}
+                        before = copy.deepcopy(event)
+                        result, error = cli.process(event, client, {"ASSAY_HOOK_CONFIG": str(config)})
+                        self.assertIsNone(error)
+                        self.assertEqual(before, event)
+                        self.assertEqual({"hookEventName", "additionalContext"}, set(result.get("hookSpecificOutput", {})))
+                        context = result.get("hookSpecificOutput", {}).get("additionalContext", "")
+                        self.assertIn("independent-audit", context)
+                        self.assertEqual(delegated, "route-subagents" in context)
+
     def test_unknown_duplicate_and_invalid_patterns_are_errors(self):
         original = (ROOT/'hooks/activation-rules.toml').read_text(encoding='utf-8')
         for replacement in (original.replace('skill/code-change', 'skill/unknown'),

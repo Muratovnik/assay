@@ -30,11 +30,33 @@ reviewer, replacement, or repair worker directly; delegation is one level deep.
 
 ## Select a useful packet
 
-Within already-authorized delegation, keep one checkable outcome per worker.
-Use a worker when independent work, specialist evidence or context isolation
-helps the task; keep short linear work local. The primary retains acceptance,
-cross-packet decisions and integration. Choose by the decisions and evidence
-the work needs, not a permanent classification of a model as strong or weak.
+Decide what to delegate and when before selecting its model. For an explicit
+request to use subagents, or unclear work boundaries, read
+[delegation planning](references/delegation-planning.md) before substantial solo
+work. Do not leave useful delegation until the primary has already solved it.
+
+Within already-authorized delegation:
+
+1. Identify a checkable outcome and how the primary will use it, not a persona,
+   file count or an arbitrary fraction of the task. The primary retains
+   acceptance, shared decisions and integration.
+2. Compare the benefit of independent progress, specialist evidence, context
+   isolation or independent verification with briefing, coordination and repair.
+   A sequential worker can be useful; parallelism is a separate decision.
+3. Choose `local`, `delegate_now`, `delegate_after` with a concrete readiness
+   trigger, or `blocked` with the missing capability. Use the existing plan when
+   a record is needed; these are decision labels, not a new runtime schema.
+4. Prepare ready packets before doing their work locally. State what the primary
+   retains while they run. Respect actual dependency, shared-state and budget
+   limits; do not invent a fixed worker count or repeat the worker's assignment.
+5. Reconsider at newly ready dependencies, changed scope or evidence, an
+   unexpected failure, and material verification. Do not replan after every tool
+   call. Integrate and check results rather than counting launches as delivery.
+
+An explicit request to use subagents calls for useful delegation when feasible,
+not merely permission to consider it. Explain a genuine no-benefit or capability
+limit instead of a ceremonial launch. If delegation is required, a later local
+fallback in this skill does not override that requirement.
 
 Read the actual owner instructions and target state before assigning work.
 Define the outcome, source identity, smallest sufficient read scope, write

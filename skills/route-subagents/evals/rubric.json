@@ -135,6 +135,150 @@
         "Не соединять all с overrides и не жертвовать выбранным бюджетом ради ненужной истории.",
         "Не запускать исполнителя или инструменты."
       ]
+    },
+    {
+      "id": "O18",
+      "assess": [
+        "Select useful research outcomes early and identify their use in acceptance or the plan, without fixing an arbitrary worker count.",
+        "Route ready packets before substantially duplicating their research; retain integration work with the primary.",
+        "Reject a ceremonial late summary as satisfying the explicit request.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O19",
+      "assess": [
+        "Do not equate three symptoms with three independent writes; first bound the shared cause and contract.",
+        "Consider a bounded common-cause investigation or defer dependent writers to a named contract decision rather than declaring all delegation useless.",
+        "Keep the requested delegation visible without manufacturing parallel workers.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O20",
+      "assess": [
+        "Recognize sequential context isolation as a possible benefit independent of parallel speedup.",
+        "Define the compact return and its consumer, weighing handoff and verification against the stated context burden.",
+        "Do not invent concurrent work, a savings measurement or a fixed number of workers.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O21",
+      "assess": [
+        "Keep the bounded read local because no useful isolation, independent evidence or parallel outcome is established.",
+        "Do not fabricate a task to increase the worker count.",
+        "Distinguish optional permission from a requirement to delegate.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O22",
+      "assess": [
+        "Identify ready cohesive worker outcomes with ownership and useful returns, using the existing routing and writing contracts.",
+        "Allow bounded concurrent implementation where the supplied independence holds; preserve primary integration.",
+        "Do not turn coordination overhead into a blanket veto on explicitly requested useful delegation.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O23",
+      "assess": [
+        "Defer dependent writes until a named schema decision and resource isolation or sequencing are established.",
+        "Do not treat source-file ownership as runtime isolation or let workers independently change the shared contract.",
+        "Allow a bounded read-only investigation where useful without treating its readiness as writer readiness.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O24",
+      "assess": [
+        "Revisit the explicit readiness trigger and prepare the now-ready delegated outcome before duplicating it locally.",
+        "Preserve the outcome identity and valid evidence, while obtaining the required routing decision for this launch.",
+        "Do not rerun unrelated research or treat the earlier deferral as a permanent rejection.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O25",
+      "assess": [
+        "Keep the named dependency unresolved and continue other genuinely ready work.",
+        "Do not poll or replay unchanged planning on every tool event.",
+        "Retain the specific trigger so deferral is revisited when the relevant condition changes.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O26",
+      "assess": [
+        "Reconsider delegation at the material verification boundary instead of freezing the initial worker plan.",
+        "Use the existing review mode and evidence boundaries, with the original brief and candidate identity rather than a preferred verdict.",
+        "Retain primary-owned stateful gates and avoid rerunning valid receipts without invalidated coverage.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O27",
+      "assess": [
+        "Reject a decorative launch without a distinct verification question or useful return.",
+        "Do not impose a reviewer on every trivial edit or grade success by launch count.",
+        "Preserve the exact acceptance and do not invent a new risk just to justify delegation.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O28",
+      "assess": [
+        "Use the finding in its named decision consumer, revising the affected boundary or explicitly preserving the unresolved requirement.",
+        "Do not treat an attached report as integration or claim the unavailable capability works.",
+        "Avoid repeating the entire research after checking sufficient decisive evidence.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O29",
+      "assess": [
+        "Keep the useful supported finding but preserve the missing required question as partial or blocked work.",
+        "Use the existing outcome and repair contract for a focused continuation or new bounded packet as appropriate.",
+        "Do not infer full delivery from prose, automatically escalate the model or duplicate the completed investigation.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O30",
+      "assess": [
+        "Report the missing capability and the unfulfilled delegation requirement explicitly.",
+        "Do not substitute local completion for required delegation, fabricate launch evidence or bypass the host gate.",
+        "Continue independently authorized useful work only within the actual request.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O31",
+      "assess": [
+        "Allow local execution under the supplied optional-delegation authority and disclose the capability limitation.",
+        "Do not impose a new requirement to delegate or invent a supported host route.",
+        "Keep the same acceptance and report only actions actually performed.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O32",
+      "assess": [
+        "Keep delegation one level deep: the worker returns a bounded finding or escalation, not child launches.",
+        "Have the primary decide and route any useful review or replacement within existing authority.",
+        "Do not accept task identifiers as the assigned evidence or outcome.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
+    },
+    {
+      "id": "O33",
+      "assess": [
+        "Do not mutate the authorized launch input or add invented API fields.",
+        "Return the changed packet and constraint through the existing routing decision process before launch.",
+        "Keep delegation planning separate from model ranking and do not bypass the guard.",
+        "Do not claim that a tool call, worker execution or native-client validation occurred."
+      ]
     }
   ]
 }
