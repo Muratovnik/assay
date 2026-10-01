@@ -42,3 +42,17 @@ id = "code-change"
 skill = "skill/code-change"
 priority = 40
 patterns = ['^(?:implement|refactor|fix the bug)\b', '^(?:реализуй|отрефактори|исправь\s+(?:код|ошибку)|внеси\s+(?:правки|изменения))\b']
+
+# Supplemental to the first workflow; selection never grants spawn authority.
+[[rules]]
+id = "delegation"
+skill = "skill/route-subagents"
+priority = 0
+patterns = [
+  '^(?:please[ ,]+)?(?:use|launch|spawn)\s+(?:(?:some|the)\s+)?sub[- ]?agents?\b',
+  '^(?:пожалуйста[, ]+)?(?:используй|запусти|подключи)\s+субагент(?:а|ов)?\b',
+  '^delegate\s+[^.;!?]{0,200}\bto\s+(?:a\s+)?sub[- ]?agents?\b',
+  '^делегируй\s+(?:[^.;!?]{0,200}\s+)?субагент(?:у|ам)\b',
+  '^[^.;!?]+?\b(?:using|with)\s+sub[- ]?agents?[.!]?$',
+  '^[^.;!?]+?\s+(?:с\s+помощью\s+субагентов|через\s+субагентов|с\s+субагентами)[.!]?$',
+]

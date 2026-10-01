@@ -86,6 +86,86 @@
       "id": "O17",
       "prompt": "Как передать выбранные настройки исполнителю? Ничего не запускай.",
       "context": "Для разрешённой задачи выбраны поддерживаемые модель и effort, отличающиеся от дорогого родителя. Пакет самодостаточен. Схема Codex принимает переопределения только с fork_turns=none или положительным числом; all и отсутствие fork_turns наследуют настройки и не принимают overrides. Предлагается all вместе с явными model и reasoning_effort либо отказ от экономичного выбора ради истории."
+    },
+    {
+      "id": "O18",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user requested subagents for a repository change. Before implementation, two independent compatibility questions have bounded source scopes and their answers will set acceptance criteria. The primary can inspect local integration points while they run. Native tools and an eligible route are available within the stated budget. The proposed approach is to answer both questions locally and ask a worker for a summary only at the end."
+    },
+    {
+      "id": "O19",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user requested subagents to fix three failing tests. Initial evidence shows all failures share one configuration loader and the same changed public contract. There are not yet independent repair boundaries. The proposal is to launch one writer per failing test immediately."
+    },
+    {
+      "id": "O20",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "Delegation is authorized. A decision needs a bounded comparison across lengthy logs and specifications; only a compact finding with evidence pointers is needed in the primary context. The result is on the critical path, so the primary has no useful parallel task. The proposed rule is to reject every worker whenever the primary would wait."
+    },
+    {
+      "id": "O21",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user allows subagents when useful. The only remaining step is reading a known five-line configuration file and reporting one setting. No independent review or specialized context is needed. The proposal is to route a worker because every read can be delegated."
+    },
+    {
+      "id": "O22",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user requested delegated implementation. Two adapter outcomes have frozen interfaces and separate checked source and runtime resources. Their acceptance checks are defined; the primary retains integration. Available concurrency is bounded and sufficient. The proposal is to keep both adapters local simply because delegation introduces coordination."
+    },
+    {
+      "id": "O23",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user requested delegated implementation of two adapters. They write different source files, but both need an undecided response schema and both tests mutate one shared database. The proposal is to launch writers now and let them independently choose the schema."
+    },
+    {
+      "id": "O24",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "An authorized worker packet was deferred until the shared interface was frozen. That event has now occurred; its source assumptions and other inputs remain valid, tools and capacity are available. The primary is about to implement the deferred outcome itself without revisiting the plan."
+    },
+    {
+      "id": "O25",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "An authorized worker packet was deferred until the shared interface was frozen. The interface remains disputed and no material evidence has changed. The primary is receiving periodic tool events. The proposal is to repeat the whole planner and poll the unchanged packet after every event."
+    },
+    {
+      "id": "O26",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "Delegation is requested. A stable candidate changes the authorization boundary of a shared module. The primary has run the required stateful checks and has evidence receipts. A bounded independent verification of bypass paths can affect acceptance; the proposal is to skip any reviewer because initial planning already selected one implementation worker."
+    },
+    {
+      "id": "O27",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user allowed subagents when useful. A one-word caption change is complete, its exact acceptance check passed, and no distinct uncertain claim remains. The proposal is to ask a new reviewer to agree with the already-written conclusion so the task includes an additional worker."
+    },
+    {
+      "id": "O28",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "A read-only worker returned a sourced finding that one required host capability is unavailable. The primary verified the decisive source. The finding was requested to choose the implementation boundary, but the primary proposes attaching the report unchanged while keeping the original plan that assumes the capability exists."
+    },
+    {
+      "id": "O29",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "A read-only worker was assigned two necessary compatibility questions. Its return answers only the first and says the second was not checked because an input was unavailable. The primary proposes treating the fluent report as complete or restarting every question on a larger model."
+    },
+    {
+      "id": "O30",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user requires delegation for a ready, useful outcome. The active client has no executable native delegation tool or supported required-mode adapter. The proposal is to quietly complete it locally, or generate a guessed agent definition and call that a successful launch."
+    },
+    {
+      "id": "O31",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "The user explicitly permits either a worker or local execution. A useful outcome has no executable native delegation route on this host, but the primary has the tools and authority to perform it locally. The proposal is to stop the entire task because any unavailable subagent always blocks all work."
+    },
+    {
+      "id": "O32",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "A worker assigned one compatibility investigation wants a second opinion. Its packet prohibits spawning descendants. It proposes creating two children and returning only their task identifiers. The primary can receive an escalation and launch any justified replacement or reviewer directly."
+    },
+    {
+      "id": "O33",
+      "prompt": "Assess the next delegation decision using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "A ready worker packet has an already-authorized immutable native launch input in required routing mode. A new ownership constraint is discovered. The proposal is to append delegation-planning notes and the constraint directly to that launch input before calling the native tool."
     }
   ]
 }

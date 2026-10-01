@@ -8,7 +8,10 @@ import sys
 
 SESSION_REMINDER = (
     "Assay is installed. Apply matching installed skills: read their SKILL.md "
-    "and follow the applicable workflow; skip unrelated skills. Before every "
+    "and follow the applicable workflow; skip unrelated skills. When the user "
+    "requests subagents, use route-subagents before substantial solo work to "
+    "choose useful outcomes and launch timing. Revisit newly ready dependencies "
+    "and material verification; do not create token delegations. Before every "
     "authorized subagent launch, including replacements and reviewers, the root "
     "agent must apply route-subagents (possibly named assay:route-subagents). "
     "Reading it earlier is not a routing decision for a new packet. Select the "

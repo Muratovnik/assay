@@ -8,6 +8,9 @@ explicit record. The worker's final result follows the separate
 
 ```text
 Outcome / question and original objective:
+Delegation purpose and expected use of the result:
+Why delegate now; dependency or reconsideration trigger when deferred:
+Primary-owned work while this runs (or why sequential isolation is useful):
 Expected effect: change_required | no_change_acceptable | read_only_finding
 Relevant root, base or snapshot, owned dirty inputs:
 Selected model and reasoning effort, brief task/quota rationale:
@@ -17,6 +20,11 @@ Acceptance evidence and permitted checks:
 Excluded actions and escalation conditions:
 Useful return and evidence pointers:
 ```
+
+These are assignment/plan notes, not additional routing API parameters. Follow
+[delegation planning](delegation-planning.md) when the split or timing is unclear.
+Finalize relevant notes in the execution prompt before preparing the route;
+never append them to an already authorized immutable launch input.
 
 Record model and effort with the launch even when inheritance implements the
 selection; no model matrix is needed. Explain ordered implementation steps only

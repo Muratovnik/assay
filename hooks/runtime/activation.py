@@ -13,6 +13,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
+DELEGATION_SKILL = "skill/route-subagents"
 SKILL_NAME = re.compile(r"(?:\$|/assay:|assay:)?([a-z][a-z0-9-]{0,63})(?![\w-])")
 EXPLAIN = re.compile(r"^(?:what|how|why|explain|что|как|почему|объясни|расскажи|не\b|do not\b|don't\b)", re.I)
 
@@ -90,33 +91,69 @@ def request_text(prompt, known_names):
     return ""
 
 
+def explicit_selection(text, rules):
+    explicit = re.match(
+        r"^(?:use|apply|используй|примени)\s+(?:(?:the\s+)?skills?\s+|the\s+|навык[и]?\s+)?(.+)$",
+        text, re.I)
+    if not explicit and not text.startswith(("$", "/assay:")):
+        return []
+    selection = explicit[1] if explicit else text
+    found = []
+    # Stop at the first non-name: later quoted or negated methods are not choices.
+    for segment in re.split(r"\s*(?:,|\band\b|\bи\b)\s*", selection, flags=re.I):
+        match = SKILL_NAME.match(segment)
+        rule = next((r for r in rules if match and r["skill"] == "skill/" + match[1]), None)
+        if not rule:
+            break
+        if rule not in found:
+            found.append(rule)
+        if segment[match.end():].strip() or len(found) == 2:
+            break
+    return found
+
+
+def delegation_hint(text, rules):
+    """Recognize a request modifier, not a downstream workflow or permission."""
+    # CommonMark has already removed code and block quotations. Mask prose
+    # quotations as well; an unmatched quote is too ambiguous for this hint.
+    quoted = r"\"[^\"]*\"|«[^»]*»|“[^”]*”|(?<!\w)'[^']*'(?!\w)"
+    text = re.sub(quoted, " ", text)
+    if re.search(r"[\"«»“”]|(?<!\w)'|'(?!\w)", text):
+        return None
+    negative = (
+        r"\b(?:do not|don't|never|avoid|without|no)\s+"
+        r"(?:(?:use|using|spawn|spawning|launch|launching)\s+)?"
+        r"(?:(?:any|more|new)\s+)?(?:sub[- ]?)?agents?\b|"
+        r"\b(?:не\s+(?:используй|запускай|подключай)|без)\s+(?:суб)?агент\w*\b"
+    )
+    if re.search(negative, text, re.I):
+        return None
+    # Only direct clauses in the first request paragraph are eligible. Do not
+    # search arbitrary words in a pasted example or a subsequent document.
+    clauses = re.split(r"[.;!?]\s+|\s+(?:and|и)\s+", text, flags=re.I)
+    return next((rule for rule in rules if rule["skill"] == DELEGATION_SKILL
+                 and any(not EXPLAIN.match(clause.strip())
+                         and re.search(pattern, clause.strip(), re.I)
+                         for clause in clauses for pattern in rule["patterns"])), None)
+
+
 def select(prompt, rules):
     names = {rule["skill"].split("/", 1)[1] for rule in rules}
     text = request_text(prompt, names)
     if not text or EXPLAIN.match(text) or text.startswith(('"', "'", "«", "“")):
         return []
-    # An explicit selection takes precedence over heuristic classification.
-    explicit = re.match(
-        r"^(?:use|apply|используй|примени)\s+(?:(?:the\s+)?skills?\s+|the\s+|навык[и]?\s+)?(.+)$",
-        text, re.I)
-    if explicit or text.startswith(("$", "/assay:")):
-        selection = explicit[1] if explicit else text
-        found = []
-        # Only a leading sequence of explicitly named methods. Do not scan
-        # the rest of a paragraph (which may say "not X" or quote another task).
-        for segment in re.split(r"\s*(?:,|\band\b|\bи\b)\s*", selection, flags=re.I):
-            match = SKILL_NAME.match(segment)
-            rule = next((r for r in rules if match and r["skill"] == "skill/" + match[1]), None)
-            if not rule:
-                break
-            if rule not in found:
-                found.append(rule)
-            if segment[match.end():].strip() or len(found) == 2:
-                break
-        return found[:2]
-    # First applicable method only: a compound request is not a reason to
-    # inject every downstream skill before the first stage has been performed.
-    return next(([rule] for rule in rules if any(re.search(pattern, text, re.I) for pattern in rule["patterns"])), [])
+    # Explicit catalog choices retain priority. An ordinary "use subagents"
+    # request is not an unknown skill name and must reach modifier selection.
+    selected = explicit_selection(text, rules)
+    if not selected:
+        selected = next(([rule] for rule in rules if rule["skill"] != DELEGATION_SKILL
+                         and any(re.search(pattern, text, re.I) for pattern in rule["patterns"])), [])
+    # Keep the first applicable workflow; delegation complements it rather than
+    # injecting implementation/review stages that are not ready yet.
+    modifier = delegation_hint(text, rules)
+    if modifier and modifier not in selected and len(selected) < 2:
+        selected.append(modifier)
+    return selected
 
 
 def context(rule_ids, rules, *, restored=False):
@@ -125,10 +162,16 @@ def context(rule_ids, rules, *, restored=False):
         return ""
     names = ", ".join(r["skill"].split("/", 1)[1] for r in selected)
     prefix = "Previous request suggested" if restored else "The request suggests"
+    delegation = (
+        " For already-authorized delegation, select useful outcomes and launch timing before substantial solo work; "
+        "revisit ready dependencies and material verification, not just an already-chosen launch."
+        if any(rule["skill"] == DELEGATION_SKILL for rule in selected) else ""
+    )
     return (f"Assay: {prefix} {names}. Read the matching installed SKILL.md before the applicable stage; "
             "reuse sufficient existing research and plans. This is a hint, not evidence of loading or compliance. "
             "Preserve the user's scope, explicit choices and read-only restrictions. Do not install missing "
-            "skills, assume unavailable tools, or delegate because of this hint. Recheck relevance to the current task.")[:MAX_CONTEXT]
+            "skills, assume unavailable tools, or delegate because of this hint. Recheck relevance to the current task."
+            + delegation)[:MAX_CONTEXT]
 
 
 def evaluate(event, rules):

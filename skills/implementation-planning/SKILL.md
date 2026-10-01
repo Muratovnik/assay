@@ -3,7 +3,7 @@ name: implementation-planning
 description: Create, review or update implementation plans, from a bounded change to a multi-stage roadmap. Use for explicit planning requests or consequential sequencing, dependencies and handoffs; skip idea-only discussion, research-only work and obvious edits that need no plan.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research independent-audit research-driven-change software-architecture test-audit test-writing ui-delivery"
+  assay-optional-skills: "code-change evidence-research independent-audit research-driven-change route-subagents software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Implementation planning
@@ -44,6 +44,13 @@ ready while the implementation it informs is not. Pilot and staged-adoption
 completion follow [staged adoption](../code-change/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request).
 Keep incidental cleanup outside the active plan unless it is necessary for the
 agreed result.
+
+When delegation is already authorized, use available
+[delegation planning](../route-subagents/references/delegation-planning.md) to
+choose which ready outcomes to hand off and which prerequisites trigger a later
+launch. Planning retains units, dependencies and acceptance; route-subagents
+retains delegation, model selection and execution contracts. Keep one owning
+plan. This link neither authorizes workers nor requires them for every unit.
 
 Before delivery, trace requirements to units and checks, and units back to their
 purpose. Check the next step can actually begin. Report what is ready, what needs

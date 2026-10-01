@@ -40,6 +40,13 @@ request; a requested draft may legitimately precede full verification. Label its
 limits rather than claiming completion or withholding an authorized draft until
 unrelated stages finish. Publication never implies merge or release.
 
+When delegation is already authorized, reconsider useful work at newly ready
+dependencies and material verification through available
+[delegation planning](../../route-subagents/references/delegation-planning.md).
+That procedure owns the work split and launch timing; this method retains
+transition readiness and the requested endpoint. Do not create a second plan,
+repeat sufficient research, or treat this link as permission to spawn.
+
 Use [evidence to change](evidence-to-change.md) when accepting a research choice and
 [review and delivery](review-and-delivery.md) when a finding or remote effect is
 involved. A method invocation alone cannot establish its output.
