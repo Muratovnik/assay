@@ -6,6 +6,19 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.12.1](https://github.com/Muratovnik/assay/compare/v0.12.0...v0.12.1) (2026-10-02)
+
+Planning and delegation now connect risky dependencies to evidence from their
+real consumers. Resource recovery distinguishes partial acquisition, cancellation
+and an uncertain result after a lost reply. Routing receipts report invalid input
+instead of silently dropping it.
+
+### Bug Fixes
+
+* **workflows:** verify material prerequisites before dependent work, test real producer output at its consumer and check the supported delivery path; preserve resource ownership through failures, distinguish a product defect from a wrong oracle or broken fixture, and retain current evidence in handoffs; add 13 public regression and control scenarios for evaluating these decisions ([f39fc01](https://github.com/Muratovnik/assay/commit/f39fc0170a4a34b0e90151c66a0bc876b4fe2bed))
+* **hooks:** honour an explicit English or Russian plan-only modifier in the first request paragraph, including restored session hints, while preserving explicit skill choices and ignoring quoted examples ([f39fc01](https://github.com/Muratovnik/assay/commit/f39fc0170a4a34b0e90151c66a0bc876b4fe2bed))
+* **route-subagents:** expose typed receipt input and output schemas, reject unknown fields and malformed or excessive evidence references with actionable errors, preserve supported legacy aliases and nullable observations, and keep CLI help usable without the optional MCP SDK ([f39fc01](https://github.com/Muratovnik/assay/commit/f39fc0170a4a34b0e90151c66a0bc876b4fe2bed))
+
 ## [0.12.0](https://github.com/Muratovnik/assay/compare/v0.11.0...v0.12.0) (2026-10-01)
 
 Subagent routing now starts by identifying useful, bounded work before substantial
