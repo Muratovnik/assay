@@ -48,6 +48,14 @@ regression material, not a secret final set. Once final feedback influences a
 change, retire that set from the final role and obtain new untouched evidence
 before making another independent final claim. Never relabel selection as final.
 
+For workflow changes, include relevant transitions as well as isolated answers:
+dependent work becoming ready, a contract changing during execution, partial
+acquisition, lost replies, compaction and a later scope restriction. Pair each
+material prohibition with nearby permitted work. Include a simple task where
+extra research, delegation or review would add no useful evidence. A composed
+case can reveal interactions the isolated controls miss; it is not evidence of
+every combination or production frequency.
+
 Keep provenance, grouping, purpose, split assignment and exposure records on the
 evaluator side, separate from executable task inputs. Record the actual access
 history; a `sealed` label is a declaration, not an access control. The external
@@ -60,6 +68,13 @@ contexts and packet hashes alone do not prove that exclusion.
 Use the cheapest adequate check: existing deterministic assertions for objective
 properties, artifact review or a calibrated model judge for open-ended outcomes.
 Do not replace a working owner check with a bespoke approximate grader.
+
+For receipt-based acceptance, identify the claim, actual subject/input identity,
+operation and discriminating observation. Reading an evidence file or receiving
+an executor's PASS does not establish that claim. Unrelated evidence cannot
+unlock it; a changed relevant input requires affected evidence to be refreshed.
+Calibrate these distinctions with wrong-claim/right-artifact and
+right-claim/stale-artifact controls. Keep missing proof separate from refutation.
 
 For claims that a grader distinguishes wrong outputs from supported ones,
 including supported outputs in another wording or format, apply

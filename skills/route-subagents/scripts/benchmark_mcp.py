@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Official stdio MCP adapter. No protocol implementation or agent launcher."""
-from __future__ import annotations
-
 import argparse
 from contextlib import asynccontextmanager
 import logging
@@ -17,6 +15,7 @@ def build_server(service):
     # Optional dependency: core CLI/refresh/import do not require MCP.
     from mcp.server import MCPServer
     from mcp.server.mcpserver.exceptions import ToolError
+    from route_evidence.receipt_types import ExecutionReceipt, OutcomeResult
 
     pipeline = RoutingPipeline(service)
 
@@ -154,8 +153,8 @@ def build_server(service):
             raise ToolError(str(exc)) from exc
 
     @server.tool()
-    async def record_routing_outcome(decision_id: str, execution: dict[str, Any],
-                                     host_receipt: str | None = None) -> dict[str, Any]:
+    async def record_routing_outcome(decision_id: str, execution: ExecutionReceipt,
+                                     host_receipt: str | None = None) -> OutcomeResult:
         """Record outcome provenance separately from route selection.
 
         Requested is not observed. Keep absent runtime, usage or acceptance
@@ -163,6 +162,10 @@ def build_server(service):
         coordination, retries and verification; do not infer subscription quota
         from API prices. No raw outputs or credentials belong in an execution
         receipt. Raw task description retention requires its separate opt-in.
+        Evidence references are bounded IDs, not URLs; objects use evidence_id,
+        source_id or id. Unsupported fields and invalid references are errors.
+        Accepted without evidence remains unknown; a reference is provenance,
+        not independent verification of its contents.
         """
         try:
             return pipeline.outcome(dict(decision_id=decision_id, execution=execution, host_receipt=host_receipt))

@@ -86,6 +86,12 @@ For an initial method-change comparison, use the existing
 It distinguishes discovery, decisions, preserved valid behavior and total cost.
 A small diagnostic sample is not a score for the library or evidence of general savings.
 
+The collection's [workflow transition probes](../skills/skill-evaluation/evals/workflow-evaluation.md)
+pair dependency, integration, lifecycle, replay and evidence decisions with valid
+neighboring conditions, plus composed-transition and small-task controls. They
+are public synthetic working inputs and a run protocol, not executed model
+results. Their read-only decision cases do not establish real dispatch or cleanup.
+
 ## Evaluator-only case metadata
 
 An optional `case-metadata.json` sits beside `cases.json`; an auxiliary

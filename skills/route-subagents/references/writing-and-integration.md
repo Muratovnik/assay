@@ -31,6 +31,11 @@ the write set. A checkout does not isolate a database, cache, port or service.
 Use unique task-owned runtime resources where collisions are possible. If a
 surface cannot be isolated or safely scheduled, keep that part advisory or local.
 
+For owned processes, transports or temporary external state, apply
+[external resource lifecycle](../../code-change/references/external-resource-lifecycle.md).
+It supplies acquisition, cancellation and restoration checks; this procedure
+retains scheduling and shared-resource ownership across packets.
+
 ## Delegate a writer
 
 Agree on the outcome, source identity, owned paths/hunks, shared decisions and

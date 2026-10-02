@@ -42,6 +42,9 @@ changes from verified results and name blocked or unavailable checks.
 Order work by real dependencies and uncertainty. A bounded investigation can be
 ready while the implementation it informs is not. Pilot and staged-adoption
 completion follow [staged adoption](../code-change/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request).
+When several units depend on an unverified integration, use
+[implementation units](references/implementation-units.md#establish-a-risky-boundary-early)
+to choose the first discriminating consumer scenario before expanding dependents.
 Keep incidental cleanup outside the active plan unless it is necessary for the
 agreed result.
 

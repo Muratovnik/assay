@@ -39,6 +39,13 @@ executed checks, source identity and unresolved issues.
 Report incidental effects instead of asserting unchanged state from final
 file hashes alone. A stopped process and a successful assignment are different.
 
+Keep returns compact enough for their named consumer: result, changed boundary,
+decisive evidence pointers, unresolved assumptions and next dependency. Retain
+large logs in the permitted evidence location instead of forwarding them through
+every packet. For an interrupted or resumed assignment, use
+[planning continuation](../../implementation-planning/references/continuation.md)
+to reconcile current bytes, completed effects and present authority before replay.
+
 For review add the role-required mode, original brief, frozen contracts,
 candidate identity, scoped risk and receipts for primary-owned stateful gates.
 Do not supply the preferred verdict. For a finding repair send its location,

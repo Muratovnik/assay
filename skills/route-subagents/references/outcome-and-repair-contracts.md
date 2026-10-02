@@ -102,6 +102,13 @@ REPAIR DELTA
 Keep frozen decisions, ownership, source identity, and out-of-scope boundaries
 unchanged. If any must change, re-plan instead of calling it a repair.
 
+Before choosing another repair, distinguish a subject defect from an unsound
+expectation or a failed fixture/setup. Use the existing
+[diagnostic reproducer procedure](../../code-change/references/diagnostic-reproducer.md)
+when the cause is unresolved. Repairing the oracle requires an independently
+justified expectation; restoring infrastructure requires evidence of its health.
+Neither an unchanged prompt nor a stronger model supplies that evidence.
+
 After each focused repair:
 
 - accept only after the primary reruns the sound oracle;

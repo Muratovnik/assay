@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WF-01",
+      "group": "wf-pair-1",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-02",
+      "group": "wf-pair-1",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-03",
+      "group": "wf-pair-2",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-04",
+      "group": "wf-pair-2",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-05",
+      "group": "wf-pair-3",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-06",
+      "group": "wf-pair-3",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-07",
+      "group": "wf-pair-4",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-08",
+      "group": "wf-pair-4",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-09",
+      "group": "wf-pair-5",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-10",
+      "group": "wf-pair-5",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Invalid/valid neighboring condition tests a scoped workflow decision without estimating production frequency.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-11",
+      "group": "wf-distinct-11",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Combined dependency drift, uncertain effect, compaction and changed authority tests interacting decisions.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-12",
+      "group": "wf-distinct-12",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Distinguishes a bad oracle and broken infrastructure from a subject defect.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-13",
+      "group": "wf-distinct-13",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Small prose correction controls unnecessary activation and coordination overhead.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

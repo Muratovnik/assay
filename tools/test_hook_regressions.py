@@ -59,6 +59,32 @@ class HookLanguageTests(unittest.TestCase):
         selected = activation.select("Apply the skills `independent-audit` and `code-change`", self.rules)
         self.assertEqual(["audit", "code-change"], [r["id"] for r in selected])
 
+    def test_explicit_plan_only_endpoint_limits_a_multi_stage_hint(self):
+        for prompt in (
+            "Implement the changes; for now, only prepare a plan.",
+            "Build an interface. For now only create an implementation plan.",
+            "Реализуй изменения. Пока только составь план.",
+            "Создай интерфейс; пока только подготовь подробный план.",
+        ):
+            with self.subTest(prompt=prompt):
+                result = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, self.rules)
+                self.assertEqual(["planning"], result["rule_ids"])
+                self.assertIn("read-only", result["context"])
+
+    def test_plan_only_data_does_not_replace_a_request_or_explicit_method(self):
+        for prompt in (
+            'Implement the parser; "for now only prepare a plan" is sample text.',
+            "Implement the parser; `for now only prepare a plan` is sample text.",
+            "Implement the parser.\n\n> For now only prepare a plan.",
+            "Implement the parser.\n\nFor now only prepare a plan.",
+        ):
+            with self.subTest(prompt=prompt):
+                self.assertEqual(["code-change"], activation.evaluate(
+                    {"hook_event_name": "UserPromptSubmit", "prompt": prompt}, self.rules)["rule_ids"])
+        self.assertEqual(["code-change"], activation.evaluate(
+            {"hook_event_name": "UserPromptSubmit", "prompt": "Use code-change; for now only prepare a plan."},
+            self.rules)["rule_ids"])
+
     def test_explicit_selection_still_abstains_for_quoted_and_negative_requests(self):
         for prompt in (
             '> Use the skill code-change', '"Use the skill code-change"',
@@ -212,6 +238,31 @@ class HookCommandTests(unittest.TestCase):
             self.assertIsNone(error)
             self.assertIn("route-subagents", result["hookSpecificOutput"]["additionalContext"])
             self.assertNotIn("Previous request", result["hookSpecificOutput"]["additionalContext"])
+
+    def test_narrowed_request_replaces_pending_implementation_hint_in_both_clients(self):
+        for client in ("codex", "claude"):
+            for narrow, expected in (
+                ("Реализуй изменения; пока только составь план.", "implementation-planning"),
+                ("Do not change files. Explain the current state.", None),
+            ):
+                with self.subTest(client=client, narrow=narrow), tempfile.TemporaryDirectory() as temporary:
+                    env = {"PLUGIN_DATA": temporary}
+                    base = {"session_id": "narrowed", "cwd": "work", "transcript_path": "parent"}
+                    self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "turn_id": "old",
+                                      "prompt": "Implement the change"}, client, env)
+                    self.cli.process({**base, "hook_event_name": "PostCompact"}, client, env)
+                    self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "turn_id": "new",
+                                      "prompt": narrow}, client, env)
+                    self.cli.process({**base, "hook_event_name": "PostCompact"}, client, env)
+                    result, error = self.cli.process({**base, "hook_event_name": "SessionStart",
+                                                      "source": "resume"}, client, env)
+                    self.assertIsNone(error)
+                    context = result["hookSpecificOutput"]["additionalContext"]
+                    self.assertNotIn("Previous request suggested code-change", context)
+                    if expected:
+                        self.assertIn("Previous request suggested " + expected, context)
+                    else:
+                        self.assertNotIn("Previous request suggested", context)
 
     def test_optional_rule_failure_preserves_session_and_launch_reminders(self):
         for event in (

@@ -5,6 +5,7 @@ import asyncio
 import importlib.metadata
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -150,6 +151,23 @@ class BrowserIntegrationTests(unittest.TestCase):
             capture_page(self.page, SOURCES["terminal-bench"], timeout=.5)
 
 
+class OptionalSDKTests(unittest.TestCase):
+    def test_cli_help_and_missing_sdk_diagnostic_without_site_packages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / "routing.json"
+            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
+            for arguments, code in ((["--help"], 0),
+                                    (["--offline", "--cache-dir", str(Path(tmp) / "cache"),
+                                      "--config", str(config)], 2)):
+                with self.subTest(arguments=arguments):
+                    result = subprocess.run([sys.executable, "-S", "-B", str(SCRIPTS / "benchmark_mcp.py"),
+                                             *arguments], capture_output=True, text=True, timeout=10)
+                    self.assertEqual(result.returncode, code, result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+                    if code == 2:
+                        self.assertIn("MCP SDK unavailable", result.stderr)
+
+
 class MCPIntegrationTests(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
@@ -261,6 +279,46 @@ build_server(service).run(transport="stdio")
                     self.assertEqual(unknown.structured_content["status"], "expired")
                     receipt = await client.call_tool("record_routing_outcome", {"decision_id": "absent", "execution": {}})
                     self.assertFalse(receipt.structured_content["recorded"])
+
+    async def test_stdio_receipt_contract_is_visible_and_rejects_lossy_input(self):
+        from mcp import Client, StdioServerParameters
+        from jsonschema import Draft202012Validator
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / "routing.json"
+            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
+            params = StdioServerParameters(command=sys.executable, args=["-B", str(SCRIPTS / "benchmark_mcp.py"),
+                "--cache-dir", str(Path(tmp) / "cache"), "--offline", "--config", str(config)])
+            async with asyncio.timeout(30):
+                async with Client(params) as client:
+                    advertised = next(tool for tool in (await client.list_tools()).tools
+                                      if tool.name == "record_routing_outcome")
+                    self.assertTrue(advertised.output_schema)
+                    schema = Draft202012Validator(advertised.input_schema)
+                    valid = {"decision_id": "absent", "execution": {
+                        "status": "completed", "actual_model": "economy", "actual_effort": "low",
+                        "observed": {"model": None, "effort": None},
+                        "usage": {"inputTokens": 8, "outputTokens": 3},
+                        "outcome": {"status": "accepted", "evidence_refs": [{"id": "receipt-1"}]},
+                    }}
+                    schema.validate(valid)
+                    receipt = await client.call_tool("record_routing_outcome", valid)
+                    self.assertFalse(receipt.is_error)
+                    Draft202012Validator(advertised.output_schema).validate(receipt.structured_content)
+                    self.assertEqual(receipt.structured_content["status"], "diagnostic_only")
+                    self.assertFalse(receipt.structured_content["recorded"])
+                    for execution in (
+                        {"elapsed_ms": 5},
+                        {"outcome": {"evidence_refs": ["https://example.org/check"]}},
+                        {"usage": {"input_tokens": True}},
+                        {"usage": {"input_tokens": -1}},
+                        {"observed": {"model": "economy", "unobserved": "discarded"}},
+                    ):
+                        with self.subTest(execution=execution):
+                            invalid = {"decision_id": "absent", "execution": execution}
+                            self.assertTrue(list(schema.iter_errors(invalid)))
+                            error = await client.call_tool("record_routing_outcome", invalid)
+                            self.assertTrue(error.is_error)
+                    self.assertFalse((await client.call_tool("routing_status", {})).is_error)
 
     async def test_native_advisor_protocol_roundtrip_without_inference(self):
         from mcp import Client, StdioServerParameters

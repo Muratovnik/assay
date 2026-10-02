@@ -71,6 +71,12 @@ mutable module state needs intentional shared semantics; scenario-local mutation
 is not a defect. Prefer explicit transitions over chained assignments when those
 assignments hide distinct state owners or couple future changes.
 
+For acquired processes, transports, temporary configuration or other external
+resources, read [external resource lifecycle](references/external-resource-lifecycle.md)
+before changing acquisition, cancellation, disposal or fault recovery. It owns
+resource failure-path checks; interrupted-effect replay follows planning's
+continuation procedure linked there.
+
 ## Use only the relevant detail
 
 - When a repair needs causal diagnosis or a persistent reproducer, use

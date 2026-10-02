@@ -237,6 +237,15 @@ Use `packet_id` for a multi-packet decision and `execution_ref` for each distinc
 attempt. Each attempt can record `launched` and then one terminal outcome;
 conflicting terminal receipts cannot replace earlier evidence.
 
+The MCP tool publishes receipt input/output shapes. `evidence_refs` contains
+bounded identifiers, or objects with `evidence_id`, `source_id` or `id`; a URL
+needs an existing evidence record identifier rather than being used as one.
+Malformed references, oversized lists and unsupported receipt fields are errors
+with the affected field and supported contract. Legacy `evidence`, flat route
+fields and camelCase usage names remain supported; canonical references take
+precedence when both forms are supplied. `accepted` without references remains
+`unknown`. References record provenance, not verification of their contents.
+
 `telemetry.mode` is `off`, `metadata` (default), or `full`. Metadata stores
 identifiers, pairs, policy/evidence references and bounded outcomes without task
 text. Full mode explicitly retains a redacted structured snapshot/result for

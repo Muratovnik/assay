@@ -49,6 +49,44 @@ _EXECUTION_KEYS = {
     "usage_provenance", "outcome", "outcome_basis", "evidence", "evidence_refs",
     "cost_observation", "task_description",
 }
+_USAGE_ALIASES = {
+    "input_tokens": ("input_tokens", "inputTokens"),
+    "cached_input_tokens": ("cached_input_tokens", "cache_read_input_tokens", "cacheReadInputTokens"),
+    "cache_creation_input_tokens": ("cache_creation_input_tokens", "cacheCreationInputTokens"),
+    "output_tokens": ("output_tokens", "outputTokens"),
+    "reasoning_output_tokens": ("reasoning_output_tokens", "reasoningOutputTokens"),
+    "total_tokens": ("total_tokens", "totalTokens"),
+}
+
+
+def _supported_fields(value: dict, allowed: set[str], field: str) -> None:
+    unknown = set(value) - allowed
+    if unknown:
+        names = sorted(key if isinstance(key, str) and _CODE.fullmatch(key)
+                       else "<invalid-field-name>" for key in unknown)
+        raise EvidenceError(f"{field}: unsupported fields {', '.join(names)}; "
+                            f"allowed fields: {', '.join(sorted(allowed))}")
+
+
+def _receipt_refs(value: Any, field: str) -> list[str]:
+    if value is None:
+        return []
+    values = value if isinstance(value, list) else [value]
+    if len(values) > 256:
+        raise EvidenceError(f"{field}: expected at most 256 references")
+    refs = []
+    for index, item in enumerate(values):
+        location = f"{field}[{index}]"
+        if isinstance(item, dict):
+            aliases = ("evidence_id", "source_id", "id")
+            _supported_fields(item, set(aliases), location)
+            candidates = [_identifier(item[key], location + "." + key)
+                          for key in aliases if key in item]
+            if not candidates:
+                raise EvidenceError(f"{location}: expected evidence_id, source_id or id")
+            item = candidates[0]
+        refs.append(_identifier(item, location))
+    return list(dict.fromkeys(refs))
 
 
 def _identifier(value: Any, field: str) -> str:
@@ -381,19 +419,16 @@ def _nonnegative(value: Any, field: str) -> int | float:
     return int(number) if number.is_integer() else number
 
 
-def _usage(value: Any, *, provenance: str | None = None) -> dict | None:
+def _usage(value: Any, *, provenance: str | None = None, receipt=False) -> dict | None:
+    if receipt and value is not None:
+        if not isinstance(value, dict):
+            raise EvidenceError("execution.usage: expected an object or null")
+        _supported_fields(value, {key for names in _USAGE_ALIASES.values() for key in names},
+                          "execution.usage")
     if not isinstance(value, dict):
         return None
-    aliases = {
-        "input_tokens": ("input_tokens", "inputTokens"),
-        "cached_input_tokens": ("cached_input_tokens", "cache_read_input_tokens", "cacheReadInputTokens"),
-        "cache_creation_input_tokens": ("cache_creation_input_tokens", "cacheCreationInputTokens"),
-        "output_tokens": ("output_tokens", "outputTokens"),
-        "reasoning_output_tokens": ("reasoning_output_tokens", "reasoningOutputTokens"),
-        "total_tokens": ("total_tokens", "totalTokens"),
-    }
     clean: dict[str, Any] = {}
-    for target, names in aliases.items():
+    for target, names in _USAGE_ALIASES.items():
         found = next((value[name] for name in names if value.get(name) is not None), None)
         if found is not None:
             clean[target] = _nonnegative(found, target)
@@ -422,6 +457,10 @@ def _usage(value: Any, *, provenance: str | None = None) -> dict | None:
 
 def _route(execution: dict, prefix: str) -> dict:
     nested = execution.get(prefix)
+    if nested is not None:
+        if not isinstance(nested, dict):
+            raise EvidenceError(f"execution.{prefix}: expected an object or null")
+        _supported_fields(nested, {"model", "effort", "service_tier"}, "execution." + prefix)
     nested = nested if isinstance(nested, dict) else {}
     result = {}
     for field in ("model", "effort", "service_tier"):
@@ -440,13 +479,14 @@ def _route(execution: dict, prefix: str) -> dict:
 def _outcome(execution: Any, *, retain_descriptions=False) -> dict:
     if not isinstance(execution, dict):
         raise EvidenceError("execution must be an object")
-    unknown = set(execution) - _EXECUTION_KEYS
-    if unknown:
-        raise EvidenceError("execution contains unsupported fields")
-    evidence_refs = _evidence_refs(execution.get("evidence_refs") or execution.get("evidence"))
+    _supported_fields(execution, _EXECUTION_KEYS, "execution")
+    evidence_refs = _receipt_refs(execution.get("evidence_refs"), "execution.evidence_refs")
+    legacy_refs = _receipt_refs(execution.get("evidence"), "execution.evidence")
+    evidence_refs = evidence_refs or legacy_refs
     outcome = execution.get("outcome", "unknown")
     if isinstance(outcome, dict):
-        evidence_refs = _evidence_refs(outcome.get("evidence_refs")) or evidence_refs
+        _supported_fields(outcome, {"status", "basis", "evidence_refs"}, "execution.outcome")
+        evidence_refs = _receipt_refs(outcome.get("evidence_refs"), "execution.outcome.evidence_refs") or evidence_refs
         basis = outcome.get("basis")
         outcome = outcome.get("status", "unknown")
     else:
@@ -457,13 +497,13 @@ def _outcome(execution: Any, *, retain_descriptions=False) -> dict:
         basis = None
     status = _identifier(execution.get("status", "unknown"), "execution status")
     if status not in _EXECUTION_STATUSES:
-        raise EvidenceError("unsupported execution status")
+        raise EvidenceError("execution.status: allowed values: " + ", ".join(sorted(_EXECUTION_STATUSES)))
     result = {
         "status": status,
         "execution_ref": _optional_identifier(execution.get("execution_ref"), "execution_ref"),
         "requested": _route(execution, "requested"),
         "observed": _route(execution, "observed"),
-        "usage": _usage(execution.get("usage"), provenance=execution.get("usage_provenance", "unknown")),
+        "usage": _usage(execution.get("usage"), provenance=execution.get("usage_provenance", "unknown"), receipt=True),
         "outcome": {
             "status": outcome,
             "basis": _optional_identifier(basis, "outcome basis"),

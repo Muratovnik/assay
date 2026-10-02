@@ -204,6 +204,21 @@ def following_workflow(text, rules):
     return []
 
 
+def plan_only_selection(text, rules):
+    """Honor a bounded current-endpoint modifier without classifying all stages."""
+    text = delegation_text(text)
+    clauses = re.split(r"[.;!?]\s+|;\s*|\s+(?:but|но)\s+", text, flags=re.I)
+    limit = (
+        r"^(?:(?:for\s+now)\s*[, :]?\s*)?only\s+"
+        r"(?:write|create|prepare|update)\s+(?:(?:an?|the)\s+)?(?:implementation\s+)?plan\b|"
+        r"^(?:пока\s*[, :]?\s*)?только\s+(?:составь|подготовь|обнови|пересмотри)\s+"
+        r"(?:подробный\s+)?план\b"
+    )
+    if any(re.search(limit, clause.strip(), re.I) for clause in clauses):
+        return next(([rule] for rule in rules if rule["id"] == "planning"), [])
+    return []
+
+
 def select(prompt, rules):
     names = {rule["skill"].split("/", 1)[1] for rule in rules}
     text = request_text(prompt, names)
@@ -213,7 +228,7 @@ def select(prompt, rules):
     # request is not an unknown skill name and must reach modifier selection.
     selected = explicit_selection(text, rules)
     if not selected:
-        selected = workflow_selection(text, rules)
+        selected = plan_only_selection(text, rules) or workflow_selection(text, rules)
     # Keep the first applicable workflow; delegation complements it rather than
     # injecting implementation/review stages that are not ready yet.
     if not selected:

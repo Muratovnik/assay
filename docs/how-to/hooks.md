@@ -73,6 +73,12 @@ URLs and versions can contain periods without ending that request. Two explicit
 skill selections fill both slots. The catalogue supplies identifiers and
 installed paths. Missing/disabled skills are not installed or advertised.
 
+A direct `for now only prepare a plan` / `пока только составь план` modifier in
+that request paragraph selects planning before ordinary implementation hints.
+Quoted/inline-code examples cannot supply the modifier; explicit skill choices
+keep priority. This bounded endpoint hint does not parse the full task graph or
+enforce a write prohibition. The actual request still controls authority.
+
 The CommonMark parser excludes blockquotes, fenced/indented code, lists and
 headings. Explanations, quoted commands and negative requests normally abstain.
 Only the first request paragraph is considered. This deliberately misses some

@@ -3,7 +3,7 @@ name: route-subagents
 description: Prepare and route bounded Codex or Claude subagent packets after the user or an explicitly invoked workflow has already authorized delegation. Select client-native routes, ownership, isolation, return contracts, and oracles; parallelism alone is never permission to spawn.
 license: MIT
 metadata:
-  assay-optional-skills: "independent-audit skill-evaluation"
+  assay-optional-skills: "code-change implementation-planning independent-audit skill-evaluation"
 ---
 
 # Route subagents
@@ -46,7 +46,9 @@ Within already-authorized delegation:
 3. Choose `local`, `delegate_now`, `delegate_after` with a concrete readiness
    trigger, or `blocked` with the missing capability. Use the existing plan when
    a record is needed; these are decision labels, not a new runtime schema.
-4. Prepare ready packets before doing their work locally. State what the primary
+4. Before dispatch, verify each material readiness trigger against its current
+   source and consumer, using [delegation planning](references/delegation-planning.md).
+   Prepare ready packets before doing their work locally. State what the primary
    retains while they run. Respect actual dependency, shared-state and budget
    limits; do not invent a fixed worker count or repeat the worker's assignment.
 5. Reconsider at newly ready dependencies, changed scope or evidence, an

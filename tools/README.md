@@ -33,6 +33,11 @@ export AUDIT_EVAL_TEST_TMP="$PWD/.cache/audit-eval-tests"
 python -B tools/check.py --all
 ```
 
+`check --all` honors an existing `AUDIT_EVAL_TEST_TMP` selection. Use it when
+the owning task requires scratch outside the checkout; without it, the command
+retains its repository-local default. Select and verify the permitted task-owned
+directory before running checks; this option does not change packet isolation.
+
 The original owner tests still run. The added audit-packet tests were already
 present but absent from the workflow. `catalog_docs.py --write` updates only
 the marked architecture table; it never rewrites the independent expected

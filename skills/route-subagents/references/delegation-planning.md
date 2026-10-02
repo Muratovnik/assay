@@ -59,6 +59,14 @@ use [writing and integration](writing-and-integration.md); it owns isolation and
 integration guarantees. Dependent writers wait for a stable shared contract.
 Read-only discovery can often proceed while that contract is unresolved.
 
+Before dispatch, inspect the observation behind a material readiness trigger and
+confirm it still applies to the packet's source and contract. Use planning's
+[dependency and early-boundary criteria](../../implementation-planning/references/implementation-units.md)
+for the prerequisite; this procedure owns launch timing. If only a plan, stub or
+unrelated green check supports it, defer that dependent writer and route a bounded
+investigation where useful. This does not reopen sufficiently verified interfaces
+or stop independent packets.
+
 ## Prepare once, route through the existing owner
 
 Use the existing [assignment packet](packet-contracts.md). Add the delegation

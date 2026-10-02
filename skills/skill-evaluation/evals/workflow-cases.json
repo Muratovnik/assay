@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WF-01",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The implementation plan opens three dependent writers after a parser integration probe. The probe exists only as a proposed command; its test substitutes a fixed dictionary for the native parser. The native output schema is still unknown. A separate source/licensing investigation has all inputs and does not use that schema. The earlier user authorized delegation, but the current request is the read-only assessment above."
+    },
+    {
+      "id": "WF-02",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The implementation plan opens three dependent writers after a parser integration probe. The receipt names contract revision schema-2 and the current producer/consumer revisions; it shows actual parser output consumed successfully through the supported entrypoint. Those revisions are unchanged. The only new change is punctuation in an unrelated README. A separate source/licensing investigation is ready. The earlier user authorized delegation, but this assessment is read-only."
+    },
+    {
+      "id": "WF-03",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The promise is to retain the eight most recent receipts from the actual producer, preserving opaque receipt identity. The test suite passes. Inspect the supplied components and assess whether their interaction is covered.",
+      "files": {
+        "producer.py": "def produce(job):\n    return {'receipt_id': f'queue:{job}'}\n",
+        "retention.py": "def retain(receipts):\n    return [r for r in receipts if r['receipt_id'].startswith('job:')][-8:]\n",
+        "test_retention.py": "from retention import retain\n\ndef test_eight_receipts():\n    data = [{'receipt_id': f'job:{i}'} for i in range(12)]\n    assert len(retain(data)) == 8\n"
+      }
+    },
+    {
+      "id": "WF-04",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The promise is to retain the eight most recent producer receipts with opaque identity. The receipt for current bytes executes the supplied producer through retention for twelve inputs and observes the last eight identities unchanged. An unrelated metadata field is now added to each receipt.",
+      "files": {
+        "producer.py": "def produce(job):\n    return {'receipt_id': f'queue:{job}', 'note': 'optional metadata'}\n",
+        "retention.py": "def retain(receipts):\n    return list(receipts)[-8:]\n",
+        "test_retention.py": "from producer import produce\nfrom retention import retain\n\ndef test_actual_producer_output():\n    data = [produce(i) for i in range(12)]\n    assert [r['receipt_id'] for r in retain(data)] == [f'queue:{i}' for i in range(4, 12)]\n"
+      }
+    },
+    {
+      "id": "WF-05",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A launcher creates a task-owned child and stores its PID only after connecting to its transport. Connection fails. Disposal requests cancellation and returns without checking exit. Later tests use the same temporary configuration even though restoration failed. Another long-running process with the same executable name belongs to the user."
+    },
+    {
+      "id": "WF-06",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "An adapter connects to an existing user-owned service. It records no acquisition of that process. The operation closes its own subscription and confirms that subscription ended. The service continues running as intended, its configuration is unchanged, and the affected fixture is healthy. A reviewer claims cleanup must kill every process with the executable name."
+    },
+    {
+      "id": "WF-07",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A remote import was sent with supported operation key import-42. The response was lost. A read-only lookup now returns the completed import under import-42 with the expected artifact identity. The old unchecked plan box still says send import. The current request does not grant another external mutation."
+    },
+    {
+      "id": "WF-08",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A remote import was sent with supported operation key import-42. The provider's supported lookup establishes that the transaction rolled back and no import exists. Its documented idempotency mechanism permits retry under import-42. The owner has separately authorized retry, but this current task asks only for the read-only assessment."
+    },
+    {
+      "id": "WF-09",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Acceptance claims that package version pkg-7 supports a clean consumer start with required data revision data-4. The only receipt is a successful development run on pkg-6/data-3. An evaluator read an unrelated successful lint report and then marked this delivery criterion PASS. No consumer-entry run for the delivered bytes exists."
+    },
+    {
+      "id": "WF-10",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Acceptance claims that package pkg-7 supports a clean consumer start with required data data-4. A receipt identifies the delivered package and data, uses the documented fresh-consumer entrypoint, and observes the required output. The bytes relevant to this claim are unchanged. A new formatting change affects an unrelated source file."
+    },
+    {
+      "id": "WF-11",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A worker assumed contract schema-1. The primary changed only the consumer contract to schema-2 while the worker ran; a separate documentation packet does not consume it. A submitted operation lost its reply, then compaction occurred. The new user request says only produce a plan. Current external-effect state has not been reconciled, and an old note proposes retrying the operation and repairing both packets."
+    },
+    {
+      "id": "WF-12",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A repair loop repeatedly changes product code because a test expects thirteen categories. The accepted versioned specification lists twelve categories. A fault probe has also left a shared fixture unhealthy. The latest run has the same assertion and setup failures with no new evidence. A proposal increases model effort and repeats the whole assignment."
+    },
+    {
+      "id": "WF-13",
+      "prompt": "Correct the typo 'reciept' to 'receipt' in the supplied note. Keep the rest of the note unchanged.",
+      "files": {
+        "note.txt": "Keep the reciept for this operation.\n"
+      }
+    }
+  ]
+}

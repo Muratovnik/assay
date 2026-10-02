@@ -26,6 +26,19 @@ logic without proving disk durability, transaction semantics or vendor fidelity.
 Reuse contract tests or a safe integration check where that difference matters.
 Do not require a real paid service merely to avoid mocks.
 
+When agreement between components is the guarantee, feed actual producer output
+through the supported consumer rather than manufacturing the format both tests
+expect. Preserve an independently justified semantic expectation or external
+vector: exercising both production sides alone can still preserve their shared
+mistake. Include a legitimate unrelated change when a rejection guard could
+accidentally depend on a whole inventory, global revision or other broad state.
+
+For a delivered package, adapter or migration, exercise its supported entry path
+in a clean consumer fixture when missing files, ambient state or code/data drift
+could invalidate the promise. Use the delivered bytes, required configuration and
+data together; a development checkout's green suite is a different boundary.
+Reuse sufficient delivery evidence for changes that do not affect that route.
+
 For persistence, recovery and data safety, observe state through the supported
 read/reopen/retry path and inspect prohibited effects. Returning success or
 calling a save helper alone is narrower evidence. Inject only the relevant

@@ -13,7 +13,7 @@ import sys
 from assay import main
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRATCH = ROOT / ".cache" / "audit-eval-tests"
+SCRATCH = Path(os.environ.get("AUDIT_EVAL_TEST_TMP", ROOT / ".cache" / "audit-eval-tests"))
 
 GATES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("source check", ("tools/check.py",)),

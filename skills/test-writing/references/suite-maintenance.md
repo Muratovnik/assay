@@ -9,6 +9,12 @@ clearing spy history does not reset nested objects, module caches, timers or
 subscriptions. Share immutable data or intentionally shared resources with an
 explicit isolation/reset contract. Local mutation inside one scenario is valid.
 
+For external acquisition, cancellation or fault restoration, use
+[external resource lifecycle](../../code-change/references/external-resource-lifecycle.md).
+It owns resource identity and failure transitions; this method retains fixture
+selection and assertions. Re-establish fixture health after a fault before
+interpreting later failures as product regressions.
+
 Organize growing suites around supported operations and coherent scenarios.
 Keep interdependent steps of one scenario together. Extract setup that hides
 incidental construction without hiding the action or expected outcome. A giant

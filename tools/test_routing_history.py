@@ -150,6 +150,60 @@ class HistoryStoreTests(unittest.TestCase):
         self.assertTrue(foreign.exists())
         self.assertIsNone(store.read("d1"))
 
+    def test_receipt_rejects_invalid_reference_without_persisting_partial_acceptance(self):
+        for index, invalid in enumerate(("https://example.org/check", {}, {"id": "not a bounded id"}, 7)):
+            with self.subTest(invalid=invalid):
+                store = HistoryStore(self.root / f"ref-{index}", clock=lambda: self.now)
+                store.write_decision("d-bad-ref", snapshot(), advisor_result(), decisions())
+                with self.assertRaisesRegex(EvidenceError, r"outcome\.evidence_refs\[1\]"):
+                    store.record_outcome("d-bad-ref", {
+                        "status": "completed", "outcome": {
+                            "status": "accepted", "evidence_refs": ["receipt-valid", invalid],
+                        },
+                    })
+                self.assertFalse(list(store.root.glob("outcome-*.json")))
+
+    def test_receipt_field_errors_identify_the_input_and_supported_contract(self):
+        cases = (
+            ({"elapsed_ms": 5}, r"execution.*elapsed_ms.*allowed"),
+            ({"outcome": {"status": "accepted", "receipt_url": "unused"}},
+             r"outcome.*receipt_url.*allowed"),
+            ({"requested": {"model": "economy", "reason": "unused"}},
+             r"requested.*reason.*allowed"),
+            ({"usage": {"input_tokens": 3, "wall_time": 4}}, r"usage.*wall_time.*allowed"),
+            ({"usage": "unknown"}, r"usage.*object"),
+        )
+        for index, (fields, message) in enumerate(cases):
+            with self.subTest(fields=fields):
+                store = HistoryStore(self.root / f"fields-{index}", clock=lambda: self.now)
+                store.write_decision("d-fields", snapshot(), advisor_result(), decisions())
+                with self.assertRaisesRegex(EvidenceError, message):
+                    store.record_outcome("d-fields", {"status": "completed", **fields})
+                self.assertFalse(list(store.root.glob("outcome-*.json")))
+
+    def test_valid_receipt_aliases_remain_supported_and_refs_are_deduplicated(self):
+        store = self.store()
+        store.write_decision("d-aliases", snapshot(), advisor_result(), decisions())
+        receipt = store.record_outcome("d-aliases", {
+            "status": "completed", "actual_model": "economy", "actual_effort": "low",
+            "observed": {"model": None, "effort": None},
+            "usage": {"inputTokens": 8, "outputTokens": 3},
+            "outcome": "accepted", "outcome_basis": "tests",
+            "evidence": [{"source_id": "check-1"}, "check-1", {"evidence_id": "check-2"}],
+        })["execution"]
+        self.assertEqual(receipt["outcome"]["status"], "accepted")
+        self.assertEqual(receipt["outcome"]["evidence_refs"], ["check-1", "check-2"])
+        self.assertEqual(receipt["observed"]["model"], "economy")
+        self.assertEqual(receipt["usage"]["total_tokens"], 11)
+
+    def test_receipt_does_not_silently_truncate_references(self):
+        store = self.store()
+        store.write_decision("d-many-refs", snapshot(), advisor_result(), decisions())
+        with self.assertRaisesRegex(EvidenceError, r"evidence_refs.*256"):
+            store.record_outcome("d-many-refs", {"status": "completed",
+                "evidence_refs": [f"check-{index}" for index in range(257)]})
+        self.assertFalse(list(store.root.glob("outcome-*.json")))
+
     def test_lifecycle_preserves_launch_and_one_terminal_receipt(self):
         store = self.store()
         store.write_decision("d-life", snapshot(), advisor_result(), decisions())
