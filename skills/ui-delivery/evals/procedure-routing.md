@@ -7,6 +7,8 @@ to the executor. Keep this table and prior answers out of its packet.
 
 | Request and causal boundary | Expected reading scope | Overreach to reject |
 | --- | --- | --- |
+| Design substantial new UI with an unfamiliar pattern and no sufficient supplied reference | Entry + Reference discovery; Component system or Visual judgment for the decision it informs | Starting custom implementation before resolving the reference question, treating a style export as a behavior contract or automatically installing a catalog service |
+| Repair a local color using a valid established theme and supplied reference | Entry + Visual judgment; affected component owner if a binding changes | A fresh external catalog survey, mandatory delegation or replacement of the accepted system solely for novelty |
 | Repair a local fade; layout and modality unchanged | Entry + Motion | Entire workspace or acceptance corpus solely because a transition exists |
 | Correct a numeric refresh that hides retained values | Entry + Data lifecycle; Content if state wording changes | Unrelated selection, motion or visual-style instructions |
 | Fix a dead strip on a persistent button; no animation | Entry + Interaction | Mandatory Motion or new edge-placement policy for every control |

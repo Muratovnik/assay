@@ -3,7 +3,7 @@ name: ui-delivery
 description: Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. Covers user actions, shared states, reusable components, editability and visual clarity in any layout mode; skip backend-only work, tool installation and illustration without UI.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change implementation-planning independent-audit product-flow-mapping"
+  assay-optional-skills: "code-change implementation-planning independent-audit product-flow-mapping route-subagents"
 ---
 
 # UI delivery
@@ -70,6 +70,7 @@ chain; do not load the whole directory or evaluation corpus.
 
 | Task or decision | Procedure |
 | --- | --- |
+| New substantial UI or unfamiliar pattern without a sufficient supplied reference | [Reference discovery](references/reference-discovery.md), before choosing a custom implementation |
 | Shared base, families, nested reuse, property effect, design-to-code mapping | [Component system](references/component-system.md) |
 | Design-system/library information architecture, consumer-facing resources, internal/example/lifecycle separation | [Design-system organization](references/design-system-organization.md) |
 | Adding/retaining primitive mechanics or standard visual states; staged library adoption | [Reuse and migration scope](../code-change/references/reuse-and-migration.md) |
