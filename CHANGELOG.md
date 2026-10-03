@@ -6,6 +6,27 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.13.0](https://github.com/Muratovnik/assay/compare/v0.12.1...v0.13.0) (2026-10-04)
+
+UI delivery now researches suitable references before custom implementation,
+starting with the existing design system and the concrete gap. Runtime changes
+connect generated-code compilation, actual build inputs and identity lifetime to
+evidence from the reached execution stage. Codex SessionEnd hooks use the client's
+three-second timeout limit.
+
+### Features
+
+* **ui:** research visual direction, component patterns or product behavior before a material custom implementation; use Refero Styles and The Component Gallery as optional reference catalogs, record the mechanism, fit, limits and adoption decision, and reuse sufficient existing evidence for local repairs ([795482b](https://github.com/Muratovnik/assay/commit/795482b9fd0698f04e41d2a40afe03c5ca829d6a))
+
+### Bug Fixes
+
+* **skills:** validate final generated code with the operation's compiler and references, account for actual runtime inputs and scoped drift, test identity guarantees over the consumer's required lifetime, and distinguish enabled functions, reached stages and helper success from completed operations; add 12 decision scenarios without claiming measured task effectiveness ([8200322](https://github.com/Muratovnik/assay/commit/820032212f18e86d8cbcba1c508b100611c6cfcd))
+* **hooks:** set Codex SessionEnd to three seconds so loading the plugin no longer requires the client to clamp its timeout; preserve other hook limits ([cfdccc1](https://github.com/Muratovnik/assay/commit/cfdccc1541b967c52b02bb324599961c7f548732))
+
+### Documentation
+
+* **ui-delivery:** refresh Figwright 0.6.0 guidance for end-to-end connection checks, process-scoped file claims, actual resize results and variant property ownership; pin source references and retain older-adapter recovery paths conditionally ([427e345](https://github.com/Muratovnik/assay/commit/427e345a5c9a0d1cec6290e70be20884f5eff2c5))
+
 ## [0.12.1](https://github.com/Muratovnik/assay/compare/v0.12.0...v0.12.1) (2026-10-02)
 
 Planning and delegation now connect risky dependencies to evidence from their
