@@ -145,12 +145,13 @@ class ReminderTests(unittest.TestCase):
                 self.assertEqual(unified, commands("SessionStart", source))
             self.assertEqual(unified if client == "claude" else [], commands("SessionStart", "fork"))
             self.assertEqual([], commands("SessionStart", "shutdown"))
-            for rules in hooks.values():
+            for event, rules in hooks.items():
                 for rule in rules:
                     self.assertEqual(1, len(rule["hooks"]))
                     for hook in rule["hooks"]:
                         self.assertEqual("command", hook["type"])
-                        self.assertLessEqual(hook["timeout"], 5)
+                        timeout_limit = 3 if client == "codex" and event == "SessionEnd" else 5
+                        self.assertLessEqual(hook["timeout"], timeout_limit)
 
     def test_guard_matcher_names_exactly_the_routing_operations(self):
         sys.path.insert(0, str(SCRIPT.parent))

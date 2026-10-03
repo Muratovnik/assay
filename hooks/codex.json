@@ -77,7 +77,7 @@
           {
             "type": "command",
             "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','codex']; runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
-            "timeout": 5
+            "timeout": 3
           }
         ]
       }

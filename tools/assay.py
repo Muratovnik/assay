@@ -876,6 +876,7 @@ def reminder_hooks(client: str = "claude") -> bytes:
         f"or os.environ['{fallback}'], 'hooks/runtime/cli.py'), run_name='__main__')\""
     )
     hook = {"type": "command", "command": command, "timeout": 5}
+    session_end_hook = {**hook, "timeout": 3} if client == "codex" else hook
     operations = "|".join(sorted(ROUTING_OPERATIONS))
     spawn = "Agent|Task" if client == "claude" else "spawn_agent|Agent"
     pre = f"{spawn}|mcp__.+__({operations})"
@@ -888,7 +889,7 @@ def reminder_hooks(client: str = "claude") -> bytes:
         "SubagentStart": [{"matcher": "^assay-", "hooks": [hook]}],
         "SubagentStop": [{"matcher": "^assay-", "hooks": [hook]}],
         "PostToolUse": [{"matcher": f"^({spawn})$", "hooks": [hook]}],
-        "SessionEnd": [{"hooks": [hook]}],
+        "SessionEnd": [{"hooks": [session_end_hook]}],
     }
     if client == "claude":
         hooks["PermissionDenied"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
