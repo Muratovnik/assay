@@ -64,7 +64,7 @@ contract is fixed.
 
 ## Preserve slots when Figwright cannot author them
 
-At the pinned Figwright implementation used by this skill, `get_component_api`
+At Figwright 0.6.0, pinned below, `get_component_api`
 can report `SLOT` properties, but `set_instance_properties` documents SLOT as
 not settable and the component-property authoring handler only creates
 BOOLEAN/TEXT/INSTANCE_SWAP properties. Treat this as a capability boundary.
@@ -141,9 +141,9 @@ not a requirement for this skill.
 - [Figma: move published components](https://help.figma.com/hc/en-us/articles/4404848314647-Move-published-components)
 - [Figma MCP: dependency-ordered component creation](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-library/references/component-creation.md#1-component-architecture)
 - [Figma MCP: slot patterns](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-use/references/component-patterns.md#slots-createslot-and-slot-properties)
-- [Figwright: component API exposes SLOT](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/mcp/src/tools/get-component-api.ts)
-- [Figwright: SLOT is not settable through set_instance_properties](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/mcp/src/tools/set-instance-properties.ts)
-- [Figwright: SLOT authoring is out of scope in the current property handler](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/plugin/src/handlers/component-property.ts)
+- [Figwright: component API exposes SLOT](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/get-component-api.ts)
+- [Figwright: SLOT is not settable through set_instance_properties](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/set-instance-properties.ts)
+- [Figwright: SLOT authoring is out of scope in the current property handler](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/plugin/src/handlers/component-property.ts)
 
 These references describe Figma and the pinned Figwright revision. Always prefer the
 capabilities and documentation of the live adapter session when they differ.

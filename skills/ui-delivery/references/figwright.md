@@ -11,12 +11,23 @@ adapter's documentation applies and none of the command names here carry over.
 ## Confirm the connection and the target file
 
 Confirm the plugin is connected (`ping`) and look at the command set this
-session actually exposes before planning a write. With more than one file open,
+session actually exposes before planning a write. `ok: true` with
+`hop: server-only` and `plugin: null` confirms the server only; a connected
+plugin answers through `hop: e2e`. Check the server and plugin versions and any
+`versionSkew` / `buildSkew` or plugin compatibility warning: installing a newer
+package does not replace a process already running the older build. With more
+than one file open,
 claim the target through the documented mechanism when the current schema
 offers it — `list_files` names the connected files and `use_file` claims one,
 by session identity when two open files share a name. Unclaimed calls follow
 whichever file the user last touched, so a task can read one file, write to
 another and still report success.
+
+In Figwright 0.6.0 the claim belongs to the MCP server process, not the whole
+client or every agent. A new process needs its own claim. `list_files` asks
+the plugins for their current names; `ping` may show a cached null name just
+after connection. A claim can survive a plugin reconnect by finding the file
+again by name, so reread identity rather than assuming the old session id lives on.
 
 Re-confirm identity and a known page/node anchor after a reconnect, a restart
 or resume, and after any change in the set of open files. A file name is not a
@@ -86,7 +97,7 @@ those gaps stay in the reported result instead of turning into a pass.
 | --- | --- |
 | Inventory, or read for implementation | `get_design_context` at sufficient detail; expand the truncated or deduped part you will build from and follow a `sectionPlan` section by section. A field missing from a compact answer is not a missing property. Check component/token/icon maps by role: the render shows the look, the tree shows links and values. |
 | Assemble from the system | `create_instance` the matching component or swap an existing one; read the contract with `get_component_api` and pass the exact current keys. Verify the overrides and one real consumer — a matching resource name does not prove compatibility. |
-| Adaptive sizing | Parent layout → append the child → `set_layout_props` for HUG/FILL and min/max per the contract. `resize_nodes` can force sizing to FIXED: use it when a fixed size is the intent, and check the resulting behavior rather than the number. Screen, panel and container sizing stays in [workspace consistency](workspace-consistency.md). |
+| Adaptive sizing | Parent layout → append the child → `set_layout_props` for HUG/FILL and min/max per the contract. `resize_nodes` can force sizing to FIXED: use it when a fixed size is the intent. In 0.6.0 it reads the sizes back: `affected` names nodes that reached the requested size, while `adjusted` gives other nodes' actual sizes and reasons. Missing or non-resizable nodes can still be skipped, so reconcile both lists with the requested set and verify the sizing behavior. Screen, panel and container sizing stays in [workspace consistency](workspace-consistency.md). |
 | Variants and properties | Name members `Prop=Value` before `combine_as_variants`, then read the derived axes back. A non-variant property is declare → bind to the correct sublayer → read → change on an instance → check the render; `bind_component_property` attaches TEXT to `characters`, BOOLEAN to `visible` and INSTANCE_SWAP to `mainComponent` per the current API. Which part should own a property is a [component system](component-system.md) question. |
 | Themes and shared finishes | Distinguish a color binding on the paint (`bind_variable_to_paint`), a scalar binding on the node (`bind_variable_to_node`) and a composite `apply_style_to_node`. When replacing a paints or effects array, carry the needed `boundVariables` through or the style stops tracking its token. Check nested mode/Theme overrides and the composed result; the judgment itself is [visual judgment](visual-judgment.md). |
 | Structural replacement | Preserve parent, order, grid row/column/span, sizing and the required links; verify the new node in its container before deleting the source. After a combine, rename or reparent, reread identifiers and property keys, suffixes included. Source fidelity and the allowed delta belong to [design transfer](design-transfer.md). |
@@ -116,13 +127,19 @@ exposed instances does not prove the adapter supports it.
 
 ## Recovery when a binding owner cannot be resolved
 
+Figwright 0.6.0 resolves a variant sublayer's property owner to the parent
+`COMPONENT_SET`; it does not read property definitions from the variant itself.
+Use the direct binding path on that version. The standalone-component route
+below applies only when an older adapter or a reproduced regression still has
+the owner-resolution defect.
+
 If the current version cannot resolve the owner of a property binding inside a
 variant set and the call comes back with a `get_componentPropertyDefinitions`
 error, check two things before changing the design: the hierarchy you passed,
 and how the adapter resolves the owner. `bind_component_property.nodeId` stays
 the target sublayer, never the component set, and the property must exist on
-the containing component — so a hierarchy mistake and an adapter defect look
-alike from outside.
+the containing standalone component or the variant's parent component set — so
+a hierarchy mistake and an adapter defect look alike from outside.
 
 With the defect confirmed for the version in use, one workable path is: author
 the component standalone → declare and bind the property → verify the effect →
@@ -135,13 +152,17 @@ workaround forever — recheck it when the adapter changes.
 
 ## Primary references
 
-- [Figwright figma-build](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/skills/figma-build/SKILL.md)
-- [Component property binding handler](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/plugin/src/handlers/bind-component-property.ts#L59)
-- [Component property owner resolution](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/plugin/src/handlers/component-property.ts#L44)
+- [Figwright 0.6.0 release](https://github.com/awdr74100/figwright/releases/tag/v0.6.0)
+- [Figwright figma-build](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/skills/figma-build/SKILL.md)
+- [Connection and version diagnostics](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/ping.ts)
+- [File claim lifetime](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/use-file.ts)
+- [Resize result contract](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/resize-nodes.ts)
+- [Component property binding handler](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/plugin/src/handlers/bind-component-property.ts#L66)
+- [Component property owner resolution](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/plugin/src/handlers/component-property.ts#L47)
 - [Figma: generate design](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-design/SKILL.md)
 - [Figma: component creation](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-generate-library/references/component-creation.md)
 - [Figma plugin API types](https://github.com/figma/mcp-server-guide/blob/ecefd5b5dfd0ca7a1b8f142e0d59bc7f8a2efde6/skills/figma-use/references/plugin-api-standalone.d.ts)
-- [Figwright tool specs: reparent, reorder and clone](https://github.com/awdr74100/figwright/blob/670b69040f0933728de9a31bb9d8ce920bf3ce44/packages/mcp/src/tools/reparent-nodes.ts)
+- [Figwright tool specs: reparent, reorder and clone](https://github.com/awdr74100/figwright/blob/de195ecf1ca3319dcb7ecfee4033de09ba66d77f/packages/mcp/src/tools/reparent-nodes.ts)
 
-Historical URLs help clarify a mechanism; they do not replace the documentation
-of the version actually in use.
+The Figwright references are pinned to the 0.6.0 release. Recheck the documentation
+and capabilities of the version actually in use when it differs.
