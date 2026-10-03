@@ -3,9 +3,10 @@
 Coordinator data for the collection, not instructions to an executor doing a
 user task. `workflow-cases.json` contains synthetic public working inputs;
 `workflow-rubric.json` and `workflow-case-metadata.json` stay with the evaluator.
-The first twelve inputs assess decisions under a present read-only request.
-WF-13 exercises a bounded edit and unnecessary activation. These inputs do not
-execute a native workload or establish behavior during real dispatch.
+WF-01–12 and WF-14–25 assess decisions under a present read-only request.
+WF-13 exercises a bounded edit and unnecessary activation. These development
+decision probes do not execute a native workload or establish behavior during
+real dispatch.
 
 ## Protected decisions
 
@@ -19,11 +20,22 @@ execute a native workload or establish behavior during real dispatch.
 | Combined transition | Contract drift, uncertain effect, compaction and narrowed authority | Relevant owners together |
 | Repair | Wrong expectation and unhealthy fixture / causal diagnosis | Diagnostic reproducer; outcome and repair |
 | Small task | One typo / unnecessary ceremony | Ordinary authoring; activation control |
+| Generated compilation (WF-14/15) | Handwritten stub or unrelated main build / final emitted bytes with actual references and SDK semantics | Code-change runtime boundaries; test-writing boundary choices |
+| Compilation inputs (WF-16/17) | Shared SDK drift despite isolated outputs / unchanged identified inputs | Code-change runtime boundaries |
+| Identity lifetime (WF-18/19) | Session lookup offered as durable identity / legitimate session-only handles | Code-change runtime boundaries; owner lifecycle tests |
+| Reached stages (WF-20/21) | Enabled defaults scored as execution / observed stages with an unrequested stage omitted | Evidence calibration; effective quality checks |
+| Guard discrimination (WF-22/23) | Permitted unrelated change rejected / relevant input change rejected and unrelated change accepted | Evaluation calibration; test-audit discriminating probes |
+| Parent completion (WF-24/25) | Helper success offered as save/logout completion / observed parent durable state and logout | Code-change runtime boundaries; owner lifecycle tests |
 
 Related invalid/valid cases share metadata groups. WF-11, WF-12 and WF-13 have
 distinct groups. All cases are public development evidence, never a sealed final
 population or an estimate of incident frequency. Reserve different groups outside
 this repository for independent final evidence; a public label cannot seal them.
+WF-14–25 add six related pairs for runtime decisions that the generic WF-01–13
+do not distinguish. Their balanced construction is a coverage choice, not an
+estimate of how often a failure occurs. The rubric evaluates supported decisions
+and observations; equivalent solutions can satisfy it without following a literal
+tool sequence.
 
 ## Run and inspect
 
@@ -50,6 +62,14 @@ Use the existing [paired pilot](../references/paired-pilot.md) and
 [evaluation design](../references/eval-design.md), including calibration and
 stopping criteria. These resources supply no runner, delegation authority, paid
 campaign or universal score threshold. No model results are bundled here.
+
+The guard pair probes recognition of a false rejection and separation of an
+original receipt from derived replay evidence. It does not calibrate an actual
+grader, reproduce a preserved trace or establish replay fidelity. Before relying
+on a grader or guard in an owner workload, retain its original evidence, exercise
+legitimate and invalid changes at that boundary, and inspect actual verdicts.
+Workload-specific calibration remains with that owner; these synthetic inputs
+do not prove skill effectiveness or preserved trace replay.
 
 ## Research and transfer boundary
 

@@ -40,6 +40,11 @@ where their agreement is the promise. State the discriminating result and effect
 before expanding dependent implementation. A compile or mocked response proves
 only its narrower boundary.
 
+When that slice includes generated code, an installed API or a costly stateful
+runner, use [runtime boundaries](../../code-change/references/runtime-boundaries.md)
+for actual inputs and the first consumer observation. Planning retains the
+dependent units and the result that makes them ready.
+
 Choose the slice by the unresolved risk; it need not span every layer or introduce
 a prototype. Existing integration evidence can satisfy it. Independent discovery
 and work behind already verified contracts can proceed. An unavailable external

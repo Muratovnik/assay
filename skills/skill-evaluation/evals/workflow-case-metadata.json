@@ -118,6 +118,114 @@
       "rationale": "Small prose correction controls unnecessary activation and coordination overhead.",
       "split": "working",
       "exposure": "public"
+    },
+    {
+      "id": "WF-14",
+      "group": "wf-pair-6",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Separates the final generated source and real SDK contract from a passing unrelated build or substitute compiler inputs.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-15",
+      "group": "wf-pair-6",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Separates the final generated source and real SDK contract from a passing unrelated build or substitute compiler inputs.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-16",
+      "group": "wf-pair-7",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Varies relevant compiler input drift while keeping output isolation and unrelated evidence separate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-17",
+      "group": "wf-pair-7",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Varies relevant compiler input drift while keeping output isolation and unrelated evidence separate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-18",
+      "group": "wf-pair-8",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Contrasts missing durability under a durable contract with legitimate ephemeral identity under a session contract.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-19",
+      "group": "wf-pair-8",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Contrasts missing durability under a durable contract with legitimate ephemeral identity under a session contract.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-20",
+      "group": "wf-pair-9",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Separates configuration defaults from reached operations and preserves a legitimate omitted stage.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-21",
+      "group": "wf-pair-9",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Separates configuration defaults from reached operations and preserves a legitimate omitted stage.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-22",
+      "group": "wf-pair-10",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Checks a plausible guard for false rejection and evidence provenance without treating synthetic replay as workload calibration.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-23",
+      "group": "wf-pair-10",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Checks a plausible guard for false rejection and evidence provenance without treating synthetic replay as workload calibration.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-24",
+      "group": "wf-pair-11",
+      "purpose": "regression",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Distinguishes a successful subordinate helper from observed parent save and logout completion.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WF-25",
+      "group": "wf-pair-11",
+      "purpose": "routine",
+      "source": "Synthetic maintainer-authored input; no production transcript.",
+      "rationale": "Distinguishes a successful subordinate helper from observed parent save and logout completion.",
+      "split": "working",
+      "exposure": "public"
     }
   ]
 }

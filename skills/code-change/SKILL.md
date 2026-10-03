@@ -82,6 +82,11 @@ continuation procedure linked there.
 - When a repair needs causal diagnosis or a persistent reproducer, use
   [diagnostic reproducers](references/diagnostic-reproducer.md). An already
   justified narrow fix does not require a new debugging campaign.
+- When generated or dynamically compiled code, installed APIs or a staged
+  runtime operation can invalidate the run before it reaches the consumer,
+  read [runtime boundaries](references/runtime-boundaries.md). It owns input,
+  compile and execution preflight; resource cleanup stays with the lifecycle
+  procedure above.
 - Before a material decision to add, retain or change reusable behavior or
   standard visual states, or deliver a staged adoption, read
   [reuse and migration scope](references/reuse-and-migration.md). A dependency or

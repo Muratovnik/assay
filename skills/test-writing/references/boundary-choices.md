@@ -44,6 +44,21 @@ read/reopen/retry path and inspect prohibited effects. Returning success or
 calling a save helper alone is narrower evidence. Inject only the relevant
 fault into disposable data; keep the normal control and recovery case intact.
 
+## Identity and lifetime
+
+Choose identity assertions from the consumer's required lifetime. A session-local
+or network identifier can be valid within that session. Require a supported
+durable identifier or GUID only when the consumer must recognize the same entity
+after persistence, reopen or restart. A GUID-shaped value alone does not establish
+that guarantee.
+Verify the relevant API semantics and observe the required lifetime through its
+supported consumer path.
+
+Keep that expectation independent of fixture convenience. A fixture that retains
+one session cannot establish restart identity, and a fixture that creates fresh
+objects need not invalidate a contract limited to the original session. Do not
+promote a fixture's chosen identifier into a product requirement.
+
 ## UI and snapshots
 
 Choose stable user-facing roles/names or explicit test hooks for interaction.

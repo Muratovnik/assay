@@ -64,6 +64,12 @@ For structural assertions, mocks, UI interaction, snapshots, property tests or
 legacy characterization, read [boundary choices](references/boundary-choices.md).
 Use only the applicable techniques; none is a mandatory stack.
 
+For generated or dynamically compiled harness code, installed API semantics or
+staged runtime checks, use available code-change's
+[runtime boundaries](../code-change/references/runtime-boundaries.md) for input,
+compile and execution preflight. This method retains the independent consumer
+expectation and assertions; a reached stage limits what the test can establish.
+
 For shared mutable setup, growing suites or relocated tests, read
 [fixtures and suite maintenance](references/suite-maintenance.md).
 

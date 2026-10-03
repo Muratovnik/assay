@@ -78,6 +78,66 @@
       "files": {
         "note.txt": "Keep the reciept for this operation.\n"
       }
+    },
+    {
+      "id": "WF-14",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Acceptance claims the current emitter produces a compilable adapter for the installed SDK. The main project build passes but excludes emitted adapters. A separate probe compiles a handwritten adapter against a local stub. The final emitted source calls Store.Commit(draft). The installed SDK declares CommitAsync(Draft, CancellationToken), which returns a receipt whose Applied flag indicates commitment. No invocation has compiled the final emitted bytes against that SDK or exercised its receipt handling."
+    },
+    {
+      "id": "WF-15",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Acceptance claims the current emitter produces a compilable adapter for the installed SDK and reports whether a draft was committed. A receipt records successful compilation of the exact final emitted bytes through the actual compiler and identifies its input/reference set, including the installed SDK. That source awaits Store.CommitAsync(draft, cancellationToken) and reports the returned Applied flag. A supported SDK-boundary probe executes that compiled adapter and observes both Applied=true and Applied=false handled as specified. The main project still excludes emitted adapters. No relevant input has changed."
+    },
+    {
+      "id": "WF-16",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Two compiler probes write to separate output directories. Probe A successfully compiled generated adapter source A using SDK revision sdk-4 and config revision cfg-2. Before Probe B, a process replaced the shared SDK path with sdk-5; the current delivery uses sdk-5. Source A and cfg-2 are unchanged. A separate pure-data parser receipt depends on neither SDK. A reviewer accepts the old adapter receipt for the current delivery because compiler outputs were isolated, then proposes rerunning the parser too."
+    },
+    {
+      "id": "WF-17",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "Acceptance claims Probe A's generated adapter compiles against the SDK and configuration in the current delivery. Two compiler probes write to separate output directories. Each receipt records successful compilation through the actual compiler and identifies its generated source, configuration, SDK and reference set. Inputs relevant to Probe A remain byte-identical throughout compilation and in the current delivery. Probe B uses another SDK in its own input location. A separate pure-data parser receipt is also current. A reviewer proposes rerunning all receipts because two SDK revisions exist on the machine."
+    },
+    {
+      "id": "WF-18",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A library promises that a saved item can be addressed by the same opaque identity after reopening the library and restarting the service. A test obtains an identity from a live in-memory registry, reads the item twice in that session, and passes. On reopen the registry is rebuilt with newly allocated identities; no saved identity mapping is present. Acceptance cites the session test as proof of the public promise."
+    },
+    {
+      "id": "WF-19",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A preview tool promises opaque handles only until its current session ends. It explicitly gives no cross-session addressing contract. A boundary test creates a preview, reads it twice under the same handle, ends the session, and observes that the old handle is unavailable. A reviewer demands persisted handles and a stable lookup after restart before accepting this change."
+    },
+    {
+      "id": "WF-20",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A run receipt contains defaults compileEnabled=true, reviewEnabled=true and publishEnabled=false. The trace records initialization, then a source-read error and termination before compilation. Its summary marks compile and review successful because those enabled fields are true. No compilation result, reviewed artifact or stage-entry event is recorded."
+    },
+    {
+      "id": "WF-21",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A run receipt contains defaults compileEnabled=true, reviewEnabled=true and publishEnabled=false. Its trace identifies the current artifact, records compiler invocation with a successful result, then a review observation for that same artifact. The summary accepts compilation and review and records publication as not requested and not reached. A reviewer calls the missing publication trace a failed delivery even though the requested scope ends at review."
+    },
+    {
+      "id": "WF-22",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The accepted boundary contract covers generated adapter source and its SDK references; an unrelated prose heading may change. A proposed guard rejects every repository change after compilation. A derived replay changes only that prose heading and is rejected, although adapter inputs are unchanged. The original passing compilation receipt is retained separately. A proposal overwrites that receipt with the rejection and calls the guard calibrated because it blocked a change."
+    },
+    {
+      "id": "WF-23",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "The accepted boundary contract covers generated adapter source and its SDK references; an unrelated prose heading may change. A guard rejects a derived replay that replaces a relevant SDK reference after compilation and accepts a separate replay changing only that prose heading. Both derived observations are linked to, but do not overwrite, the original compilation receipt. A reviewer demands acceptance of the SDK replacement because preserving the original receipt should make all replays valid."
+    },
+    {
+      "id": "WF-24",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A requested workflow must save a draft so it survives reopening, then log out. Its serialization helper produces a valid payload and returns success. The parent trace starts save, receives a storage error, and never reaches logout. A wrapper reports the whole workflow successful using only the helper result. No reopened read or logged-out session observation exists."
+    },
+    {
+      "id": "WF-25",
+      "prompt": "Assess the next step using the relevant Assay methods. Explain which work is ready, which claim lacks proof, and the smallest justified next action. This request is read-only: do not launch agents or change files.",
+      "context": "A requested workflow must save a draft so it survives reopening, then log out. The serialization helper returns success. The parent receipt identifies the draft, records successful storage acknowledgment, reads the same saved draft after reopening, and observes the session logged out. A reviewer rejects delivery solely because serialization was performed by a helper rather than in the parent function."
     }
   ]
 }

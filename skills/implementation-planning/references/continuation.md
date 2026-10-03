@@ -19,6 +19,11 @@ Keep failure, unavailable proof and explicitly deferred work distinguishable.
 Use whatever existing statuses express these meanings; do not require new labels
 or a fixed state-machine schema.
 
+Keep current acceptance and the next action in one identifiable owning record;
+other summaries point to it instead of maintaining competing progress copies.
+Preserve original check receipts. Corrected grading or replay of retained evidence
+produces a linked derived result with its new scope, not a rewritten original run.
+
 For a long document, keep a short orientation and load the current stage plus its
 shared constraints and prerequisite decisions. Do not reread every future detail,
 or omit a shared contract to save context. Selective reading is a mechanism to
