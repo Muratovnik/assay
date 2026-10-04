@@ -6,6 +6,19 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.14.0](https://github.com/Muratovnik/assay/compare/v0.13.0...v0.14.0) (2026-10-04)
+
+Code changes now choose evidence of correctness before deciding to add tests.
+Existing coverage can be reused when sufficient, while explicit testing requests,
+required project checks and real consumer boundaries retain their protection.
+
+### Features
+
+* **code-change:** choose verification before adding tests, distinguish diagnostic checks from regression protection, refresh results when relevant inputs change, and reconcile completion with the original consumer outcome; planning links to this decision and test-writing retains independent expectations ([8531707](https://github.com/Muratovnik/assay/commit/853170764f9515aaa288679290a7fbc183de8e0d))
+
+The additional evaluation cases are public synthetic examples. Improved task
+outcomes and lower execution cost have not been established by a paired comparison.
+
 ## [0.13.0](https://github.com/Muratovnik/assay/compare/v0.12.1...v0.13.0) (2026-10-04)
 
 UI delivery now researches suitable references before custom implementation,
