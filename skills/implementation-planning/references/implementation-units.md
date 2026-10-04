@@ -77,6 +77,12 @@ acceptance. Reuse suitable existing checks. New tests are needed for a meaningfu
 gap, not to manufacture changed test files. State an unavailable check and the
 proof still needed. Keep planned commands distinct from actual executed evidence.
 
+When the choice or scope of verification is unresolved, use code-change's
+[verification scope](../../code-change/references/verification-scope.md) to choose
+the evidence before scheduling new tests or broader runs. Planning retains the
+unit's consumer outcome, required checks and dependencies; that procedure neither
+authorizes execution nor replaces test-writing's oracle and assertion criteria.
+
 Separate implementation acceptance from a later product hypothesis. A working
 onboarding flow can be verified before a retention effect can be measured. Give
 that later observation a metric/population, owner and review condition when known;

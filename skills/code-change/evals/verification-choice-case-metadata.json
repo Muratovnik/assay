@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "V01",
+      "group": "verification-choice-small-change",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Distinguishes sufficient existing checks from test-file activity on a mechanical edit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V02",
+      "group": "verification-choice-existing-gap",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Existing coverage already exposes the requested bug; new test files are not the outcome.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V03",
+      "group": "verification-choice-small-change",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "A one-line change can protect a consequential negative guarantee absent from a green suite.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V04",
+      "group": "verification-choice-consumer-boundary",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Catches green helper checks while a required public consumer remains disconnected.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V05",
+      "group": "verification-choice-means-and-outcome",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Unconfirmed suggested mechanism must not replace the requested performance and freshness outcome.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V06",
+      "group": "verification-choice-means-and-outcome",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Known cause and adopted means should allow direct implementation without repeated discovery.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V07",
+      "group": "verification-choice-receipt-validity",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Paired continuation inputs distinguish sufficient receipts from evidence invalidated by a later shared change.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V08",
+      "group": "verification-choice-receipt-validity",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Paired continuation inputs distinguish sufficient receipts from evidence invalidated by a later shared change.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V09",
+      "group": "verification-choice-consumer-boundary",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Unavailable integration must not be replaced with a larger volume of narrower tests.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V10",
+      "group": "verification-choice-oracle-source",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Tests anti-proxy completion without assuming a particular model training cause.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V11",
+      "group": "verification-choice-oracle-source",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "A nearby legitimate structural contract prevents a blanket ban on exact assertions.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "V12",
+      "group": "verification-choice-explicit-test-request",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for verification-choice; not a production incident.",
+      "rationale": "Protects explicit useful test authoring from an overbroad anti-testing rule.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "VD01",
+      "group": "verification-choice-small-change",
+      "purpose": "routine",
+      "source": "Synthetic native-discovery scenario authored for verification-choice.",
+      "rationale": "Ordinary mechanical implementation should not require the detailed branch.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "VD02",
+      "group": "verification-choice-consumer-boundary",
+      "purpose": "challenge",
+      "source": "Synthetic native-discovery scenario authored for verification-choice.",
+      "rationale": "A green helper result must not capture routing away from consumer evidence.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "VD03",
+      "group": "verification-choice-run-only",
+      "purpose": "should-not-fire",
+      "source": "Synthetic native-discovery scenario authored for verification-choice.",
+      "rationale": "A run-only request must remain run-only.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "VD04",
+      "group": "verification-choice-explicit-test-request",
+      "purpose": "routine",
+      "source": "Synthetic native-discovery scenario authored for verification-choice.",
+      "rationale": "Test writing can be the entry point without a production change.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

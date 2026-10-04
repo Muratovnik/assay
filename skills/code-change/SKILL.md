@@ -26,6 +26,14 @@ improvements. Apply an agreed convention within its actual scope; do not turn
 a later preference into a historical violation. Existing inconsistency is
 evidence to investigate, not permission to choose whichever style is convenient.
 
+When a reported symptom has no established cause or a proposed mechanism may not
+serve the outcome, resolve that uncertainty before committing to the mechanism.
+Use the planning method's
+[scope criteria](../implementation-planning/references/scope-and-readiness.md#recover-the-actual-contract)
+and the diagnostic procedure below as needed. Comparing approaches does not widen
+write authority. Do not reopen a justified solution or require a separate plan
+for an obvious authorized edit.
+
 Retain supported behavior during refactoring, including exports, input shapes,
 side effects, errors and lifecycle. Name intentional behavior changes separately.
 Use existing project boundaries and primitives. A small repair does not authorize
@@ -43,6 +51,21 @@ When implementing a unit of an already active
 return the actual changed subject, checks and unfinished scope to that owner.
 This method retains implementation quality; it does not restart research or own
 the remaining publication steps of the larger request.
+
+## Choose verification before adding tests
+
+Identify the affected guarantee and what observation would distinguish a correct
+change from a plausible defect. Reuse sufficient existing coverage; add or repair
+tests for a meaningful gap or an explicit testing requirement, not because code
+changed. Complete required owner checks. A small diff is not evidence of low risk,
+and no new test does not mean no verification.
+
+For an uncertain choice of checks, a diagnostic versus permanent test, or a
+proposed expansion or repeat of verification, read
+[verification scope](references/verification-scope.md). It owns the evidence choice
+and stopping condition; [test-writing](../test-writing/SKILL.md) owns test oracles
+and assertions when tests need changing. Apply a clear choice directly without a
+new document, approval step or mandatory test-first sequence.
 
 ## Responsibilities and interfaces
 
@@ -117,10 +140,15 @@ moving CSS or renaming a helper does not itself improve maintainability. Check t
 state ownership is clearer, avoid speculative extensibility and keep cleanup
 proportional to the actual burden within scope.
 
-Run relevant owner checks and verify behavior at affected boundaries. For test
-design use the test method above; do not equate a file move with unchanged check
-coverage. Report the concrete responsibility/guarantee improved and evidence or
-remaining gaps. No mandatory new architecture document or metric target.
+Verify the resulting candidate with the selected checks or still-applicable
+receipts, and complete owner-required gates. Reconcile that evidence with the
+original consumer outcome, affected callers and remaining scope; green checks
+alone do not establish completion.
+Do not equate a file move with unchanged check coverage. Once evidence is
+sufficient, continue to the requested delivery; reopen verification for a changed
+relevant input, failure, concrete unresolved concern or owner requirement.
+Report the responsibility/guarantee improved, actual checks and remaining gaps.
+No mandatory new architecture document, metric target or separate reviewer.
 
 The `evals/` cases and rubrics are evaluation data, not runtime instructions;
 do not read them while performing a user's implementation task.
