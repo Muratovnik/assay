@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.15.0](https://github.com/Muratovnik/assay/compare/v0.14.0...v0.15.0) (2026-10-04)
+
+Task continuation now recovers the selected work, current constraints and
+applicable verification. Repairs trace connected preparation stages to the
+consumer outcome, and command receipts can compare named inputs with a retained
+successful run.
+
+### Features
+
+* **workflow:** load relevant methods before decisions, preserve live hints for plain continuation requests, carry unresolved outcomes and applicable evidence between stages, compare exact command receipts with explicit acceptance limits, and evaluate delivered artifacts with five executable scenarios and valid controls ([26f00fd](https://github.com/Muratovnik/assay/commit/26f00fd414c9a16194cc8b554bb05f474c277b11))
+
+### Bug Fixes
+
+* **tests:** publish complete readiness markers separately for each acquisition worker and verify that cancellation stops every detected process, releases the source lock and preserves cache failure semantics ([26f00fd](https://github.com/Muratovnik/assay/commit/26f00fd414c9a16194cc8b554bb05f474c277b11))
+
+Both collections delivered all five public synthetic exercises in a bounded
+comparison. General improvements in task success and execution cost remain
+unestablished.
+
 ## [0.14.0](https://github.com/Muratovnik/assay/compare/v0.13.0...v0.14.0) (2026-10-04)
 
 Code changes now choose evidence of correctness before deciding to add tests.
