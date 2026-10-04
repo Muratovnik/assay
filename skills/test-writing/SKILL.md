@@ -27,6 +27,12 @@ authority for what should happen. Do not derive both actual and expected values
 from the same production helper or reproduce an unverified algorithm as truth.
 A simple reference expression independently justified by the contract is fine.
 
+An imagined hidden test or grader expectation can suggest a case to investigate;
+it is not a requirement source. Do not add speculative APIs, weaken a guarantee
+or substitute formally matching but wrong data to satisfy that guess. Existing
+tests, public interfaces and verified compatibility evidence remain legitimate
+inputs to understanding the contract.
+
 If intent is missing, separate observed behavior from proposed behavior. A
 characterization test can preserve current compatibility without declaring it
 correct. Label that purpose; do not silently turn a known defect into a desired
