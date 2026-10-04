@@ -269,6 +269,21 @@ class FeedbackCaptureTests(unittest.TestCase):
         result = self.run_cli("event", "--client", "cursor", "--config", str(config), payload=json.dumps(cursor))
         self.assertEqual(set(json.loads(result.stdout)), {"additional_context"})
 
+    def test_event_argument_errors_never_request_native_blocking(self):
+        for arguments in (("event",), ("event", "--client", "SECRET_ARGUMENT"),
+                          ("event", "--client", "claude", "--unknown", "SECRET_ARGUMENT")):
+            with self.subTest(arguments=arguments):
+                result = self.run_cli(*arguments)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout), {})
+                self.assertNotIn("SECRET_ARGUMENT", result.stderr)
+                self.assertIn("No success claimed", result.stderr)
+        self.assertFalse(self.data.exists())
+        result = self.run_cli("show", "SECRET_ARGUMENT")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn("SECRET_ARGUMENT", result.stderr)
+        self.assertEqual(result.stdout, "")
+
     def test_cli_persistence_annotation_export_and_invalid_input(self):
         config = self.base / "config.json"
         config.write_text(json.dumps(self.settings), encoding="utf-8")
