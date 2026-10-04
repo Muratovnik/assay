@@ -17,6 +17,13 @@ from route_evidence.core import loads
 MAX_INPUT = 1024 * 1024
 
 
+class FeedbackParser(argparse.ArgumentParser):
+    def error(self, message):
+        # Native clients can interpret argparse's normal exit 2 as a request
+        # to block. Also avoid echoing user-supplied command argument values.
+        raise ValueError("invalid feedback command arguments")
+
+
 def input_object(path=None):
     if path:
         with path.open("rb") as stream:
@@ -32,9 +39,10 @@ def input_object(path=None):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    parser = FeedbackParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    event = commands.add_parser("event", help="native event on stdin; payload failures never block a task")
+    event = commands.add_parser("event", help="native event on stdin; input failures never block a task")
     event.add_argument("--client", choices=tuple(feedback.CLIENT_EVENTS), required=True)
     event.add_argument("--config", type=Path, help="absolute owner-controlled ASSAY_HOOK_CONFIG override")
     for name in ("list", "show", "annotate", "review", "delete", "export"):
@@ -48,8 +56,8 @@ def main(argv=None):
             command.add_argument("--status", choices=feedback.REVIEW_STATES, required=True)
             command.add_argument("--reason", required=True)
             command.add_argument("--duplicate-of")
-    args = parser.parse_args(argv)
     try:
+        args = parser.parse_args(arguments)
         if args.command == "event":
             # Import lazily: inspection/annotation does not load client guards,
             # settings or a model, and an event never edits native settings.
@@ -86,7 +94,7 @@ def main(argv=None):
         # Do not echo payloads, paths, credentials or user/model summaries. The
         # optional recorder never emits a blocking code or permission decision.
         print("Assay: feedback operation unavailable; check configuration, input, store capacity and permissions. No success claimed.", file=sys.stderr)
-        if args.command == "event":
+        if arguments[:1] == ["event"]:
             print("{}")
             return 0
         return 2
