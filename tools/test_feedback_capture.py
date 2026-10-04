@@ -55,11 +55,12 @@ class FeedbackCaptureTests(unittest.TestCase):
     def test_input_signals_and_nearby_valid_controls(self):
         for prompt in ("Ты упустил обязательную проверку.", "Нет, я просил исследование, а не реализацию.",
                        "Почему ты не проверил библиотеку?", "Я уже говорил не менять API.",
-                       "That is incorrect.", "I asked for a review, not a patch."):
+                       "That is incorrect.", "I asked for a review, not a patch.",
+                       "No, you missed the constraint.", "Нет, это неправильно."):
             with self.subTest(prompt=prompt):
                 self.assertIsNotNone(feedback.signal(prompt))
         for prompt in ("Add a linter.", "I changed my mind; use another library.",
-                       "Explain why you might miss a requirement.", "No thanks.",
+                       "Explain why you might miss a requirement.", "No thanks.", "You missed nothing.",
                        "> You missed the check.", "```text\nYou missed the check.\n```",
                        "- You missed the check.", "Discuss this example:\n\nYou missed the check.",
                        '"You missed the check" is an example.', "    You missed the check."):
@@ -197,6 +198,17 @@ class FeedbackCaptureTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.capture(settings={"feedback_capture": "content", "state_dir": "relative"})
 
+    def test_linked_state_path_does_not_write_to_target(self):
+        target = self.base / "other-owner"
+        target.mkdir()
+        try:
+            self.data.symlink_to(target, target_is_directory=True)
+        except OSError:
+            self.skipTest("native directory symlink permission unavailable")
+        with self.assertRaises(ValueError):
+            self.capture()
+        self.assertEqual(list(target.iterdir()), [])
+
     def test_integrated_native_plugin_entry_and_replay_default(self):
         config = self.base / "config.json"
         config.write_text(json.dumps(self.settings), encoding="utf-8")
@@ -228,11 +240,34 @@ class FeedbackCaptureTests(unittest.TestCase):
             result, _ = cli.process(self.event("claude"), "claude", {})
         self.assertEqual(result["hookSpecificOutput"]["additionalContext"], "Existing hint.\nFeedback hint.")
 
-    def run_cli(self, *args, payload=""):
+    def run_cli(self, *args, payload="", ascii_stdout=False):
         environment = {key: value for key, value in os.environ.items()
                        if key not in {"ASSAY_HOOK_CONFIG", "ASSAY_ROUTING_CONFIG", "PLUGIN_DATA", "CLAUDE_PLUGIN_DATA"}}
-        return subprocess.run([sys.executable, "-I", "-B", str(ROOT / "hooks/runtime/feedback_cli.py"), *args],
-                              input=payload, capture_output=True, text=True, encoding="utf-8", env=environment, check=False)
+        command = [sys.executable, "-I", "-B"]
+        if ascii_stdout:
+            command += ["-c", "import sys, runpy; sys.stdout.reconfigure(encoding='ascii'); path=sys.argv.pop(1); runpy.run_path(path, run_name='__main__')"]
+        command += [str(ROOT / "hooks/runtime/feedback_cli.py"), *args]
+        return subprocess.run(command, input=payload, capture_output=True, text=True,
+                              encoding="utf-8", env=environment, check=False)
+
+    def test_all_standalone_clients_and_non_utf8_console_export(self):
+        config = self.base / "config.json"
+        config.write_text(json.dumps(self.settings), encoding="utf-8")
+        prompt = "Нет, ты упустил проверку русского текста."
+        for client in ("claude", "codex", "gemini", "cursor"):
+            result = self.run_cli("event", "--client", client, "--config", str(config),
+                                  payload=json.dumps(self.event(client, prompt)))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(bool(output), client != "cursor")
+        exported = self.run_cli("export", "--state-dir", str(self.data), ascii_stdout=True)
+        self.assertEqual(exported.returncode, 0, exported.stderr)
+        records = [json.loads(line) for line in exported.stdout.splitlines()]
+        self.assertEqual({item["source"]["client"] for item in records}, {"claude", "codex", "gemini", "cursor"})
+        self.assertTrue(all(item["excerpt"] == prompt for item in records))
+        cursor = {**self.event("cursor", prompt), "hook_event_name": "postToolUse", "tool_use_id": "tool-1"}
+        result = self.run_cli("event", "--client", "cursor", "--config", str(config), payload=json.dumps(cursor))
+        self.assertEqual(set(json.loads(result.stdout)), {"additional_context"})
 
     def test_cli_persistence_annotation_export_and_invalid_input(self):
         config = self.base / "config.json"

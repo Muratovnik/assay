@@ -152,7 +152,6 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "state_configured": settings["state_dir"] is not None,
               "record_events": settings["record_events"], "hooks_trusted": "unknown",
               "feedback_capture": settings["feedback_capture"],
-              "feedback_storage_ready": settings["state_dir"] is not None,
               "native_execution": "unverified", "model_compliance": "unverified",
               "settings_modified": False, "conflicts": []}
     if settings_path:
