@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state
+from runtime import state, feedback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence.service import load_config
@@ -41,15 +41,18 @@ def options(environment):
     if location and (not isinstance(location, str) or not Path(location).is_absolute()):
         raise ValueError("hook configuration path must be absolute")
     raw = read_json(location) if location else {}
-    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events"}:
+    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events", "feedback_capture"}:
         raise ValueError("unknown hook option")
     value = {"disabled_rules": [], "disabled_skills": [], "record_events": False,
+             "feedback_capture": "off",
              "state_dir": environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA"), **raw}
     for key in ("disabled_rules", "disabled_skills"):
         if not isinstance(value[key], list) or any(not isinstance(v, str) for v in value[key]):
             raise ValueError("invalid disabled rules or skills")
     if type(value["record_events"]) is not bool:
         raise ValueError("invalid recording option")
+    if not isinstance(value["feedback_capture"], str) or value["feedback_capture"] not in feedback.MODES:
+        raise ValueError("invalid feedback capture mode")
     if value["state_dir"] is not None and (not isinstance(value["state_dir"], str) or not Path(value["state_dir"]).is_absolute()):
         raise ValueError("hook state directory must be absolute")
     return value
@@ -83,7 +86,7 @@ def routing_result(event, client, environment):
         return failure(event, "plugin", True)
 
 
-def process(event, client, environment, *, root=ROOT, clock=None):
+def _process(event, client, environment, *, root=ROOT, clock=None):
     normalized = normalize(event, client)
     if normalized is None:
         return {}, None
@@ -115,6 +118,30 @@ def process(event, client, environment, *, root=ROOT, clock=None):
         return protected or legacy, "Assay: optional hints unavailable; routing decision and basic reminders retained. Run hooks doctor."
 
 
+def process(event, client, environment, *, root=ROOT, clock=None):
+    result, error = _process(event, client, environment, root=root, clock=clock)
+    if event.get("hook_event_name") != "UserPromptSubmit":
+        return result, error
+    # Feedback may append context, never merge into a permission decision or
+    # replacement payload. Failure in this optional feature preserves the first
+    # owner's complete result. No second native handler is registered.
+    if result and (set(result) != {"hookSpecificOutput"} or
+                   set(result["hookSpecificOutput"]) - {"hookEventName", "additionalContext"}):
+        return result, error
+    try:
+        kwargs = {"clock": clock} if clock else {}
+        extra = feedback.handle(event, client, options(environment), root=root, **kwargs)
+        if extra:
+            original = result.get("hookSpecificOutput", {}).get("additionalContext", "")
+            message = extra["hookSpecificOutput"]["additionalContext"]
+            result = {"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
+                      "additionalContext": "\n".join(part for part in (original, message) if part)}}
+    except Exception:
+        diagnostic = "Assay: optional feedback capture unavailable; existing hook result retained. Check feedback configuration, capacity and permissions."
+        error = "\n".join(part for part in (error, diagnostic) if part)
+    return result, error
+
+
 def doctor(client, environment, *, root=ROOT, settings_path=None):
     settings = options(environment)
     rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
@@ -124,6 +151,8 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "prompt_parser_available": importlib.util.find_spec("markdown_it") is not None,
               "state_configured": settings["state_dir"] is not None,
               "record_events": settings["record_events"], "hooks_trusted": "unknown",
+              "feedback_capture": settings["feedback_capture"],
+              "feedback_storage_ready": settings["state_dir"] is not None,
               "native_execution": "unverified", "model_compliance": "unverified",
               "settings_modified": False, "conflicts": []}
     if settings_path:
