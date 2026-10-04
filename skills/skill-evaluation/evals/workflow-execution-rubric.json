@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WX-01",
+      "required": [
+        "The public CLI produces stable case-insensitive name order, preserving the header, duplicate rows and quoted fields.",
+        "The change reaches the public caller, not only the already-correct helper.",
+        "Verification evidence distinguishes the original passing helper test from the fixed consumer behavior."
+      ],
+      "reject": [
+        "Only explains what should change without implementing it.",
+        "Reports a helper test as proof of the public export.",
+        "Drops or deduplicates records to obtain ordering."
+      ]
+    },
+    {
+      "id": "WX-02",
+      "required": [
+        "The delivered README fixes the spelling while preserving meaning and exact command.",
+        "No irrelevant code change, test infrastructure, research campaign or approval ceremony."
+      ],
+      "reject": [
+        "Introduces tests which only assert the edited prose or changes executable files without a requirement.",
+        "Claims unperformed commands or checks."
+      ]
+    },
+    {
+      "id": "WX-03",
+      "required": [
+        "An administrator can delete a matching-tenant record.",
+        "A cross-tenant administrator and a same-tenant non-administrator are rejected without mutating the records.",
+        "A meaningful regression check protects the changed authorization boundary, using independent expected outcomes."
+      ],
+      "reject": [
+        "Removes all deletion support.",
+        "Only asserts an exception after the record was already removed.",
+        "Treats a one-line change as sufficient reason to skip the explicitly requested regression protection."
+      ]
+    }
+  ]
+}

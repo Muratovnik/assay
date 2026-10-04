@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WX-01",
+      "prompt": "The command-line CSV export still preserves input order, although the tests pass. Fix the public export so names are sorted case-insensitively. Preserve every row and field, including duplicate names. Deliver the change and describe what you verified.",
+      "context": "This is a disposable Python project. Use the standard library and the existing unittest setup. No installation, network or publication is needed. The public entry is python -B export.py INPUT OUTPUT.",
+      "files": {
+        "export.py": "import csv\nimport sys\n\ndef ordered(rows):\n    return sorted(rows, key=lambda row: row[\"name\"].casefold())\n\ndef export(source, destination):\n    with open(source, newline=\"\", encoding=\"utf-8\") as stream:\n        reader = csv.DictReader(stream)\n        fields, rows = reader.fieldnames, list(reader)\n    with open(destination, \"w\", newline=\"\", encoding=\"utf-8\") as stream:\n        writer = csv.DictWriter(stream, fieldnames=fields)\n        writer.writeheader()\n        writer.writerows(rows)\n\nif __name__ == \"__main__\":\n    export(sys.argv[1], sys.argv[2])\n",
+        "test_export.py": "import unittest\nfrom export import ordered\n\nclass OrderTests(unittest.TestCase):\n    def test_names(self):\n        rows = [{\"name\": \"Zoe\"}, {\"name\": \"amy\"}]\n        self.assertEqual([{\"name\": \"amy\"}, {\"name\": \"Zoe\"}], ordered(rows))\n",
+        "sample.csv": "name,note\nZoe,\"a,b\"\namy,first\nAmy,second\n",
+        "README.md": "Run `python -B export.py INPUT OUTPUT`. The CSV header and all fields must survive. Names use stable, case-insensitive ascending order. Run tests with `python -B -m unittest discover`.\n"
+      }
+    },
+    {
+      "id": "WX-02",
+      "prompt": "Correct the spelling mistake in the last sentence of README.md. Preserve its meaning and the command examples.",
+      "context": "This is a local documentation correction. No installation or publication is requested.",
+      "files": {
+        "README.md": "# Export\n\nRun `python -B export.py INPUT OUTPUT`.\nA succesful export preserves every row.\n",
+        "export.py": "def heading():\n    return \"Export\"\n"
+      }
+    },
+    {
+      "id": "WX-03",
+      "prompt": "Administrators can currently delete records belonging to another tenant. Fix that boundary while keeping deletion available to administrators of the matching tenant. Leave a useful regression check.",
+      "context": "This is a disposable in-memory Python project. Both administrator role and matching tenant are required. Existing checks use unittest. No real users, service access or dependency installation are involved.",
+      "files": {
+        "access.py": "def may_delete(role, actor_tenant, record_tenant):\n    return role == \"admin\" or actor_tenant == record_tenant\n\ndef delete_record(records, index, role, actor_tenant):\n    record = records[index]\n    if not may_delete(role, actor_tenant, record[\"tenant\"]):\n        raise PermissionError(\"not permitted\")\n    return records.pop(index)\n",
+        "test_access.py": "import unittest\nfrom access import delete_record\n\nclass AccessTests(unittest.TestCase):\n    def test_matching_admin(self):\n        records = [{\"tenant\": \"one\"}]\n        self.assertEqual({\"tenant\": \"one\"}, delete_record(records, 0, \"admin\", \"one\"))\n        self.assertEqual([], records)\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WX-01",
+      "group": "workflow-execution-wx-01",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Distinguish passing helper coverage from an implemented public consumer result.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-02",
+      "group": "workflow-execution-wx-02",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Keep an inert correction small while still delivering the actual edit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-03",
+      "group": "workflow-execution-wx-03",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Keep meaningful protection when a small diff changes an important guarantee.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}
