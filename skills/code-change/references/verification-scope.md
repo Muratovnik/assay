@@ -47,6 +47,16 @@ edited file suggests. Refresh that evidence and retain still-valid results. A
 known failed check needs diagnosis of code, test, contract or environment; an
 unchanged retry does not erase the failure.
 
+Before reusing a recorded result, identify the required command and guarantee,
+checked subject, input population, relevant environment and observed outcome.
+Use an existing receipt mechanism when available; no new logger or mandatory
+wrapper is needed. A comparison of named file bytes can reject stale evidence,
+but cannot discover an omitted dependency or establish oracle relevance. Include
+newly relevant files and account for configuration, interpreter, dependencies and
+external state. A commit of unchanged tested bytes alone is not invalidation.
+A missing or unverifiable receipt is not a passing check; neither should an
+unrelated edit force all checks to rerun. Keep the original receipt unchanged.
+
 Once the affected guarantees and required gates have adequate evidence on the
 current candidate, continue to the requested delivery. Broaden or repeat checking
 for a new relevant change, observed failure, concrete unresolved concern or owner

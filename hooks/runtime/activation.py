@@ -106,6 +106,27 @@ def request_text(prompt, known_names):
     return ""
 
 
+def continuation_request(prompt):
+    """Recognize only a whole, plain continuation request, never a task or consent.
+
+    Additional paragraphs, quoted/code examples and scope modifiers must go
+    through ordinary task selection; they must not inherit an old hint.
+    """
+    if not isinstance(prompt, str) or len(prompt) > MAX_PROMPT:
+        return False
+    from markdown_it import MarkdownIt
+    tokens = MarkdownIt("commonmark").parse(prompt)
+    if [token.type for token in tokens] != ["paragraph_open", "inline", "paragraph_close"]:
+        return False
+    children = tokens[1].children or []
+    if not children or any(child.type != "text" for child in children):
+        return False
+    text = prompt.strip()
+    return re.fullmatch(
+        r"(?:(?:please|пожалуйста)[, ]+)?(?:continue|resume|go on|go ahead|продолжай|продолжи|продолжим)[.!]?",
+        text, re.I) is not None
+
+
 def explicit_selection(text, rules):
     explicit = re.match(
         r"^(?:use|apply|используй|примени)\s+(?:(?:the\s+)?skills?\s+|the\s+|навык[и]?\s+)?(.+)$",

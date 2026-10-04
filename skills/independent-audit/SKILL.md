@@ -3,7 +3,7 @@ name: independent-audit
 description: Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change software-architecture test-audit test-writing ui-delivery"
+  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change skill-evaluation software-architecture test-audit test-writing ui-delivery"
 ---
 
 # Independent audit
@@ -47,6 +47,7 @@ Inspect only the relevant methods:
 | Audit concern | Reference |
 | --- | --- |
 | A plan's readiness, requirement coverage, dependencies or stale acceptance | [Plan review and replanning criteria](../implementation-planning/references/review-and-replan.md) |
+| A skill's method, discovery, execution or claimed behavioral improvement | [Skill evaluation](../skill-evaluation/SKILL.md), as read-only criteria; no new campaign or repair authority |
 | Implementation/refactoring quality, conventions, state or effective checks | [Code quality verification](references/code-quality.md) |
 | Architecture proposals, application structure, ownership, migration, discovery, retirement or compatibility | [Architecture and migration](references/architecture-and-migration.md) |
 | Repository readers, onboarding, installation or distribution | [Repository and release](references/repository-and-release.md) |

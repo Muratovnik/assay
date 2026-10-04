@@ -134,15 +134,24 @@ not forever and not across unidentified deliveries. Claude prompt text is never 
 can be a legitimate new task. Consequently duplicate Claude prompt deliveries
 without IDs cannot be reliably suppressed.
 
-A new user prompt replaces the active suggestion, even when no rule matches.
-Changed rules/skill bytes invalidate restoration. Clear/end/expiry retire context.
-Claude can restore on supported session resume/compact events. Codex PostCompact
-accepts no additionalContext: it only marks restoration pending; the next supported
-pre-tool event can include a brief reminder. If a routing reply owns that event,
-the undelivered reminder remains pending, whether the routing reply denies or
-rewrites the operation. A genuinely new prompt cancels stale restoration.
-Without usable identity/data storage, no restoration is claimed. Cross-plugin
-content duplication cannot be deduplicated by this runtime.
+An explicit task or an unrecognized new request replaces the active suggestion,
+even when no rule matches. A whole plain continuation such as `continue`, `resume`
+or `продолжай` can instead retain an unexpired suggestion for the same identity
+and fingerprint. Quoted/code/list examples, extra paragraphs and scope modifiers
+are not this continuation form. `continue, but only prepare a plan` goes through
+ordinary selection; an unrecognized restriction clears rather than inherits.
+The hook stores only a suggestion, not the task, permission or a `skills_used`
+claim. The agent still reconciles the actual work and current authority through
+[continuation](../../skills/implementation-planning/references/continuation.md).
+
+Changed rules/skill entrypoint bytes invalidate restoration. Clear/end/expiry
+retire context. Claude can restore on supported session resume/compact events.
+Codex PostCompact accepts no additionalContext: it only marks restoration pending;
+the next supported pre-tool event can include a brief reminder. If a routing
+reply owns that event, the undelivered reminder remains pending, whether the
+routing reply denies or rewrites the operation. A genuinely new prompt cancels
+stale restoration. Without usable identity/data storage, no restoration is claimed.
+Cross-plugin content duplication cannot be deduplicated by this runtime.
 
 ## Client contracts and model settings
 

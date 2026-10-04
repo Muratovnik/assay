@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import time
 from typing import Any, Sequence
@@ -119,7 +120,82 @@ def verify(packet: Path, expected_digest: str) -> tuple[dict[str, Any], dict[str
             json.loads((packet / "result.json").read_text(encoding="utf-8")))
 
 
+def check_reuse(packet: Path, expected_digest: str, *, argv: Sequence[str],
+                cwd: Path, inputs: Sequence[str]) -> dict[str, Any]:
+    """Compare a retained successful command with explicitly selected current inputs.
+
+    Matching recorded inputs is not acceptance: the caller still owns input
+    completeness, environment/dependency equivalence and oracle relevance.
+    This function neither executes the command nor refreshes the old receipt.
+    """
+    if (isinstance(argv, (str, bytes)) or not argv
+            or any(not isinstance(s, str) or not s or "\0" in s for s in argv)
+            or isinstance(inputs, (str, bytes)) or not inputs
+            or any(not isinstance(s, str) or not s for s in inputs)):
+        raise ValueError("require an exact argv and nonempty source input list")
+    intent, result = verify(packet, expected_digest)
+    if (not isinstance(intent, dict) or not isinstance(result, dict)
+            or type(intent.get("schema")) is not int or intent["schema"] != 1
+            or type(result.get("schema")) is not int or result["schema"] != 1):
+        raise ValueError("unsupported receipt schema")
+    before = intent.get("inputs_before")
+    if (not isinstance(before, dict) or not before
+            or any(not isinstance(name, str) or not isinstance(value, str)
+                   or len(value) != 64 or any(c not in "0123456789abcdef" for c in value)
+                   for name, value in before.items())
+            or not isinstance(intent.get("argv"), list) or not intent["argv"]
+            or any(not isinstance(value, str) or not value for value in intent["argv"])
+            or not isinstance(intent.get("cwd"), str) or not Path(intent["cwd"]).is_absolute()
+            or not isinstance(result.get("inputs_after"), dict)
+            or not isinstance(result.get("changed_inputs"), list)):
+        raise ValueError("incomplete recorded command or inputs")
+    cwd = cwd.resolve(strict=True)
+    current = file_hashes(cwd, inputs)
+    if len(current) != len(inputs):
+        raise ValueError("duplicate source input paths")
+    mismatches = []
+    if intent["argv"] != list(argv):
+        mismatches.append("command")
+    if intent["cwd"] != str(cwd):
+        mismatches.append("working_directory")
+    if set(before) != set(current):
+        mismatches.append("input_population")
+    if any(current[name] != before[name] for name in set(before) & set(current)):
+        mismatches.append("input_bytes")
+    if (result.get("state") != "completed" or type(result.get("exit_code")) is not int
+            or result["exit_code"] != 0):
+        mismatches.append("unsuccessful_run")
+    if result["changed_inputs"] or result["inputs_after"] != before:
+        mismatches.append("inputs_changed_during_run")
+    return {"status": "not-reusable" if mismatches else "matching-recorded-inputs",
+            "mismatches": mismatches, "inputs_checked": len(current),
+            "command_executed": False, "acceptance_verified": False,
+            "limits": ["Only the explicitly named input population was compared.",
+                       "Environment, dependencies, external state and oracle relevance need owner review.",
+                       "A retained digest establishes byte integrity, not trusted provenance or isolation."]}
+
+
+def reuse_main(arguments: Sequence[str]) -> int:
+    parser = argparse.ArgumentParser(description=check_reuse.__doc__)
+    parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--manifest-sha256", required=True)
+    parser.add_argument("--cwd", type=Path, required=True)
+    parser.add_argument("--input", action="append", required=True, dest="inputs")
+    parser.add_argument("argv", nargs=argparse.REMAINDER)
+    args = parser.parse_args(arguments)
+    argv = args.argv[1:] if args.argv[:1] == ["--"] else args.argv
+    try:
+        result = check_reuse(args.receipt, args.manifest_sha256, argv=argv,
+                             cwd=args.cwd, inputs=args.inputs)
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        parser.exit(2, f"receipt reuse: unverified: {error}\n")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result["status"] == "matching-recorded-inputs" else 1
+
+
 def main() -> int:
+    if sys.argv[1:2] == ["reuse"]:
+        return reuse_main(sys.argv[2:])
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true", help="authorize this one command")
     parser.add_argument("--cwd", type=Path, required=True)

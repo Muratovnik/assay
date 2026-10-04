@@ -16,6 +16,19 @@ into one is a normal outcome here.
 **Small fixes need no ceremony.** A wrong instruction, a broken link, a
 description that fires on the wrong task: send the pull request.
 
+For a material method or discovery change, use the existing
+[skill-evaluation method](skills/skill-evaluation/SKILL.md) before drafting a
+replacement. Separate missing knowledge, a missed route, an ignored instruction
+and an insufficient acceptance check. A trigger/description correction can need
+a focused discovery comparison without needing a large campaign. Inert spelling
+and packaging changes do not need behavioral runs.
+
+Inspect actual task artifacts when claiming better execution, not only answers
+about what an agent should do. The [small execution comparison](skills/skill-evaluation/evals/workflow-execution.md)
+provides input-only examples and a bounded protocol. Existing adequate evidence
+can be reused. Report an unmeasured candidate as such; authored cases and green
+source checks are not a measured improvement or a claim of quota savings.
+
 ## Setting up
 
 ```text

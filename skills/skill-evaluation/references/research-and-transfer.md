@@ -36,6 +36,14 @@ trace; without it the cause remains a hypothesis. Improve routing when the branc
 was missed and the oracle when the check was weak. Another paraphrase does not
 establish that an execution failure is fixed.
 
+When discovery or timing is the suspected cause, check whether the description
+was treated as a substitute for reading and whether the needed procedure arrived
+before its decision. Compare the natural route first. A separately identified
+forced-method run can diagnose a missed route, but cannot replace its result or
+prove automatic selection. Preserve useful descriptions; this is not a ban on
+summaries or a reason to load every skill. Prefer correcting a demonstrated entry
+or handoff gap to adding global instructions or a blocking hook.
+
 For a recurring incident, recover the prior hypothesis and acceptance check with
 the available [continuation procedure](../../implementation-planning/references/continuation.md#carry-a-goal-across-different-tasks)
 and the requirement's source with the planning

@@ -102,7 +102,8 @@ continuation procedure linked there.
 
 ## Use only the relevant detail
 
-- When a repair needs causal diagnosis or a persistent reproducer, use
+- When a repair needs causal diagnosis, successive different setup failures keep
+  the consumer unreached, or evidence needs to survive a handoff, use
   [diagnostic reproducers](references/diagnostic-reproducer.md). An already
   justified narrow fix does not require a new debugging campaign.
 - When generated or dynamically compiled code, installed APIs or a staged

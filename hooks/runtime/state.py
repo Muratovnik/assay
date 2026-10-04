@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import time
 
-from .activation import context
+from .activation import context, continuation_request
 from .events import event_key, identity
 
 TTL = 24 * 3600
@@ -46,6 +46,14 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
             # session, which would destroy a different agent's current context.
             tx.delete("hook-context", key)
         elif name == "UserPromptSubmit" and outcome is None:
+            previous = tx.get("hook-context", key)
+            if (not decision["rule_ids"] and continuation_request(event.get("prompt"))
+                    and previous and previous["fingerprint"] == fingerprint):
+                # Preserve a live suggestion, not task state or authorization.
+                # Explicit tasks/modifiers still replace it, including no-match.
+                retained = [identifier for identifier in previous["rules"]
+                            if any(rule["id"] == identifier for rule in rules)][:2]
+                decision = {"rule_ids": retained, "context": context(retained, rules, restored=True)}
             _put(tx, "hook-context", key, {"rules": decision["rule_ids"], "fingerprint": fingerprint}, now)
         elif name == "PostCompact":
             # Codex accepts common output only, not additionalContext here.

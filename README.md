@@ -46,10 +46,12 @@ primary documentation. Neither pins a model.
 ## Install
 
 The instructions are Markdown. The **Claude Code and Codex plugin reminders**
-require Python 3.11+ available as `python` and use only its standard library.
-The symlink installer and repository checks also need `requirements-tools.txt`.
-Optional skill scripts declare their own dependencies; loading prose does not
-install them.
+require Python 3.11+ available as `python`. Basic session/delegation reminders use
+the standard library; prompt classification additionally needs `markdown-it-py`
+from `hooks/requirements.txt` in the isolated interpreter used by the hook.
+See [hook setup and diagnostics](docs/how-to/hooks.md). The symlink installer and
+repository checks need `requirements-tools.txt`. Optional skill scripts declare
+their own dependencies; loading prose does not install them.
 
 | Client | Command |
 | --- | --- |

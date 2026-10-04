@@ -25,6 +25,14 @@ be blocked by publication capability. Tool availability does not grant permissio
 Check consequential capability early enough to avoid silently promising an
 unavailable endpoint; an untried relevant tool is not proof of unavailability.
 
+At a material transition, carry the next unresolved decision, sufficient input,
+continuing constraints, applicable evidence and the criteria needed before that
+decision. Keep this in the existing task or handoff; a short paragraph can suffice.
+Load missing applicable criteria before choosing the mechanism, not afterward to
+justify it. Reuse criteria already read and still applicable. A present report or
+completed checkbox is not the observation that makes dependent work ready; do not
+replace this check with a new artifact graph, mandatory file or full-context dump.
+
 | Transition | Sufficient input | Result to carry forward |
 | --- | --- | --- |
 | Research to choice | The relevant options, local constraints, source conditions and material unknowns | A supported choice, retained alternative or bounded unresolved decision |

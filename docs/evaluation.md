@@ -92,6 +92,20 @@ neighboring conditions, plus composed-transition and small-task controls. They
 are public synthetic working inputs and a run protocol, not executed model
 results. Their read-only decision cases do not establish real dispatch or cleanup.
 
+The [small execution comparison](../skills/skill-evaluation/evals/workflow-execution.md)
+adds three tasks requiring delivered changes: a public CLI whose helper test is
+already green, an inert spelling correction and a small authorization repair.
+It separates natural discovery from a diagnostic forced-method run and grades
+actual artifacts and consumer outcomes. Its fixture tests exercise known faulty
+and repaired programs, not a model. This is a prepared pilot, not a completed
+behavioral experiment.
+
+For previously captured commands, the optional
+[receipt reuse procedure](how-to/reuse-verification.md) compares exact commands
+and named current inputs without another execution. Matching those inputs does
+not prove environment equivalence, complete input selection or task acceptance.
+Keep raw receipts private and retain their original identity.
+
 ## Evaluator-only case metadata
 
 An optional `case-metadata.json` sits beside `cases.json`; an auxiliary

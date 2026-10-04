@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "WX-01",
+      "group": "workflow-execution-wx-01",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Distinguish passing helper coverage from an implemented public consumer result.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-02",
+      "group": "workflow-execution-wx-02",
+      "purpose": "should-not-fire",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Keep an inert correction small while still delivering the actual edit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-03",
+      "group": "workflow-execution-wx-03",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored task; not a production incident.",
+      "rationale": "Keep meaningful protection when a small diff changes an important guarantee.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-04",
+      "group": "workflow-execution-wx-04",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored staged report; not a production incident.",
+      "rationale": "Changing preparation errors must not hide an unreached consumer, while verified diagnostic progress remains useful.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "WX-05",
+      "group": "workflow-execution-wx-05",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored continuation and source-scope observations; not native-run receipts.",
+      "rationale": "Preserve narrowed authority, an unaffected useful observation and a correct implementation without accepting stale or insufficient evidence.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

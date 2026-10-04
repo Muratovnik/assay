@@ -45,7 +45,9 @@
 ## 安装
 
 指令使用 Markdown。**Claude Code 与 Codex 插件的提醒钩子**要求可通过 `python`
-调用的 Python 3.11+，只使用标准库。符号链接安装器及仓库检查还需要
+调用的 Python 3.11+。基本会话和委派提醒只使用标准库；请求分类还需要在钩子所用
+解释器的隔离环境中安装 `hooks/requirements.txt` 中的 `markdown-it-py`。参见
+[钩子配置与诊断](docs/how-to/hooks.md)。符号链接安装器及仓库检查需要
 `requirements-tools.txt`。可选技能脚本另有依赖；读取指令不会安装这些依赖。
 
 | 客户端 | 命令 |

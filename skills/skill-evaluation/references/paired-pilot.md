@@ -19,6 +19,13 @@ failure, a nearby valid solution that must not be rejected, and a simple task
 that must not acquire unnecessary research or planning. For material claims,
 reserve a further case before tuning; an exposed case becomes regression data.
 
+Match the task to the claimed improvement. A supplied-fact recommendation can
+probe understanding, but cannot replace an implementation task when the claim is
+better execution. Inspect the delivered artifact and its real consumer boundary,
+not just the final explanation. A project issue or historical change can supply
+a task only after its original requirement is recovered and its solution, grading
+keys and private data are excluded from the executor's input.
+
 Do not put grading keys, earlier answers or evaluation-only instructions in the
 executor's packet. Preserve raw outputs, artifacts and failures separately from
 future inputs. Authorized work copies and frozen evidence packets serve different
