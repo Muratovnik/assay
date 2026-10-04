@@ -28,7 +28,7 @@ TEXT_FIELDS = ("task", "observed", "expected", "hypothesis", "evidence")
 # existing CommonMark selector keeps quoted documents/code out of this grammar.
 SIGNALS = (
     ("omission", r"^(?:you (?:missed|omitted|forgot|ignored)\b|ты (?:упустил\w*|пропустил\w*|забыл\w*|проигнорировал\w*)\b)"),
-    ("correction", r"^(?:(?:no|нет)[,.!:]?\s+)?(?:i (?:asked|said|meant)\b|я (?:просил\w*|говорил\w*|имел\w* в виду)\b)"),
+    ("correction", r"^(?:i (?:asked|said|meant)\b|я (?:просил\w*|говорил\w*|имел\w* в виду)\b)"),
     ("correction", r"^(?:that(?:'s| is) (?:wrong|incorrect|not what i)|this is (?:wrong|incorrect|not what i)|это (?:неправильно|неверно|не то)\b)"),
     ("omission", r"^(?:why (?:didn't|did not|haven't|have not) you\b|почему ты не\b)"),
     ("repeated_constraint", r"^(?:i already (?:told|asked)|я (?:уже|же) (?:говорил\w*|просил\w*)\b|ты опять\b|you (?:did it|are doing it) again\b)"),
@@ -80,6 +80,9 @@ def source(event, client):
 
 def signal(prompt):
     text = request_text(prompt, set())
+    text = re.sub(r"^(?:no|нет)[,.!:]?\s+", "", text, flags=re.I)
+    if re.match(r"^you missed nothing\b", text, re.I):
+        return None
     for kind, pattern in SIGNALS:
         if re.search(pattern, text, re.I):
             return kind
@@ -106,14 +109,17 @@ def candidate_id(origin):
 def notice(record, directory, root):
     entry = json.dumps(str(root / "hooks/runtime/feedback_cli.py"))
     location = json.dumps(str(directory))
-    schema = '{"category":"reported_mismatch|changed_requirement|preference|disagreement|uncertain","basis":"prior_requirement|new_requirement|unknown"}'
     detail = (" Optional text fields: task, observed, expected, hypothesis, evidence (each <=1500 characters)."
               if record["capture_mode"] == "content" else " Do not include free text in metadata mode.")
     return (f"Assay feedback candidate {record['id']} was recorded locally, not confirmed as an error. "
             "During this existing turn, compare the user's correction with the earlier request and actual work. "
             "Changed requirements, preferences and disagreement are not proof of failure; do not agree merely to please. "
             "If permitted shell access is available, annotate once using Python 3.11+ with -I -B and script "
-            f"{entry}, arguments annotate {record['id']} --state-dir {location}, JSON on stdin: {schema}."
+            f"{entry}, arguments annotate {record['id']} --state-dir {location}, JSON on stdin. "
+            'A valid uncertain annotation is {"category":"uncertain","basis":"unknown"}. '
+            "Choose category from reported_mismatch, changed_requirement, preference, disagreement, uncertain; "
+            "choose basis from prior_requirement, new_requirement, unknown. A reported mismatch is an allegation, not proof. "
+            "Use unknown when the earlier requirement cannot be located; do not reconstruct it from the complaint."
             + detail + " Keep the cause unknown unless supported; never confirm, dismiss, create evals or edit instructions automatically. "
             "No additional model call, retry loop or interruption of the user's task is required. "
             "Missing permission or an unavailable recorder leaves the candidate unannotated; do not bypass the sandbox.")

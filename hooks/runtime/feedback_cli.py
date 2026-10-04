@@ -34,7 +34,7 @@ def input_object(path=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    event = commands.add_parser("event", help="native event on stdin; never blocks a task")
+    event = commands.add_parser("event", help="native event on stdin; payload failures never block a task")
     event.add_argument("--client", choices=tuple(feedback.CLIENT_EVENTS), required=True)
     event.add_argument("--config", type=Path, help="absolute owner-controlled ASSAY_HOOK_CONFIG override")
     for name in ("list", "show", "annotate", "review", "delete", "export"):
@@ -62,7 +62,9 @@ def main(argv=None):
             records = feedback.read(args.state_dir)
             if args.command == "export":
                 for record in records:
-                    print(json.dumps(record, ensure_ascii=False))
+                    # ASCII JSON is valid UTF-8 and round-trips non-ASCII text
+                    # even under a Windows console's legacy output encoding.
+                    print(json.dumps(record))
                 return 0
             result = [{key: record[key] for key in ("id", "created_at", "status", "signal", "capture_mode")}
                       | {"client": record["source"]["client"], "annotations": len(record["annotations"])}
@@ -78,7 +80,7 @@ def main(argv=None):
         else:
             feedback.delete(args.state_dir, args.id)
             result = {"id": args.id, "deleted": True}
-        print(json.dumps(result, ensure_ascii=False))
+        print(json.dumps(result))
         return 0
     except Exception:
         # Do not echo payloads, paths, credentials or user/model summaries. The

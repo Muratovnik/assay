@@ -5,6 +5,11 @@ models, install dependencies, launch advisors, read transcripts or modify client
 settings. Their text and any subsequent agent work still consume context/quota.
 Skills-only installations do not install hooks.
 
+User corrections can optionally be retained as local feedback candidates. See
+[feedback capture](feedback-capture.md) for consent modes, inspection and native
+Claude/Codex/Cursor/Gemini adapters. This is separate from the technical reminder
+state described below; it is off by default and never confirms failures automatically.
+
 ## Install, enable and verify separately
 
 The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
@@ -122,12 +127,15 @@ second list of skill definitions. Explicit-only skill selections are derived
 from the catalogue. Disabling a rule also suppresses its explicit suggestion;
 that does not prevent the user or model from using the skill directly.
 
-Small namespaced records reuse the existing `PipelineStore` SQLite transactions,
-path checks and expiry, not a new storage engine. Each hook namespace is capped
-at 128 records with a 24-hour lifetime. Records contain hashes, rule IDs, event
-names and decision classes, never prompts, paths, arguments or transcript text.
-`record_events: true` enables bounded technical event recording; it is off by
-default. Its evidence label is `command_input_unattested`, not native execution.
+Small namespaced technical reminder records reuse the existing `PipelineStore`
+SQLite transactions, path checks and expiry, not a new storage engine. Each such
+hook namespace is capped at 128 records with a 24-hour lifetime. These records
+contain hashes, rule IDs, event names and decision classes, never prompts, paths,
+arguments or transcript text. `record_events: true` enables bounded technical
+event recording; it is off by default. Its evidence label is
+`command_input_unattested`, not native execution. The separate opt-in
+`feedback_capture` option has its own [content consent and retention](feedback-capture.md),
+and does not share the routing database or these namespace limits.
 
 Scope includes client, session, working directory and agent identity. Codex also
 uses transcript *identity* without opening that file; absent both agent and
