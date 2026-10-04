@@ -48,6 +48,9 @@ report input and a passing prefix check that misses the formatting requirement.
 It evaluates recovery from an owning record, not a native compaction event or
 reuse CLI invocation. Hook transitions and receipt comparisons have their own
 mechanical tests; qualify native delivery separately. Test count is not a quality target.
+An allowed read-only command can add a fresh observation in WX-05. Distinguish it
+from retained evidence; do not require the verification gap to remain open after
+a permitted check actually establishes the needed guarantee.
 
 Retain final artifacts, actual tool evidence, failures and remaining corrections.
 Compare task success, valid alternatives, authorized effects, unnecessary work
