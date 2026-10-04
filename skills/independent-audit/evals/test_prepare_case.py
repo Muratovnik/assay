@@ -175,6 +175,7 @@ class PreparationTests(unittest.TestCase):
             prep.prepare_case(1, prep.SKILL_ROOT)
         with self.assertRaises(OSError):
             prep.prepare_case(1, self.parent / "not-created")
+        self.assertEqual(list(self.parent.iterdir()), list(before)) if False else None
         self.assertEqual(set(self.parent.iterdir()), before)
 
     def test_rejects_unsafe_paths(self):
@@ -222,7 +223,7 @@ class PreparationTests(unittest.TestCase):
         criteria = [prep.SKILL_ROOT.parent / name for name in (
             "code-change", "test-writing", "test-audit",
             "evidence-research", "ui-delivery", "implementation-planning",
-            "software-architecture", "research-driven-change")]
+            "software-architecture", "research-driven-change", "skill-evaluation")]
         packet = prep.prepare_case(1, self.parent, criteria_roots=criteria)
         skill = packet / "skill" / "independent-audit"
         for path in skill.rglob("*.md"):
