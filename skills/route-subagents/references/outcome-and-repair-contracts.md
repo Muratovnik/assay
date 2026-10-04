@@ -111,7 +111,9 @@ Neither an unchanged prompt nor a stronger model supplies that evidence.
 
 After each focused repair:
 
-- accept only after the primary reruns the sound oracle;
+- accept only after the primary verifies the repair against the sound oracle on
+  the current candidate; reuse a verified still-applicable result or rerun the
+  affected check under [verification scope](../../code-change/references/verification-scope.md);
 - select a different capability or configuration only for a demonstrated
   reasoning or task-shape mismatch;
 - re-plan for ownership, interface, source, authority, or isolation failures;

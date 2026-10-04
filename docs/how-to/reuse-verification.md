@@ -11,15 +11,16 @@ service, determine whether tests are adequate or approve task completion.
 
 ## Capture an authorized check
 
-Run from the repository root. Create an existing task-owned evidence directory
-outside the source tree, such as `../assay-evidence`. Command output may contain
-private data; do not publish that directory or its logs by default.
+Run from the repository root. Select an existing task-owned evidence directory
+under the owner's storage and retention policy, outside managed installation
+roots. Replace `EVIDENCE_DIRECTORY` below with that path. Command output may
+contain private data; do not publish that directory or its logs by default.
 
 The following example captures the focused receipt tests and the two source files
 they exercise. Use the same interpreter and environment for the intended check.
 
 ```text
-python -B tools/command_receipt.py --execute --cwd . --output-parent ../assay-evidence --input tools/command_receipt.py --input tools/test_receipt_reuse.py -- python -B -m unittest tools.test_receipt_reuse
+python -B tools/command_receipt.py --execute --cwd . --output-parent EVIDENCE_DIRECTORY --input tools/command_receipt.py --input tools/test_receipt_reuse.py -- python -B -m unittest tools.test_receipt_reuse
 ```
 
 The JSON output supplies `packet`, `state`, `exit_code` and `manifest_sha256`.

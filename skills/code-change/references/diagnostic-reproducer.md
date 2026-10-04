@@ -14,6 +14,16 @@ State which explanations are supported and which still need a distinguishing
 observation. Avoid fixed hypothesis counts or automatic architectural escalation
 based on the number of attempts.
 
+Different setup errors can leave the same consumer boundary unreached. Before
+another costly run or repair handoff, trace the connected prerequisites against
+the current inputs and identify the blocking transition. Use
+[runtime boundaries](runtime-boundaries.md) when generated inputs, compilation or
+staged execution are involved. Carry the furthest verified boundary, remaining
+consumer outcome and next distinguishing observation in the existing task; do not
+create another progress store. A changed error message or completed local edit
+alone does not establish advancement. A probe that eliminates a plausible cause
+or verifies a needed prerequisite can be useful progress without a product edit.
+
 When safe and useful, reduce irrelevant inputs and steps while rechecking that
 the same symptom persists. Probe the boundary that distinguishes the explanations:
 for example, whether the input reached a component, whether configuration was
