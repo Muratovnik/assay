@@ -186,7 +186,7 @@ mandatory unresolved parts prevent acceptance.
 | --- | --- |
 | PASS | Every required scoped claim established; no confirmed in-scope defects. |
 | PASS WITH NON-BLOCKING FINDINGS | Every required claim established; confirmed remaining defects do not block this stage. |
-| FAIL | A required claim refuted or a demonstrated defect prevents acceptance. |
+| FAIL | A required claim refuted or a demonstrated defect prevents acceptance. List other unknowns separately. |
 | INCONCLUSIVE | No decisive failure, but required evidence or a material acceptance choice remains unresolved. |
 
 Known acceptance failure dominates missing evidence. Caveats alone do not justify

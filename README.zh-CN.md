@@ -79,7 +79,7 @@
 <details>
 <summary><b>符号链接安装器</b> —— 获取智能体配置，并让改动即时生效</summary>
 
-Claude Code 插件已包含两个配置。符号链接安装器还提供 Codex 配置，
+Claude Code 插件已包含两个智能体配置。符号链接安装器还提供 Codex 配置，
 并使检出目录中的修改无需重装即可生效。不要重复安装插件已提供的 Claude 条目：
 
 ```text

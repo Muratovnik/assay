@@ -44,7 +44,7 @@ installation mechanism; this change does not add a second settings installer.
 Update/remove/rollback the plugin with its native lifecycle; linked installations
 still follow [the existing external-snapshot procedure](upgrade-linked-install.md).
 Keep foreign settings unchanged. Do not copy the hook into user settings in addition
-to enabling the plugin. `claude-routes --remove`
+to enabling the plugin. After rollback, review trust again. `claude-routes --remove`
 and the existing ownership manifest govern generated definitions, not plugin removal.
 Persistent plugin data has its own lifetime and is not an install-state database.
 
