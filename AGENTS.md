@@ -17,6 +17,14 @@ profile adapters are generated from those two, never edited by hand.
 
 ## Writing a skill
 
+For a new capability or a material change to method decisions, discovery or
+execution, apply [skill evaluation](skills/skill-evaluation/SKILL.md) before
+choosing more rules. It owns diagnosis, research transfer and behavioral evidence;
+this contract owns packaging. A description or trigger edit can change behavior
+even when the diff is small. An inert typo or metadata correction needs no new
+campaign. Reuse sufficient evidence, and distinguish a proposed candidate from
+an improvement supported by comparable task execution.
+
 - One directory per skill under `skills/<name>/`, where `<name>` matches the
   frontmatter `name` exactly: lowercase, hyphenated, no more than 64 characters.
 - `SKILL.md` frontmatter carries `name`, `description` and `license`. The

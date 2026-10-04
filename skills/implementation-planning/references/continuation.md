@@ -51,6 +51,18 @@ Recurrence is a reason to investigate, not a fixed retry count authorizing a rew
 
 ## Reconcile before continuing
 
+A short continuation request refers back to selected work; it does not by itself
+identify a new project or prove that every previous permission still applies.
+Recover the task and its next unresolved decision from the available conversation
+and owning record, then apply current restrictions. Ask only when the selected
+work remains materially ambiguous after that recovery. A narrowed request such as
+"continue, but only review" changes authority even if the topic stays the same.
+
+Retain references to the criteria needed for the remaining decisions, not every
+skill ever used. A reminder is a pointer, not proof that the criteria were read or
+followed. Re-read only missing or invalidated context before the decision it
+protects; do not restart the whole lifecycle or persist a second task model.
+
 Resolve the selected task exactly. If its identifier or source is unavailable,
 report that rather than silently selecting a nearby plan. Inspect the current
 artifact and relevant drift, preserving unrelated work. Recorded progress is a
