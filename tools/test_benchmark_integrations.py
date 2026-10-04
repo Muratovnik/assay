@@ -197,7 +197,10 @@ from route_evidence.cache import Cache
 from benchmark_mcp import build_server
 root = Path(sys.argv[2])
 def slow(self, source, validators, *, browser):
-    code = "import os,sys,time; from pathlib import Path; Path(sys.argv[1]).write_text(str(os.getpid())); time.sleep(20)"
+    code = ("import os,sys,time; from pathlib import Path; "
+            "marker=Path(sys.argv[1]).with_name('worker.'+str(os.getpid())+'.pid'); "
+            "ready=marker.with_suffix('.ready'); ready.write_text(str(os.getpid()), encoding='ascii'); "
+            "ready.replace(marker); time.sleep(20)")
     self.run([sys.executable, "-B", "-S", "-c", code, str(root / "worker.pid")])
 ProcessScope.fetch = slow
 service = RoutingService(Cache(root / "cache"), timeout=25)
@@ -210,18 +213,19 @@ build_server(service).run(transport="stdio")
                     await client.list_tools()
                     call = asyncio.create_task(client.call_tool("get_routing_context", {
                         "task_types": ["terminal"], "available": request()["available"]}))
+                    def worker_pids():
+                        return [int(path.read_text(encoding="ascii")) for path in root.glob("worker.*.pid")]
                     until = time.monotonic() + 10
-                    while not (root / "worker.pid").exists() and time.monotonic() < until:
+                    while not worker_pids() and time.monotonic() < until:
                         await asyncio.sleep(.02)
-                    self.assertTrue((root / "worker.pid").exists())
-                    pid = int((root / "worker.pid").read_text())
+                    self.assertTrue(worker_pids())
                     call.cancel()
                     with self.assertRaises(asyncio.CancelledError):
                         await call
                     until = time.monotonic() + 3
-                    while is_running(pid) and time.monotonic() < until:
+                    while any(is_running(pid) for pid in worker_pids()) and time.monotonic() < until:
                         await asyncio.sleep(.02)
-                    self.assertFalse(is_running(pid))
+                    self.assertFalse(any(is_running(pid) for pid in worker_pids()))
                     acquired = False
                     while time.monotonic() < until:
                         with source_lock(root / "cache" / "terminal-bench.lock") as acquired:
@@ -234,7 +238,7 @@ build_server(service).run(transport="stdio")
                     for path in (root / "cache").glob("*.json"):
                         envelope = json.loads(path.read_text())
                         self.assertIsNone(envelope.get("snapshot"))
-                        self.assertFalse(envelope.get("failures", 0))
+                        self.assertFalse(envelope.get("failures", 0), envelope)
 
     async def test_stdio_tools_session_inventory_and_validation(self):
         from mcp import Client, StdioServerParameters
