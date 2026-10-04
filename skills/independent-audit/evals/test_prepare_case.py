@@ -175,7 +175,6 @@ class PreparationTests(unittest.TestCase):
             prep.prepare_case(1, prep.SKILL_ROOT)
         with self.assertRaises(OSError):
             prep.prepare_case(1, self.parent / "not-created")
-        self.assertEqual(list(self.parent.iterdir()), list(before)) if False else None
         self.assertEqual(set(self.parent.iterdir()), before)
 
     def test_rejects_unsafe_paths(self):
