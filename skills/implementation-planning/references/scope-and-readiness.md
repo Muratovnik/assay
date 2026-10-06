@@ -98,6 +98,23 @@ its implementation. Preserve that remainder and its continuation condition rathe
 than dropping it or silently expanding the current assignment. No extra tracker,
 mandatory approval field or fixed document schema is required.
 
+### Costly decision categories
+
+Some choices are expensive to reverse whatever the diff size: architectural style;
+data schemas and storage formats; public contracts such as APIs, package exports,
+CLI interfaces, events and message schemas; language and stack; fundamental
+dependencies such as a framework, engine, ORM or transport; splitting into modules,
+packages or repositories; observability infrastructure; test infrastructure and
+check configuration; the security and permission model.
+
+A change in one of these categories is a reason to check its consequences and the
+current authority, not an automatic heavy process. Then either apply the fitting
+measures — alternatives, rollback, isolation, stages and an owner question before
+an irreversible step — or state why they do not apply, for example "internal
+boundary; no external consumer of this schema, checked in the package exports".
+A clearly documented incompatible change can be the right decision for a young
+system. Renaming an internal helper is not splitting modules. Choices outside
+these categories keep ordinary judgment of their consequences.
 
 ## Classify unknowns by the next decision
 

@@ -58,6 +58,9 @@ public contract, placement, check and condition for reconsideration. Include the
 cost and the simplest viable alternative; do not manufacture alternatives or
 numerical requirements. Physical, semantic, deployment and trust boundaries are
 different choices. A module need not be a service, package or separate repository.
+For a choice in planning's
+[costly decision categories](../implementation-planning/references/scope-and-readiness.md#costly-decision-categories),
+add its rollback and staging, or state why they do not apply.
 
 Keep observed implementation, documented intent, inference and unknowns distinct.
 Likewise distinguish proposed, owner-adopted and implementation-verified decisions.

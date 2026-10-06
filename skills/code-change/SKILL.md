@@ -41,6 +41,10 @@ guarantee no existing check covers — untrusted input at a boundary, a persiste
 state format or an external contract — establish the
 [necessary capability](../implementation-planning/references/scope-and-readiness.md#establish-a-necessary-capability).
 A fix inside a boundary that is already enforced and checked skips this step.
+A change in one of the
+[costly decision categories](../implementation-planning/references/scope-and-readiness.md#costly-decision-categories)
+is not made silently inside a local task: check its consequences and authority
+first.
 
 Retain supported behavior during refactoring, including exports, input shapes,
 side effects, errors and lifecycle. Name intentional behavior changes separately.
