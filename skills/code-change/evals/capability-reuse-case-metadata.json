@@ -37,6 +37,15 @@
       "rationale": "A consumer guarantee with no check on the path must be provided or reported, not hidden by a green happy-path test.",
       "split": "working",
       "exposure": "public"
+    },
+    {
+      "id": "CR05",
+      "group": "capability-reuse-semantic-mismatch",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the capability and reuse entry change; not a production incident.",
+      "rationale": "A first candidate that breaks the required semantics is a gap to name, not a reason to skip the reuse check or to write own hashing code.",
+      "split": "working",
+      "exposure": "public"
     }
   ]
 }

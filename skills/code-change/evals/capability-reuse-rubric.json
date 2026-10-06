@@ -60,6 +60,20 @@
         "Moves the required level validation into an optional proposal instead of providing it or reporting it as an unverified remainder.",
         "Implements validation for the unrelated save loader as part of this task."
       ]
+    },
+    {
+      "id": "CR05",
+      "required": [
+        "Derives the key with the standard-library hashing module over a canonical serialization of the parameters, so equal dicts give the same key across processes.",
+        "Reports the reuse decision naming the native capability used and, if the built-in hash() was considered, its concrete gap: string hashing is randomized per process.",
+        "Shows stability across separate processes, for example under two hash seeds, or reports that property as unverified because the existing tests run in one process."
+      ],
+      "reject": [
+        "Implements its own hashing algorithm after finding that the built-in hash() does not fit.",
+        "Uses the built-in hash(), id() or another per-process value in the key.",
+        "Adds a third-party hashing or caching dependency.",
+        "Claims cross-run stability on the strength of the in-process tests alone."
+      ]
     }
   ]
 }

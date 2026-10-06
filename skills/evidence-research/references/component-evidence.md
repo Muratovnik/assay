@@ -1,7 +1,8 @@
 # Component and platform evidence
 
 Use for consequential dependency freshness, API limitations, maintenance or
-replacement claims. The comparison method owns fit and total cost of ownership.
+replacement claims, and before borrowing a specific resource from another project
+or package. The comparison method owns fit and total cost of ownership.
 
 Establish the installed version, proposed version, supported environment and
 capability needed. Check matching primary documentation, source or release notes.

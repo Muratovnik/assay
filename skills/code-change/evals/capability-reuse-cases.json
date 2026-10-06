@@ -45,6 +45,16 @@
         "levels/broken.json": "{\"name\": \"\", \"size\": \"12\"}\n",
         "test_levels.py": "import unittest\nfrom pathlib import Path\nfrom levels import LevelRegistry, load_level\n\nclass LevelTests(unittest.TestCase):\n    def test_valid_level_is_registered(self):\n        registry = LevelRegistry()\n        load_level(Path(__file__).with_name('levels') / 'forest.json', registry)\n        self.assertEqual(144, registry.area('forest'))\n"
       }
+    },
+    {
+      "id": "CR05",
+      "prompt": "Add cache_key(params) that returns a short hexadecimal key for a dict of string request parameters. Equal dicts must give the same key in separate runs of the program, because the key names files in the on-disk cache.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nThe project supports Python 3.11 and later.\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "cache.py": "def cache_key(params):\n    raise NotImplementedError\n",
+        "test_cache.py": "import unittest\nfrom cache import cache_key\n\nclass CacheKeyTests(unittest.TestCase):\n    def test_order_does_not_matter(self):\n        self.assertEqual(cache_key({'a': '1', 'b': '2'}), cache_key({'b': '2', 'a': '1'}))\n\n    def test_different_params_differ(self):\n        self.assertNotEqual(cache_key({'a': '1'}), cache_key({'a': '2'}))\n"
+      }
     }
   ]
 }

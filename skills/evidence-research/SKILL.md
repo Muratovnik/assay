@@ -44,6 +44,9 @@ brief changes. Do not impose a full landscape survey on a narrow correction.
   [comparison and synthesis](references/comparison-and-synthesis.md).
 - For consequential package freshness, maintenance or platform-support claims,
   also use [component evidence](references/component-evidence.md).
+- Before copying, adapting or redistributing someone else's code, behavior
+  implementation or asset, use its
+  [borrowing procedure](references/component-evidence.md#borrow-a-specific-resource).
 - For a substantive review of scholarly studies, use
   [literature review](references/literature-review.md). Other research does not
   require a literature-review protocol.

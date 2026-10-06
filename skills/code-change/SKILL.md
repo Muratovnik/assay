@@ -132,9 +132,15 @@ continuation procedure linked there.
   dependency; and before a material decision to add, retain or change standard
   visual states, or deliver a staged adoption, read
   [reuse and migration scope](references/reuse-and-migration.md). A one-line
-  helper, project-specific business logic or a case where the existing option
-  breaks the required semantics needs no reuse check. A dependency or shared
-  location does not establish delegation or completion of the outcome.
+  helper or project-specific business logic needs no reuse check. An existing
+  option that breaks the required semantics is a gap to name in the reuse line,
+  not a reason to skip it. A dependency or shared location does not establish
+  delegation or completion of the outcome.
+- Before copying, adapting or redistributing code, behavior or assets from
+  another project, package or public repository, use the
+  [borrowing procedure](../evidence-research/references/component-evidence.md#borrow-a-specific-resource).
+  Studying an approach without taking its bytes needs only its first and last
+  steps.
 - For TypeScript/Vue style choices, read the
   [conventions profile](references/typescript-vue-conventions.md). Its adoption
   boundary matters; it is not a universal language standard.
@@ -170,7 +176,7 @@ sufficient, continue to the requested delivery; reopen verification for a change
 relevant input, failure, concrete unresolved concern or owner requirement.
 Report the responsibility/guarantee improved, actual checks and remaining gaps.
 Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
-when that reference applied. When the work met a concrete unchecked contract
+when the change introduced or kept such behavior or changed a dependency. When the work met a concrete unchecked contract
 outside the requested result, you may add `Optional proposal: <missing means> —
 risk: <unchecked contract or input>; not implemented`. Omit it when an existing
 check covers that guarantee; a guarantee the result needs is never optional.

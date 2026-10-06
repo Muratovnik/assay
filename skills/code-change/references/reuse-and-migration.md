@@ -45,9 +45,9 @@ presence nor a preference for reuse authorizes an unrelated rewrite.
 
 ## Report the reuse decision
 
-When the change introduces or keeps own code for behavior that commonly has an
-existing implementation, or adds or removes a dependency, state the decision in
-one line of the final report and name only the parts that apply:
+When the change introduces or keeps behavior that commonly has an existing
+implementation, whoever performs it, or adds or removes a dependency, state the
+decision in one line of the final report and name only the parts that apply:
 
 ```text
 Reuse: native <X> | installed <Y> | external <Z> | own code — gap: <concrete gap>; alternatives checked: <names, where checked> | not searched: <reason>
