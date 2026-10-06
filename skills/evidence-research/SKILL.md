@@ -56,7 +56,8 @@ no delegation, installation, settings changes, outreach or paid evaluation.
 
 ## Maintain the evidence boundary
 
-Distinguish found, retrieved, read and checked-for-this-claim. A download, search
+Distinguish found, retrieved, read, checked-for-this-claim and from memory, not
+opened. A download, search
 snippet, successful URL or truncated tool response does not establish content
 verification. Open the section, table, reference, code or hook on which the
 conclusion depends. Identify the source revision/date and relevant reading scope.

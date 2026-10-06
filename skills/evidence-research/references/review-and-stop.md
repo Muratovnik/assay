@@ -17,6 +17,13 @@ performed by the same executor. If an authorized independent review exists, give
 it the original question and evidence boundary, not only your list of findings.
 Do not spawn agents or create a new review gate from this procedure.
 
+For a source check of a costly conclusion, a reviewer packet can be: the
+load-bearing claims with their cited locations, without your reasoning; the task
+"open each cited source, compare attribution, conditions and qualifiers with the
+claim, and list every discrepancy or unopened source". Agreement from that review
+is a new input, not proof; a specific discrepancy is confirmed by checking the
+source it names.
+
 ## Bound further work
 
 Continue for a named unanswered question or conflict that can materially change
@@ -28,6 +35,16 @@ Repeated sources alone do not establish saturation. Check whether queries and
 source families were diverse enough for the task. If access or a real budget
 prevents resolution, state the unresolved decision, examined scope and resulting
 limit. Never infer that evidence does not exist from a thin first search.
+
+When stopping, name which situation applies, so the limits state why:
+
+- the evidence is sufficient for the decision it serves;
+- the data are unreachable: name the checked access boundary, not the first
+  failed query;
+- further search costs more than the decision warrants: name what it could
+  still change;
+- the uncertainty cannot be reduced with available means: name what would
+  resolve it.
 
 Reuse still-valid source material. Revisit only changed assumptions or affected
 branches after new user feedback. For failures distinguish a transient error,

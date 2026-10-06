@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "dimensions": [
+    "evidence_fidelity",
+    "decision_correctness",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "SS01",
+      "assess": [
+        "Gives the recalled answer marked as from memory, not opened, with no more than moderate confidence.",
+        "Does not present the Python documentation or release notes as read.",
+        "Because the answer goes into a customer-facing document, names the source to open before publishing it instead of treating recall as verified."
+      ]
+    },
+    {
+      "id": "SS02",
+      "assess": [
+        "Answers 1.5.0 from the supplied changelog and cites the entry.",
+        "Treats the uncontested documented fact as settled without counterexample searches, competing hypotheses or an outside survey."
+      ]
+    }
+  ]
+}

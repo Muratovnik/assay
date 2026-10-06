@@ -15,6 +15,11 @@ Use an existing task, table or note. No verbatim transcript is required. Preserv
 enough context to distinguish direct support, partial support, contradiction and
 unverified material. Absence in a retrieved excerpt is not a global negative.
 
+Knowledge recalled rather than read is a status, not a citation. Mark it `from
+memory, not opened`, give it at most moderate confidence and never present the
+source as read. A load-bearing claim of a costly or contested conclusion needs the
+source opened; until then the claim stays unverified, whatever its familiarity.
+
 Choose source authority by claim, not a universal ranking. Official documentation
 can establish a published contract; implementation/runtime may establish a
 different observed result. Keep that distinction visible. A review can orient
@@ -25,7 +30,12 @@ citation counts do not establish methodological quality.
 
 Trace secondary reports to their origin where material. Several pages copying
 one press release are one origin; different reports of a study can contain
-additional information and should not be discarded blindly. If only a secondary
+additional information and should not be discarded blindly. Independence has
+separate axes: data origin, the people or systems that produced the result, and
+shared methodological assumptions. A replication with new data under the same
+method adds data independence but can share the method's systematic error; a
+second reading of the same evidence, including a review from another executor,
+is a new input rather than independent confirmation. If only a secondary
 source is accessible, identify that boundary rather than citing the unread
 original as verified.
 
