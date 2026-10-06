@@ -291,6 +291,104 @@
         "pyproject.toml": "[project]\nname=\"harbor-tools\"\nrequires-python=\">=3.12\"\n",
         "release.txt": "The owner confirms the package is published and these commands are the supported user route.\n"
       }
+    },
+    {
+      "id": "TW19",
+      "prompt": "Write the public README for Cedar 1.2.0. Its readers are people deciding whether the released tool fits their CSV task and trying it for the first time.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "product.txt": "Cedar inspects local UTF-8 CSV files and prints row counts and column names. It reads the selected file and makes no changes. It has no server, account or upload capability. Embedded newlines inside quoted CSV fields are supported. A malformed row stops inspection with exit code 2; it is not silently repaired.\n",
+        "pyproject.toml": "[project]\nname = \"cedar-tools\"\nversion = \"1.2.0\"\nrequires-python = \">=3.12\"\n[project.scripts]\ncedar = \"cedar_tools.cli:main\"\n",
+        "cli-help.txt": "cedar inspect FILE [--columns]\n  FILE: path to a local UTF-8 CSV file\n  Without --columns, print the number of data rows, excluding the header.\n  With --columns, also print the header column names in input order.\n  Exit 0 on success; exit 2 on malformed CSV.\n",
+        "release-notes.md": "# 1.2.0\nThe new --columns option prints column names alongside the row count. Earlier versions print row counts only. The package cedar-tools 1.2.0 is published. The supported user install is pipx install cedar-tools; Python 3.12+ and pipx must already be available.\n",
+        "examples/orders.csv": "order_id,total\na17,12.50\na18,7.00\n",
+        "examples/output.txt": "For examples/orders.csv: cedar inspect examples/orders.csv --columns prints:\n2 rows\ncolumns: order_id, total\n",
+        "author-notes.md": "# Release preparation\nThe implementer compared cli-help.txt with the parser, checked pyproject.toml and rewrote two README sentences from product.txt. The draft slogan was \"Bring order to your data\" and a proposed example was cedar --help with no further explanation.\nThe owner installed cedar-tools 1.2.0 with pipx on Python 3.12 and inspected examples/orders.csv on a clean Linux profile; the captured output matches examples/output.txt. No macOS or Windows execution was performed. The Markdown renderer was unavailable. Local relative links were inspected against the supplied tree; no external links were checked.\n",
+        "tree.txt": "README.md\nLICENSE\ndocs/reference.md\nexamples/orders.csv\n",
+        "docs/reference.md": "# Cedar reference\nThe command and exit-code contract is the one reproduced in cli-help.txt.\n",
+        "LICENSE": "MIT License. Copyright 2026 Cedar contributors.\n"
+      }
+    },
+    {
+      "id": "TW20",
+      "prompt": "Write a release acceptance report for Cedar 1.2.0 for the release owner deciding which claims the supplied checks support and what remains unchecked.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "product.txt": "Cedar inspects local UTF-8 CSV files and prints row counts and column names. It reads the selected file and makes no changes. It has no server, account or upload capability. Embedded newlines inside quoted CSV fields are supported. A malformed row stops inspection with exit code 2; it is not silently repaired.\n",
+        "pyproject.toml": "[project]\nname = \"cedar-tools\"\nversion = \"1.2.0\"\nrequires-python = \">=3.12\"\n[project.scripts]\ncedar = \"cedar_tools.cli:main\"\n",
+        "cli-help.txt": "cedar inspect FILE [--columns]\n  FILE: path to a local UTF-8 CSV file\n  Without --columns, print the number of data rows, excluding the header.\n  With --columns, also print the header column names in input order.\n  Exit 0 on success; exit 2 on malformed CSV.\n",
+        "release-notes.md": "# 1.2.0\nThe new --columns option prints column names alongside the row count. Earlier versions print row counts only. The package cedar-tools 1.2.0 is published. The supported user install is pipx install cedar-tools; Python 3.12+ and pipx must already be available.\n",
+        "examples/orders.csv": "order_id,total\na17,12.50\na18,7.00\n",
+        "examples/output.txt": "For examples/orders.csv: cedar inspect examples/orders.csv --columns prints:\n2 rows\ncolumns: order_id, total\n",
+        "author-notes.md": "# Release preparation\nThe implementer compared cli-help.txt with the parser, checked pyproject.toml and rewrote two README sentences from product.txt. The draft slogan was \"Bring order to your data\" and a proposed example was cedar --help with no further explanation.\nThe owner installed cedar-tools 1.2.0 with pipx on Python 3.12 and inspected examples/orders.csv on a clean Linux profile; the captured output matches examples/output.txt. No macOS or Windows execution was performed. The Markdown renderer was unavailable. Local relative links were inspected against the supplied tree; no external links were checked.\n",
+        "tree.txt": "README.md\nLICENSE\ndocs/reference.md\nexamples/orders.csv\n",
+        "docs/reference.md": "# Cedar reference\nThe command and exit-code contract is the one reproduced in cli-help.txt.\n",
+        "LICENSE": "MIT License. Copyright 2026 Cedar contributors.\n"
+      }
+    },
+    {
+      "id": "TW21",
+      "prompt": "Rewrite package/README.md for the Lark extension page in the ForgeHub catalog using the supplied product and release facts. Help these readers choose the extension and understand the compatibility choice controlled by PinnedUI.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "package/README.md": "# Lark\n\nLark is a client-side extension that translates add-on labels into English. It runs only on the player's client; the server and other players do not need to install it.\n\n## Install\nClick Install on this catalog page and let the manager install Lark and its dependencies.\n\n## First use\nOpen the game after installation. Labels are translated automatically while the game language is English.\n\nFor example, \"Bonjour\" becomes \"Hello\".\n\n## Coverage\nLark contains catalogs for eight add-ons. Coverage varies by add-on. See [coverage](../docs/coverage.md).\n\nCode is distributed under the [MIT License](../LICENSE).\n",
+        "audience-and-surface.txt": "Readers already use the ForgeHub mod manager and understand the term client-side extension. This catalog page provides the working Install button; the manager installs the package and all dependencies. No configuration or additional first-use action is required. English must be the game language. Changing the language of a running game requires a restart. Markdown relative links resolve from package/README.md within this published package.\n",
+        "change.txt": "Lark now also translates audio captions for the eight supported add-ons. All current behavior in audience-and-surface.txt is authoritative. The plain Bonjour/Hello pair illustrates an ordinary literal translation with no special product behavior.\n",
+        "settings.txt": "PinnedUI is a Lark-specific setting unfamiliar to this audience. With PinnedUI=true, menu translations are limited to the audited versions of add-ons. Dictionary loading is unaffected by PinnedUI. The setting is not needed for initial activation.\n",
+        "docs/coverage.md": "# Coverage\nCatalogs exist for eight add-ons; their depth varies and this does not promise complete translation of every add-on. Audio captions are included where a catalog has matching entries.\n",
+        "LICENSE": "MIT License. Copyright 2026 Lark contributors.\n"
+      }
+    },
+    {
+      "id": "TW22",
+      "prompt": "Write a public README for the released Silt CLI so a new user can decide whether it fits and finish a first export.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "package.json": "{\"name\":\"silt-cli\",\"version\":\"2.0.0\",\"engines\":{\"node\":\">=22\"},\"bin\":{\"silt\":\"bin/silt.js\"}}\n",
+        "contract.txt": "Silt exports a project catalog from the fictional Silt service to a local CSV file. The npm package silt-cli 2.0.0 is published. Supported install: npm install -g silt-cli. Node.js 22+ with npm must be available first.\nBefore export, the user needs an existing Silt project and a read-only project token obtained from Project settings > Access > Read token. The token is restricted to that project. In a POSIX shell, export SILT_TOKEN= followed by the token value supplies it. Never embed an actual token in documentation.\nCommand: silt export PROJECT --output FILE. PROJECT is the project slug from Project settings, not its display name. FILE is a new local path whose parent directory must already exist. An existing output file is rejected with exit 4; the command never overwrites it. A missing SILT_TOKEN exits 3. Export prints the count of data rows and the output path.\n",
+        "sample.txt": "Illustrative fixture, not a run by the writer: project slug sample-catalog, display name Sample Catalog, and one record with id=oak and label=Oak. With SILT_TOKEN set to that project's read token, silt export sample-catalog --output catalog.csv in a directory without catalog.csv prints \"1 row exported to catalog.csv\" and creates a CSV with header id,label and row oak,Oak.\n",
+        "notes.md": "An early README draft used only \"silt --help\" as its example and the sentence \"Export without limits.\" The service contract limits exports to at most 500 data rows; an oversized project fails with exit 5 and produces no output file.\n"
+      }
+    },
+    {
+      "id": "TW23",
+      "prompt": "Rewrite this public README so a prospective user can understand Moss and make a first archive from the released package.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "README.md": "# Moss\n\nMoss is utilized for the facilitation of local file archiving. It writes a ZIP archive from one local directory.\n\nWe renamed three internal modules during the sprint. The author read the test file before choosing this paragraph order. The prototype badge artwork took two afternoons.\n\nDuring the documentation sprint the author used this local word-count command:\n\n```sh\npython tools/count_readme_words.py README.md\n```\n\nInstall the published package with `pipx install moss-tools`, then run `moss archive ./notes --output notes.zip`. You need Python 3.12+, pipx, an existing source directory and a new output path. The command prints the number of archived files.\n\nBy default files larger than 20 MiB are skipped. `--include-large` includes them only if at least 2 GiB of free local storage is available; otherwise the command exits 3 without creating the archive. ZIP output is not encrypted. Empty source directories succeed with zero archived files.\n\nParser documentation adapted from Fern Parser Notes, copyright 2025 Fern contributors, CC BY 4.0.\n\nThis page was generated from the Moss CLI contract and reviewed by its maintainer.\n",
+        "contract.txt": "moss-tools 1.0 is published. README commands, prerequisites and behavior are accurate as written. The documented large-file threshold, storage condition, empty-input exception and lack of encryption are part of the user contract. Keep the Fern attribution/license notice and the generation/review notice in distributed documentation. The sprint and artwork notes record internal author history, with no user dependency.\n"
+      }
+    },
+    {
+      "id": "TW24",
+      "prompt": "Copyedit only the opening paragraph of this README to make it read naturally. Leave the rest of the page as supplied. Return the complete page with that edit.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "README.md": "# Moss\n\nMoss is utilized for the facilitation of local file archiving. It writes a ZIP archive from one local directory.\n\nWe renamed three internal modules during the sprint. The author read the test file before choosing this paragraph order. The prototype badge artwork took two afternoons.\n\nDuring the documentation sprint the author used this local word-count command:\n\n```sh\npython tools/count_readme_words.py README.md\n```\n\nInstall the published package with `pipx install moss-tools`, then run `moss archive ./notes --output notes.zip`. You need Python 3.12+, pipx, an existing source directory and a new output path. The command prints the number of archived files.\n\nBy default files larger than 20 MiB are skipped. `--include-large` includes them only if at least 2 GiB of free local storage is available; otherwise the command exits 3 without creating the archive. ZIP output is not encrypted. Empty source directories succeed with zero archived files.\n\nParser documentation adapted from Fern Parser Notes, copyright 2025 Fern contributors, CC BY 4.0.\n\nThis page was generated from the Moss CLI contract and reviewed by its maintainer.\n",
+        "contract.txt": "moss-tools 1.0 is published. README commands, prerequisites and behavior are accurate as written. The documented large-file threshold, storage condition, empty-input exception and lack of encryption are part of the user contract. Keep the Fern attribution/license notice and the generation/review notice in distributed documentation. The sprint and artwork notes record internal author history, with no user dependency.\n"
+      }
+    },
+    {
+      "id": "TW25",
+      "prompt": "Update the public README for Quarry 2.2 using the supplied successive release records. Keep it useful for users choosing an export format and completing an export.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "README.md": "# Quarry\n\nQuarry exports a local catalog to CSV. Install the published package with `pipx install quarry-tools`; Python 3.12+ and pipx are required.\n\nRun `quarry export catalog.toml --format csv --output catalog.csv`. It prints the number of exported records. The source must be a local TOML catalog, and the output path must not already exist.\n\n## Formats\n\nCSV is the only built-in format. JSON and NDJSON are outside the project scope. For JSON, use your own conversion script after exporting CSV.\n\n## Roadmap\n\nJSON export may be considered for a later version. Streaming export is planned.\n\nExports are limited to at most 500 records. Quarry does not upload data or encrypt output.\n",
+        "release-2.1.md": "# 2.1\nJSON export shipped with --format json. CSV remains the default. Both formats have the existing 500-record maximum. The old CSV-to-JSON conversion workaround is unnecessary for JSON output.\n",
+        "release-2.2.md": "# 2.2\nNDJSON export shipped with --format ndjson and writes one JSON object per line. NDJSON streams output and supports catalogs of any record count. CSV and JSON still allow at most 500 records. CSV remains the default. All formats use local TOML input and require a new output path; nothing uploads or encrypts data. quarry-tools 2.2 is published and the existing pipx install route and runtime prerequisite remain supported.\n",
+        "example-catalog.toml": "[[records]]\nid = \"oak\"\nlabel = \"Oak\"\n"
+      }
+    },
+    {
+      "id": "TW26",
+      "prompt": "Rewrite this ADR for engineers who will implement and operate the accepted storage decision. Make the decision and consequences easy to follow.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "adr.md": "# ADR 7: queue storage\n\nStatus: accepted on 2026-08-14. Supersedes ADR 3, which chose an in-memory queue for the pilot. ADR 3 remains linked for the pilot assumptions.\n\nUse the local Slate journal for queue jobs. The pilot lost queued jobs after a process restart; restart recovery is now a product requirement. We considered retaining the in-memory queue and adopting a remote database. The former still loses queued jobs on restart. The latter provides cross-host coordination but requires a service this deployment cannot operate. Slate recovers committed jobs after restart and runs on the same host.\n\nThis decision does not provide cross-host failover. A failed disk can lose the journal, so operators must keep the documented daily snapshot. If recovery reports a checksum mismatch, stop the worker and contact the incident lead; do not delete the journal to force startup.\n\nA multi-host service remains proposed, not approved. Revisit this decision when the deployment needs workers on more than one host.\n",
+        "decision-record.txt": "All status, date, alternatives, pilot history and operational conditions in adr.md are accurate. ADR 3 is available at adr-003.md. The daily snapshot procedure is at snapshots.md. No implementation has yet been rolled out; acceptance of the decision is not deployment verification.\n",
+        "adr-003.md": "# ADR 3\nStatus: superseded by ADR 7. The pilot used an in-memory queue while restart recovery was out of scope.\n",
+        "snapshots.md": "# Daily snapshot\nThe operator uses the approved host snapshot process each day and retains the journal snapshot on another disk.\n"
+      }
     }
   ],
   "triggers": [
@@ -345,6 +443,24 @@
     {
       "id": "TT13",
       "prompt": "Write the commit message for this staged diff."
+    },
+    {
+      "id": "TT14",
+      "prompt": "Our little CLI has working code but no README. Use the attached files to write the repository README for a new user of the released package. Explain what it does and how to reach a first result.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested Markdown artifact; do not run commands, contact services or change files.",
+      "files": {
+        "src/reed_cli.py": "import argparse\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"text\")\n    args = parser.parse_args()\n    print(len(args.text.split()))\n",
+        "pyproject.toml": "[project]\nname = \"reed-tools\"\nversion = \"1.0.0\"\nrequires-python = \">=3.12\"\n[project.scripts]\nreed = \"reed_cli:main\"\n",
+        "release.txt": "The owner confirms reed-tools 1.0.0 is published and pipx install reed-tools is the supported route. Python 3.12+ and pipx are prerequisites. reed \"oak elm\" prints 2. The command counts whitespace-separated words in its text argument, with no files or network access.\n"
+      }
+    },
+    {
+      "id": "TT15",
+      "prompt": "Refactor the attached word-count CLI so counting lives in a pure function used by main. Keep command behavior unchanged. Return the revised Python file.",
+      "context": "All products, records and paths in this packet are fictional local fixtures. Use the supplied sources only. Return the requested code artifact; do not run commands, contact services or change files.",
+      "files": {
+        "src/reed_cli.py": "import argparse\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"text\")\n    args = parser.parse_args()\n    print(len(args.text.split()))\n"
+      }
     }
   ]
 }

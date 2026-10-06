@@ -1,5 +1,7 @@
 <!-- Authoring template only. Resolve all {{slots}} and remove these comments.
-Use the selected profile. Omit inapplicable sections; do not invent metadata.
+Select content for this reader and publication surface before using the profile.
+Every section below is conditional. Omit inapplicable sections and their headings;
+do not invent metadata or actions to fill a slot.
 The hero is plain Markdown here; apply the selected renderer's header treatment.
 Badges follow the hero only for established targets. Do not paste a placeholder URL.
 -->
@@ -13,17 +15,20 @@ Badges follow the hero only for established targets. Do not paste a placeholder 
 
 {{Distinct supported uses; for a tiny tool avoid repeating the opening.}}
 
-{{Existing demonstration image/live link with useful description if available;
-otherwise let Quick start provide the demonstration and remove this slot.}}
+{{An appropriate existing image/live link or supported example when it explains
+a non-obvious behavior or choice. No mandatory text-example fallback; use a
+needed first-use example once, or remove this slot.}}
 
 ## Install
 
-{{Or Access for a hosted product. State prerequisites and the supported route;
-include exact commands only after checking their source.}}
+{{Or Access for a hosted product. Include this section only for setup, prerequisites
+or a route this audience still needs. Do not repeat a catalog's supplied install
+steps. A repository page may need a download link. Verify any exact commands.}}
 
 ## Quick start
 
-{{Starting directory/files/access, ordered actions, and recognizable result.
+{{Only when first use requires an action or setup; omit for automatic operation.
+Starting directory/files/access, ordered actions, and recognizable result.
 Put a relevant warning before an action. Label illustrative output accurately.}}
 
 ## Documentation
