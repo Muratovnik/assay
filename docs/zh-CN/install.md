@@ -24,6 +24,12 @@ skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配
 是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的
 加载或行为。参见[交付矩阵](../install.md#installation-surfaces)。
 
+提示词建议、会话提醒、路由守卫和反馈案例记录只在存在 `hooks/runtime` 与
+`skills/route-subagents/scripts` 的位置可用：两种插件路径和完整检出。仅安装技能时，
+请用客户端的常规方式显式调用方法，并把反馈案例记在任务自己的笔记中。如何确认
+当前生效的技能副本、`doctor` 报告什么，以及缺少协作技能时如何继续，参见
+[英文版](../install.md#check-what-a-session-can-use)。
+
 ## 自动技能提醒
 
 完整插件为 Claude Code 和 Codex 分别生成 `hooks/hooks.json` 与
@@ -66,6 +72,11 @@ codex plugin marketplace add Muratovnik/assay
 Codex 从项目中的 `.agents/skills` 读取技能，并逐级向上直到仓库根目录，账号级则
 读取 `$HOME/.agents/skills`。它的智能体定义位于 `~/.codex/agents/*.toml`，插件
 路径不会写入该位置：若需要配置，请使用下方的符号链接安装器。
+
+Codex 向模型展示的初始技能列表（名称与描述）上限约为上下文窗口的 2%，窗口未知时
+为 8,000 个字符；超出时先缩短描述，再省略部分技能并给出警告（已于 2026-10-06 对照
+Codex 文档核实）。Assay 的十四个描述约占 3,900 个字符，且每个描述都先说明何时使用、
+再说明何时跳过。
 
 ## 通过技能 CLI 安装到任意智能体
 

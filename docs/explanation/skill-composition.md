@@ -23,7 +23,9 @@ loader. `tools/skill_resources.py` delegates CommonMark parsing to markdown-it-p
 Code fences are examples, not links; reference links and HTML href/src resources
 are inspected. The checker copies the collection and each singleton to ordinary
 temporary layouts, checks declared peer boundaries, requires local resources and
-rejects broken peer targets when that peer is present. Empty selections fail.
+rejects broken peer targets when that peer is present. A link to a section must
+match a heading anchor in the target, so a renamed heading fails rather than
+leaving a dangling reference. Empty selections fail.
 
 These checks do not run an installer, resolve all dynamic script/import paths,
 validate URL contents, prove a client discovered the skill or establish useful

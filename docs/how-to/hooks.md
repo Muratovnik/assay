@@ -294,6 +294,17 @@ model adherence or quota savings. No model benchmark/eval is required by this ch
 Use ordinary work incidents to add sanitized regressions, and keep native observation
 and human assessment separate from a green unit suite.
 
+To see how the hint grammar covers your own wording, collect the first paragraphs
+of 30–50 real requests, remove code, paths, names and secrets, and write one
+`{"hook_event_name":"UserPromptSubmit","session_id":"replay","cwd":".","prompt":"..."}`
+object per line. Replay it and compare each result with the method you expected.
+A missed request becomes a candidate rule only together with a nearby
+should-not-fire wording, both added to `tools/fixtures/hooks/prompts.json` and
+checked against the existing controls. The share of hinted requests describes the
+grammar on that sample, not which skill a client selects from descriptions; if
+methods are still chosen late with good coverage, examine the cases rather than
+widening the grammar further.
+
 ## Sources and adopted mechanisms
 
 Contracts were checked against primary documentation on 2026-09-29. A new client
