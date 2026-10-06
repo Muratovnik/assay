@@ -292,14 +292,23 @@ class DelegationActivationTests(unittest.TestCase):
 class DelegationReminderTests(unittest.TestCase):
     def test_session_reminder_reaches_planning_before_launch(self):
         for source in ("startup", "resume", "clear", "compact", "fork"):
-            with self.subTest(source=source):
-                result = reminders.reminder({"hook_event_name": "SessionStart", "source": source}, {})
-                output = result["hookSpecificOutput"]
-                self.assertEqual({"hookEventName", "additionalContext"}, set(output))
-                self.assertIn("before substantial solo work", output["additionalContext"])
-                self.assertIn("does not authorize delegation", output["additionalContext"])
-                self.assertIn("workers must not spawn", output["additionalContext"])
-                self.assertLessEqual(len(output["additionalContext"]), 1200)
+            for environment, planning in (({}, False), ({"ASSAY_ROUTING_CONFIG": "routing.json"}, True)):
+                with self.subTest(source=source, routing=planning):
+                    result = reminders.reminder({"hook_event_name": "SessionStart", "source": source}, environment)
+                    output = result["hookSpecificOutput"]
+                    self.assertEqual({"hookEventName", "additionalContext"}, set(output))
+                    self.assertEqual(planning, "before substantial solo work" in output["additionalContext"])
+                    self.assertIn("does not authorize delegation", output["additionalContext"])
+                    self.assertIn("workers must not spawn", output["additionalContext"])
+                    self.assertLessEqual(len(output["additionalContext"]), 1200)
+        # Without configured routing, the delegation request itself carries the
+        # planning guidance before any launch.
+        rules, _ = activation.load_rules(ROOT)
+        for prompt in ("Use subagents", "Research alternatives using subagents."):
+            with self.subTest(prompt=prompt):
+                decision = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, rules)
+                self.assertIn("delegation", decision["rule_ids"])
+                self.assertIn("before substantial solo work", decision["context"])
 
     def test_required_claude_guard_still_owns_launches(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -104,7 +104,10 @@ user's scope. It never turns a plan/review into permission to edit. It does not
 claim to load a skill or assume that a particular MCP tool exists. Even an
 observed Skill load would not prove compliance with its method.
 
-The session and delegation reminders reuse `route-subagents`' existing guidance.
+The session reminder is three sentences: use matching installed skills, and no
+delegation is authorized by it. Delegation guidance from `route-subagents` is added
+at session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives with
+a delegation request and in the reminder before each launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
 failures. There is no universal blocking Stop hook.
