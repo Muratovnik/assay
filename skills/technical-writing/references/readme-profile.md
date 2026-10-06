@@ -38,8 +38,8 @@ not be omitted merely because the model has a different aesthetic preference.
 | Navigation | `Documentation` links to relevant existing pages. A short page with no deeper docs can omit this block. | Do not add dead links or create a documentation site for the template. |
 | Limits and provenance | State material limits where they affect use. End with a licence link when its terms are known. Include a contributing link when available and relevant. | Never assume MIT, invent support promises or remove existing legal/attribution notices. |
 
-Order for applicable blocks: hero → badges → useful capabilities → available
-visual/live demonstration → first-result path → navigation → further limits →
+Order for applicable blocks: hero → badges → useful capabilities → demonstration
+→ installation or access → first use → navigation → further limits →
 contributing pointer → licence. A risk or limit needed earlier moves before the
 relevant action; this is an explicit exception, not style drift. A primary visual
 may follow the hero if the owner selects that treatment. No universal line count

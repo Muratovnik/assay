@@ -448,3 +448,11 @@ not establish all outside effects. There is no measured automatic discovery,
 cross-model portability, broader language coverage, cost saving or guarantee of
 flawless prose. Repository gates are a separate structural result, not behavioral
 evidence.
+
+Merge review then aligned one sentence after selection: the block order in
+`references/readme-profile.md` still named the superseded `visual/live
+demonstration` and `first-result path`, so it now names the table's demonstration,
+installation or access and first use. This renames blocks the table already
+defines and was not executed. The merged runtime map digest is
+`197e3f394a50c46407956b716b5e1a5fa39f8b2bd5e3df1665386be4dcaa7851`, not
+candidate 3's; no other runtime file changed.
