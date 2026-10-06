@@ -34,9 +34,9 @@
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
 | [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
 
-两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 通过只读的取证
-手段审查冻结的材料包并给出结论；`official-docs-researcher` 依据一手文档回答一个
-有界限的问题。二者都不绑定模型。
+两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 审查冻结的材料包
+并给出结论：在客户端能保持只读的地方重新运行只读取证手段，否则读取材料包中的回执；
+`official-docs-researcher` 依据一手文档回答一个有界限的问题。二者都不绑定模型。
 
 > [!NOTE]
 > 技能是给智能体的指令，其中一些还附带智能体可以运行的脚本。无论来自本仓库还是

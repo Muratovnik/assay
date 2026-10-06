@@ -35,8 +35,9 @@ proof of activation. Each row links to the method itself.
 | [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
 
 Two agent profiles ship as capability boundaries rather than personas.
-`evidence-reviewer` reviews a frozen packet through a read-only oracle and
-returns a verdict; `official-docs-researcher` answers one bounded question from
+`evidence-reviewer` reviews a frozen packet and returns a verdict, rerunning a
+read-only oracle where the client keeps it read-only and otherwise reading the
+packet's receipts; `official-docs-researcher` answers one bounded question from
 primary documentation. Neither pins a model.
 
 > [!NOTE]

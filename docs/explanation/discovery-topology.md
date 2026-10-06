@@ -92,12 +92,15 @@ rendered adapters ask the client to constrain itself accordingly — the Codex
 adapter asks for a read-only sandbox, and the Claude adapter uses plan mode
 with a capability-derived tool list.
 
-Only the `evidence-reviewer` profile receives `Bash`, and only because its
-declared oracle has to be executable for the review to mean anything; its
-instructions still forbid mutating commands, so the added capability is
-scoped to running a check, not to changing anything. `official-docs-researcher`
-gets no execution capability at all, consistent with a read-only research
-role.
+Only the `evidence-reviewer` profile declares an executable oracle, because a
+review that cannot rerun its check means less. Codex receives it inside a
+read-only sandbox. Claude ignores a plugin subagent's `permissionMode`, and some
+parent modes override a native one, so a shell there would not stay read-only:
+the Claude projection is a bounded reader with `Read`, `Grep` and `Glob`, names
+the oracle unavailable and reads the snapshot-bound receipts the caller supplies
+instead. That is a real loss of the rerun on Claude, accepted in exchange for not
+promising a boundary the client does not keep. `official-docs-researcher` gets no
+execution capability at all, consistent with a read-only research role.
 
 That distinction has a limit worth stating plainly: an adapter's requested
 sandbox is configuration, not a guarantee. Whether a given session actually
