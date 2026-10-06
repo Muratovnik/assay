@@ -67,7 +67,10 @@ contexts and packet hashes alone do not prove that exclusion.
 
 Use the cheapest adequate check: existing deterministic assertions for objective
 properties, artifact review or a calibrated model judge for open-ended outcomes.
-Do not replace a working owner check with a bespoke approximate grader.
+Do not replace a working owner check with a bespoke approximate grader. A
+requirement about the order of actions, such as reading a criterion before
+writing code, needs a trace of that order; graded from the final answer alone it
+stays unknown, neither met nor failed.
 
 For receipt-based acceptance, identify the claim, actual subject/input identity,
 operation and discriminating observation. Reading an evidence file or receiving

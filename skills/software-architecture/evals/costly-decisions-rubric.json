@@ -5,7 +5,7 @@
     {
       "id": "CD01",
       "must": [
-        "Recognize the change as a persisted format and public contract with external readers before writing it.",
+        "Treat the change as a persisted format and public contract: the result names the released desktop app and the partner import tool as affected readers.",
         "Use the documented reader behavior: an unknown top-level key breaks the stated consumers.",
         "Choose a compatible route, such as a version change with tolerant loading and a stated migration, or implement only the safe part and put the incompatible format decision to the owner before release.",
         "State how the change is rolled back and what the existing round-trip test does not establish about other readers."
