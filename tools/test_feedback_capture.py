@@ -510,6 +510,27 @@ class FeedbackCaptureTests(unittest.TestCase):
         self.assertEqual(stored.returncode, 0, stored.stderr)
         self.assertEqual(json.loads(stored.stdout)["capture_mode"], "content")
 
+    def test_doctor_names_a_working_record_command(self):
+        config = self.base / "hooks.json"
+        config.write_text(json.dumps({"state_dir": str(self.data)}), encoding="utf-8")
+        report = cli.doctor("claude", {"ASSAY_HOOK_CONFIG": str(config)})["feedback_record"]
+        self.assertTrue(report["available"])
+        argv = report["argv"]
+        self.assertEqual(argv[:3], ["python", "-I", "-B"])
+        self.assertEqual(Path(argv[3]), ROOT / "hooks/runtime/feedback_cli.py")
+        case = self.base / "case.json"
+        case.write_text('{"kind":"correction"}', encoding="utf-8")
+        command = [sys.executable, *argv[1:]]
+        command[command.index("CASE.json")] = str(case)
+        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(self.records()), 1)
+        unavailable = cli.doctor("claude", {})["feedback_record"]
+        self.assertEqual((unavailable["available"], unavailable["reason"]), (False, "no state directory configured"))
+        config.write_text(json.dumps({"state_dir": str(self.data), "feedback_capture": "off"}), encoding="utf-8")
+        off = cli.doctor("claude", {"ASSAY_HOOK_CONFIG": str(config)})["feedback_record"]
+        self.assertEqual((off["available"], off["reason"]), (False, "feedback_capture is off"))
+
 
 if __name__ == "__main__":
     unittest.main()

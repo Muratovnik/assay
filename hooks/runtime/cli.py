@@ -147,6 +147,19 @@ def process(event, client, environment, *, root=ROOT, clock=None):
     return result, error
 
 
+def record_command(environment, settings, root):
+    """Name the explicit record command, since a model shell may not see plugin variables."""
+    if settings["feedback_capture"] == "off":
+        return {"available": False, "reason": "feedback_capture is off"}
+    if not settings["state_dir"]:
+        return {"available": False, "reason": "no state directory configured"}
+    location = environment.get("ASSAY_HOOK_CONFIG")
+    return {"available": True,
+            "argv": ["python", "-I", "-B", str(root / "hooks/runtime/feedback_cli.py"), "record",
+                     *(["--config", location] if location else []),
+                     "--state-dir", settings["state_dir"], "--input", "CASE.json"]}
+
+
 def doctor(client, environment, *, root=ROOT, settings_path=None):
     settings = options(environment)
     rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
@@ -158,6 +171,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "record_events": settings["record_events"], "hooks_trusted": "unknown",
               "feedback_capture": settings["feedback_capture"],
               "feedback_trigger": settings["feedback_trigger"],
+              "feedback_record": record_command(environment, settings, root),
               "native_execution": "unverified", "model_compliance": "unverified",
               "settings_modified": False, "conflicts": []}
     if settings_path:

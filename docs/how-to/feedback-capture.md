@@ -60,7 +60,11 @@ python -I -B hooks/runtime/feedback_cli.py record --state-dir /absolute/private-
 ```
 
 `--config` reads the storage mode and data directory from an owner configuration
-file instead. The JSON object accepts:
+file instead. An agent's shell usually does not know where the plugin or its data
+directory is: `doctor` prints the exact command as `feedback_record.argv`, with
+`CASE.json` standing for the input file, or says why recording is unavailable.
+Give that command to the agent, for example in project instructions, or run it
+yourself. The JSON object accepts:
 
 | Field | Meaning |
 | --- | --- |
