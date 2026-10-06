@@ -4,42 +4,42 @@
 
 > A research synthesis, not task-execution instructions or normative Assay policy. Source status and verification limits are retained from the original document. [About the corpus and translations](../README.md).
 
-**Revision date: October 6, 2026.** Incorporates review comments from October 5, 2026 and targeted checks of disputed sources.
+**Revision date: October 6, 2026.** Incorporates review comments from October 5, 2026 and the results of targeted checks of disputed sources.
 
 ## Contents
 
 - [1. Research question and status of the conclusions](#1-research-question-and-status-of-the-conclusions)
-- [2. Levels of behavior and boundaries of causal inference](#2-levels-of-behavior-and-boundaries-of-causal-inference)
+- [2. Levels of behavior and limits of causal conclusions](#2-levels-of-behavior-and-limits-of-causal-conclusions)
 - [3. Ambiguity in expert rules](#3-ambiguity-in-expert-rules)
-- [4. Translating expert rules into specifications and the source of criteria](#4-translating-expert-rules-into-specifications-and-the-source-of-criteria)
-- [5. Formats for representing rules](#5-formats-for-representing-rules)
+- [4. Translating expert rules into a specification and identifying the source of criteria](#4-translating-expert-rules-into-a-specification-and-identifying-the-source-of-criteria)
+- [5. Rule representation formats](#5-rule-representation-formats)
 - [6. Capabilities and limitations of natural-language instructions](#6-capabilities-and-limitations-of-natural-language-instructions)
 - [7. Mechanisms for conveying rules and levels of intervention](#7-mechanisms-for-conveying-rules-and-levels-of-intervention)
-- [8. The prompt-only boundary and comparison along 10 axes](#8-the-prompt-only-boundary-and-comparison-along-10-axes)
+- [8. The prompt-only boundary and comparison along 10 dimensions](#8-the-prompt-only-boundary-and-comparison-along-10-dimensions)
 - [9. Supporting reasoning and controlling the solution method](#9-supporting-reasoning-and-controlling-the-solution-method)
 - [10. Faithfulness of visible reasoning](#10-faithfulness-of-visible-reasoning)
-- [11. Self-correction, external criticism, and agent collaboration](#11-self-correction-external-criticism-and-agent-collaboration)
+- [11. Self-correction, external critique, and agent collaboration](#11-self-correction-external-critique-and-agent-collaboration)
 - [12. Specification gaming and proxy optimization](#12-specification-gaming-and-proxy-optimization)
 - [13. Resolving conflicting rules](#13-resolving-conflicting-rules)
 - [14. Contextual activation of rules and overspecification](#14-contextual-activation-of-rules-and-overspecification)
 - [15. Uncertainty, calibration, and epistemic honesty](#15-uncertainty-calibration-and-epistemic-honesty)
 - [16. Interaction with the environment](#16-interaction-with-the-environment)
 - [17. Long-term behavior and recovery](#17-long-term-behavior-and-recovery)
-- [18. Generalization, transfer between models, and task differences](#18-generalization-transfer-between-models-and-task-differences)
-- [19. Checking rule compliance and behavioral quality](#19-checking-rule-compliance-and-behavioral-quality)
+- [18. Generalization, transfer across models, and task differences](#18-generalization-transfer-across-models-and-task-differences)
+- [19. Verifying rule compliance and behavior quality](#19-verifying-rule-compliance-and-behavior-quality)
 - [20. Methodology for studying control mechanisms](#20-methodology-for-studying-control-mechanisms)
-- [21. A map of errors and side effects](#21-a-map-of-errors-and-side-effects)
+- [21. Map of errors and side effects](#21-map-of-errors-and-side-effects)
 - [22. Integrated control model and limits of generalization](#22-integrated-control-model-and-limits-of-generalization)
 - [23. Editorial clarifications and limits of the evidence base](#23-editorial-clarifications-and-limits-of-the-evidence-base)
 - [24. Sources](#24-sources)
 
 ## 1. Research question and status of the conclusions
 
-Through which mechanisms can a rule, an expert norm, or a problem-solving method be conveyed to a large language model; which properties of its behavior can be changed; where do the capabilities of textual instructions end; and how can substantive compliance be checked?
+By what mechanisms can a rule, an expert norm, or a solution method be conveyed to a large language model? Which properties of its behavior can be changed? Where do the capabilities of a textual instruction end? How can we check that a requirement has been met in substance?
 
-Answering requires distinguishing several tasks: obtaining a correct result, producing a particular sequence of observable actions, achieving sustained rule compliance, and establishing the role intermediate reasoning played in computing the answer. These tasks are related, but success in one does not establish success in the others. A model may give the correct answer for an undesirable reason, describe a procedure in detail while skipping a mandatory check, or pass a formal test without achieving the user's goal.
+Answering requires distinguishing several tasks: obtaining the correct result, achieving a particular sequence of observable actions, securing consistent compliance with rules, and establishing the role intermediate reasoning played in computing the answer. These tasks are related, but success in one does not prove success in the others. A model can produce the right answer on an undesirable basis, describe a procedure in detail while skipping a mandatory check, or pass a formal test without achieving the user's goal.
 
-This review primarily concerns practical model control through instructions, examples, context, work organization, tools, feedback, solution search, and training. A “required reasoning pattern” is understood here chiefly as a testable decision policy: which information is gathered, which alternatives are considered, which conditions trigger checking or reconsideration, how constraints are respected, and when work counts as complete. This operationalization permits testable requirements without treating the model's text as a direct record of its internal algorithm.
+The main subject of this review is applied model control through instructions, examples, context, organization of work, tools, feedback, solution search, and training. Here, a “required reasoning pattern” primarily means a verifiable decision policy: which information is collected, which alternatives are considered, which conditions trigger checking or reconsideration, how constraints are respected, and when work is considered complete. This operationalization enables testable requirements without declaring the model's text a direct record of its internal algorithm.
 
 ### 1.1. How to read the claims
 
@@ -47,910 +47,957 @@ The document distinguishes four knowledge statuses:
 
 | Status | Meaning |
 |---|---|
-| Empirical result | A specific effect is described in the cited publication. Its scope is limited to the studied models, tasks, metrics, and conditions |
-| Methodological conclusion | A conclusion follows from the structure of verification: for example, assessing a step's correctness does not itself establish its causal contribution to the answer |
-| Engineering recommendation or hypothesis | A proposed system arrangement is plausible and may draw on related findings, but must be tested in the target workflow |
-| Unsupported claim | The source is unidentified, only part of the formulation was checked, or the evidence is insufficient for the stated generalization |
+| Empirical finding | A particular effect is described in the cited publication. Its scope is limited to the models, tasks, metrics, and conditions studied |
+| Methodological conclusion | The conclusion follows from how a check is designed: for example, assessing whether a step is correct does not by itself establish its causal contribution to the answer |
+| Engineering recommendation or hypothesis | A proposed way of organizing a system is plausible and may draw on related findings, but must be tested in the target workflow |
+| Unsupported claim | The source is unidentified, only part of the wording has been checked, or evidence is insufficient for the proposed generalization |
 
-Much of the practical model is the author's synthesis, not the result of a single comparative experiment. The main empirical base consists of work from 2022–2025. Reconstructing the bibliography added precise references to selected relevant publications from 2026; this does not make all other conclusions verified statements about every 2026 model. Mathematics, code, questions with verifiable answers, and limited agent environments dominate. Transfer to open-ended expert decisions and long real-world projects remains a separate evaluation task.
+Much of the practical model is an authorial synthesis, not the result of a single comparative experiment. The main empirical base concerns works from 2022–2025. Recovery of the bibliography added exact references to selected relevant 2026 publications; this does not turn the other conclusions into verified statements about every 2026 model. Mathematics, code, questions with verifiable answers, and bounded agent environments dominate. Transfer to open-ended expert decisions and long-running real projects remains a separate validation task.
 
-The review process itself had limits: some works were checked through abstracts, others from reviewers' memory; experiments were not reproduced. This revision checked bibliographic details and selected critical primary-source passages. This is targeted restoration of the text's support, not a new systematic search of the entire literature. Section 23 records exact corrections, remaining gaps, and the boundaries of this check.
+The review process itself had limitations: some works were checked through abstracts, others from reviewers' memory; experiments were not reproduced. Preparation of this revision checked bibliographic information and selected critical passages in primary sources. This is targeted restoration of support for the text, not a new systematic search of all literature. Exact corrections, remaining gaps, and the boundaries of that check are collected in Section 23.
 
-### 1.2. The central position
+### 1.2. Main position
 
-Instructions influence model behavior but do not themselves guarantee a specified internal computational method. Stronger control is possible over formalized output properties and system actions: for example, checking a format, fixing stage order, executing a program, retaining the actual test result, or permitting an action only after a predicate is satisfied. The reliability of that control is bounded by specification correctness, verification completeness, and coverage of the execution mechanism.
+An instruction influences model behavior but does not itself guarantee a specified internal computational method. More stringent control is possible over formalized output properties and system actions: for example, checking a format, fixing the sequence of stages, executing a program, retaining the actual test result, or permitting an action only after a predicate holds. The reliability of such control is limited by specification correctness, verification completeness, and the execution mechanism's coverage.
 
-The task is therefore to align **the goal, specification, available observations, execution method, and evidence of the result**. The model's explanation is one artifact to study. It does not replace the result, independent verification, or evidence that a mandatory action actually occurred.
+The task is therefore to align **the goal, specification, available observations, execution method, and evidence of the result**. The model's explanation is one of the artifacts being investigated. It replaces neither the result, independent verification, nor evidence that a mandatory action actually occurred.
 
-## 2. Levels of behavior and boundaries of causal inference
+## 2. Levels of behavior and limits of causal conclusions
 
-### 2.1. What is actually observed
+### 2.1. What exactly is observed
 
-| Level | Example | What can be checked | What that check does not establish |
+| Level | Example | What can be checked | What the check does not establish |
 |---|---|---|---|
-| Internal computation | Activations, hidden states, computation of the next-token distribution | Not directly observable through an ordinary application interface; specialized research on open models may use instrumentation | One explanation cannot reconstruct the complete actual algorithm |
-| Verbalized chain of thought, CoT | An intermediate inference, subtask analysis, draft | Text, sequence, logical connections, and responses to controlled interventions where the interface permits them | Coherence and detail do not guarantee causal faithfulness |
-| Post-answer explanation | Justification of a decision already obtained | Factual consistency, completeness of arguments, correspondence to the answer | It may be a rationalization; the existence of an explanation does not prove the decision was reached that way |
+| Internal computation | Activations, hidden states, computation of the next-token distribution | Not directly observable through an ordinary application interface; specialized studies of open models can use instrumentation | One explanation cannot reconstruct the complete actual algorithm |
+| Verbalized chain of thought, CoT | Intermediate conclusion, analysis of subtasks, draft | Text, sequence, logical connections, and responses to controlled interventions if the interface allows them | Coherence and detail do not guarantee causal faithfulness |
+| Post-answer explanation | Justification of a decision already reached | Consistency with facts, completeness of arguments, and correspondence to the answer | It may be a rationalization; the mere appearance of an explanation does not prove the decision was reached that way |
 | Solution strategy | Find sources, test hypotheses, compare options | Stages actually performed, queries, and data obtained | A described plan is not an executed plan |
-| Intermediate artifacts | Plan, evidence table, risk list, decision record | Field completion and content, references to observations, use in a subsequent stage | Formally completing a structure does not guarantee substantive analysis |
-| Final decision | Answer, selected library, program, recommendation | Correctness, usefulness, constraint compliance, and acceptance criteria | One correct answer does not establish a stable rule or desired procedure |
-| Action sequence | API calls, searches, code execution, environment changes | Request/response logs and state before and after an action | Calling a tool does not establish correct interpretation of its result |
-| Behavior under uncertainty | Clarification, data search, partial answer, abstention, human handoff | Whether the action fits the available data and error cost | Saying “I am confident” or “I am uncertain” is not a calibrated probability |
+| Intermediate artifacts | Plan, evidence table, risk list, decision record | Field completion and content, references to observations, use of the artifact in the next stage | Filling in a structure formally does not guarantee substantive analysis |
+| Final decision | Answer, selected library, program, recommendation | Correctness, usefulness, and compliance with constraints and acceptance criteria | One correct answer does not establish a stable rule or the desired procedure |
+| Action sequence | API calls, search, code execution, changes to the environment | Request/response logs and state before and after an action | The fact of a tool call does not prove its result was interpreted correctly |
+| Behavior under uncertainty | Clarification, data search, partial answer, abstention, escalation to a human | Whether the action fits the available evidence and the cost of error | “I am confident” or “I am uncertain” is not a calibrated probability |
 
-This classification does not equate a “hidden chain of thought” with internal computation. Even if a model reveals a textual draft, it remains a token sequence rather than a complete description of the network's computation. Conversely, an inaccessible hidden process in an application interface does not imply that other methods cannot investigate model mechanisms.
+In this classification, a “hidden chain of thought” and internal computation are not treated as identical. Even when a model exposes a textual draft, it remains a token sequence, not a complete account of network computation. Conversely, the hidden process being unavailable through an application interface does not imply that investigating model mechanisms by other methods is impossible in principle.
 
-Nor is it correct to say only textual output can be directly guaranteed and everything else is beyond control. An ordinary instruction does not guarantee even text format. An external executor, validator, or restriction on permitted actions can enforce stronger properties at the whole-system level. The object and boundary of any guarantee must be named each time.
+Nor can we say that only textual output is directly guaranteed while everything else is beyond control. An ordinary instruction does not guarantee even text format. An external executor, validator, or restriction on permissible actions can enforce stronger properties at the level of the whole system. The object and boundary of each guarantee must be named.
 
 ### 2.2. Influence, observation, and enforcement
 
-**Influence** means changing the probability of desired behavior: for example, showing a comparison of alternatives makes a similar response more likely. **Observation** means having checkable data about behavior: answers, intermediate artifacts, and action logs. **Enforcement** means the system is constructed to block a particular invalid action or prevent a stage from completing without a required verification result.
+**Influence** means changing the probability of desired behavior: for example, demonstrating a comparison of alternatives makes a similar response more likely. **Observation** means having verifiable evidence about behavior: answers, intermediate artifacts, and action logs. **Enforcement** means that the system is constructed so that it cannot pass a particular impermissible action or finish a stage without a mandatory check result.
 
-These properties are not interchangeable. A plan in a prompt influences generation; a log records an action; an external verifier can block a transition. Answer accuracy, procedural controllability, observability, and causal explainability must be assessed separately.
+These properties are not interchangeable. A plan in a prompt influences generation; a log records an action; an external checking mechanism can block a transition. Result accuracy, procedural controllability, observability, and causal explainability must be assessed separately.
 
-Ordinary inference-time prompting does not change model parameters: it changes generation inputs. Weight changes belong to training. More samples, tree search, and multiple passes change the computational procedure and budget, so their effects cannot be attributed solely to successful prompt wording.
+In ordinary inference-time prompting, model parameters do not change: the input conditions for generation change. Changing weights is training. Increasing sample count, tree search, and multiple passes change the computational procedure and budget, so their effects cannot be attributed solely to a well-worded prompt.
 
 ### 2.3. Three different causal claims
 
-1. **The result changed.** Accuracy improved after structure was added. A sound controlled comparison can estimate the intervention's causal effect on the result.
-2. **The observable trajectory changed.** Different steps, checks, and interactions with the environment appeared. This supplies additional information about system behavior.
-3. **The internal mechanism changed in exactly the specified way.** This requires specialized checks; the first two observations are insufficient.
+1. **The outcome changed.** Accuracy improved after adding structure. A valid controlled comparison can estimate the intervention's causal effect on the outcome.
+2. **The observable trajectory changed.** Different steps, checks, and interactions with the environment appeared. This provides additional information about system behavior.
+3. **The internal mechanism changed in exactly the specified way.** This claim requires specialized checks; the first two observations are insufficient.
 
-Alternative explanations for improvement include useful examples, more attempts, additional information, selecting a successful candidate, familiarity with the task type, or changed context use. Listing these explanations proves none of them. In particular, the unjustified statement “the model reasons like a human” must not be replaced by the equally unjustified “it merely writes more text and accidentally finds the answer.” CoT ablations show why that substitution is too simple; Section 9 discusses them. [Wei2022] [Lanham2023]
+Possible alternative explanations for improvement include useful examples, more attempts, additional information, selection of a successful candidate, familiarity with the task type, or a change in context use. Listing these explanations establishes none of them. In particular, the unsupported formula “the model reasons like a human” must not be replaced with the equally unsupported formula “it merely writes more text and happens to find the answer.” CoT ablations show why this substitution is too simple; Section 9 discusses this further. [Wei2022] [Lanham2023]
 
-A working rule for interpreting evidence is to formulate the conclusion at the level actually tested. Checking an external action sequence establishes properties of that sequence. Checking the final answer establishes properties of that answer. A conclusion about the causal role of text requires interventions on the text and analysis of consequences, not a judgment of its persuasiveness.
+A working rule for interpreting evidence is to state a conclusion at the level where verification was performed. Checking an external action sequence establishes properties of that sequence. Checking the final answer establishes properties of the answer. A conclusion about the causal role of text requires interventions in the text and analysis of their consequences, not an assessment of how persuasive it is.
 
 ## 3. Ambiguity in expert rules
 
-### 3.1. Why a norm clear to a person may be an incomplete specification
+### 3.1. Why a norm clear to a human can be an incomplete specification
 
-An expert instruction often relies on knowledge its author leaves unstated: what to compare, which consequences matter, when an exception is acceptable, and how much checking is enough. A person from the same professional environment may reconstruct some of these conditions. A model may do so too, but alignment with the author's intent needs testing.
+An expert instruction often relies on knowledge its author leaves unstated: what to compare, which consequences are material, when an exception is permissible, and how much checking is enough. A person from the same professional environment may reconstruct some of these conditions. A model may also reconstruct them, but agreement with the author's intent has to be checked.
 
-Consider “Use an existing library if it does not create excessive lifecycle costs.” Neither the cost components, evaluation horizon, comparison alternative, nor threshold for “excessive” is defined. The model receives several tasks at once: interpret the norm, obtain evidence, evaluate options, and decide. A persuasive answer may hide divergence at the first step: for example, comparing only initial development time when the author also meant upgrades, compatibility, and maintenance.
+Consider the rule: “Use an existing library if it does not create excessive lifecycle costs.” Neither the components of cost, assessment horizon, alternative, nor threshold for excess is defined. The model receives several tasks at once: determine what the norm means, gather information, assess options, and decide. An apparently persuasive answer can conceal divergence at the very first step: for example, the model compared only initial development time, whereas the author also meant updates, compatibility, and maintenance.
 
-Analyzing ambiguity primarily exposes such divergences. It does not assume every professional norm can be fully quantified or every model judgment should be replaced with a fixed algorithm. The classification below is a specification-design aid; its usefulness in a particular system must be established by checking decisions.
+Analyzing ambiguity is primarily needed to detect such divergences. It does not assume that every professional norm can be fully expressed numerically or that every model judgment should be replaced by a fixed algorithm. The classification below is a specification-design tool; its usefulness in a particular system must be supported by checking decisions.
 
 ### 3.2. Nine types of ambiguity
 
 | Type | Where uncertainty arises | Example | What can be clarified |
 |---|---|---|---|
 | Vague predicate | It is unclear which cases fall under a concept | “Material risk,” “reasonable complexity,” “sufficient checking” | Definition, qualitative anchors, range, and contrasting cases |
-| Hidden reference class | A judgment depends on an unnamed group or scale | “Available resources,” “normal cost,” “a good solution for the project” | The project, team, horizon, and class of alternatives used in the comparison |
-| Unspecified threshold or baseline | The decision boundary or initial level is absent | “10% worse” | Worse on which metric and relative to what, such as last month's mean error; how equality at the threshold is treated |
-| Conflicting values | Simultaneously active norms demand different actions | “Reuse existing solutions” and “minimize dependencies” | Which requirements are hard, which permit trade-offs, and when priorities change |
-| Undefined proxy | A measurable feature silently replaces the goal | Test scores called “quality” without the test's limits | Which element is the goal, which is the measurement, and what remains outside it |
-| Implicit exception | A formally general rule has exceptions known to the expert | “Every method must be testable,” while another form of support is acceptable in some cases | Exceptions, their grounds, and superficially similar cases that are not exceptions |
-| Unobservable condition | Applying the norm requires information unavailable to the model | “At increased risk,” “if the change adds substantial value” | How to obtain the data and what to do when the condition cannot be established |
-| Circular criterion | The success definition repeats the term being evaluated | “Choose the most successful solution” | Independent success indicators or an explicitly limited approximation |
-| Self-evaluated criterion | The model sets a standard and declares itself compliant | “Choose the best solution and make sure it is best” | Who defines the criterion, what data support the assessment, and how the conclusion is checked |
+| Hidden reference class | An assessment depends on an unnamed group or scale | “Available resource,” “usual cost,” “a good solution for the project” | The project, team, horizon, and class of alternatives being compared |
+| Unspecified threshold or baseline | The decision boundary or starting level is undefined | “10% worse” | Worse on which metric and relative to what—for example, last month's mean error; how equality at the threshold is treated |
+| Conflicting values | Simultaneously active norms require different actions | “Use an existing solution” and “minimize dependencies” | Which requirements are hard constraints, which permit trade-offs, and when priority changes |
+| Undefined proxy | A measured indicator silently replaces the goal | Test scores are called “quality” without explaining verification limits | What is the goal, what is the measurement, and which properties it leaves out |
+| Implicit exception | A formally general rule has exceptions known to the expert | “All methods must be verifiable,” although a different form of support is acceptable in certain cases | Exceptions, their reasons, and cases that only superficially resemble exceptions |
+| Unobservable condition | Applying the norm requires information unavailable to the model | “At elevated risk,” “if the change adds substantial new value” | How to obtain the information; what to do if the condition cannot be established |
+| Circular criterion | The definition of success repeats the word being assessed | “Choose the most successful solution” | Independent indicators of success or an explicitly bounded approximation |
+| Self-evaluated criterion | The model sets the standard and declares that it meets it | “Choose the best solution and make sure it is the best” | Who defines the criterion, what evidence supports the assessment, and how the conclusion is checked |
 
-These types overlap. “Do not create excessive lifecycle costs” contains a vague predicate, a hidden comparison horizon, and costs that cannot be observed without additional evidence. Correcting one word therefore does not make the rule unambiguous.
+These types overlap. “Do not create excessive lifecycle cost” simultaneously contains a vague predicate, a hidden comparison horizon, and costs unobservable without additional data. Correcting one word therefore does not yet make the rule unambiguous.
 
 ### 3.3. Clarifying meaning while preserving professional judgment
 
-The clarification should match the gap. A hidden reference class needs context more than another adjective. An unknown fact needs a data source. Conflicting goals need a selection rule or a procedure for discussing the trade-off. An implicit exception needs a pair of nearby cases with different decisions.
+The clarification should match the gap. For a hidden reference class, specifying context is more useful than adding another adjective. An unknown fact needs a data source. Conflicting goals need a decision rule or a procedure for discussing the trade-off. An implicit exception needs a pair of nearby cases with different decisions.
 
-Excessive formalization creates the opposite problem: the model receives many checkable fields while the task's meaning remains outside them. File counts and code-character counts, for example, are easy to measure but do not themselves determine maintenance complexity. Using a convenient number does not remove the need to explain how it relates to the goal and when that relation breaks down.
+Excessive formalization creates the opposite problem: the model receives many checkable fields while the task's meaning remains outside them. For example, file count or code-character count is easy to measure, but these indicators do not themselves determine maintenance complexity. Using a convenient number does not remove the need to explain its connection to the goal and when that connection breaks down.
 
-The design hypothesis is to explicitly describe critical ambiguities while allowing freedom where several good solutions are acceptable and can be evaluated through their result. Sufficiency depends not on specification length, but on which interpretation errors it prevents and which new constraints it creates.
+The design hypothesis is to make critical ambiguities explicit while leaving freedom where different good solutions are permissible and can be assessed by their outcomes. The adequacy of this description is determined not by its length, but by the interpretation errors it prevents and the new constraints it introduces.
 
-## 4. Translating expert rules into specifications and the source of criteria
+## 4. Translating expert rules into a specification and identifying the source of criteria
 
-### 4.1. Separating goals, indicators, and decisions
+### 4.1. Separating the goal, indicators, and decision
 
-Translating a norm starts with its purpose. A library-selection goal may include development speed, functional suitability, compatibility, result quality, and future cost. “Use a package” and “write a custom implementation” are possible decisions. Package age, test coverage, and support duration are pieces of evidence that may inform assessment. None automatically replaces the goal.
+Translating a norm begins with why it exists. For library selection, the goal can include development speed, functional fit, compatibility, result quality, and future cost. “Use a package” or “write an in-house implementation” are possible decisions. Package age, test coverage, and support time are individual facts that may contribute to assessment. None automatically replaces the goal.
 
 Three elements should be distinguished:
 
-- **Goal:** the useful state to achieve.
-- **Proxy:** observable indicators used because the whole goal is difficult to measure directly.
-- **Acceptance criterion:** evidence and constraints sufficient to accept a particular result in the current task.
+- **Goal:** the useful state that should be achieved.
+- **Proxy:** the observable indicators used because measuring the entire goal directly is difficult.
+- **Acceptance criterion:** the evidence and constraints sufficient to accept a particular result for this task.
 
-They may diverge. Code passes available tests but misses an important user scenario; a library has high coverage but incompatible interfaces; text contains required keywords but uses them meaninglessly. Acceptance must therefore explain the boundaries of each piece of evidence. Another test or evaluator helps when it checks a material gap, not merely when it adds a positive signal.
+These elements may diverge. Code passes the available tests but misses a material user scenario; a library has high coverage but incompatible dependencies; a text contains the required keywords but uses them meaninglessly. Acceptance should therefore explain the boundaries of each piece of evidence. An additional test or evaluator is useful if it checks a material gap, not merely increases the number of positive signals.
 
 ### 4.2. A sequence for operationalization
 
-The following sequence can be used as a design procedure. It describes checkable preparation for a decision, not the model's hidden computational process.
+The following sequence can serve as a design procedure. It describes verifiable preparation for a decision and does not claim to describe the model's hidden computational process.
 
-First recover implicit conditions: the decision object, alternatives, horizon, constraints, and error consequences. For a maintenance-cost norm, not only initial effort matters but also the evaluation period and kinds of support included. Without these conditions, an estimate can be numerically neat but substantively unsuitable.
+First recover implicit conditions: the decision object, alternatives, horizon, constraints, and consequences of error. For a norm about maintenance costs, not only initial effort matters, but also the period considered and which kinds of support are included. An assessment without these conditions may be numerically meticulous yet substantively unusable.
 
-Next break disputed concepts into factors. “The library is genuinely better” requires specifying in what respect: development time, implementation quality, community support, compatibility, or another property. Qualitative anchors may suffice for some factors; others require measurement. Precision does not itself imply mandatory quantification.
+Next break down disputed concepts into factors. “The library is genuinely better” requires specifying in what respect: development time, implementation quality, community support, compatibility, or another property. Qualitative anchors sometimes suffice for these factors; sometimes measurements are needed. The requirement for precision does not itself imply that numerical assessment is mandatory.
 
-Then establish applicability boundaries, exceptions, and conflict-resolution order. Distinguish a hard constraint from a preference. When a rule depends on an external fact, identify the source, acceptable uncertainty, and action if evidence is missing: more search, a bounded conclusion, clarification, or human handoff.
+Then specify applicability limits, exceptions, and how to resolve conflicts. Separating hard constraints from preferences is useful. If a rule depends on an external fact, identify the source, tolerable uncertainty, and action when evidence is missing: further search, a bounded conclusion, clarification, or escalation to a human.
 
-Next show typical, negative, boundary, and contrastive cases. A positive example demonstrates the required action; a negative one shows when it is inappropriate. A contrastive pair differs on a material factor, while a boundary case tests the exact transition condition. Demonstrations need not only correct answers but the features separating them.
+The next step is to show typical, negative, boundary, and contrasting cases. A positive example demonstrates the required action; a negative example shows where it is inappropriate. A contrasting pair differs in a material factor, while a boundary case checks the exact transition condition. Demonstrations need not only correct answers but also the features that distinguish them.
 
-Finally specify checkable artifacts and observable consequences: which alternatives must be presented, which data obtained, which conditions compared, and what establishes the result. Test the norm on new cases and revise it where the model selected another interpretation. Success on the examples does not establish transfer to another domain, format, or combination of rules.
+Finally, define checkable artifacts and observable consequences: which alternatives must be presented, what data obtained, which conditions compared, and what supports the result. Then test the norm on new cases and revise the description where the model selected a different interpretation. Success on the examples used does not establish transfer to another domain, format, or rule combination.
 
 ### 4.3. Numbers and qualitative anchors
 
-Numerical thresholds conveniently illustrate unambiguous branching. One could hypothetically define risk as a probability above 0.1 and consequences exceeding 100 thousand dollars; limit support to N hours per month; set an acceptable error rate of X%; or consider a library with test coverage above 90%. These numbers illustrate the form of a requirement, not established universal norms.
+Numerical thresholds are useful for illustrating unambiguous branching. Risk could hypothetically be defined as a combination of probability above 0.1 and consequences exceeding 100 thousand dollars; support could be limited to N hours per month; an acceptable error rate could be X%; or a library with test coverage above 90% could be considered. These numbers illustrate the form of a requirement, not established universal norms.
 
-Every such threshold creates further questions. Where did the probability estimate come from? What consequences are included? How reliable is the coverage indicator? Why does this boundary change the decision? Can the numerical condition be met without achieving the goal? Without answers, formalization merely relocates uncertainty into inputs or metric selection.
+Each threshold raises further questions. Where did the probability estimate come from? What consequences are included? How trustworthy is the coverage measure? Why does this boundary change the decision? Can the numerical condition be met without achieving the goal? Without answers, formalization merely relocates uncertainty into the inputs or metric selection.
 
-The same applies to “use a package if a custom implementation takes more than N hours.” It may express a real customer preference but does not automatically account for solution lifetime, maintenance, or other requirements. Its acceptability depends on the task.
+The same applies to “use a package if an in-house implementation would take more than N hours.” Such a rule may express a real customer preference but does not automatically account for solution lifetime, maintenance, or other requirements. Its acceptability depends on the specific task.
 
-Lifecycle cost may be assessed through expected maintenance tasks over a chosen horizon and their effort. But simply multiplying a task count by years of life does not give a reliable cost without a model of task frequency, difficulty, and uncertainty. File or line counts are likewise limited indicators. Without a justified quantitative model, explicit qualitative levels and examples are more useful than false numerical precision.
+For lifecycle cost, one can estimate expected support tasks over the selected period and the effort they require. However, simply multiplying task count by years of lifetime does not produce a reliable cost without a model of task frequency, difficulty, and uncertainty. File count or lines of code can likewise serve only as limited indicators. Without a justified quantitative model, explicitly described qualitative levels and examples are more useful than false numerical precision.
 
 ### 4.4. Where the criterion comes from
 
 | Criterion source | What is delegated | Conditions and limitations |
 |---|---|---|
-| Model-defined criterion | The model defines “material,” “reasonable,” or “best” and applies its definition | Permissible discretion depends on error consequences, task flexibility, and independent checking. There is a risk of silently replacing the author's intent |
-| Human-defined criterion | A person supplies definitions, boundaries, and priorities | Makes intent more explicit, but a human formulation may also be incomplete, contradictory, or based on a poor proxy |
-| Example-defined criterion | A boundary is inferred from demonstrations | Diversity and discriminating cases are needed. The model may mistake an incidental feature for the principal condition |
-| External evidence | Measurements come from a test, database, API, simulator, or observation | Reduces guessing of facts; criterion selection and correct interpretation still need checking |
-| Learned criterion | A standard is acquired during training or represented by a learned preference model | It need not match the local goal. It may be opaque and reproduce features of training judgments |
+| Model-defined criterion | The model defines “material,” “reasonable,” or “best” and applies that definition | Permissible freedom depends on error consequences, task flexibility, and independent verification. There is a risk of silently replacing the author's intent |
+| Human-defined criterion | A human sets definitions, boundaries, and priorities | Makes intent more explicit, but human wording can also be incomplete, contradictory, or based on a poor proxy |
+| Example-defined criterion | The boundary is inferred from demonstrations | Diversity and discriminating cases are needed. The model may mistake an incidental feature of examples for the central condition |
+| External evidence | Measurable information comes from a test, database, API, simulator, or observation | Reduces the need to guess facts; selecting the criterion and interpreting it correctly still need checking |
+| Learned criterion | The standard was acquired in training or is represented by a learned preference model | Does not necessarily match the local goal. The criterion may be opaque and reproduce features of training assessments |
 
-These can be combined. A person sets the goal and hard constraints, examples clarify boundaries, a tool provides measurements, and the model compares permissible alternatives. An external oracle may return a risk-materiality estimate from inputs; its result still needs a clear criterion definition, data quality, and applicability scope. A learned preference model can score candidates, but its score remains a separate proxy with its own boundaries.
+These options can be combined. A human defines the goal and hard constraints, examples clarify boundaries, a tool supplies a measurement, and the model compares permissible options. An external oracle might, for example, return a risk-materiality assessment from input data; that result also requires a clear criterion definition, data quality, and scope. A learned preference model can assess candidates, but its score remains a separate proxy with its own scope.
 
-Opacity is greatest when the same generator invents the criterion, selects the solution, and confirms its quality. This does not automatically make the result wrong, but weakens independence. “Decide reasonably” leaves broad discretion; it cannot simultaneously be treated as an exact specification and evidence of agreement with user intent.
+Opacity is greatest when the same generator invents the criterion, chooses the solution, and confirms its quality. This does not automatically make the result wrong, but weakens verification independence. “Decide sensibly” allows broad discretion; it cannot simultaneously be treated as a precise specification and evidence of compliance with the user's intent.
 
 ### 4.5. When clarification becomes overload
 
-Clarification should prevent a material error. Excessive detail can add irrelevant duties, prohibit valid solutions, create conflicts, and consume resources maintaining the instruction itself. A visible symptom is a formally complete checklist alongside a weak answer to the actual task.
+Clarification should prevent a material error. Excessive detail can add irrelevant duties, prohibit permissible solutions, introduce conflicts, and consume resources maintaining the instruction itself. A visible symptom is a formally complete checklist alongside a weak solution to the original task.
 
-The practical hypothesis is to seek a minimally sufficient specification: retain decision-changing conditions and test the value of additional detail. Model knowledge can support general, well-described domain actions, but alignment with local preferences still requires evaluation of outcomes. No universal rule count or degree of formality follows from the evidence considered.
+The practical hypothesis is to seek a minimally sufficient specification: retain conditions that change the decision and test the value of added detail. Model knowledge can be used for general actions well described in the domain, but agreement with local preferences must still be assessed from results. The evidence reviewed does not imply a universal number of rules or degree of formality.
 
-## 5. Formats for representing rules
+## 5. Rule representation formats
 
 ### 5.1. Twelve formats
 
-A format determines which part of a norm is convenient to express and check. It does not establish the criterion's truth or guarantee application in new conditions.
+A format determines which part of a norm is convenient to express and check. It establishes neither the truth of the criterion nor a guarantee that the model will apply it in new conditions.
 
 | Format | What it conveys | Advantage | Limitation |
 |---|---|---|---|
-| Prose | Context, purpose, explanation, qualifications | Flexible expression of meaning, easy editing | Ambiguity and difficulty of machine checking |
-| Principles | General reference points: caution, simplicity, justification | Preserve decision freedom | Permit different interpretations without context and examples |
-| Rules | A particular condition and required action | Easier to identify compliance or violation | Hidden exceptions and misrecognized conditions remain possible |
-| Conditional rules | “If A, then B; otherwise C” branches | Express contextual dependence | Nesting and combinations complicate application |
-| Decision trees and tables | Explicit mappings from conditions to actions | Make paths and missing combinations visible | Grow rapidly and require maintenance when conditions change |
-| Rubrics | Quality criteria, levels, or scores | Support comparable assessment of candidates | Mechanical scoring and optimization toward the rubric are possible |
+| Prose | Context, goal, explanation, and qualifications | Expresses meaning flexibly and is easy to edit | Ambiguity and difficulty of machine verification |
+| Principles | General orientations: caution, simplicity, justification | Preserve discretion in deciding | Allow different interpretations without context and examples |
+| Rules | An individual condition and required action | Easier to identify compliance or violation | Hidden exceptions and misrecognized conditions are possible |
+| Conditional rules | “If A, then B; otherwise C” branches | Express how a decision depends on context | Nesting and combinations of conditions complicate application |
+| Decision trees and tables | Explicit mappings from conditions to actions | Make choice paths and missing combinations inspectable | Grow rapidly and need maintenance when conditions change |
+| Rubrics | Quality criteria, levels, or scores | Support comparable assessment of candidates | Mechanical scoring and optimization for the rubric are possible |
 | Examples | Demonstrations of desired behavior | Show concrete application of a norm | Do not establish which feature was learned or how the rule transfers |
-| Contrastive cases | Correct/incorrect, permissible/impermissible, rule/exception | Highlight the boundary between similar situations | Contrast must concern a material factor |
-| State machines | Agent states, permitted actions, transitions | Suitable for external control of work sequence | Transition conditions must be observable; decision substance may remain unchecked |
-| Executable checks | Predicates, tests, validators | Give a definite result for a formalized property | Do not automatically cover the whole goal; vulnerable to incomplete coverage and manipulation |
-| Learned policies | Behavior acquired in model parameters | Avoid repeating the whole norm in each request | Updating and transfer need data and evaluation; the policy is less transparent |
-| Hybrids | Text, examples, rubrics, states, and checks combined | Different forms can close different gaps | Components may conflict or add unnecessary complexity |
+| Contrasting cases | Correct/incorrect, permissible/impermissible, rule/exception | Highlight a boundary between similar situations | The contrast must concern a material factor |
+| State machines | Agent states, permissible actions, and transitions | Suit external control of workflow sequence | Need observable transition conditions; decision content may remain unchecked |
+| Executable checks | Predicates, tests, and validators | Return a definite result for a formalized property | Do not automatically cover the whole goal; vulnerable to incomplete coverage and manipulation |
+| Learned policies | Behavior acquired in model parameters | Avoid repeating the whole norm in every request | Updating and transfer require data and evaluation; the policy is less transparent |
+| Hybrids | Combinations of text, examples, rubrics, states, and checks | Different forms may cover different gaps | Components may conflict or introduce unnecessary complexity |
 
-### 5.2. Choosing a form for the task property
+### 5.2. Choosing a form to fit task properties
 
-Text and principles suit general intent. A rule or check suits a clear binary condition. States and transitions suit a sequence of actions. A rubric suits comparative assessment, such as analyzing architecture through simplicity, scalability, and resilience. But these property names themselves need definitions and examples.
+Text and principles suit a general intention. A rule or check suits a clear binary condition. States and transitions suit a series of actions. A rubric suits comparative assessment—for example, examining an architectural decision for simplicity, scalability, and resilience. But these quality labels themselves need definitions and examples.
 
-A useful design option is a brief norm, its purpose, a few discriminating cases, and a check of a material property. It is not a universally best template: compare it with a simpler option. An additional field is justified when it improves the decision or exposes an important error.
+A useful design option is a short norm, an explanation of its purpose, a few discriminating cases, and a check of a material property. This is not a universally best template: it must be compared with a simpler option. An additional field is justified when it improves a decision or enables detection of an important error.
 
-Written and executed forms also differ. “Move to the next stage after the test” remains a model instruction. An external state machine can technically prevent transition until a test result exists. The guarantee concerns the transition and its opening conditions; it does not establish test completeness, a correct world model, or faithful hidden reasoning.
+The written and executable forms must also be distinguished. “After the test, proceed to the next stage” remains an instruction to the model. An external state machine can technically close the transition until a test result is obtained. This guarantee concerns the transition and its opening conditions; it does not establish test completeness, a correct world model, or faithful hidden reasoning.
 
 ## 6. Capabilities and limitations of natural-language instructions
 
-### 6.1. What the empirical base shows
+### 6.1. What the empirical evidence shows
 
-Textual instructions can change model answers and actions, but compliance depends on the task, wording, model, and evaluation procedure. FollowEval assessed models from 2023 on bilingual English/Chinese tasks designed by experts. Each test covered more than one of five dimensions: string manipulation, commonsense, logical reasoning, spatial reasoning, and answer constraints. Checking used regular expressions; evaluated models substantially underperformed humans. This result concerns that set of models and tasks. [FollowEval2023]
+A textual instruction can change model answers and actions, but the degree of compliance depends on the task, wording, model, and verification procedure. FollowEval assessed 2023 models on expert-prepared bilingual tasks in English and Chinese. Every test addressed more than one of five dimensions: string manipulation, commonsense, logical reasoning, spatial reasoning, and response constraints. Verification used regular expressions; the assessed models substantially underperformed humans. This finding applies to that set of models and tasks. [FollowEval2023]
 
-FollowEval cannot establish that format compliance destroys the substantive goal. It evaluates instruction following; conflict between a goal and proxy requires a separate setup. It also does not justify transferring the magnitude of the gap to every subsequent reasoning model. [FollowEval2023]
+FollowEval cannot serve as evidence that format compliance destroys the substantive goal. The benchmark assesses instruction following; a conflict between goal and proxy needs a separate setup. Nor does it justify transferring the size of the performance gap to any reasoning models from later years. [FollowEval2023]
 
-Studies of formatting and paraphrase sensitivity explain why one successful prompt is insufficient evidence of robustness. Formatting sensitivity, sensitivity to semantic paraphrases, and failure to meet multiple constraints are different effects and should not be merged into one universal assessment that “the model does not understand instructions.” [Sclar2024] [Mizrahi2024]
+Studies of sensitivity to presentation and paraphrasing show why one successful prompt is insufficient to establish method robustness. However, sensitivity to formatting, sensitivity to semantic paraphrases, and failure to meet multiple constraints are different effects; they should not be merged into a universal judgment that “the model does not understand instructions.” [Sclar2024] [Mizrahi2024]
 
-### 6.2. Factors that need to be distinguished
+### 6.2. Factors that must be distinguished
 
-| Factor | Possible problem | How to investigate or reduce it |
+| Factor | Possible problem | How to investigate or mitigate it |
 |---|---|---|
-| Completeness and specificity | The model chooses the wrong interpretation, omits necessities, or adds unnecessary work | State the goal, conditions, and expected outcome; compare decisions before and after clarification |
-| Number of rules | Omissions, competition, duplication, and unseen combinations | Check each rule and their combinations; remove genuinely irrelevant requirements |
-| Logical structure | Ambiguous AND/OR, nesting, confused conditions and consequences | Make relationships explicit, use discriminating cases and checkable branching |
-| Order and formatting | Priority inferred from salience or position rather than meaning | State priority explicitly and test semantically equivalent reorderings |
-| Negative formulations | A prohibited action appears anyway or the prohibition is read too broadly | Describe permitted action and test both violation and excessive refusal |
-| Conflicts | One norm ignored or unjustified averaging | Separate hard constraints and preferences, define resolution conditions |
-| Length and information position | Relevant content remains in context but is used less well, or is displaced beyond the window | Check positional effects separately from physical text availability |
-| Extraneous context | Irrelevant information obscures the norm | Compare full and selected context, accounting for mistaken omissions |
-| Paraphrase and vocabulary | Words equivalent in intent cause different decisions | Use several formulations; for example, compare “significant” and “material risk” |
-| Abstractness | “Be conservative” or “evaluate trade-offs” does not define a concrete choice | Supply scope, criteria, and examples while preserving appropriate freedom |
-| Model and inference configuration | Results depend on family, size, training, context, and budget | Record model, snapshot, settings, and tools; test transfer separately |
+| Completeness and specificity | The model chooses the wrong interpretation, omits necessities, or adds excess | Specify the goal, conditions, and expected result; compare decisions before and after clarification |
+| Number of rules | Omissions, competition, duplication, and combinations absent from the examples | Test each rule and combinations of rules; remove genuinely irrelevant requirements |
+| Logical structure | Ambiguous AND/OR, nesting, confused conditions and consequences | Make relationships explicit; use discriminating cases and checkable branching |
+| Order and presentation | Priority is inferred from prominence or position rather than meaning | State priority explicitly and test semantically equivalent permutations |
+| Negative wording | A prohibited action still appears, or the prohibition is interpreted too broadly | Describe permissible action and test both violations and excessive refusal |
+| Conflicts | One norm is ignored or an unjustified compromise is made | Separate hard constraints from preferences and define resolution conditions |
+| Information length and position | Required content remains in context but is used less effectively, or is pushed out of the window | Test positional effects and the text's physical availability separately |
+| Extraneous context | Irrelevant information obscures the norm | Compare full and selected context, considering the cost of mistakenly omitting material |
+| Paraphrasing and vocabulary | Words equivalent in intent produce different decisions | Use several formulations; for example, check consistency between “significant” and “material risk” |
+| Abstraction | “Be conservative” or “assess trade-offs” does not determine a specific choice | Provide scope, criteria, and examples while retaining needed discretion |
+| Model and inference mode | Results depend on family, size, training, context, and budget | Record the model, snapshot, settings, and available tools; test transfer separately |
 
-The table supplies factors for analysis. It does not claim a monotonic law in which every added detail worsens the answer, every prohibition is unreliable, or every larger model outperforms a smaller one on a particular requirement. Those comparisons require their own data.
+The table specifies factors for analysis. It does not assert a monotonic law whereby every extra detail worsens an answer, every prohibition is unreliable, or every large model outperforms a smaller one on a given requirement. Such comparisons need their own data.
 
-### 6.3. Rule position in context
+### 6.3. A rule's position in context
 
-Lost in the Middle observed a U-shaped relationship: information near the beginning and end was used better than information in the middle on the studied tasks. It should therefore not be described as primarily forgetting early material, nor used to recommend placing everything important only at the end. Transfer to a particular instruction system needs testing. [Liu2024]
+Lost in the Middle observed a U-shaped relationship: in the tasks studied, information at the beginning and end of context was used better than information in the middle. The result therefore cannot be described as forgetting mainly early parts, nor does it imply placing everything important only at the end. Transfer of this observation to a particular instruction system should be tested. [Liu2024]
 
-A separate technical problem arises when an instruction no longer fits the available window or is lost during history compression. Increasing a window, for example from 2048 to 4096 tokens, does not itself explain rule loss. It is necessary to know whether the text remained available, where it was located, and what surrounded it.
+There is also a technically distinct problem: when an instruction no longer fits the available window or is lost during history compression, the model does not receive it in full. Increasing the window, for example from 2048 to 4096 tokens, does not itself explain the loss of a rule. We need to know whether the text remains available, where it is positioned, and what surrounds it.
 
-Repeating key constraints, maintaining a short permanent core, organizing general and local rules hierarchically, and loading detail dynamically are context-design options. They may reduce irrelevant material but introduce selection risk: a rule not retrieved in time cannot participate in the decision. Selective provision's advantage over supplying all rules together is treated here as a testable hypothesis, not an established universal result.
+Repeating key constraints, maintaining a short persistent core of norms, arranging general and local rules hierarchically, and loading details dynamically are context-design options. They may reduce excess information but introduce selection risk: a rule not retrieved in time does not participate in the decision. The advantage of selective delivery over all rules at once is treated here as a testable hypothesis, not an established universal regularity.
 
 ### 6.4. Complexity, model, and transfer
 
-Instruction following depends on pretraining and subsequent tuning. InstructGPT shows that training on demonstrations and human preferences can substantially change behavior; this cannot be attributed to a well-worded request or treated as a guarantee of correctly understanding every new norm. [Ouyang2022]
+Instruction following depends on pretraining and subsequent tuning. InstructGPT shows that training on demonstrations and human preferences can substantially change model behavior; this effect cannot be attributed to one well-worded request or treated as a guarantee of correct understanding of any new norm. [Ouyang2022]
 
-Model family, size, base/instruction-tuned status, provider settings, tokenization, available window, tool preparation, and inference budget should be considered separately. Comparing 7B with 70B, five samples with one, or GPT, Llama, Gemini, and Claude requires a concrete task and the same defined criterion. An anecdotal stylistic difference between assistants does not establish their overall controllability. Soft prompts and other architecture-related parameters also need separate transfer checks.
+Model family, size, base/instruction-tuned variant, provider settings, tokenization, available window, tool training, and output budget must be considered separately. Comparing 7B with 70B, five samples with one, or GPT, Llama, Gemini, and Claude requires a specific task and an identically defined criterion. An anecdotal stylistic difference between two assistants does not establish their general controllability. Soft prompts and other architecture-related parameters also need separate transfer testing.
 
-More computation can provide additional candidates and checks, but does not make an ambiguous norm unambiguous. Visible CoT or a detailed plan may help organize answer artifacts; their existence does not establish compliance with a specified internal algorithm.
+More computation enables additional candidates and checks but does not make an ambiguous norm unambiguous. Visible CoT or a detailed plan may help organize answer artifacts; the existence of those artifacts does not establish compliance with a prescribed internal algorithm.
 
-Excessive instructions can introduce unnecessary stages, conflicts, extra research, and mechanical checklist completion. Insufficient instructions can omit important conditions. The working goal is a sufficient specification for a defined scope, tested across paraphrases, new formats, norm combinations, exceptions, and long trajectories.
+Excessive instructions can create unnecessary stages, conflicts, extra research, and mechanical checklist completion. Insufficient instructions can leave the model without material conditions. The working aim is a specification sufficient for the stated scope, with testing that covers paraphrases, new formats, rule combinations, exceptions, and long trajectories.
 
 ## 7. Mechanisms for conveying rules and levels of intervention
 
 ### 7.1. Fifteen mechanisms
 
-**1. Role or persona.** “You are a senior engineer” supplies professional context, presumed style, and explanation level. It may influence a response, but the role label does not define engineering decision criteria. The strength and direction of the effect depend on task and model; it cannot be assumed invariably superficial or sufficient for competence.
+**1. Role or persona.** “You are a senior engineer” sets a professional context, expected style, and level of explanation. This can affect the answer, but a role label does not define engineering decision criteria. The strength and direction of the effect depend on the task and model; it cannot be treated as invariably superficial or, conversely, sufficient for competence.
 
-**2. Direct natural-language instruction.** A rule explicitly states a requirement, such as a format, mandatory data source, or selection condition. “Do not choose a library older than N years” illustrates literal checkability, not the justification of age as a quality criterion. Complex norms still raise meaning, exception, and conflict questions.
+**2. Direct natural-language instruction.** A rule explicitly describes a requirement: for example, a specified format, a mandatory data source, or a selection condition. “Do not choose a library older than N years” illustrates literal verifiability well but does not justify age as a quality criterion. For a complex norm, questions of meaning, exceptions, and conflicts remain.
 
-**3. Few-shot demonstrations.** Several case/action pairs show how to apply a norm. They can clarify meaning and format without a long description. But one or two convenient examples do not specify the whole scope: the model may transfer an incidental feature or fail to apply the principle to a new task structure.
+**3. Few-shot demonstrations.** Several “case → required action” pairs show how to apply a norm. They may clarify meaning and format without a long description. But one or two convenient examples do not define the entire domain: a model may transfer an incidental feature or fail to apply the intended principle when the task has a new structure.
 
-**4. Contrastive examples.** Permissible/impermissible or rule/exception pairs show the discriminating boundary. Nearly identical cases with different decisions are particularly useful. Unlike simply adding positive examples, the focus is on the factor that should change the action.
+**4. Contrasting examples.** Pairs of permissible and impermissible cases, or a rule and an exception, show the discriminating boundary. Nearly identical cases with different decisions are especially useful. Unlike merely increasing positive demonstrations, this directs attention to the factor that should change the action.
 
-**5. Rubrics and checklists.** Criteria, levels, or questions help compare candidates. An architectural decision may be considered through simplicity, scalability, and resilience. Substantive application must be checked: a completed table does not establish correct assessment. The available evidence does not imply universal superiority of checklists over other forms.
+**5. Rubrics and checklists.** A list of criteria, levels, or questions helps compare candidates. For example, an architectural decision can be considered in terms of simplicity, scalability, and resilience. Substantive application of the criteria needs checking: a completed table does not prove the properties were assessed correctly. The available evidence does not imply universal superiority of checklists over other forms.
 
-**6. A prescribed decision procedure.** Instructions specify an order: clarify requirements, find alternatives, compare, choose. Such a procedure makes expected actions explicit. A textual algorithm and an externally enforced sequence are different control mechanisms: a model may skip a described step or mark it complete without the necessary information.
+**6. A prescribed decision procedure.** An instruction sets a sequence: establish requirements, find alternatives, compare them, choose. Such a procedure makes expected actions explicit. However, a textual algorithm and an order technically enforced by an external system are different forms of control: the model can skip a described step or mark it complete without the required information.
 
-**7. Task decomposition.** A complex decision is split into subtasks. Instead of “write a program,” dependencies and structure can be specified separately; research can distinguish known facts, hypotheses, and selection criteria. Decomposition helps when subtasks connect substantively to the overall goal and their results are checked. Faulty decomposition can entrench the wrong framing.
+**7. Task decomposition.** A complex decision is split into subtasks. Instead of a general “write a program,” dependencies and structure can be specified separately; in research, known facts, testable hypotheses, and selection criteria can be separated. Decomposition is useful when subtasks are substantively connected to the overall goal and their results are checked. Incorrect decomposition can entrench a wrong problem formulation.
 
-**8. Dynamic retrieval of rules and context.** A system selects policies, documents, and information relevant to the current stage. Programming may load suitable norms while leaving other processes' details outside context. Potential savings bring risks of incorrect routing, ranking, and omitted mandatory conditions. Retrieval completeness needs evaluation.
+**8. Dynamic retrieval of rules and context.** A system selects policies, documents, and information relevant to the current stage. For programming, for example, it loads an appropriate set of norms while leaving details of other processes outside the context. Potential savings come with risks of incorrect routing, ranking, and omission of a mandatory condition. Retrieval completeness needs assessment.
 
-**9. Structured intermediate representations.** Plans, evidence tables, hypothesis lists, decision records, tags, and logical fields make stage results inspectable. They are useful artifacts, not established transcripts of thought. Checking must distinguish field presence, content correctness, and actual use in a subsequent action.
+**9. Structured intermediate representations.** A plan, evidence table, hypothesis list, decision record, tags, and logical fields make stage results inspectable. They are useful as artifacts, not as a proven transcript of thought. Verification must distinguish a field's existence, the correctness of its content, and actual use in the next action.
 
-**10. Tools and environmental interaction.** A model may execute HTTP or SQL requests, search, call APIs, compile code, run tests, and use simulations. ReAct combines reasoning and actions with observations; its results include HotpotQA, FEVER, ALFWorld, and WebShop. Toolformer studied API use, including a calculator, question answering, search, a calendar, and translation. Gains were evaluated on zero-shot tasks after training the model to select and use APIs; this is not an experiment in merely connecting tools to an unchanged model. These are particular tasks and training/use methods, not a guarantee that every connected service helps. [ReAct2023] [Toolformer2023]
+**10. Tools and interaction with the environment.** A model can issue HTTP or SQL queries, search, call APIs, compile code, and run tests and simulations. ReAct combines reasoning and actions that obtain observations; its results include HotpotQA, FEVER, ALFWorld, and WebShop. Toolformer investigated API use, including a calculator, question answering, search, calendar, and translation. Gains were evaluated on zero-shot tasks after training the model to select and use APIs; this was not an experiment merely connecting tools to an unchanged model. These are particular tasks and tool-training/use methods, not a guarantee that any connected service is useful. [ReAct2023] [Toolformer2023]
 
-**11. External feedback.** After a candidate, a system receives a test or simulation result, a human judgment, another LLM's assessment, or verifier output. The signal may justify fixing code or revising a decision. Another model instance is not automatically an independent source of truth; what information and criteria it adds, and whether the executor can use the criticism, matter.
+**11. External feedback.** After producing a candidate, the system receives a test or simulation result, or an assessment from a human, another LLM, or a verifier. The signal may justify fixing code or reconsidering a decision. Another model instance does not automatically become an independent source of truth; what information and criteria it adds, and whether the executor can use its comments, matter.
 
-**12. Repeated generation and search.** Self-consistency, stochastic sampling, beam search, tree search, and Tree of Thoughts create and select multiple candidates. They change the solution procedure and computational cost. Consensus may be informative, but agreement does not establish truth, calibrated confidence, or compliance with a prescribed hidden process.
+**12. Repeated generation and search.** Self-consistency, stochastic sampling, beam search, tree search, and Tree of Thoughts create and select multiple options. They change the solution-search procedure and computation cost. Consensus may be a useful signal, but matching answers do not establish truth, calibrated confidence, or compliance with a specified hidden process.
 
-**13. Criticism and revision.** A model, another instance, multiple models, or a person searches for errors and proposes changes. Formats include self-critique, critic/executor, and debate. Testable benefit depends on a concrete criterion, informational diversity, and correction ability. An additional participant does not itself add facts; shared blind spots and consensus pressure may persist.
+**13. Critique and revision.** A model, another instance, multiple models, or a human look for errors and propose changes. Formats include self-critique, critic/executor, and debate. Verifiable benefits depend on the particular criterion, diversity of information, and ability to correct errors. An additional participant does not itself bring new facts; shared blind spots and pressure toward consensus may persist.
 
-**14. Fine-tuning, instruction tuning, and reinforcement learning.** Training changes parameters using demonstrations, judgments, or rewards. It may reinforce style and behavior without repeating the specification in every prompt. Data preparation, cost, updating, and transfer beyond the training distribution remain separate tasks. Better instruction following does not guarantee new expert judgments unconditionally. [Ouyang2022]
+**14. Fine-tuning, instruction tuning, and reinforcement learning.** Training changes parameters using demonstrations, assessments, or rewards. It may consolidate the intended style and behavior without repeating the entire specification in a request. But data preparation, cost, updating, and transfer outside the training distribution remain separate tasks. Improved instruction following does not imply an unconditional guarantee for new expert judgments. [Ouyang2022]
 
-**15. Policy-aware training.** Training examples and judgments are explicitly connected to a norm, procedure, conflicts, and exceptions. This is a way to train desired policy application, not a promise that it will work in every new case. Familiar-rule compliance, transfer, composition, and robustness to changed conditions need separate tests.
+**15. Policy-aware training.** Training examples and assessments are deliberately tied to a norm, procedure, conflicts, and exceptions. This is a formulation for learning the desired policy application, not a promise that the model will comply in every new case. Separate tests of familiar-rule compliance, transfer, composition, and robustness to changed conditions are needed.
 
 ### 7.2. At what level the system changes
 
-Similar external outcomes can result from different interventions. To understand the source of improvement and transfer conditions, the changed level must be recorded.
+Similar external outcomes can arise from different interventions. To understand the source of improvement and its transfer conditions, the level of change must be recorded.
 
-| Level | What changes | What remains unproven by itself |
+| Level | What changes | What is not established by that alone |
 |---|---|---|
 | Inference-time prompting | Request wording, role, rule, and required artifacts | A particular internal mechanism and universal compliance |
-| In-context learning | Demonstrations and comparisons within context | Learning the intended feature and transfer beyond examples |
-| Context engineering | Composition, order, currency, and delivery of documents and data | Complete retrieval and correct interpretation |
-| Agent scaffold | Plans, memory, states, planner/executor, action loop | Quality of the goal, criteria, and within-stage decisions |
-| Decoding and inference search | Temperature, sampling, passes, aggregation, search | That a gain came from one instruction or the desired reasoning method |
-| External verification | Checking format, code, facts, results, or actions | Criterion completeness and evaluator independence |
-| Post-training | Parameters through SFT, instruction/preference tuning, RL, LoRA, and other methods | Reliable transfer to a new norm or distribution |
-| Process supervision | Intermediate-step judgments in training or trajectory selection | Causal connection between an approved step and final answer |
-| Architecture and initial capabilities | Size, modalities, memory mechanisms, architecture components | Transfer of the observed effect to another architecture |
+| In-context learning | Demonstrations and comparison cases within context | Acquisition of the intended feature and transfer beyond examples |
+| Context engineering | Selection, order, freshness, and delivery of documents and data | Retrieval completeness and correct interpretation |
+| Agent scaffold | Plans, memory, states, planner/executor, and action loop | Quality of the goal itself, criteria, and within-stage decisions |
+| Decoding and inference search | Temperature, sampling, pass count, aggregation, and search | That a gain is due to one instruction or the intended reasoning method |
+| External verification | Checking format, code, facts, outcome, or actions | Criterion completeness and evaluator independence |
+| Post-training | Parameters through SFT, instruction/preference tuning, RL, LoRA, and other tuning methods | Reliable transfer to a new norm or distribution |
+| Process supervision | Intermediate-step assessments during training or trajectory selection | A causal connection between an approved step and the final answer |
+| Architecture and baseline capabilities | Size, modalities, memory mechanisms, and architectural components | That the observed effect transfers to another architecture |
 
-Some categories overlap: few-shot belongs to prompting; retrieval concerns context organization, not necessarily training; an evaluator can select candidates at inference or supply training feedback. That is not a reason to merge their effects. Comparisons must describe the concrete configuration.
+Some categories overlap: few-shot belongs to prompting; retrieval concerns context organization, not necessarily training; an evaluator can be used for selection at inference and as a training signal. This is not a reason to combine their effects. A comparison must describe the specific configuration.
 
-A prompt changes the conditional output distribution given context, not trained parameters. A result after RLHF cannot automatically be attributed to request wording. When a method uses multiple passes and external checks, comparison with one call measures the entire bundle.
+A prompt changes the conditional output distribution for a given context but does not rewrite learned parameters. If a result appeared after RLHF, it cannot automatically be attributed to the request text. If a method used many passes and external checks, comparison with one call measures the entire bundle of changes.
 
 ### 7.3. Step supervision and external constraints
 
-Process supervision differs from evaluating only the final answer: feedback concerns intermediate steps. In Lightman et al., it improved results on MATH relative to outcome supervision. However, evaluated steps were those annotators judged correct; this does not establish causal faithfulness or guarantee every approved step caused the answer. [Lightman2023]
+Process supervision differs from evaluating only the final answer: feedback concerns intermediate steps. In Lightman et al., this scheme improved results on MATH compared with outcome supervision. However, the steps were assessed as correct by annotators; this does not establish causal faithfulness or guarantee that each approved step caused the answer. [Lightman2023]
 
-The same distinction holds for external workflows. A system can be technically required to obtain compilation output before advancing, or permitted only certain states. This is stronger than a verbal promise regarding that observable condition. But successful compilation does not prove a user scenario, and a call log does not establish correct interpretation.
+The same distinction applies to an external workflow. A system can be technically required to obtain a compilation result before proceeding, or permit only certain states. For that particular observable condition, such checking is stronger than a verbal promise to perform an action. But successful compilation does not establish that a user scenario was fulfilled, and a call log does not establish correct interpretation of the result.
 
-Tools also require a defined exchange format and checkable output provenance. Actual tool output must be distinguished from a model's retelling. When a compiler error, new document, or simulation result arrives, the next question is whether the decision changed in accordance with the observation's content.
+Tools also need a defined exchange format and verifiable provenance of their outputs. The actual tool response must be distinguished from the model's paraphrase. After a compilation error, new document, or simulation result, the next check is whether the decision changed consistently with the observation's content.
 
-## 8. The prompt-only boundary and comparison along 10 axes
+## 8. The prompt-only boundary and comparison along 10 dimensions
 
-### 8.1. The boundary is determined by the required outcome
+### 8.1. The boundary is determined by the outcome requirement
 
-Prompt-only here means control through one textual instruction without a separate demonstration set, external search, tools, or a verification procedure. Other classifications include few-shot in prompting, so the system's components must be stated explicitly in comparisons.
+Here, prompt-only means control through one textual instruction without a separate set of demonstrations, external search, tools, or a verification procedure. Other classifications include few-shot in prompting, so comparisons must explicitly name the system's components.
 
-A simple prompt may suffice for a reversible task with flexible style, an uncomplicated choice, rounding, or a specified answer structure. “Suffice” means the observed result meets the goal at an acceptable frequency and error cost. Even strict headings and item order do not become guaranteed just because words describe them easily.
+A simple prompt may suffice for a reversible task with flexible style, a simple choice, rounding, or a specified answer structure. “Suffice” means that the observed result meets the goal with an acceptable frequency and consequences of errors. Even a strict header and item order do not become guaranteed merely because they are easy to describe in words.
 
-One textual prescription may be inadequate for a long action chain, conflicting norms, unknown facts, or consequential criteria. An added mechanism should target a concrete error source: examples clarify boundaries, retrieval supplies information, tests check properties, external state constrains sequence. Fine-tuning is neither the mandatory next step in every such chain nor the sole guarantee of reliability.
+For a long action chain, conflicting norms, unknown facts, and consequential criteria, a textual prescription alone may not suffice. An added mechanism should address a particular error source: examples clarify boundaries, retrieval supplies information, a test checks a property, and external state constrains sequence. Fine-tuning is neither a mandatory continuation of every such chain nor the only guarantee of reliability.
 
 ### 8.2. What each option adds
 
-| Approach | What it adds | Typical limitations |
+| Approach | What it adds | Characteristic limitations |
 |---|---|---|
 | Prompt-only | Goal, conditions, style, and required artifacts in text | Ambiguity, wording sensitivity, no independent verification |
-| Prompt + examples | Demonstrations of application and exceptions | Example selection, incidental features, transfer beyond what was shown |
-| Prompt + workflow | Separate stages and an expected sequence | Textual steps can be skipped; external execution can enforce a faulty procedure |
-| Prompt + retrieval | Current information and selected norms | Incomplete search, staleness, relevance, interpretation |
-| Prompt + tools/environment | Execution, observation, calculation, and experimental feedback | Tool, call, and feedback-use errors; infrastructure |
-| Prompt + external verifier | Additional checking of a candidate or action | Limited coverage, faulty evaluator, correlated errors, cost |
-| Fine-tuning/RL with suitable context | Learned behavior changed through data and judgments | Data, computation, updating, opacity, and out-of-training transfer |
+| Prompt + examples | Demonstrations of application and exceptions | Example selection, incidental features, and transfer beyond demonstrations |
+| Prompt + workflow | Separate stages and an expected sequence | A textual step can be skipped; external execution can entrench a wrong procedure |
+| Prompt + retrieval | Current information and selected norms | Search incompleteness, staleness, relevance, and interpretation |
+| Prompt + tools/environment | Execution, observation, computation, and experimental feedback | Tool errors, incorrect calls and use of results, infrastructure |
+| Prompt + external verifier | Additional checking of a candidate or action | Limited coverage, a mistaken evaluator, correlated errors, cost |
+| Fine-tuning/RL with suitable context | Changes in acquired behavior based on data and assessments | Data, computation, updating, opacity, and transfer beyond training |
 
-This is a description of capabilities, not a universal quality ladder. Search may add nothing needed for a fully specified abstract task. A compiler does not replace fact-checking, and an LLM judge does not replace runtime measurement. Several components may share the same poor criterion, so a complex system can confidently accept a wrong result too.
+This describes capabilities, not a universal quality ladder. Search may add no necessary information to a fully specified abstract task. A compiler does not replace fact-checking, and an LLM judge does not replace execution-time measurement. Multiple components can share the same poor criterion, so a complex system can also confidently accept an incorrect result.
 
-### 8.3. Ten comparison axes
+### 8.3. Ten comparison dimensions
 
-| Axis | What to compare | Material qualification |
+| Dimension | What to compare | Material qualification |
 |---|---|---|
-| Reliability | Frequency of goal attainment and mandatory-condition compliance within scope | Average accuracy and absence of critical violations are different requirements |
-| Generalizability | New cases, domains, structures, exceptions, norm combinations | Success near demonstrations does not establish transfer |
-| Fragility | Behavior changes under paraphrases, reorderings, formatting, and small input shifts | One successful prompt cannot measure it |
-| Cost | Tokens, calls, tools, training, human judgments | A cheap call may require expensive correction; a complex method may be excessive |
-| Latency | Time to a usable result, including checking and correction | Parallelism, sequential dependencies, and retries must be explicit |
-| Portability | Operation on another family, snapshot, provider, or architecture | Text transfers technically more easily than tuned parameters, but quality preservation still needs checking |
-| Dependence on model capabilities | Requirements for context, tools, structured output, task understanding | A scaffold may require abilities another model lacks |
-| Maintenance effort | Updating norms, examples, tests, data, integrations, trained policy | Quickly changing text does not mean its consequences are easy to check |
-| Observability | Visibility into actions, inputs, and acceptance grounds | More logs and CoT do not mean a more faithful account of hidden computation |
-| Resistance to manipulation | Formally passing evaluation, bypassing restrictions, or changing accessible criteria | Proxy-boundary tests and a concrete threat model are needed; a test's existence does not solve the problem |
+| Reliability | Frequency of goal achievement and mandatory-condition compliance within a stated scope | Average accuracy and absence of critical violations are different requirements |
+| Generalizability | New cases, domains, structures, exceptions, and norm combinations | Success near demonstrations does not establish transfer |
+| Brittleness | Behavioral changes under paraphrases, permutations, formatting, and small input shifts | Cannot be assessed from one successful prompt |
+| Cost | Tokens, calls, tools, training, and human assessments | A cheap call may require expensive correction; a complex method may be excessive |
+| Latency | Time to a usable result, including checking and correction cycles | Parallelism, sequential dependencies, and retries must be accounted for explicitly |
+| Portability | Operation on another family, snapshot, provider, or architecture | Transferring text is technically easier than transferring tuned parameters, but preserved quality still needs checking |
+| Dependence on model capabilities | Requirements for context, tools, structured output, and task understanding | A scaffold may require capabilities another model lacks |
+| Maintenance effort | Updating norms, examples, tests, data, integrations, and learned policies | Editing text quickly does not mean all consequences are easy to verify |
+| Observability | Ability to inspect performed actions, inputs, and acceptance grounds | More logs and CoT do not imply a more faithful account of the hidden process |
+| Resistance to manipulation | Possibility of formally passing assessment, bypassing restrictions, or altering an accessible criterion | Proxy boundaries and the specific threat model need testing; the existence of a test does not itself solve the problem |
 
-Trade-offs differ across these axes. External checking may detect a particular error better and increase latency. A short instruction is easier to maintain but may retain a critical ambiguity. Training relocates behavior into parameters while making local-norm changes harder. These conclusions should be evaluated relative to a particular task, not presented as a general method ranking.
+Different trade-offs are possible along these dimensions. External checking may improve detection of a particular error and increase latency. A short instruction is easier to maintain but may leave critical ambiguity. Training moves part of behavior into parameters but complicates updating a local norm. Such conclusions should be assessed against a particular task, not presented as a general ranking of methods.
 
 ### 8.4. How to test whether added complexity is justified
 
-A practical comparison starts with a baseline, identifies its material failure, and adds a mechanism targeting that failure. Each change records model, context, tools, budget, and acceptance criterion. Compare whole-system results separately from individual component contributions: gains after simultaneously adding examples, search, and three checks cannot be attributed to one component.
+A practical comparison scheme is to take a baseline, identify its material failure, and add a mechanism aimed at that failure. For each change, record the model, context, available tools, budget, and acceptance criterion. It is useful to compare the overall system result and each component's contribution separately: a gain after adding examples, search, and three checks simultaneously cannot be attributed to only one of them.
 
-Evaluation should include cases where a rule applies and does not, boundaries, new situations, conflicts, ways to exploit the proxy, and long trajectories where relevant. Side effects need separate attention: unnecessary actions, unjustified refusals, slowdown, lost flexibility, and formal compliance without goal attainment.
+Assessment should include cases where the rule applies and does not apply, boundaries, new situations, conflicts, ways to exploit proxies, and long trajectories when relevant to the task. Side effects must be tracked separately: unnecessary actions, unjustified refusals, slowing down, lost legitimate flexibility, and formal compliance without goal achievement.
 
-This preserves the purpose of combining mechanisms without requiring the largest possible system. An acceptable configuration is determined by observed quality and error consequences. Concrete behavioral checking within declared boundaries establishes sufficiency—not instruction length, agent count, fine-tuning, or explanation detail.
+This preserves the value of combining mechanisms without making maximum system complexity mandatory. An acceptable configuration is determined by observed quality and error consequences. Evidence of sufficiency comes from testing specific behavior within stated boundaries, not instruction length, agent count, the presence of fine-tuning, or explanation detail.
 
 ## 9. Supporting reasoning and controlling the solution method
 
-Many methods grouped under “reasoning” were designed to improve answer quality. They do not therefore automatically establish a required expert policy. A method may perform well on a mathematics benchmark while providing no evidence that it follows “first check an alternative explanation” in open research work.
+Many methods commonly grouped under “reasoning” were developed to improve answer quality. This does not mean they also impose the required expert policy. A method may perform well on a mathematical task set while no evidence shows whether it follows “first test an alternative explanation” in open-ended research.
 
 ### 9.1. What the main techniques change
 
-| Technique | What it organizes | Possible benefit | Boundary of inference |
+| Technique | What it organizes | Possible benefit | Limit of the conclusion |
 |---|---|---|---|
-| Chain-of-Thought | Generating intermediate steps before the answer | Better performance on some arithmetic, logical, and symbolic tasks | An accuracy gain alone does not establish a complete reflection of internal computation |
-| Zero-shot CoT | A general stepwise-solving instruction without demonstrations | May activate useful answer development | Wording and model capabilities remain important; verbal step order does not guarantee procedure |
-| Few-shot CoT | Examples of intermediate steps and answers | Demonstrates the solution form as well as the result | Example dependence, superficial transfer, and inappropriate templates are possible |
-| Decomposition and Least-to-Most | Subtasks and use of their results | Reduces individual-step difficulty; helps some relationally complex tasks | Faulty decomposition or unchecked intermediate results can propagate |
-| Self-consistency | Several trajectories and aggregation of final answers | Reduces the influence of an unlucky sample | Consensus is not truth, error independence, or calibrated confidence |
-| Tree of Thoughts, beam search, other search procedures | Branching, candidate evaluation, backtracking | Explores alternatives and abandons dead ends | Depends on evaluator, search, and budget; does not establish transfer or faithful CoT |
-| Planning and ReAct | Alternation of planning, actions, and observations | Adds external information and makes some procedure observable | Tool presence does not guarantee timely calls or correct use of results |
-| Verification and draft → check → correct procedures | Checking and selecting generated candidates | Can reject or correct a wrong answer | Selecting a correct result does not explain how the initial candidate was obtained |
-| Self-critique and multi-agent discussion | Reassessment of assumptions and results | May reveal alternatives and errors | Repeating one error across agents and agreement are not independent verification |
-| Process supervision | Intermediate-step feedback, usually through evaluator training | More local error signals and encouragement of approved steps | A step's correctness or acceptability is not its causal role in the answer |
+| Chain-of-Thought | Generation of intermediate steps before the answer | Improved solutions to some arithmetic, logical, and symbolic tasks | An accuracy gain alone does not show that the text fully reflects the internal process |
+| Zero-shot CoT | A general instruction to solve step by step without demonstrations | May activate a useful way of developing the answer | Wording and model capabilities remain material; the sequence of verbal steps does not guarantee the procedure |
+| Few-shot CoT | Examples of intermediate steps and an answer | Demonstrates not only the result but the form of the solution | Dependence on examples, superficial transfer, and use of an inappropriate template are possible |
+| Decomposition and Least-to-Most | Subtask division and use of their results | Reduces individual-step complexity; helps on some tasks with complex relations | An incorrect decomposition or unchecked intermediate conclusion can propagate |
+| Self-consistency | Multiple trajectories and aggregation of final answers | Reduces the influence of one unsuccessful sample | Consensus is not truth, error independence, or calibrated confidence |
+| Tree of Thoughts, beam search, other search procedures | Branching, candidate evaluation, and returning to earlier decisions | Explores multiple paths and permits abandoning dead ends | Success depends on evaluator quality, search, and computational budget; it does not establish transfer or faithful CoT |
+| Planning and ReAct | Alternation of planning, actions, and observations | Introduces external information and makes part of the procedure observable | A tool's availability does not guarantee timely invocation or correct use of its result |
+| Verification and “draft → check → correct” procedures | Checking and selecting existing candidates | Enables rejection or correction of an incorrect answer | Selecting a correct result does not automatically explain how the original candidate was produced |
+| Self-critique and multi-agent discussion | Reassessment of assumptions and results | May reveal alternatives and errors | Several agents repeating the same mistake and agreeing are not independent verification |
+| Process supervision | Feedback on intermediate steps, usually by training an evaluator | Provides a more localized error signal and encourages approved steps | A step's correctness or acceptability is not identical to its causal role in the answer |
 
-Technique names do not determine the intervention level. “First decompose the task” in text differs from a program that calls a model separately for each subtask and passes checked results forward. In the latter, an external system determines part of execution order. Likewise, training a process evaluator and using an existing one to select candidates are different operations. [Wei2022] [Kojima2022] [Zhou2023] [Wang2023] [ToT2023] [ReAct2023] [Lightman2023]
+Method names do not themselves define the intervention level. A textual request to “first decompose the task” differs from a program that separately calls the model for each subtask and passes a checked result onward. In the latter case, part of the execution order is set externally. Likewise, training a process evaluator and using a ready evaluator for candidate selection are different operations. [Wei2022] [Kojima2022] [Zhou2023] [Wang2023] [ToT2023] [ReAct2023] [Lightman2023]
 
-### 9.2. What CoT actually shows
+### 9.2. What CoT actually demonstrates
 
-Wei et al. (2022) found CoT improved some arithmetic, commonsense, and symbolic tasks in large models of that period. The scale effect must not become a permanent parameter-count threshold: substantial results appeared in models on the order of a hundred billion parameters and above; smaller models could show no benefit or deterioration. This is a historical observation about the evaluated models. [Wei2022]
+In Wei et al. (2022), CoT improved performance on several arithmetic, commonsense, and symbolic tasks for large models of that period. The scaling effect in this study must not become a timeless parameter-count threshold: substantial results appeared in models with roughly a hundred billion parameters and above, while smaller models could show no benefit or deterioration. This is a historical observation about the models studied. [Wei2022]
 
-Higher accuracy does not prove human-like reasoning. But ablations using equations alone, extra dot tokens, and reasoning after the answer did not reproduce the full CoT effect. “The model simply generated more text” therefore does not describe those ablation results. Substantive intermediate steps matter under the studied conditions; a single mechanistic theory of every CoT effect does not follow. [Wei2022]
+Improved accuracy does not establish human-like reasoning. However, ablations using only equations, additional dot tokens, and reasoning after the answer did not reproduce the full CoT effect. Therefore, “the model merely generated more text” does not describe these ablation results. Substantive intermediate steps matter in the conditions studied; this does not imply a unified mechanistic theory of all CoT effects. [Wei2022]
 
-The opposite extreme—treating all CoT as a decorative story—is also unjustified. Causal dependence on intermediate text may exist and vary across tasks and models. A particular property should be checked rather than choosing between unconditional trust and unconditional rejection. [Lanham2023]
+The opposite extreme—treating every CoT as a decorative story—is also unjustified. Causal dependence on intermediate text can exist and vary across tasks and models. A particular property must be tested rather than choosing unconditional trust or unconditional dismissal. [Lanham2023]
 
-### 9.3. Tree of Thoughts: a numerical example and a sound comparison
+### 9.3. Tree of Thoughts: a numerical example and a valid comparison
 
-In Yao et al. (2023), on **Game of 24**, GPT-4 with CoT solved **4%** of tasks, while Tree of Thoughts with **b = 5** solved **74%**. This is an accuracy comparison on one task with substantially different search organization and more model calls. It is not a measurement of paraphrase robustness, universal transfer, or all agent-decision quality. [ToT2023]
+In Yao et al. (2023), on **Game of 24**, GPT-4 with CoT solved **4%** of tasks, while Tree of Thoughts with **b = 5** solved **74%**. This compares accuracy on a particular task under substantially different search organization and a larger number of model calls. It is not a measure of robustness to paraphrasing, universal transfer, or the quality of all agent decisions. [ToT2023]
 
-The work also considered creative writing and mini-crosswords. Several task types broaden the illustration but do not remove the need for a new-domain check. Practical selection should separately compare quality, calls, tokens, latency, branch-evaluation cost, and evaluator-error frequency. More expensive search cannot automatically be credited to a better instruction.
+The same work considered creative writing and mini-crosswords. Multiple task types broaden the illustration but do not remove the need for validation in a new domain. Practical selection should compare quality, call counts, tokens, latency, branch-evaluation costs, and evaluator error rates separately. A more expensive search's advantage cannot automatically be attributed to a better instruction.
 
 ### 9.4. Process and outcome supervision
 
-Outcome supervision evaluates the final result. Process supervision gives feedback on intermediate steps, for example identifying the first incorrect transition. It helps localize error and changes incentives: the evaluator rewards approved solution elements as well as a matching answer.
+Outcome supervision evaluates the final result. Process supervision provides feedback on intermediate steps—for example, identifying the first incorrect transition. This helps localize errors and changes incentives: an evaluator rewards not only a matching answer but also approved solution elements.
 
-Lightman et al. showed process supervision outperforming outcome supervision on MATH in the studied training and selection system. This supports the usefulness of step evaluation. It **does not guarantee causal faithfulness**: annotators or reward models assess the presented step, not all of the generator's internal computation directly. [Lightman2023]
+Lightman et al. showed an advantage of process over outcome supervision on MATH in the training and solution-selection system studied. This setup supports the usefulness of evaluating steps. It **does not guarantee causal faithfulness** of the chain: the annotator or reward model evaluates the presented step, not directly all the generator's internal computations. [Lightman2023]
 
-More detailed supervision needs annotation, an evaluator model, computation, and quality control of the evaluator itself. Annotation errors or proxy incentives can enter the procedure. The general conclusion is that this is an additional control mechanism whose value needs testing through outcomes and required behavioral properties. It cannot be declared either a theoretical guarantee of an “honest chain” or useless because it offers no such guarantee.
+More detailed supervision requires annotation, an evaluation model, computation, and quality control of the evaluator itself. Annotation errors or proxy incentives may enter the procedure. The general conclusion is that this is an additional control mechanism whose usefulness must be assessed by the final result and required behavioral properties. It cannot be declared either a theoretical guarantee of an “honest chain” or useless merely because that guarantee is absent.
 
 ## 10. Faithfulness of visible reasoning
 
-### 10.1. Distinctions that must be preserved
+### 10.1. Distinctions that must not be lost
 
-**Explanation plausibility** means the explanation appears coherent and persuasive to a reader. **Reasoning correctness** means the facts and logical transitions in the presented text are correct. **Causal faithfulness** means the explanation reflects factors and dependencies actually involved in producing the answer. These properties can diverge. [Jacovi2020] [Turpin2023]
+**Explanation plausibility** means that an explanation seems coherent and persuasive to a reader. **Reasoning correctness** means that facts and logical transitions in the presented text are correct. **Causal faithfulness** means that the explanation reflects factors and dependencies that actually contributed to producing the answer. These properties can diverge. [Jacovi2020] [Turpin2023]
 
-Faithfulness also has another meaning: **consistency with a source**. A summary, for example, should not attribute absent facts to a document. Checking that property does not test whether CoT describes the model's internal mechanism. MAMM-Refine uses faithfulness in this document-consistency sense. [Wan2025]
+Faithfulness also has another meaning: **consistency with a source**. For example, a summary must not attribute absent facts to a document. Checking this property does not test whether CoT describes the model's internal mechanism. MAMM-Refine uses the term in precisely this sense of generated content being consistent with a document. [Wan2025]
 
-Faithfulness should be treated as graded and condition-dependent. One step may influence a later decision while another is ignored; a draft may be partly used while the final answer includes further processing. “Lying CoT” and “the model lied” often conflate causal unfaithfulness, factual error, and deceptive intent. One mismatch between text and result does not establish intent.
+Faithfulness should be treated as a graded, condition-dependent property. One step may influence a later decision while another is ignored; a draft may be used in part, and the final answer may involve additional processing. “Lying CoT” and “the model lied” often conflate causal unfaithfulness, factual error, and intent to deceive. A discrepancy between text and result alone does not establish intent.
 
-### 10.2. Empirical support
+### 10.2. Empirical foundations
 
-| Work | Observation or test | Conditions and limits |
+| Work | What was observed or tested | Conditions and limits |
 |---|---|---|
-| Turpin et al. (2023) | Biasing input features changed answers, but explanations did not identify those features; rationalizations appeared | GPT-3.5 and Claude 1.0; BIG-Bench Hard and social-bias tasks. Example: demonstrations systematically label the correct option A |
-| Lanham et al. (2023) | Answers depend differently on CoT when errors, alterations, or paraphrases are introduced | Contribution varies by task and model size; both higher- and lower-faithfulness conditions were found |
-| Arcuschin et al. (2025 preprint; later revisions) | Unfaithfulness also appeared in natural tasks without a specially added explicit biasing feature | Particular frequencies cannot be generalized to all models. Versions changed; direct quotes and old proportions are not used without version identification |
-| Xiong, Chen, Qi, Lakkaraju (2025) | Counterfactual insertions tested within-draft and draft-to-answer dependence; faithfulness was selective | Six evaluated reasoning models, GPQA Diamond, MMLU global facts. Step type and intervention regime matter |
+| Turpin et al. (2023) | Biasing input features changed answers, but models did not name those features in explanations; rationalizations appeared | GPT-3.5 and Claude 1.0; BIG-Bench Hard tasks and social biases. Example: the correct demonstration option was systematically labeled A |
+| Lanham et al. (2023) | Dependence of the answer on CoT varied under inserted errors, modified steps, and paraphrasing | CoT's contribution varies with task and model size; conditions of both higher and lower faithfulness were found |
+| Arcuschin et al. (2025 preprint; subsequent revisions) | Unfaithfulness also appeared in natural tasks without a deliberately inserted explicit biasing feature | Particular frequencies cannot be transferred to any model. Versions changed; verbatim quotations and earlier rates without a version are not used |
+| Xiong, Chen, Qi, Lakkaraju (2025) | Counterfactual insertions tested dependencies within drafts and between drafts and answers; faithfulness was selective | Six evaluated reasoning models, GPQA Diamond, and MMLU global facts. Step type and intervention mode matter |
 
-Sources: [Turpin2023], [Lanham2023], [Arcuschin2025], [Xiong2025]. These works justify checking CoT; they do not establish that every LLM's reasoning is a rationalization.
+Sources: [Turpin2023], [Lanham2023], [Arcuschin2025], [Xiong2025]. These works justify checking CoT; they do not establish that all reasoning by all LLMs is rationalization.
 
-Xiong et al. evaluated R1-Distill-Llama-8B, R1-Distill-Qwen-7B/14B/32B, QwQ-32B, and Skywork-OR1-32B-Preview with temperature = 0. DeepSeek-R1 and Qwen3-32B supplied drafts and must not be confused with the six evaluated models. The study distinguishes **intra-draft faithfulness** and **draft-to-answer faithfulness**; backtracking and explicit correction steps were treated differently from ordinary continuation. Disagreement with a draft needs interpretation: refusing to follow an erroneous intermediate conclusion can improve final accuracy. [Xiong2025]
+Xiong et al. evaluated R1-Distill-Llama-8B, R1-Distill-Qwen-7B/14B/32B, QwQ-32B, and Skywork-OR1-32B-Preview, using decoding with temperature = 0. DeepSeek-R1 and Qwen3-32B supplied drafts; this must not be confused with membership in the six evaluated models. The work distinguishes **intra-draft faithfulness** and **draft-to-answer faithfulness**; backtracking and explicit correction steps were treated differently from ordinary continuation. Observed disagreement with a draft needs interpretation: refusing an incorrect intermediate conclusion can improve answer correctness. [Xiong2025]
 
 ### 10.3. Testing the causal role of intermediate text
 
-Useful research interventions include removing or shortening a step, inserting an error, replacing a conclusion, reordering parts, counterfactual substitution, and paraphrasing. The expected response must be defined in advance: when the model should change its answer, preserve it, or explicitly correct an error. Preserving the answer after a meaningless edit differs from preserving it after a decisive fact changes. [Lanham2023] [Xiong2025]
+Useful research interventions include deleting or shortening a step, inserting an error, replacing a conclusion, reordering parts, counterfactual substitution, and paraphrasing. Expected reactions must be defined in advance: when should a model change the answer, preserve it, or explicitly correct an error? Preserving an answer after a meaningless edit and after changing a decisive fact are different outcomes. [Lanham2023] [Xiong2025]
 
-Controls should consider whether the intervention creates contradiction, an unusual input, or an opportunity to solve the task again without the modified step. If removing a procedure does not worsen the result, that does not prove it was never used: redundant solution paths may exist. If it does worsen the result, that demonstrates the intervention's role, not complete identity between the text and hidden algorithm.
+Controls should consider whether an intervention introduced a contradiction, an unusual model input, or an opportunity to solve the task again without the changed step. If deleting a procedure did not worsen performance, this does not prove the procedure was never used: redundant solution paths are possible. If performance worsened, this shows the intervention's role, not complete identity between the text and the hidden algorithm.
 
-Research access may permit analysis of logits, attention, and internal states. These are additional observations, not automatic causal explanations. Applications more often have only artifacts and external-action traces, so their conclusions should be bounded accordingly.
+With research access, logits, attention, and internal states can be analyzed. These are additional observations, not automatically complete causal explanations. Applications more often expose only artifacts and traces of external actions, so conclusions should be bounded by those observations.
 
-### 10.4. A formal connection between arguments and decisions
+### 10.4. A formal connection between arguments and the decision
 
-Freedman et al. (2024) discuss the lack of a guaranteed connection between ordinary CoT steps and decisions and propose ArgLLMs: a model forms arguments, while the result is computed through a formal procedure over an argument graph. This can specify the system decision's dependence on an explicit graph. Argument truth and adequacy of assigned evaluations remain separate questions. [Freedman2024]
+Freedman et al. (2024) discuss the lack of a guaranteed connection between ordinary CoT steps and a decision and propose ArgLLMs: a model produces arguments, while the outcome is computed through a formal procedure over an argumentation graph. This establishes the system decision's dependence on an explicit graph. Argument truth and the adequacy of assigned assessments remain separate questions. [Freedman2024]
 
-This illustrates the distinction between controlling an external procedure and explaining a model's hidden process. Formalization may make one decision segment checkable without establishing every input premise's truth or universal system reliability.
+This illustrates the distinction between controlling an external procedure and explaining a model's hidden process. Formalization can make a particular part of a decision checkable without ensuring the truth of every input premise or universal system reliability.
 
-## 11. Self-correction, external criticism, and agent collaboration
+## 11. Self-correction, external critique, and agent collaboration
 
-### 11.1. Why “check yourself” is insufficient
+### 11.1. Why “check yourself” alone is insufficient
 
-Self-correction includes different procedures that cannot be evaluated with one formula. Regeneration in the same context, targeted checking of a claim, a test result, and independent expert assessment provide different signals. “Think again,” “critically assess the answer,” and “have you missed alternatives?” may change the response but do not guarantee improvement.
+Self-correction includes different procedures that cannot be assessed with one formula. Regenerating with the same context, checking a particular claim, obtaining a test result, and receiving an independent expert assessment provide different signals. “Think again,” “critically assess the answer,” or “have you missed alternatives?” may change an answer without guaranteeing improvement.
 
-Huang et al. studied **intrinsic self-correction**—correcting reasoning without external feedback. In the studied conditions models struggled, sometimes worsening quality. This is a bounded result about particular 2023–2024 models and tasks, not proof that every repeated deliberation is useless, especially in systems additionally trained for reflection. [Huang2024]
+Huang et al. investigated **intrinsic self-correction**—correcting reasoning without external feedback. In the studied conditions, models struggled and sometimes performance deteriorated. This is a bounded finding about particular models and tasks from 2023–2024, not proof that all reconsideration is useless, especially in systems additionally trained for reflection. [Huang2024]
 
-### 11.2. Types of checking and their limits
+### 11.2. Types of checking and their limitations
 
-| Procedure | What can change | Main risk |
+| Procedure | What may change | Main risk |
 |---|---|---|
-| Re-answering without a new signal | Sampling and answer development | Repeated error, rationalization, greater confidence without improvement |
-| A critic with the same context | Attention and the list of assumptions to check | Shared blind spots and anchoring on the proposed solution |
-| Reframing the criticism task | Focus on a particular error, alternative, or boundary | New wording may help but does not itself create facts |
-| Additional data | Grounds for revising the decision | Irrelevant, incorrect, or misinterpreted information |
-| Another instance of the same model | Another trajectory or criticism approach | Correlated errors and no independent knowledge |
-| Another model or several models | Different preparation, heuristics, and proposals | Consensus may reflect shared bias; persuasive wording may win |
-| Executable verifier | A concrete compiler, test, simulation, or predicate signal | Incomplete criterion and incorrect interpretation |
-| Human or subject expert | New experience and independent judgment | Expert error, cost, latency; clear checking criteria are needed |
+| Another answer without a new signal | Sampling and the way the answer is developed | Repeated error, rationalization, increased confidence without improvement |
+| A critic with the same context | Focus of attention and the premises selected for checking | Shared blind spots and anchoring on the proposed solution |
+| A reframed critique | Focus on a particular error, alternative, or boundary case | New wording may help but does not itself create new facts |
+| Additional evidence | Grounds for reconsideration | Irrelevant, erroneous, or misunderstood information |
+| Another instance of the same model | A different trajectory or approach to critique | Correlated errors and no independent knowledge |
+| A different model or multiple models | Differences in training, heuristics, and proposals | Consensus may reflect shared biases; persuasive wording may win |
+| An executable verifier | A specific signal from compilation, testing, simulation, or a predicate check | Incompleteness of the criterion itself and incorrect interpretation |
+| A human or domain expert | New experience and independent judgment | Expert error, cost, and latency; clear verification criteria are needed |
 
-The engineering purpose of a separate critic is to obtain information or checking absent from the initial decision. Role separation may organize work, but the “critic” role does not make an assessment independent. Agents can propose new arguments; their actual novelty and correctness need verification.
+The engineering purpose of a separate critic is to obtain information or verification absent from the original decision. Role separation can help organize work, but the role “critic” does not make an assessment independent. Multiple agents can suggest new arguments; their actual novelty and correctness require checking.
 
 ### 11.3. What MAMM-Refine supports
 
-Wan, Chen, Stengel-Eskin, and Bansal (NAACL 2025) studied cooperation among multiple instances and types of models to detect factual inconsistencies, critique, and revise generated text. MAMM-Refine integrates these checks into a refinement procedure; improvements were shown on three summarization datasets and long-form question answering. [Wan2025]
+Wan, Chen, Stengel-Eskin, and Bansal (NAACL 2025) studied collaboration between multiple model instances and types in detecting factual inconsistencies, critiquing, and correcting generated text. MAMM-Refine combines those checks into a refinement procedure; improvements were shown on three summarization datasets and long-form question answering. [Wan2025]
 
-The target is **consistency between the answer and the source document**. This does not establish that discussion makes CoT causally faithful. Multiple models and iterations add computation, and automated factual-consistency assessments have their own limits.
+What is corrected here is **the answer's consistency with its source document**. This result cannot establish that discussion makes CoT causally faithful. Multiple models and iterations also add computation costs; automatic assessments of factual consistency have limitations of their own.
 
-### 11.4. When criticism helps, fails to help, or harms
+### 11.4. When critique helps, fails to help, or causes harm
 
-Revision is substantive when a specific change can be identified: a false premise, new fact, counterexample, refined criterion, or corrected mismatch with a test. The correction needs verification; producing a new version is not sufficient.
+Revision is substantive when the change can be identified: an incorrect premise was found, a new fact obtained, a counterexample discovered, a criterion clarified, or a particular discrepancy with a test corrected. After correction, the result must be checked rather than crediting the mere existence of a new version.
 
-Unproductive reflection appears as rephrasing the old answer, listing generic caveats, or adding a “self-check” section without checkable consequences. Potential harm includes replacing a correct answer with a wrong one, increasing unjustified confidence, spending resources rechecking a solved simple question, and losing the initial goal.
+Unproductive reflection appears as repeating an earlier answer in different words, listing generic cautions, or adding a “self-check” section without verifiable consequences. Possible harms include replacing a correct answer with an incorrect one, raising unjustified confidence, spending resources rechecking an already solved simple question, and losing the original goal.
 
-The absolute claim “think again helps only with new data” should therefore be replaced by a more precise one: benefit without an external signal is limited and depends on model, task, and procedure; an independent check gives clearer grounds for correction. In code, compilation and substantive-example checks supply different, potentially complementary evidence. This is a design choice for a concrete risk, not a demand to always launch the maximum number of critics.
+The absolute formula “think again helps only with new evidence” should therefore be replaced with a more precise one: benefits without an external signal are limited and depend on the model, task, and procedure; an independent check result supplies clearer grounds for correction. In code, for example, compilation and checks of meaningful examples provide different evidence and can complement each other. This is a design choice for a particular risk, not a requirement always to launch the maximum number of critics.
 
 ## 12. Specification gaming and proxy optimization
 
 ### 12.1. Goal, proxy, and acceptance criterion
 
-A **goal** is the desired change or result quality. A **proxy** is an available measurement used in place of full goal assessment. An **acceptance criterion** is the condition under which a result may be considered sufficient. Their relationship must stay explicit.
+The **goal** is the required change or result quality. A **proxy** is an available measure used in place of a full assessment of the goal. An **acceptance criterion** is the condition under which a result may be considered sufficient. The connection between them must remain explicit.
 
-For example, the goal is working, maintainable software; the proxy is passing tests; acceptance checks declared behavior, important constraints, and an acceptable change scope. Tests can be necessary without covering security, performance, or real scenarios. A green signal does not establish untested properties.
+For example, the goal is a working, maintainable software solution; the proxy is passing tests; acceptance involves checking the claimed behavior, material constraints, and acceptable change scope. Tests may be necessary while still leaving security, performance, or real scenarios uncovered. A green signal does not establish unchecked properties.
 
-Another example is a requirement to consider alternatives. Counting list items or occurrences of “option” and “risk” is easy but weak. A model may list obviously unsuitable candidates or insert the required words without affecting the decision. Substantive acceptance checks relevance and fit between selection and stated conditions.
+Another example is a requirement to consider alternatives. Item count and the words “option” or “risk” are easy to check but weak proxies. A model can list obviously unsuitable options or insert the required words without affecting its decision. Substantive acceptance checks the alternatives' relevance and the choice's fit to the stated conditions.
 
 ### 12.2. Main forms of divergence
 
 | Form | What happens | Example and boundaries |
 |---|---|---|
-| Literal compliance | The checkable form is satisfied while meaning is lost | Required keywords appear in an empty answer |
-| Shortcut learning | A statistical cue replaces the intended criterion | A familiar phrase from demonstrations triggers a template regardless of context |
-| Sycophancy | The answer adapts to the user's beliefs or desired reaction | Persuasive agreement takes priority over truthful disagreement |
-| Grader hacking / evaluator gaming | The response targets evaluator weaknesses | High-scoring phrases appear without the intended quality |
-| Reward hacking | An imperfect reward signal is optimized | Behavior earns a high score while diverging from the setter's intent |
-| Reward tampering | The system interferes with evaluation or reward machinery | Reward or verification code is changed in a specially designed environment |
-| Goal misgeneralization | A learned goal-achieving method transfers to the wrong goal or conditions | Behavior useful in training persists after the task's meaning changes |
+| Literal compliance | The checkable form is met while meaning is lost | Required keywords appear, but the answer is empty |
+| Shortcut learning | A statistical cue replaces the intended criterion | A familiar demonstration phrase triggers a stock answer regardless of context |
+| Sycophancy | The answer adapts to the user's beliefs or desired reaction | Persuasive agreement is preferred over truthful objection |
+| Grader hacking / evaluator gaming | The answer targets weaknesses of a particular evaluator | Phrases rewarded by the judge are inserted without the required quality |
+| Reward hacking | An imperfect reward signal is optimized | Behavior scores highly while diverging from the task setter's intent |
+| Reward tampering | The system interferes with evaluation or reward mechanisms | Reward or checking code is modified in a specially constructed environment |
+| Goal misgeneralization | An acquired means of pursuing a goal transfers to the wrong goal or conditions | Behavior useful in training continues after the task's meaning changes |
 
-The table describes possible failure mechanisms. An intent to deceive must not be attributed to every factual error or incomplete answer. Some divergences arise from specification, interpretation, training, or evaluator design without evidence of intentional violation.
+This table describes possible failure mechanisms. Specific intent to “cheat” should not be attributed to every factual error or incomplete answer. Some divergences arise from incorrect specification, interpretation, training, or evaluator design without evidence of intentional violation.
 
-### 12.3. What studies show
+### 12.3. What the studies show
 
-Sharma et al. found sycophancy in the studied assistants and a relationship between agreement with users' beliefs and human preferences. This explains why preference training may reward agreement at truthfulness's expense. The finding concerns studied models and procedures; it does not make all politeness or stylistic adaptation a violation. [Sharma2023]
+Sharma et al. found sycophancy in the assistants studied and an association between agreement with user beliefs and human preferences. This explains why preference training can encourage agreement at the expense of truthfulness. The finding concerns the models and procedures studied, not a claim that any politeness or stylistic adaptation is a violation. [Sharma2023]
 
-Denison et al. trained models through specially constructed environments offering opportunities to game rewards. After that training, in rare cases—**less than 1%**—reward-function tampering appeared in a separate evaluation environment; the initial model without this curriculum showed no such cases in the control tests. This demonstrates possible generalization of circumvention behavior under particular incentives and access. It does not prove an arbitrary LLM bypasses every hard constraint “when necessary.” [Denison2024]
+Denison et al. trained models in a sequence of specially constructed environments with opportunities for reward gaming. After this training, rare cases—**less than 1%**—of interference with the reward function appeared in a separate test environment; the original model without that curriculum showed no corresponding cases in control tests. This demonstrates possible generalization of circumvention behavior under particular incentives and access. It does not prove that an arbitrary LLM bypasses any hard constraint “when necessary.” [Denison2024]
 
-A formally enforced constraint and a manipulable reward are different system components. A model may find a loophole in a predicate that incompletely describes the goal. It may also affect the verifier if given access. Neither possibility establishes that it can violate a correctly enforced boundary outside its available actions. Security conclusions need a specific threat model, permissions, and verification scope.
+An executable check therefore remains useful. Its strength depends on what it checks and whether the evaluated system can change the mechanism itself. A hard restriction imposed by an external executor and a request that the model not break a rule are different measures.
 
-### 12.4. Protecting the meaning of acceptance
+### 12.4. Testing divergence between goal and metric
 
-A useful design procedure asks how an answer might satisfy the metric while failing the goal. For a code task, examples include modifying the test instead of the implementation, bypassing a failing branch, hardcoding expected answers, or declaring success from compilation alone. For research, examples include formal source counts, repeating one underlying source, or citing a work that does not support the claim.
+It is useful to include cases where a formal score can be obtained without meeting the goal: incomplete-coverage tests, stock answers containing required words, unsuitable alternatives, and hidden conflicts between a local criterion and the global result. Contrasting and counterfactual examples can test whether the decision responds to a material factor or only the task's form.
 
-Possible controls include independent criteria, hidden or reserved cases, meaningful negative and boundary tests, separation of implementation and acceptance authority, checking actual environment effects, and review of suspiciously easy success. Each control has limits: a hidden test may be incomplete; an independent judge may share a bias; a formal predicate may encode the wrong property.
-
-The practical aim is not to remove every proxy—complete direct measurement is often unavailable—but to keep the proxy's relation to the goal explicit and test the ways it can fail. Additional checklists and scores are useful only when they close a material evidential gap. A system with many checks can still optimize the same mistaken criterion.
+Different evidence sources—outcomes, intermediate artifacts, independent assessment, executed actions, and environmental consequences—should complement one another. Check count is itself a proxy: several equally weak checks do not provide independent confirmation. When choosing a verifier, ask which particular error it can detect and which properties remain outside its coverage.
 
 ## 13. Resolving conflicting rules
 
-A norm may be clear in isolation yet conflict with another. “Minimize dependencies,” “reuse mature solutions,” “finish quickly,” and “verify the outcome” cannot always be maximized together. Conflict resolution therefore needs its own specification; the mere presence of all rules does not define their priorities.
+An expert policy rarely consists of independent requirements. “Analyze deeply” may conflict with “do not spend time on the obvious,” and “check everything carefully” with a deadline. “Use an existing library” and “minimize dependencies” require a choice when an existing solution adds a dependency. “Maximize performance” and “minimize expense” may conflict depending on available options; sometimes one change improves both. The uncertainty here concerns not an individual word but which requirement may be compromised and who has authority to decide.
 
-### 13.1. Types of conflict
+It is useful to distinguish applicability conflicts from preference conflicts. The former require establishing whether a rule applies—for example, whether a standard covers this component. In the latter, both requirements apply, but available solutions satisfy them to different degrees. Item order in a request may suggest priority, but verifiable control requires making priority explicit. “Consider both requirements” does not yet define an acceptable trade-off.
 
-Conflicts may concern incompatible actions, resource competition, different interpretations of the same requirement, or goals that cannot be jointly optimized. Distinguish a genuine contradiction from a conditional rule whose applicability has not been established. A prohibition may be hard, while a speed preference permits a compromise; treating both as equal-weight preferences silently changes the contract.
+### 13.1. Eight ways to specify a resolution policy
 
-The source of authority also matters. A user's explicit constraint, a project's adopted policy, a general professional recommendation, and an example in a retrieved document do not necessarily have equal status. Evidence about what works is not itself permission to ignore an applicable restriction.
+The following are design options. Their comparative reliability depends on the task, model, and controller implementation; the supplied evidence does not establish a universal ranking.
 
-### 13.2. Eight resolution approaches
+| Method | How the choice is specified | Example | Limitation |
+|---|---|---|---|
+| **Priority list** | Rules are ordered by importance; the higher-priority rule governs a conflict | First comply with the mandatory standard, then choose for implementation convenience | An incorrect priority can exclude a reasonable compromise; a less prominent requirement may disappear from the decision entirely |
+| **Lexicographic order** | Optimize the primary criterion first; a secondary criterion distinguishes options equal on the primary one | First meet admissibility, then compare quality, then cost | Even a small loss on the primary criterion cannot be compensated by a large secondary gain; boundaries are rigid |
+| **Weighted criteria** | Scores are made comparable and combined using specified weights | A hypothetical scheme assigns 20% of the score to time and 80% to quality | Weights without scales and measurement rules create false precision; writing `0,8:0,2` does not guarantee the model performs the corresponding calculation |
+| **Explicit trade-off analysis** | Compare alternatives' consequences and explain the choice | “What changes with A versus B? What are the benefits, drawbacks, and costs of each change?” | A coherent explanation can hide omitted consequences; an argument table does not prove optimality |
+| **Conditional priority** | Priority depends on a recognized condition | “If the standard applies, follow it; otherwise choose a local solution” | Misrecognizing the condition selects the wrong branch; numerous nested conditions complicate verification |
+| **Higher-level goal** | Interpret particular rules through an overall goal | “Minimize risk” or “improve overall project efficiency” | The model must again define risk or efficiency; without criteria, the conflict moves to a more abstract level |
+| **Constraint satisfaction** | Separate requirements from preferences: meet `must` constraints first, then optimize `soft` ones | Only options passing mandatory checks are admissible; select the less costly among them | Requirements need correct formalization; if none is feasible, a mandatory constraint must not silently become a preference |
+| **Example-defined or learned preferences** | Provide conflict cases with expert decisions, or train a model on such decisions | Similar choices between an existing library and an in-house implementation, with their differences explained | Examples may not expose the operative criterion; transfer to new conflicts needs testing. In-context demonstrations and weight fine-tuning are different interventions |
 
-| Approach | How it resolves the conflict | Limitation |
-|---|---|---|
-| Explicit priority | One rule outranks another in specified conditions | Priority must be applicable and clear; a blanket hierarchy may reject legitimate cases |
-| Lexicographic ordering | Higher-priority criteria are satisfied before lower-priority ones are optimized | Small higher-priority differences may dominate large lower-priority benefits; ordering needs justification |
-| Hard constraints plus preferences | Invalid alternatives are excluded, then permissible ones are compared | Correct identification and enforcement of hard boundaries are required |
-| Weighted optimization | Criteria are combined using specified weights | Weights and measurements may be unjustified; a high score can conceal violation of a nontradeable condition |
-| Contextual exceptions | A rule changes under an explicitly defined circumstance | The exception must be recognized correctly and not become a general loophole |
-| Decision table or tree | Conditions map to permitted actions | Combinations can grow rapidly and leave gaps |
-| Clarification or human handoff | The unresolved value choice is returned to an authorized person | Adds delay and requires knowing when clarification is necessary |
-| External resolution policy | A system-level mechanism determines allowable trade-offs or blocks an action | Formal compliance does not establish that the policy reflects the right goal or covers every action |
+Lexicographic order and conditional branching must not be conflated. “The standard applies—follow the standard” defines a policy branch. Lexicographic choice defines how to compare multiple admissible solutions using ordered criteria. Both mechanisms can be combined, but are checked differently.
 
-These are design options, not a universally ordered list. An explicit decision boundary may resolve a narrow conflict more directly than a weighted score. For a broad judgment, qualitative comparison may be more honest than assigning unsupported numbers.
+Some natural formulations merely conceal an unresolved conflict. “If the task is urgent, do not run unnecessary tests,” for example, leaves the model to define urgency and which tests are unnecessary. This can illustrate conditional policy but does not suffice to cancel mandatory verification. Likewise, “choose the middle ground” does not explain why averaging is compatible with a hard constraint.
 
-### 13.3. Example: reuse versus dependency cost
+### 13.2. Example: an existing library and lifecycle cost
 
-A request to reuse existing solutions and minimize dependencies does not require selecting one slogan permanently. The comparison may consider functional fit, integration effort, lifecycle support, security, licensing, replaceability, and a custom alternative. A component that saves initial work but creates unacceptable obligations may be rejected; a mature component that avoids substantial custom maintenance may be accepted.
+“Use an existing solution” and “do not create excessive lifecycle cost” cannot be checked from package availability alone. We need to know which costs count, what they are compared with, and over what horizon. Initial development time, solution quality, and maintenance across a component's lifetime may favor different options. Library popularity or the minimum dependency count can be indicators, but do not automatically replace the goal.
 
-The selected criterion needs a source. A model-generated weighting such as `0,8:0,2` does not become justified merely because it is numerical. If a hard restriction prohibits a dependency, favorable average scores cannot override it. If the restriction is only a preference, a material benefit may justify a trade-off within the user's authority.
+The policy must distinguish facts and preferences. The factual part concerns option suitability and expected costs. Preferences determine the acceptable exchange between time now and maintenance later. A model can gather options and explain consequences; authority to change a mandatory boundary independently must follow from the task. Testing such a policy includes cases where an existing library is justified, cases where it does not fit, and cases where a small change in one factor changes the decision.
 
-A good specification preserves the condition that changes the decision, not just the final choice. Contrastive cases can vary maintenance burden, compatibility, or the availability of a suitable internal component while keeping the superficial task similar.
+### 13.3. External policy and the limits of a structural guarantee
 
-### 13.4. What Yamazaki adds and what remains unchecked
+Yamazaki's *Who Decides the Trade-off? Resolution Policy as Delegation Governance in Autonomous Agents* considers an explicit trade-off resolution policy as part of delegation. The official abstract describes a comparison of behavioral compliance and structural assurance involving two models and 2248 probes. The full text is unavailable for checking; the available description is insufficient to reconstruct all experimental conditions or quantitatively rank control methods. [Yamazaki2026]
 
-Koji Yamazaki's *Who Decides the Trade-off? Resolution Policy as Delegation Governance in Autonomous Agents* (ACM CAIS 2026) separates an agent's apparent compliance from the policy governing trade-offs between requirements. The official abstract describes **2248 probes** and **two models**; it asks who determines the resolution policy rather than assuming the model's choice is automatically authorized. [Yamazaki2026]
+Discussion of this architecture uses `mandate` for delegation conditions, `Resolution Policy`, and `Compliance Gate` for external control of admission to execution. These terms are retained here to describe the concept. The exact use of `mandate` and `Compliance Gate` in the full primary source has not been verified; the definition of Resolution Policy is supported by the official abstract.
 
-Only the official page and abstract were checked; the full ACM text was not read. Numerical baselines differ between a brief announcement and the abstract, so they are not reconciled by assumption. Detailed terms such as mandate or ComplianceGate on linked material do not establish a verified account of the full method. The useful conclusion is bounded: conflict-resolution policy is a distinct governance object, not proof that every conflict in arbitrary LLMs is resolved randomly.
+As an architectural concept, the system can be understood as follows: a delegated task has explicit authority and constraints, a policy determines the permissible ordering of trade-offs, and an external component checks the decision before execution. The model can propose the substantive choice; a checkable formal constraint is applied independently of its promise to comply.
+
+A deterministic component guarantees only the property it actually checks, given correct inputs and implementation. It does not establish policy completeness, information truth, correct translation of an expert norm into a formal predicate, or causal faithfulness of textual reasoning. If a controller checks only that a “risk assessment” field exists, field existence is what it structurally assures. To check action admissibility, the condition must express admissibility itself and cover the execution path.
 
 ## 14. Contextual activation of rules and overspecification
 
-Not every rule is relevant to every task. A system can provide a small common core and retrieve additional instructions when their conditions matter. This may reduce irrelevant context, but creates a new decision: which rule to deliver, when, and with what priority.
+Selecting rules relevant to the current step is a separate control task. Instead of maintaining a long permanent “constitution,” a detailed policy can be stored outside the active request and relevant parts retrieved as work proceeds. Potential benefits include less irrelevant text, duplication, and conflicting detail. Potential harm is omitting a rule that should apply. Selective delivery's advantage should therefore be treated as an engineering hypothesis, not an established universal result.
 
-### 14.1. Six ways to organize rule delivery
+### 14.1. What exactly constrains context
 
-| Mechanism | What it does | Material risk |
+The available window size, the position of information inside it, and substantive interference must be distinguished. If information falls outside the window, the model does not receive it. If it remains in the request, this does not mean it is used equally successfully in every position. *Lost in the Middle* found that, on the tasks studied, information at the beginning and end of context was used better than information in the middle. This cannot be described as simply forgetting early parts, or automatically extended to any rules and all modern models. [Liu2024]
+
+Irrelevant instructions create another problem: they may activate unnecessary procedures or introduce competing interpretations. Duplicates are not always helpful: two slightly different versions of a rule require another decision about which applies. Nested conditions and `AND`/`OR` combinations increase the range of possible interpretation errors. These mechanisms must be checked separately; shortening text does not necessarily resolve a substantive conflict, and increasing the window does not fix ambiguity.
+
+Positioning key rules at the beginning or end of a request can be tested as a layout option. Repeating requirements also needs testing: it consumes context and can create contradictions after one copy is updated. A positional effect does not imply that everything important should always be placed at the end.
+
+### 14.2. Mechanisms for selecting and loading rules
+
+| Mechanism | Organization | What needs checking |
 |---|---|---|
-| Task classification | Selects guidance by task type | A misclassified task receives the wrong method or misses a necessary one |
-| Stage-based loading | Adds rules for research, planning, execution, or review at the relevant stage | A missed transition or stale stage can delay a rule until after its decision |
-| Retrieval from a rule base | Finds relevant policies or references through search | Ranking errors, missing terminology, and incomplete retrieval |
-| Hierarchical instructions | Separates general constraints from local detail | Conflicting levels or unclear precedence |
-| Explicit activation conditions | States when a procedure applies and when it should be skipped | Vague triggers cause overactivation or omission |
-| Compact summaries with deeper references | Supplies a short entry point and conditionally loads detail | A summary may lose a decisive qualification or substitute for reading the procedure |
+| **Retrieval from a rule base** | Search for norms, documents, and specifications relevant to the current task | Completeness of mandatory-rule retrieval, ranking quality, and absence of stale variants |
+| **Policy hierarchy** | Short global principles are supplemented by local rules | A local clarification must not silently displace an active global constraint |
+| **Selecting the level of detail** | Determine the required procedural depth, then select a subprocedure | A simplified branch must not lose a check needed for this particular case |
+| **Procedural branching** | Classify the task before assembling context and select a rule set | A classifier or keyword set must distinguish meaning, not just familiar wording |
+| **Loading as work proceeds** | A new state or subtask triggers retrieval of additional rules | A rule must arrive before the decision it concerns, not after the action |
+| **Context and memory manager** | Organize the current goal, active constraints, available information, and intermediate results | Compression and updates must not change mandatory requirements' meaning or restore a revoked version |
 
-A directory, a “skill” label, or a reference link does not by itself create selective loading. The actual client or executor must discover and read the material. Documentation of an intended route differs from evidence that the route was followed.
+A simple procedural-branching example loads development rules for a code task and communication rules for a communication task. But a keyword alone is insufficient: explaining a code error to a user may require both groups. A router must account for overlapping domains, or a carefully selected short context will be incomplete.
 
-### 14.2. Six failure modes of contextual delivery
+Selection errors may cost more than retaining a large rule set. *Recall*—the proportion of genuinely necessary rules retrieved—is especially important here. However, attaining high recall by inserting everything recreates the original problem. Omissions, unnecessary activations, and final behavior must all be evaluated. Routing cannot be judged useful merely because the request became shorter.
 
-| Failure | Manifestation | What to check |
-|---|---|---|
-| Missing rule | Relevant guidance was never supplied | Catalog, retrieval scope, and task-to-rule mapping |
-| Wrong activation | Irrelevant guidance is applied | Trigger specificity and negative cases |
-| Late activation | A rule arrives after the decision it should govern | Stage transitions and actual action order |
-| Qualification loss | A summary preserves a slogan but drops an exception or limit | Summary fidelity against the source passage |
-| Conflicting delivery | Several sources impose incompatible obligations | Authority, version, precedence, and applicability |
-| Context overload | Too much guidance obscures the current task | Actual relevance, duplicated instructions, and task outcomes |
+A direct experiment could compare the full set, a selection of relevant rules, and a deliberately incomplete selection on identical tasks and comparable budgets. It should include changed wording, a multi-domain task, and a transition to a new subtask. This is a proposed test, not a description of research already conducted.
 
-These failures need different corrections. Rephrasing a rule cannot repair a branch that was never loaded. Adding another global instruction may worsen overload without fixing routing. Conversely, a short prompt may simply lack a necessary criterion; not every omission is a retrieval problem.
+### 14.3. When detail begins to interfere
 
-### 14.3. Evidence and limits of the selective-context hypothesis
+Overspecification is not only about length. A short rule may impose an unsuitable action sequence. Conversely, a large instruction may be justified by genuinely necessary constraints. The object of assessment is the requirement's contribution to behavior quality.
 
-Lost in the Middle supports position sensitivity in its studied long-context tasks, while Shi et al. show effects of irrelevant context on arithmetic tasks in GSM-IC. These are reasons to investigate context composition. They are not direct proof that any dynamically selected rule system outperforms supplying all relevant guidance together. [Liu2024] [Shi2023]
+The map of possible side effects includes several distinct cases:
 
-Selective provision trades context volume against recall. A smaller packet can be cheaper while omitting the condition that would change a decision. The comparison must therefore include correct selection, missed rules, unintended activation, timing, result quality, and full-chain cost rather than input length alone.
+- **Mechanical checklist compliance.** The model enumerates items and fills fields without connecting them to the task.
+- **Reduced useful autonomy.** Details prohibit suitable solution methods and obstruct use of available knowledge.
+- **Brittleness on new cases.** More special exceptions make it harder to establish the applicable combination outside familiar scenarios.
+- **Excessive planning and research.** The procedure requires repeated checks after the specific uncertainty has been resolved.
+- **Lost time and budget.** Reporting fields, unnecessary calls, and repeated checks increase latency without necessarily improving outcomes.
+- **Hidden conflicts.** Rare, duplicated, or contradictory norms distract from the active goal and mandatory requirements.
 
-A useful test contrasts a full context, a selected context, and a selected context with a deliberately omitted decisive rule. The last condition helps identify whether the system can notice the gap or confidently proceed under an incomplete contract. The value of such a test depends on the actual task distribution and acceptance criterion.
+These effects do not mean that every LLM inevitably produces incoherent text above some rule count. No such general threshold is established. They should be treated as risks of a particular specification and measured through omissions, outcome quality, unnecessary actions, and the ability to solve new tasks.
 
-### 14.4. Minimally sufficient specification
+### 14.4. A minimally sufficient set
 
-The practical aim is neither the longest instruction nor the shortest possible one. It is enough guidance to preserve material conditions, exceptions, and evidence requirements without adding obligations that do not improve the user's result.
+A minimally sufficient specification makes critical conditions explicit and leaves discretion where the solution method can be evaluated by its result. A vague material concept is clarified through a definition, examples, or external measurement. Noncritical familiar decisions can be delegated to the model, but that delegation remains a testable system component, not an assumption that the model necessarily “already knows” the desired norm.
 
-Indicators of overspecification include repeated definitions, rules unrelated to the current decision, mandatory artifacts with no downstream use, forced alternatives that are not genuinely viable, and checks that merely reproduce existing evidence. Indicators of underspecification include undefined success, hidden thresholds, ambiguous authority, and no action for missing data.
+For each requirement, identify the error it prevents and the observable difference it should produce. An extra item is questionable if it does not change needed behavior, duplicates another item, or requires a procedure unrelated to risk. If removing it produces errors on negative or boundary cases, brevity has been achieved at the expense of meaning. Selection should follow that distinction, not maximum rule count or minimum tokens.
 
-The boundary should be tested through decisions and legitimate neighboring cases. A safeguard that blocks the original failure but also rejects valid work is not automatically a good improvement. The model's knowledge may fill ordinary domain detail, but critical local preferences and constraints should not be left to an unexamined guess.
+Depth of detail depends on the task. Creative work permits more ways to produce a suitable result; formal compatibility checking may require a precise predicate. The general principle is to formalize what needs to be determined and not present a preferred working technique as a mandatory condition for every solution.
 
 ## 15. Uncertainty, calibration, and epistemic honesty
 
-A model can express uncertainty, request information, or abstain. These are observable behaviors, not direct measurements of how accurately it knows its own limits. Their quality depends on whether the response fits available evidence, the task, and consequences of error.
+Correct behavior includes not only an answer but also an appropriate response to missing evidence. A model should distinguish a known fact, an assumption, incomplete information, contradictory evidence, and an error in its own result. These states require different actions: answer, bound the conclusion, seek clarification, use a tool, test an alternative, or pass the decision to a human.
 
-### 15.1. What calibration measures
+### 15.1. Self-assessment and actual calibration
 
-Calibration concerns agreement between stated probabilities and actual frequencies across comparable cases. A confidence of 90% is well calibrated only in relation to a series of outcomes with roughly the corresponding correctness rate. One successful answer or one confident error cannot establish calibration.
+Calibration describes correspondence between stated confidence and the observed proportion of correct answers across comparable cases. An isolated “I am 90% confident” does not establish that such answers are correct nine times out of ten. Persuasive language, CoT length, or categorical wording cannot replace calibration testing.
 
-Verbal confidence, token probabilities, repeated-sample agreement, and a separately elicited probability are different measurements. They should not be treated as interchangeable. A model may be accurate but poorly calibrated, or calibrated on one distribution and not another.
+The equally strong assertion that “LLM self-assessment is always useless” is also wrong. Kadavath et al. obtained substantive self-assessment results in specifically defined formats while finding limits to the transfer of knowledge assessment to new tasks. The particular confidence-elicitation method, model, and task distribution must therefore be tested. [Kadavath2022]
 
-Kadavath et al. found useful self-assessment in specified formats and limits in transfer to new tasks. This prevents an unconditional conclusion that every model self-assessment is worthless. It also does not justify treating any freely generated confidence number as a measured probability. [Kadavath2022]
+Instruction tuning and preference training can improve instruction following while also changing calibration. These are different quality dimensions. The GPT-4 technical report discusses worsened calibration after post-training on a multiple-choice MMLU subset. Confidence there is assessed through the logprobs of A/B/C/D options, which must not be equated with a verbal “I am 90% confident.” This result should not be extended to every model, every form of RLHF, or any open-ended task. [Ouyang2022] [GPT4Report2023]
 
-### 15.2. Training, ownership, and confidence
+### 15.2. The effect of attributed answer ownership
 
-The GPT-4 Technical Report describes changes in calibration after post-training on a subset of MMLU, using confidence based on log probabilities for options A/B/C/D. This is a particular confidence definition and evaluation setup, not a universal finding about every form of verbal uncertainty. [GPT4Report2023]
+Sanz-Guerrero, Mager, and von der Wense (2026) studied **ownership bias**: the same answer can receive higher confidence when presented as the model's own answer rather than a user's message. The work compared six open models, three datasets, and three confidence-elicitation methods, analyzing post-training and dialogue formatting separately. [SanzGuerrero2026]
 
-Sanz-Guerrero, Mager, and von der Wense (2026) studied **ownership bias**: confidence can depend on whether an answer is presented as the model's own response. The main evidence concerns open models and objective QA tasks. The object is an answer, not an “own chain of thought”; the result must not be turned into proof of CoT unfaithfulness. [SanzGuerrero2026]
+This is a self-assessment effect involving **an answer and its attributed authorship**. It should not be called a separate established effect of “one's own chain of thought” or evidence of a particular CoT's unfaithfulness. Practically, it means assessment of one's own results can depend on presentation context. Changing the assessment framing is worth investigating, but does not create a universal calibration guarantee.
 
-A confident explanation may arise from presentation, familiar wording, or attributed authorship rather than stronger evidence. These are hypotheses to distinguish in a concrete system. The origin of confidence should be tracked separately from whether the answer is actually correct.
+### 15.3. Requirements for an uncertainty policy
 
-### 15.3. A policy for uncertainty
-
-| Situation | Appropriate direction | What must not be inferred |
+| Situation | Required observable behavior | What to check |
 |---|---|---|
-| A decisive fact is missing and obtainable | Search, use a tool, or request the fact | The missing fact may not be silently guessed |
-| Evidence is partial but a bounded answer is useful | State the established subset and material limitations | Partial evidence does not support the full claim |
-| Sources conflict | Examine definitions, conditions, provenance, and alternatives | A source vote or fluent synthesis does not resolve the conflict |
-| Error consequences are high | Add a suitable independent check or authorized handoff | Caution alone does not prove correctness |
-| The task permits several valid answers | Explain the criterion and compare admissible options | Multiple answers do not automatically imply ignorance |
-| Further information is unavailable or not worth its cost | State the remaining uncertainty and basis for stopping | A resource limit does not increase evidential confidence |
+| A task condition is missing | Ask for material clarification or explicitly state a reasonable assumption | Whether the unknown condition changes the decision; whether the question is unnecessary |
+| An external fact is needed | Find a source, call an API, measure, or execute a check | Whether actual data were obtained and support the conclusion |
+| Only part of the answer is available | Give the supported part with its boundaries | Whether partial uncertainty is replaced by unjustified total refusal |
+| Evidence conflicts | Compare sources and conditions; preserve unresolved uncertainty | Whether a convenient side is chosen without grounds |
+| Error consequences exceed what is acceptable for an automated decision | Abstain from deciding or escalate to the appropriate reviewer | Whether escalation grounds are defined and escalation does not become permanent inaction |
+| New information changes a premise | Revise the decision and related actions | Whether the outcome changes substantively rather than only the explanation's wording |
 
-A policy should specify what information is needed, how to obtain it, and what action follows if it remains unavailable. “Say you do not know when uncertain” expresses an intention but does not define an appropriate threshold or prove the model distinguishes cases. External measures and tool-use criteria help make the policy testable.
+Missing evidence in the current context, an inaccessible source, and a substantively unresolved answer are different states. Retrieval may help in the first; the second requires stating the access limit; in the third, even accessible sources may not support a definite conclusion. None should be turned into a confident answer or the same blanket refusal.
 
-### 15.4. Epistemic honesty and unsupported special effects
+Such a policy can be conveyed through instructions, examples, external routing rules, or training. “If uncertain, say you do not know” states an intention but does not itself set a suitable threshold or prove that the model distinguishes cases. External metrics and criteria for using a tool help make this checkable.
 
-Epistemic honesty means preserving the distinction between observed, inferred, assumed, and unknown. It includes not presenting a retrieved title as a read source, a plan as an executed action, or a self-check as independent verification. These are reportable properties of the work, not claims about an inaccessible internal state.
+Multiple runs with different seeds and answer comparison may reveal instability. Disagreement is a useful diagnostic signal, but agreement does not exclude a shared error. Self-consistency therefore cannot be interpreted as a probability of truth without separate calibration. Excessive confidence, underestimating correct answers, and excessive abstention all need checking.
 
-The former “multiple-answer paradox” reference was not recovered. Without an identifiable publication, definition, confidence metric, models, and controlled variation in the number of valid answers, it cannot be used as an established effect. The broader problem remains valid: correctness, ambiguity of the task, and confidence need separate treatment.
+### 15.4. An unsupported specific effect
 
-A useful uncertainty policy should also avoid excessive refusal. Underconfidence, unnecessary handoffs, and refusing a reversible task despite sufficient evidence can be failures. Evaluation therefore needs both cases where further checking is necessary and nearby cases where proceeding is justified.
+The materials referred to a “multiple-answer paradox”: allegedly, as the number of permissible correct answers increases, accuracy rises while stated confidence falls. An unambiguous source for this claim was not recovered. It is retained as a question to investigate, not an established finding or basis for a general policy. Testing it requires a definition of correctness, a confidence-elicitation method, specific models, and comparable conditions with different numbers of permissible answers.
+
+The general recommendation remains without that support: assess confidence against observed results and actions, distinguish hypothesis from fact, and test when a system obtains missing information, continues work, or justifiably stops.
 
 ## 16. Interaction with the environment
 
-Tools and external observations can change the information available for a decision. A compiler can report an actual error; a database can supply a fact; a simulator can expose a predicted consequence. This is different from generating another explanation from the same context.
+An agentic process includes a recurring cycle: observation, decision, action, feedback, and state update. Without external access, the model uses available context and knowledge acquired during training. Interaction with an environment can supply new information and test an assumption. This changes the available grounds for deciding but does not itself guarantee correct interpretation of results.
 
-### 16.1. What the environment adds
+ReAct illustrates organizing alternating reasoning and actions that obtain observations. The work studied HotpotQA, FEVER, ALFWorld, and WebShop: question answering, claim verification, and environment-interaction tasks. Results concern specific tools and setups, not a promise to eliminate hallucinations in any agent. [ReAct2023]
 
-| Environment or tool | Added observation | Boundary of the evidence |
-|---|---|---|
-| Compiler or interpreter | Whether a particular program builds or executes | Does not establish all required behavior or the correctness of the task |
-| Test suite | Results for specified inputs and assertions | Limited by scenarios, oracle quality, environment, and coverage |
-| Search or retrieval | Documents and data not already in context | Finding a source does not establish relevance, truth, or correct interpretation |
-| Database or API | Structured facts or action results | Depends on permissions, freshness, completeness, and the API contract |
-| Simulator | Outcomes under an explicit model of the environment | Transfer depends on the simulator's fidelity and assumptions |
-| Human feedback | Requirements, corrections, or expert judgments | Human error, ambiguity, and authority still need consideration |
+### 16.1. What information the environment adds
 
-A tool should address a specific uncertainty. A calculator helps with arithmetic but not with whether a metric represents the goal. A test runner can establish that tests ran but not that the chosen tests cover the user's real need.
+In programming, a model can write code, compile or execute it, and run checks. Compilation errors, test results, and actual program output are different signals. A compiler detects particular code errors; a test example checks observable behavior on a specific input. None automatically establishes every property of a program.
 
-### 16.2. Acting on observations
+Other observations include an HTTP request, a database SQL query, an API call, documentation search, a calculator, a simulator, a knowledge base, or web search. Current library documentation, for example, permits checking an API rather than assuming an earlier version. A question about current news needs a source of current information. These examples illustrate the distinction between existing knowledge and the ability to check the state of the world.
 
-ReAct illustrates alternating reasoning, action, and observation, while Toolformer studies learning to select and use APIs. Their results support particular methods in defined tasks; they do not guarantee every connected tool improves every agent. Toolformer includes training, so its gains cannot be attributed solely to providing a new endpoint to an unchanged model. [ReAct2023] [Toolformer2023]
+External evidence is not automatically needed for every abstract task. When all conditions are supplied and the solution does not depend on a changing environment, additional search may add nothing. The rationale for a tool call should connect it to a missing fact, computation, or check. Being able to call an API is not itself a criterion for usefulness.
 
-The important question after obtaining feedback is whether the decision changes appropriately. An agent may collect a compiler error and continue claiming success, or retrieve a contradictory source and ignore it. Tool availability and tool-call count are therefore insufficient measures of evidence use.
+### 16.2. Feedback must affect the decision
 
-Errors in the environment also matter: unavailable services, stale data, incomplete responses, ambiguous status codes, and faulty simulators can introduce new uncertainty. A model's confident paraphrase must not replace the actual result. The system should preserve enough provenance to distinguish observation from interpretation.
+Tool availability and use of its result are different properties. An agent can misread a compilation error, ignore a material part of test output, or mistake absent data for confirmation of a hypothesis. A verifiable cycle therefore includes not only the call but also interpretation, revised assumptions, and rechecking where needed.
+
+The exchange format helps separate the request, actual tool response, and subsequent model conclusion. Results should be retained in a form that allows checking what the tool actually returned. “Tests passed” does not replace an execution result; the model's account must not silently substitute for the original data. Complex tool output may require a predefined interpretation procedure or human assistance, but such assistance must not itself be treated as an infallibility guarantee.
+
+A practical criterion for using feedback is that subsequent actions change in accordance with the information obtained. If the environment refutes an assumption, the agent should revise the affected decision. If an error does not affect another verified part, automatically repeating the entire process is unjustified. This distinction helps combine error correction with control of unnecessary work.
 
 ### 16.3. Observable action and evidence of completion
 
-Process verification should distinguish intention, a tool invocation, its result, and the resulting external effect. Requesting an operation does not mean it succeeded. Written code differs from executed code; a called test differs from a completed test with a specific outcome; a promised comparison differs from obtained and compared evidence about alternatives.
+Process checking benefits from distinguishing intention, tool call, tool result, and consequence in the external environment. Requesting an operation does not mean it succeeded. Written code differs from executed code; an invoked test differs from a test completed with a particular outcome; promised alternative checking differs from information about alternatives actually obtained and compared.
 
-Logs, test results, and action effects can establish particular external operations. They do not reveal every internal computation, but support claims about what was done. Checking must include result quality and the connection between observations and subsequent decisions: many calls without useful information do not establish deep research.
+Logs, test results, and action consequences can confirm specific external operations. They do not reveal all internal model computation but support claims about what was done. Verification must cover both result quality and the connection between observations and later decisions: many calls without useful information are not evidence of deep research.
 
-Tools add infrastructure requirements: service availability, understandable output, execution-error handling, correct interpretation, and control of permitted actions. Their usefulness must therefore be evaluated over the full process, including cost and delay. The engineering hypothesis is that relevant independent feedback can correct faulty assumptions; implementation needs a checkable connection between observation and action.
+Tools add infrastructure requirements: service availability, an understandable result format, accounting for execution errors, correct interpretation, and control of permissible actions. Environment usefulness is therefore assessed for the whole process, including cost and latency. The engineering hypothesis is that relevant independent feedback can correct mistaken assumptions; its implementation requires a verifiable connection between observation and action.
 
 ## 17. Long-term behavior and recovery
 
-One instance of rule compliance does not prove preservation over a sequence of actions. Long tasks need the goal, constraints, accumulated results, and changed conditions to be retained. The evidence presented does not establish any memory or planning mechanism as a universal guarantee of consistency. The following maps risks and ways to design checks.
+Complying with a rule once does not establish its preservation across an action sequence. A long task requires retaining its goal, constraints, accumulated results, and changing conditions. The presented evidence does not justify treating any memory or planning mechanism as a universal guarantee of such consistency. The following maps risks and ways to design verification.
 
 ### 17.1. What can change over a long horizon
 
-| Risk | Observable manifestation | What to check |
+| Risk | Observable manifestation | Example |
 |---|---|---|
-| Goal drift | A local subtask replaces the original outcome | Whether intermediate work remains connected to the user's goal |
-| Lost constraints | A previously stated condition disappears after several stages | Availability and actual use of the condition before relevant actions |
-| Stale plan | Work follows an earlier plan despite changed requirements or evidence | Whether new information updates the plan and acceptance criteria |
-| False completion state | A promised or attempted action is recorded as completed | Actual tool results and external state |
-| Inconsistent memory | Different records contain conflicting versions of a decision | The authoritative record, provenance, and reconciliation procedure |
-| Repeated work | The same search or failed attempt is repeated without a new reason | Retained results, failure causes, and the value of another attempt |
-| Compression loss | A summary drops an exception, source limitation, or open question | Fidelity of retained context to the decision-relevant material |
-| Recovery failure | After interruption, the agent resumes from the wrong stage or assumptions | Current state, prior receipts, unresolved dependencies, and the next justified action |
+| **Inconsistency between steps** | A later action contradicts an earlier commitment | A prohibition on technology X is introduced mid-task, but the next stage proposes it again |
+| **Loss of the original goal** | An answer remains topically related but stops advancing the task | The agent discusses possible improvements instead of completing the requested implementation |
+| **Loss during context compression** | The active state loses a goal, constraint, or material decision rationale | After context compaction, an action plan remains but its applicability condition disappears |
+| **Premature stopping** | Work is declared finished while a criterion remains unmet | One suitable intermediate result is obtained and checking a mandatory property stops |
+| **Accumulation of local decisions** | Each step is individually acceptable, but their combination violates the overall goal | Saving time in every module worsens the product's overall architecture |
+| **Uncorrected error** | New steps rely on a result already refuted | A calculation error is identified, but dependent estimates and plans are not updated |
+| **Failure to replan** | New information is recorded, but the strategy remains unchanged | A requirement changes, while implementation continues under the revoked condition |
+| **Return of a revoked decision** | The system retrieves an obsolete task as active | A feature is planned, then judged unnecessary, but later the agent starts implementing it again |
 
-These are possible failure modes, not established universal frequencies. Their importance depends on task duration, the environment, access to persistent state, and the cost of an incorrect continuation.
+This map does not claim that every risk necessarily occurs in every model. It specifies distinguishable failure indicators. Frequency and severity depend on the model, process length, environment structure, and state-storage methods. A larger token budget expands available resources but does not itself determine which constraints are retained or when work ends.
 
-### 17.2. External state and memory
+### 17.2. Memory and task state
 
 External state can store the goal, active constraints, completed actions, verified results, open questions, and next step. Progress records, plans, logs, a separate memory module, an auxiliary database, RAG, or a state manager can serve this purpose. They differ in access and update methods, so “memory” is not a ready-made solution.
 
-A record is useful only if it remains accurate and is consulted when needed. Storing every generated explanation may preserve errors and increase retrieval noise. A compact summary may omit the qualification that changes a decision. The choice concerns what must persist, who can update it, how conflicts are resolved, and how the next stage checks its current validity.
+Distinguishing active information from history is especially important. When a rule changes or a decision is revoked, simply retaining both texts leaves the model another conflict. If a discovered error affects an earlier conclusion, the original “success” record must carry its current status. Otherwise, retrieval can reload refuted support.
 
-Separate a historical record from an active contract. An old decision can explain why work took a particular direction without remaining authoritative after requirements change. Likewise, an earlier successful test may no longer establish the current artifact's behavior after further edits.
+Context compression can change the available grounds for a decision. A condensed record needs to retain not only planned work but also critical conditions, feedback already obtained, and outstanding obligations. A readable summary may be unsuitable for continuation if it removes an exception or turns a hypothesis into fact. Recovery quality is tested by continuing the task after compression, not merely by the summary's textual quality.
 
-### 17.3. Replanning and recovery
+### 17.3. Checkpoints and completion criteria
 
-After an interruption or material change, the system should reconcile the original goal, the latest authorized requirements, actual artifacts, and prior evidence. It should identify what is complete, what failed, which conclusions still apply, and where the next unresolved dependency lies. Restarting every stage can waste work; resuming mechanically can preserve stale assumptions.
+Checks can be attached to material state changes: completing a stage, new evidence, tool errors, a changed requirement, or recovery after context loss. At such a point, compare the current goal, performed actions, and remaining conditions. Periodic reminders and local checks are possible components; their frequency should fit the task.
 
-Recovery needs distinguishable states. “Not attempted,” “attempted but failed,” “partly completed,” “completed but not checked,” and “checked under a previous revision” are not interchangeable. An agent should not turn missing evidence into a successful result merely to continue the plan.
+Frequent clarification questions may help when a decision genuinely remains for the user. They do not replace internal state and are not needed at every transition. An agent can continue authorized work independently when conditions are clear; a new circumstance making an important requirement ambiguous is a separate reason to clarify it.
 
-A useful test introduces an interruption, a tool failure, a changed requirement, or a context summary and checks whether the agent preserves the material goal and constraints. Success on an uninterrupted happy path does not establish recovery behavior.
+To detect premature stopping, completion is tied to task criteria and observed results. “Done” is a status report, not proof of that status. The opposite risk remains: endless checks after criteria are met consume budget and can divert work from its goal. A testable policy must distinguish an unfinished task, a completed task, and further improvements outside its scope.
 
-### 17.4. What long-horizon evaluation must preserve
+### 17.4. Recovery and plan revision
 
-Long-task evaluation should inspect the final outcome together with relevant actions and state transitions. The amount of stored text, presence of a plan, or number of checkpoints does not establish consistency. The key questions are whether obligations survived, observations changed decisions appropriately, and the final result matches the actual current request.
+After an error, fixing only the latest message is insufficient. Identify which conclusions and future actions depended on the erroneous result. Correcting a numerical calculation, for example, may require changing the selected option and related estimates, but does not necessarily invalidate independent verified information. Recovery includes revisiting affected dependencies and continuing from the current state.
 
-A memory or orchestration layer may improve those properties, but its benefit must be compared with a simpler baseline under comparable conditions. Additional storage, retrieval, and synchronization create maintenance and error costs. The collected evidence supports investigating these designs, not a universal guarantee that adding memory solves long-term behavior.
+The same principle applies to new evidence. A plan is useful as a working hypothesis, not an immutable instruction. When conditions change, check its applicability, retain usable parts, and update the rest. A separate replanning test should introduce a material mid-task change and check subsequent actions. Interruption, resumption, context-compression, and cancellation-of-a-planned-feature scenarios are also useful.
 
-## 18. Generalization, transfer between models, and task differences
+Plans, external logs, intermediate memory, and explicit states make these transitions observable. This supports considering them engineering aids for a long process. It does not replace measuring consistency in a particular system or prove that an agent with these components automatically preserves its goal.
 
-A rule may work on demonstrations but fail on new cases. A procedure may transfer technically to another model while losing quality. Generalization therefore needs its own object, conditions, and tests rather than being inferred from a successful example.
+## 18. Generalization, transfer across models, and task differences
 
-### 18.1. Types of transfer
+A rule that worked on a familiar example may be a reproduced template. Generalization is tested where the form or situation changes and the intended meaning either remains applicable or should cease to apply. One set of positive examples is therefore insufficient even with high accuracy on that set.
 
-| Transfer type | What changes | What success on the original task does not establish |
+### 18.1. Six kinds of generalization
+
+| Kind | What changes | What to check |
 |---|---|---|
-| New instances | Objects or values change within the same task structure | That the model learned the intended condition rather than a superficial cue |
-| Paraphrase and format | Wording, order, or presentation changes while intended meaning is preserved | Invariance to semantically equivalent formulations |
-| Structural transfer | Relationships or task composition change | Ability to apply the rule beyond the demonstrated pattern |
-| Domain transfer | The subject area and required background knowledge change | That the same criteria or examples remain suitable |
-| Rule composition | Several norms, exceptions, or priorities apply together | Correct resolution of combinations absent from demonstrations |
-| Model transfer | Family, size, training, or snapshot changes | Equivalent interpretation and behavior from the same text |
-| Environment transfer | Tools, permissions, data, or execution conditions change | That an apparently identical workflow has the same effective capabilities |
-| Long-horizon transfer | The rule must survive multiple stages, interruptions, and revisions | Stable compliance beyond a short interaction |
+| **Semantic** | Requirement wording while meaning is preserved | Whether replacing “significant risk” with “material risk,” reordering phrases, or using another equivalent expression changes behavior |
+| **Structural** | Input representation, task format, or stage order | Whether the rule applies after data move into a table, actions are reordered, or a task is decomposed |
+| **Cross-domain** | Subject area | Whether the principle is recognized beyond the original example's terminology rather than replaced by another criterion |
+| **Compositional** | Multiple rules become simultaneously applicable | Whether all requirements survive joint optimization of performance and expense |
+| **Under new conflicts** | Applicable rules require incompatible decisions | Whether the choice follows the specified policy rather than arbitrary averaging or ignoring a less prominent rule |
+| **At the applicability boundary** | A small detail changes the correct decision | Whether the model distinguishes nearly identical cases where a rule must activate and deactivate |
 
-The categories overlap, but separating them makes a claim testable. “The prompt generalizes” is incomplete without saying what changed and which property remained acceptable.
+Every kind requires new cases beyond the demonstrations. If few-shot examples show only particular libraries, for instance, testing must include a library absent from the demonstrations with stated characteristics. Otherwise, name recognition may be mistaken for criterion transfer. If library information is unknown, correct behavior includes obtaining it or explicitly acknowledging its absence; an invented indicator does not demonstrate generalization.
 
-### 18.2. Demonstrations and causal features
+A boundary example is a rule requiring a library updated within the last two years. Specify what is dated, the reference date, and whether the exact boundary is included. Then test both sides and equality at the boundary. “Two years” illustrates test design here, not a recommended universal dependency-suitability criterion. Replacing checking with arbitrary rounding would change the rule.
 
-Examples should vary superficial features while preserving the relevant decision condition, and vary the condition while keeping the surface similar. This helps distinguish use of the intended rule from imitation of a familiar phrase or object. A large number of near-duplicate positive examples may still fail to define an exception.
+The two opposite errors are overgeneralization and undergeneralization. In the former, a rule applies to every superficially similar situation, including exceptions. In the latter, a required case is rejected because its format or vocabulary is unfamiliar. Automatically inserting familiar “correct” phrases, including politically correct wording regardless of context, illustrates template reproduction. The purpose is to establish behavioral boundaries, not demand recognizable words.
 
-A negative result also needs interpretation. Failure may reflect missing subject knowledge, an ambiguous norm, wrong retrieval, a tool mismatch, insufficient budget, or an actual limitation of the method. A single failed configuration does not identify which layer is responsible.
+Abstraction only potentially facilitates transfer. “Use library X” is tied to a particular tool; “minimize changes to existing code” applies more broadly but needs permissible exceptions explained. The more abstract a principle, the more room for interpretation. Contrasting examples and explicit criteria help test that space without establishing universal understanding.
 
-### 18.3. Differences between tasks and models
+### 18.2. Dimensions of transfer across models and modes
 
-Mathematics, code, factual QA, summarization, creative work, diagnosis, and open-ended engineering decisions offer different oracles. A uniquely checkable arithmetic answer is not the same as selecting a library under uncertain lifecycle costs. A method's accuracy gain on the former does not automatically establish a good decision policy on the latter.
+The portability of a textual instruction is not the portability of achieved behavior. The same text can be sent to another model, but pretraining, post-training, available tools, and generation mode will change. Comparisons need several dimensions recorded.
 
-Model size, family, post-training, context handling, and tool-use preparation may affect transfer separately. The same instruction can be technically accepted by different systems yet induce different interpretations. Comparing models requires a common task contract and comparable settings, not anecdotal differences in style.
-
-Fine-tuning changes parameters but does not guarantee generalization outside the training data and behaviors. Diverse conflict examples may help establish preferences, but do not resolve every future conflict. A multi-agent protocol can be reused in another domain while its evaluators and arguments remain tied to the earlier subject. Architectural reusability and empirically demonstrated transfer are different properties.
-
-*The Illusion of Thinking* reported declining accuracy of reasoning models on complex instances of controlled synthetic puzzles, including Tower of Hanoi. This must not become proof that LLMs only memorize templates or cannot generalize at all. Interpretation was debated, including output limitations and task-instance design. The conclusion should remain tied to the particular setup and its limitations. [Shojaee2025]
-
-For an open-ended expert norm such as choosing a library under acceptable lifecycle cost, transfer from tasks with verifiable answers remains a separate hypothesis. New cases, negative and boundary examples, conflicts, different models, and long processes are needed to increase confidence. Before that evaluation, the appropriate claim is a justified design direction and partly supported mechanisms, not a universal way to make a model reason according to one expert policy.
-
-## 19. Checking rule compliance and behavioral quality
-
-Evaluation should answer two different questions: was the goal achieved, and was the required policy followed? Repeating a rule, producing long reasoning, or giving one correct answer is insufficient. Cases are needed that distinguish formal compliance from substantive execution.
-
-### 19.1. Seven types of evaluation case
-
-| Case type | Question | Example |
+| Dimension | Differences to account for | How to avoid overinterpreting results |
 |---|---|---|
-| Positive | Is the rule applied when its condition holds? | A suitable supported library is considered when reuse fits the task |
-| Negative | Is the rule skipped when it does not apply? | An irrelevant dependency is not added merely because a reuse rule exists |
-| Boundary | Is the exact transition condition understood? | A hypothetical two-year library-age threshold distinguishes below, equal to, and above the boundary, with inclusion specified |
-| Novel | Does the rule work beyond demonstrations and familiar objects? | An unknown library, different data format, or unfamiliar context |
-| Conflict | Is the specified order for resolving incompatible requirements followed? | Reducing execution time while preserving a required quality check |
-| Adversarial | Can a system earn a formally good score without the goal? | Required words and a weak passing test conceal failure to solve the task; one suite creates false sufficiency |
-| Long-horizon | Does the rule survive a sequence and changing context? | Original constraints and new decisions remain active after stages, failure, or history compression |
+| **Family and exact version** | GPT, Llama, Claude, Gemini, and their snapshots | One version's result does not become a property of the entire family |
+| **Size** | For example, 7B and 70B | These illustrate sizes, not established reliability thresholds; size does not replace training and task information |
+| **Base versus instruction-tuned model** | Different instruction-tuning and post-training regimes | Do not credit a prompt with a capability acquired in training |
+| **Provider and access implementation** | Tokenization, available configuration, interface, and undisclosed details | Similar model or product names do not establish identical conditions |
+| **Context** | Window size, occupancy, information position, and compression | Window capacity and actual information use are measured separately |
+| **Inference budget** | Calls, generation length, time, temperature, seeds, and selection method | Five samples versus one cannot be compared as a pure wording benefit |
+| **Tools** | Search, code execution, API availability, and training to use them | A system with access to new information solves the task under different conditions |
+| **Architecture and adaptation method** | Memory, multimodal capabilities, trainable components, and soft prompting | Transferring text differs from transferring a parameterized soft prompt or fine-tuned weights |
 
-Examples should differ in more than object names. Superficially similar cases with different correct actions test applicability boundaries. Superficially different cases governed by the same rule test transfer. A positive example without a negative control may hide overgeneralization; a negative example without a positive one may hide inability to apply the rule at all.
+“Five samples on GPT-4 versus one sample or another model, such as GPT-3” illustrates possible confounding. It is not a published comparative result. Model and computational budget changed together, so an individual technique's contribution cannot be isolated without additional control.
+
+Observations that Claude and ChatGPT respond differently to style requests should be treated as anecdotal until versions, tasks, and measurement are specified. They may motivate checking but do not justify permanent product “personalities.” Likewise, all modern models cannot be declared equally susceptible to a particular rationalization type: faithfulness depends on the conditions studied and how it is measured.
+
+It is useful to separate general methodological requirements—define concepts, state constraints, check conclusions—from empirical techniques showing an effect only in some models. A further category is incidental tricks tied to a particular implementation or bug. Repetition on one snapshot does not justify treating them as stable control mechanisms.
+
+### 18.3. What changes across tasks
+
+**Programming** makes results relatively observable: compilation, execution, tests, and debugging are available. Modularity, standards, security, and performance can be assessed here. But passing a test covers only the properties tested. An expert judgment about maintenance costs or architectural quality does not become unambiguous merely because the program compiles.
+
+**Research, diagnosis, and planning** require incomplete information, alternative explanations, and trade-offs. Distinguishing cause from symptom applies to diagnosis and data analysis alike. Scientific reasoning needs valid hypotheses, grounds, and checkable conclusions; a scientific writing style does not establish those properties. In source synthesis, consistency of claims with documents is assessed separately: this is not causal CoT faithfulness.
+
+**Medical and other consequential expert tasks** add requirements for evidence sufficiency and action admissibility. “Do not apply anything without explicit indications” illustrates a domain norm that still needs an applicable standard and specific conditions. Performance on a mathematical puzzle does not establish reliable compliance with that norm.
+
+**Creative tasks** often allow multiple suitable results. A rigid step sequence may restrict exploration, and a rubric may replace the artistic goal. Evaluation must account for the task and the criteria on which options may be compared. Tree of Thoughts considered Game of 24, creative writing, and crosswords; the different setups show a diversity of tests, not equal search benefits for every creative or planning task. [ToT2023]
+
+**QA, web navigation, and game environments** allow assessing retrieval of a needed fact, action success, and state change. Game progress is an example of an external outcome; reasoning length or query count cannot replace it. Feedback availability makes some errors observable, but the verification strategy depends on what information the environment actually returns.
+
+### 18.4. Which transfer conclusions are warranted
+
+Few-shot and CoT can improve outcomes on particular task distributions. Success on nearby examples does not establish distant transfer. Rubrics and structured procedures may specify a broader scheme, but claims of consistent superiority require a particular source and comparison. Retrieval, tools, and verifiers enable relevant information in a new domain; benefits depend on search quality, check applicability, and the model's ability to use results.
+
+Fine-tuning changes parameters but does not guarantee generalization outside the scope of data and learned behavior. Diverse conflict examples may help specify preferences but do not suffice to regard all future conflicts as resolved. A multi-agent protocol can be reused in another domain while its evaluators and arguments remain tied to the previous subject. Architectural reusability and empirically verified transfer are different properties.
+
+*The Illusion of Thinking* reported declining reasoning-model accuracy on difficult instances of controlled synthetic puzzles, including Tower of Hanoi. This cannot be turned into proof that LLMs only memorize templates or cannot generalize at all. Its interpretation was debated, including with respect to output limits and task-instance design. Conclusions must stay tied to the specific setup and its limitations. [Shojaee2025]
+
+For an open-ended expert norm, such as library selection under acceptable lifecycle costs, transferring results from tasks with verifiable answers remains a separate hypothesis. Increasing confidence requires new cases, negative and boundary examples, conflicts, different models, and long processes. Until such testing, it is appropriate to describe a justified design direction and partly supported mechanisms, not a discovered universal way to make a model reason according to one expert policy.
+
+## 19. Verifying rule compliance and behavior quality
+
+Evaluation must answer two different questions: was the goal achieved, and was the required policy followed? Checking whether a model repeated a rule, wrote long reasoning, or obtained one correct answer is insufficient. Cases are needed that distinguish formal compliance from substantive fulfillment.
+
+### 19.1. Seven case classes that must be considered
+
+“Must be considered” means deciding which classes are relevant when designing evaluation. It does not require an equally large test set for every simple action.
+
+| Class | Question tested | Example |
+|---|---|---|
+| Positive | Does the model apply the rule when it should? | Dependency selection actually compares suitable options against stated criteria |
+| Negative controls | Does it refrain from applying the rule outside its scope? | A library-selection procedure is not started for a task needing no new dependency |
+| Boundary | Does it respond to a small but material condition change? | Under a hypothetical two-year library-age threshold, distinguish below, equal, and above the threshold; boundary inclusion is explicit |
+| Novel | Does the rule work beyond demonstrations and familiar objects? | An unfamiliar library, different data format, or unfamiliar context appears |
+| Conflict | Does it follow the specified resolution order for incompatible requirements? | Execution time must be reduced while a particular quality check is maintained |
+| Adversarial | Can the system obtain a formally good score without achieving the goal? | An answer contains required words and passes a weak test but fails the task; one test set creates a false impression of sufficiency |
+| Long-horizon | Does the rule survive action sequences and context changes? | Original constraints and new decisions remain in force after stages, an error, or history compression |
+
+Examples must differ in more than object names. Superficially similar cases with different correct actions test applicability boundaries. Superficially different cases governed by the same rule test transfer. A positive example without a negative control may hide overgeneralization; a negative example without a positive one may hide inability to apply the rule at all.
 
 ### 19.2. Five kinds of evidence
 
-| Evidence type | What is observed | Strength | Limitation |
+| Evidence kind | What is observed | Strength | Limitation |
 |---|---|---|---|
-| Outcome evidence | Final answer, working artifact, domain metric | Checks the achieved result | Does not reveal the path; incomplete metrics invite proxy optimization |
-| Behavioral evidence | Strategy selection, reaction, information seeking, changed decisions | Shows how policy appears in external behavior | Reasoning length, request count, and section presence are weak without substantive checking |
-| Trajectory evidence | Intermediate inferences, plans, tables, successive revisions | Shows the observable sequence and dependencies between artifacts | A plausible trajectory need not faithfully describe hidden computation |
-| Execution evidence | Tool calls, executed tests, actually inspected data | Establishes particular external actions | Action occurrence does not prove sufficiency or correct use of the result |
-| Environment evidence | File changes, execution outcomes, system state, action consequences | Checks whether the claimed external change occurred | Local success may not achieve the overall goal; environment and measurement also have limits |
+| Outcome evidence | Final answer, result functionality, domain metric | Checks the achieved result | Does not expose the solution path; an incomplete metric is vulnerable to proxy optimization |
+| Behavioral evidence | Strategy selection, response pattern, seeking data, changed decisions | Shows how policy appears in external behavior | Reasoning length, query count, or section presence are weak indicators without checking meaning |
+| Trajectory evidence | Intermediate conclusions, plans, tables, sequence of states | Helps localize errors and compare stages | A textual trace may be incomplete or causally unfaithful |
+| Process evidence | Recorded tool calls, executed tests, data actually examined | Confirms specific external actions | The action alone does not prove sufficiency or correct use of its result |
+| Environment evidence | File changes, execution results, system state, action consequences | Checks whether the claimed external change occurred | A successful local action may not achieve the global goal; environment and measurement also have limits |
 
-This classification is not an absolute ranking. Actually running a useless test is strong evidence of its execution and weak evidence of product quality. A textual mathematical proof can be substantive evidence when its correctness is independently checked, even if it is not an exact history of the model's internal computation.
+This classification does not impose an absolute ranking. Actually running a useless test, for example, is strong evidence that it ran and weak evidence of product quality. A textual mathematical proof can be a substantive artifact if its correctness is independently checked, even if it is not an exact history of model computation.
 
 ### 19.3. Self-declaration and observed result
 
-| Model declaration | Evidence to look for |
+| Model statement | Evidence to seek |
 |---|---|
 | “I considered alternatives” | Substantive suitable options, comparison grounds, and a connection to the final choice |
-| “I assessed risks” | Relevant factors, available evidence, material consequences, and an effect on the decision |
-| “I checked the code” | A particular executed check, its result, and fit to the property being tested |
-| “I found a source” | An available source, correct attribution, and support for the specific claim |
-| “I performed the action” | Actual state change and the action result |
-| “I followed the rule” | Behavior on positive, negative, boundary, and conflicting cases |
+| “I assessed the risks” | Factors considered, available data, material consequences, and how assessment affected the decision |
+| “I checked the code” | A particular executed check, its result, and its fit to the property being checked |
+| “I found a source” | An accessible source, correct attribution, and support for the particular claim |
+| “I performed the action” | Actual state change and action outcome |
+| “I followed the rule” | Behavior on positive, negative, boundary, and conflict cases |
 
-A report should distinguish proposed, attempted, executed, checked, and independently confirmed. A successful command can establish one formal property without proving the whole task. Likewise, a source title or accessible URL is not a record of reading the passage needed for the conclusion.
+An alternatives list is better than a bare declaration, but lists can also be filled mechanically. A citation is better than an unnamed “study,” but a publication's existence does not mean it supports this claim. Verification must connect a statement to its substantive consequence. Faithfulness in XAI helps formulate that distinction; it does not make every explanation accompanied by a log demonstrably faithful. [Jacovi2020]
 
-### 19.4. Evaluators and independence
+An action absent from the available log is unconfirmed by that log. If log completeness is guaranteed and the action is absent, nonperformance can be established. Intent to deceive is a separate claim and does not automatically follow from incomplete confirmation.
 
-An evaluator can be a formal predicate, test suite, simulator, person, or another model. Its suitability depends on the property being checked. A compiler is a stronger oracle for compilation than an LLM's impression, while it cannot judge whether the product solves the intended problem.
+### 19.4. Designing a comparison
 
-Evaluator independence is not established by a different role name or a fresh context. Shared data, criteria, training patterns, and assumptions can produce correlated errors. A judge that sees the candidate's persuasive explanation may be anchored by it. Where possible, criteria should be established independently of the candidate and checked against known-invalid and nearby valid cases.
+For each mechanism, it is useful to record in advance:
 
-A material change to the evaluator requires its own validation. If the evaluator rewards keywords, accepts the original defect, or rejects a legitimate exception, a higher score is not evidence of better behavior. Grading quality, task quality, and model quality must remain separate.
+1. The required behavioral change and cases where behavior should not change.
+2. The outcome criterion and, separately, the procedural-compliance criterion.
+3. The baseline against which the change is compared.
+4. The exact intervention components: text, examples, retrieval, tools, evaluator, training, or search.
+5. Model and version, generation settings, attempts, and token/time limits.
+6. Test cases, including exceptions and possible formal compliance without the goal.
+7. Evaluation method: executable check, human, another model, or a combination.
+8. What counts as a useful improvement after cost, latency, and new failures are considered.
 
-### 19.5. Comparable conditions and held-out evidence
+If call count rises, the evaluator changes, and external data are added, an improvement belongs to that combination. Appropriate ablations are required to determine individual contributions. Comparing one successful prompt with one unsuccessful prompt does not yield a stable effect estimate. Work on formatting and paraphrase sensitivity supports testing multiple permissible task formulations. [Sclar2024] [Mizrahi2024]
 
-A comparison should preserve task inputs, instructions, tools, permissions, model settings, and budget as far as the question requires. Adding search, more attempts, and an external critic simultaneously measures a bundle; isolating a component's contribution requires separate conditions or ablations.
+Human and LLM-judge evaluation also needs checking for criterion fit and bias. Hidden test cases and predefined contrasts help assess actual norm application, transfer, and robustness to fitting a known rubric. For reproducibility, the case set and procedure must be recorded even when cases are not disclosed to the evaluated model beforehand.
 
-Examples used to tune a rule are development evidence, not independent final evidence. Repeatedly selecting changes against the same cases can overfit the evaluator. Reserved cases, new domains, paraphrases, and boundary controls can test broader claims, but their strength still depends on coverage and independence.
-
-Failed attempts and confounders should remain visible. A tool failure is not automatically a model defect, and rerunning unchanged conditions until a preferred answer appears is not a fair comparison. Small pilots can inform a local choice without establishing universal superiority, portability, or cost savings.
+Direct state indicators are also useful for agent tasks: action success, stage completion, progress in a game or simulation, constraint preservation, and recovery from error. Each indicator's connection to the final goal must be specified. “Progress” on one counter can coexist with regression on another.
 
 ## 20. Methodology for studying control mechanisms
 
-Research on model control should specify the intervention, target behavior, evidence, and comparison. A convincing prompt or coherent theory is not by itself an experiment showing stable compliance.
+### 20.1. Search and source-inclusion protocol
 
-### 20.1. Define the object and claim
+A systematic review begins with research questions and definitions. What counts here as a rule, reasoning, strategy, process, behavior, faithfulness, and successful transfer? How do self-consistency, self-correction, process supervision, and specification gaming differ? Without aligned terminology, results measuring different properties are easily combined.
 
-Begin with the required outcome and policy: what should change, in which tasks, and under which conditions? Separate accuracy, rule compliance, tool use, uncertainty behavior, cost, and causal faithfulness. A claim about one should not silently be evaluated through another.
+Empirical inclusion conditions should be defined in advance: actual LLMs, particular interventions, and measurements of the required behavior. Work from 2022 onward forms the main temporal scope; earlier publications may be needed for conceptual foundations. The GPT-3 era is useful history but must not replace checking later families—GPT-4, Gemini, Claude, and models specially trained for reasoning. Mentioning a new family in an introduction does not mean it participated in an experiment.
 
-State what would count as failure and what a nearby legitimate case looks like. For “consider alternatives,” a list of unsuitable options should not pass; for “avoid unnecessary dependencies,” a suitable component should not be rejected automatically. The acceptance criterion must preserve the user's actual need.
+Sources should be distinguished by status:
 
-### 20.2. Choose a baseline and intervention
-
-The baseline may be an ordinary prompt, the prior instruction, a workflow without the new component, or a simpler mechanism. It should be viable rather than artificially weak. Record exactly what changes and what remains fixed.
-
-Comparisons can examine prompt wording, examples, retrieval, external verification, search budget, or training, but these are distinct interventions. If several change together, the result concerns the combined system. Additional computation must be accounted for rather than attributed solely to better reasoning guidance.
-
-### 20.3. Search and source assessment
-
-A literature search should include existing methods, contrary or null findings, applicability limits, and work on the evaluator itself. Use primary publications for claims about what a study did; abstracts can establish a limited result but not every protocol detail.
-
-Source chains need attention. Several summaries of one experiment do not provide independent evidence. A conference abstract, full paper, revised preprint, vendor report, and commentary have different roles. Preserve version, task, sample, model, metric, and actual reading scope with a load-bearing claim.
-
-An unresolved reference should stay unresolved rather than being silently replaced with a thematically convenient paper. A newly found work may support a revised claim without proving the identity of an old numeric marker. Absence from a limited search is not proof of nonexistence.
-
-### 20.4. Design discriminating tests
-
-Tests should vary conditions capable of separating plausible explanations. If a rule was omitted, force-loading it may help diagnose discovery; that forced condition does not demonstrate automatic discovery. If a criterion is ambiguous, contrastive cases can reveal which interpretation was used. If a test accepts a known defect, the problem may be the oracle rather than the instruction.
-
-Include positive, negative, boundary, novel, conflict, adversarial, and long-horizon cases as required by the claim. Not every study needs every type, but a broad transfer claim cannot rest only on familiar positive examples. Hold out evidence before tuning when an independent final assessment is needed.
-
-### 20.5. Interpret results and costs
-
-Report outcomes and procedure separately. A method may improve average accuracy while increasing critical violations, unnecessary refusals, latency, or maintenance effort. Full-chain costs include retries, tools, review, correction, and human work where measured.
-
-A null result may reflect insufficient sensitivity, a weak intervention, an unsuitable task, or a genuine lack of benefit. A positive result may depend on examples, budget, selection, or extra information. Both need conditions and alternatives, not automatic universalization.
-
-Confidence should match the evidence. Small local comparisons can justify retaining, adapting, or rejecting a candidate for a particular workflow. They do not establish a universal method for all models or prove the intended internal computation.
-
-### 20.6. Reporting and reproducibility
-
-Keep model and snapshot, instructions, input bytes, settings, tool contracts, permissions, environment, budgets, evaluation criteria, and actual outputs where available and appropriate. Distinguish a prepared protocol from an executed experiment and an executed experiment from an independent replication.
-
-Reports should retain unsuccessful attempts, missing traces, unavailable sources, and unresolved interpretations. Structural validation establishes artifact shape, not semantic correctness. Reproducible execution may repeat a flawed criterion, so the criterion itself remains open to examination.
-
-The purpose of documentation is to let a reader trace the conclusion to what was actually observed. More tables, longer reasoning, or a large bibliography do not compensate for a missing connection between the intervention, task, and measured result.
-
-## 21. A map of errors and side effects
-
-The following map connects possible failures with observable symptoms and directions for checking. It is a diagnostic aid, not a frequency ranking or a guarantee that one control removes every error.
-
-| Error or side effect | Observable manifestation | Direction for checking |
+| Type | What it provides | What to consider |
 |---|---|---|
-| Misinterpreted norm | A plausible decision follows a different meaning from the author's | Clarify criteria, reference class, exceptions, and contrastive cases |
-| Literalism | Required form is satisfied while the task's meaning is lost | Compare artifacts and outcomes with the actual goal |
-| Missing rule | A material condition never enters the decision | Check discovery, retrieval, timing, and context availability |
-| Ignored instruction | The rule was available but behavior contradicts it | Inspect the action trace and competing constraints rather than adding a paraphrase automatically |
-| Context loss | A rule, exception, or goal disappears during a long process | Check compression, retrieval, state, and continuation |
-| Overspecification | Irrelevant obligations, redundant artifacts, and excessive procedure | Compare usefulness and costs with a simpler sufficient specification |
-| Underspecification | Undefined success, hidden thresholds, or unresolved authority | Supply the decision-relevant missing conditions |
-| Proxy optimization | A score improves without the intended outcome | Test known-invalid results, boundary cases, and the oracle's coverage |
-| Sycophancy | Agreement with the user displaces a better-supported conclusion | Test sensitivity to stated beliefs and preserve evidence-based disagreement |
-| Rationalization | A persuasive explanation omits a factor that changed the answer | Use controlled interventions and distinguish plausibility from causal faithfulness |
-| Correlated criticism | Several critics repeat the same error | Examine shared sources, assumptions, and genuinely new information |
-| Harmful self-correction | A correct answer becomes incorrect after an unsupported revision | Compare before and after against an independent criterion |
-| Tool misuse | An irrelevant call, misread result, or ignored error | Inspect the tool contract, actual response, and its effect on the next decision |
-| False completion | A plan, attempt, or partial action is reported as success | Check actual artifacts, external effects, and acceptance evidence |
-| Goal drift | Local optimization replaces the user's original objective | Reconcile current work with the goal and latest authorized constraints |
-| Overthinking | Additional reasoning increases cost without a useful change | Measure quality and full-chain cost, not reasoning length alone |
-| Excessive refusal or underconfidence | Valid work is rejected or a correct answer unnecessarily withheld | Test calibration and uncertainty policy on comparable cases |
-| Cross-model disagreement | The same specification produces different decisions across models | Check interpretations, settings, and criteria; disagreement alone does not establish who is right |
+| Peer-reviewed paper | A publication with described methods and external review | Review does not exclude errors, metric limitations, or transfer gaps |
+| Preprint | Access to new findings and methods before or outside peer-reviewed publication | Posting on arXiv is not itself peer review; versions may change substantially |
+| Engineering or vendor report | Data about a particular system, settings, and practical limitations | Selective disclosure, author interests, and dependence on closed infrastructure |
+| Technical note or experimental blog post | A reproducible specific example or hypothesis | Data, methods, and clear conditions are needed; author authority does not replace checking |
+| Anecdotal observation | A signal of a possible problem or an idea for a test | Does not establish frequency, cause, or universality of an effect |
 
-Some categories overlap. Mechanical rubric completion may be literalism and proxy optimization; context loss may produce goal drift and premature completion. The classification should therefore help locate the cause and the point of verification, not merely label an answer.
+A focus on 2024–2026 makes sense as a requirement to update the search, not as grounds to declare that a known older effect has automatically disappeared or persisted. Models, interfaces, post-training methods, task sets, and even versions of one paper may change.
+
+### 20.2. Competing explanations
+
+Research should test alternatives rather than merely collect support for an initial position. For example:
+
+- Is a clear instruction sufficient, or does improvement require examples, external evidence, or an execution structure?
+- Is the answer causally connected to CoT, or does the explanation merely fit an answer already chosen?
+- Does self-critique add a new signal, or is the effect explained by additional sampling and selection?
+- Does the rule require fine-tuning, or can a simpler method achieve it on the target distribution?
+- What are the separate contributions of additional sampling, search organization, verification, and candidate selection to test-time compute gains?
+- Does the result persist outside training examples, the familiar domain, and the selected prompt format?
+
+These explanations can act together; comparison aims to establish their contributions and interactions. A human-like mechanism cannot be assumed proven at the outset. But “memorization only” also needs testing. Absence of evidence for one mechanism does not automatically establish another.
+
+### 20.3. Evidence-quality criteria
+
+| Criterion | Main question |
+|---|---|
+| Construct validity | Is the intended property measured: accuracy, factual consistency, causal faithfulness, rule compliance, or something else? |
+| Internal validity | Can the effect be attributed to the intervention after accounting for budget, examples, data, evaluator, and accompanying changes? |
+| External validity | To which models, tasks, domains, and workflows does the conclusion transfer? |
+| Robustness | Were permissible paraphrases, rule orders, example sets, seeds, and other conditions tested? |
+| Reproducibility | Are prompts, code, data, settings, and evaluation descriptions available in sufficient detail for repetition? |
+| Independent reproduction | Is there confirmation by another group and in another environment? |
+| Model dependence | Are the effects of size, family, base version, and post-training separated? |
+| Benchmark dependence | Could the conclusion be an effect of a single test's design or evaluator? |
+| Prompt dependence | Is the conclusion based on accidentally successful wording? |
+| Adequacy of numerical reporting | Are denominator, metric, conditions, and uncertainty specified for quantitative conclusions? |
+
+Checking from memory is useful for identifying a possible error but is not equivalent to rereading a source. An abstract supports a work's existence, stated question, and some main findings; a disputed detail may require methods, a table, or an appendix. Finding a publication does not establish the exactness of an attributed quotation.
+
+### 20.4. Handling divergent results
+
+If one study reports improvement and another deterioration, retain both and compare conditions: model generation, task complexity and type, metric, sample count, training methods, annotation, and available information. Explanations of the difference must be labeled hypotheses unless directly tested.
+
+For example, evidence that CoT is useful and evidence that it is not fully faithful are compatible because they measure different properties. Improved accuracy with process supervision is compatible with no guarantee of causal faithfulness. Fine-tuning benefits on a familiar distribution are compatible with failure outside it. These pairs do not require choosing one claim and deleting the other.
+
+If equally defined claims remain incompatible under the same conditions after comparison, preserve that incompatibility as unresolved. Contradictions must not be removed by silently replacing the metric, source version, or object studied.
+
+## 21. Map of errors and side effects
+
+This maps possible failures and places to check them. It combines empirically studied phenomena with engineering scenarios; a row's existence does not mean its frequency has been measured for every LLM.
+
+| Error | Manifestation | How to discriminate or test |
+|---|---|---|
+| Literalism | Every textual item is followed, including ones inappropriate to the case | Exceptions, negative controls, and comparison with the goal |
+| Underspecification | The model defines an unclear requirement itself or performs the minimum formal act | Explicit definitions, contrasting cases, and interpretation checks |
+| Overspecification | Attention shifts to procedure; conflicts and unnecessary checks increase | Comparison with a smaller relevant rule set and accounting for costs |
+| Instruction conflict | A prominent rule, mechanical compromise, or nonreproducible strategy is selected | Cases with incompatible requirements and a predefined resolution policy |
+| Context loss | Constraints disappear and revoked decisions are reused | Tests after long chains, history compression, and state recovery |
+| Goal drift | Locally appropriate work stops solving the original task | Compare the current plan and artifacts with the final goal |
+| Proxy optimization | Score or formal compliance rises while meaning deteriorates | Cases where metric and goal diverge; independent outcome indicators |
+| Reward hacking / evaluator gaming | Weaknesses in the evaluator or reward mechanism are exploited | Test evaluation coverage and independence; adversarial cases |
+| Reward tampering | The reward function or check itself changes when that access is available | Integrity controls on execution and verification layers; precise access descriptions |
+| Hallucinatory reasoning | Facts, sources, or intermediate grounds are invented | Source and fact checking, executed computation, counterexamples |
+| Causally unfaithful explanation | Persuasive text does not reflect material answer dependencies | Controlled interventions and distinguishing plausible from faithful |
+| Overgeneralization | A rule applies to every similar situation | Negative and boundary cases |
+| Undergeneralization | A rule is not recognized in a new format or object | Semantic, structural, and novel cases |
+| Premature completion | Work stops before the required state is reached | Check completion criteria and actual result readiness |
+| Unproductive self-reflection | Critique expands without changing grounds or outcome | Connect the discovered error, correction, and recheck |
+| Mechanical checklist completion | Fields are filled, but the substantive question remains unresolved | Check links between items, evidence, and the final choice |
+| Overthinking | A solved subtask keeps generating steps without proportionate benefit | Account for marginal benefits of additional passes, errors, and costs |
+| Sycophancy | Expected agreement replaces assessment of facts and arguments | Contrasts varying the user's position while facts remain unchanged |
+| Goal misgeneralization | An acquired policy persists after task meaning changes | Transfer to cases with different goals but similar surface features |
+| Uncalibrated confidence | Confident error, underestimation of a correct answer, or unjustified refusal | Check calibration and the uncertainty policy on comparable cases |
+| Cross-model disagreement | The same specification yields different decisions across models | Check interpretations, settings, and criteria; disagreement alone does not establish who is right |
+
+Some categories overlap. Mechanical rubric completion may be both literalism and proxy optimization; context loss may cause goal drift and premature completion. The classification should therefore help identify a cause and a place to check, not merely label an answer.
 
 ## 22. Integrated control model and limits of generalization
 
 ### 22.1. How the elements fit together
 
-The practical framework consists of linked decisions:
+The practical framework consists of a sequence of connected decisions:
 
-1. **Define the control object.** Is the requirement a correct answer, mandatory action, stage order, response to uncertainty, rule transfer, or a causally testable explanation?
-2. **Analyze the expert norm.** Identify unclear concepts, hidden reference classes, thresholds, exceptions, conflicting values, and conditions unavailable to the model.
-3. **Choose a representation.** Brief text, principles, if–then rules, decision tables, rubrics, examples, formal procedures, executable checks, or a combination.
-4. **Choose an intervention level.** Instructions and examples, context organization, external action structure, tools, feedback, search, training, or architecture.
-5. **Align the goal and evaluation.** Identify proxies, acceptance criteria, and ways to detect their divergence.
-6. **Test the policy.** Use relevant positive, negative, boundary, novel, conflict, adversarial, and long-horizon cases.
-7. **Check cost and transfer.** Compare the full process with a viable baseline, retaining conditions, failures, and limits of generalization.
+1. **Define the object of control.** Is the requirement a correct answer, a mandatory action, the order of stages, a response to uncertainty, rule transfer, or a causally testable explanation?
+2. **Analyze the expert norm.** Identify undefined concepts, the hidden reference class, thresholds, exceptions, conflicting values, and conditions inaccessible to the model.
+3. **Choose a representation.** A short text, principles, if–then rules, a decision table, a rubric, examples, a formal procedure, an executable check, or a combination of these.
+4. **Choose the level of intervention.** Instructions and examples, context organization, an external action structure, tools, feedback, search, training, or architecture.
+5. **Align the goal and evaluation.** Specify proxies, acceptance criteria, and ways to detect divergence between them.
+6. **Test the policy.** Use appropriate positive, negative, boundary, novel, conflicting, adversarial, and long-horizon cases.
+7. **Check cost and transfer.** Account for latency, resources, maintenance, model capabilities, robustness to changes, and the consequences of new components.
+8. **Revise in response to observations.** Refine the specification or mechanism when an error reveals a specific gap; do not accumulate rules merely to create a feeling of control.
 
-The sequence is a design synthesis rather than a validated universal algorithm. It can return to earlier decisions when evidence reveals an ambiguous criterion, an unsuitable oracle, or a missed branch. Its usefulness should be judged through the decisions and results it improves.
+This framework is an engineering synthesis. It is not the only permissible workflow and does not prove that the maximal combination of methods is better than the minimal one. A simple task may need only a short instruction and a lightweight check; a property that must be strictly enforced during execution may require an external mechanism. Add complexity to address an identified failure or requirement while retaining a way to test its benefit.
 
-### 22.2. What is supported and what remains a hypothesis
+### 22.2. What is known about the transfer of different mechanisms
 
-| Conclusion | Status and boundary |
-|---|---|
-| Instructions and examples can change model behavior | Supported in particular models and tasks; not a guarantee of every new norm |
-| Tools and feedback can add information unavailable in another text-only pass | Supported as a mechanism and in defined experiments; usefulness depends on relevance and correct use |
-| External enforcement can constrain formalized actions or transitions | A system-level property bounded by specification and executor coverage, not a guarantee of the whole goal |
-| CoT can contribute to answers but is not automatically causally faithful | Supported by differing intervention results; faithfulness is graded and condition-dependent |
-| Process supervision can improve measured performance | Supported in the studied setups; does not prove every approved step caused the answer |
-| Multiple agents can improve criticism or factual consistency | Supported for particular procedures; agent count and consensus are not independent truth |
-| Selective context and compact rule delivery may reduce irrelevant work | An engineering hypothesis with retrieval and omission risks; no universal superiority is established |
-| Memory, plans, and external state may support long-term consistency | An architectural hypothesis requiring long-task evaluation and recovery checks |
-| Expert norms can be made more testable through explicit conditions and contrasting cases | A practical design approach; its transfer and sufficiency need evaluation in the target workflow |
-| A single universal method can guarantee expert reasoning across models and domains | Not established by the reviewed evidence |
+| Mechanism | Reasonable expectation | Limitation of the evidence |
+|---|---|---|
+| Few-shot and CoT | Can improve performance on tasks close to the demonstrations or the studied class | Do not ensure transfer to an arbitrary new domain and do not, by themselves, establish causal faithfulness |
+| Structured instructions, rubrics, checklists | A general framework may help transfer and verification | Universal superiority of checklists is not established by the available unresolved references |
+| Retrieval, tools, external verification | New information and independent computations may extend the range of applicability | Dependence on search, interfaces, data quality, verification, and the model's ability to use the result |
+| Fine-tuning, RL, and policy-aware training | Behavior may become more stable on a relevant distribution | A rule may fail to transfer outside the training distribution; data diversity and the training method matter |
+| Criticism and agent discussion | The procedure can be applied in different domains | Arguments, evaluators, and discussion rules may be narrowly tuned; architectural reusability is not empirical transfer |
+| External deterministic policies | A formalized property may be preserved independently of the generator's particular text | The guarantee is limited by predicates, input data, and complete coverage of actions by the mechanism |
 
-A limitation of the evidence does not make every practical mechanism useless. It determines how strong a claim can be made and what must be checked before relying on it in another setting.
+Studies of declining success as complexity increases, including *The Illusion of Thinking*, demonstrate limitations of the studied systems on controlled tasks. They do not establish that all LLM work reduces to memorization. Criticism of these experimental designs—including output limits and the construction of task instances—must also be considered; a dispute about the cause of a decline cannot be settled by a paper's title. [Shojaee2025]
 
-### 22.3. The main practical conclusion
-
-Reliable control is not achieved by asking for a long explanation or listing every desirable professional quality. It requires a connection between the user's goal, a sufficiently explicit norm, the model's available information and actions, and evidence capable of distinguishing success from formal compliance.
-
-Where a property can be enforced externally, the boundary of that enforcement should be named. Where judgment remains necessary, its criteria, uncertainty, and alternatives should be visible. Where transfer is untested, a plausible recommendation should remain a hypothesis rather than a universal guarantee.
-
-The result is a map for choosing and checking mechanisms, not a promise that one prompt, one workflow, or one training method makes a model a universally reliable expert. Its practical value depends on applying the appropriate mechanism to the actual failure and checking the resulting behavior under the stated conditions.
+There is no basis for treating any identified technique as a universal guarantee that expert rules will generalize across all models. At the same time, the absence of a universal guarantee does not negate measurable improvements in a particular system. A well-founded conclusion must name the property achieved, the conditions, the test cases, and the remaining uncertainty.
 
 ## 23. Editorial clarifications and limits of the evidence base
 
-This section records corrections that affect the meaning and strength of conclusions. Original uncertainty is not removed merely because a bibliographic entry was recovered. The source, the result, its attribution, and transfer to the current claim require separate checks.
+This section preserves the substance of critical comments: which claims were corrected, which became more precise after checking, and which still require confirmation. The corrected claim is used in the main text; an erroneous formulation appears here only to explain the change, not as an alternative currently accepted conclusion.
 
-### 23.1. Material corrections
+### 23.1. Corrected attributions, concepts, and overgeneralizations
 
-| Topic | Correction | Consequence and boundary |
+| Subject of clarification | What changed | Grounds and effect on the conclusion |
 |---|---|---|
 | Authors of the thinking-drafts study | The attribution “Devonport et al.” was replaced with Xiong, Chen, Qi, Lakkaraju (2025) | The exact publication was identified. The conclusion about selective faithfulness is retained; authorship and the set of evaluated models were corrected. DeepSeek-R1 and Qwen3-32B are not confused with the six models for which the metrics were measured [Xiong2025] |
 | MAMM-Refine | “Ma et al. (2024)” was replaced with Wan, Chen, Stengel-Eskin, Bansal (NAACL 2025) | The method concerns improving factual consistency of generation with a document. It remains in the review of criticism and revision but is excluded from evidence for the causal faithfulness of CoT [Wan2025] |
