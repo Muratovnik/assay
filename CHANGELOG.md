@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.16.1](https://github.com/Muratovnik/assay/compare/v0.16.0...v0.16.1) (2026-10-06)
+
+Technical documentation now selects material for its reader and publication
+surface before arranging it, and the finished draft is reviewed for passages
+that add nothing this reader needs. Three foundational research studies are
+published in English and Russian.
+
+### Bug Fixes
+
+* **technical-writing:** select, condense, move or remove material for the reader, task, publication surface and authorized scope before choosing headings; make README demonstration, installation and first-use blocks conditional, so a catalog-managed install or automatic operation gets no ritual section; review the finished draft for re-explained familiar terms, claims repeated across prose, headings and table cells, process provenance and purposeless modifiers, while keeping necessary conditions, newcomer explanations, acceptance evidence and required notices; reconcile related current claims after a behavior change; keep the preservation checker's strict exit codes and report an authorized deletion instead of hiding it; add 13 public regression cases and two discovery inputs ([d5766ab](https://github.com/Muratovnik/assay/commit/d5766ab2670dc1fd98127cab8bd2764d6196be0f))
+
+### Documentation
+
+* **research:** publish the research-quality, software-engineering and LLM reasoning and behavior control studies in English and Russian, with paired indexes ([46740f2](https://github.com/Muratovnik/assay/commit/46740f2eb8d0db046eec2842f8b20a0354837ee6))
+
+The technical-writing change was exercised on a small set of synthetic tasks
+with one model configuration, and those tasks are now public. Automatic
+discovery, other models and broader prose quality have not been established.
+
 ## [0.16.0](https://github.com/Muratovnik/assay/compare/v0.15.0...v0.16.0) (2026-10-06)
 
 Code changes now establish the capability a guarantee needs and consider
