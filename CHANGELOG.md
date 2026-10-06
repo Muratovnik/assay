@@ -6,6 +6,38 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.16.0](https://github.com/Muratovnik/assay/compare/v0.15.0...v0.16.0) (2026-10-06)
+
+Code changes now establish the capability a guarantee needs and consider
+existing implementations before writing their own, entered by concrete kinds of
+behavior rather than a judgment of materiality. Corrections and acceptable
+examples can be kept as explicit local records for later review, and the Claude
+evidence reviewer promises only the boundary the client keeps.
+
+### ⚠ BREAKING CHANGES
+
+* **profiles:** the Claude `evidence-reviewer` is a bounded reader with `Read`, `Grep` and `Glob`; it no longer reruns the oracle or loads skills, so callers include snapshot-bound receipts for the named oracle and pass audit criteria by path, and a packet without receipts is refused; the Codex projection keeps the oracle ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+
+### Features
+
+* **code-change:** establish which capability provides an unchecked guarantee before choosing the implementation; enter the reuse reference before writing or keeping own code for behavior that commonly has an existing implementation, such as parsing, validation, retries, caching, dates, hashing, CLI arguments, HTTP clients, pathfinding or asset loading; name a semantic mismatch as the gap instead of skipping the check; report the decision in a `Reuse:` line and an unrequested missing capability in an optional proposal line ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+* **implementation-planning:** list the conditions a project should supply, separating observable facts from owner decisions, and the costly decision categories that need the contract check, each with a nearby control ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+* **evidence-research:** borrow code, behavior or assets from another project through one procedure for provenance, terms, compatibility and the permitted operation; mark sources recalled from memory as not opened, name independence axes, compare on a discriminating basis without a query quota and stop in four stated situations ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+* **hooks:** record corrections and allowed examples with an explicit command, keep the storage mode separate from the optional correction-grammar trigger, review metadata records with codes and a basis reference instead of text, and print the record command in `doctor`; recognize Russian lookups for an existing implementation ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+
+### Bug Fixes
+
+* **route-subagents:** keep the session reminder to three sentences while preserving the subagent planning step for any wording of the request; add the routing checklist at session start only when routing is configured, and tell packet builders what a reviewer without the oracle needs ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+* **tools:** check heading anchors in links between skill files ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+
+### Documentation
+
+* **how-to:** describe project conditions for agents, client settings that guard tests and check configuration, feedback records with their privacy limits, and what each install route lacks ([18fd6c6](https://github.com/Muratovnik/assay/commit/18fd6c6b023a0c53656bb96cffbdc83db2442b3b))
+
+The added evaluation cases are public synthetic examples, and no model run was
+performed for this release. Better decisions, task outcomes or lower cost have
+not been established.
+
 ## [0.15.0](https://github.com/Muratovnik/assay/compare/v0.14.0...v0.15.0) (2026-10-04)
 
 Task continuation now recovers the selected work, current constraints and
