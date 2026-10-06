@@ -32,7 +32,10 @@ standard. Keep the approval note out of the README.
 
 After a profile is chosen, its applicable requirements are requirements: do not
 remove an agreed hero, badge row or section order just because minimalism is
-preferred by the model. Equally, formatting never authorizes a false claim, a
+preferred by the model. Decide content eligibility using
+[document design](document-design.md#select-content-before-arranging-it) and the
+conditions below; a visual style does not require an unnecessary section.
+Equally, formatting never authorizes a false claim, a
 fabricated asset or an unsafe instruction. Report conflicts or missing required
 material to the author rather than silently changing the standard.
 
@@ -53,25 +56,40 @@ user parameters such as a token variable remain legitimate.
 Start with the job the product helps the reader do and a distinguishing supported
 constraint or mechanism. Do not lead with the repository inventory or an inflated
 claim. Give concrete uses instead of several restatements of the tagline.
+Use the audience's established terms and keep distinct uses separate. Apply the
+[content review](document-design.md#review-the-finished-content) to the opening
+and feature list together so a property is not restated as another capability.
 
-Offer a recognizable result: a relevant existing screenshot with an explanation,
-a working demonstration link, or a complete example with a supported expected
-outcome. If no screenshot exists, a text example is the defined fallback, not an
-excuse to invent a UI. The same example can serve both demonstration and first
-use; do not repeat it under two headings to fill the template.
+Add a demonstration when it explains a non-obvious behavior, comparison or
+choice. Use a relevant existing screenshot, working demo link or supported
+example. A missing screenshot does not require a text example; an obvious
+before/after pair may add nothing to the purpose already stated. If one example
+also teaches first use, keep it once. Never invent an asset or execution receipt.
 
-Choose a primary installation or access path for this audience. Link alternatives
-when that is enough; include genuinely different platform steps when necessary.
-A complete quickstart has a starting state, ordered actions and an observable
-result. Explain placeholders. Label illustrative output as an example when it is
-not an execution receipt. A documented supported command needs no repetitive
-personal disclaimer, but do not assert a successful test that did not happen.
+Include installation or access instructions when this audience needs information
+beyond the route the publication surface already supplies: prerequisites, a
+choice of package or environment, permissions, or an unusual step. A catalog
+page whose manager handles installation may need only product-specific conditions;
+a repository page may still need the actual download or access link. Confirm what
+the reader can already see rather than assuming every catalog handles setup.
+
+Include first-use steps when an action after installation is needed to obtain a
+result. Automatic operation with no setup needs no ritual `Quick start` section.
+When a procedure is needed, provide its starting state, ordered actions and
+observable result, with explained placeholders and real platform differences.
+Label illustrative output as an example. A documented supported command needs
+no repetitive personal disclaimer, but do not assert a test that did not happen.
 
 Keep product information, reference detail and contributor tasks distinct. Link
 actual existing documents instead of manufacturing a docs tree. Important limits
 belong before the decision or action they affect, even if the standard footer
 also collects less urgent limits. Planned work can be omitted from current
 Features or clearly separated; never present it as available.
+Keep release deltas and author verification notes in their appropriate record
+unless they change the reader's decision here. Use existing changelog navigation
+when useful; do not add a rolling `What changed` summary by default. After a
+behavior change, reconcile the related current claims instead of layering a new
+exception onto stale prose.
 
 ## Presentation and completion
 

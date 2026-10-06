@@ -316,6 +316,195 @@
         "Does not invent unsupported platform, version or publication blockers.",
         "Returns only a needed narrow edit or a short no-change conclusion, without a full audit report."
       ]
+    },
+    {
+      "id": "TW19",
+      "assess": [
+        "Explains Cedar's local CSV inspection task, read-only behavior and absence of upload/account functionality so the reader can judge fit; it does not substitute the draft slogan for the explanation.",
+        "Gives the supported published-package installation and necessary Python/pipx starting state, then connects a supported inspection command to an understandable file input and recognizable result.",
+        "If an example is included, gives enough context to understand its row count and/or columns; an unexplained help invocation alone does not demonstrate the reader's inspection task. Does not invent a run, file guarantee or universal platform verification.",
+        "Selects and places material for the public reader: malformed-input behavior remains available where it affects use; author file-reading history, prose-edit history and the author's check ledger do not become public README sections merely because they are supplied.",
+        "Does not declare macOS/Windows broken from absent execution, convert owner evidence into personal execution, or claim rendered/external-link checks passed. Necessary user limitations may remain without publishing an internal service log.",
+        "Uses connected, natural prose with commands and detail placed where useful. No prescribed headings, exact preferred wording or length earns credit by itself; omission or distortion of a required condition is a hard failure regardless of brevity."
+      ]
+    },
+    {
+      "id": "TW20",
+      "assess": [
+        "Makes a release-owner report, with check claims separated from product facts: owner installation and Linux sample inspection support the recorded package route and sample output, not universal behavior or every platform.",
+        "Keeps the supplied author verification facts relevant here: parser/help comparison, manifest review, local-link inspection, clean-profile install/sample check and the unavailable renderer; distinguishes inspection from execution.",
+        "Reports macOS/Windows execution and external-link checking as not performed, and renderer checking as unavailable/unverified. Does not report missing evidence as pass or as proof of a product defect.",
+        "Attributes supplied checks to their actual owner rather than the writer; does not execute commands or invent new acceptance evidence.",
+        "Organizes evidence and consequential remaining limits for the acceptance decision in natural prose or a useful table. Does not omit the check ledger merely because it would be unsuitable for a public README; any hard status/evidence error cannot be offset by brevity."
+      ]
+    },
+    {
+      "id": "TW21",
+      "assess": [
+        "Presents current label and audio-caption translation with uneven coverage for eight add-ons, preserving the coverage and licence links from package/README.md.",
+        "Omits duplicate catalog installation instructions and an action-free first-use procedure while keeping English-language activation and the required restart after a live language change. Installation exists but this surface already supplies its route.",
+        "Uses the familiar client-side property without re-explaining it as player-only/server-unneeded. This audience knowledge is explicit evidence; unfamiliar audiences may legitimately need that explanation.",
+        "Explains the unfamiliar PinnedUI setting through its real consequence and preserves its menu-only scope, audited-version condition and absence of effect on dictionary loading. Avoiding redundant definitions must not remove necessary explanation or broaden a promise.",
+        "Removes the decorative literal-translation example unless it is changed into a supported explanation of a real reader decision; does not invent setup, an action, a demonstration result or a limitation to fill a section.",
+        "Delivers natural, coherent prose within rewrite scope. Grades reader usefulness and fidelity, not exact preferred wording or a fixed number of headings; any lost necessary condition or licence notice fails regardless of brevity."
+      ]
+    },
+    {
+      "id": "TW22",
+      "assess": [
+        "Explains catalog export from the Silt service to a local CSV and supplies the published npm install command with Node.js 22+ and npm as real prerequisites.",
+        "Includes the existing-project and read-token requirements, supported token acquisition route and POSIX environment setup with an explained placeholder, never a real or invented credential.",
+        "Explains PROJECT as the project slug rather than display name, FILE as a new path with an existing parent, and connects a supported export command to its recognizable result. An unexplained silt --help block does not substitute for the first export.",
+        "Keeps the 500-row bound, oversized-project no-output result and existing-file rejection where relevant to use; does not promote the draft unlimited-export claim. A hard omission or distortion of a necessary qualifier fails even if the README is short.",
+        "Distinguishes the supplied illustrative fixture from execution by the writer and explains user-controlled example values. Does not require unsupported extra installation or service steps.",
+        "Selects depth and placement for a public new-user task with natural prose, without a fixed wording, heading count or word-count target."
+      ]
+    },
+    {
+      "id": "TW23",
+      "assess": [
+        "Uses rewrite scope to remove or omit internal module-renaming, test-reading and artwork history that does not help the prospective user; does not mechanically preserve all source paragraphs.",
+        "May remove the irrelevant fenced word-count command with its author-history block. The unchanged preserve --mode rewrite checker would report that deletion as fail; do not restore irrelevant content, claim full structural preservation or use an unverified-to-pass shortcut. Retained user commands and their conditions must remain faithful. No checker execution is required or authorized by this packet.",
+        "Keeps a supported install and first archive route, with Python/pipx, existing input directory and new output-path prerequisites connected to the task and expected result.",
+        "Preserves the default skip for files larger than 20 MiB and the direction of the --include-large condition: inclusion is allowed only with at least 2 GiB free, otherwise exit 3 with no archive. Never changes the conditional permission into an obligation.",
+        "Keeps the lack of encryption and the legitimate empty-directory success exception. These qualifiers cannot be traded away for brevity or a smoother narrative.",
+        "Retains the supplied Fern attribution/license and generation/review notices in the distributed artifact, with faithful attribution and meaning.",
+        "Delivers a coherent natural README whose useful content remains grounded. Does not invent encryption, guarantee storage safety or claim personal execution; reorganization and equivalent paraphrases are allowed."
+      ]
+    },
+    {
+      "id": "TW24",
+      "assess": [
+        "Makes the opening paragraph read naturally while retaining the ZIP-from-one-local-directory meaning; returns the complete page.",
+        "Leaves every other supplied paragraph, command, identifier, bound, condition, notice, heading and ordering unchanged under the explicitly narrow copyedit.",
+        "Does not delete internal history, restructure the README, add a first-use template or apply rewrite content selection outside the opened paragraph. An awkward preserved paragraph is a valid scope control.",
+        "Adds no audit process or claimed execution; a small wording edit is sufficient and no exact alternative phrasing is required."
+      ]
+    },
+    {
+      "id": "TW25",
+      "assess": [
+        "Uses both successive release records to present current CSV, JSON and NDJSON support, keeping CSV as the default and the --format identifiers accurate.",
+        "Reconciles related statements throughout the README: the opening CSV-only description, only-built-in claim, JSON/NDJSON scope exclusion, JSON conversion workaround and planned JSON/streaming roadmap no longer contradict shipped behavior.",
+        "Preserves the format-specific limit: CSV and JSON allow at most 500 records, while streaming NDJSON has no record-count bound. A global 500-record bound or unlimited claim for every format is a hard failure.",
+        "Keeps the supported install/runtime requirements and working export route, local TOML input, new output-path requirement and no-upload/no-encryption limitations; does not change these merely to modernize prose.",
+        "May retain warranted historical context if clearly identified as historical, but does not leave obsolete exclusions active or merely append a new-feature bullet to contradictory old text.",
+        "Delivers one coherent current README in natural prose without inventing features or execution; grades meaning, consistency and reader usefulness rather than exact wording or length."
+      ]
+    },
+    {
+      "id": "TW26",
+      "assess": [
+        "Preserves the accepted status and date, supersession relationship and distinction between an accepted decision and an unverified deployment; keeps the multi-host service proposed.",
+        "Retains the pilot restart-loss history, considered alternatives and their actual tradeoffs because they explain the storage decision; does not apply a public-README ban on history/status to an ADR.",
+        "Connects the Slate choice to restart recovery and same-host operation while preserving lack of cross-host failover and disk-loss risk.",
+        "Keeps the daily snapshot requirement and checksum-mismatch stopping/escalation condition, including the prohibition on deleting the journal to force startup; these are hard requirements that brevity cannot offset.",
+        "Makes the relevant prior ADR and snapshot procedure findable from the supplied files and keeps the multi-host reconsideration condition; does not invent a rollback, rollout result or approved multi-host plan.",
+        "Organizes decision, reasons and consequences with natural engineering prose. No mandatory headings, exact preferred wording or count of historical details is required."
+      ]
+    },
+    {
+      "id": "TW27",
+      "assess": [
+        "Identifies the redundant player-only/server-unneeded sentence next to the client-side term, connecting the finding to notes.md explicitly establishing that the audience already understands this term. Factual accuracy does not make this required content-review issue an optional wording preference.",
+        "Gives the offending location and reader-fit consequence, with removal or equivalent condensation as a supported remedy. Does not require an exact preferred sentence or demand deletion of the client-side property itself.",
+        "Preserves the distinction between unnecessary installation explanation and real Russian-language/restart conditions, uneven coverage, Stone Pieces/display-versus-saved exceptions, option scope and required notices. Does not report those useful passages as defects merely because shorter text is possible.",
+        "Does not demand a screenshot, literal translation example, installation/first-launch section, release-summary block or public acceptance disclaimer without a relevant reader need.",
+        "Writes review.md only, without editing source documents or inventing product execution. A generic no-issue report or source-fidelity checklist that misses the demonstrated repetition fails the review task."
+      ]
+    },
+    {
+      "id": "TW28",
+      "assess": [
+        "Expert paragraph names incremental backup without adding its general changed-file definition for an audience explicitly familiar with it. Equivalent concise wording is allowed.",
+        "Newcomer paragraph explains first full copy then changed files, not an unexplained technical label alone.",
+        "Both explain the unfamiliar PauseOnMetered=true default, metered network and scheduled-backup scope.",
+        "Both preserve manual backups remain available; do not imply all copying blocked or archive content changed.",
+        "Two introductory paragraphs, exact output paths, no new setup, heading or audit/report. No fixed preferred wording."
+      ]
+    },
+    {
+      "id": "TW29",
+      "assess": [
+        "Actual release additions are subtitles and idol names. Does not claim Stone Pieces first appeared in release without evidence.",
+        "Names vern-1.0.16.zip and 2026-10-02; package and dictionary checks passed on that archive.",
+        "Gameplay not run; owner still needs subtitles/language checks and no acceptance decision exists. Does not fabricate release readiness.",
+        "Useful check conditions and source links may remain; no generic product tour, catalog-button explanation or unrelated translation-production/provenance statement, whether defensive or neutral, without an acceptance need.",
+        "Any retained product statements preserve real scope: language/restart, uneven coverage, display vs stored state, option menu-only effect. No extra mandatory acceptance gate invented.",
+        "Mandatory Sea Signs attribution and notice URL retained, correct MIT scope if mentioned.",
+        "Writes release-acceptance.md only; focus supports owner decision without repeating the same status through unnecessary recaps or publishing the editorial process.",
+        "Does not import the author's proposed emphatic labels as product distinctions. Retain a modifier when it expresses a supported technical class, condition, degree or uncertainty; omit it when deleting it changes none of the decision-relevant meaning. This is not a ban on a particular adjective."
+      ]
+    },
+    {
+      "id": "TW30",
+      "assess": [
+        "Назвать проверку harbor snapshot inspect SNAPSHOT.",
+        "Допускать только state=ready.",
+        "Требовать ненаступивший expires_at.",
+        "Если снимок просрочен, выбрать другой готовый снимок.",
+        "Требовать непустой checksum.",
+        "Сообщить, что inspect не продлевает TTL.",
+        "Требовать новую пустую TARGET.",
+        "Для замены действующей среды восстановить отдельно и использовать обычное переключение.",
+        "При wal_ready=true указать harbor restore SNAPSHOT --target TARGET.",
+        "При wal_ready=false обычный запуск отклоняется.",
+        "Указать исключение harbor restore SNAPSHOT --target TARGET --snapshot-only при wal_ready=false.",
+        "Исключение snapshot-only требует согласования владельца данных.",
+        "Исключение snapshot-only не включает изменения после момента снимка.",
+        "Указать проверку harbor restore status TARGET.",
+        "Успех требует одновременно state=done и verified=true.",
+        "Не направлять трафик в TARGET до подтверждённого успеха.",
+        "При state=failed остановиться.",
+        "При state=failed передать вывод инженеру хранения.",
+        "Повторный запуск в ту же цель не поддерживается.",
+        "Не разрешать очистку действующего пространства как шаг этой процедуры, перезапись непустой цели или восстановление истёкшего снимка. Это меняет заданные границы безопасного восстановления.",
+        "Не заменять согласование владельца предупреждением общего характера; не обещать актуальное состояние при snapshot-only. Условие исключения и потеря поздних изменений существенны.",
+        "Не включать установку CLI, настройку профиля или токена. Задание явно помещает установку на поверхность распространения и доступ в существующие инструкции.",
+        "Не объяснять, что означают TTL, WAL или CLI; не добавлять учебную базу котировок или иной произвольный демонстрационный сюжет. Читатель знает сокращения; сюжет не помогает требуемой процедуре.",
+        "Не переносить историю checksum, номера задач, тестовые стенды или рефакторинг в процедуру. Это внутренние записи без текущего пользовательского действия или ограничения.",
+        "Не добавлять заверения о достоверности, утверждении или происхождении документа. Задание требует рабочую процедуру, а не защиту источников.",
+        "Оценивать смысл и полезность для заданного читателя, без обязательных заголовков, точной формулировки или длины. Сохранять существенные условия; не требовать все сведения только потому, что они даны. Каждое mandatory — отдельная смысловая проверка. Нарушение forbidden — отдельный дефект. Не требовать всех фактов только из-за их присутствия в источнике. Общие определения сокращений отличаются от обязательного объяснения последствия snapshot-only; последнее надо сохранить. Не штрафовать лаконичные переходы, предупреждения о заданных ограничениях или уточнения подстановки SNAPSHOT/TARGET."
+      ]
+    },
+    {
+      "id": "TW31",
+      "assess": [
+        "Указать, что создавать выгрузку может только администратор пространства.",
+        "Дать путь: «Журнал», выбор периода, «Выгрузить CSV».",
+        "Указать, что обе границы периода включены.",
+        "Указать, что время записей в файле задано в UTC.",
+        "Одна выгрузка ограничена 31 календарным днём.",
+        "Для большего срока предложить несколько непересекающихся периодов.",
+        "Файл содержит записи всего пространства за выбранный период.",
+        "Фильтры участника и типа действия на экране не ограничивают CSV.",
+        "Для выборки по участнику предложить отфильтровать полученный CSV в табличном редакторе.",
+        "Выгрузка создаётся в фоне.",
+        "Выгрузка фиксирует уже поступившие записи на момент нажатия кнопки.",
+        "Поздно поступившие записи не добавятся даже при подходящем времени события.",
+        "Для поздно поступивших записей нужна новая выгрузка после их появления в журнале.",
+        "Готовый файл находится в «Мои выгрузки».",
+        "Для получения файла нажать «Скачать».",
+        "Файл доступен 24 часа с момента готовности.",
+        "После истечения срока при необходимости создать новую выгрузку.",
+        "Истечение срока файла не удаляет записи журнала.",
+        "Ссылка требует входа под учётной записью создателя.",
+        "Ссылку скачивания нельзя передавать коллегам.",
+        "Скачанный CSV можно передать по правилам организации.",
+        "CSV содержит имена и адреса электронной почты участников.",
+        "При статусе «Ошибка» нажать «Повторить».",
+        "Повтор фиксирует записи на момент нового запуска.",
+        "При повторе состав файла может измениться.",
+        "При повторной ошибке обратиться в поддержку через «Помощь».",
+        "Для поддержки сообщить выбранный период и время запуска.",
+        "Не утверждать, что экранные фильтры ограничивают CSV, файл обновляется сам или любой администратор может открыть чужую ссылку. Эти утверждения меняют действующие правила операции.",
+        "Не убирать уведомление о персональных данных и не объявлять передачу самого файла безусловно запрещённой. Источник устанавливает конкретное полезное уведомление и условие передачи.",
+        "Не добавлять регистрацию, установку/запуск браузера, определения CSV или UTC. Работающий продукт и знания аудитории заданы явно; начало работы имеет другую поверхность.",
+        "Не добавлять пекарню, график опозданий или другие произвольные сценарии. Это не задача внутренней проверки через выгрузку.",
+        "Не включать иконку, модуль, SVG-42, бета-отзывы или хронологию разработки. Внутренние записи не меняют текущее действие пользователя.",
+        "Не добавлять независимую проверку, подтверждение достоверности или рассказ о происхождении справки. Это не запрошено и не помогает операции.",
+        "Оценивать смысл и полезность для заданного читателя, без обязательных заголовков, точной формулировки или длины. Сохранять существенные условия; не требовать все сведения только потому, что они даны. Проверять atomic mandatory независимо. Не требовать все факты источника. Практическое объяснение среза и исключения фильтров требуется; энциклопедическое определение CSV/UTC запрещено. Сохранение заданного уведомления о данных не считать лишним юридическим дисклеймером. Не добавлять необоснованных оценок размера файла, скорости, стоимости или политики хранения журнала."
+      ]
     }
   ],
   "triggers": [
@@ -383,6 +572,16 @@
       "id": "TT13",
       "activate": false,
       "why": "A commit message belongs to the change workflow, not to the documentation set."
+    },
+    {
+      "id": "TT14",
+      "activate": true,
+      "why": "An ordinary request to produce a reader-facing README from local code/package/release sources should select the documentation method without naming it. A load/read trace in the enabled collection is required to establish discovery."
+    },
+    {
+      "id": "TT15",
+      "activate": false,
+      "why": "The nearby task changes only Python implementation and requests no documentation. Code work should not acquire a README workflow; use actual load/read evidence rather than self-report."
     }
   ]
 }

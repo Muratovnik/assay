@@ -34,7 +34,7 @@ someone else's words.
 `rewrite` compares fenced blocks, inline code spans, link destinations and the
 frontmatter as a multiset: the same blocks must all still be there, in any
 order, under any heading. Table rows and blockquotes are not protected, because
-restructuring them is the point of a rewrite — but an inline-code command inside a simple table cell
+the mode permits restructuring them — but an inline-code command inside a simple table cell
 is still compared when the scanner recognizes it. Do not assume this covers
 complex table/HTML syntax.
 
@@ -42,6 +42,28 @@ Table protection is deliberately coarse: the whole row is compared, so editing
 the prose in a description cell is reported as a change. That is the safe
 direction for a copyedit. If the wording in a cell genuinely has to change, make
 that edit deliberately rather than expecting the check to bless it.
+
+## Intentional removal and retained meaning
+
+The script's `rewrite` mode checks that *all* recognized protected content remains.
+It does not decide which material belongs in a rewritten document. An authorized
+rewrite may remove an unnecessary example or section, including its code or links;
+the full-file check will correctly report those removed regions as `fail` under
+its narrower contract. Do not restore irrelevant content just to obtain exit `0`.
+
+Review each reported difference against the requested scope. Distinguish a
+deliberate whole-section removal from an accidentally changed command, identifier
+or destination that should remain. Check retained material against the original,
+including prerequisites, qualifier scope, command-to-section relationships and
+required notices. A legitimate deletion does not excuse corruption elsewhere.
+If material moves, verify an accessible destination and sufficient local context.
+Do not describe the whole file as structurally preserved when the check failed.
+
+Keep the checker and its strict exit codes conservative. A task-specific decision
+can accept an intentional deletion after review without changing `fail` to `pass`,
+weakening a project gate or using `--allow-unverified`. If an actual required gate
+conflicts with the authorized rewrite, report that contract conflict. Copyediting
+does not gain deletion authority from the existence of `rewrite` mode.
 
 ## Statuses and exit codes
 
