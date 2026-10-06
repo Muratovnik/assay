@@ -156,14 +156,26 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             raise aa.ContractError(
                 "compatibility fixture: Codex reviewer lost read-only sandbox"
             )
-        header = claude.split("\n---\n", 1)[0]
-        if "tools: Read, Grep, Glob, ToolSearch, Bash" not in header:
+        header, body = claude.split("\n---\n", 1)
+        if "\ntools: Read, Grep, Glob\n" not in header + "\n":
             raise aa.ContractError(
-                "compatibility fixture: Claude reviewer cannot run its oracle"
+                "compatibility fixture: Claude reviewer is not a bounded reader"
             )
         if "permissionMode: plan" not in header:
             raise aa.ContractError(
                 "compatibility fixture: Claude reviewer lost plan mode"
+            )
+        if "Capabilities unavailable in this projection: read-only-oracle" not in body:
+            raise aa.ContractError(
+                "compatibility fixture: Claude reviewer hides its unavailable oracle"
+            )
+        if "You may run the caller's declared read-only oracle" in body:
+            raise aa.ContractError(
+                "compatibility fixture: Claude reviewer is told to run an oracle it lacks"
+            )
+        if "You may run the caller's declared read-only oracle" not in codex:
+            raise aa.ContractError(
+                "compatibility fixture: Codex reviewer lost its oracle instruction"
             )
         profile = json.loads(source.decode("utf-8", "strict"))
         if "read-only-oracle" not in profile["capabilities"]:

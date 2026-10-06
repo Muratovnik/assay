@@ -59,6 +59,13 @@ level, no machine path and no runtime state. Codex skills project only to the
 native `~/.agents/skills` root; Claude links through that same native entry.
 Never manage Codex's `.system` directory.
 
+A capability a client surface cannot hold inside the profile's boundary is
+rendered as unavailable there, not granted with a configuration the client
+ignores. The profile keeps the capability; that projection names it unavailable,
+omits its tools and any tool that extends a session at runtime, and uses the
+profile's instructions conditioned `without` it. The table of such surfaces lives
+in the generator with the client facts that justify it.
+
 The link lifecycle may create or remove only exact catalogued targets. It refuses
 real directories, foreign links, modified adapters and reparse-point ancestors.
 It does not package anything or keep install state.

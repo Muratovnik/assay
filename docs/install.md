@@ -30,6 +30,28 @@ dependencies from this field. The source gate copies the collection and each
 singleton into temporary layouts to check Markdown resource boundaries; it does
 not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
+Hook-backed features — prompt hints, the session reminder, the routing guard and
+the [feedback recorder](how-to/feedback-capture.md) — exist only where
+`hooks/runtime` and `skills/route-subagents/scripts` are present: the two plugin
+routes and a full checkout. On a skills-only route, invoke a method explicitly in
+the client's usual way and keep feedback cases in the task's own notes; nothing
+else needs installing to continue.
+
+## Check what a session can use
+
+- **Which copy is active.** Compare the skills the client itself lists with the
+  catalogue. A name listed twice means two installed copies; Codex keeps both,
+  so do not assume which one a session selects. Remove or disable the copy you
+  do not intend to use, through its owning route.
+- **Hooks.** `python -I -B hooks/runtime/cli.py doctor --client claude` (or
+  `codex`) reports the hook configuration it can read, not trust, permissions or
+  native execution.
+- **Missing peers.** A link to a skill that is not installed marks that part of a
+  method as unavailable. Continue with the available part and say what is
+  missing; do not install a peer in the middle of a task.
+- **Evidence levels.** An explicit invocation shows that the method can run on
+  that route, not that the client would select it automatically.
+
 ## Automatic skill reminders
 
 The full plugin ships separate generated manifests for Claude Code
@@ -80,6 +102,14 @@ Codex reads skills from `.agents/skills` in the project, walking up to the
 repository root, and from `$HOME/.agents/skills` for your user account. Its agent
 definitions live in `~/.codex/agents/*.toml`, which the plugin route does not
 write: for the profiles, use the symlink installer below.
+
+Codex shows the model an initial list of skill names and descriptions within a
+budget of about 2% of the context window, or 8,000 characters when the window is
+unknown. Past that budget it shortens descriptions first and then omits skills
+with a warning; a selected skill still loads its full `SKILL.md` (checked against
+[Codex skills documentation](https://developers.openai.com/codex/skills) on
+2026-10-06). Assay's fourteen descriptions take about 3,900 characters and state
+when to use a skill before when to skip it.
 
 ## Any agent, through the skills CLI
 

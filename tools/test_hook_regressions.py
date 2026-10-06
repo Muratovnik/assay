@@ -95,13 +95,15 @@ class HookLanguageTests(unittest.TestCase):
                 self.assertEqual([], activation.select(prompt, self.rules))
 
     def test_legacy_and_restored_context_remain_english(self):
-        for event in (
-            {"hook_event_name": "SessionStart", "source": "startup"},
-            {"hook_event_name": "PreToolUse", "tool_name": "Agent"},
-            {"hook_event_name": "PreToolUse", "tool_name": "spawn_agent"},
+        routing = {"ASSAY_ROUTING_CONFIG": "routing.json"}
+        for event, environment, expected in (
+            ({"hook_event_name": "SessionStart", "source": "startup"}, {}, "Assay is installed."),
+            ({"hook_event_name": "SessionStart", "source": "startup"}, routing, "route-subagents"),
+            ({"hook_event_name": "PreToolUse", "tool_name": "Agent"}, {}, "route-subagents"),
+            ({"hook_event_name": "PreToolUse", "tool_name": "spawn_agent"}, {}, "route-subagents"),
         ):
-            text = reminder(event, {})["hookSpecificOutput"]["additionalContext"]
-            self.assertIn("route-subagents", text)
+            text = reminder(event, environment)["hookSpecificOutput"]["additionalContext"]
+            self.assertIn(expected, text)
             self.assertNotRegex(text, r"[\u0400-\u04ff]")
         text = activation.context(["audit"], self.rules, restored=True)
         self.assertIn("Previous request suggested independent-audit", text)
@@ -221,7 +223,7 @@ class HookCommandTests(unittest.TestCase):
                         self.assertIsNone(error)
                         context = result["hookSpecificOutput"]["additionalContext"]
                         self.assertIn("Assay is installed.", context)
-                        self.assertIn("route-subagents", context)
+                        self.assertIn("does not authorize delegation", context)
                         self.assertEqual(suggested, "Previous request suggested code-change" in context)
 
     def test_session_compact_restore_consumes_pending_hint_once(self):

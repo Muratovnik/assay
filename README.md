@@ -35,8 +35,9 @@ proof of activation. Each row links to the method itself.
 | [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
 
 Two agent profiles ship as capability boundaries rather than personas.
-`evidence-reviewer` reviews a frozen packet through a read-only oracle and
-returns a verdict; `official-docs-researcher` answers one bounded question from
+`evidence-reviewer` reviews a frozen packet and returns a verdict, rerunning a
+read-only oracle where the client keeps it read-only and otherwise reading the
+packet's receipts; `official-docs-researcher` answers one bounded question from
 primary documentation. Neither pins a model.
 
 > [!NOTE]
@@ -116,6 +117,9 @@ falling back to a shell.
 
 - [Installing assay](docs/install.md) — per-client detail, uninstalling and upgrading.
 - [Upgrading a linked install](docs/how-to/upgrade-linked-install.md) — moving a symlink install to a newer revision, and the way back if it goes wrong.
+- [Stating project conditions](docs/how-to/project-conditions.md) — a short fragment for your project's instructions so agents stop guessing stage, contracts and dependency policy.
+- [Recording feedback cases](docs/how-to/feedback-capture.md) — keeping corrections and acceptable examples locally for later review, without another model.
+- [Guarding tests and check configuration](docs/how-to/project-guards.md) — client settings a project can use to require approval for edits to its checks.
 - [How assay is put together](docs/architecture.md) — the inventory, the discovery topology and the guarded install lifecycle.
 - [Why one source reaches several clients](docs/explanation/discovery-topology.md) — why a skill is linked and a profile rendered, and what each choice costs.
 - [What the evaluations establish](docs/evaluation.md) — what each skill's `evals/` directory proves and does not prove.

@@ -67,10 +67,12 @@ other skills do not restate it.
 
 Profiles are capability boundaries, not roles with a model attached. The Codex
 adapter asks for a read-only sandbox and the Claude adapter uses plan mode with a
-capability-derived tool list. Only the evidence reviewer receives `Bash`, because
-its declared oracle has to be executable, and its instructions still forbid
-mutating commands. An adapter's requested sandbox is configuration: verify the
-effective session policy rather than assuming a parent process left it intact.
+capability-derived tool list. Only the evidence reviewer declares an executable
+oracle. Codex runs it inside the read-only sandbox; Claude ignores a plugin
+subagent's permission mode, so the Claude projection names the oracle unavailable,
+keeps only reading tools and reads the caller's receipts instead. An adapter's
+requested sandbox is configuration: verify the effective session policy rather
+than assuming a parent process left it intact.
 
 ## Routing advice
 
@@ -159,4 +161,7 @@ optional hook state; `route-subagents` still owns all mandatory routing decision
 client capability facts and the existing transactional store. Declarative
 `hooks/activation-rules.toml` references catalogue IDs, not duplicate methods.
 `tools/assay.py render` generates both native manifests with one command per event.
-See [the hook contract](how-to/hooks.md) for boundaries and evidence limitations.
+It also owns the optional [feedback recorder](how-to/feedback-capture.md): explicit
+records of corrections and allowed examples, with correction-grammar capture off
+by default. See [the hook contract](how-to/hooks.md) for boundaries and evidence
+limitations.

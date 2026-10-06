@@ -11,7 +11,9 @@ score. An undocumented capability is unknown until examined, not automatically
 absent. A maintained alternative is not itself a reason to replace working code.
 
 For a material adoption consider integration, maintenance, licensing, security,
-operating constraints and replacement/migration costs where they affect fit.
+operating constraints and replacement/migration costs where they affect fit. Taking
+a specific fragment or asset follows the
+[borrowing procedure](component-evidence.md#borrow-a-specific-resource).
 Different dependencies or more popular products need an in-scope benefit.
 Learning from a product does not authorize adopting its code, service or features.
 An approved product policy outranks an appealing external convention.
@@ -22,6 +24,12 @@ Separate disagreement about facts, definitions, methods, interpretation and time
 Check configurations, populations and benchmarks before treating different
 measurements as incompatible. Seek evidence capable of changing the conclusion,
 without requiring an opponent for an uncontested fact or manufacturing balance.
+For a contested or load-bearing conclusion, name the alternative it was weighed
+against and the observation that distinguishes them, preferring evidence already
+available. Search for a counterexample or null result only when no such basis
+exists or it is stale, and record the query in the evidence. While competing
+explanations remain equally supported keep them open; there is no minimum number
+of hypotheses or queries for a class of conclusions.
 
 For a causal claim consider plausible alternatives and what observation would
 distinguish them. Chronology, correlation or an actor's explanation may be useful

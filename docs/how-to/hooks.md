@@ -5,6 +5,13 @@ models, install dependencies, launch advisors, read transcripts or modify client
 settings. Their text and any subsequent agent work still consume context/quota.
 Skills-only installations do not install hooks.
 
+User corrections and acceptable examples can be kept as local feedback cases by
+an explicit `record` command. See [feedback capture](feedback-capture.md) for
+storage modes, the optional correction-hook trigger, review and native
+Claude/Codex/Cursor/Gemini adapters. This is separate from the technical reminder
+state described below; automatic capture is off by default and nothing confirms
+failures automatically.
+
 ## Install, enable and verify separately
 
 The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
@@ -85,15 +92,35 @@ Only the first request paragraph is considered. This deliberately misses some
 indirect requests rather than inventing a universal intent classifier. It is
 still a heuristic, not an authorization mechanism or prompt-injection boundary.
 
+Two rules accept non-imperative lookups for an existing solution: `reuse-lookup`
+(`посмотри/проверь, есть ли готов…`) and `reuse-question` (`можно ли
+переиспользовать…` or `…использовать/взять готов…`). After `готов…` both require
+a named kind of solution — implementation, solution, library, behavior, code,
+component, module, package, tool, parser, validator, algorithm, mechanism, asset,
+sprite, template, utility, function, class, plugin or analogue — because
+`готовый` also means "finished", as in a finished build or a ready token. Both
+select evidence-research and can be disabled separately. Other question forms
+still abstain. Replay of a wording shows what this grammar recognizes, not which
+method a client selects from skill descriptions.
+
 A suggestion asks to reuse sufficient existing research/plans and preserve the
 user's scope. It never turns a plan/review into permission to edit. It does not
 claim to load a skill or assume that a particular MCP tool exists. Even an
 observed Skill load would not prove compliance with its method.
 
-The session and delegation reminders reuse `route-subagents`' existing guidance.
+The session reminder is three sentences: use matching installed skills; when the
+user requests subagents, use `route-subagents` before substantial solo work; no
+delegation is authorized by it. The planning step stays in every session because
+the delegation hint recognizes only narrow imperatives such as "use subagents",
+and the reminder before a launch arrives after solo work may have started. The
+rest of the routing checklist is added at session start only when
+`ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the reminder before each
+launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
-failures. There is no universal blocking Stop hook.
+failures. There is no universal blocking Stop hook. Assay does not ship a hook
+that guards project paths; to require approval for edits to tests or check
+configuration, see [project guards](project-guards.md).
 
 ## Optional state and privacy
 
@@ -115,12 +142,16 @@ second list of skill definitions. Explicit-only skill selections are derived
 from the catalogue. Disabling a rule also suppresses its explicit suggestion;
 that does not prevent the user or model from using the skill directly.
 
-Small namespaced records reuse the existing `PipelineStore` SQLite transactions,
-path checks and expiry, not a new storage engine. Each hook namespace is capped
-at 128 records with a 24-hour lifetime. Records contain hashes, rule IDs, event
-names and decision classes, never prompts, paths, arguments or transcript text.
-`record_events: true` enables bounded technical event recording; it is off by
-default. Its evidence label is `command_input_unattested`, not native execution.
+Small namespaced technical reminder records reuse the existing `PipelineStore`
+SQLite transactions, path checks and expiry, not a new storage engine. Each such
+hook namespace is capped at 128 records with a 24-hour lifetime. These records
+contain hashes, rule IDs, event names and decision classes, never prompts, paths,
+arguments or transcript text. `record_events: true` enables bounded technical
+event recording; it is off by default. Its evidence label is
+`command_input_unattested`, not native execution. The separate
+`feedback_capture` and `feedback_trigger` options have their own
+[content consent, trigger and retention](feedback-capture.md), and do not share
+the routing database or these namespace limits.
 
 Scope includes client, session, working directory and agent identity. Codex also
 uses transcript *identity* without opening that file; absent both agent and
@@ -272,6 +303,17 @@ They do not measure skill usefulness, actual client load, sandbox effectiveness,
 model adherence or quota savings. No model benchmark/eval is required by this change.
 Use ordinary work incidents to add sanitized regressions, and keep native observation
 and human assessment separate from a green unit suite.
+
+To see how the hint grammar covers your own wording, collect the first paragraphs
+of 30–50 real requests, remove code, paths, names and secrets, and write one
+`{"hook_event_name":"UserPromptSubmit","session_id":"replay","cwd":".","prompt":"..."}`
+object per line. Replay it and compare each result with the method you expected.
+A missed request becomes a candidate rule only together with a nearby
+should-not-fire wording, both added to `tools/fixtures/hooks/prompts.json` and
+checked against the existing controls. The share of hinted requests describes the
+grammar on that sample, not which skill a client selects from descriptions; if
+methods are still chosen late with good coverage, examine the cases rather than
+widening the grammar further.
 
 ## Sources and adopted mechanisms
 

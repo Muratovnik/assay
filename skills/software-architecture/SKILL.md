@@ -18,7 +18,9 @@ workflow, automatic audit gate or a second source of product requirements.
 Recover the requested outcome, scope, adopted rules, available evidence and
 allowed effects. Reuse supplied answers and inspect relevant existing artifacts
 before asking for missing facts. Resolve only uncertainty capable of changing a
-material decision; name nonblocking assumptions and continue useful work.
+material decision; name nonblocking assumptions and continue useful work. Stage,
+public contracts, dependency policy and expected extensions are among the
+[conditions a project should supply](../implementation-planning/references/scope-and-readiness.md#conditions-the-project-should-supply).
 
 A proposal or placement question does not authorize application changes. A request
 that already authorizes implementation needs no extra approval ceremony. Use
@@ -56,6 +58,9 @@ public contract, placement, check and condition for reconsideration. Include the
 cost and the simplest viable alternative; do not manufacture alternatives or
 numerical requirements. Physical, semantic, deployment and trust boundaries are
 different choices. A module need not be a service, package or separate repository.
+For a choice in planning's
+[costly decision categories](../implementation-planning/references/scope-and-readiness.md#costly-decision-categories),
+add its rollback and staging, or state why they do not apply.
 
 Keep observed implementation, documented intent, inference and unknowns distinct.
 Likewise distinguish proposed, owner-adopted and implementation-verified decisions.

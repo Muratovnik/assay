@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "CR01",
+      "prompt": "Make load_settings(path) read the release settings from a TOML file and return them as a dict. Settings files are small and trusted.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nThe project supports Python 3.11 and later.\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "settings.py": "def load_settings(path):\n    raise NotImplementedError\n",
+        "release.toml": "channel = \"stable\"\nretries = 3\n\n[mirror]\nurl = \"https://example.invalid/releases\"\n",
+        "test_settings.py": "import unittest\nfrom pathlib import Path\nfrom settings import load_settings\n\nclass SettingsTests(unittest.TestCase):\n    def test_release_file(self):\n        data = load_settings(Path(__file__).with_name('release.toml'))\n        self.assertEqual(data['channel'], 'stable')\n        self.assertEqual(data['retries'], 3)\n        self.assertEqual(data['mirror']['url'], 'https://example.invalid/releases')\n"
+      }
+    },
+    {
+      "id": "CR02",
+      "prompt": "Implement discount_for(order): orders above 100 get 5%, loyalty members get an additional 2%, and the total discount never exceeds 7%. Return the discount amount.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "pricing.py": "from dataclasses import dataclass\n\n@dataclass\nclass Order:\n    total: float\n    loyalty_member: bool = False\n\n\ndef discount_for(order):\n    raise NotImplementedError\n",
+        "test_pricing.py": "import unittest\nfrom pricing import Order, discount_for\n\nclass DiscountTests(unittest.TestCase):\n    def test_cases(self):\n        for order, expected in [\n            (Order(100), 0.0),\n            (Order(200), 10.0),\n            (Order(50, True), 1.0),\n            (Order(200, True), 14.0),\n        ]:\n            with self.subTest(order=order):\n                self.assertAlmostEqual(discount_for(order), expected)\n"
+      }
+    },
+    {
+      "id": "CR03",
+      "prompt": "Add import_users(rows) that stores each row through the existing repository. A consumer of the import must never see a user with an invalid email or a negative age.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nUserRepository.add is the agreed definition of a valid email and age in this project.\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "users.py": "class UserRepository:\n    def __init__(self):\n        self.users = []\n\n    def add(self, email, age):\n        if '@' not in email or email.startswith('@') or email.endswith('@'):\n            raise ValueError('invalid email')\n        if age < 0:\n            raise ValueError('negative age')\n        self.users.append({'email': email, 'age': age})\n\n\ndef import_users(rows, repository):\n    raise NotImplementedError\n",
+        "test_users.py": "import unittest\nfrom users import UserRepository\n\nclass RepositoryTests(unittest.TestCase):\n    def test_valid_user_is_stored(self):\n        repository = UserRepository()\n        repository.add('a@example.invalid', 30)\n        self.assertEqual(1, len(repository.users))\n\n    def test_invalid_users_are_rejected_and_not_stored(self):\n        for email, age in [('no-at-sign', 30), ('@example.invalid', 30), ('a@example.invalid', -1)]:\n            repository = UserRepository()\n            with self.subTest(email=email, age=age):\n                with self.assertRaises(ValueError):\n                    repository.add(email, age)\n                self.assertEqual([], repository.users)\n"
+      }
+    },
+    {
+      "id": "CR04",
+      "prompt": "Add load_level(path) that reads a level JSON file and registers it with the LevelRegistry. Right now broken level files crash the game much later, during play.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "levels.py": "import json\n\n\nclass LevelRegistry:\n    \"\"\"Consumers read name (non-empty str) and size (positive int) without checks.\"\"\"\n\n    def __init__(self):\n        self.levels = {}\n\n    def register(self, level):\n        self.levels[level['name']] = level\n\n    def area(self, name):\n        size = self.levels[name]['size']\n        return size * size\n\n\ndef load_level(path, registry):\n    raise NotImplementedError\n",
+        "saves.py": "import json\n\n\ndef load_save(path):\n    with open(path, encoding='utf-8') as stream:\n        return json.load(stream)\n",
+        "levels/forest.json": "{\"name\": \"forest\", \"size\": 12}\n",
+        "levels/broken.json": "{\"name\": \"\", \"size\": \"12\"}\n",
+        "test_levels.py": "import unittest\nfrom pathlib import Path\nfrom levels import LevelRegistry, load_level\n\nclass LevelTests(unittest.TestCase):\n    def test_valid_level_is_registered(self):\n        registry = LevelRegistry()\n        load_level(Path(__file__).with_name('levels') / 'forest.json', registry)\n        self.assertEqual(144, registry.area('forest'))\n"
+      }
+    },
+    {
+      "id": "CR05",
+      "prompt": "Add cache_key(params) that returns a short hexadecimal key for a dict of string request parameters. Equal dicts must give the same key in separate runs of the program, because the key names files in the on-disk cache.",
+      "context": "The supplied files are a task-owned Python project. Edit within this project and use its existing tools. Report actual checks and unresolved requirements.",
+      "files": {
+        "AGENTS.md": "# Project instructions\nThe project supports Python 3.11 and later.\nUse Python's existing unittest suite: python -B -m unittest discover -p 'test_*.py'.\nComplete this gate for code changes. Do not add dependencies without a stated need.\nPreserve public APIs and keep unrelated work unchanged.\n",
+        "cache.py": "def cache_key(params):\n    raise NotImplementedError\n",
+        "test_cache.py": "import unittest\nfrom cache import cache_key\n\nclass CacheKeyTests(unittest.TestCase):\n    def test_order_does_not_matter(self):\n        self.assertEqual(cache_key({'a': '1', 'b': '2'}), cache_key({'b': '2', 'a': '1'}))\n\n    def test_different_params_differ(self):\n        self.assertNotEqual(cache_key({'a': '1'}), cache_key({'a': '2'}))\n"
+      }
+    }
+  ]
+}

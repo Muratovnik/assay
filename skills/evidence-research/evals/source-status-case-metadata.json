@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "cases": [
+    {
+      "id": "SS01",
+      "group": "source-status-recall",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the recalled-knowledge status; not a production incident.",
+      "rationale": "Recall without an opened source must be labelled and kept below verified, especially for an external document.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS02",
+      "group": "source-status-uncontested",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored for the discriminating-basis rule; not a production incident.",
+      "rationale": "An uncontested fact settled by supplied documents needs no counter-search ritual.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

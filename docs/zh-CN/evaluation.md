@@ -102,6 +102,10 @@ python tools/eval_assets.py prepare --cases skills/<skill>/evals/cases.json --ca
 标识的是输入，而不是测量版本：请把评分标准、评判配置、元数据以及划分与暴露历史
 另行保存在协调者现有的证据记录中。
 
+通过[反馈记录](../how-to/feedback-capture.md)保存的案例不是评测数据。案例只能在
+脱敏后手动进入 `evals/` 用例集合，`purpose` 设为 `regression` 或 `should-not-fire`，
+`source` 指明已复查的记录；任何记录都不会自动变成评测用例、规则或方法改动。
+
 ## 从配对试验到迭代改进
 
 新建或实质修改用例集合或评测者时，使用

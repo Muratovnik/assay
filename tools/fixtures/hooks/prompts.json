@@ -59,5 +59,22 @@
   {"prompt":"# Use subagents\n\nExplain delegation","rules":[]},
   {"prompt":"Implement the change.\n\nUse subagents.","rules":["code-change"]},
   {"prompt":"Implement the parser; «use subagents","rules":["code-change"]},
-  {"prompt":"Research \"Package A\" using subagents.","rules":["research","delegation"]}
+  {"prompt":"Research \"Package A\" using subagents.","rules":["research","delegation"]},
+  {"prompt":"Посмотри, есть ли готовые реализации pathfinding для этого движка, прежде чем писать свою.","rules":["reuse-lookup"]},
+  {"prompt":"Проверь, есть ли готовый парсер TOML в стандартной библиотеке","rules":["reuse-lookup"]},
+  {"prompt":"Можно ли переиспользовать поведение мобов из ванильного движка вместо своего AI?","rules":["reuse-question"]},
+  {"prompt":"Можно ли использовать готовый валидатор схем вместо своего?","rules":["reuse-question"]},
+  {"prompt":"Проверь, есть ли готовое поведение мобов в движке, прежде чем писать своё","rules":["reuse-lookup"]},
+  {"prompt":"Можно ли взять готовые спрайты из соседнего проекта?","rules":["reuse-question"]},
+  {"prompt":"Можно ли использовать готовую библиотеку для валидации схем?","rules":["reuse-question"]},
+  {"prompt":"Посмотри, есть ли в логе ошибка","rules":[]},
+  {"prompt":"Проверь, есть ли в логе ошибка","rules":[]},
+  {"prompt":"```text\nПосмотри, есть ли готовые реализации\n```","rules":[]},
+  {"prompt":"> Можно ли переиспользовать этот код?\n\nОбъясни эту цитату","rules":[]},
+  {"prompt":"Можно ли запустить тесты локально?","rules":[]},
+  {"prompt":"Можно ли взять эту задачу в работу?","rules":[]},
+  {"prompt":"Объясни, можно ли использовать готовые решения","rules":[]},
+  {"prompt":"Проверь, есть ли готовый билд на CI","rules":[]},
+  {"prompt":"Посмотри, есть ли готовые ответы от сервера в логе","rules":[]},
+  {"prompt":"Можно ли использовать готовый токен из .env для теста?","rules":[]}
 ]

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "skill_name": "software-architecture",
+  "cases": [
+    {
+      "id": "CD01",
+      "group": "costly-decisions-persisted-format",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the costly decision categories; not a production incident.",
+      "rationale": "A small feature diff changes a persisted public format; the category must prompt a consequence and authority check.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "CD02",
+      "group": "costly-decisions-local-rename",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored for the costly decision categories; not a production incident.",
+      "rationale": "An internal rename inside one module must not trigger the heavier treatment.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

@@ -8,18 +8,25 @@ import sys
 
 SESSION_REMINDER = (
     "Assay is installed. Apply matching installed skills: read their SKILL.md "
-    "and follow the applicable workflow; skip unrelated skills. When the user "
-    "requests subagents, use route-subagents before substantial solo work to "
-    "choose useful outcomes and launch timing. Revisit newly ready dependencies "
-    "and material verification; do not create token delegations. Before every "
-    "authorized subagent launch, including replacements and reviewers, the root "
-    "agent must apply route-subagents (possibly named assay:route-subagents). "
-    "Reading it earlier is not a routing decision for a new packet. Select the "
-    "child model and supported effort deliberately through its workflow, which "
-    "weighs full-chain cost against quality using available evidence, and use the "
-    "smallest sufficient context. Reuse valid plan evidence. Preserve explicit "
-    "user choices. This reminder "
-    "does not authorize delegation; workers must not spawn further agents."
+    "and follow the applicable workflow, skip unrelated skills, and when the user "
+    "requests subagents use route-subagents before substantial solo work to choose "
+    "useful outcomes and launch timing. This reminder does not authorize "
+    "delegation; workers must not spawn further agents."
+)
+# The planning step stays in every session: the request hint recognizes only
+# narrow imperatives, and the launch reminder arrives after solo work started.
+# The routing checklist is added at session start only where routing is
+# configured; otherwise it arrives before every launch.
+ROUTING_SESSION_REMINDER = (
+    " Revisit newly ready "
+    "dependencies and material verification; do not create token delegations. "
+    "Before every authorized subagent launch, including replacements and "
+    "reviewers, the root agent must apply route-subagents (possibly named "
+    "assay:route-subagents). Reading it earlier is not a routing decision for a "
+    "new packet. Select the child model and supported effort deliberately through "
+    "its workflow, which weighs full-chain cost against quality using available "
+    "evidence, and use the smallest sufficient context. Reuse valid plan evidence. "
+    "Preserve explicit user choices."
 )
 DELEGATION_REMINDER = (
     "Assay routing checkpoint: route-subagents is required for every authorized "
@@ -60,7 +67,8 @@ def reminder(event: dict, environ=None) -> dict:
     if name == "SessionStart" and event.get("source") in (
         "startup", "resume", "clear", "compact", "fork"
     ):
-        context = SESSION_REMINDER
+        routing = (os.environ if environ is None else environ).get("ASSAY_ROUTING_CONFIG")
+        context = SESSION_REMINDER + (ROUTING_SESSION_REMINDER if routing else "")
     elif name == "PreToolUse" and event.get("tool_name") in (
         "spawn_agent", "Agent", "Task"
     ):

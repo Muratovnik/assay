@@ -2,6 +2,7 @@
 
 CommonMark parsing belongs to markdown-it-py. This module owns only Assay's
 resource-boundary policy, not an installer, dependency resolver or renderer.
+Section links are checked against GitHub-style heading anchors.
 """
 from __future__ import annotations
 
@@ -9,6 +10,7 @@ import os
 import shutil
 import stat
 import tempfile
+import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
@@ -34,8 +36,7 @@ class _HTMLReferences(HTMLParser):
             )
 
 
-def markdown_targets(text: str) -> list[str]:
-    """Extract real links, excluding examples inside code spans and fences."""
+def _parse(text: str) -> list:
     try:
         from markdown_it import MarkdownIt
     except ImportError as error:
@@ -46,8 +47,32 @@ def markdown_targets(text: str) -> list[str]:
     match = FRONTMATTER.match(text)
     if match:
         text = text[match.end():]
+    return MarkdownIt("commonmark").parse(text)
+
+
+def heading_anchors(text: str) -> set[str]:
+    """Return GitHub-style heading anchors, with -1, -2 for repeated headings."""
+    tokens = _parse(text)
+    counts: dict[str, int] = {}
+    anchors: set[str] = set()
+    for index, token in enumerate(tokens):
+        if token.type != "heading_open":
+            continue
+        title = "".join(child.content for child in tokens[index + 1].children or []
+                        if child.type in {"text", "code_inline"})
+        base = "".join(character for character in title.strip().lower()
+                       if character in " -_" or unicodedata.category(character)[0] in "LN")
+        base = base.replace(" ", "-")
+        count = counts.get(base, 0)
+        anchors.add(base if not count else f"{base}-{count}")
+        counts[base] = count + 1
+    return anchors
+
+
+def markdown_targets(text: str) -> list[str]:
+    """Extract real links, excluding examples inside code spans and fences."""
     result: list[str] = []
-    pending = list(MarkdownIt("commonmark").parse(text))
+    pending = list(_parse(text))
     while pending:
         token = pending.pop()
         attribute = {"link_open": "href", "image": "src"}.get(token.type)
@@ -85,13 +110,32 @@ def markdown_problems(path: Path, root: Path) -> list[str]:
         targets = markdown_targets(path.read_text(encoding="utf-8", errors="strict"))
     except (OSError, UnicodeError, ContractError) as error:
         return [f"{label}: {error}"]
+    anchors: dict[Path, set[str]] = {}
     for target in targets:
         try:
             raw = local_target(target)
+            parsed = urlsplit(target)
             if raw is not None:
-                (path.parent / raw).resolve(strict=True).relative_to(root.resolve(strict=True))
+                resolved = (path.parent / raw).resolve(strict=True)
+                resolved.relative_to(root.resolve(strict=True))
+            elif parsed.fragment and not parsed.scheme and not parsed.netloc:
+                resolved = path.resolve(strict=True)
+            else:
+                continue
         except (OSError, ValueError):
             problems.append(f"{label}: broken or out-of-root link {target!r}")
+            continue
+        fragment = unquote(parsed.fragment)
+        if not fragment or resolved.suffix != ".md" or not resolved.is_file():
+            continue
+        try:
+            if resolved not in anchors:
+                anchors[resolved] = heading_anchors(resolved.read_text(encoding="utf-8", errors="strict"))
+        except (OSError, UnicodeError, ContractError) as error:
+            problems.append(f"{label}: unreadable link target {target!r}: {error}")
+            continue
+        if fragment not in anchors[resolved]:
+            problems.append(f"{label}: link to a missing section {target!r}")
     return problems
 
 

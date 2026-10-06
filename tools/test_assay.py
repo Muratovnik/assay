@@ -281,7 +281,7 @@ class AgentAssetsTests(unittest.TestCase):
             with self.assertRaisesRegex(aa.ContractError, "never managed"):
                 aa.load_catalog(root)
 
-    def test_evidence_reviewer_adapters_can_run_a_read_only_oracle(self) -> None:
+    def test_evidence_reviewer_oracle_runs_only_where_the_surface_holds_it(self) -> None:
         catalog = aa.load_catalog(aa.ROOT)
         asset = next(
             item for item in catalog.assets if item.id == "profile/evidence-reviewer"
@@ -291,12 +291,38 @@ class AgentAssetsTests(unittest.TestCase):
         claude = aa.render_profile(source, asset, "claude").decode("utf-8")
         self.assertEqual("read-only", tomllib.loads(codex)["sandbox_mode"])
         self.assertIn("You may run the caller's declared read-only oracle", codex)
+        self.assertIn("Report the oracle you independently reran", codex)
+        self.assertNotIn("Capabilities unavailable", codex)
+        self.assertNotIn("did not rerun the oracle", codex)
+        # Claude ignores a plugin subagent's permissionMode, so its projection is
+        # a bounded reader: no shell, no runtime tool or skill loading.
         tool_line = next(line for line in claude.splitlines() if line.startswith("tools: "))
         self.assertEqual(
-            {"Read", "Grep", "Glob", "ToolSearch", "Bash", "Skill"},
-            {value.strip() for value in tool_line.removeprefix("tools: ").split(",")},
+            ["Read", "Grep", "Glob"],
+            [value.strip() for value in tool_line.removeprefix("tools: ").split(",")],
         )
-        self.assertIn("permissionMode: plan", claude)
+        self.assertIn("Capabilities unavailable in this projection: read-only-oracle, skill-discovery.", claude)
+        self.assertNotIn("You may run the caller's declared read-only oracle", claude)
+        self.assertNotIn("Report the oracle you independently reran", claude)
+        self.assertIn("read the snapshot-bound receipts in the packet", claude)
+        self.assertIn("that you did not rerun the oracle", claude)
+        self.assertIn("read the independent-audit criteria the caller includes or names by path", claude)
+
+    def test_conditional_profile_instructions_are_validated(self) -> None:
+        catalog = aa.load_catalog(aa.ROOT)
+        asset = next(
+            item for item in catalog.assets if item.id == "profile/evidence-reviewer"
+        )
+        document = json.loads((aa.ROOT / asset.path).read_text(encoding="utf-8"))
+        for bad in ({"text": "x", "requires": "primary-web-research"},
+                    {"text": "x", "requires": "read-only-oracle", "without": "skill-discovery"},
+                    {"text": "", "without": "read-only-oracle"},
+                    {"text": "x", "when": "read-only-oracle"},
+                    {"requires": "read-only-oracle"}):
+            with self.subTest(bad=bad):
+                broken = {**document, "instructions": [*document["instructions"], bad]}
+                with self.assertRaises(aa.ContractError):
+                    aa.render_profile(json.dumps(broken).encode("utf-8"), asset, "claude")
 
     def test_plan_is_native_deterministic_and_read_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

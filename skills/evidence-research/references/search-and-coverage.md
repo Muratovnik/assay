@@ -28,7 +28,9 @@ Where known relevant materials exist, use a diverse subset as a diagnostic probe
 For a missed item distinguish query exclusion, different terminology, absent
 indexing and legitimate scope exclusion. Adapt the relevant query or discovery
 route. Do not tune only to exact known titles, assume the probe set is complete,
-or label its recall as recall over the internet.
+or label its recall as recall over the internet. When a counterexample or null-result
+search is warranted follows
+[comparison and synthesis](comparison-and-synthesis.md#explain-disagreement-and-causation).
 
 Follow references, citations and repository trees when a likely source routes
 detail elsewhere. For a skill, inspect its applicable references, commands,

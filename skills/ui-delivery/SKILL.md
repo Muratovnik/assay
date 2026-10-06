@@ -3,7 +3,7 @@ name: ui-delivery
 description: Design, build, transfer, edit or review UI and its design artifacts, from operational screens to mockups, component libraries and their code. Covers user actions, shared states, reusable components, editability and visual clarity in any layout mode; skip backend-only work, tool installation and illustration without UI.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change implementation-planning independent-audit product-flow-mapping route-subagents"
+  assay-optional-skills: "code-change evidence-research implementation-planning independent-audit product-flow-mapping route-subagents"
 ---
 
 # UI delivery

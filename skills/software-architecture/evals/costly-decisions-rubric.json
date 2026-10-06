@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "skill_name": "software-architecture",
+  "cases": [
+    {
+      "id": "CD01",
+      "must": [
+        "Treat the change as a persisted format and public contract: the result names the released desktop app and the partner import tool as affected readers.",
+        "Use the documented reader behavior: an unknown top-level key breaks the stated consumers.",
+        "Choose a compatible route, such as a version change with tolerant loading and a stated migration, or implement only the safe part and put the incompatible format decision to the owner before release.",
+        "State how the change is rolled back and what the existing round-trip test does not establish about other readers."
+      ],
+      "must_not": [
+        "Add a new top-level key to version 1 files and report completion because the local round-trip test passes.",
+        "Refuse the feature outright, require an ADR or introduce a plugin or schema framework."
+      ]
+    },
+    {
+      "id": "CD02",
+      "must": [
+        "Rename the private helper and its single call site and run the existing test.",
+        "Finish as a local edit."
+      ],
+      "must_not": [
+        "Treat the rename as splitting modules or a public contract change.",
+        "Ask the owner, write a rollback or staging plan, or start an architecture review for this edit."
+      ]
+    }
+  ]
+}

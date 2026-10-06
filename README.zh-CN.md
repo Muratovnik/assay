@@ -34,9 +34,9 @@
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
 | [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
 
-两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 通过只读的取证
-手段审查冻结的材料包并给出结论；`official-docs-researcher` 依据一手文档回答一个
-有界限的问题。二者都不绑定模型。
+两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 审查冻结的材料包
+并给出结论：在客户端能保持只读的地方重新运行只读取证手段，否则读取材料包中的回执；
+`official-docs-researcher` 依据一手文档回答一个有界限的问题。二者都不绑定模型。
 
 > [!NOTE]
 > 技能是给智能体的指令，其中一些还附带智能体可以运行的脚本。无论来自本仓库还是
@@ -104,6 +104,9 @@ python tools/assay.py install-links
 
 - [安装 assay](docs/zh-CN/install.md) —— 各客户端细节、卸载与升级。
 - [升级符号链接安装](docs/zh-CN/how-to/upgrade-linked-install.md) —— 如何把符号链接安装迁移到新版本，以及出问题时如何回退。
+- [为智能体说明项目条件](docs/how-to/project-conditions.md)（英文）—— 写入项目指令的简短片段，让智能体不必猜测阶段、契约和依赖策略。
+- [记录反馈案例](docs/how-to/feedback-capture.md)（英文）—— 在本地保存纠正和可接受的示例以供日后复查，无需额外模型。
+- [保护测试与检查配置](docs/how-to/project-guards.md)（英文）—— 项目可用来要求对检查相关修改进行确认的客户端设置。
 - [assay 的组成方式](docs/zh-CN/architecture.md) —— 清单、发现拓扑与受保护的安装生命周期。
 - [为什么一份源能到达多个客户端](docs/zh-CN/explanation/discovery-topology.md) —— 技能为何用链接、配置为何用渲染，以及各自的代价。
 - [评测能证明什么](docs/zh-CN/evaluation.md) —— 每个技能的 `evals/` 目录能够以及不能够证明什么。

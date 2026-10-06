@@ -23,6 +23,56 @@ possible improvement. Carry exact version, compatibility, data and environment
 constraints into affected units. Incidental debt goes outside the active scope;
 necessary enabling work needs a clear connection to the requested result.
 
+## Establish a necessary capability
+
+Before choosing how to implement a change that introduces or relies on a
+guarantee no existing check covers — untrusted input at a boundary, a persisted
+state format or an external contract — establish which capability provides that
+guarantee, whether an existing one already does, and what remains unprovided.
+A fix inside a boundary that is already enforced and checked does not need this
+step.
+
+Start from the consumer: which inputs or states it must accept or reject and how
+a correct result differs from a plausible imitation. Then find the existing owner
+of that guarantee on the reachable path, such as a validator, schema, type,
+migration guard or check, and confirm the path actually invokes it. A capability
+present elsewhere in the project does not cover this path. Three outcomes are valid:
+
+- an existing capability covers the guarantee: use it and add no competitor;
+- it is missing and providing it is within the task's authority: provide it as
+  part of the change, preferring a fitting existing mechanism;
+- providing it exceeds the authority: deliver the authorized part and report the
+  unprovided guarantee as an unverified remainder, not as an optional extra.
+
+An improvement the requested result does not need stays a separate optional
+proposal and widens nothing. Example: an import endpoint whose consumer must
+reject malformed records has no validation on that path; the validator, existing
+or new, belongs to the requested guarantee. Control: fixing an off-by-one error in
+a date parser that existing tests already cover changes nothing at that boundary.
+
+## Conditions the project should supply
+
+Some conditions decide which choice is right but rarely appear in a request. Look
+for them before a decision that depends on them; an absent condition is not a
+license to substitute the usual value.
+
+| Condition | Observable fact: extract it yourself | Owner decision: do not infer it |
+| --- | --- | --- |
+| Stage and horizon | Release tags, migrations, consumers in other packages | Expected lifetime; whether a prototype may be replaced |
+| Criticality and risk | Deployment and data-handling configuration | Criticality, user base, acceptable risk and reversibility |
+| Critical areas | Protected paths and required gates in configuration | Which areas need extra care |
+| Dependencies | Installed versions, lock files, existing internal components | Dependency policy: licenses, bans, preferred components |
+| Public contracts | Package exports, CLI flags, schemas, events | Which contracts external consumers rely on |
+| Checks | Test locations, project gates, CI configuration | Required depth beyond the project's own gates |
+| Extensions and research | Announced roadmap items in project documents | Expected extension directions; question type and known validity threats |
+
+Extract an observable fact before asking about it. For a missing owner decision,
+name the assumption in the result and continue safe work; ask only when the
+assumption changes a choice that is costly to reverse. Keep each condition's
+source and date or revision; name a stale condition stale instead of applying it
+silently. The values belong in the project's own instructions; this method holds
+no project values.
+
 ## Check material changes to the contract
 
 Keep the desired outcome, chosen means, continuing constraints and authority of
@@ -47,6 +97,24 @@ review or faithful transfer can leave a broader goal unfinished without authoriz
 its implementation. Preserve that remainder and its continuation condition rather
 than dropping it or silently expanding the current assignment. No extra tracker,
 mandatory approval field or fixed document schema is required.
+
+### Costly decision categories
+
+Some choices are expensive to reverse whatever the diff size: architectural style;
+data schemas and storage formats; public contracts such as APIs, package exports,
+CLI interfaces, events and message schemas; language and stack; fundamental
+dependencies such as a framework, engine, ORM or transport; splitting into modules,
+packages or repositories; observability infrastructure; test infrastructure and
+check configuration; the security and permission model.
+
+A change in one of these categories is a reason to check its consequences and the
+current authority, not an automatic heavy process. Then either apply the fitting
+measures — alternatives, rollback, isolation, stages and an owner question before
+an irreversible step — or state why they do not apply, for example "internal
+boundary; no external consumer of this schema, checked in the package exports".
+A clearly documented incompatible change can be the right decision for a young
+system. Renaming an internal helper is not splitting modules. Choices outside
+these categories keep ordinary judgment of their consequences.
 
 ## Classify unknowns by the next decision
 

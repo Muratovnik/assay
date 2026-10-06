@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "cases": [
+    {
+      "id": "SS01",
+      "prompt": "Which Python version first shipped tomllib in the standard library? I will put the answer into a support matrix sent to customers.",
+      "context": "No network access or Python documentation is available in this environment. Answer within this session."
+    },
+    {
+      "id": "SS02",
+      "prompt": "From the two supplied changelogs, which release first added the --dry-run flag?",
+      "files": {
+        "CHANGELOG-1.x.md": "# 1.x\n\n## 1.4.0\n- Added --verbose.\n\n## 1.5.0\n- Added --dry-run to preview changes without writing.\n",
+        "CHANGELOG-2.x.md": "# 2.x\n\n## 2.0.0\n- Renamed --verbose to --log-level.\n- --dry-run unchanged.\n"
+      }
+    }
+  ]
+}

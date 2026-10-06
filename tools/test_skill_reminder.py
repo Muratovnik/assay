@@ -68,9 +68,28 @@ class ReminderTests(unittest.TestCase):
                 context = output["hookSpecificOutput"]
                 self.assertEqual({"hookEventName", "additionalContext"}, set(context))
                 self.assertEqual("SessionStart", context["hookEventName"])
-                self.assertIn("route-subagents", context["additionalContext"])
-                self.assertIn("does not authorize delegation", context["additionalContext"])
-                self.assertLess(len(context["additionalContext"]), 1000)
+                text = context["additionalContext"]
+                self.assertIn("does not authorize delegation", text)
+                self.assertIn("workers must not spawn further agents", text)
+                # Without configured routing the base reminder stays short but
+                # keeps the planning step for any wording of a subagent request;
+                # the launch reminder carries the routing checklist.
+                self.assertIn("route-subagents before substantial solo work", text)
+                self.assertNotIn("Before every authorized subagent launch", text)
+                self.assertLessEqual(len(re.findall(r"\.\s", text + " ")), 3)
+                self.assertLess(len(text), 360)
+
+    def test_configured_routing_adds_delegation_guidance_at_session_start(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / "routing.json"
+            config.write_text("{}", encoding="utf-8")
+            text = self.output({"hook_event_name": "SessionStart", "source": "startup"}, config)[
+                "hookSpecificOutput"]["additionalContext"]
+        self.assertTrue(text.startswith("Assay is installed."))
+        self.assertIn("Before every authorized subagent launch", text)
+        self.assertEqual(1, text.count("before substantial solo work"))
+        self.assertIn("does not authorize delegation", text)
+        self.assertLess(len(text), 1000)
 
     def test_delegation_aliases_remind_without_permission_or_argument_changes(self):
         for tool in ("spawn_agent", "Agent", "Task"):

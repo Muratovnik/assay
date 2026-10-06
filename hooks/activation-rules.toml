@@ -19,6 +19,21 @@ skill = "skill/evidence-research"
 priority = 90
 patterns = ['^(?:research|compare|investigate alternatives)\b', '^find\s+(?:existing|alternative)\b', '^(?:исследуй|сравни|изучи\s+(?:аналоги|существующие)|найди\s+(?:аналоги|готовые))\b', '^проведи\s+исследование\b']
 
+# A lookup for an existing solution phrased as a check or a reuse question is
+# still a request; explanation forms stay excluded. Each rule can be disabled
+# separately through `disabled_rules`.
+[[rules]]
+id = "reuse-lookup"
+skill = "skill/evidence-research"
+priority = 90
+patterns = ['^(?:посмотри|проверь),?\s+есть\s+ли\s+готов\w*\s+(?:реализаци|решени|библиотек|поведени|код|компонент|модул|пакет|инструмент|парсер|валидатор|алгоритм|механизм|ассет|спрайт|шаблон|утилит|функци|класс|плагин|аналог)']
+
+[[rules]]
+id = "reuse-question"
+skill = "skill/evidence-research"
+priority = 90
+patterns = ['^можно\s+ли\s+(?:переиспользовать|(?:взять|использовать)\s+готов\w*\s+(?:реализаци|решени|библиотек|поведени|код|компонент|модул|пакет|инструмент|парсер|валидатор|алгоритм|механизм|ассет|спрайт|шаблон|утилит|функци|класс|плагин|аналог))']
+
 [[rules]]
 id = "planning"
 skill = "skill/implementation-planning"

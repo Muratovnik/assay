@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "skill_name": "software-architecture",
+  "cases": [
+    {
+      "id": "CD01",
+      "prompt": "Add an optional tags list to saved projects and write it into the project file.",
+      "context": "The user authorizes implementing the feature in this repository. Report the change, checks and anything left for the owner.",
+      "files": {
+        "project_io.py": "import json\n\nFORMAT_VERSION = 1\n\n\ndef _norm(path):\n    return path.replace('\\\\', '/')\n\n\ndef save(project, path):\n    data = {'version': FORMAT_VERSION, 'name': project['name'], 'files': [_norm(p) for p in project['files']]}\n    with open(path, 'w', encoding='utf-8') as stream:\n        json.dump(data, stream)\n\n\ndef load(path):\n    with open(path, encoding='utf-8') as stream:\n        data = json.load(stream)\n    return {'name': data['name'], 'files': data['files']}\n",
+        "docs/project-format.md": "# Project file format\n\nVersion 1 is stable. The released desktop app 1.x and a partner import tool read these files.\nReaders reject unknown top-level keys.\n",
+        "test_project_io.py": "import tempfile\nimport unittest\nfrom pathlib import Path\nfrom project_io import load, save\n\nclass RoundTrip(unittest.TestCase):\n    def test_round_trip(self):\n        with tempfile.TemporaryDirectory() as directory:\n            path = Path(directory) / 'p.json'\n            save({'name': 'demo', 'files': ['a\\\\b.txt']}, path)\n            self.assertEqual(load(path), {'name': 'demo', 'files': ['a/b.txt']})\n"
+      }
+    },
+    {
+      "id": "CD02",
+      "prompt": "Rename the private helper _norm to _normalize_path in project_io.py.",
+      "context": "The helper is used only inside that module. The user authorizes the edit. Report the change and checks.",
+      "files": {
+        "project_io.py": "import json\n\nFORMAT_VERSION = 1\n\n\ndef _norm(path):\n    return path.replace('\\\\', '/')\n\n\ndef save(project, path):\n    data = {'version': FORMAT_VERSION, 'name': project['name'], 'files': [_norm(p) for p in project['files']]}\n    with open(path, 'w', encoding='utf-8') as stream:\n        json.dump(data, stream)\n",
+        "test_project_io.py": "import json\nimport tempfile\nimport unittest\nfrom pathlib import Path\nfrom project_io import save\n\nclass Save(unittest.TestCase):\n    def test_paths_are_normalized(self):\n        with tempfile.TemporaryDirectory() as directory:\n            path = Path(directory) / 'p.json'\n            save({'name': 'demo', 'files': ['a\\\\b.txt']}, path)\n            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['files'], ['a/b.txt'])\n"
+      }
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 # Reuse and migration scope
 
-Use for material decisions to add, retain or change reusable behavior or visual
-states, adapt a dependency, or carry out a requested migration. Inspect the affected
-boundary and callers; a small unrelated repair needs no whole-repository inventory.
+Use before writing or keeping own code for behavior that commonly has an existing
+implementation, before adding, adapting or removing a dependency, for material
+decisions about visual states, or to carry out a requested migration. Inspect
+the affected boundary and callers; a small unrelated repair needs no
+whole-repository inventory.
 
 ## Preserve the applicable outcome
 
@@ -27,8 +29,11 @@ duplication in the changed boundary, identify the concrete API gap, unsupported
 consumer behavior or operating constraint and compare the maintenance burden.
 Reuse still-applicable evidence; use the component-evidence procedure in
 [evidence-research](../../evidence-research/references/component-evidence.md) when
-version, compatibility or maintenance premises need verification. Do not claim
-that no solution exists because the first candidate or configuration failed.
+version, compatibility or maintenance premises need verification, and its
+[borrowing procedure](../../evidence-research/references/component-evidence.md#borrow-a-specific-resource)
+before copying or adapting code, behavior or assets from another project or
+package. Do not claim that no solution exists because the first candidate or
+configuration failed.
 
 Preserve a useful facade for product semantics, styling, compatibility or a stable
 consumer interface. Simple native controls can be the fitting reusable primitive.
@@ -37,6 +42,23 @@ record a material exception briefly in the owning decision or task, including th
 conditions that would invalidate its rationale. A historical workaround must be
 rechecked when its relevant version or environment changes. Neither library
 presence nor a preference for reuse authorizes an unrelated rewrite.
+
+## Report the reuse decision
+
+When the change introduces or keeps behavior that commonly has an existing
+implementation, whoever performs it, or adds or removes a dependency, state the
+decision in one line of the final report and name only the parts that apply:
+
+```text
+Reuse: native <X> | installed <Y> | external <Z> | own code — gap: <concrete gap>; alternatives checked: <names, where checked> | not searched: <reason>
+```
+
+The line points a reviewer at the decision; it is not evidence that alternatives
+were examined. A filled line without the matching reading, registry or
+documentation lookup and diff is a formal answer, not a check. Omit it for
+project-specific logic, a one-line helper or a change that touches no such
+behavior. Declining a dependency is a valid decision when the line names the fit
+or obligation that rules it out.
 
 ## Apply this to UI primitives
 

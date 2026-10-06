@@ -292,14 +292,32 @@ class DelegationActivationTests(unittest.TestCase):
 class DelegationReminderTests(unittest.TestCase):
     def test_session_reminder_reaches_planning_before_launch(self):
         for source in ("startup", "resume", "clear", "compact", "fork"):
-            with self.subTest(source=source):
-                result = reminders.reminder({"hook_event_name": "SessionStart", "source": source}, {})
-                output = result["hookSpecificOutput"]
-                self.assertEqual({"hookEventName", "additionalContext"}, set(output))
-                self.assertIn("before substantial solo work", output["additionalContext"])
-                self.assertIn("does not authorize delegation", output["additionalContext"])
-                self.assertIn("workers must not spawn", output["additionalContext"])
-                self.assertLessEqual(len(output["additionalContext"]), 1200)
+            for environment, routing in (({}, False), ({"ASSAY_ROUTING_CONFIG": "routing.json"}, True)):
+                with self.subTest(source=source, routing=routing):
+                    result = reminders.reminder({"hook_event_name": "SessionStart", "source": source}, environment)
+                    output = result["hookSpecificOutput"]
+                    self.assertEqual({"hookEventName", "additionalContext"}, set(output))
+                    self.assertIn("before substantial solo work", output["additionalContext"])
+                    self.assertIn("does not authorize delegation", output["additionalContext"])
+                    self.assertIn("workers must not spawn", output["additionalContext"])
+                    self.assertLessEqual(len(output["additionalContext"]), 1200)
+
+    def test_planning_reaches_requests_the_hint_grammar_misses(self):
+        # The anchored delegation grammar recognizes narrow imperatives only.
+        # Whatever the wording, the planning step must arrive before the agent
+        # starts solo work: from the request hint or from the session reminder.
+        rules, _ = activation.load_rules(ROOT)
+        session = reminders.reminder({"hook_event_name": "SessionStart", "source": "startup"}, {})
+        session_text = session["hookSpecificOutput"]["additionalContext"]
+        for prompt in ("Use subagents", "Research alternatives using subagents.",
+                       "Можешь использовать субагентов для этого ревью.",
+                       "Run this with subagents in parallel.",
+                       "Распараллель это через агентов.",
+                       "Use a workflow to review the diff."):
+            with self.subTest(prompt=prompt):
+                decision = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, rules)
+                channels = (session_text, decision.get("context") or "")
+                self.assertTrue(any("before substantial solo work" in text for text in channels))
 
     def test_required_claude_guard_still_owns_launches(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -21,9 +21,11 @@ this method; a read-only audit uses the same criteria without repair authority.
 ## Establish the working contract
 
 Read the request, owner instructions, affected callers and effective project
-configuration. Separate required behavior, adopted conventions and proposed
-improvements. Apply an agreed convention within its actual scope; do not turn
-a later preference into a historical violation. Existing inconsistency is
+configuration, including the
+[conditions a project should supply](../implementation-planning/references/scope-and-readiness.md#conditions-the-project-should-supply)
+when a decision depends on them. Separate required behavior, adopted conventions
+and proposed improvements. Apply an agreed convention within its actual scope; do
+not turn a later preference into a historical violation. Existing inconsistency is
 evidence to investigate, not permission to choose whichever style is convenient.
 
 When a reported symptom has no established cause or a proposed mechanism may not
@@ -33,6 +35,16 @@ Use the planning method's
 and the diagnostic procedure below as needed. Comparing approaches does not widen
 write authority. Do not reopen a justified solution or require a separate plan
 for an obvious authorized edit.
+
+Before choosing how to implement a change that introduces or relies on a
+guarantee no existing check covers — untrusted input at a boundary, a persisted
+state format or an external contract — establish the
+[necessary capability](../implementation-planning/references/scope-and-readiness.md#establish-a-necessary-capability).
+A fix inside a boundary that is already enforced and checked skips this step.
+A change in one of the
+[costly decision categories](../implementation-planning/references/scope-and-readiness.md#costly-decision-categories)
+is not made silently inside a local task: check its consequences and authority
+first.
 
 Retain supported behavior during refactoring, including exports, input shapes,
 side effects, errors and lifecycle. Name intentional behavior changes separately.
@@ -111,10 +123,24 @@ continuation procedure linked there.
   read [runtime boundaries](references/runtime-boundaries.md). It owns input,
   compile and execution preflight; resource cleanup stays with the lifecycle
   procedure above.
-- Before a material decision to add, retain or change reusable behavior or
-  standard visual states, or deliver a staged adoption, read
-  [reuse and migration scope](references/reuse-and-migration.md). A dependency or
-  shared location does not establish delegation or completion of the outcome.
+- Before writing or keeping own code for behavior that commonly has an existing
+  implementation in the platform, engine or installed dependencies — format
+  parsing and serialization, schema and input validation, retries, timeouts and
+  rollback, caching, dates and locales, hashing, cryptography and authentication,
+  CLI arguments, HTTP clients, file paths, pathfinding, steering, behavior state
+  machines, collision or asset loading — or before adding or removing a
+  dependency; and before a material decision to add, retain or change standard
+  visual states, or deliver a staged adoption, read
+  [reuse and migration scope](references/reuse-and-migration.md). A one-line
+  helper or project-specific business logic needs no reuse check. An existing
+  option that breaks the required semantics is a gap to name in the reuse line,
+  not a reason to skip it. A dependency or shared location does not establish
+  delegation or completion of the outcome.
+- Before copying, adapting or redistributing code, behavior or assets from
+  another project, package or public repository, use the
+  [borrowing procedure](../evidence-research/references/component-evidence.md#borrow-a-specific-resource).
+  Studying an approach without taking its bytes needs only its first and last
+  steps.
 - For TypeScript/Vue style choices, read the
   [conventions profile](references/typescript-vue-conventions.md). Its adoption
   boundary matters; it is not a universal language standard.
@@ -149,6 +175,11 @@ Do not equate a file move with unchanged check coverage. Once evidence is
 sufficient, continue to the requested delivery; reopen verification for a changed
 relevant input, failure, concrete unresolved concern or owner requirement.
 Report the responsibility/guarantee improved, actual checks and remaining gaps.
+Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
+when the change introduced or kept such behavior or changed a dependency. When the work met a concrete unchecked contract
+outside the requested result, you may add `Optional proposal: <missing means> —
+risk: <unchecked contract or input>; not implemented`. Omit it when an existing
+check covers that guarantee; a guarantee the result needs is never optional.
 No mandatory new architecture document, metric target or separate reviewer.
 
 The `evals/` cases and rubrics are evaluation data, not runtime instructions;
