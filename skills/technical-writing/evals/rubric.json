@@ -402,6 +402,109 @@
         "Makes the relevant prior ADR and snapshot procedure findable from the supplied files and keeps the multi-host reconsideration condition; does not invent a rollback, rollout result or approved multi-host plan.",
         "Organizes decision, reasons and consequences with natural engineering prose. No mandatory headings, exact preferred wording or count of historical details is required."
       ]
+    },
+    {
+      "id": "TW27",
+      "assess": [
+        "Identifies the redundant player-only/server-unneeded sentence next to the client-side term, connecting the finding to notes.md explicitly establishing that the audience already understands this term. Factual accuracy does not make this required content-review issue an optional wording preference.",
+        "Gives the offending location and reader-fit consequence, with removal or equivalent condensation as a supported remedy. Does not require an exact preferred sentence or demand deletion of the client-side property itself.",
+        "Preserves the distinction between unnecessary installation explanation and real Russian-language/restart conditions, uneven coverage, Stone Pieces/display-versus-saved exceptions, option scope and required notices. Does not report those useful passages as defects merely because shorter text is possible.",
+        "Does not demand a screenshot, literal translation example, installation/first-launch section, release-summary block or public acceptance disclaimer without a relevant reader need.",
+        "Writes review.md only, without editing source documents or inventing product execution. A generic no-issue report or source-fidelity checklist that misses the demonstrated repetition fails the review task."
+      ]
+    },
+    {
+      "id": "TW28",
+      "assess": [
+        "Expert paragraph names incremental backup without adding its general changed-file definition for an audience explicitly familiar with it. Equivalent concise wording is allowed.",
+        "Newcomer paragraph explains first full copy then changed files, not an unexplained technical label alone.",
+        "Both explain the unfamiliar PauseOnMetered=true default, metered network and scheduled-backup scope.",
+        "Both preserve manual backups remain available; do not imply all copying blocked or archive content changed.",
+        "Two introductory paragraphs, exact output paths, no new setup, heading or audit/report. No fixed preferred wording."
+      ]
+    },
+    {
+      "id": "TW29",
+      "assess": [
+        "Actual release additions are subtitles and idol names. Does not claim Stone Pieces first appeared in release without evidence.",
+        "Names vern-1.0.16.zip and 2026-10-02; package and dictionary checks passed on that archive.",
+        "Gameplay not run; owner still needs subtitles/language checks and no acceptance decision exists. Does not fabricate release readiness.",
+        "Useful check conditions and source links may remain; no generic product tour, catalog-button explanation or unrelated translation-production/provenance statement, whether defensive or neutral, without an acceptance need.",
+        "Any retained product statements preserve real scope: language/restart, uneven coverage, display vs stored state, option menu-only effect. No extra mandatory acceptance gate invented.",
+        "Mandatory Sea Signs attribution and notice URL retained, correct MIT scope if mentioned.",
+        "Writes release-acceptance.md only; focus supports owner decision without repeating the same status through unnecessary recaps or publishing the editorial process.",
+        "Does not import the author's proposed emphatic labels as product distinctions. Retain a modifier when it expresses a supported technical class, condition, degree or uncertainty; omit it when deleting it changes none of the decision-relevant meaning. This is not a ban on a particular adjective."
+      ]
+    },
+    {
+      "id": "TW30",
+      "assess": [
+        "Назвать проверку harbor snapshot inspect SNAPSHOT.",
+        "Допускать только state=ready.",
+        "Требовать ненаступивший expires_at.",
+        "Если снимок просрочен, выбрать другой готовый снимок.",
+        "Требовать непустой checksum.",
+        "Сообщить, что inspect не продлевает TTL.",
+        "Требовать новую пустую TARGET.",
+        "Для замены действующей среды восстановить отдельно и использовать обычное переключение.",
+        "При wal_ready=true указать harbor restore SNAPSHOT --target TARGET.",
+        "При wal_ready=false обычный запуск отклоняется.",
+        "Указать исключение harbor restore SNAPSHOT --target TARGET --snapshot-only при wal_ready=false.",
+        "Исключение snapshot-only требует согласования владельца данных.",
+        "Исключение snapshot-only не включает изменения после момента снимка.",
+        "Указать проверку harbor restore status TARGET.",
+        "Успех требует одновременно state=done и verified=true.",
+        "Не направлять трафик в TARGET до подтверждённого успеха.",
+        "При state=failed остановиться.",
+        "При state=failed передать вывод инженеру хранения.",
+        "Повторный запуск в ту же цель не поддерживается.",
+        "Не разрешать очистку действующего пространства как шаг этой процедуры, перезапись непустой цели или восстановление истёкшего снимка. Это меняет заданные границы безопасного восстановления.",
+        "Не заменять согласование владельца предупреждением общего характера; не обещать актуальное состояние при snapshot-only. Условие исключения и потеря поздних изменений существенны.",
+        "Не включать установку CLI, настройку профиля или токена. Задание явно помещает установку на поверхность распространения и доступ в существующие инструкции.",
+        "Не объяснять, что означают TTL, WAL или CLI; не добавлять учебную базу котировок или иной произвольный демонстрационный сюжет. Читатель знает сокращения; сюжет не помогает требуемой процедуре.",
+        "Не переносить историю checksum, номера задач, тестовые стенды или рефакторинг в процедуру. Это внутренние записи без текущего пользовательского действия или ограничения.",
+        "Не добавлять заверения о достоверности, утверждении или происхождении документа. Задание требует рабочую процедуру, а не защиту источников.",
+        "Оценивать смысл и полезность для заданного читателя, без обязательных заголовков, точной формулировки или длины. Сохранять существенные условия; не требовать все сведения только потому, что они даны. Каждое mandatory — отдельная смысловая проверка. Нарушение forbidden — отдельный дефект. Не требовать всех фактов только из-за их присутствия в источнике. Общие определения сокращений отличаются от обязательного объяснения последствия snapshot-only; последнее надо сохранить. Не штрафовать лаконичные переходы, предупреждения о заданных ограничениях или уточнения подстановки SNAPSHOT/TARGET."
+      ]
+    },
+    {
+      "id": "TW31",
+      "assess": [
+        "Указать, что создавать выгрузку может только администратор пространства.",
+        "Дать путь: «Журнал», выбор периода, «Выгрузить CSV».",
+        "Указать, что обе границы периода включены.",
+        "Указать, что время записей в файле задано в UTC.",
+        "Одна выгрузка ограничена 31 календарным днём.",
+        "Для большего срока предложить несколько непересекающихся периодов.",
+        "Файл содержит записи всего пространства за выбранный период.",
+        "Фильтры участника и типа действия на экране не ограничивают CSV.",
+        "Для выборки по участнику предложить отфильтровать полученный CSV в табличном редакторе.",
+        "Выгрузка создаётся в фоне.",
+        "Выгрузка фиксирует уже поступившие записи на момент нажатия кнопки.",
+        "Поздно поступившие записи не добавятся даже при подходящем времени события.",
+        "Для поздно поступивших записей нужна новая выгрузка после их появления в журнале.",
+        "Готовый файл находится в «Мои выгрузки».",
+        "Для получения файла нажать «Скачать».",
+        "Файл доступен 24 часа с момента готовности.",
+        "После истечения срока при необходимости создать новую выгрузку.",
+        "Истечение срока файла не удаляет записи журнала.",
+        "Ссылка требует входа под учётной записью создателя.",
+        "Ссылку скачивания нельзя передавать коллегам.",
+        "Скачанный CSV можно передать по правилам организации.",
+        "CSV содержит имена и адреса электронной почты участников.",
+        "При статусе «Ошибка» нажать «Повторить».",
+        "Повтор фиксирует записи на момент нового запуска.",
+        "При повторе состав файла может измениться.",
+        "При повторной ошибке обратиться в поддержку через «Помощь».",
+        "Для поддержки сообщить выбранный период и время запуска.",
+        "Не утверждать, что экранные фильтры ограничивают CSV, файл обновляется сам или любой администратор может открыть чужую ссылку. Эти утверждения меняют действующие правила операции.",
+        "Не убирать уведомление о персональных данных и не объявлять передачу самого файла безусловно запрещённой. Источник устанавливает конкретное полезное уведомление и условие передачи.",
+        "Не добавлять регистрацию, установку/запуск браузера, определения CSV или UTC. Работающий продукт и знания аудитории заданы явно; начало работы имеет другую поверхность.",
+        "Не добавлять пекарню, график опозданий или другие произвольные сценарии. Это не задача внутренней проверки через выгрузку.",
+        "Не включать иконку, модуль, SVG-42, бета-отзывы или хронологию разработки. Внутренние записи не меняют текущее действие пользователя.",
+        "Не добавлять независимую проверку, подтверждение достоверности или рассказ о происхождении справки. Это не запрошено и не помогает операции.",
+        "Оценивать смысл и полезность для заданного читателя, без обязательных заголовков, точной формулировки или длины. Сохранять существенные условия; не требовать все сведения только потому, что они даны. Проверять atomic mandatory независимо. Не требовать все факты источника. Практическое объяснение среза и исключения фильтров требуется; энциклопедическое определение CSV/UTC запрещено. Сохранение заданного уведомления о данных не считать лишним юридическим дисклеймером. Не добавлять необоснованных оценок размера файла, скорости, стоимости или политики хранения журнала."
+      ]
     }
   ],
   "triggers": [

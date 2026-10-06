@@ -60,8 +60,12 @@ grader's input, noting that an answer can still reveal its method.
 Use a separately authored and access-restricted fresh set to assess transfer.
 The `N-` cases added with C1 are diagnostic regressions, not that fresh set.
 Source validity, actual agent behavior and reader preference are different
-results. A critical semantic failure prevents case acceptance even when prose
-is preferred. Measure tokens, time and cost only from actual records.
+results. Every required criterion must hold for a case to pass, including a
+reader-fit requirement established by its brief. Retaining a required fact cannot
+offset copying irrelevant facts or re-explaining explicitly known background.
+A semantic failure likewise prevents acceptance even when prose is preferred.
+Keep optional wording preferences separate from these requirements. Measure
+tokens, time and cost only from actual records.
 
 Russian/English were the earlier pilot's scope. Simplified Chinese runtime and
 cases remain in the package without new behavioral qualification. Use a grader
@@ -238,3 +242,209 @@ establish flawless prose, full discovery, model portability, savings or a pass
 on every public case. Further iteration needs a distinguishing execution trace
 or acceptance intervention, not another synonymous rule or repeated unchanged
 run. Preserve these results if that later work changes the evaluator or method.
+
+## Reader-fit review repair — 2026-10-06
+
+### Reopened decision and research
+
+The owner rejected delivery with a known failed requirement. That objection is
+correct: the preceding amendment's partial P1 result did not complete the requested
+repair. This follow-up starts from `99f4d04a74220f5bafdc7fabd58f021d9b3141f5`;
+it preserves the preceding results rather than relabeling them as accepted.
+
+Two gaps were observable. The method already prohibited explaining a familiar
+term, yet the finished README did it. The evaluation gave preservation of facts
+more weight than selection of useful facts: an acceptance report could retain
+unnecessary product and translation-production material and still serve as a
+positive control. A rule's presence and a passing package check resolve neither.
+
+A fixed-draft diagnostic supplied the failed README, its audience and sources to
+an ordinary editorial-review request without pointing out the defect. The baseline
+review declared no required correction and treated the redundant player/server
+explanation as necessary. This confirms a detection failure in that execution.
+It does not establish the original load sequence or a single hidden cause.
+
+The repair draws on these limited transfers:
+
+- [Google's audience guidance](https://developers.google.com/tech-writing/one/audience)
+  defines needed explanation relative to established reader knowledge. The
+  [editing guidance](https://developers.google.com/tech-writing/two/editing)
+  makes the actual draft the subject of review. These are editorial practices,
+  not measured effects on this skill.
+- [Self-Refine, section 2 and Table 2](https://proceedings.neurips.cc/paper_files/paper/2023/file/91edff07232fb1b55a505a9e9f6c0ff3-Paper-Conference.pdf)
+  motivates feedback that identifies a concrete span and an applicable change.
+  Its task-specific results do not guarantee improvement in technical prose.
+- [Huang et al.](https://arxiv.org/abs/2310.01798) and
+  [Tyen et al.](https://aclanthology.org/2024.findings-acl.826/) limit reliance on
+  generic self-correction and distinguish finding an error from repairing one
+  already located. Their studied reasoning tasks motivated the diagnostic;
+  they do not establish a universal limitation on editing.
+- [Context-engineering guidance](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+  supports concrete, flexible instructions with representative contrasts rather
+  than an expanding catalog of forbidden phrases.
+- [Google's table guidance](https://developers.google.com/style/tables) requires
+  useful information dimensions. The repair applies the same contribution test
+  to adjacent cells, shared statuses and source narration as to ordinary prose.
+
+Review also used relevant methodological sections of three owner-supplied
+documents on software engineering, research quality and reasoning control.
+Their guidance on adequate acceptance criteria, competing explanations and
+separating working from final evidence informed the protocol. Those documents
+were not treated as independently verified empirical evidence or redistributed.
+
+### Method and acceptance changes
+
+The existing core now routes drafts, rewrites and content reviews through a
+finished-content review. A file edit rereads the saved text. The review locates an
+exact passage, asks what decision, action, distinction, reason or evidence it adds
+for this reader, and removes or merges surplus within the authorized scope. It
+then checks the remaining actors, conditions, exceptions, bounds and notices.
+
+Selection applies to propositions, not source sentences. Rephrasing an irrelevant
+account of how translations were prepared does not make it useful. An adjective
+must express a supported distinction or useful emphasis, not merely endorse the
+author's work. Comparisons cover prose, headings and table cells; a summary,
+per-item status or repeated citation remains valid when it has a distinct role.
+
+Contrasts retain explanations for newcomers, new permissions involving known
+concepts, acceptance evidence and required attribution. Narrow copyedits remain
+narrow, and suitable prose can remain unchanged. There is no deletion quota,
+target length, word blacklist, visible checklist, recursive polish loop or new
+runtime. The preservation checker and discovery rules are unchanged.
+
+Every required criterion must hold, including reader fit. A preserved fact cannot
+compensate for an irrelevant passage. Wording preferences remain optional.
+
+### Execution and measurement record
+
+All writing executions used fresh native tasks with requested `gpt-6.1-sol`,
+effort `high` and no inherited conversation. Within each working task the brief,
+sources, tools and delivery wrapper stayed the same; only the method and work
+paths changed. The method was explicitly invoked. Its 16-file snapshot included
+references, assets, adapter and scripts but excluded `evals/`. Opaque method paths
+did not provide an independently blinded or randomized outcome assessment.
+
+The existing `tools/eval_assets.py prepare` made input-only working and final
+packets. The fixed-draft diagnostic used matching local input copies. Final
+artifact inventories and source hashes were checked; all compared working inputs
+remained identical, and current runtime bytes match the selected snapshot. This
+is post-run file evidence, not a complete record of reads or transient effects.
+
+The SHA-256 below hashes the runtime-file/hash map serialized as JSON with sorted
+keys and `(',', ':')` separators. Its serialization differs from the prior record.
+
+| Runtime | Map digest |
+| --- | --- |
+| Baseline `99f4d04` | `8510d2df78f923179392415946d79284b4535520334b04d1e34c62a078fba536` |
+| Candidate 1 | `4f6f6d4fdbfe4f2177ce4fc7eb2e2c8e57b8f8f41d6a7dcd785d9d20b27aa8de` |
+| Candidate 2 | `1a7002c53acf54d09498355f54bbf1785ef42eea628cc981e659e7b1226194e6` |
+| Selected candidate 3 | `887de80fd366e02157936e311a492485ada8ccc4dbf1956aa8d887296d816c97` |
+
+The working task corpus digest is
+`a8b08933f6a7bdcfba9b888237cacc9918633ba864f8b6756108db8f3071f329`.
+Measurement v1 is `42af8460e495c3cdbb2198c2da2c2cbe69440b08c4a084cb7d5e198b4e76ab9b`;
+v2 is `8669d0e33fd259974e85c5667531a458375f67d177c501d37fca85290da7161e`.
+Raw inputs, grading versions, outputs, method maps and preparation manifests are
+retained with the external experiment evidence. There is no complete native
+load/read trace, billed-usage record or independently verified model-version receipt.
+
+Candidate 1 repaired the familiar-term failure and removed the report's product
+tour and defensive provenance, but repeated check meanings in adjacent table
+cells and repeated the table's attribution. Candidate 2 addressed those failures.
+It passed the narrower v1 working criteria, yet original-request adjudication
+found neutral production provenance in W1 and purposeless `явных` in W2.
+
+Those were acceptance-criteria defects, not grounds to accept the requested work.
+Before the next executions, v2 expanded W1 `selection` and W2 `scope` to cover
+irrelevant process propositions regardless of tone, and added W2 `source_wording`
+to test a modifier's supported contribution. W3 stayed unchanged. All existing
+outputs were separately regraded under v2; their v1 results remain intact.
+
+The initial budget was ten writing executions, with up to three after one repair.
+The discovered measurement gap led to one explicit extension before execution:
+candidate 3 on the same three working tasks, then the two reserved final tasks.
+The completed total is **16 writing executions**: two diagnostic reviews, twelve
+working executions and two final executions. Research, preparation and review
+coordination are additional task turns, not included in that count. There was no
+unchanged retry until green, model sweep or separate paid model service. Method
+changes and additional review effort form a bundle; their isolated effects are
+not measured.
+
+Two preparation errors occurred before writing execution: the protected-source
+guard rejected the first output placement, and a final input copy encountered
+already-created empty output directories. The first used a separate source
+corpus; the second verified those directories were empty and copied the inputs.
+Neither required weakening a guard, changing task facts or scoring a model failure.
+
+### Observed results
+
+PASS here means every required criterion for that task and measurement held in
+the inspected artifact. It is not a claim about a success rate on other tasks.
+
+| Task | Baseline | Candidate 1 | Candidate 2 | Candidate 3 |
+| --- | --- | --- | --- | --- |
+| D0: ordinary review of the failed README | FAIL: did not locate redundancy | PASS: exact passage, audience premise and remedy | Not run | Not run |
+| W1: Vern catalog README | FAIL v1/v2: familiar-term definition | PASS v1/v2 | PASS v1; FAIL v2: neutral production provenance | PASS v2 |
+| W2: Vern release acceptance | FAIL v1/v2: product/provenance surplus and duplicate claims; v2 also catches the modifier | FAIL v1/v2: duplicate table/status/source claims | PASS v1; FAIL v2: purposeless modifier | PASS v2 |
+| W3: Tern expert and newcomer paragraphs | PASS v1/v2 | PASS v1/v2 | PASS v1/v2 | PASS v2 |
+
+D0's positive result belongs to candidate 1; it was not rerun under the selected
+method. W1/W2 share source facts. W3 produces two audience variants in one grouped
+task, not two independent observations, and shows no comparative improvement.
+The working cases informed selection and are not unseen evidence.
+
+In candidate 3's W1, the opening uses `клиентский мод` without redefining it.
+The document omits process provenance and retains uneven coverage, activation
+and restart, the actual three-fix exception, display versus saved-state limits,
+the menu-only setting scope and mandatory notices. W2 retains the exact archive
+and date, passed package/dictionary checks, unperformed gameplay, owner decision,
+real release changes and check conditions. Its evidence table has distinct
+columns; useful summary and detail retain their different roles.
+
+Independent review agreed on those v2 outcomes and the historic regrading. Eight
+small calibration probes produced `PASS, FAIL, PASS, FAIL, PASS, FAIL, FAIL, PASS`.
+They distinguish known definitions from needed consequences, protected attribution
+from defensive or neutral surplus, and purposeless modifiers from the meaningful
+technical contrast `явное/неявное преобразование`. Two initial probe descriptions
+were clarified as partial-property checks: neither a setting-effect snippet nor
+an attribution snippet proves whole-document completeness. Verdicts did not change.
+
+A separate author prepared two final task groups before the runtime changes.
+The primary did not read their briefs or keys until candidate 3 was selected and
+its selection record saved. No runtime tuning followed those reads or results.
+These are candidate-only transfer and preservation checks, with no final baseline.
+Their briefs explicitly establish reader knowledge and content-selection scope;
+they do not test spontaneous discovery of those constraints.
+
+| Reserved task | Result and retained distinctions |
+| --- | --- |
+| F1: SRE snapshot-restore procedure | PASS: all 19 mandatory meanings and six exclusion criteria. Keeps eligibility conjunction, expiry and new-target limits, both WAL branches, owner approval, omitted later changes, both success fields, traffic gate and failure escalation. No installation, glossary, demonstration or work-history material. |
+| F2: in-product audit-export help | PASS: all 27 mandatory meanings and six exclusion criteria. Keeps administrator scope, inclusive period/UTC/31-day bound, whole-space population, screen-filter exception, arrival cutoff, download path, 24 hours from readiness, creator access, file-sharing condition, personal-data notice and retry/support behavior. No onboarding, glossary, development history or provenance assurance. |
+
+The primary artifact assessment and a separate read-only review agreed on both
+final results. Supported optional operational explanations were not charged as
+defects merely because a shorter wording was possible.
+
+The final F1 input packet digest is
+`a13259ee0a1baaa1164ecae28f82705b49a1f1bf0b6f70c8feb61c49c4836e61`;
+its grading digest is `fb5cdb12db18d2cdad796c0b418d8b49f285fefc3c39a5868943274fc2b0b029`.
+F2 is `aa1d03f74b85fe98bde85c05f69dcb9437651bc8cb9ccd348890ca22cd947b5a`;
+its grading digest is `211aad6a21ae1330d550d3ec8c7ed85c9b9648954318bcb97d64e0f032eecc98`.
+
+### Published regressions and conclusion
+
+TW27 adds the ordinary fixed-draft review, TW28 the expert/newcomer contrast, and
+TW29 the acceptance-report selection requirements. TW30/TW31 publish the reserved
+procedure and in-product help as future regressions after selection. Their briefs
+normalize only the absolute working-directory sentence; actual run bytes and
+hashes stay in the evidence. Once published, these are no longer reserved inputs.
+All 40 prior cases, 15 triggers, their criteria and shared dimensions are unchanged;
+the collection now has 45 task cases and the same 15 triggers.
+
+The selected method satisfies the revised working acceptance and both reserved
+artifact checks. This closes the demonstrated reader-fit defects within that
+scope. Shared-filesystem boundaries were instruction-based; file inventories do
+not establish all outside effects. There is no measured automatic discovery,
+cross-model portability, broader language coverage, cost saving or guarantee of
+flawless prose. Repository gates are a separate structural result, not behavioral
+evidence.

@@ -6,7 +6,8 @@ the absence of a blacklist of expressions.
 
 ## Meaning before style
 
-Preserve supported facts and their relationships: who did what, negations,
+For material the document needs, preserve supported facts and their relationships:
+who did what, negations,
 units, bounds, uncertainty, conditions, commitments and release status. A change
 from a necessary condition to a sufficient one changes the instruction. An upper
 bound, approximate value and measured result are not interchangeable. Meaningful
@@ -20,9 +21,10 @@ For a standalone document, carry over context its future reader needs. Do not
 copy every editor note into the document, and do not assume the reader sees the
 brief. Material explicitly guaranteed to that audience can be inherited.
 
-An omission may improve focus when outside the assignment. Do not remove a caveat
-that changes the remaining claim. Under a local copyedit, report an out-of-scope
-factual correction rather than silently applying it.
+Within an authorized rewrite, omit material that does not serve the reader's
+task even when it came from an accurate source. Do not remove a caveat that changes
+the remaining claim. Under a local copyedit, report an out-of-scope factual
+correction rather than silently applying it.
 
 ## Improve the reading, not the resemblance to a template
 
@@ -42,6 +44,9 @@ A copyedit repairs a local defect or meets the agreed style. A rewrite can impro
 organization, emphasis and voice even where every original sentence is grammatical.
 No-op protects already good work; it does not forbid an explicitly requested new
 approach. Explain a change only with a real benefit, not an invented grammar rule.
+In a content review, use the [final content review](document-design.md#review-the-finished-content)
+to distinguish a redundant explanation from an equally valid wording preference.
+Accuracy and grammaticality alone do not establish suitability for the reader.
 
 Ambiguity permits multiple readings; contradiction requires incompatible claims
 about the same scope. Separate stages, actors or operating modes may explain

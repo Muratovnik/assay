@@ -41,7 +41,9 @@ before choosing headings or polishing sentences:
 2. **Select the necessary material.** Keep, condense, move or remove material
    according to the reader's task. A supported fact does not automatically
    belong on this page. Separate the main path from reference detail,
-   contributor tasks and the author's work record.
+   contributor tasks and the author's work record. Completeness covers this
+   reader's unresolved needs; it does not require teaching an explicitly known
+   concept again for a hypothetical newcomer.
 3. **Make the connection explicit.** Pair a command with its purpose, needed
    starting state and recognizable result. Pair an architectural decision with
    its reason and consequence. Describe real limitations where they affect use.
@@ -71,6 +73,7 @@ writing quality. No extra planning file or reader-agent phase is mandatory.
 | A supported necessary condition is missing for this reader | A completeness issue. |
 | The sources do not cover a claim | Unverified, not disproven. |
 | A sentence permits multiple readings | Ambiguity; clarify it without alleging contradictory behavior. |
+| A passage only repeats established reader knowledge or an adjacent claim, with no needed distinction | A relevance issue when content selection is in scope; locate the repetition and the knowledge it adds nothing to. |
 | Another correct expression is preferred | Optional editorial judgment, not a preservation failure. |
 
 A serious unknown can limit release readiness without making the statement false.
@@ -104,8 +107,17 @@ without turning a clean document into a service log. For `review`, report real
 findings and consequential limits, or a brief no-issue conclusion. Do not invent
 a quota, restore every wording preference or narrate the method.
 
-Check that the final document, not just its accompanying explanation, contains
-what the reader needs. After a substantive update, reconcile the affected claims
+For a draft, rewrite or content review, apply the
+[final content review](references/document-design.md#review-the-finished-content)
+to the completed draft after composing it. For a file edit, reread the saved text;
+the plan or change summary is not the review subject. Then
+locate unnecessary passages, remove or merge them in an edit, then check the
+remaining claims against their conditions. A review reports the specific finding;
+a copyedit checks only its opened passage. Factual accuracy alone does not settle
+whether an explanation belongs. Finish the requested artifact without a visible
+self-review transcript or repeated polishing of already suitable text.
+
+After a substantive update, reconcile the affected claims
 and related exclusions using [document design](references/document-design.md#update-the-semantic-unit).
 Inspect command-to-section relationships, relative links
 from the actual document path, and the rendered form when tools are authorized.

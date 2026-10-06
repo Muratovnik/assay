@@ -56,9 +56,9 @@ user parameters such as a token variable remain legitimate.
 Start with the job the product helps the reader do and a distinguishing supported
 constraint or mechanism. Do not lead with the repository inventory or an inflated
 claim. Give concrete uses instead of several restatements of the tagline.
-When an established term already conveys a property to this audience, do not
-repeat its definition as another capability; explain only an unfamiliar meaning
-or a consequential exception.
+Use the audience's established terms and keep distinct uses separate. Apply the
+[content review](document-design.md#review-the-finished-content) to the opening
+and feature list together so a property is not restated as another capability.
 
 Add a demonstration when it explains a non-obvious behavior, comparison or
 choice. Use a relevant existing screenshot, working demo link or supported
