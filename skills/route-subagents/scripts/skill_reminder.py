@@ -8,14 +8,17 @@ import sys
 
 SESSION_REMINDER = (
     "Assay is installed. Apply matching installed skills: read their SKILL.md "
-    "and follow the applicable workflow; skip unrelated skills. This reminder "
-    "does not authorize delegation; workers must not spawn further agents."
+    "and follow the applicable workflow, skip unrelated skills, and when the user "
+    "requests subagents use route-subagents before substantial solo work to choose "
+    "useful outcomes and launch timing. This reminder does not authorize "
+    "delegation; workers must not spawn further agents."
 )
-# Delegation guidance also arrives with a delegation request and before every
-# launch. At session start it is added only where routing is configured.
+# The planning step stays in every session: the request hint recognizes only
+# narrow imperatives, and the launch reminder arrives after solo work started.
+# The routing checklist is added at session start only where routing is
+# configured; otherwise it arrives before every launch.
 ROUTING_SESSION_REMINDER = (
-    " When the user requests subagents, use route-subagents before substantial "
-    "solo work to choose useful outcomes and launch timing. Revisit newly ready "
+    " Revisit newly ready "
     "dependencies and material verification; do not create token delegations. "
     "Before every authorized subagent launch, including replacements and "
     "reviewers, the root agent must apply route-subagents (possibly named "

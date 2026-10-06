@@ -104,10 +104,14 @@ user's scope. It never turns a plan/review into permission to edit. It does not
 claim to load a skill or assume that a particular MCP tool exists. Even an
 observed Skill load would not prove compliance with its method.
 
-The session reminder is three sentences: use matching installed skills, and no
-delegation is authorized by it. Delegation guidance from `route-subagents` is added
-at session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives with
-a delegation request and in the reminder before each launch.
+The session reminder is three sentences: use matching installed skills; when the
+user requests subagents, use `route-subagents` before substantial solo work; no
+delegation is authorized by it. The planning step stays in every session because
+the delegation hint recognizes only narrow imperatives such as "use subagents",
+and the reminder before a launch arrives after solo work may have started. The
+rest of the routing checklist is added at session start only when
+`ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the reminder before each
+launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
 failures. There is no universal blocking Stop hook. Assay does not ship a hook
