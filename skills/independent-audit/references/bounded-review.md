@@ -43,7 +43,9 @@ erase them behind an area's other passing checks.
 ## Preserve the packet boundary
 
 The primary establishes the objective, owner criteria, review mode, exact
-snapshot, permitted read-only oracle, and owned scope before delegation. The
+snapshot, permitted read-only oracle, and owned scope before delegation. When
+the selected role cannot run that oracle or load this method, the packet carries
+the oracle's snapshot-bound receipts and names these criteria by path. The
 reviewer independently tests the supplied claims; it does not repair the work,
 invent missing packet inputs, switch modes, or expand access.
 
@@ -67,7 +69,9 @@ role declares that contract; otherwise report the missing input and its effect
 on coverage. This differs from a valid packet whose mandatory acceptance evidence
 cannot be established during review: that result is `inconclusive`.
 
-Only run the declared oracle within the actual permissions. A profile requesting
+Only run the declared oracle within the actual permissions. A role whose
+adapter names the oracle unavailable reads its receipts instead and reports
+that it did not rerun it. A profile requesting
 read-only mode does not prove the effective session boundary; inherited runtime
 overrides and client behavior must be checked. Never relax settings yourself.
 If a necessary probe cannot run, report that gap without labeling it successful.

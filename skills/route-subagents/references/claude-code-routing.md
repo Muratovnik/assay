@@ -91,6 +91,13 @@ permissions to make an unsupported child setting appear effective. A bounded
 formal reviewer is not required for every informal review; choose the role by
 its input and evidence contract, not its name.
 
+Assay's Claude `evidence-reviewer` projection is a bounded reader for that
+reason: it has only `Read`, `Grep` and `Glob`, names the oracle and skill
+discovery unavailable, and returns `refused` without snapshot-bound receipts for
+the named oracle. Give it those receipts, and pass audit criteria such as the
+installed `independent-audit` `SKILL.md` and `references/bounded-review.md` by
+path, since it cannot load the skill. Its Codex projection keeps the oracle.
+
 Primary references: [subagents](https://code.claude.com/docs/en/sub-agents),
 [model configuration](https://code.claude.com/docs/en/model-config) and
 [worktrees](https://code.claude.com/docs/en/worktrees).
