@@ -23,6 +23,33 @@ possible improvement. Carry exact version, compatibility, data and environment
 constraints into affected units. Incidental debt goes outside the active scope;
 necessary enabling work needs a clear connection to the requested result.
 
+## Establish a necessary capability
+
+Before choosing how to implement a change that introduces or relies on a
+guarantee no existing check covers — untrusted input at a boundary, a persisted
+state format or an external contract — establish which capability provides that
+guarantee, whether an existing one already does, and what remains unprovided.
+A fix inside a boundary that is already enforced and checked does not need this
+step.
+
+Start from the consumer: which inputs or states it must accept or reject and how
+a correct result differs from a plausible imitation. Then find the existing owner
+of that guarantee on the reachable path, such as a validator, schema, type,
+migration guard or check, and confirm the path actually invokes it. A capability
+present elsewhere in the project does not cover this path. Three outcomes are valid:
+
+- an existing capability covers the guarantee: use it and add no competitor;
+- it is missing and providing it is within the task's authority: provide it as
+  part of the change, preferring a fitting existing mechanism;
+- providing it exceeds the authority: deliver the authorized part and report the
+  unprovided guarantee as an unverified remainder, not as an optional extra.
+
+An improvement the requested result does not need stays a separate optional
+proposal and widens nothing. Example: an import endpoint whose consumer must
+reject malformed records has no validation on that path; the validator, existing
+or new, belongs to the requested guarantee. Control: fixing an off-by-one error in
+a date parser that existing tests already cover changes nothing at that boundary.
+
 ## Check material changes to the contract
 
 Keep the desired outcome, chosen means, continuing constraints and authority of

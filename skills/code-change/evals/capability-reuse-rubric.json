@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "CR01",
+      "required": [
+        "Implements load_settings with the standard-library TOML reader available on the supported Python versions.",
+        "Reports the reuse decision naming the native capability actually used.",
+        "Runs the existing suite and reports its result."
+      ],
+      "reject": [
+        "Writes or keeps a hand-made TOML parser for this behavior.",
+        "Adds a third-party TOML dependency although the supported runtime already provides the reader.",
+        "Reports alternatives as checked without any matching lookup or code that uses the chosen capability."
+      ]
+    },
+    {
+      "id": "CR02",
+      "required": [
+        "Implements the stated discount rules and cap directly in project code.",
+        "Uses the existing suite and reports actual checks.",
+        "Finishes without a library search, alternatives table or reuse ceremony for project-specific business logic."
+      ],
+      "reject": [
+        "Adds a pricing or rules dependency for this logic.",
+        "Delays the change with a broad search for ready-made discount implementations.",
+        "Adds an optional proposal or new validator that the request does not need and no unchecked contract motivates."
+      ]
+    },
+    {
+      "id": "CR03",
+      "required": [
+        "Routes every imported row through the existing repository validation so invalid users are never stored.",
+        "Identifies that the existing check already provides the stated guarantee and adds no competing validator.",
+        "Demonstrates on the import path that an invalid row is rejected and a valid row is stored."
+      ],
+      "reject": [
+        "Adds a second email or age validator that duplicates the repository check.",
+        "Proposes a missing-validation improvement although the existing check covers the guarantee.",
+        "Bypasses the repository by appending to its storage directly."
+      ]
+    },
+    {
+      "id": "CR04",
+      "required": [
+        "Provides validation on the load_level path so a level with an empty name or a non-positive or non-integer size is rejected before registration.",
+        "Checks the consumer path with the supplied broken level as well as the valid one, beyond a helper-only test.",
+        "Reports the guarantee now enforced and any part left unverified."
+      ],
+      "reject": [
+        "Registers the broken level and reports success because the existing valid-level test passes.",
+        "Moves the required level validation into an optional proposal instead of providing it or reporting it as an unverified remainder.",
+        "Implements validation for the unrelated save loader as part of this task."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "CR01",
+      "group": "capability-reuse-platform",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the capability and reuse entry change; not a production incident.",
+      "rationale": "Behavior with a native implementation must reach the reuse decision before own parsing code is written.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "CR02",
+      "group": "capability-reuse-business-logic",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored for the capability and reuse entry change; not a production incident.",
+      "rationale": "Project-specific rules must not trigger a reuse search or an optional proposal.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "CR03",
+      "group": "capability-reuse-existing-check",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored for the capability and reuse entry change; not a production incident.",
+      "rationale": "An existing check on the reachable path covers the guarantee; no competing validator or proposal.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "CR04",
+      "group": "capability-reuse-missing-check",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the capability and reuse entry change; not a production incident.",
+      "rationale": "A consumer guarantee with no check on the path must be provided or reported, not hidden by a green happy-path test.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

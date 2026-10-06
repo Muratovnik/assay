@@ -85,6 +85,13 @@ Only the first request paragraph is considered. This deliberately misses some
 indirect requests rather than inventing a universal intent classifier. It is
 still a heuristic, not an authorization mechanism or prompt-injection boundary.
 
+Two rules accept non-imperative lookups for an existing solution: `reuse-lookup`
+(`посмотри/проверь, есть ли готов…`) and `reuse-question` (`можно ли
+переиспользовать…` or `…использовать/взять готов…`). Both select
+evidence-research and can be disabled separately. Other question forms still
+abstain. Replay of a wording shows what this grammar recognizes, not which
+method a client selects from skill descriptions.
+
 A suggestion asks to reuse sufficient existing research/plans and preserve the
 user's scope. It never turns a plan/review into permission to edit. It does not
 claim to load a skill or assume that a particular MCP tool exists. Even an

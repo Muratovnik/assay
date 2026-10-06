@@ -34,6 +34,12 @@ and the diagnostic procedure below as needed. Comparing approaches does not wide
 write authority. Do not reopen a justified solution or require a separate plan
 for an obvious authorized edit.
 
+Before choosing how to implement a change that introduces or relies on a
+guarantee no existing check covers — untrusted input at a boundary, a persisted
+state format or an external contract — establish the
+[necessary capability](../implementation-planning/references/scope-and-readiness.md#establish-a-necessary-capability).
+A fix inside a boundary that is already enforced and checked skips this step.
+
 Retain supported behavior during refactoring, including exports, input shapes,
 side effects, errors and lifecycle. Name intentional behavior changes separately.
 Use existing project boundaries and primitives. A small repair does not authorize
@@ -111,10 +117,18 @@ continuation procedure linked there.
   read [runtime boundaries](references/runtime-boundaries.md). It owns input,
   compile and execution preflight; resource cleanup stays with the lifecycle
   procedure above.
-- Before a material decision to add, retain or change reusable behavior or
-  standard visual states, or deliver a staged adoption, read
-  [reuse and migration scope](references/reuse-and-migration.md). A dependency or
-  shared location does not establish delegation or completion of the outcome.
+- Before writing or keeping own code for behavior that commonly has an existing
+  implementation in the platform, engine or installed dependencies — format
+  parsing and serialization, schema and input validation, retries, timeouts and
+  rollback, caching, dates and locales, hashing, cryptography and authentication,
+  CLI arguments, HTTP clients, file paths, pathfinding, steering, behavior state
+  machines, collision or asset loading — or before adding or removing a
+  dependency; and before a material decision to add, retain or change standard
+  visual states, or deliver a staged adoption, read
+  [reuse and migration scope](references/reuse-and-migration.md). A one-line
+  helper, project-specific business logic or a case where the existing option
+  breaks the required semantics needs no reuse check. A dependency or shared
+  location does not establish delegation or completion of the outcome.
 - For TypeScript/Vue style choices, read the
   [conventions profile](references/typescript-vue-conventions.md). Its adoption
   boundary matters; it is not a universal language standard.
@@ -149,6 +163,11 @@ Do not equate a file move with unchanged check coverage. Once evidence is
 sufficient, continue to the requested delivery; reopen verification for a changed
 relevant input, failure, concrete unresolved concern or owner requirement.
 Report the responsibility/guarantee improved, actual checks and remaining gaps.
+Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
+when that reference applied. When the work met a concrete unchecked contract
+outside the requested result, you may add `Optional proposal: <missing means> —
+risk: <unchecked contract or input>; not implemented`. Omit it when an existing
+check covers that guarantee; a guarantee the result needs is never optional.
 No mandatory new architecture document, metric target or separate reviewer.
 
 The `evals/` cases and rubrics are evaluation data, not runtime instructions;
