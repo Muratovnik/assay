@@ -57,7 +57,9 @@ in one owning file; other documents link to it instead of copying it.
 
 The fragment does not grant authority, approve risky changes or enforce anything.
 Approvals, permissions and protected paths stay with the client configuration and
-the project's own review process. Writing a condition down does not prove that an agent applied
+the project's own review process; [project guards](project-guards.md) covers the
+client-side options for tests and check configuration. Writing a condition down
+does not prove that an agent applied
 it: check the result and the report, which should cite the condition or name the
 assumption it made instead.
 

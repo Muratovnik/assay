@@ -110,7 +110,9 @@ at session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives w
 a delegation request and in the reminder before each launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
-failures. There is no universal blocking Stop hook.
+failures. There is no universal blocking Stop hook. Assay does not ship a hook
+that guards project paths; to require approval for edits to tests or check
+configuration, see [project guards](project-guards.md).
 
 ## Optional state and privacy
 
