@@ -18,7 +18,9 @@ workflow, automatic audit gate or a second source of product requirements.
 Recover the requested outcome, scope, adopted rules, available evidence and
 allowed effects. Reuse supplied answers and inspect relevant existing artifacts
 before asking for missing facts. Resolve only uncertainty capable of changing a
-material decision; name nonblocking assumptions and continue useful work.
+material decision; name nonblocking assumptions and continue useful work. Stage,
+public contracts, dependency policy and expected extensions are among the
+[conditions a project should supply](../implementation-planning/references/scope-and-readiness.md#conditions-the-project-should-supply).
 
 A proposal or placement question does not authorize application changes. A request
 that already authorizes implementation needs no extra approval ceremony. Use

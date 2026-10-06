@@ -21,9 +21,11 @@ this method; a read-only audit uses the same criteria without repair authority.
 ## Establish the working contract
 
 Read the request, owner instructions, affected callers and effective project
-configuration. Separate required behavior, adopted conventions and proposed
-improvements. Apply an agreed convention within its actual scope; do not turn
-a later preference into a historical violation. Existing inconsistency is
+configuration, including the
+[conditions a project should supply](../implementation-planning/references/scope-and-readiness.md#conditions-the-project-should-supply)
+when a decision depends on them. Separate required behavior, adopted conventions
+and proposed improvements. Apply an agreed convention within its actual scope; do
+not turn a later preference into a historical violation. Existing inconsistency is
 evidence to investigate, not permission to choose whichever style is convenient.
 
 When a reported symptom has no established cause or a proposed mechanism may not

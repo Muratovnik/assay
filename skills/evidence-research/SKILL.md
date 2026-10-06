@@ -3,7 +3,7 @@ name: evidence-research
 description: Investigate questions, compare options or assess gaps using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence; skip simple fact lookups, text summaries and routine implementation.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change research-driven-change"
+  assay-optional-skills: "code-change implementation-planning research-driven-change"
 ---
 
 # Evidence research
@@ -26,6 +26,8 @@ Identify the decision or explanation sought, material constraints, audience,
 time/version scope and desired deliverable. Reuse applicable prior evidence,
 checking volatile assumptions. Clarify only uncertainty that would materially
 change the work; distinguish a user's proposed solution from the underlying need.
+Question type, known validity threats and dependency policy can come from the
+[conditions a project should supply](../implementation-planning/references/scope-and-readiness.md#conditions-the-project-should-supply).
 
 For a substantial investigation, keep a compact map of answer-bearing questions
 in the existing task or notes. Select families appropriate to the task, including

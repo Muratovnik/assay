@@ -116,6 +116,8 @@ falling back to a shell.
 
 - [Installing assay](docs/install.md) — per-client detail, uninstalling and upgrading.
 - [Upgrading a linked install](docs/how-to/upgrade-linked-install.md) — moving a symlink install to a newer revision, and the way back if it goes wrong.
+- [Stating project conditions](docs/how-to/project-conditions.md) — a short fragment for your project's instructions so agents stop guessing stage, contracts and dependency policy.
+- [Recording feedback cases](docs/how-to/feedback-capture.md) — keeping corrections and acceptable examples locally for later review, without another model.
 - [How assay is put together](docs/architecture.md) — the inventory, the discovery topology and the guarded install lifecycle.
 - [Why one source reaches several clients](docs/explanation/discovery-topology.md) — why a skill is linked and a profile rendered, and what each choice costs.
 - [What the evaluations establish](docs/evaluation.md) — what each skill's `evals/` directory proves and does not prove.

@@ -50,6 +50,29 @@ reject malformed records has no validation on that path; the validator, existing
 or new, belongs to the requested guarantee. Control: fixing an off-by-one error in
 a date parser that existing tests already cover changes nothing at that boundary.
 
+## Conditions the project should supply
+
+Some conditions decide which choice is right but rarely appear in a request. Look
+for them before a decision that depends on them; an absent condition is not a
+license to substitute the usual value.
+
+| Condition | Observable fact: extract it yourself | Owner decision: do not infer it |
+| --- | --- | --- |
+| Stage and horizon | Release tags, migrations, consumers in other packages | Expected lifetime; whether a prototype may be replaced |
+| Criticality and risk | Deployment and data-handling configuration | Criticality, user base, acceptable risk and reversibility |
+| Critical areas | Protected paths and required gates in configuration | Which areas need extra care |
+| Dependencies | Installed versions, lock files, existing internal components | Dependency policy: licenses, bans, preferred components |
+| Public contracts | Package exports, CLI flags, schemas, events | Which contracts external consumers rely on |
+| Checks | Test locations, project gates, CI configuration | Required depth beyond the project's own gates |
+| Extensions and research | Announced roadmap items in project documents | Expected extension directions; question type and known validity threats |
+
+Extract an observable fact before asking about it. For a missing owner decision,
+name the assumption in the result and continue safe work; ask only when the
+assumption changes a choice that is costly to reverse. Keep each condition's
+source and date or revision; name a stale condition stale instead of applying it
+silently. The values belong in the project's own instructions; this method holds
+no project values.
+
 ## Check material changes to the contract
 
 Keep the desired outcome, chosen means, continuing constraints and authority of
@@ -74,6 +97,7 @@ review or faithful transfer can leave a broader goal unfinished without authoriz
 its implementation. Preserve that remainder and its continuation condition rather
 than dropping it or silently expanding the current assignment. No extra tracker,
 mandatory approval field or fixed document schema is required.
+
 
 ## Classify unknowns by the next decision
 

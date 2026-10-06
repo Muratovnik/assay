@@ -104,6 +104,8 @@ python tools/assay.py install-links
 
 - [安装 assay](docs/zh-CN/install.md) —— 各客户端细节、卸载与升级。
 - [升级符号链接安装](docs/zh-CN/how-to/upgrade-linked-install.md) —— 如何把符号链接安装迁移到新版本，以及出问题时如何回退。
+- [为智能体说明项目条件](docs/how-to/project-conditions.md)（英文）—— 写入项目指令的简短片段，让智能体不必猜测阶段、契约和依赖策略。
+- [记录反馈案例](docs/how-to/feedback-capture.md)（英文）—— 在本地保存纠正和可接受的示例以供日后复查，无需额外模型。
 - [assay 的组成方式](docs/zh-CN/architecture.md) —— 清单、发现拓扑与受保护的安装生命周期。
 - [为什么一份源能到达多个客户端](docs/zh-CN/explanation/discovery-topology.md) —— 技能为何用链接、配置为何用渲染，以及各自的代价。
 - [评测能证明什么](docs/zh-CN/evaluation.md) —— 每个技能的 `evals/` 目录能够以及不能够证明什么。
