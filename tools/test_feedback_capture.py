@@ -290,7 +290,14 @@ class FeedbackCaptureTests(unittest.TestCase):
                      {"kind": "correction", "methods_reported": ["/srv/methods/skill.md"]},
                      {"kind": "correction", "revision": "main"},
                      {"kind": "correction", "related": "missing-record"},
-                     {"kind": "correction", "client": "other"}):
+                     {"kind": "correction", "client": "other"},
+                     {"kind": "correction", "session_id": "user said SECRET_TEXT in logs, fix it"},
+                     {"kind": "correction", "trace_refs": ["Users/someone/Desktop/SECRET_TEXT/notes.md"]},
+                     {"kind": "correction", "trace_refs": ["home/someone/SECRET_TEXT.md"]},
+                     {"kind": "correction", "criterion": {"ref": "Z:notes.md"}},
+                     # The source gate forbids literal home paths even as samples.
+                     *({"kind": "correction", "criterion": {"ref": "/".join((*prefix, "Users", "someone", "notes.md"))}}
+                       for prefix in (("c",), ("mnt", "c"), ("cygdrive", "c")))):
             with self.subTest(data=data):
                 with self.assertRaises(ValueError):
                     self.explicit(data)
@@ -301,6 +308,12 @@ class FeedbackCaptureTests(unittest.TestCase):
         allowed = self.explicit({"kind": "allowed_behavior", "criterion": {"code": "R8", "ref": "TASK-7"},
                                  "related": correction["id"], "revision": "315e1f6"})
         self.assertEqual(allowed["related"], correction["id"])
+        # Native session identifiers and repository-relative anchors stay usable.
+        native = self.explicit({"kind": "correction", "client": "claude",
+                                "session_id": "0b7d3c1e-5f2a-4c8e-9d61-2a4f7e9b1c35",
+                                "trace_refs": ["docs/decisions/0007-cache.md#kb:a7f3", "src/Users.cs",
+                                               "users/models.py"]})
+        self.assertEqual(native["source"]["session_id"], "0b7d3c1e-5f2a-4c8e-9d61-2a4f7e9b1c35")
         self.assertEqual(allowed["context"]["method_identity"]["revision_basis"], "caller_supplied")
         content = self.explicit({"kind": "correction", "excerpt": "You missed the validator."},
                                 settings={"feedback_capture": "content"})

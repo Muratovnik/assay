@@ -45,6 +45,9 @@ TEXT_FIELDS = ("task", "observed", "expected", "hypothesis", "evidence")
 # Identifiers only: tracker items, commits, receipts, session IDs or relative
 # anchors. No spaces, so a reference cannot carry a sentence.
 REFERENCE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:#/@+-]{0,159}")
+# A drive-qualified or home-rooted path stays a user path when its root is
+# stripped. Shape cannot prove that a relative name or a token is not private.
+USER_PATH = re.compile(r"[A-Za-z]:|(?:(?:mnt|cygdrive)/)?(?:[a-z]/)?(?:Users|home)/")
 CRITERION_CODE = re.compile(r"[A-Za-z][A-Za-z0-9.-]{0,31}")
 METHOD_PATH = re.compile(r"skills/[a-z][a-z0-9-]{0,63}/(?:SKILL\.md|references/[a-z0-9][a-z0-9-]{0,95}\.md)")
 REVISION = re.compile(r"[0-9a-f]{7,64}")
@@ -69,9 +72,9 @@ def bounded_id(value):
 
 
 def reference(value):
-    """Accept a bounded identifier, never an absolute path or prose."""
-    if not isinstance(value, str) or not REFERENCE.fullmatch(value) or re.match(r"[A-Za-z]:/", value):
-        raise ValueError("references must be bounded identifiers without spaces or absolute paths")
+    """Accept a bounded identifier, never a user path or prose."""
+    if not isinstance(value, str) or not REFERENCE.fullmatch(value) or USER_PATH.match(value):
+        raise ValueError("references must be bounded identifiers without spaces or user paths")
     return value
 
 
@@ -293,8 +296,10 @@ def record(directory, data, settings, *, root, clock=time.time):
     if client not in (*CLIENT_EVENTS, "unknown"):
         raise ValueError("unknown client")
     session = data.get("session_id")
-    if session is not None and not bounded_id(session):
-        raise ValueError("invalid session id")
+    if session is not None:
+        # A hook reads the session ID from the native event; a caller-supplied
+        # one takes the identifier shape so it cannot carry a sentence.
+        reference(session)
     rule = criterion(data.get("criterion"))
     if kind == "allowed_behavior" and not rule:
         # An allowed example is defined by the criterion it satisfies, never by

@@ -66,11 +66,11 @@ file instead. The JSON object accepts:
 | --- | --- |
 | `kind` | Required: `correction` or `allowed_behavior`. |
 | `criterion` | `{"code": "...", "ref": "..."}`: a short code from the owner's requirement list and a reference to the owning task or decision. Required for `allowed_behavior`: an allowed example is defined by the criterion it meets, never by an absence of complaints. |
-| `client`, `session_id` | Optional: `claude`, `codex`, `gemini`, `cursor` or `unknown`, and the client session in which a person can find the transcript. |
+| `client`, `session_id` | Optional: `claude`, `codex`, `gemini`, `cursor` or `unknown`, and the identifier of the client session in which a person can find the transcript. It takes the same identifier shape as `trace_refs`. |
 | `methods_reported` | Optional catalogue-relative paths such as `skills/code-change/SKILL.md` that the agent reports having read; stored as `self_reported`. |
 | `revision` | Optional commit or digest of the method copy, stored as `caller_supplied`. |
 | `related` | Optional ID of a retained record, for example the correction an allowed example answers. |
-| `trace_refs` | Optional identifiers of available traces: receipts, commits, task items. No spaces or absolute paths. |
+| `trace_refs` | Optional identifiers of available traces: receipts, commits, task items or anchors relative to the owning repository. No spaces and no user paths. |
 | `excerpt` | The original correction text; accepted only when the storage mode is `content`. |
 
 Example of an allowed example linked to a reviewed correction:
@@ -100,6 +100,15 @@ installation (`recorder_root_bytes`). These are pointers, not proof:
 Unknown values stay `unknown`; nothing is reconstructed from current files later.
 The source records an evidence level: `command_input_unattested` for hook
 capture and `caller_report_unattested` for explicit records.
+
+In metadata mode every caller-supplied identifier — session ID, trace and
+criterion references, basis references — must be a single token of letters,
+digits and `._:#/@+-`, so it cannot carry a sentence. The recorder also rejects
+drive-qualified paths and paths rooted at `Users/` or `home/`, including those
+with the leading `/` or `C:/` removed. That is a shape check, not a privacy
+proof: it cannot tell whether a relative name or a token such as a key is
+private. Use tracker IDs, commits, receipts and anchors relative to the owning
+repository, never a secret or a path from your machine.
 
 ## Optional correction hook
 
