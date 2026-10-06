@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -25,7 +26,7 @@ class FeedbackCaptureTests(unittest.TestCase):
         self.base = Path(self.temp.name).resolve()
         self.data = self.base / "data"
         self.now = 1000000.0
-        self.settings = {"state_dir": str(self.data), "feedback_capture": "content"}
+        self.settings = {"state_dir": str(self.data), "feedback_capture": "content", "feedback_trigger": "hook"}
 
     def clock(self):
         return self.now
@@ -47,10 +48,15 @@ class FeedbackCaptureTests(unittest.TestCase):
 
     def test_disabled_has_no_storage_or_parser_effect(self):
         with patch.object(feedback, "signal", side_effect=AssertionError("must not classify")):
-            for client in ("claude", "codex", "gemini", "cursor"):
-                self.assertEqual(self.capture(client, settings={"feedback_capture": "off"}), {})
+            for settings in ({"feedback_capture": "off", "feedback_trigger": "hook"},
+                             {"state_dir": str(self.data)},
+                             {"state_dir": str(self.data), "feedback_capture": "content"}):
+                for client in ("claude", "codex", "gemini", "cursor"):
+                    with self.subTest(settings=settings, client=client):
+                        self.assertEqual(self.capture(client, settings=settings), {})
         self.assertFalse(self.data.exists())
-        self.assertEqual(cli.options({})["feedback_capture"], "off")
+        defaults = cli.options({})
+        self.assertEqual((defaults["feedback_capture"], defaults["feedback_trigger"]), ("metadata", "explicit"))
 
     def test_input_signals_and_nearby_valid_controls(self):
         for prompt in ("Ты упустил обязательную проверку.", "Нет, я просил исследование, а не реализацию.",
@@ -161,7 +167,10 @@ class FeedbackCaptureTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     feedback.annotate(self.data, key, {"category": "reported_mismatch", "basis": "prior_requirement", **extra}, clock=self.clock)
         self.assertEqual(self.records()[0]["annotations"], [])
-        feedback.review(self.data, key, "confirmed", "Compared against the earlier requirement.", clock=self.clock)
+        with self.assertRaises(ValueError):
+            feedback.review(self.data, key, "confirmed", "Compared against the earlier requirement.", clock=self.clock)
+        feedback.review(self.data, key, "confirmed", "Compared against the earlier requirement.",
+                        basis_ref="commit:abc1234", clock=self.clock)
         self.assertEqual(self.records()[0]["status"], "confirmed")
         self.assertEqual(self.records()[0]["review"]["provenance"], "explicit_local_review_unattested")
         with self.assertRaises(ValueError):
@@ -194,9 +203,11 @@ class FeedbackCaptureTests(unittest.TestCase):
             self.assertEqual(self.capture(client, {"hook_event_name": "Stop"}), {})
         self.assertFalse(self.data.exists())
         with self.assertRaises(ValueError):
-            self.capture(settings={"feedback_capture": "content"})
+            self.capture(settings={"feedback_capture": "content", "feedback_trigger": "hook"})
         with self.assertRaises(ValueError):
-            self.capture(settings={"feedback_capture": "content", "state_dir": "relative"})
+            self.capture(settings={"feedback_capture": "content", "feedback_trigger": "hook", "state_dir": "relative"})
+        with self.assertRaises(ValueError):
+            self.capture(settings={**self.settings, "feedback_trigger": "always"})
 
     def test_linked_state_path_does_not_write_to_target(self):
         target = self.base / "other-owner"
@@ -239,6 +250,160 @@ class FeedbackCaptureTests(unittest.TestCase):
         with patch.object(cli, "_process", return_value=(base, None)), patch.object(feedback, "handle", return_value=extra):
             result, _ = cli.process(self.event("claude"), "claude", {})
         self.assertEqual(result["hookSpecificOutput"]["additionalContext"], "Existing hint.\nFeedback hint.")
+
+    def explicit(self, data, settings=None):
+        return feedback.record(self.data, data, settings or {"feedback_capture": "metadata"}, root=ROOT, clock=self.clock)
+
+    def test_explicit_record_without_hook_keeps_metadata_free_of_text(self):
+        with patch.object(feedback, "signal", side_effect=AssertionError("explicit record does not classify")):
+            entry = self.explicit({"kind": "correction", "client": "codex", "session_id": "session-1",
+                                   "criterion": {"code": "R2", "ref": "TASK-12"},
+                                   "methods_reported": ["skills/code-change/SKILL.md",
+                                                        "skills/code-change/references/reuse-and-migration.md"],
+                                   "trace_refs": ["receipt:42"]})
+        stored = self.records()[0]
+        self.assertEqual((stored["kind"], stored["status"], stored["signal"]), ("correction", "candidate", "explicit"))
+        self.assertEqual(stored["source"]["evidence_level"], "caller_report_unattested")
+        self.assertIsNone(stored["excerpt"])
+        context = stored["context"]
+        self.assertEqual(context["assay_version"], (ROOT / "VERSION").read_text(encoding="utf-8").strip())
+        self.assertEqual(context["rules_fingerprint"], feedback.load_rules(ROOT)[1])
+        self.assertEqual(context["methods_reported"]["provenance"], "self_reported")
+        identity = context["method_identity"]
+        self.assertEqual((identity["revision"], identity["revision_basis"]), ("unknown", "unknown"))
+        self.assertEqual(identity["digest_basis"], "recorder_root_bytes")
+        expected = hashlib.sha256((ROOT / "skills/code-change/SKILL.md").read_bytes()).hexdigest()
+        self.assertEqual(identity["digests"]["skills/code-change/SKILL.md"], expected)
+        self.assertEqual(entry["id"], stored["id"])
+        unknown = self.explicit({"kind": "correction"})
+        self.assertEqual(unknown["context"]["methods_reported"], "unknown")
+        self.assertEqual(unknown["context"]["method_identity"]["digests"], "unknown")
+
+    def test_explicit_record_boundaries(self):
+        for data in ({"kind": "allowed_behavior"},
+                     {"kind": "complaint"},
+                     {"kind": "correction", "excerpt": "SECRET_TEXT"},
+                     {"kind": "correction", "note": "free text"},
+                     {"kind": "correction", "criterion": {"code": "has spaces"}},
+                     {"kind": "correction", "criterion": {"ref": "Z:/private/notes.md"}},
+                     {"kind": "correction", "trace_refs": ["a sentence with spaces"]},
+                     {"kind": "correction", "methods_reported": ["/srv/methods/skill.md"]},
+                     {"kind": "correction", "revision": "main"},
+                     {"kind": "correction", "related": "missing-record"},
+                     {"kind": "correction", "client": "other"}):
+            with self.subTest(data=data):
+                with self.assertRaises(ValueError):
+                    self.explicit(data)
+        with self.assertRaises(ValueError):
+            self.explicit({"kind": "correction"}, settings={"feedback_capture": "off"})
+        self.assertEqual(self.records(), [])
+        correction = self.explicit({"kind": "correction"})
+        allowed = self.explicit({"kind": "allowed_behavior", "criterion": {"code": "R8", "ref": "TASK-7"},
+                                 "related": correction["id"], "revision": "315e1f6"})
+        self.assertEqual(allowed["related"], correction["id"])
+        self.assertEqual(allowed["context"]["method_identity"]["revision_basis"], "caller_supplied")
+        content = self.explicit({"kind": "correction", "excerpt": "You missed the validator."},
+                                settings={"feedback_capture": "content"})
+        self.assertEqual(content["excerpt"], "You missed the validator.")
+        self.assertNotIn("SECRET_TEXT", json.dumps(self.records()))
+
+    def test_metadata_review_uses_codes_and_keeps_history(self):
+        prompt = "You missed the secret SENTINEL_PRIVATE_TEXT."
+        self.capture(event=self.event("claude", prompt), settings={**self.settings, "feedback_capture": "metadata"})
+        key = self.records()[0]["id"]
+        other = self.explicit({"kind": "correction"})["id"]
+        source = copy.deepcopy(feedback.read(self.data, key, clock=self.clock)["source"])
+        for call in (lambda: feedback.review(self.data, key, "dismissed", "SENTINEL_PRIVATE_TEXT", clock=self.clock),
+                     lambda: feedback.review(self.data, key, "dismissed", clock=self.clock),
+                     lambda: feedback.review(self.data, key, "dismissed", reason_code="same_incident", clock=self.clock),
+                     lambda: feedback.review(self.data, key, "confirmed", clock=self.clock),
+                     lambda: feedback.review(self.data, key, "confirmed", basis_ref="has spaces", clock=self.clock),
+                     lambda: feedback.review(self.data, key, "dismissed", reason_code="preference", layer="guess", clock=self.clock)):
+            with self.assertRaises(ValueError):
+                call()
+        feedback.review(self.data, key, "dismissed", reason_code="not_a_correction", clock=self.clock)
+        feedback.review(self.data, key, "candidate", reason_code="new_evidence", clock=self.clock)
+        feedback.review(self.data, key, "duplicate", reason_code="same_incident", duplicate_of=other, clock=self.clock)
+        feedback.review(self.data, key, "confirmed", basis_ref="TASK-12", layer="not_loaded", clock=self.clock)
+        record = feedback.read(self.data, key, clock=self.clock)
+        self.assertEqual([item["status"] for item in record["reviews"]], ["dismissed", "candidate", "duplicate", "confirmed"])
+        self.assertEqual(record["review"], record["reviews"][-1])
+        self.assertEqual((record["review"]["basis_ref"], record["review"]["layer"]), ("TASK-12", "not_loaded"))
+        self.assertEqual(record["source"], source)
+        self.assertNotIn("SENTINEL_PRIVATE_TEXT", json.dumps(record))
+        with patch.object(feedback, "MAX_REVIEWS", 4):
+            with self.assertRaises(ValueError):
+                feedback.review(self.data, key, "candidate", reason_code="reopened", clock=self.clock)
+        self.assertEqual(len(feedback.read(self.data, key, clock=self.clock)["reviews"]), 4)
+
+    def test_annotation_layer_codes_and_allowed_examples(self):
+        correction = self.explicit({"kind": "correction"})["id"]
+        feedback.annotate(self.data, correction, {"category": "reported_mismatch", "basis": "prior_requirement",
+                                                  "layer": "loaded_not_applied", "trace_refs": ["session:abc"]},
+                          clock=self.clock)
+        for data in ({"category": "uncertain", "basis": "unknown", "layer": "probably"},
+                     {"category": "uncertain", "basis": "unknown", "trace_refs": "session:abc"},
+                     {"category": "uncertain", "basis": "unknown", "hypothesis": "free text"}):
+            with self.subTest(data=data):
+                with self.assertRaises(ValueError):
+                    feedback.annotate(self.data, correction, data, clock=self.clock)
+        allowed = self.explicit({"kind": "allowed_behavior", "criterion": {"code": "R8"}})["id"]
+        with self.assertRaises(ValueError):
+            feedback.annotate(self.data, allowed, {"category": "uncertain", "basis": "unknown"}, clock=self.clock)
+        feedback.annotate(self.data, allowed, {"trace_refs": ["commit:abc1234"]}, clock=self.clock)
+        self.assertEqual(len(feedback.read(self.data, allowed, clock=self.clock)["annotations"]), 1)
+
+    def test_version_one_records_read_as_unknown_and_remain_old_reader_compatible(self):
+        old = {"schema": 1, "id": "v1-record", "created_at": self.now, "expires_at": self.now + 3600,
+               "status": "dismissed", "source": {"client": "claude", "event": "UserPromptSubmit", "scope": "s",
+                                                 "session_id": "session-1", "delivery_id": None,
+                                                 "evidence_level": "command_input_unattested"},
+               "signal": "omission", "capture_mode": "content", "assay_version": "0.15.0",
+               "excerpt": "You missed it.", "excerpt_truncated": False, "annotations": [],
+               "review": {"at": self.now, "reason": "Requirement changed.", "duplicate_of": None,
+                          "provenance": "explicit_local_review_unattested"},
+               "pending_notice": False}
+        with feedback.store(self.data, clock=self.clock).transaction() as tx:
+            tx.put(feedback.KIND, old["id"], old, old["expires_at"])
+        record = feedback.read(self.data, "v1-record", clock=self.clock)
+        self.assertEqual(record["kind"], "correction")
+        self.assertEqual(record["context"]["rules_fingerprint"], "unknown")
+        self.assertEqual(record["context"]["assay_version"], "0.15.0")
+        self.assertEqual(record["reviews"], [old["review"]])
+        feedback.review(self.data, "v1-record", "candidate", "Reopened after new evidence.", clock=self.clock)
+        updated = feedback.read(self.data, "v1-record", clock=self.clock)
+        self.assertEqual(len(updated["reviews"]), 2)
+        self.assertEqual(updated["excerpt"], old["excerpt"])
+        # Keys an older reader indexes directly stay present in new records.
+        fresh = self.explicit({"kind": "correction"})
+        for key in ("id", "created_at", "expires_at", "status", "signal", "capture_mode", "source",
+                    "annotations", "review", "excerpt", "pending_notice"):
+            self.assertIn(key, fresh)
+        self.assertIn("client", fresh["source"])
+
+    def test_store_overflow_is_visible_and_keeps_the_hint(self):
+        config = self.base / "config.json"
+        config.write_text(json.dumps(self.settings), encoding="utf-8")
+        environment = {"ASSAY_HOOK_CONFIG": str(config)}
+        with patch.object(feedback, "MAX_RECORDS", 1):
+            _, error = cli.process(self.event("claude"), "claude", environment, clock=self.clock)
+            self.assertIsNone(error)
+            event = self.event("claude", "You forgot the constraint.")
+            expected, _ = cli._process(event, "claude", environment, clock=self.clock)
+            second, error = cli.process(event, "claude", environment, clock=self.clock)
+        self.assertIn("optional feedback capture unavailable", error)
+        self.assertEqual(second, expected)
+        self.assertEqual(len(self.records()), 1)
+
+    def test_no_network_is_used(self):
+        def refuse(*args, **kwargs):
+            raise AssertionError("network access attempted")
+        with patch("socket.socket", side_effect=refuse), patch("socket.create_connection", side_effect=refuse):
+            self.capture()
+            key = self.explicit({"kind": "correction"})["id"]
+            feedback.annotate(self.data, key, {"category": "uncertain", "basis": "unknown"}, clock=self.clock)
+            feedback.review(self.data, key, "dismissed", reason_code="other", clock=self.clock)
+        self.assertEqual(len(self.records()), 2)
 
     def run_cli(self, *args, payload="", ascii_stdout=False):
         environment = {key: value for key, value in os.environ.items()
@@ -303,6 +468,34 @@ class FeedbackCaptureTests(unittest.TestCase):
         self.assertNotIn("SECRET_PAYLOAD", invalid.stderr)
         unknown = self.run_cli("show", "missing", "--state-dir", str(self.data))
         self.assertEqual(unknown.returncode, 2)
+
+    def test_cli_record_and_coded_review(self):
+        created = self.run_cli("record", "--state-dir", str(self.data),
+                               payload='{"kind":"correction","client":"claude","criterion":{"code":"R1"}}')
+        self.assertEqual(created.returncode, 0, created.stderr)
+        result = json.loads(created.stdout)
+        self.assertEqual((result["kind"], result["capture_mode"]), ("correction", "metadata"))
+        reviewed = self.run_cli("review", result["id"], "--state-dir", str(self.data), "--status", "dismissed",
+                                "--reason-code", "new_requirement", "--layer", "unknown")
+        self.assertEqual(reviewed.returncode, 0, reviewed.stderr)
+        self.assertEqual(json.loads(reviewed.stdout), {"id": result["id"], "status": "dismissed", "reviews": 1})
+        text = self.run_cli("review", result["id"], "--state-dir", str(self.data), "--status", "dismissed",
+                            "--reason", "SECRET_REASON")
+        self.assertEqual(text.returncode, 2)
+        self.assertNotIn("SECRET_REASON", text.stderr)
+        listed = json.loads(self.run_cli("list", "--state-dir", str(self.data)).stdout)
+        self.assertEqual(listed[0]["kind"], "correction")
+        config = self.base / "off.json"
+        config.write_text(json.dumps({"state_dir": str(self.data), "feedback_capture": "off"}), encoding="utf-8")
+        refused = self.run_cli("record", "--config", str(config), payload='{"kind":"correction"}')
+        self.assertEqual(refused.returncode, 2)
+        self.assertEqual(len(json.loads(self.run_cli("list", "--state-dir", str(self.data)).stdout)), 1)
+        content = self.base / "content.json"
+        content.write_text(json.dumps({"state_dir": str(self.data), "feedback_capture": "content"}), encoding="utf-8")
+        stored = self.run_cli("record", "--config", str(content),
+                              payload='{"kind":"correction","excerpt":"Ты упустил валидатор."}')
+        self.assertEqual(stored.returncode, 0, stored.stderr)
+        self.assertEqual(json.loads(stored.stdout)["capture_mode"], "content")
 
 
 if __name__ == "__main__":

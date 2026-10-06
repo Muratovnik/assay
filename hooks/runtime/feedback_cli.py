@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture or inspect local feedback candidates without calling a model."""
+"""Record, capture or inspect local feedback cases without calling a model."""
 from __future__ import annotations
 
 import argparse
@@ -45,6 +45,10 @@ def main(argv=None):
     event = commands.add_parser("event", help="native event on stdin; input failures never block a task")
     event.add_argument("--client", choices=tuple(feedback.CLIENT_EVENTS), required=True)
     event.add_argument("--config", type=Path, help="absolute owner-controlled ASSAY_HOOK_CONFIG override")
+    explicit = commands.add_parser("record", help="explicit case from the user or agent; JSON object on stdin or --input")
+    explicit.add_argument("--state-dir", type=Path, help="absolute parent data directory; default from configuration")
+    explicit.add_argument("--config", type=Path, help="absolute owner-controlled ASSAY_HOOK_CONFIG override")
+    explicit.add_argument("--input", type=Path, help="JSON object file; default stdin")
     for name in ("list", "show", "annotate", "review", "delete", "export"):
         command = commands.add_parser(name)
         command.add_argument("--state-dir", type=Path, required=True, help="absolute parent data directory, not its feedback child")
@@ -54,7 +58,10 @@ def main(argv=None):
             command.add_argument("--input", type=Path, help="JSON object file; default stdin")
         if name == "review":
             command.add_argument("--status", choices=feedback.REVIEW_STATES, required=True)
-            command.add_argument("--reason", required=True)
+            command.add_argument("--reason", help="free text; content mode only")
+            command.add_argument("--reason-code", choices=sorted({code for codes in feedback.REVIEW_CODES.values() for code in codes}))
+            command.add_argument("--basis-ref", help="identifier of the evidence a confirmation rests on")
+            command.add_argument("--layer", choices=feedback.LAYERS, help="reviewer's cause-layer hypothesis")
             command.add_argument("--duplicate-of")
     try:
         args = parser.parse_args(arguments)
@@ -66,6 +73,18 @@ def main(argv=None):
             if args.config:
                 environment["ASSAY_HOOK_CONFIG"] = str(args.config)
             result = feedback.handle(input_object(), args.client, options(environment), root=ROOT)
+        elif args.command == "record":
+            from runtime.cli import options
+            environment = dict(os.environ)
+            if args.config:
+                environment["ASSAY_HOOK_CONFIG"] = str(args.config)
+            settings = options(environment)
+            directory = args.state_dir or settings["state_dir"]
+            if not directory:
+                raise ValueError("record needs --state-dir or a configured state directory")
+            entry = feedback.record(directory, input_object(args.input), settings, root=ROOT)
+            result = {"id": entry["id"], "kind": entry["kind"], "status": entry["status"],
+                      "capture_mode": entry["capture_mode"]}
         elif args.command in {"list", "export"}:
             records = feedback.read(args.state_dir)
             if args.command == "export":
@@ -74,7 +93,7 @@ def main(argv=None):
                     # even under a Windows console's legacy output encoding.
                     print(json.dumps(record))
                 return 0
-            result = [{key: record[key] for key in ("id", "created_at", "status", "signal", "capture_mode")}
+            result = [{key: record[key] for key in ("id", "kind", "created_at", "status", "signal", "capture_mode")}
                       | {"client": record["source"]["client"], "annotations": len(record["annotations"])}
                       for record in records]
         elif args.command == "show":
@@ -83,8 +102,10 @@ def main(argv=None):
             record = feedback.annotate(args.state_dir, args.id, input_object(args.input))
             result = {"id": record["id"], "status": record["status"], "annotations": len(record["annotations"])}
         elif args.command == "review":
-            record = feedback.review(args.state_dir, args.id, args.status, args.reason, duplicate_of=args.duplicate_of)
-            result = {"id": record["id"], "status": record["status"]}
+            record = feedback.review(args.state_dir, args.id, args.status, args.reason,
+                                     reason_code=args.reason_code, basis_ref=args.basis_ref,
+                                     layer=args.layer, duplicate_of=args.duplicate_of)
+            result = {"id": record["id"], "status": record["status"], "reviews": len(record["reviews"])}
         else:
             feedback.delete(args.state_dir, args.id)
             result = {"id": args.id, "deleted": True}

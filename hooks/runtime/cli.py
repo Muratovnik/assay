@@ -41,10 +41,13 @@ def options(environment):
     if location and (not isinstance(location, str) or not Path(location).is_absolute()):
         raise ValueError("hook configuration path must be absolute")
     raw = read_json(location) if location else {}
-    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events", "feedback_capture"}:
+    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events",
+                   "feedback_capture", "feedback_trigger"}:
         raise ValueError("unknown hook option")
+    # Storage defaults to metadata for explicit records; the correction
+    # grammar stays off until the owner selects the hook trigger.
     value = {"disabled_rules": [], "disabled_skills": [], "record_events": False,
-             "feedback_capture": "off",
+             "feedback_capture": "metadata", "feedback_trigger": "explicit",
              "state_dir": environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA"), **raw}
     for key in ("disabled_rules", "disabled_skills"):
         if not isinstance(value[key], list) or any(not isinstance(v, str) for v in value[key]):
@@ -53,6 +56,8 @@ def options(environment):
         raise ValueError("invalid recording option")
     if not isinstance(value["feedback_capture"], str) or value["feedback_capture"] not in feedback.MODES:
         raise ValueError("invalid feedback capture mode")
+    if not isinstance(value["feedback_trigger"], str) or value["feedback_trigger"] not in feedback.TRIGGERS:
+        raise ValueError("invalid feedback trigger")
     if value["state_dir"] is not None and (not isinstance(value["state_dir"], str) or not Path(value["state_dir"]).is_absolute()):
         raise ValueError("hook state directory must be absolute")
     return value
@@ -152,6 +157,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "state_configured": settings["state_dir"] is not None,
               "record_events": settings["record_events"], "hooks_trusted": "unknown",
               "feedback_capture": settings["feedback_capture"],
+              "feedback_trigger": settings["feedback_trigger"],
               "native_execution": "unverified", "model_compliance": "unverified",
               "settings_modified": False, "conflicts": []}
     if settings_path:

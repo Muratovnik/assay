@@ -44,6 +44,11 @@ stop it when no new discriminating evidence or ready authorized action exists, o
 when its agreed resource boundary is reached, and report the remainder instead of
 rephrasing the same rule until a favorable verdict appears.
 
+After classifying a correction, offer to keep it as a case for later review when
+an explicit feedback record is available in this installation; recording is not
+required. The case follows [skill evaluation](../../skill-evaluation/SKILL.md#compare-relevant-conditions)
+and never turns the correction into a rule by itself.
+
 ## Keep checks attached to the checked result
 
 After a repair or incoming change, compare the current subject with the revision

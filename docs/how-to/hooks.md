@@ -5,10 +5,12 @@ models, install dependencies, launch advisors, read transcripts or modify client
 settings. Their text and any subsequent agent work still consume context/quota.
 Skills-only installations do not install hooks.
 
-User corrections can optionally be retained as local feedback candidates. See
-[feedback capture](feedback-capture.md) for consent modes, inspection and native
+User corrections and acceptable examples can be kept as local feedback cases by
+an explicit `record` command. See [feedback capture](feedback-capture.md) for
+storage modes, the optional correction-hook trigger, review and native
 Claude/Codex/Cursor/Gemini adapters. This is separate from the technical reminder
-state described below; it is off by default and never confirms failures automatically.
+state described below; automatic capture is off by default and nothing confirms
+failures automatically.
 
 ## Install, enable and verify separately
 
@@ -133,9 +135,10 @@ hook namespace is capped at 128 records with a 24-hour lifetime. These records
 contain hashes, rule IDs, event names and decision classes, never prompts, paths,
 arguments or transcript text. `record_events: true` enables bounded technical
 event recording; it is off by default. Its evidence label is
-`command_input_unattested`, not native execution. The separate opt-in
-`feedback_capture` option has its own [content consent and retention](feedback-capture.md),
-and does not share the routing database or these namespace limits.
+`command_input_unattested`, not native execution. The separate
+`feedback_capture` and `feedback_trigger` options have their own
+[content consent, trigger and retention](feedback-capture.md), and do not share
+the routing database or these namespace limits.
 
 Scope includes client, session, working directory and agent identity. Codex also
 uses transcript *identity* without opening that file; absent both agent and
