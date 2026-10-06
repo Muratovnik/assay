@@ -47,6 +47,24 @@ class SkillResourceTests(unittest.TestCase):
             (root / "missing.md").write_text("Present\n", encoding="utf-8")
             self.assertEqual([], markdown_problems(path, root))
 
+    def test_section_anchors_are_validated(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "target.md").write_text(
+                "# Target\n\n## Report the `Reuse` decision\n\n## Notes\n\n## Notes\n\n"
+                "## Условия проекта\n", encoding="utf-8")
+            path = root / "source.md"
+            for link in ("target.md#report-the-reuse-decision", "target.md#notes-1",
+                         "target.md#%D1%83%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0",
+                         "#local-part"):
+                with self.subTest(link=link):
+                    path.write_text(f"# Source\n\n## Local part\n\n[ok]({link})\n", encoding="utf-8")
+                    self.assertEqual([], markdown_problems(path, root))
+            for link in ("target.md#missing-part", "target.md#notes-2", "#absent"):
+                with self.subTest(link=link):
+                    path.write_text(f"# Source\n\n[bad]({link})\n", encoding="utf-8")
+                    self.assertTrue(markdown_problems(path, root))
+
     def test_declared_peer_can_be_absent_but_local_resource_cannot(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
