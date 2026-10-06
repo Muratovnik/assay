@@ -141,6 +141,12 @@ The source digest identifies inputs, not the measurement version: retain rubric,
 judge configuration, metadata and split/exposure history separately in the
 coordinator's existing evidence record.
 
+Cases kept with the [feedback recorder](how-to/feedback-capture.md) are not
+evaluation data. One enters an `evals/` corpus only by hand, after sanitizing,
+with `purpose` set to `regression` or `should-not-fire` and a `source` naming the
+reviewed record; no recorded case becomes an evaluation case, rule or method
+change automatically.
+
 ## From a pilot to iterative improvement
 
 For a new or materially changed corpus or evaluator, use
