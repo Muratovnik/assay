@@ -26,8 +26,9 @@ approved change is a normal event, and the prompt makes it a decision.
 
 ## Claude Code
 
-Add `ask` rules to the project's `.claude/settings.json`. Paths starting with `/`
-are relative to the settings source, and the patterns use gitignore syntax:
+Add `ask` rules to the project's `.claude/settings.json`. In that file a path
+starting with `/` resolves against the session's primary working directory, so
+start sessions from the project root; the patterns use gitignore syntax:
 
 ```json
 {
@@ -42,12 +43,18 @@ are relative to the settings source, and the patterns use gitignore syntax:
 ```
 
 Rules are evaluated deny, then ask, then allow, so a broader `allow` cannot skip a
-matching `ask`. An explicit ask rule is not auto-approved in any permission mode,
-including `bypassPermissions`; use `deny` where an edit must never happen. `Edit`
-rules cover Claude's file tools, file commands it recognizes in Bash such as
-`sed` or `tee`, and shell redirections. They do not cover a subprocess that
+matching `ask`. Every permission mode, including `bypassPermissions` and auto
+mode, still prompts for an explicit ask rule. An installed client mod that
+handles tool checks can approve such a call, so check which mods are installed
+where you rely on the prompt.
+
+An `Edit` ask rule covers Claude's file tools. The documentation extends `Edit`
+**deny** rules, not ask rules, to file commands Claude recognizes in Bash, such as
+`sed` or `tee`, and to shell redirection targets; a shell edit of a path that has
+only an ask rule is not documented to prompt. No rule covers a subprocess that
 writes files itself, such as a script run by a test command; that needs the
-client's sandbox.
+client's sandbox. Use `deny` where an edit must never happen, and the reviewable
+diff below where a shell edit must at least be visible.
 
 A project `PreToolUse` hook is the alternative when the decision needs logic: it
 receives `tool_input.file_path` for file edits and can return the
@@ -70,7 +77,8 @@ Codex does not offer the same path-scoped prompt today:
 
 Until a documented path-scoped control exists, keep the protection reviewable:
 ask for a line such as `git diff --stat -- tests/ .github/workflows/` in the final
-report and read that diff before accepting the work.
+report and read that diff before accepting the work. The same line covers shell
+edits in Claude Code that an ask rule does not reach.
 
 ## What this does not do
 

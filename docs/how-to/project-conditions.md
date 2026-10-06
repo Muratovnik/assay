@@ -13,10 +13,13 @@ assumptions about the rest.
 
 ## Add a fragment to the project's instructions
 
-Put a short section in the instruction file your clients already read: Claude
-Code loads `CLAUDE.md` at the start of every session and can also read
-`AGENTS.md`; Codex combines `AGENTS.md` files from the repository root down to
-the working directory, within a size limit (32 KiB by default). Both treat the
+Put a short section in the instruction file your clients already read. Claude
+Code loads `CLAUDE.md` at the start of every session. By default it reads
+`AGENTS.md` only when there is no `CLAUDE.md`, `.claude/CLAUDE.md` or
+`CLAUDE.local.md` in the working directory or above it; a project that has one
+should import `AGENTS.md` from it with an `@AGENTS.md` line or keep the section
+in `CLAUDE.md`. Codex combines `AGENTS.md` files from the repository root down
+to the working directory, within a size limit (32 KiB by default). Both treat the
 text as context, not as enforced configuration. Write only decisions; leave out
 facts the repository already shows, such as test locations or installed versions.
 
