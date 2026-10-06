@@ -150,7 +150,10 @@ link can serve a preview, but a delivered result obtains its resource through
 the accepted asset pipeline or a stable dynamic source. Verify the intended
 variant, size/aspect ratio and how the asset is fetched after the session ends.
 Do not replace an exact asset with an approximate glyph because of a similar
-name; a one-off preview and a standard CDN or API are both legitimate.
+name; a one-off preview and a standard CDN or API are both legitimate. The terms
+under which a borrowed asset may be used follow the
+[borrowing procedure](../../evidence-research/references/component-evidence.md#borrow-a-specific-resource);
+this section keeps the variant and lifecycle checks.
 
 ## Optional composition pilot for new surfaces
 

@@ -11,7 +11,9 @@ score. An undocumented capability is unknown until examined, not automatically
 absent. A maintained alternative is not itself a reason to replace working code.
 
 For a material adoption consider integration, maintenance, licensing, security,
-operating constraints and replacement/migration costs where they affect fit.
+operating constraints and replacement/migration costs where they affect fit. Taking
+a specific fragment or asset follows the
+[borrowing procedure](component-evidence.md#borrow-a-specific-resource).
 Different dependencies or more popular products need an in-scope benefit.
 Learning from a product does not authorize adopting its code, service or features.
 An approved product policy outranks an appealing external convention.

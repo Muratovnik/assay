@@ -29,8 +29,11 @@ duplication in the changed boundary, identify the concrete API gap, unsupported
 consumer behavior or operating constraint and compare the maintenance burden.
 Reuse still-applicable evidence; use the component-evidence procedure in
 [evidence-research](../../evidence-research/references/component-evidence.md) when
-version, compatibility or maintenance premises need verification. Do not claim
-that no solution exists because the first candidate or configuration failed.
+version, compatibility or maintenance premises need verification, and its
+[borrowing procedure](../../evidence-research/references/component-evidence.md#borrow-a-specific-resource)
+before copying or adapting code, behavior or assets from another project or
+package. Do not claim that no solution exists because the first candidate or
+configuration failed.
 
 Preserve a useful facade for product semantics, styling, compatibility or a stable
 consumer interface. Simple native controls can be the fitting reusable primitive.

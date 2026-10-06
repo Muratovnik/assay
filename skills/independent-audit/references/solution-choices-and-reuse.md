@@ -99,7 +99,8 @@ whole architecture, or treat access to source as permission to incorporate it.
 Evaluate only decision-relevant tradeoffs: requirement coverage, integration and
 configuration, transitive dependencies, deployment/privacy constraints, security,
 license compatibility, maintainership, updates/API stability, and exit or rollback
-costs. Consider the ongoing testing and support burden of custom code as well as
+costs. For a specific borrowed fragment or asset, check its terms and operation with
+the [borrowing procedure](../../evidence-research/references/component-evidence.md#borrow-a-specific-resource). Consider the ongoing testing and support burden of custom code as well as
 that of an external dependency. A mature component is not automatically suitable;
 a small implementation is not automatically cheap or safe.
 

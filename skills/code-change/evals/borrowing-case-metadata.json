@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "BR01",
+      "group": "borrowing-excluded-asset",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the borrowing procedure; not a production incident.",
+      "rationale": "A more specific notice excludes assets from the repository license; availability is not permission.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "BR02",
+      "group": "borrowing-permitted-snippet",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored for the borrowing procedure; not a production incident.",
+      "rationale": "A permitted snippet is copied with its notice and recorded, without an unnecessary legal stop.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}
