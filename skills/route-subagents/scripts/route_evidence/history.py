@@ -565,8 +565,10 @@ class HistoryStore:
 
     def _write_immutable(self, path: Path, record: dict) -> dict:
         _refuse_link_ancestors(self.root)
-        if len(encoded(record)) > MAX_RECORD_BYTES:
-            raise EvidenceError("history record exceeds size limit")
+        size = len(encoded(record))
+        if size > MAX_RECORD_BYTES:
+            raise EvidenceError(f"history_record_limit_exceeded: actual_bytes={size}, "
+                                f"limit_bytes={MAX_RECORD_BYTES}, limit_source=history_store")
         with source_lock(self.root / ".write.lock") as acquired:
             if not acquired:
                 raise EvidenceError("history write is already in progress")

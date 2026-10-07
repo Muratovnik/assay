@@ -18,7 +18,8 @@ AdvisorResult: TypeAlias = dict[str, Any]
 
 MAX_PACKETS = 8
 MAX_CANDIDATES_PER_PACKET = 64
-MAX_SEMANTIC_BYTES = 24 * 1024
+LEGACY_SNAPSHOT_BYTES = 24 * 1024
+MAX_RESULT_BYTES = 64 * 1024
 MAX_METADATA_BYTES = 4 * 1024
 MAX_FEATURES = 16
 MAX_CAPABILITIES = 32
@@ -38,7 +39,7 @@ _PROHIBITED_FEATURE_NAMES = {"prompt", "instruction", "instructions", "message",
 _PROHIBITED_FEATURE_SUFFIXES = ("_prompt", "_instruction", "_instructions", "_message",
                                 "_source_code", "_code", "_path", "_task_text", "_freeform_text")
 
-DEFAULT_POLICY = {
+LEGACY_POLICY = {
     "schema_version": 1,
     "policy_version": "routing-policy-v1",
     "fallback": "caller-baseline",
@@ -46,8 +47,11 @@ DEFAULT_POLICY = {
     "strict_unknown_constraints": [],
     "max_packets": MAX_PACKETS,
     "max_candidates_per_packet": MAX_CANDIDATES_PER_PACKET,
-    "max_snapshot_bytes": MAX_SEMANTIC_BYTES,
+    "max_snapshot_bytes": LEGACY_SNAPSHOT_BYTES,
 }
+DEFAULT_POLICY = {**LEGACY_POLICY, "schema_version": 2,
+                  "policy_version": "routing-policy-v2", "max_snapshot_bytes": None,
+                  "max_advisor_result_bytes": MAX_RESULT_BYTES}
 COMPACT_EVIDENCE_ENCODING = {
     "candidate_ref": "candidates index",
     "candidate_row": "ref,pool-index...",
@@ -253,9 +257,12 @@ def validate_packets(packets: Any) -> list[dict]:
 def normalize_policy(overrides: Any = None) -> dict:
     if overrides is None:
         return copy.deepcopy(DEFAULT_POLICY)
-    overrides = _object(overrides, "policy", set(DEFAULT_POLICY))
-    policy = {**copy.deepcopy(DEFAULT_POLICY), **copy.deepcopy(overrides)}
-    if policy["schema_version"] != 1 or policy["policy_version"] != "routing-policy-v1":
+    legacy = isinstance(overrides, dict) and (overrides.get("schema_version") == 1
+                                            or overrides.get("policy_version") == "routing-policy-v1")
+    defaults = LEGACY_POLICY if legacy else DEFAULT_POLICY
+    overrides = _object(overrides, "policy", set(defaults))
+    policy = {**copy.deepcopy(defaults), **copy.deepcopy(overrides)}
+    if (policy["schema_version"], policy["policy_version"]) != (defaults["schema_version"], defaults["policy_version"]):
         raise EvidenceError("policy: unsupported schema or policy version")
     if policy["fallback"] not in {"caller-baseline", "none"}:
         raise EvidenceError("policy.fallback: unsupported fallback")
@@ -268,12 +275,19 @@ def normalize_policy(overrides: Any = None) -> dict:
         raise EvidenceError("policy.strict_unknown_constraints: duplicate constraint")
     policy["strict_unknown_constraints"] = sorted(strict)
     bounds = (("max_packets", 1, MAX_PACKETS),
-              ("max_candidates_per_packet", 1, MAX_CANDIDATES_PER_PACKET),
-              ("max_snapshot_bytes", 1024, MAX_SEMANTIC_BYTES))
+              ("max_candidates_per_packet", 1, MAX_CANDIDATES_PER_PACKET))
     for key, minimum, maximum in bounds:
         value = policy[key]
         if type(value) is not int or not minimum <= value <= maximum:
             raise EvidenceError(f"policy.{key}: expected integer in {minimum}..{maximum}")
+    limit = policy["max_snapshot_bytes"]
+    if not (limit is None and not legacy) and (type(limit) is not int or limit < 1024
+            or (legacy and limit > LEGACY_SNAPSHOT_BYTES)):
+        raise EvidenceError("policy.max_snapshot_bytes: invalid bound")
+    if not legacy:
+        limit = policy["max_advisor_result_bytes"]
+        if type(limit) is not int or not 1024 <= limit <= MAX_RESULT_BYTES:
+            raise EvidenceError("policy.max_advisor_result_bytes: invalid bound")
     return policy
 
 
@@ -655,6 +669,7 @@ def validate_result(snapshot: Any, result: Any) -> AdvisorResult:
         size = len(encoded(normalized))
     except (TypeError, ValueError, RecursionError) as exc:
         raise EvidenceError("advisor result is not finite JSON") from exc
-    if size > snapshot["policy"]["max_snapshot_bytes"]:
+    limit = snapshot["policy"].get("max_advisor_result_bytes", snapshot["policy"]["max_snapshot_bytes"])
+    if size > limit:
         raise EvidenceError("advisor_result_limit_exceeded")
     return normalized

@@ -65,8 +65,11 @@ class Transaction:
 
     def put(self, kind: str, key: str, value: dict, expires: float):
         payload = encoded(value)
-        if len(payload) > MAX_PAYLOAD or expires <= self.clock():
-            raise EvidenceError("pipeline_record_bound_or_expiry")
+        if len(payload) > MAX_PAYLOAD:
+            raise EvidenceError(f"pipeline_record_limit_exceeded: actual_bytes={len(payload)}, "
+                                f"limit_bytes={MAX_PAYLOAD}, limit_source=required_store")
+        if expires <= self.clock():
+            raise EvidenceError("pipeline_record_expired")
         if self.get(kind, key) is None and self.db.execute("SELECT count(*) FROM records").fetchone()[0] >= MAX_RECORDS:
             raise EvidenceError("pipeline_store_full")
         self.db.execute("INSERT INTO records VALUES (?,?,?,?) ON CONFLICT(kind,id) DO UPDATE "

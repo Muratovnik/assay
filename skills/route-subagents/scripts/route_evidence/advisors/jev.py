@@ -327,7 +327,7 @@ class JevAdapter:
             raise AdapterError("jev_candidate_limit")
         state = _external_state(snapshot)
         questions, packet_by_question = _questions(snapshot)
-        io_limit = min(MAX_IO_BYTES, snapshot["policy"]["max_snapshot_bytes"])
+        io_limit = min(MAX_IO_BYTES, snapshot["policy"]["max_snapshot_bytes"] or MAX_IO_BYTES)
         if (len(encoded(semantic_projection(snapshot))) > io_limit
                 or len(encoded({"state": state, "model": self.model, "questions": questions})) > MAX_WIRE_BYTES):
             raise AdapterError("jev_request_too_large")

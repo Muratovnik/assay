@@ -181,16 +181,30 @@ models with compatible APIs are separate backends, not local Jev.
 
 ## Bounds, failures and cache
 
-Defaults are 8 packets, 64 eligible pairs per packet and 24 KiB of semantic
-snapshot and result. Configure smaller values through advisor `max_packets`,
-`max_candidates_per_packet`, `max_snapshot_bytes`. The complete evidence is
-deduplicated; candidates or inconvenient measurements are never removed to fit.
+Routing policy v2 defaults to 8 packets, 64 eligible pairs per packet, no shared
+native input byte cap (`max_snapshot_bytes: null`) and a separate 64 KiB result
+cap (`max_advisor_result_bytes`). An owner may set an input cap in `policy`;
+it has no built-in 24 KiB ceiling. Packet and candidate bounds remain structural.
+The complete evidence is deduplicated; candidates or inconvenient measurements
+are never removed to fit.
 An overflow returns a reason and eligible baseline where possible. It does not
 silently select top-k, split into paid batches or inherit an expensive parent.
 
-The semantic limit excludes transport identity and timestamps. Jev's serialized
-request, including Choice questions and that metadata, has a separate 64 KiB
-bound; this overhead is not extra task content. Byte limits are not token counts.
+An explicitly configured semantic input limit excludes transport identity and
+timestamps. Policy v1 retains its former 24 KiB maximum and shared result bound
+for compatibility. To replace that policy deliberately, run `migrate-config
+--source old.json --output new.json --native-input-unlimited`, then point the
+registration at the new file. Migration never rewrites the source and preserves
+an existing schema 3 pipeline configuration.
+
+Jev retains its adapter's 24 KiB semantic bound and separate 64 KiB serialized
+request bound. These are adapter guards, not claims about a vendor context window.
+Native transport limits belong to the client. Portable envelopes (256 KiB),
+required-mode records (512 KiB), history records (2 MiB) and task summaries
+(6 KiB) have their own storage/projection bounds; unlimited native input does
+not disable those boundaries. Byte limits are not token counts. A fallback
+reports its stage, validation error or configured input bytes/limit where known;
+a history write failure is reported as `telemetry_status: write_failed`.
 
 At most 16 semantic pending decisions live in a connection. They expire after
 ten minutes or earlier inventory/evidence expiry. `busy` preserves existing

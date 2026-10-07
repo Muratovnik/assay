@@ -113,15 +113,13 @@ class NativeAdapterTests(unittest.TestCase):
                          ("model-00", "low", "none"))
         self.assertEqual(result["descriptor"]["privacy_profile"], "native-structured")
         self.assertFalse(result["tool_disable_enforced"])
-        # Evidence-only keeps the 0.8.0 root handoff: prompt and contract travel
-        # with it and the advisor answers in its final message.
         self.assertIn("Do not use tools, delegate", result["prompt"])
         self.assertIn("Return one JSON object and no prose", result["prompt"])
-        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v3")
+        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v5")
         private = prepare_native(self.snapshot, self.route, available=self.available, delivery="private")
         self.assertNotIn("prompt", private)
         self.assertNotIn("result_contract", private)
-        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v4")
+        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v6")
         with self.assertRaises(EvidenceError):
             prepare_native(self.snapshot, self.route, available=self.available, delivery="elsewhere")
         result = advisor_input(self.snapshot, self.route)

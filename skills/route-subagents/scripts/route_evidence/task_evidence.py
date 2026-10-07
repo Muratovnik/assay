@@ -20,6 +20,17 @@ MAX_ROWS = 15000
 MAX_SUMMARY = 6144
 
 
+def _failure_reason(exc):
+    message = str(exc)
+    if "deadline" in message or "timeout" in message:
+        return "retrieval_timeout"
+    if "budget" in message or "byte limit" in message or "too_large" in message:
+        return "retrieval_budget_exceeded"
+    if isinstance(exc, OSError):
+        return "storage_unavailable"
+    return "invalid_evidence"
+
+
 def validate_summary(value):
     if not isinstance(value, dict) or value.get("schema_version") != 1 or len(encoded(value)) > MAX_SUMMARY:
         raise EvidenceError("invalid task evidence projection")
@@ -51,7 +62,8 @@ def attach_summary(snapshot, summary):
     output["evidence"]["task_similarity_evidence"] = validate_summary(summary)
     output["evidence_hash"] = digest(output["evidence"])
     output["snapshot_id"] = snapshot_identity({k:v for k,v in output.items() if k != "snapshot_id"})
-    if len(encoded(semantic_projection(output))) > output["policy"]["max_snapshot_bytes"]:
+    limit = output["policy"]["max_snapshot_bytes"]
+    if limit is not None and len(encoded(semantic_projection(output))) > limit:
         return snapshot
     return validate_routing_snapshot(output)
 
@@ -260,8 +272,8 @@ class TaskEvidence:
             if acquisition:
                 result["acquisition"] = acquisition
             return validate_summary(result)
-        except (EvidenceError, ValueError, OSError):
-            return {"schema_version": 1, "status": "unavailable", "reason": "invalid_missing_or_over_budget",
+        except (EvidenceError, ValueError, OSError) as exc:
+            return {"schema_version": 1, "status": "unavailable", "reason": _failure_reason(exc),
                     "mode": self.config["mode"], "packets": [], "cost_units_are_not_interchangeable": True}
         finally:
             scope.cancel()
@@ -412,6 +424,8 @@ class TaskEvidence:
                     current[layer] = [v for v in values if v["status"] != "unknown"]
                 # Local and public estimates are never pooled into one score.
                 entry = {"packet_id": packet["packet_id"], "status": "available" if local or public else "no_match",
+                    "reason": (None if local or public else "query_missing" if not query
+                               else "corpus_missing" if document is None else "empty_search"),
                     "neighbors": len(neighbors), "examples": [digest(r["task_id"])[:16] for _, r in neighbors[:3]],
                     "public_coverage": public_coverage(public),
                     "public": current["public"], "local": current["local"],
@@ -423,8 +437,8 @@ class TaskEvidence:
                 base["packets"].append(entry)
             base.update(status="available", corpus_fingerprint=(document or {}).get("fingerprint"),
                         source=(document or {}).get("corpus", {}).get("source"))
-        except (EvidenceError, OSError, ValueError, KeyError, TypeError):
-            return {**base, "packets": [], "status": "unavailable", "reason": "invalid_missing_or_over_budget"}
+        except (EvidenceError, OSError, ValueError, KeyError, TypeError) as exc:
+            return {**base, "packets": [], "status": "unavailable", "reason": _failure_reason(exc)}
         if len(encoded(base)) > MAX_SUMMARY:
             return {"schema_version": 1, "status": "insufficient_coverage", "reason": "summary_budget_exceeded",
                     "mode": self.config["mode"], "packets": [], "cost_units_are_not_interchangeable": True}

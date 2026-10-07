@@ -12,7 +12,7 @@ from route_evidence.advice import (build_snapshot, decide, default_policy,
 from route_evidence.advice_contracts import (AdviceLimitError, candidate_id,
                                              validate_packets, validate_result,
                                              validate_routing_snapshot, snapshot_identity)
-from route_evidence.core import EvidenceError, digest
+from route_evidence.core import EvidenceError, digest, encoded
 
 
 CREATED = "2030-01-01T00:00:00Z"
@@ -332,13 +332,56 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(decision["status"], "chosen")
 
     def test_policy_bounds_are_strict_and_normalized(self):
-        self.assertEqual(default_policy()["max_snapshot_bytes"], 24576)
+        self.assertIsNone(default_policy()["max_snapshot_bytes"])
+        self.assertEqual(default_policy()["max_advisor_result_bytes"], 65536)
         self.assertEqual(default_policy({"strict_unknown_constraints": ["max_cost_usd"]})
                          ["strict_unknown_constraints"], ["max_cost_usd"])
         for override in ({"max_packets": 9}, {"max_snapshot_bytes": 999},
                          {"strict_unknown_constraints": ["made_up"]}, {"new_key": True}):
             with self.subTest(override=override), self.assertRaises(EvidenceError):
                 default_policy(override)
+
+
+class InputBudgetTests(unittest.TestCase):
+    def test_former_byte_boundary_preserves_full_input_in_both_native_deliveries(self):
+        from route_evidence.advisors.native import prepare_native, advisor_input
+        from route_evidence.task_evidence import attach_summary
+        available = [{"model": "economy-a", "efforts": ["low"]},
+                     {"model": "frontier-b", "efforts": ["high"]}]
+        route = {"model": "economy-a", "effort": "low",
+                 "selection_basis": {"source": "caller", "reason_code": "bounded_ranking"}}
+        empty = snapshot(packet(), context_value=context(guidance={"excerpt": ""}))
+        overhead = len(encoded(semantic_projection(empty)))
+        for size in (24575, 24576, 24577, 65536):
+            excerpt = "x" * (size - overhead)
+            value = snapshot(packet(), context_value=context(guidance={"excerpt": excerpt}))
+            self.assertEqual(len(encoded(semantic_projection(value))), size)
+            handoff = prepare_native(value, route, available=available)
+            self.assertEqual(handoff["status"], "ready")
+            self.assertIn(excerpt, handoff["prompt"])
+            private = prepare_native(value, route, available=available, delivery="private")
+            self.assertNotIn("prompt", private)
+            self.assertIn(excerpt, advisor_input(value, route)["prompt"])
+            attached = attach_summary(value, {"schema_version": 1, "mode": "lexical",
+                "status": "unavailable", "reason": "corpus_missing", "packets": []})
+            self.assertIn("task_similarity_evidence", attached["evidence"])
+
+    def test_legacy_policy_keeps_its_limit_and_cache_identity(self):
+        old = default_policy({"schema_version": 1})
+        self.assertEqual(old["max_snapshot_bytes"], 24576)
+        with self.assertRaises(AdviceLimitError):
+            snapshot(packet(), context_value=context(guidance={"excerpt": "x" * 30000}), policy=old)
+        self.assertNotEqual(semantic_key(snapshot(packet(), policy=old), descriptor()),
+                            semantic_key(snapshot(packet()), descriptor()))
+
+    def test_response_budget_is_independent_of_input_budget(self):
+        value = snapshot(packet(), policy=default_policy({"max_snapshot_bytes": 30000,
+                                                         "max_advisor_result_bytes": 1024}))
+        response = result_for(value, metadata={"notes": ["x" * 400] * 4})
+        with self.assertRaisesRegex(EvidenceError, "advisor_result_limit_exceeded"):
+            validate_result(value, response)
+        independent = snapshot(packet())
+        validate_result(independent, result_for(independent, metadata=response["metadata"]))
 
 
 class AdvisorResultTests(unittest.TestCase):

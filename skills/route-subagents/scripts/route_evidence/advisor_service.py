@@ -89,6 +89,16 @@ class AdvisorWorkflow:
                     "advisor_result": result, "launch_verified": False}
         if "task_evidence_status" in state:
             response["task_evidence_status"] = state["task_evidence_status"]
+        if reason:
+            response["fallback_context"] = {
+                "code": reason, "stage": state.get("failure_stage", "policy"),
+                "policy_version": snapshot["policy"]["policy_version"],
+                "backend": self.advisor["backend"], "expires_at": snapshot["expires_at"],
+                **state.get("failure_detail", {}),
+            }
+            for decision in decisions:
+                if decision["decision_type"] == "fallback":
+                    decision["fallback_context"] = copy.deepcopy(response["fallback_context"])
         if self.service.offline:
             response["status"] = "diagnostic_only"
         state.update(state=response["status"], response=response, result_hash=digest(result), result=copy.deepcopy(result))
@@ -96,8 +106,9 @@ class AdvisorWorkflow:
             try:
                 self.history.write_decision(state["id"], snapshot, result, decisions,
                                             retrieval_seconds=state.get("retrieval_seconds"))
-            except (EvidenceError, OSError):
+            except (EvidenceError, OSError) as exc:
                 response["telemetry_status"] = "write_failed"
+                response["telemetry_error"] = str(exc)[:500]
         if cache and result is not None and state.get("cache_key"):
             self._remember(state, state["expires"])
         return copy.deepcopy(response)
@@ -155,6 +166,12 @@ class AdvisorWorkflow:
                 if snapshot is None:
                     raise
                 limit_reason = str(exc).split(":", 1)[0]
+                from .advice import semantic_projection
+                state.update(failure_stage="snapshot_policy", failure_detail={
+                    "actual_bytes": len(encoded(semantic_projection(snapshot))),
+                    "configured_limit_bytes": self.policy["max_snapshot_bytes"],
+                    "limit_source": "configured_policy",
+                })
             state["snapshot"] = snapshot
             with self._lock:
                 if self.service.offline:
@@ -183,7 +200,8 @@ class AdvisorWorkflow:
                 try:
                     handoff = prepare_native(snapshot, advisor_route, available=request["available"],
                                              delivery=native_delivery)
-                except EvidenceError:
+                except EvidenceError as exc:
+                    state.update(failure_stage="native_prepare", failure_detail={"validation_error": str(exc)[:500]})
                     return self._finish(state, reason="invalid_advisor_route_or_payload")
                 if handoff.get("status") == "needs_advisor_route":
                     response = self._finish(state, reason="needs_advisor_route")
@@ -259,7 +277,8 @@ class AdvisorWorkflow:
             "id", "snapshot", "inventory", "request", "settings_hash", "advisor_route", "descriptor", "cache_key")}
         payload["schema_version"] = 1
         if len(encoded(payload)) > 262144:
-            raise EvidenceError("portable_envelope_limit_exceeded")
+            raise EvidenceError(f"portable_envelope_limit_exceeded: actual_bytes={len(encoded(payload))}, "
+                                "limit_bytes=262144, limit_source=portable_envelope")
         return {"payload": payload, "checksum": digest(payload),
                 "authority": "integrity_only_not_execution_permission"}
 
@@ -366,7 +385,11 @@ class AdvisorWorkflow:
             try:
                 from .advisors.native import parse_native
                 result = parse_native(state["snapshot"], advisor_result, advisor_route=state["advisor_route"])
-            except EvidenceError:
+            except EvidenceError as exc:
+                state.update(failure_stage="native_result_validation", failure_detail={
+                    "validation_error": str(exc)[:500], "snapshot_id": state["snapshot"]["snapshot_id"],
+                    "prompt_version": state["descriptor"]["prompt_version"],
+                })
                 return self._finish(state, reason="invalid_advisor_result")
             return self._finish(state, result, cache=cache)
 

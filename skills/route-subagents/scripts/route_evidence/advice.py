@@ -289,7 +289,7 @@ def build_snapshot(context, packets, *, policy, created_at, expires_at, client) 
     if any(len(packet["eligible"]) > policy["max_candidates_per_packet"]
            for packet in snapshot["packets"]):
         raise AdviceLimitError("candidate_limit_exceeded", snapshot)
-    if len(encoded(semantic_projection(snapshot))) > policy["max_snapshot_bytes"]:
+    if policy["max_snapshot_bytes"] is not None and len(encoded(semantic_projection(snapshot))) > policy["max_snapshot_bytes"]:
         raise AdviceLimitError("snapshot_limit_exceeded", snapshot)
     return snapshot
 

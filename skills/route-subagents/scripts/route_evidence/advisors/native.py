@@ -11,11 +11,8 @@ from ..advice_contracts import validate_result, validate_routing_snapshot
 from ..core import EvidenceError, encoded, loads
 
 BACKEND = "native-economy"
-# The root-mediated handoff keeps the 0.8.0 prompt and cache identity. The
-# private delivery of required routing is a separate prompt revision.
-PROMPT_VERSIONS = {"handoff": "native-routing-v3", "private": "native-routing-v4"}
+PROMPT_VERSIONS = {"handoff": "native-routing-v5", "private": "native-routing-v6"}
 PROMPT_VERSION = PROMPT_VERSIONS["handoff"]
-MAX_SNAPSHOT_BYTES = 24 * 1024
 _BASIS_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}\Z")
 
 
@@ -157,8 +154,8 @@ def prepare_native(
     an economy model itself because the active client owns that current catalog.
     """
     snapshot = validate_routing_snapshot(snapshot)
-    limit = min(MAX_SNAPSHOT_BYTES, snapshot["policy"]["max_snapshot_bytes"])
-    if len(encoded(semantic_projection(snapshot))) > limit:
+    limit = snapshot["policy"]["max_snapshot_bytes"]
+    if limit is not None and len(encoded(semantic_projection(snapshot))) > limit:
         raise EvidenceError("native_snapshot_too_large")
     if advisor_route is None:
         return _needs_route(snapshot["snapshot_id"], "missing_advisor_route")
@@ -200,8 +197,8 @@ def prepare_native(
 def advisor_input(snapshot: dict[str, Any], advisor_route: dict[str, Any]) -> dict[str, Any]:
     """Private input for a host-bound advisor, never part of a root handoff."""
     snapshot = validate_routing_snapshot(snapshot)
-    limit = min(MAX_SNAPSHOT_BYTES, snapshot["policy"]["max_snapshot_bytes"])
-    if len(encoded(semantic_projection(snapshot))) > limit:
+    limit = snapshot["policy"]["max_snapshot_bytes"]
+    if limit is not None and len(encoded(semantic_projection(snapshot))) > limit:
         raise EvidenceError("native_snapshot_too_large")
     prompt, contract = _render_prompt(snapshot, advisor_route["model"], advisor_route["effort"], "private")
     return {"prompt": prompt, "result_contract": contract}

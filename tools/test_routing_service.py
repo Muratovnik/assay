@@ -144,6 +144,9 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
         result = self.service.complete_routing(prepared["decision_id"], answer)
         self.assertEqual(result["status"], "no_decision")
         self.assertIsNone(result["decisions"][0]["selected"])
+        self.assertEqual(result["fallback_context"]["stage"], "native_result_validation")
+        self.assertIn("every eligible candidate", result["fallback_context"]["validation_error"])
+        self.assertEqual(result["fallback_context"]["snapshot_id"], prepared["snapshot_id"])
 
     async def test_portable_envelope_restarts_without_model_calls(self):
         prepared = await self.prepare(portable=True)
@@ -206,6 +209,22 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
 
 
 class AdvisorConfigTests(unittest.TestCase):
+    def test_unlimited_native_migration_is_explicit_and_preserves_required_configuration(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source, ordinary, migrated = (Path(tmp) / name for name in ("source.json", "ordinary.json", "new.json"))
+            old = {"schema_version": 2, "client": "test", "policy": {
+                "schema_version": 1, "policy_version": "routing-policy-v1", "max_snapshot_bytes": 24576}}
+            source.write_text(json.dumps(old), encoding="utf-8")
+            original = source.read_bytes()
+            migrate_config(source, ordinary)
+            self.assertEqual(load_config(ordinary)["policy"]["max_snapshot_bytes"], 24576)
+            migrate_config(ordinary, migrated, native_input_unlimited=True)
+            new = load_config(migrated)
+            self.assertIsNone(new["policy"]["max_snapshot_bytes"])
+            self.assertEqual(new["pipeline"], load_config(ordinary)["pipeline"])
+            self.assertEqual(source.read_bytes(), original)
+            self.assertFalse(new["advisor"]["jev"]["enabled"])
+
     def test_v1_migration_is_explicit_exclusive_and_preserves_values(self):
         with tempfile.TemporaryDirectory() as tmp:
             source, target = Path(tmp) / "v1.json", Path(tmp) / "v2.json"
