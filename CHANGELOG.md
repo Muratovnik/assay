@@ -6,6 +6,33 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.0](https://github.com/Muratovnik/assay/compare/v0.16.1...v0.17.0) (2026-10-07)
+
+Native routing now asks whether each model and effort pair can meet the concrete
+assignment, then compares measured costs among adequate candidates. New configs
+use this policy; existing configs retain their declared policy until explicitly
+migrated with `migrate-config --native-decisions`.
+
+### Features
+
+* **routing:** use named task-adequacy questions and packet-local evidence, select adequate routes by comparable benchmark or supported paired task costs, separate unknown adequacy and cost from fallback, and include task criteria and privacy scope in cache identity ([2da38a0](https://github.com/Muratovnik/assay/commit/2da38a0cc22d0f12743729f6a63838ed45a4e4fb))
+
+### Bug Fixes
+
+* **routing:** remove the shared 24 KiB native input ceiling while keeping a separate result limit and complete candidate inventory ([14c656e](https://github.com/Muratovnik/assay/commit/14c656e19140758572a97bc895a2993177ef743d))
+* **routing:** preserve explicit-choice provenance and distinguish selected routes from recorded fallback ([0a481a9](https://github.com/Muratovnik/assay/commit/0a481a97ea4b07278346631fde241310451f1acf))
+* **routing:** compare benchmark quality and expense without anchoring the recommendation to the caller baseline ([671c860](https://github.com/Muratovnik/assay/commit/671c8607526cda2dc461d31d54cd0e45434cf441))
+* **routing:** preserve packet assessment bindings when cached advice is reused ([a8f2542](https://github.com/Muratovnik/assay/commit/a8f2542e5b33c20dd3461d0faf8fda11e55edf39))
+* **routing:** put readable quality and expense evidence alongside the complete native snapshot ([a1e4d2d](https://github.com/Muratovnik/assay/commit/a1e4d2d3ba6470fd30e4408533b9b7eb092b3117))
+* **routing:** deliver large private Claude inputs through native tools and validate foreground replies ([c795675](https://github.com/Muratovnik/assay/commit/c79567504ff2f482d64fc89ac2c889131796aca6))
+* **routing:** accept an omitted empty uncertainty list for known assessments while requiring grounds for unknown judgments ([6a6eafe](https://github.com/Muratovnik/assay/commit/6a6eafe2d9fc30e113fd665909cae4fa058cc680))
+
+Cost comparisons stay within matching cohorts and cost units. Task inference,
+unmeasured alternatives and conflicting evidence remain explicit uncertainties;
+benchmark USD does not establish subscription quota savings or the cost of a new
+assignment. Structural checks do not establish the accuracy of every adequacy
+judgment.
+
 ## [0.16.1](https://github.com/Muratovnik/assay/compare/v0.16.0...v0.16.1) (2026-10-06)
 
 Technical documentation now selects material for its reader and publication
