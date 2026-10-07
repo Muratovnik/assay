@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import secrets
 from pathlib import Path
 
@@ -270,6 +271,11 @@ class RoutingPipeline:
     def _put_attempt(self, tx, state, role, packet_id, native_input, route, variant):
         attempt_id = secrets.token_hex(16)
         native_input = copy.deepcopy(native_input)
+        if os.environ.get("CLAUDE_CODE_DISABLE_BACKGROUND_TASKS") == "1":
+            if native_input.get("run_in_background") is True:
+                raise EvidenceError("background_tasks_disabled")
+            # Claude omits this argument from its tool schema in this mode.
+            native_input.pop("run_in_background", None)
         native_input["prompt"] += "\n\nAssay attempt: " + attempt_id
         stub = launch_stub(attempt_id, native_input)
         run = {"attempt_id": attempt_id, "decision_id": state["decision_id"], "packet_id": packet_id,

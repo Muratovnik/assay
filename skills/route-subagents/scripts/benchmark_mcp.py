@@ -58,7 +58,7 @@ def build_server(service):
             except EvidenceError as exc:
                 raise ToolError(str(exc)) from exc
 
-    @server.tool()
+    @server.tool(meta={"anthropic/maxResultSizeChars": 500000})
     async def prepare_routing(
         packets: list[dict[str, Any]],
         available: list[dict[str, Any]] | None = None,
@@ -98,7 +98,7 @@ def build_server(service):
         except EvidenceError as exc:
             raise ToolError(str(exc)) from exc
 
-    @server.tool()
+    @server.tool(meta={"anthropic/maxResultSizeChars": 500000})
     async def get_advisor_input(decision_id: str, host_receipt: str | None = None) -> dict[str, Any]:
         """Advisor only: retrieve the private input for your own registered run.
 

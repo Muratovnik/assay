@@ -43,6 +43,21 @@ carry the raw report outside the PostToolUse replacement. Sessions that need
 background workers can use approved routes without an advisor, or explicitly
 choose evidence-only mode without the private-return guarantee.
 
+When that switch is set in the MCP process too, registered foreground launch
+inputs omit `run_in_background`: Claude removes that field from the active tool
+schema. A background request is rejected as `background_tasks_disabled`.
+The host still matches every returned launch argument exactly; no argument
+coercion or weaker receipt check is used.
+
+The MCP input tools declare `_meta["anthropic/maxResultSizeChars"] = 500000`,
+Claude's documented ceiling for inline text results. Without that annotation,
+Claude persists a successful result over 50,000 characters to a file; the private
+advisor cannot read that file. This client delivery boundary is distinct from
+the native snapshot budget and the required-mode store limit. Inputs exceeding
+the host's inline ceiling cannot be assessed by this isolated delivery route;
+do not grant file tools or treat a file reference as delivered evidence. See
+[Claude MCP output limits](https://code.claude.com/docs/en/mcp#raise-the-limit-for-a-specific-tool).
+
 Advisor replacements preserve the mandatory Claude `AgentOutput` fields and
 bounded numeric usage. Prompts, citations, report fields and output-file paths are
 removed. The guard-failure replacement uses the same native schema; a malformed

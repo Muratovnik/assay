@@ -294,8 +294,11 @@ build_server(service).run(transport="stdio")
                 "--cache-dir", str(Path(tmp) / "cache"), "--offline", "--config", str(config)])
             async with asyncio.timeout(30):
                 async with Client(params) as client:
-                    advertised = next(tool for tool in (await client.list_tools()).tools
-                                      if tool.name == "record_routing_outcome")
+                    listed = (await client.list_tools()).tools
+                    advertised = next(tool for tool in listed if tool.name == "record_routing_outcome")
+                    for name in ("prepare_routing", "get_advisor_input"):
+                        delivery = next(tool for tool in listed if tool.name == name)
+                        self.assertEqual(delivery.meta["anthropic/maxResultSizeChars"], 500000)
                     self.assertTrue(advertised.output_schema)
                     schema = Draft202012Validator(advertised.input_schema)
                     valid = {"decision_id": "absent", "execution": {

@@ -280,6 +280,33 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.now += 601
         self.assertEqual("deny", self.event("PreToolUse", **event)["hookSpecificOutput"]["permissionDecision"])
 
+    async def test_disabled_background_schema_keeps_exact_foreground_launches(self):
+        with patch.dict(os.environ, {"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"}):
+            prepared = await self.prepare()
+            self.assertNotIn("run_in_background", prepared["handoff"]["input"])
+            self.assertNotIn("run_in_background", self.launch(prepared["handoff"]))
+            private = self.private_input(prepared["decision_id"])
+            self.submit(prepared["decision_id"], self.synthetic_answer(private))
+            self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a",
+                       tool_response={"status": "completed", "agentId": "advisor-a", "content": []})
+            worker = self.authorize(prepared["decision_id"])
+            self.assertNotIn("run_in_background", worker["input"])
+            changed = {**worker["input"], "model": "other-model"}
+            denial = self.event("PreToolUse", tool_name="Agent", tool_use_id="tampered", tool_input=changed)
+            self.assertEqual("deny", denial["hookSpecificOutput"]["permissionDecision"])
+            self.assertNotIn("run_in_background", self.launch(worker, agent="worker-a", tool_id="worker"))
+
+    async def test_disabled_background_schema_rejects_requested_background_worker(self):
+        with patch.dict(os.environ, {"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"}):
+            prepared = await self.prepare(launch_requests={"work": {"profile": "general-purpose",
+                "prompt": "bounded", "run_in_background": True}})
+            self.launch(prepared["handoff"])
+            self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
+            self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a",
+                       tool_response={"status": "completed", "agentId": "advisor-a", "content": []})
+            with self.assertRaisesRegex(EvidenceError, "background_tasks_disabled"):
+                self.authorize(prepared["decision_id"])
+
     async def test_file_edit_after_authorization_blocks_native_launch(self):
         decision = await self.decided()
         launch = self.authorize(decision)
