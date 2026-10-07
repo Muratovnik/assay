@@ -257,6 +257,8 @@ class AdvisorWorkflow:
             packet_map = dict(zip(hit["packet_ids"], state["snapshot"]["packet_ids"]))
             for ranking in result["rankings"]:
                 ranking["packet_id"] = packet_map[ranking["packet_id"]]
+            for assessment in result.get("metadata", {}).get("assessments", []):
+                assessment["packet_id"] = packet_map[assessment["packet_id"]]
             result = validate_result(state["snapshot"], result)
             response = self._finish(state, result)
             response["cache_hit"] = True

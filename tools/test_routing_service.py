@@ -146,13 +146,18 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_exact_cache_reuses_only_unchanged_semantics(self):
         first = await self.prepare()
-        self.service.complete_routing(first["decision_id"], self.answer(first))
+        answer = self.answer(first)
+        answer["metadata"]["assessments"] = [{"packet_id": PACKETS[0]["packet_id"],
+            "cohort_ids": [], "basis": "No benchmark measurements; bounded synthetic protocol check."}]
+        self.service.complete_routing(first["decision_id"], answer)
         hit = await self.prepare()
         self.assertTrue(hit["cache_hit"])
         self.assertNotEqual(first["decision_id"], hit["decision_id"])
         renamed = await self.prepare(packets=[{**PACKETS[0], "packet_id": "same-work-new-id"}])
         self.assertTrue(renamed["cache_hit"])
         self.assertEqual(renamed["decisions"][0]["packet_id"], "same-work-new-id")
+        self.assertEqual(renamed["decisions"][0]["assessment"]["packet_id"], "same-work-new-id")
+        self.assertEqual(renamed["decisions"][0]["assessment"]["basis"], answer["metadata"]["assessments"][0]["basis"])
         different = await self.prepare(packets=[{"packet_id": "tests", "task_types": ["tests"], "features": {}}])
         self.assertEqual(different["status"], "awaiting_native_advice")
 
