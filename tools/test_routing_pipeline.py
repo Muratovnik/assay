@@ -189,7 +189,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_user_choice_is_honored_only_for_a_generated_inventory_pair(self):
         chosen = {"model": "worker-alpha", "effort": "high"}
         with patch("route_evidence.advisors.native.prepare_native", side_effect=AssertionError("must skip")):
-            prepared = await self.prepare(packets=[{**PACKETS[0], "explicit": chosen}])
+            prepared = await self.prepare(packets=[{**PACKETS[0], "explicit": chosen, "explicit_source": "user"}])
         self.assertNotIn("handoff", prepared)
         decision = prepared["decisions"][0]
         self.assertEqual(decision["decision_type"], "explicit_user_choice")
@@ -218,7 +218,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         with patch("route_evidence.advisors.native.prepare_native", side_effect=AssertionError("must skip")):
             prepared = await self.prepare(packets=[{**PACKETS[0], "explicit": pair}])
         self.assertNotIn("handoff", prepared)
-        self.assertEqual(prepared["decisions"][0]["decision_type"], "explicit_user_choice")
+        self.assertEqual(prepared["decisions"][0]["decision_type"], "configured_choice")
         self.assertEqual("deny", self.event("PreToolUse", tool_name="Agent", tool_use_id="a", tool_input={"prompt": "skip"})["hookSpecificOutput"]["permissionDecision"])
         self.launch(self.authorize(prepared["decision_id"]), agent="worker-a")
 
@@ -839,7 +839,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.service = self.make_service()
         self.pipeline = RoutingPipeline(self.service)
         self.event("SessionStart")
-        prepared = await self.prepare(packets=[{**PACKETS[0], "explicit": {"model": "opus", "effort": "high"}}])
+        prepared = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
+                                               "explicit": {"model": "opus", "effort": "high"}}])
         self.assertEqual(prepared["decisions"][0]["decision_type"], "explicit_user_choice")
         launch = self.authorize(prepared["decision_id"])
         self.assertEqual((launch["input"]["model"], launch["requested_effort"]), ("opus", "high"))

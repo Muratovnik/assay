@@ -64,6 +64,22 @@ def decisions(selected=None):
 
 
 class HistoryStoreTests(unittest.TestCase):
+    def test_selected_route_and_fallback_survive_storage_as_distinct_values(self):
+        value = snapshot()
+        chosen = next(c for c in value["candidates"] if c["model"] == "gpt-5.6-luna")
+        fallback = next(c for c in value["candidates"] if c["model"] == "gpt-6-astra")
+        decision = {**decisions(chosen["candidate_id"])[0],
+            "fallback": {"status": "available", "selected": fallback, "reason": "caller_baseline"},
+            "selection_provenance": {"source": "caller", "verification": "declared_not_attested"},
+            "inventory_size": 2, "eligible_count": 2,
+            "fallback_context": {"code": "invalid_advisor_result", "stage": "native_result_validation"}}
+        self.store().write_decision("distinct", value, advisor_result(value), [decision])
+        stored = self.store().read("distinct")
+        self.assertEqual(stored["decisions"][0]["selected"], chosen)
+        self.assertEqual(stored["decisions"][0]["fallback"]["selected"], fallback)
+        self.assertEqual(stored["decisions"][0]["selection_provenance"], decision["selection_provenance"])
+        self.assertEqual(stored["decisions"][0]["fallback_context"], decision["fallback_context"])
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

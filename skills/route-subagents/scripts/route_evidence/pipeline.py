@@ -242,6 +242,7 @@ class RoutingPipeline:
                     raise EvidenceError("explicit_choice_conflicts_with_configured_choice")
                 # A configured choice is binding even if the root omits it.
                 packet["explicit"] = copy.deepcopy(approved)
+                packet["explicit_source"] = "configuration"
             # A user's own explicit choice stays as supplied. Policy accepts it
             # only for an inventory pair with a generated, expressible variant.
             baseline = packet.get("baseline")

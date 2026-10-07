@@ -84,7 +84,10 @@ older configurations, the evidence-only workflow applies.
 
 Use the [routing advisor workflow](references/routing-advisor.md) when
 configured: one `prepare_routing` request for the plan, structured packets and
-the current host's available model × effort pairs. It extends the existing
+the current host's complete available model × effort inventory, confirmed once
+and reused while current. Include every supported effort, including unmeasured
+pairs; exclude only through declared hard requirements or actual availability.
+Do not preselect one preferred route or omit intermediate efforts. It extends the existing
 [benchmark evidence service](references/benchmark-routing.md), including its
 source refresh, cohorts, coverage gaps and vendor guidance.
 
@@ -94,6 +97,13 @@ effort once from an explicit choice, a real client economy role or a short
 choice grounded in current availability and relevant cost/fit evidence. Send
 that pair with `selection_basis`; do not start another advisor to choose it.
 No known basis means `needs_advisor_route`, not inherited parent settings.
+
+Reserve packet `explicit` with `explicit_source: "user"` for a model or effort
+the human actually specified. A deliberate binding caller choice uses
+`explicit_source: "caller"`; a tentative preference belongs outside `explicit`.
+Use `baseline` only as an eligible fallback/comparison route. Neither the
+primary's settings nor a profile default is human choice. Provenance is a
+declaration, not host attestation; unknown origin must stay unknown.
 
 For `awaiting_native_advice`, the primary launches the returned bounded packet
 through the native client and submits its structured answer to

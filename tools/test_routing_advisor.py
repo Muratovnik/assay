@@ -48,6 +48,8 @@ def packet(packet_id="p1", **extra):
         },
         "baseline": {"model": "economy-a", "effort": "low"},
     }
+    if extra.get("explicit"):
+        value["explicit_source"] = "user"
     value.update(extra)
     return value
 
@@ -448,6 +450,35 @@ class AdvisorResultTests(unittest.TestCase):
 
 
 class DecisionTests(unittest.TestCase):
+    def test_caller_choice_does_not_claim_human_authority(self):
+        value = snapshot(packet(explicit={"model": "frontier-b", "effort": "high"}, explicit_source=None))
+        decision = decide(value, reason="pending")[0]
+        self.assertEqual(decision["decision_type"], "caller_choice")
+        self.assertEqual(decision["selection_provenance"], {"source": "caller", "verification": "declared_not_attested"})
+        legacy = snapshot(packet(explicit={"model": "frontier-b", "effort": "high"}, explicit_source=None),
+                          policy=default_policy({"schema_version": 1}))
+        historical = decide(legacy, reason="pending")[0]
+        self.assertEqual(historical["selection_provenance"]["source"], "legacy_unspecified")
+
+    def test_complete_inventory_retains_unmeasured_efforts_and_baseline_is_not_a_filter(self):
+        inventory = [("economy-a", "low"), ("frontier-b", "low"), ("frontier-b", "medium"), ("frontier-b", "high")]
+        ctx = context(inventory)
+        value = snapshot(packet(baseline={"model": "frontier-b", "effort": "high"}), context_value=ctx)
+        decision = decide(value, reason="pending")[0]
+        self.assertEqual({(c["model"], c["effort"]) for c in value["candidates"]}, set(inventory))
+        self.assertEqual((decision["inventory_size"], decision["eligible_count"]), (4, 4))
+        self.assertEqual(decision["decision_type"], "advisor")
+        self.assertIsNone(decision["selected"])
+        single = snapshot(packet(), context_value=context([("economy-a", "low")]))
+        constrained = decide(single, reason="pending")[0]
+        self.assertEqual(constrained["selection_provenance"]["source"], "eligibility_constraints")
+
+    def test_selection_origin_rejects_unknown_or_unbound_declarations(self):
+        for raw in (packet(explicit_source="user"), packet(explicit={"model": "economy-a"}, explicit_source=[]),
+                    packet(explicit={"model": "economy-a"}, explicit_source="root_settings")):
+            with self.assertRaisesRegex(EvidenceError, "explicit_source"):
+                validate_packets([raw])
+
     def test_complete_explicit_and_single_eligible_bypass_advisor(self):
         explicit = snapshot(packet(explicit={"model": "frontier-b", "effort": "high"}))
         self.assertEqual(decide(explicit, None, reason="pending")[0]["decision_type"],

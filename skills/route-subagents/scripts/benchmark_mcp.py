@@ -43,6 +43,8 @@ def build_server(service):
         ) -> dict[str, Any]:
             """Explicit evidence-only mode: comparative data, not enforced routing.
 
+            Supply the complete host model/effort inventory once, not a preferred
+            subset. Preserve unmeasured routes; only hard constraints exclude.
             Host inventory must be confirmed, not guessed. Measured model/effort
             rows are cohort-specific; API dollars and tokens are not subscription
             quota. Source errors do not prove that measurements do not exist.
@@ -70,6 +72,11 @@ def build_server(service):
         """Prepare registered routing before authorized delegation, not instead of it.
 
         Each packet contains packet_id, task_types, features and requirements;
+        supply the complete confirmed host inventory once per connection. Missing
+        benchmark rows do not exclude candidates. explicit_source=user is only
+        for a human model/effort instruction; omit explicit for a tentative
+        preference and use baseline for fallback. An explicit choice without a
+        source is caller_choice under policy v2, not verified human authority.
         no raw code, credentials or task text belongs in structured features.
         launch_requests maps every packet ID to profile and prompt, plus optional
         description, isolation=worktree and run_in_background. Those execution

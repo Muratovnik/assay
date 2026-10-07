@@ -213,6 +213,8 @@ def _packet_metadata(value: Any, field: str, candidates: list[dict], *, include_
         **context,
         "packet_id": _identifier(value.get("packet_id"), field + ".packet_id"),
         "explicit": bool(value.get("explicit", False)),
+        **({"explicit_source": _identifier(value["explicit_source"], "explicit_source")}
+           if value.get("explicit_source") else {}),
         "baseline": _optional_identifier(baseline, field + ".baseline"),
         "eligible": [_identifier(item, field + ".eligible") for item in eligible],
         "excluded": clean_excluded,
@@ -328,15 +330,30 @@ def _decision(value: Any) -> dict:
         })
     fallback = value.get("fallback")
     if isinstance(fallback, dict):
-        selected = fallback.get("selected")
+        fallback_selected = fallback.get("selected")
         fallback = {
             "status": _optional_identifier(fallback.get("status"), "fallback.status"),
-            "selected": _candidate(selected, "fallback.selected") if selected is not None else None,
+            "selected": _candidate(fallback_selected, "fallback.selected") if fallback_selected is not None else None,
             "reason": _optional_identifier(fallback.get("reason"), "fallback.reason"),
         }
     elif fallback is not None:
         fallback = _identifier(fallback, "fallback")
+    extra = {}
+    if "selection_provenance" in value:
+        extra["selection_provenance"] = _redacted_json(value["selection_provenance"], "selection_provenance")
+    if "fallback_context" in value:
+        diagnostics = value["fallback_context"]
+        allowed = {"code", "stage", "policy_version", "backend", "expires_at", "validation_error",
+                   "snapshot_id", "prompt_version", "actual_bytes", "configured_limit_bytes", "limit_source"}
+        if not isinstance(diagnostics, dict) or set(diagnostics) - allowed:
+            raise EvidenceError("invalid fallback diagnostics")
+        extra["fallback_context"] = {key: _redacted_json(item, "fallback_context." + key)
+                                     for key, item in diagnostics.items()}
+    for key in ("inventory_size", "eligible_count"):
+        if key in value:
+            extra[key] = _nonnegative(value[key], key)
     return {
+        **extra,
         "packet_id": _identifier(value.get("packet_id"), "packet_id"),
         "status": _identifier(value.get("status"), "decision status"),
         "decision_type": _identifier(value.get("decision_type"), "decision type"),
@@ -1026,8 +1043,8 @@ def replay(record: dict, *, policy: dict | None = None) -> dict:
     if policy is not None:
         effective_policy = default_policy(policy)
         source_packets = [{key: copy.deepcopy(packet[key]) for key in
-                           ("packet_id", "task_types", "features", "explicit", "baseline",
-                            "requirements", "capabilities")}
+                           ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
+                            "requirements", "capabilities") if key in packet}
                           for packet in snapshot["packets"]]
         snapshot["policy"] = effective_policy
         snapshot["policy_hash"] = digest(effective_policy)

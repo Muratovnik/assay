@@ -209,7 +209,7 @@ def validate_packets(packets: Any) -> list[dict]:
     if not isinstance(packets, list) or not packets or len(packets) > MAX_PACKETS:
         raise EvidenceError(f"packets: expected 1..{MAX_PACKETS} packets")
     result, seen = [], set()
-    allowed = {"packet_id", "task_types", "features", "explicit", "baseline",
+    allowed = {"packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
                "requirements", "capabilities"}
     for index, raw in enumerate(copy.deepcopy(packets)):
         field = f"packets[{index}]"
@@ -242,6 +242,10 @@ def validate_packets(packets: Any) -> list[dict]:
                 "value": _feature_atom(item["value"], field + ".features." + key + ".value"),
                 "provenance": provenance,
             }
+        source = raw.get("explicit_source")
+        if source is not None and (not isinstance(source, str) or source not in {"user", "caller", "configuration"}
+                                   or not raw.get("explicit")):
+            raise EvidenceError(field + ".explicit_source: requires an explicit choice and a known source")
         result.append({
             "packet_id": packet_id,
             "task_types": task_types,
@@ -250,6 +254,7 @@ def validate_packets(packets: Any) -> list[dict]:
             "baseline": _pair(raw.get("baseline"), field + ".baseline", partial=False),
             "requirements": _requirements(raw.get("requirements"), field + ".requirements"),
             "capabilities": _candidate_capabilities(raw.get("capabilities"), field + ".capabilities"),
+            **({"explicit_source": source} if source is not None else {}),
         })
     return result
 
@@ -544,7 +549,7 @@ def validate_routing_snapshot(snapshot: Any) -> RoutingSnapshot:
         if not isinstance(raw, dict):
             raise EvidenceError("snapshot packet must be an object")
         source_packets.append({key: raw[key] for key in
-                               ("packet_id", "task_types", "features", "explicit", "baseline",
+                               ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
                                 "requirements", "capabilities") if key in raw})
     normalized = validate_packets(source_packets)
     derived = [derive_packet(packet, candidates, snapshot["evidence"], policy) for packet in normalized]

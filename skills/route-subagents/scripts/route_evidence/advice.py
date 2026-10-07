@@ -360,6 +360,7 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             "excluded": copy.deepcopy(packet["excluded"]),
             "fallback": fallback,
             "evidence_refs": [snapshot["evidence_hash"]],
+            "inventory_size": len(candidates), "eligible_count": len(packet["eligible"]),
         }
         if offline:
             codes = ["offline_diagnostic"]
@@ -371,14 +372,20 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
 
         explicit = packet["explicit"]
         if set(explicit) == {"model", "effort"}:
+            source = packet.get("explicit_source")
+            legacy = source is None and snapshot["policy"]["schema_version"] == 1
+            choice_type = ("explicit_user_choice" if source == "user" or legacy else
+                           "configured_choice" if source == "configuration" else "caller_choice")
+            base["selection_provenance"] = {"source": source or ("legacy_unspecified" if legacy else "caller"),
+                                            "verification": "declared_not_attested"}
             match = next((candidate for candidate in candidates.values()
                           if candidate["model"] == explicit["model"]
                           and candidate["effort"] == explicit["effort"]), None)
             if match is not None and match["candidate_id"] in packet["eligible"]:
-                decisions.append({**base, "status": "chosen", "decision_type": "explicit_user_choice",
-                                  "selected": _selection(match), "reason_codes": ["explicit_user_choice"]})
+                decisions.append({**base, "status": "chosen", "decision_type": choice_type,
+                                  "selected": _selection(match), "reason_codes": [choice_type]})
             else:
-                decisions.append({**base, "status": "no_decision", "decision_type": "explicit_user_choice",
+                decisions.append({**base, "status": "no_decision", "decision_type": choice_type,
                                   "selected": None, "reason_codes": ["invalid_explicit_choice"]})
             continue
 
@@ -388,7 +395,9 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             if any(warning["candidate_id"] == match["candidate_id"] for warning in packet["warnings"]):
                 codes.append("unknown_evidence_warning")
             decisions.append({**base, "status": "chosen", "decision_type": "single_eligible",
-                              "selected": _selection(match), "reason_codes": codes})
+                              "selected": _selection(match), "reason_codes": codes,
+                              "selection_provenance": {"source": "eligibility_constraints",
+                                                       "explicit_source": packet.get("explicit_source")}})
             continue
 
         if not packet["eligible"]:

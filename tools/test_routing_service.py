@@ -100,7 +100,8 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_explicit_choice_and_single_candidate_bypass_native(self):
         with patch("route_evidence.advisors.native.prepare_native", side_effect=AssertionError("unexpected advisor")):
-            explicit = await self.prepare(packets=[{**PACKETS[0], "explicit": {"model": "worker-alpha", "effort": "high"}}])
+            explicit = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
+                                                   "explicit": {"model": "worker-alpha", "effort": "high"}}])
             self.assertEqual(explicit["decisions"][0]["decision_type"], "explicit_user_choice")
             one = await self.prepare(available=[{"model": "worker-alpha", "efforts": ["low"]}])
             self.assertEqual(one["decisions"][0]["decision_type"], "single_eligible")

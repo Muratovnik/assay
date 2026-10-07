@@ -81,7 +81,7 @@ Illustrative request; replace model/effort values with confirmed runtime values:
 Features are bounded scalars or identifier lists, each with `caller`, `observed`
 or `unknown` provenance. `features: {}` is valid; missing facts remain unknown.
 Do not send task prose, code, paths, credentials or raw tool outputs. Optional
-packet fields are `explicit` (model and/or effort), `baseline` (both),
+packet fields are `explicit` (model and/or effort), `explicit_source`, `baseline` (both),
 `requirements` and `capabilities`. A requirement can declare:
 
 ```json
@@ -99,6 +99,20 @@ excluded with a reason. Unknown measurements warn by default; use
 `policy.unknown_evidence="strict"` applies strict handling to all declared numeric
 constraints. A required capability always needs a positive declaration.
 The original benchmark response is unchanged by advisor filtering.
+
+Supply the complete confirmed host inventory once per connection. The server
+cannot enumerate MCP host models or prove the caller supplied every pair; this
+is a client obligation. Keep unmeasured candidates and intermediate efforts.
+`baseline` never filters that inventory. Decisions report `inventory_size`,
+`eligible_count` and exclusions so a singleton is visibly a constrained choice.
+
+`explicit_source: "user"` declares an actual human instruction; `"caller"`
+declares a deliberate binding caller choice. A tentative preference must omit
+`explicit`. Under policy v2, an omitted origin becomes `caller_choice`, never
+`explicit_user_choice`. A required-mode approved choice receives
+`explicit_source: "configuration"` from its adapter and is `configured_choice`.
+The server validates declarations, not human message provenance. Legacy policy
+v1 keeps its historical decision label with `legacy_unspecified` provenance.
 
 An explicit full choice or a single eligible pair finishes without advisor
 inference. Otherwise `awaiting_native_advice` returns `decision_id`, expiry and

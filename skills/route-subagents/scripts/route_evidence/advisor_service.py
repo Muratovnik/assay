@@ -181,7 +181,7 @@ class AdvisorWorkflow:
                 if limit_reason:
                     return self._finish(state, reason=limit_reason)
                 preflight = decide(snapshot, reason="advisor_required")
-                if all(d.get("decision_type") in ("explicit_user_choice", "single_eligible")
+                if all(d.get("decision_type") in ("explicit_user_choice", "caller_choice", "configured_choice", "single_eligible")
                        or not p["eligible"] for d, p in zip(preflight, snapshot["packets"])):
                     return self._finish(state, reason="no_advisor_needed")
                 if not self.advisor["enabled"]:
