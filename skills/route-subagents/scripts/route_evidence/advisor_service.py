@@ -186,15 +186,6 @@ class AdvisorWorkflow:
                     return self._finish(state, reason="no_advisor_needed")
                 if not self.advisor["enabled"]:
                     return self._finish(state, reason="advisor_disabled")
-                task_packets = snapshot["evidence"].get("task_similarity_evidence", {}).get("packets", [])
-                if len(task_packets) == len(snapshot["packets"]) and task_packets and all(
-                    p.get("comparison", {}).get("comparisons") and
-                    all(c["net_benefit"] <= 0 for c in p["comparison"]["comparisons"]) and
-                    p["comparison"].get("baseline") and
-                    {c["candidate_id"] for c in p["comparison"]["comparisons"]} ==
-                    {c["candidate_id"] for c in snapshot["candidates"]} - {p["comparison"]["baseline"]}
-                    for p in task_packets):
-                    return self._finish(state, reason="cost_no_benefit")
             if self.advisor["backend"] == "native-economy":
                 from .advisors.native import prepare_native
                 try:

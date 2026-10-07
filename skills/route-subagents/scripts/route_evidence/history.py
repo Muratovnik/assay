@@ -341,6 +341,9 @@ def _decision(value: Any) -> dict:
     extra = {}
     if "selection_provenance" in value:
         extra["selection_provenance"] = _redacted_json(value["selection_provenance"], "selection_provenance")
+    for key in ("assessment", "ties"):
+        if key in value:
+            extra[key] = _redacted_json(value[key], key)
     if "fallback_context" in value:
         diagnostics = value["fallback_context"]
         allowed = {"code", "stage", "policy_version", "backend", "expires_at", "validation_error",

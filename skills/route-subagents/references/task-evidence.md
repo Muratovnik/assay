@@ -303,9 +303,10 @@ corpus identities, separate public/local groups, and explicit status. Maximum
 32 neighbors, 3 hashed example references and 6 KiB for **all** packets together,
 within the existing snapshot budget. Over-budget evidence is explicitly omitted.
 No-match, unavailable and insufficient-coverage preserve the original workflow.
-Explicit routes and a sole candidate skip corpus work; a fully covered
-nonpositive cost comparison can skip advice and preserve the supplied baseline.
-Incomplete coverage cannot suppress consideration of unknown alternatives.
+Explicit routes and a sole candidate skip corpus work. Cost comparisons remain
+advisor evidence: a nonpositive expense benefit cannot skip the quality
+assessment or force the baseline. Missing local evidence does not suppress
+available benchmark quality/cost or consideration of unknown alternatives.
 
 ## Optional semantic adapter
 

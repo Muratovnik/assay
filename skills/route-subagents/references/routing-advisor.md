@@ -128,6 +128,24 @@ are explicit groups. Native probabilities and confidence remain null. The
 server checks snapshot identity, exact route, inventory, policy, expiry and
 result bounds; it never repairs a partial ranking by guessing missing entries.
 
+Policy v2 native results also carry `metadata.assessments`: entries with
+`packet_id`, up to 8 relevant `cohort_ids`, and a `basis` of at most 300
+characters. Explain task adequacy, the same-cohort quality/cost tradeoff and
+remaining uncertainty. A non-abstained ranking with measured benchmark expense
+must cite at least one relevant cost cohort. The server checks those references
+and bounds; it cannot prove that the explanation or task prediction is correct.
+Legacy results and packets without benchmark costs remain readable.
+
+Use known benchmark cost immediately, even without local history or subscription
+quota measurements. Keep those units and expense scopes separate. Among routes
+adequate for this packet, prefer lower measured expense; justify paying more
+for a relevant quality gain without inventing a universal quality threshold.
+Missing measurements warrant uncertainty or abstention when adequacy cannot
+be supported, not automatic preservation of the baseline. The baseline is a
+fallback/comparator: changing only that field must not reverse a strict ranking.
+Policy v2 resolves a top tie in supplied ranking order and records `advisor_tie`
+and the tie group; it makes no claim that the selected tied member is superior.
+
 Use the returned selection for the real worker. Reconsider only a concrete
 missed constraint, incorrect input or changed goal, then prepare a new snapshot.
 Record that reason rather than paying for a second full ranking debate.

@@ -32,8 +32,10 @@ def _failure_reason(exc):
 
 
 def validate_summary(value):
-    if not isinstance(value, dict) or value.get("schema_version") != 1 or len(encoded(value)) > MAX_SUMMARY:
+    if not isinstance(value, dict) or value.get("schema_version") != 1:
         raise EvidenceError("invalid task evidence projection")
+    if len(encoded(value)) > MAX_SUMMARY:
+        raise EvidenceError("task_summary_budget_exceeded")
     allowed = {"schema_version", "mode", "packets", "cost_units_are_not_interchangeable", "status",
                "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash", "acquisition"}
     if set(value) - allowed or not isinstance(value.get("packets"), list) or len(value["packets"]) > 8:

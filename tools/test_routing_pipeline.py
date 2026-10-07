@@ -111,13 +111,19 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     def submit(self, decision_id, answer, agent="advisor-a"):
         return self.pipeline.complete(self.rpc("complete_routing", {"decision_id": decision_id, "advisor_result": answer}, agent=agent))
 
+    def synthetic_answer(self, private):
+        answer = copy.deepcopy(private["result_contract"])
+        for assessment in answer["metadata"].get("assessments", []):
+            assessment["basis"] = "Fixture-supplied ranking; no benchmark costs or production task-quality claim."
+        return answer
+
     async def decided(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         private = self.private_input(prepared["decision_id"])
-        self.submit(prepared["decision_id"], private["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(private))
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "agentId": "advisor-a", "content": []})
-        self.decision(prepared["decision_id"])
+        self.assertEqual(self.decision(prepared["decision_id"])["decisions"][0]["decision_type"], "advisor")
         return prepared["decision_id"]
 
     def decision(self, decision_id):
@@ -135,7 +141,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         private = self.private_input(prepared["decision_id"])
         self.assertIn("Routing snapshot data:", private["prompt"])
         self.assertNotIn("PRIVATE_WORK_PROMPT", json.dumps(private))
-        self.submit(prepared["decision_id"], private["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(private))
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
         result = self.decision(prepared["decision_id"])
         self.assertEqual(result["status"], "decided")
@@ -309,7 +315,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_abstaining_advisor_falls_back_to_the_baseline(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        answer = self.private_input(prepared["decision_id"])["result_contract"]
+        answer = self.synthetic_answer(self.private_input(prepared["decision_id"]))
         answer["rankings"][0].update(abstained=True, ranking=[], ties=[])
         self.submit(prepared["decision_id"], answer)
         self.event("SubagentStop", agent="advisor-a")
@@ -391,7 +397,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         private = self.private_input(prepared["decision_id"])
         self.service = self.make_service()
         self.pipeline = RoutingPipeline(self.service)
-        self.submit(prepared["decision_id"], private["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(private))
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
         self.assertEqual(self.decision(prepared["decision_id"])["status"], "decided")
         self.service.context.assert_not_called()
@@ -399,7 +405,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_submissions_are_idempotent_and_conflicts_rejected(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        answer = self.private_input(prepared["decision_id"])["result_contract"]
+        answer = self.synthetic_answer(self.private_input(prepared["decision_id"]))
         self.assertEqual(self.submit(prepared["decision_id"], answer), self.submit(prepared["decision_id"], answer))
         changed = copy.deepcopy(answer)
         changed["rankings"][0]["ranking"].reverse()
@@ -409,7 +415,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_numeric_confidence_rejected_even_with_valid_identity(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        answer = self.private_input(prepared["decision_id"])["result_contract"]
+        answer = self.synthetic_answer(self.private_input(prepared["decision_id"]))
         answer["rankings"][0]["confidence"] = 0.9
         self.submit(prepared["decision_id"], answer)
         self.event("SubagentStop", agent="advisor-a")
@@ -450,7 +456,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         request = {"profile": "general-purpose", "prompt": "same bounded work"}
         prepared = await self.prepare(packets=packets, launch_requests={"work": request, "other": request})
         self.launch(prepared["handoff"])
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         self.event("SubagentStop", agent="advisor-a")
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
         first = self.authorize(prepared["decision_id"])
@@ -507,7 +513,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_stop_without_return_does_not_authorize_or_cache_advice(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         self.event("SubagentStop", agent="advisor-a")
         self.assertEqual(self.decision(prepared["decision_id"])["status"], "awaiting_advisor_completion")
         with self.assertRaisesRegex(EvidenceError, "completion_not_observed"):
@@ -517,7 +523,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_observed_model_mismatch_cannot_authorize_or_seed_cache(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={
             "status": "completed", "agentId": "advisor-a", "resolvedModel": "different-model", "content": []})
         self.assertEqual(self.decision(prepared["decision_id"])["status"], "no_decision")
@@ -528,7 +534,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_advisor_result_redaction_preserves_native_shape_and_observed_model(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         raw = completed_output(resolvedModel=ROUTE["model"], modelsUsed=[ROUTE["model"]])
         event = self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response=raw)
         safe = event["hookSpecificOutput"]["updatedToolOutput"]
@@ -563,7 +569,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
     async def test_model_switch_is_detected_even_if_final_model_matches(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={
             "status": "completed", "resolvedModel": ROUTE["model"],
             "modelsUsed": [ROUTE["model"], "other-model"], "content": []})
@@ -816,7 +822,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         # The advisor's alias is in the stub the root sends and in the substitution.
         self.assertEqual(prepared["handoff"]["input"]["model"], "haiku")
         self.assertEqual(self.launch(prepared["handoff"])["model"], "haiku")
-        self.submit(prepared["decision_id"], self.private_input(prepared["decision_id"])["result_contract"])
+        self.submit(prepared["decision_id"], self.synthetic_answer(self.private_input(prepared["decision_id"])))
         self.event("SubagentStop", agent="advisor-a", effort={"level": "low"})
         # The host reports the full ID the alias resolved to; that is not a mismatch.
         self.returned("call-a", "advisor-a", "fixture-haiku-9")

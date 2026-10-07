@@ -492,8 +492,8 @@ class DecisionTests(unittest.TestCase):
         self.assertEqual(decisions["ambiguous"]["reason_codes"], ["advisor_required"])
         self.assertEqual(decisions["explicit"]["status"], "chosen")
 
-    def test_advisor_selection_and_tie_use_eligible_baseline(self):
-        value = snapshot(packet())
+    def test_legacy_advisor_tie_preserves_baseline(self):
+        value = snapshot(packet(), policy=default_policy({"schema_version": 1}))
         eligible = value["packets"][0]["eligible"]
         response = result_for(value)
         response["rankings"][0]["ranking"] = list(reversed(eligible))
@@ -502,13 +502,27 @@ class DecisionTests(unittest.TestCase):
         self.assertEqual(decision["decision_type"], "advisor")
         self.assertEqual(decision["selected"]["model"], "economy-a")
 
-    def test_tie_without_eligible_baseline_uses_candidate_id(self):
-        value = snapshot(packet(baseline={"model": "missing", "effort": "low"}))
+    def test_legacy_tie_without_eligible_baseline_uses_candidate_id(self):
+        value = snapshot(packet(baseline={"model": "missing", "effort": "low"}),
+                         policy=default_policy({"schema_version": 1}))
         eligible = value["packets"][0]["eligible"]
         response = result_for(value)
         response["rankings"][0]["ties"] = [eligible]
         decision = decide(value, response)[0]
         self.assertEqual(decision["selected"]["candidate_id"], min(eligible))
+
+    def test_v2_baseline_change_cannot_reverse_strict_ranking_or_hide_tie(self):
+        order = [candidate_id("frontier-b", "high"), candidate_id("economy-a", "low")]
+        for baseline in ({"model": "frontier-b", "effort": "high"}, {"model": "economy-a", "effort": "low"}):
+            value = snapshot(packet(baseline=baseline))
+            response = result_for(value)
+            response["rankings"][0]["ranking"] = order
+            self.assertEqual(decide(value, response)[0]["selected"]["candidate_id"], order[0])
+            response["rankings"][0]["ties"] = [order]
+            tied = decide(value, response)[0]
+            self.assertEqual(tied["selected"]["candidate_id"], order[0])
+            self.assertEqual(tied["ties"], [order])
+            self.assertIn("advisor_tie", tied["reason_codes"])
 
     def test_abstention_or_failure_uses_only_an_eligible_baseline(self):
         value = snapshot(packet())

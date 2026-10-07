@@ -98,6 +98,24 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(disabled["status"], "no_decision")
         self.assertFalse(legacy.advisor_workflow.advisor["enabled"])
 
+    async def test_nonpositive_local_expense_does_not_skip_quality_assessment(self):
+        from route_evidence.advice_contracts import candidate_id
+        service = self.make_service(config={"schema_version": 2, "telemetry": {"mode": "off"},
+            "task_evidence": {"enabled": True, "auto_download": False}})
+        baseline = {"model": "worker-alpha", "effort": "high"}
+        baseline_id = candidate_id(**{"model": baseline["model"], "level": baseline["effort"]})
+        alternatives = [candidate_id(model["model"], level) for model in AVAILABLE for level in model["efforts"]
+                        if (model["model"], level) != (baseline["model"], baseline["effort"])]
+        summary = {"schema_version": 1, "mode": "lexical", "status": "available",
+            "cost_units_are_not_interchangeable": True, "packets": [{"packet_id": "implementation",
+                "comparison": {"baseline": baseline_id, "comparisons": [
+                    {"candidate_id": cid, "net_benefit": 0} for cid in alternatives]},
+                "limitations": ["quality_not_proven"]}]}
+        service.advisor_workflow.task_evidence.async_summarize = AsyncMock(return_value=summary)
+        reply = await self.prepare(service, packets=[{**PACKETS[0], "baseline": baseline}])
+        self.assertEqual(reply["status"], "awaiting_native_advice")
+        self.assertNotIn("decisions", reply)
+
     async def test_explicit_choice_and_single_candidate_bypass_native(self):
         with patch("route_evidence.advisors.native.prepare_native", side_effect=AssertionError("unexpected advisor")):
             explicit = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",

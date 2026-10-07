@@ -115,11 +115,11 @@ class NativeAdapterTests(unittest.TestCase):
         self.assertFalse(result["tool_disable_enforced"])
         self.assertIn("Do not use tools, delegate", result["prompt"])
         self.assertIn("Return one JSON object and no prose", result["prompt"])
-        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v5")
+        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v7")
         private = prepare_native(self.snapshot, self.route, available=self.available, delivery="private")
         self.assertNotIn("prompt", private)
         self.assertNotIn("result_contract", private)
-        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v6")
+        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v8")
         with self.assertRaises(EvidenceError):
             prepare_native(self.snapshot, self.route, available=self.available, delivery="elsewhere")
         result = advisor_input(self.snapshot, self.route)
@@ -161,6 +161,55 @@ class NativeAdapterTests(unittest.TestCase):
         )
         process = subprocess.run([sys.executable, "-B", "-c", code], check=False)
         self.assertEqual(process.returncode, 0)
+
+
+class QualityCostAssessmentTests(unittest.TestCase):
+    def snapshot(self, *, costs=(.2, .5), scores=(.88, .88), task="implementation"):
+        comparison = {"source_id": "synthetic", "version": "fixture", "subset": "all",
+            "harness": "fixture", "metric": "pass_at_1", "protocol": "fixture-only",
+            "expense_axes": ["cost_usd"], "candidates": [
+                {"model": f"model-{i:02d}", "effort": "low", "score": scores[i],
+                 "expenses": {"cost_usd": costs[i]}, "cost_basis": "synthetic_response_usd"}
+                for i in range(2)]}
+        ctx = {"schema_version": 2, "client": "test-client", "task_types": [task],
+            "inventory": [{"model": f"model-{i:02d}", "effort": "low"} for i in range(2)],
+            "tasks": [{"task_type": task, "primary_comparisons": [comparison], "supporting_comparisons": []}],
+            "sources": [], "guidance": {}, "declared_constraints": {}}
+        return build_snapshot(ctx, [{"packet_id": "p", "task_types": [task], "features": {}}],
+            policy=normalize_policy(), client="test-client", created_at="2030-01-01T00:00:00Z",
+            expires_at="2030-01-01T00:10:00Z")
+
+    def answer(self, snap):
+        value = native_result(snap)
+        value["metadata"]["assessments"] = [{"packet_id": "p", "cohort_ids": [snap["evidence"]["cohorts"][0]["cohort_id"]],
+            "basis": "Equal measured quality; lower response USD cost preferred for a verified bounded task. Chain/quota unknown."}]
+        return value
+
+    def test_measured_cost_requires_a_relevant_assessment_even_without_local_history(self):
+        snap = self.snapshot()
+        with self.assertRaisesRegex(EvidenceError, "quality_cost_assessment_required"):
+            parse_native(snap, native_result(snap))
+        reply = self.answer(snap)
+        self.assertEqual(parse_native(snap, reply), reply)
+        for change, code in ((lambda r: r["metadata"]["assessments"][0].update(cohort_ids=["cohort_foreign"]), "cohort_invalid"),
+                             (lambda r: r["metadata"]["assessments"][0].update(basis=""), "basis_invalid"),
+                             (lambda r: r["metadata"]["assessments"][0].update(packet_id="other"), "packet_invalid")):
+            bad = self.answer(snap)
+            change(bad)
+            with self.assertRaisesRegex(EvidenceError, code):
+                parse_native(snap, bad)
+        missing = native_result(snap)
+        missing["rankings"][0].update(abstained=True, ranking=[])
+        self.assertTrue(parse_native(snap, missing)["rankings"][0]["abstained"])
+
+    def test_cost_and_quality_changes_are_preserved_in_separate_cohort_identities(self):
+        first, cost_only, quality_only = self.snapshot(), self.snapshot(costs=(.5, .2)), self.snapshot(scores=(.7, .93))
+        for changed in (cost_only, quality_only):
+            self.assertNotEqual(first["evidence_hash"], changed["evidence_hash"])
+        cohort = cost_only["evidence"]["cohorts"][0]
+        from route_evidence.advice_contracts import _compact_candidate
+        self.assertEqual([_compact_candidate(cohort, i)["score"] for i in range(2)], [.88, .88])
+        self.assertEqual([_compact_candidate(cohort, i)["expenses"] for i in range(2)], [[[0, .5]], [[0, .2]]])
 
 
 class FakeClient:

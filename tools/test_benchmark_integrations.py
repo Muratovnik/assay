@@ -393,6 +393,8 @@ build_server(service).run(transport="stdio")
                 self.assertFalse(private.is_error)
                 self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(private.structured_content))
                 answer = private.structured_content["result_contract"]
+                for assessment in answer["metadata"].get("assessments", []):
+                    assessment["basis"] = "Synthetic protocol fixture ranking; no benchmark cost or production quality claim."
                 arguments = {"decision_id": value["decision_id"], "advisor_result": answer}
                 forged = await client.call_tool("complete_routing", arguments)
                 self.assertTrue(forged.is_error)

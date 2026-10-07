@@ -7,13 +7,56 @@ import re
 from typing import Any
 
 from ..advice import semantic_projection
-from ..advice_contracts import validate_result, validate_routing_snapshot
+from ..advice_contracts import _compact_candidate, validate_result, validate_routing_snapshot
 from ..core import EvidenceError, encoded, loads
 
 BACKEND = "native-economy"
-PROMPT_VERSIONS = {"handoff": "native-routing-v5", "private": "native-routing-v6"}
+PROMPT_VERSIONS = {"handoff": "native-routing-v7", "private": "native-routing-v8"}
 PROMPT_VERSION = PROMPT_VERSIONS["handoff"]
 _BASIS_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}\Z")
+ASSESSMENT_PLACEHOLDER = "Replace with task adequacy, same-cohort quality/cost tradeoff and uncertainty."
+
+
+def _packet_cohorts(snapshot, packet):
+    ids = {ref for task in snapshot["evidence"]["tasks"] if task["task_type"] in packet["task_types"]
+           for key in ("primary_cohort_ids", "supporting_cohort_ids") for ref in task[key]}
+    return [cohort for cohort in snapshot["evidence"]["cohorts"] if cohort["cohort_id"] in ids]
+
+
+def _cost_cohorts(snapshot, packet):
+    refs = [index for index, candidate in enumerate(snapshot["candidates"])
+            if candidate["candidate_id"] in packet["eligible"]]
+    return {cohort["cohort_id"] for cohort in _packet_cohorts(snapshot, packet)
+            if any((_compact_candidate(cohort, ref) or {}).get("expenses") for ref in refs)}
+
+
+def _validate_assessments(snapshot, result):
+    assessments = result["metadata"].get("assessments", [])
+    if not isinstance(assessments, list):
+        raise EvidenceError("native_assessments_invalid")
+    by_packet = {}
+    for item in assessments:
+        if (not isinstance(item, dict) or set(item) != {"packet_id", "cohort_ids", "basis"}
+                or not isinstance(item["packet_id"], str) or item["packet_id"] not in snapshot["packet_ids"]
+                or item["packet_id"] in by_packet):
+            raise EvidenceError("native_assessment_packet_invalid")
+        refs = item["cohort_ids"]
+        packet = next(p for p in snapshot["packets"] if p["packet_id"] == item["packet_id"])
+        relevant = {c["cohort_id"] for c in _packet_cohorts(snapshot, packet)}
+        if (not isinstance(refs, list) or len(refs) > 8 or any(not isinstance(ref, str) for ref in refs)
+                or len(set(refs)) != len(refs) or not set(refs) <= relevant):
+            raise EvidenceError("native_assessment_cohort_invalid")
+        if (not isinstance(item["basis"], str) or not item["basis"].strip() or len(item["basis"]) > 300
+                or item["basis"] == ASSESSMENT_PLACEHOLDER):
+            raise EvidenceError("native_assessment_basis_invalid")
+        by_packet[item["packet_id"]] = item
+    rankings = {r["packet_id"]: r for r in result["rankings"]}
+    for packet in snapshot["packets"]:
+        costs = _cost_cohorts(snapshot, packet)
+        if snapshot["policy"]["schema_version"] >= 2 and costs and not rankings[packet["packet_id"]]["abstained"]:
+            item = by_packet.get(packet["packet_id"])
+            if item is None or not costs.intersection(item["cohort_ids"]):
+                raise EvidenceError("native_quality_cost_assessment_required:" + packet["packet_id"])
 
 
 def _needs_route(snapshot_id: str, reason: str) -> dict[str, Any]:
@@ -94,7 +137,9 @@ def _result_contract(snapshot: dict[str, Any], model: str, level: str,
         ],
         "metadata": {
             "contract_version": PROMPT_VERSIONS[delivery],
-            "explanation_source": "policy_or_none",
+            "explanation_source": "advisor_quality_cost_assessment",
+            **({"assessments": [{"packet_id": p["packet_id"], "cohort_ids": [], "basis": ASSESSMENT_PLACEHOLDER}
+                                 for p in snapshot["packets"]]} if snapshot["policy"]["schema_version"] >= 2 else {}),
         },
     }
 
@@ -112,8 +157,12 @@ def _render_prompt(snapshot: dict[str, Any], model: str, level: str,
            "Do not delegate, inspect the workspace, or perform any packet task. " if private else
            "Do not use tools, delegate, inspect the workspace, or perform any packet task. ")
         + "Use only the supplied structured snapshot. Weigh each packet's task types, structured "
-        "features, capabilities, quality evidence, and labeled expense evidence. Prefer economy "
-        "only when the evidence supports adequate task quality and the required capabilities. "
+        "features, capabilities, quality evidence, and labeled expense evidence. Assess ambiguity, "
+        "error impact, verification strength, tool/context needs and rework risk. Quality and benchmark "
+        "cost are joint decision criteria: compare both whenever available within the same cohort. "
+        "Among candidates adequate for this packet, prefer lower measured expense; explain why a "
+        "quality gain warrants paying more when quality differs. No universal quality threshold or "
+        "effort default applies. A verified bounded task and an ambiguous high-impact task may differ. "
         "Never average scores across cohorts, sources, harnesses, subsets, or revisions. Never "
         "treat API price, tokens, steps, or duration as subscription quota usage. "
         "Task similarity evidence, when present, reports historical cost and quality separately. "
@@ -121,15 +170,26 @@ def _render_prompt(snapshot: dict[str, Any], model: str, level: str,
         "benchmarks and capabilities, even when local chain history or exact model matches are "
         "absent. That absence alone does not invalidate the public evidence. Historical scores "
         "and response prices are observations, not predictions for different current models. "
-        "Prefer the lowest expected full-chain expense consistent with required quality, including "
-        "retries, verification and coordination. Response-only costs are not chain costs. Unknown "
-        "cost or quality does not justify downgrading; preserve the baseline or abstain. Paired "
+        "Separate measured benchmark cost, predicted task cost and observed full-chain cost. "
+        "Use known benchmark cost now even without local chain history or subscription quota data; "
+        "do not call those measurements unknown. Include retries, verification and coordination "
+        "when estimating chain expense, and label unmeasured components unknown. Response-only "
+        "costs are not chain costs. Missing cost or quality is uncertainty to explain, not a command "
+        "to keep the baseline or exclude a candidate. Abstain when adequacy cannot be supported. "
+        "The baseline is a fallback and comparison route, never a preferred winner or ordering prior. "
+        "Changing only baseline must not reverse a strict evidence-based ranking; switching overhead "
+        "counts only if actually supplied with comparable units and quality. Paired "
         "comparisons are observational, not guarantees. Never convert units or map historical models "
         "to current ones. "
         + ("Submit one JSON object as advisor_result in complete_routing. "
            "Your final message must contain only the decision_id and submission status, never rankings or evidence. "
            if private else "Return one JSON object and no prose. ")
         + "Reorder each contract ranking from best to worst without adding, dropping, or repeating IDs. "
+        "Complete each metadata.assessments entry with a basis of at most 300 characters explaining "
+        "task adequacy, the quality/cost tradeoff and uncertainty. Cite relevant cohort_ids from this "
+        "snapshot; a non-abstained ranking with measured benchmark expense must cite cost evidence. "
+        "Keep all metadata within 4096 UTF-8 bytes, using only the necessary cohort references. "
+        "Use ties for indistinguishable candidates, not a fabricated strict preference. "
         "Do not invent numeric probabilities or confidence. If the evidence is insufficient, "
         "set abstained=true, ranking=[], and give bounded reason_codes. The exact response "
         f"contract is: {contract_json}\nRouting snapshot data:\n{snapshot_json}"
@@ -218,6 +278,7 @@ def parse_native(
         raise EvidenceError("native_backend_mismatch")
     if any(item["probabilities"] is not None or item["confidence"] is not None for item in result["rankings"]):
         raise EvidenceError("native_numeric_confidence_forbidden")
+    _validate_assessments(snapshot, result)
     if advisor_route is not None:
         if not isinstance(advisor_route, dict):
             raise EvidenceError("native_advisor_route_invalid")

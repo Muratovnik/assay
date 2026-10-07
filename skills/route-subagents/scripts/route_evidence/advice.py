@@ -322,17 +322,17 @@ def _reason(value: Any, fallback: str) -> str:
     return value if isinstance(value, str) and _REASON.fullmatch(value) else fallback
 
 
-def _top_candidate(entry: dict, packet: dict, candidates: dict[str, dict]) -> dict:
+def _top_candidate(entry: dict, packet: dict, candidates: dict[str, dict], policy: dict) -> dict:
     first = entry["ranking"][0]
     tie = next((group for group in entry["ties"] if first in group), [first])
     baseline = packet["baseline"]
-    if baseline:
+    if baseline and policy["schema_version"] == 1:
         current = next((candidate_id for candidate_id in tie
                         if candidates[candidate_id]["model"] == baseline["model"]
                         and candidates[candidate_id]["effort"] == baseline["effort"]), None)
         if current is not None:
             return candidates[current]
-    return candidates[min(tie)]
+    return candidates[first] if policy["schema_version"] >= 2 else candidates[min(tie)]
 
 
 def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
@@ -412,12 +412,20 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             continue
 
         if entry is not None and not entry["abstained"]:
-            selected = _top_candidate(entry, packet, candidates)
+            selected = _top_candidate(entry, packet, candidates, snapshot["policy"])
             codes = ["advisor_selected", *entry["reason_codes"]]
+            top_tie = next((group for group in entry["ties"] if entry["ranking"][0] in group), [])
+            if top_tie:
+                codes.append("advisor_tie")
+            assessments = result["metadata"].get("assessments", [])
+            assessment = next((item for item in assessments if isinstance(item, dict)
+                               and item.get("packet_id") == packet["packet_id"]), None) if isinstance(assessments, list) else None
             if any(warning["candidate_id"] == selected["candidate_id"] for warning in packet["warnings"]):
                 codes.append("unknown_evidence_warning")
             decisions.append({**base, "status": "chosen", "decision_type": "advisor",
                               "selected": _selection(selected),
+                              "ties": copy.deepcopy(entry["ties"]),
+                              **({"assessment": copy.deepcopy(assessment)} if assessment else {}),
                               "reason_codes": list(dict.fromkeys(codes))})
             continue
 
