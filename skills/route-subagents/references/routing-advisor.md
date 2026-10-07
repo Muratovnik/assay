@@ -136,6 +136,12 @@ must cite at least one relevant cost cohort. The server checks those references
 and bounds; it cannot prove that the explanation or task prediction is correct.
 Legacy results and packets without benchmark costs remain readable.
 
+Native prompts include a decoded quality/expense reading aid with exact
+candidate IDs, model/effort pairs and cohort references. Its values come from
+the validated compact tables; it neither predicts missing values nor replaces
+the complete snapshot, which remains in the same prompt. This avoids requiring
+the advisor to reconstruct known measurements through nested integer indexes.
+
 Use known benchmark cost immediately, even without local history or subscription
 quota measurements. Keep those units and expense scopes separate. Among routes
 adequate for this packet, prefer lower measured expense; justify paying more

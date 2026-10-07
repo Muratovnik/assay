@@ -115,11 +115,11 @@ class NativeAdapterTests(unittest.TestCase):
         self.assertFalse(result["tool_disable_enforced"])
         self.assertIn("Do not use tools, delegate", result["prompt"])
         self.assertIn("Return one JSON object and no prose", result["prompt"])
-        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v7")
+        self.assertEqual(result["descriptor"]["prompt_version"], "native-routing-v11")
         private = prepare_native(self.snapshot, self.route, available=self.available, delivery="private")
         self.assertNotIn("prompt", private)
         self.assertNotIn("result_contract", private)
-        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v8")
+        self.assertEqual(private["descriptor"]["prompt_version"], "native-routing-v12")
         with self.assertRaises(EvidenceError):
             prepare_native(self.snapshot, self.route, available=self.available, delivery="elsewhere")
         result = advisor_input(self.snapshot, self.route)
@@ -184,6 +184,23 @@ class QualityCostAssessmentTests(unittest.TestCase):
         value["metadata"]["assessments"] = [{"packet_id": "p", "cohort_ids": [snap["evidence"]["cohorts"][0]["cohort_id"]],
             "basis": "Equal measured quality; lower response USD cost preferred for a verified bounded task. Chain/quota unknown."}]
         return value
+
+    def test_native_reading_aid_binds_quality_and_cost_to_exact_route_without_replacing_snapshot(self):
+        snap = self.snapshot(costs=(.17, .61), scores=(.86, .94))
+        available = [{"model": c["model"], "efforts": [c["effort"]]} for c in snap["candidates"]]
+        route = {"model": "model-00", "effort": "low",
+                 "selection_basis": {"source": "caller", "reason_code": "bounded_ranking"}}
+        for prepared in (prepare_native(snap, route, available=available), advisor_input(snap, route)):
+            prompt = prepared["prompt"]
+            original = json.loads(prompt.split("\nRouting snapshot data:\n", 1)[1])
+            self.assertEqual(original, snap)
+            aid = json.loads(prompt.split("unknown rows remain in the snapshot):\n", 1)[1].split("\nRouting snapshot data:\n", 1)[0])
+            self.assertEqual(aid[0]["cohort_id"], snap["evidence"]["cohorts"][0]["cohort_id"])
+            rows = {r["model"]: r for r in aid[0]["measurements"]}
+            self.assertEqual((rows["model-00"]["effort"], rows["model-00"]["score"], rows["model-00"]["expenses"]),
+                             ("low", .86, {"cost_usd": .17}))
+            self.assertEqual((rows["model-01"]["score"], rows["model-01"]["expenses"]), (.94, {"cost_usd": .61}))
+            self.assertEqual({r["candidate_id"] for r in rows.values()}, set(snap["packets"][0]["eligible"]))
 
     def test_measured_cost_requires_a_relevant_assessment_even_without_local_history(self):
         snap = self.snapshot()
