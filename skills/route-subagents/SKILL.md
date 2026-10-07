@@ -74,7 +74,8 @@ or reviewer directly within the existing authorization.
 
 ## Choose model and effort for the task
 
-Select both settings before each spawn. Preserve a model or effort explicitly
+Obtain both settings through the recommendation workflow before each spawn by
+default. Preserve a model or effort explicitly
 chosen by the user; the primary's settings are not an implicit choice for its
 children. A profile remains a capability boundary, not a model selection.
 `routing_status` reports the configured `pipeline.mode`. Without a mode, and for
@@ -100,8 +101,17 @@ that pair with `selection_basis`; do not start another advisor to choose it.
 No known basis means `needs_advisor_route`, not inherited parent settings.
 
 Reserve packet `explicit` with `explicit_source: "user"` for a model or effort
-the human actually specified. A deliberate binding caller choice uses
-`explicit_source: "caller"`; a tentative preference belongs outside `explicit`.
+the human actually specified. For ordinary recommendations omit `explicit` and
+supply `task_spec`, criteria and the complete inventory. A caller preference is
+not an exemption from the advisor. To use `explicit_source: "caller"`, first
+explain the task-specific reason for departing from recommendations, or request
+and receive explicit user confirmation. Include the corresponding
+`caller_override` basis from the [routing contract](references/routing-advisor.md).
+Without either basis, continue through recommendations; do not launch the
+preferred pair or relabel it as a user/configuration choice. A generic claim
+that a model is stronger or balanced does not justify bypassing task adequacy
+and measured cost. Explain the exception to the user before dispatch. An
+unanswered confirmation request supplies no authority.
 Use `baseline` only as an eligible fallback/comparison route. Neither the
 primary's settings nor a profile default is human choice. Provenance is a
 declaration, not host attestation; unknown origin must stay unknown.

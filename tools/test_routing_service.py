@@ -226,7 +226,8 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
             context["sources"] = [{"source_id": "old", "last_success_at": timestamp(self.now - 90000)}]
             return context
         self.service.context.side_effect = stale
-        result = await self.prepare(packets=[{**PACKETS[0], "explicit": {"model": "worker-alpha", "effort": "high"}}])
+        result = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
+                                             "explicit": {"model": "worker-alpha", "effort": "high"}}])
         self.assertEqual(result["status"], "no_decision")
         self.assertIsNone(result["decisions"][0]["selected"])
         self.assertIn("snapshot_expired", result["decisions"][0]["reason_codes"])

@@ -202,13 +202,14 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({k: decision["selected"][k] for k in chosen}, chosen)
         self.assertEqual(self.authorize(prepared["decision_id"])["requested_effort"], "high")
         # Outside the confirmed inventory the choice is refused, not replaced.
-        refused = await self.prepare(packets=[{**PACKETS[0], "explicit": {"model": "worker-alpha", "effort": "max"}}])
+        refused = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
+                                             "explicit": {"model": "worker-alpha", "effort": "max"}}])
         self.assertEqual(refused["decisions"][0]["reason_codes"], ["invalid_explicit_choice"])
         self.assertIsNone(refused["decisions"][0]["selected"])
         # An inventory pair without a generated definition cannot be expressed.
         self.config["pipeline"]["variants"] = [v for v in self.config["pipeline"]["variants"] if v["effort"] != "high"]
         self.configure()
-        missing = await self.prepare(packets=[{**PACKETS[0], "explicit": chosen}])
+        missing = await self.prepare(packets=[{**PACKETS[0], "explicit": chosen, "explicit_source": "user"}])
         self.assertEqual(missing["decisions"][0]["reason_codes"], ["invalid_explicit_choice"])
 
     async def test_configured_choice_rejects_a_contradicting_request(self):
@@ -226,6 +227,19 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("handoff", prepared)
         self.assertEqual(prepared["decisions"][0]["decision_type"], "configured_choice")
         self.assertEqual("deny", self.event("PreToolUse", tool_name="Agent", tool_use_id="a", tool_input={"prompt": "skip"})["hookSpecificOutput"]["permissionDecision"])
+        self.launch(self.authorize(prepared["decision_id"]), agent="worker-a")
+
+    async def test_caller_override_requires_basis_and_preserves_dispatch_boundary(self):
+        task = {**PACKETS[0], "explicit": {"model": "worker-alpha", "effort": "high"}, "explicit_source": "caller"}
+        with self.assertRaisesRegex(EvidenceError, "caller_override_required"):
+            await self.prepare(packets=[task])
+        self.service.context.assert_not_called()
+        basis = {"kind": "justification", "reason": "The required runtime capability is missing from the recommended route."}
+        prepared = await self.prepare(packets=[{**task, "caller_override": basis}])
+        self.assertEqual(prepared["decisions"][0]["decision_type"], "caller_choice")
+        self.assertEqual(prepared["decisions"][0]["selection_provenance"]["caller_override"], basis)
+        unauthorized = self.event("PreToolUse", tool_name="Agent", tool_use_id="a", tool_input={"prompt": "skip"})
+        self.assertEqual(unauthorized["hookSpecificOutput"]["permissionDecision"], "deny")
         self.launch(self.authorize(prepared["decision_id"]), agent="worker-a")
 
     async def test_valid_cache_skips_second_advisor_but_creates_new_decision(self):

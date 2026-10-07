@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .cache import atomic_write, source_lock
-from .core import EvidenceError, encoded, epoch, is_reparse, loads, timestamp
+from .core import EvidenceError, digest, encoded, epoch, is_reparse, loads, timestamp
 
 
 HISTORY_SCHEMA = 1
@@ -182,6 +182,13 @@ def _candidate(value: Any, field: str) -> dict:
     }
 
 
+def _override_metadata(value: Any) -> dict:
+    from .advice_contracts import _caller_override
+    basis = _caller_override(value, "caller_override")
+    return {"kind": basis["kind"], "basis_hash": digest(basis),
+            **({"reference": basis["reference"]} if "reference" in basis else {})}
+
+
 def _packet_metadata(value: Any, field: str, candidates: list[dict], *, include_task_features=False) -> dict:
     if not isinstance(value, dict):
         raise EvidenceError(f"{field}: expected an object")
@@ -215,6 +222,7 @@ def _packet_metadata(value: Any, field: str, candidates: list[dict], *, include_
         "explicit": bool(value.get("explicit", False)),
         **({"explicit_source": _identifier(value["explicit_source"], "explicit_source")}
            if value.get("explicit_source") else {}),
+        **({"caller_override": _override_metadata(value["caller_override"])} if "caller_override" in value else {}),
         "baseline": _optional_identifier(baseline, field + ".baseline"),
         "eligible": [_identifier(item, field + ".eligible") for item in eligible],
         "excluded": clean_excluded,
@@ -346,7 +354,10 @@ def _decision(value: Any) -> dict:
         fallback = _identifier(fallback, "fallback")
     extra = {}
     if "selection_provenance" in value:
-        extra["selection_provenance"] = _redacted_json(value["selection_provenance"], "selection_provenance")
+        provenance = copy.deepcopy(value["selection_provenance"])
+        if "caller_override" in provenance:
+            provenance["caller_override"] = _override_metadata(provenance["caller_override"])
+        extra["selection_provenance"] = _redacted_json(provenance, "selection_provenance")
     for key in ("assessment", "ties", "economic_assessment"):
         if key in value:
             extra[key] = _redacted_json(value[key], key)
@@ -635,7 +646,7 @@ class HistoryStore:
             record["task_evidence_usage"] = {"status": task["status"], "bytes": len(encoded(task)),
                                              "seconds": retrieval_seconds}
         if self.mode == "full":
-            if any("task_spec" in p for p in snapshot["packets"]) and not self.retain_descriptions:
+            if any("task_spec" in p or "caller_override" in p for p in snapshot["packets"]) and not self.retain_descriptions:
                 record["full_unavailable_reason"] = "native_task_description_not_retained"
             else:
                 record["full"] = _full_payload(snapshot, result)
@@ -1056,7 +1067,7 @@ def replay(record: dict, *, policy: dict | None = None) -> dict:
         effective_policy = default_policy(policy)
         source_packets = [{key: copy.deepcopy(packet[key]) for key in
                            ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-                            "requirements", "capabilities", "task_spec") if key in packet}
+                            "requirements", "capabilities", "task_spec", "caller_override") if key in packet}
                           for packet in snapshot["packets"]]
         snapshot["policy"] = effective_policy
         snapshot["policy_hash"] = digest(effective_policy)

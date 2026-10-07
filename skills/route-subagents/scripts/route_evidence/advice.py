@@ -377,7 +377,9 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             choice_type = ("explicit_user_choice" if source == "user" or legacy else
                            "configured_choice" if source == "configuration" else "caller_choice")
             base["selection_provenance"] = {"source": source or ("legacy_unspecified" if legacy else "caller"),
-                                            "verification": "declared_not_attested"}
+                                            "verification": "declared_not_attested",
+                                            **({"caller_override": copy.deepcopy(packet["caller_override"])}
+                                               if "caller_override" in packet else {})}
             match = next((candidate for candidate in candidates.values()
                           if candidate["model"] == explicit["model"]
                           and candidate["effort"] == explicit["effort"]), None)
@@ -397,7 +399,9 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             decisions.append({**base, "status": "chosen", "decision_type": "single_eligible",
                               "selected": _selection(match), "reason_codes": codes,
                               "selection_provenance": {"source": "eligibility_constraints",
-                                                       "explicit_source": packet.get("explicit_source")}})
+                                                       "explicit_source": packet.get("explicit_source"),
+                                                       **({"caller_override": copy.deepcopy(packet["caller_override"])}
+                                                          if "caller_override" in packet else {})}})
             continue
 
         if not packet["eligible"]:

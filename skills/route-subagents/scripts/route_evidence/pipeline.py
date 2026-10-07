@@ -31,6 +31,11 @@ def compact(response: dict) -> dict:
         fields = {"packet_id", "status", "decision_type", "selected", "reason_codes"}
         result["decisions"] = [{k: copy.deepcopy(v) for k, v in d.items() if k in fields}
                                for d in response["decisions"]]
+        for original, decision in zip(response["decisions"], result["decisions"]):
+            provenance = original.get("selection_provenance", {})
+            if "caller_override" in provenance:
+                decision["selection_provenance"] = {k: copy.deepcopy(v) for k, v in provenance.items()
+                    if k in {"source", "verification", "explicit_source", "caller_override"}}
     return result
 
 
@@ -244,6 +249,7 @@ class RoutingPipeline:
                 # A configured choice is binding even if the root omits it.
                 packet["explicit"] = copy.deepcopy(approved)
                 packet["explicit_source"] = "configuration"
+                packet.pop("caller_override", None)
             # A user's own explicit choice stays as supplied. Policy accepts it
             # only for an inventory pair with a generated, expressible variant.
             baseline = packet.get("baseline")

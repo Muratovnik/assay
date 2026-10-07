@@ -121,7 +121,7 @@ class AdvisorWorkflow:
 
     async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
                               task_queries=None, cost_objectives=None, native_delivery="handoff"):
-        packets = validate_packets(packets)
+        packets = validate_packets(packets, require_caller_override=True)
         from .task_evidence import validate_queries
         task_queries = validate_queries(task_queries, [p["packet_id"] for p in packets])
         task_types = list(dict.fromkeys(t for packet in packets for t in packet["task_types"]))

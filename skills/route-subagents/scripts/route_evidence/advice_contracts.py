@@ -205,13 +205,41 @@ def _candidate_capabilities(value: Any, field: str) -> list[dict]:
     return result
 
 
-def validate_packets(packets: Any) -> list[dict]:
+def _clean_prose(value: Any, field: str, *, limit=4096) -> str:
+    from .task_evidence import query_text
+    try:
+        value = query_text(value)
+    except EvidenceError as exc:
+        raise EvidenceError(field + ": " + str(exc)) from exc
+    if (len(value.encode("utf-8")) > limit or not value.strip()
+            or any(ord(c) < 32 for c in value) or "```" in value):
+        raise EvidenceError(field + ": expected a bounded cleaned single-line description")
+    if re.search(r"[A-Za-z]:[\\/]|/(?:home|Users)/|\b(?:api[_ -]?key|password|secret)\s*[:=]|sk-[A-Za-z0-9_-]{16,}", value, re.I):
+        raise EvidenceError(field + ": redact paths and credentials")
+    return value
+
+
+def _caller_override(value: Any, field: str) -> dict:
+    value = _object(value, field, {"kind", "reason", "reference"}, {"kind"})
+    kind = value["kind"]
+    if not isinstance(kind, str) or kind not in {"justification", "user_confirmation"}:
+        raise EvidenceError(field + ": expected justification or user_confirmation")
+    if kind == "justification" and "reason" not in value:
+        raise EvidenceError(field + ": justification requires a task-specific reason")
+    if kind == "user_confirmation" and "reference" not in value:
+        raise EvidenceError(field + ": confirmation requires the actual user-message reference")
+    return {"kind": kind,
+            **({"reason": _clean_prose(value["reason"], field + ".reason", limit=1000)} if "reason" in value else {}),
+            **({"reference": _safe_name(value["reference"], field + ".reference")} if "reference" in value else {})}
+
+
+def validate_packets(packets: Any, *, require_caller_override=False) -> list[dict]:
     """Validate and normalize caller-supplied structured task packets."""
     if not isinstance(packets, list) or not packets or len(packets) > MAX_PACKETS:
         raise EvidenceError(f"packets: expected 1..{MAX_PACKETS} packets")
     result, seen = [], set()
     allowed = {"packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-               "requirements", "capabilities", "task_spec"}
+               "requirements", "capabilities", "task_spec", "caller_override"}
     for index, raw in enumerate(copy.deepcopy(packets)):
         field = f"packets[{index}]"
         raw = _object(raw, field, allowed, {"packet_id", "task_types", "features"})
@@ -247,31 +275,36 @@ def validate_packets(packets: Any) -> list[dict]:
         if source is not None and (not isinstance(source, str) or source not in {"user", "caller", "configuration"}
                                    or not raw.get("explicit")):
             raise EvidenceError(field + ".explicit_source: requires an explicit choice and a known source")
+        explicit = _pair(raw.get("explicit"), field + ".explicit", partial=True)
+        caller_choice = bool(explicit) and source in (None, "caller")
+        override = None
+        if "caller_override" in raw:
+            if not caller_choice:
+                raise EvidenceError(field + ".caller_override: requires a caller explicit choice")
+            override = _caller_override(raw["caller_override"], field + ".caller_override")
+        if require_caller_override and caller_choice and override is None:
+            raise EvidenceError(field + ": caller_override_required: omit explicit to use recommendations; "
+                                "otherwise supply a task-specific justification or actual user confirmation")
         result.append({
             "packet_id": packet_id,
             "task_types": task_types,
             "features": normalized_features,
-            "explicit": _pair(raw.get("explicit"), field + ".explicit", partial=True),
+            "explicit": explicit,
             "baseline": _pair(raw.get("baseline"), field + ".baseline", partial=False),
             "requirements": _requirements(raw.get("requirements"), field + ".requirements"),
             "capabilities": _candidate_capabilities(raw.get("capabilities"), field + ".capabilities"),
             **({"explicit_source": source} if source is not None else {}),
+            **({"caller_override": override} if override is not None else {}),
             **({"task_spec": _task_spec(raw["task_spec"], field + ".task_spec")} if "task_spec" in raw else {}),
         })
     return result
 
 
 def _task_spec(value, field):
-    from .task_evidence import query_text
     value = _object(value, field, {"goal", "criteria", "verification", "error_impact", "ambiguity", "provenance"},
                     {"goal", "criteria", "verification", "error_impact", "ambiguity", "provenance"})
     def prose(raw):
-        raw = query_text(raw)
-        if not raw.strip() or any(ord(c) < 32 for c in raw) or "```" in raw:
-            raise EvidenceError(field + ": expected a cleaned single-line task description")
-        if re.search(r"[A-Za-z]:[\\/]|/(?:home|Users)/|\b(?:api[_ -]?key|password|secret)\s*[:=]|sk-[A-Za-z0-9_-]{16,}", raw, re.I):
-            raise EvidenceError(field + ": redact paths and credentials before native routing")
-        return raw
+        return _clean_prose(raw, field)
     criteria = value["criteria"]
     if not isinstance(criteria, list) or not 1 <= len(criteria) <= 8:
         raise EvidenceError(field + ".criteria: expected 1..8 acceptance criteria")
@@ -583,7 +616,7 @@ def validate_routing_snapshot(snapshot: Any) -> RoutingSnapshot:
             raise EvidenceError("snapshot packet must be an object")
         source_packets.append({key: raw[key] for key in
                                ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-                                "requirements", "capabilities", "task_spec") if key in raw})
+                                "requirements", "capabilities", "task_spec", "caller_override") if key in raw})
     normalized = validate_packets(source_packets)
     derived = [derive_packet(packet, candidates, snapshot["evidence"], policy) for packet in normalized]
     if raw_packets != derived:

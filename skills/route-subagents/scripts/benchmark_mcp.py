@@ -73,8 +73,14 @@ def build_server(service):
 
         Each packet contains packet_id, task_types, features and requirements;
         supply the complete confirmed host inventory once per connection. Missing
-        benchmark rows do not exclude candidates. explicit_source=user is only
-        for a human model/effort instruction; omit explicit for a tentative
+        benchmark rows do not exclude candidates. Recommendations are the default:
+        omit explicit and supply task_spec with actual acceptance criteria.
+        explicit_source=user is only for a human model/effort instruction.
+        Caller choices require caller_override: kind=justification with a cleaned
+        task-specific reason (at most 1000 UTF-8 bytes), or kind=user_confirmation
+        with the actual user-message reference. Explain the exception before
+        dispatch; requested confirmation is not received approval. An unexplained
+        caller choice is rejected before retrieval. Omit explicit for a tentative
         preference and use baseline for fallback. An explicit choice without a
         source is caller_choice under policy v2, not verified human authority.
         no raw code, credentials or task text belongs in structured features.

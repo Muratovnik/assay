@@ -75,6 +75,13 @@ Illustrative request; replace model/effort values with confirmed runtime values:
       "phase": {"value": "implementation", "provenance": "caller"},
       "ambiguity": {"value": "low", "provenance": "caller"},
       "verification": {"value": "deterministic-tests", "provenance": "observed"}
+    },
+    "task_spec": {
+      "goal": "Implement a bounded decimal parser with explicit invalid-input errors.",
+      "criteria": [{"id":"syntax","description":"Accept decimal integers only and reject trailing input."},
+                   {"id":"range","description":"Reject values outside the stated bounds without overflow."}],
+      "verification": "Run deterministic normal, boundary and invalid-input cases.",
+      "error_impact": "low", "ambiguity": "low", "provenance": "caller"
     }
   }],
   "available": [{"model": "runtime-model", "efforts": ["low", "high"]}],
@@ -89,7 +96,7 @@ Illustrative request; replace model/effort values with confirmed runtime values:
 Features are bounded scalars or identifier lists, each with `caller`, `observed`
 or `unknown` provenance. `features: {}` is valid; missing facts remain unknown.
 Do not send task prose, code, paths, credentials or raw tool outputs. Optional
-packet fields are `explicit` (model and/or effort), `explicit_source`, `baseline` (both),
+packet fields are `explicit` (model and/or effort), `explicit_source`, `caller_override`, `baseline` (both),
 `requirements` and `capabilities`. A requirement can declare:
 
 ```json
@@ -114,15 +121,47 @@ is a client obligation. Keep unmeasured candidates and intermediate efforts.
 `baseline` never filters that inventory. Decisions report `inventory_size`,
 `eligible_count` and exclusions so a singleton is visibly a constrained choice.
 
+Recommendations are the default: omit `explicit`, derive `task_spec` and its
+criteria from the assignment, and complete the native advice workflow. A
+preference or a broad benchmark quality advantage is not a reason to skip that
+workflow. Hard requirements and genuine user choices remain binding.
+
 `explicit_source: "user"` declares an actual human instruction; `"caller"`
-declares a deliberate binding caller choice. A tentative preference must omit
-`explicit`. Under policy v2, an omitted origin becomes `caller_choice`, never
+declares an exceptional binding caller choice. New preparations require
+`caller_override` for every caller choice, including a partial pair or an
+omitted origin. Without it, `caller_override_required` rejects the preparation
+before evidence retrieval or pending decision/history creation. Omit `explicit`
+to use recommendations, or supply one of these bases:
+
+```json
+{"kind":"justification","reason":"The local capability check shows that the recommended route cannot satisfy the required tool boundary.","reference":"capability-check-1"}
+```
+
+```json
+{"kind":"user_confirmation","reference":"user-message-42"}
+```
+
+`justification` requires a cleaned single-line, task-specific `reason`, at most
+1000 UTF-8 bytes; its bounded identifier `reference` is optional. Explain why
+recommendations cannot satisfy this assignment and the quality/cost consequence
+before dispatch. `user_confirmation` requires a bounded identifier referencing
+actual explicit approval for the selected pair; requesting approval alone does
+not suffice. It may also carry `reason`. Never relabel a caller preference as
+human or configured authority. The basis is valid only alongside a caller's
+nonempty `explicit`, never on an ordinary recommendation or another origin.
+
+A tentative preference must omit `explicit`. Under policy v2, an omitted origin becomes `caller_choice`, never
 `explicit_user_choice`. A required-mode approved choice receives
 `explicit_source: "configuration"` from its adapter and is `configured_choice`.
-The server validates declarations, not human message provenance. Legacy policy
-v1 keeps its historical decision label with `legacy_unspecified` provenance.
+The server validates the declared basis structure, not the truth of a reason or
+human message provenance. Results retain the exception basis under
+`selection_provenance.caller_override`; metadata history retains its kind,
+optional reference and `basis_hash`, without the reason text. Full retention of
+exception text requires `retain_descriptions=true`. Historical snapshots remain
+readable for diagnostic replay and confer no new execution authority. Legacy
+policy v1 keeps its historical decision label with `legacy_unspecified` provenance.
 
-An explicit full choice or a single eligible pair finishes without advisor
+An authorized explicit full choice or a single eligible pair finishes without advisor
 inference. Otherwise `awaiting_native_advice` returns `decision_id`, expiry and
 `handoff`. Launch exactly that bounded handoff through the primary's native
 subagent mechanism. The prompt instructs the advisor to rank only supplied data,
