@@ -6,6 +6,16 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.1](https://github.com/Muratovnik/assay/compare/v0.17.0...v0.17.1) (2026-10-07)
+
+Delegation uses task-specific recommendations by default. A binding caller
+choice now requires a declared justification or an actual user-confirmation
+reference, including partial choices and choices with an omitted origin.
+
+### Bug Fixes
+
+* **routing:** reject unexplained caller overrides before retrieval, preserve justified exceptions and their provenance, retain history privacy and diagnostic replay, and keep user choices and dispatch constraints binding ([6e676b1](https://github.com/Muratovnik/assay/commit/6e676b14bb67c5114f933fb23c1e8115f6eb39bf))
+
 ## [0.17.0](https://github.com/Muratovnik/assay/compare/v0.16.1...v0.17.0) (2026-10-07)
 
 Native routing now asks whether each model and effort pair can meet the concrete
