@@ -1,6 +1,8 @@
 # Routing advice over the existing evidence service
 
-The advisor ranks current client model × effort pairs for structured packets.
+The native [decision contract](native-decision-contract.md) assesses current
+client model × effort pairs against a concrete task, then code selects using
+comparable benchmark cost. Legacy policies and optional Jev still use rankings.
 Assay builds its input from the existing benchmark comparisons and applies a
 deterministic policy to its answer. The native client still owns permissions,
 launch, interruption and quota. Neither MCP nor CLI launches an agent, changes
@@ -9,6 +11,12 @@ the primary model or enforces a per-child token allowance.
 The optional [task evidence extension](task-evidence.md) adds local query retrieval
 and historical full-chain cost/quality estimates. It is disabled by default;
 missing evidence preserves this workflow and never implies subscription savings.
+
+For policy v3, supply a native-only cleaned `task_spec` with concrete acceptance
+criteria. Use `migrate-config --native-decisions` to adopt it explicitly. The
+legacy request/response examples below apply to policy v1/v2; new native responses
+use named `answers`, not a full ranking. Missing task details are a setup outcome,
+not a reason to recommend the most capable model.
 
 ## Enable for one client
 

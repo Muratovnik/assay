@@ -341,7 +341,7 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
     if not isinstance(offline, bool):
         raise EvidenceError("offline must be boolean")
     result = validate_result(snapshot, result) if result is not None else None
-    rankings = {item["packet_id"]: item for item in result["rankings"]} if result else {}
+    rankings = {item["packet_id"]: item for item in result.get("rankings", [])} if result else {}
     candidates = _candidate_map(snapshot)
     decisions = []
     pending = result is None and reason in (None, "pending", "advisor_required")
@@ -411,6 +411,19 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
                               "selected": None, "reason_codes": ["advisor_required"]})
             continue
 
+        economic_cause = None
+        if result is not None and result["schema_version"] == 2:
+            from .economic_policy import select_adequate
+            selected_id, codes, assessment = select_adequate(snapshot, packet, result)
+            base["economic_assessment"] = assessment
+            base["selection_provenance"] = {"source": "native_task_adequacy_and_measured_cost",
+                                            "verification": "task_inference_not_attested"}
+            if selected_id is not None:
+                decisions.append({**base, "status": "chosen", "decision_type": "advisor",
+                                  "selected": _selection(candidates[selected_id]), "reason_codes": codes})
+                continue
+            economic_cause = codes[0]
+
         if entry is not None and not entry["abstained"]:
             selected = _top_candidate(entry, packet, candidates, snapshot["policy"])
             codes = ["advisor_selected", *entry["reason_codes"]]
@@ -429,7 +442,7 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
                               "reason_codes": list(dict.fromkeys(codes))})
             continue
 
-        cause = "advisor_abstained" if entry is not None else failure_code
+        cause = economic_cause or ("advisor_abstained" if entry is not None else failure_code)
         if fallback["status"] == "available":
             decisions.append({**base, "status": "chosen", "decision_type": "fallback",
                               "selected": fallback["selected"], "reason_codes": [cause, "caller_baseline"]})

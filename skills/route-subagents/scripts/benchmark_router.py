@@ -88,6 +88,8 @@ def main(argv=None):
     mp.add_argument("--enable-advisor", action="store_true")
     mp.add_argument("--native-input-unlimited", action="store_true",
                     help="explicitly replace the legacy shared input cap with routing-policy-v2")
+    mp.add_argument("--native-decisions", action="store_true",
+                    help="explicitly migrate native advice to task adequacy and deterministic cost selection")
     mp.add_argument("--mode", choices=["required", "evidence-only"], default="evidence-only",
                     help="evidence-only keeps the existing workflow; required is an explicit opt-in")
     ic = subs.add_parser("inventory-confirm",
@@ -117,7 +119,7 @@ def main(argv=None):
         if args.command == "migrate-config":
             from route_evidence.advisor_config import migrate_config
             result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor, mode=args.mode,
-                                    native_input_unlimited=args.native_input_unlimited)
+                                    native_input_unlimited=args.native_input_unlimited, native_decisions=args.native_decisions)
             print(json.dumps(result, indent=2))
             return 0
         if args.command == "inventory-confirm":

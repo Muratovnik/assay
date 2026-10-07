@@ -94,12 +94,12 @@ def load_config(path: Path | None):
     if path is None:
         return {}
     config = read_document(path)
-    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2, 3):
-        raise EvidenceError("configuration requires schema_version=1, 2 or 3")
+    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2, 3, 4):
+        raise EvidenceError("configuration requires schema_version=1, 2, 3 or 4")
     allowed = {"schema_version", "client", "preferences", "inventory"}
     if config["schema_version"] >= 2:
         allowed.update({"advisor", "policy", "telemetry", "task_evidence"})
-    if config["schema_version"] == 3:
+    if config["schema_version"] >= 3:
         allowed.add("pipeline")
     if set(config) - allowed:
         raise EvidenceError("unknown configuration field")
@@ -119,7 +119,7 @@ def load_config(path: Path | None):
     if config["schema_version"] >= 2:
         from .advisor_config import settings
         config.update(settings(config))
-    if config["schema_version"] == 3:
+    if config["schema_version"] >= 3:
         from .pipeline_config import settings as pipeline_settings
         config["pipeline"] = pipeline_settings(config)
     return config

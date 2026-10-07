@@ -113,7 +113,13 @@ do not attach the whole conversation or repository. The optional `jev` backend
 requires separate configuration and external-data consent. Neither adapter is
 a new persistent agent profile, and there is no hidden native-to-Jev fallback.
 
-Policy validates the ranking and preserves explicit choices and hard
+For native policy v3, follow the [decision contract](references/native-decision-contract.md):
+derive `task_spec` and acceptance criteria from the actual assignment; assess
+adequacy independently of price and let code compare measured benchmark costs.
+Do not replace task-specific sufficiency with maximum benchmark quality, and do
+not treat missing measurements as proof that cheaper pairs cannot do the task.
+
+Policy validates the advisor result and preserves explicit choices and hard
 constraints. Use its selected route. Veto only for a concrete missed capability,
 incorrect input or changed goal, and record that reason; do not repeat the full
 ranking analysis by default. An abstention or invalid answer uses only an

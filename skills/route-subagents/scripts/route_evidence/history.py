@@ -265,6 +265,12 @@ def _ranking(value: Any, field: str) -> list[str]:
 def _result_metadata(result: Any) -> dict | None:
     if result is None:
         return None
+    if isinstance(result, dict) and result.get("schema_version") == 2:
+        clean = copy.deepcopy(result)
+        for assessment in clean["assessments"]:
+            for basis in assessment["bases"]:
+                basis.pop("explanation", None)
+        return _redacted_json(clean, "advisor_result")
     if not isinstance(result, dict) or result.get("schema_version") != 1:
         raise EvidenceError("advisor result: expected schema_version=1")
     rankings = result.get("rankings", [])
@@ -341,7 +347,7 @@ def _decision(value: Any) -> dict:
     extra = {}
     if "selection_provenance" in value:
         extra["selection_provenance"] = _redacted_json(value["selection_provenance"], "selection_provenance")
-    for key in ("assessment", "ties"):
+    for key in ("assessment", "ties", "economic_assessment"):
         if key in value:
             extra[key] = _redacted_json(value[key], key)
     if "fallback_context" in value:
@@ -379,7 +385,7 @@ def _redacted_json(value: Any, field: str = "full", *, allow_evidence_text: bool
             raise EvidenceError(f"{field}: non-finite number")
         return value
     if isinstance(value, str):
-        return _safe_string(value, field, limit=65536 if allow_evidence_text else 1000)
+        return _safe_string(value, field, limit=65536 if allow_evidence_text else 4096 if ".task_spec." in field else 1000)
     if isinstance(value, list):
         if len(value) > 512:
             raise EvidenceError(f"{field}: list exceeds limit")
@@ -419,7 +425,7 @@ def _full_payload(snapshot: dict, result: dict | None) -> dict:
     if clean_result is not None:
         result_fields = {
             "schema_version", "snapshot_id", "backend", "requested_model",
-            "resolved_model", "effort", "rankings", "metadata",
+            "resolved_model", "effort", "rankings", "metadata", "answers", "assessments", "probabilities", "confidence",
         }
         clean_result = {key: value for key, value in clean_result.items()
                         if key in result_fields}
@@ -629,7 +635,10 @@ class HistoryStore:
             record["task_evidence_usage"] = {"status": task["status"], "bytes": len(encoded(task)),
                                              "seconds": retrieval_seconds}
         if self.mode == "full":
-            record["full"] = _full_payload(snapshot, result)
+            if any("task_spec" in p for p in snapshot["packets"]) and not self.retain_descriptions:
+                record["full_unavailable_reason"] = "native_task_description_not_retained"
+            else:
+                record["full"] = _full_payload(snapshot, result)
         return self._write_immutable(self._path(decision_id, "decision"), record)
 
     def record_outcome(self, decision_id: str, execution: dict) -> dict:
@@ -1047,7 +1056,7 @@ def replay(record: dict, *, policy: dict | None = None) -> dict:
         effective_policy = default_policy(policy)
         source_packets = [{key: copy.deepcopy(packet[key]) for key in
                            ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-                            "requirements", "capabilities") if key in packet}
+                            "requirements", "capabilities", "task_spec") if key in packet}
                           for packet in snapshot["packets"]]
         snapshot["policy"] = effective_policy
         snapshot["policy_hash"] = digest(effective_policy)

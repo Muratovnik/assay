@@ -194,9 +194,9 @@ class AdvisorWorkflow:
                 except EvidenceError as exc:
                     state.update(failure_stage="native_prepare", failure_detail={"validation_error": str(exc)[:500]})
                     return self._finish(state, reason="invalid_advisor_route_or_payload")
-                if handoff.get("status") == "needs_advisor_route":
-                    response = self._finish(state, reason="needs_advisor_route")
-                    response.update(status="needs_advisor_route", setup=handoff)
+                if handoff.get("status") in {"needs_advisor_route", "needs_task_details"}:
+                    response = self._finish(state, reason=handoff["status"])
+                    response.update(status=handoff["status"], setup=handoff)
                     state["response"] = copy.deepcopy(response)
                     return response
                 descriptor = handoff.get("descriptor") or {
@@ -255,8 +255,11 @@ class AdvisorWorkflow:
             result = copy.deepcopy(hit["result"])
             result["snapshot_id"] = state["snapshot"]["snapshot_id"]
             packet_map = dict(zip(hit["packet_ids"], state["snapshot"]["packet_ids"]))
-            for ranking in result["rankings"]:
+            for ranking in result.get("rankings", []):
                 ranking["packet_id"] = packet_map[ranking["packet_id"]]
+            if result["schema_version"] == 2:
+                from .decision_contracts import remap_packets
+                result = remap_packets(result, packet_map)
             for assessment in result.get("metadata", {}).get("assessments", []):
                 assessment["packet_id"] = packet_map[assessment["packet_id"]]
             result = validate_result(state["snapshot"], result)

@@ -21,7 +21,7 @@ def settings(config=None):
         "enabled", "backend", "native", "jev", "max_packets",
         "max_candidates_per_packet", "max_snapshot_bytes", "max_pending", "pending_seconds",
     }, "advisor")
-    advisor.setdefault("enabled", config.get("schema_version") in (2, 3))
+    advisor.setdefault("enabled", config.get("schema_version") in (2, 3, 4))
     advisor.setdefault("backend", "native-economy")
     if type(advisor["enabled"]) is not bool or advisor["backend"] not in ("native-economy", "jev"):
         raise EvidenceError("invalid advisor enabled/backend")
@@ -64,6 +64,8 @@ def settings(config=None):
     policy = copy.deepcopy(config.get("policy", {}))
     if not isinstance(policy, dict):
         raise EvidenceError("policy must be an object")
+    if config.get("schema_version") == 4 and not policy:
+        policy = {"schema_version": 3}
     for key in ("max_packets", "max_candidates_per_packet", "max_snapshot_bytes"):
         if key in advisor:
             if key in policy and policy[key] != advisor[key]:
@@ -85,8 +87,8 @@ def settings(config=None):
 
 
 def migrate_config(source: Path, destination: Path, *, enable_advisor=False, mode="evidence-only",
-                   native_input_unlimited=False):
-    """Create a v3 configuration exclusively; never install or rewrite the source.
+                   native_input_unlimited=False, native_decisions=False):
+    """Create a versioned configuration exclusively; never rewrite the source.
 
     The default keeps the existing workflow. Required routing is an explicit mode.
     """
@@ -94,21 +96,28 @@ def migrate_config(source: Path, destination: Path, *, enable_advisor=False, mod
     from .pipeline_config import settings as pipeline_settings
 
     config = load_config(source)
-    if config.get("schema_version") not in (1, 2) and not (native_input_unlimited and config.get("schema_version") == 3):
+    if config.get("schema_version") not in (1, 2) and not ((native_input_unlimited or native_decisions)
+                                                        and config.get("schema_version") in (3, 4)):
         raise EvidenceError("migration requires a v1 or v2 source")
     legacy = config["schema_version"]
-    config["schema_version"] = 3
+    config["schema_version"] = 4 if native_decisions else 3
     if legacy == 1:
         config["advisor"] = {"enabled": enable_advisor or mode == "required"}
     if native_input_unlimited:
         policy = config.setdefault("policy", {})
         policy.update(schema_version=2, policy_version="routing-policy-v2", max_snapshot_bytes=None)
         config.setdefault("advisor", {}).pop("max_snapshot_bytes", None)
+    if native_decisions:
+        if config.get("advisor", {}).get("backend", "native-economy") != "native-economy":
+            raise EvidenceError("native decisions migration requires the native backend")
+        config.setdefault("policy", {}).update(schema_version=3, policy_version="routing-policy-v3", max_snapshot_bytes=None)
+        config.setdefault("advisor", {}).pop("max_snapshot_bytes", None)
     config.update(settings(config))
-    config["pipeline"] = pipeline_settings(config if legacy == 3 else {"pipeline": {"mode": mode}})
+    config["pipeline"] = pipeline_settings(config if legacy >= 3 else {"pipeline": {"mode": mode}})
     with destination.open("xb") as stream:
         stream.write(encoded(config))
-    return {"status": "migrated", "schema_version": 3, "advisor_enabled": config["advisor"]["enabled"],
+    return {"status": "migrated", "schema_version": config["schema_version"], "advisor_enabled": config["advisor"]["enabled"],
             "pipeline_mode": config["pipeline"]["mode"], "setup_required": config["pipeline"]["mode"] == "required",
             "native_input_unlimited": native_input_unlimited,
+            "native_decisions": native_decisions,
             "registration_changed": False, "launch_arguments_changed": False}

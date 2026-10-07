@@ -52,6 +52,7 @@ LEGACY_POLICY = {
 DEFAULT_POLICY = {**LEGACY_POLICY, "schema_version": 2,
                   "policy_version": "routing-policy-v2", "max_snapshot_bytes": None,
                   "max_advisor_result_bytes": MAX_RESULT_BYTES}
+DECISION_POLICY = {**DEFAULT_POLICY, "schema_version": 3, "policy_version": "routing-policy-v3"}
 COMPACT_EVIDENCE_ENCODING = {
     "candidate_ref": "candidates index",
     "candidate_row": "ref,pool-index...",
@@ -210,7 +211,7 @@ def validate_packets(packets: Any) -> list[dict]:
         raise EvidenceError(f"packets: expected 1..{MAX_PACKETS} packets")
     result, seen = [], set()
     allowed = {"packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-               "requirements", "capabilities"}
+               "requirements", "capabilities", "task_spec"}
     for index, raw in enumerate(copy.deepcopy(packets)):
         field = f"packets[{index}]"
         raw = _object(raw, field, allowed, {"packet_id", "task_types", "features"})
@@ -255,8 +256,38 @@ def validate_packets(packets: Any) -> list[dict]:
             "requirements": _requirements(raw.get("requirements"), field + ".requirements"),
             "capabilities": _candidate_capabilities(raw.get("capabilities"), field + ".capabilities"),
             **({"explicit_source": source} if source is not None else {}),
+            **({"task_spec": _task_spec(raw["task_spec"], field + ".task_spec")} if "task_spec" in raw else {}),
         })
     return result
+
+
+def _task_spec(value, field):
+    from .task_evidence import query_text
+    value = _object(value, field, {"goal", "criteria", "verification", "error_impact", "ambiguity", "provenance"},
+                    {"goal", "criteria", "verification", "error_impact", "ambiguity", "provenance"})
+    def prose(raw):
+        raw = query_text(raw)
+        if not raw.strip() or any(ord(c) < 32 for c in raw) or "```" in raw:
+            raise EvidenceError(field + ": expected a cleaned single-line task description")
+        if re.search(r"[A-Za-z]:[\\/]|/(?:home|Users)/|\b(?:api[_ -]?key|password|secret)\s*[:=]|sk-[A-Za-z0-9_-]{16,}", raw, re.I):
+            raise EvidenceError(field + ": redact paths and credentials before native routing")
+        return raw
+    criteria = value["criteria"]
+    if not isinstance(criteria, list) or not 1 <= len(criteria) <= 8:
+        raise EvidenceError(field + ".criteria: expected 1..8 acceptance criteria")
+    clean = []
+    for criterion in criteria:
+        criterion = _object(criterion, field + ".criterion", {"id", "description"}, {"id", "description"})
+        clean.append({"id": _safe_name(criterion["id"], field + ".criterion.id"),
+                      "description": prose(criterion["description"])})
+    if len({c["id"] for c in clean}) != len(clean):
+        raise EvidenceError(field + ": duplicate criterion ID")
+    if any(not isinstance(value[key], str) or value[key] not in {"low", "medium", "high"}
+           for key in ("error_impact", "ambiguity")):
+        raise EvidenceError(field + ": unknown impact or ambiguity")
+    if not isinstance(value["provenance"], str) or value["provenance"] not in {"caller", "observed"}:
+        raise EvidenceError(field + ": task facts require a declared provenance")
+    return {**value, "goal": prose(value["goal"]), "verification": prose(value["verification"]), "criteria": clean}
 
 
 def normalize_policy(overrides: Any = None) -> dict:
@@ -264,7 +295,9 @@ def normalize_policy(overrides: Any = None) -> dict:
         return copy.deepcopy(DEFAULT_POLICY)
     legacy = isinstance(overrides, dict) and (overrides.get("schema_version") == 1
                                             or overrides.get("policy_version") == "routing-policy-v1")
-    defaults = LEGACY_POLICY if legacy else DEFAULT_POLICY
+    decisions = isinstance(overrides, dict) and (overrides.get("schema_version") == 3
+                                                or overrides.get("policy_version") == "routing-policy-v3")
+    defaults = LEGACY_POLICY if legacy else DECISION_POLICY if decisions else DEFAULT_POLICY
     overrides = _object(overrides, "policy", set(defaults))
     policy = {**copy.deepcopy(defaults), **copy.deepcopy(overrides)}
     if (policy["schema_version"], policy["policy_version"]) != (defaults["schema_version"], defaults["policy_version"]):
@@ -550,7 +583,7 @@ def validate_routing_snapshot(snapshot: Any) -> RoutingSnapshot:
             raise EvidenceError("snapshot packet must be an object")
         source_packets.append({key: raw[key] for key in
                                ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-                                "requirements", "capabilities") if key in raw})
+                                "requirements", "capabilities", "task_spec") if key in raw})
     normalized = validate_packets(source_packets)
     derived = [derive_packet(packet, candidates, snapshot["evidence"], policy) for packet in normalized]
     if raw_packets != derived:
@@ -596,6 +629,9 @@ def _metadata_value(value: Any, field: str, depth: int = 0) -> Any:
 def validate_result(snapshot: Any, result: Any) -> AdvisorResult:
     """Validate an advisor response against the exact immutable snapshot."""
     snapshot = validate_routing_snapshot(snapshot)
+    if isinstance(result, dict) and result.get("schema_version") == 2:
+        from .decision_contracts import validate_decision_result
+        return validate_decision_result(snapshot, result)
     required = {"schema_version", "snapshot_id", "backend", "requested_model", "resolved_model",
                 "effort", "rankings", "metadata"}
     result = _object(copy.deepcopy(result), "advisor result", required, required)
