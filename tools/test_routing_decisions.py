@@ -93,7 +93,22 @@ class DecisionContractTests(unittest.TestCase):
         self.assertIn("benchmark_cost_selected", selected["reason_codes"])
         self.assertEqual(prepared["descriptor"]["privacy_profile"], "native-task-spec-v1")
         private = advisor_input(snap, ROUTE)
-        self.assertEqual(private["result_contract"]["metadata"]["contract_version"], "native-decisions-private-v1")
+        self.assertEqual(private["result_contract"]["metadata"]["contract_version"], "native-decisions-private-v2")
+
+    def test_omitted_optional_unknowns_do_not_erase_or_supply_adequacy(self):
+        snap = snapshot()
+        value = answer(snap)
+        value["assessments"][0]["bases"][0].pop("unknowns")
+        original = copy.deepcopy(value)
+        parsed = parse_native(snap, value)
+        self.assertEqual(value, original)
+        self.assertEqual(parsed["answers"], original["answers"])
+        self.assertEqual(parsed["assessments"][0]["bases"][0]["unknowns"], [])
+        self.assertEqual(decide(snap, parsed)[0]["selected"]["model"], "model-00")
+        value = answer(snap, {"model-00": "unknown"})
+        value["assessments"][0]["bases"][1].pop("unknowns")
+        with self.assertRaisesRegex(EvidenceError, "unknown_basis_required"):
+            parse_native(snap, value)
 
     def test_legacy_cost_refs_are_not_a_new_economic_decision(self):
         from test_routing_adapters import native_result

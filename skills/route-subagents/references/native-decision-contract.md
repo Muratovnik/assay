@@ -97,7 +97,10 @@ Every question has exactly one answer and a packet-local basis. Share a basis
 only when it applies to every referring candidate. A measurement basis requires
 a quality row for that exact candidate in a cited matching cohort. Missing rows
 do not establish inadequacy; never fabricate measurements from another effort.
-Unknown requires `kind: "unknown"` and a nonempty unknowns list. Adequate and
+Unknown requires `kind: "unknown"` and a nonempty unknowns list. For known
+assessments the `unknowns` field may be omitted and normalizes to an empty list;
+this default never supplies a missing answer, criterion or unknown judgment's
+grounds. Adequate and
 inadequate require a concrete criterion. Structural validation cannot prove the
 semantic accuracy of the judgment; real task controls remain necessary.
 

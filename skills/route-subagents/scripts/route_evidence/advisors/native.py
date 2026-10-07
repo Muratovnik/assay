@@ -13,7 +13,8 @@ from ..core import EvidenceError, encoded, loads
 BACKEND = "native-economy"
 PROMPT_VERSIONS = {"handoff": "native-routing-v11", "private": "native-routing-v12"}
 PROMPT_VERSION = PROMPT_VERSIONS["handoff"]
-DECISION_VERSIONS = {"handoff": "native-decisions-v1", "private": "native-decisions-private-v1"}
+DECISION_VERSIONS = {"handoff": "native-decisions-v2", "private": "native-decisions-private-v2"}
+SUPPORTED_DECISION_VERSIONS = set(DECISION_VERSIONS.values()) | {"native-decisions-v1", "native-decisions-private-v1"}
 _BASIS_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}\Z")
 ASSESSMENT_PLACEHOLDER = "Replace with task adequacy, same-cohort quality/cost tradeoff and uncertainty."
 
@@ -266,7 +267,8 @@ def _render_decisions(snapshot, model, level, delivery):
         "Return exactly one answer for each question name, referring to a basis in that packet's assessments. "
         "Each adequate basis cites all acceptance criterion IDs; inadequate cites and explains an actual unmet "
         "requirement rather than missing measurement or generic uncertainty. Unknown uses kind=unknown and nonempty "
-        "unknowns. Share bases only where the explanation applies to every referring candidate; cite relevant "
+        "unknowns. For adequate/inadequate bases unknowns may be omitted and defaults to an empty list; this never "
+        "supplies a missing adequacy judgment or an unknown answer's grounds. Share bases only where the explanation applies to every referring candidate; cite relevant "
         "cohort IDs, label task_inference, and explain material transfer gaps. Basis IDs are at most 16 characters; "
         "explanations are one sentence at most 300 characters. Keep the complete answer within 65536 UTF-8 bytes by "
         "sharing common bases; never omit a candidate/question. Probabilities and confidence must remain null. "
@@ -370,7 +372,7 @@ def parse_native(
         if any(item["probabilities"] is not None or item["confidence"] is not None for item in result["rankings"]):
             raise EvidenceError("native_numeric_confidence_forbidden")
         _validate_assessments(snapshot, result)
-    elif not isinstance(result["metadata"].get("contract_version"), str) or result["metadata"].get("contract_version") not in set(DECISION_VERSIONS.values()):
+    elif not isinstance(result["metadata"].get("contract_version"), str) or result["metadata"].get("contract_version") not in SUPPORTED_DECISION_VERSIONS:
         raise EvidenceError("native_decision_contract_version_invalid")
     if advisor_route is not None:
         if not isinstance(advisor_route, dict):

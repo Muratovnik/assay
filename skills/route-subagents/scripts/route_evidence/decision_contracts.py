@@ -77,7 +77,7 @@ def validate_decision_result(snapshot, result):
             raise EvidenceError("native_decision_bases_invalid")
         for basis in entries:
             fields = {"id", "kind", "criterion_ids", "cohort_ids", "explanation", "unknowns"}
-            basis = _object(basis, "basis", fields, fields)
+            basis = _object(basis, "basis", fields, fields - {"unknowns"})
             basis_id = _safe_name(basis["id"], "basis.id")
             if len(basis_id) > 16 or (packet_id, basis_id) in bases:
                 raise EvidenceError("native_decision_basis_id_invalid")
@@ -92,7 +92,7 @@ def validate_decision_result(snapshot, result):
             if (not isinstance(explanation, str) or not explanation.strip() or len(explanation) > 300
                     or any(ord(c) < 32 for c in explanation) or explanation.startswith("Replace with")):
                 raise EvidenceError("native_decision_explanation_invalid")
-            basis["unknowns"] = _reason_codes(basis["unknowns"], "basis.unknowns")
+            basis["unknowns"] = _reason_codes(basis.get("unknowns", []), "basis.unknowns")
             bases[packet_id, basis_id] = basis
     answers = result["answers"]
     if not isinstance(answers, list) or len(answers) != len(bindings):
