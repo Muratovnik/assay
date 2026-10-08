@@ -86,6 +86,12 @@ python tools/eval_assets.py prepare --cases skills/<skill>/evals/cases.json --ca
 分别观察加载、决策、合法行为是否保留以及总成本。小规模诊断不等于整个技能库的
 评分，也不能证明普遍节省。
 
+这些[小规模执行比较文件](../../skills/skill-evaluation/evals/workflow-execution.md)
+是任务与协议规范，而非运行记录。
+[PR 24 固定版本的证据记录](https://github.com/Muratovnik/assay/blob/f951f07eb57d9d270d973a411082524d01f2b290/docs/research/skill-effectiveness/outcomes.json)
+另行保留五个工作流任务组中的十次已完成试验，比较未提供 Assay 与提供完整技能目录的条件。
+该比较与包含 42 次运行的诊断仍是独立研究，结果不合并。
+
 ## 仅供评测者使用的用例元数据
 
 可选的 `case-metadata.json` 位于 `cases.json` 旁；辅助集合 `<prefix>-cases.json`

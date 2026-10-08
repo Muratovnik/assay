@@ -113,8 +113,12 @@ covers delivered CSV, authorization and report-generation repairs, an inert
 spelling correction, and read-only assessment of retained verification.
 It separates natural discovery from a diagnostic forced-method run and grades
 actual artifacts and consumer outcomes. Its fixture tests exercise known faulty
-and repaired programs, not a model. This is a prepared pilot, not a completed
-behavioral experiment.
+and repaired programs, not a model. These corpus files specify the comparison;
+they are not execution records.
+[PR 24's pinned evidence](https://github.com/Muratovnik/assay/blob/f951f07eb57d9d270d973a411082524d01f2b290/docs/research/skill-effectiveness/outcomes.json)
+separately retains ten completed trials across five workflow groups, comparing
+no supplied Assay with the complete catalog. That comparison and the 42-assignment
+diagnostic remain separate studies; their results are not pooled.
 
 For previously captured commands, the optional
 [receipt reuse procedure](how-to/reuse-verification.md) compares exact commands
