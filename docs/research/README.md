@@ -44,6 +44,12 @@ Do not silently repair a disputed source claim in only one language. A substanti
 
 ## Other research records
 
-[Skill effectiveness](skill-effectiveness.md) compares current external evidence with the Assay skill evaluation inventory at a pinned revision and identifies the missing behavioral proof; the [paired measurement protocol](../how-to/compare-skills.md) specifies how to obtain that proof. It is an evidence-status and study-design record, **not** measured Assay performance.
+[Comparative evidence for Assay skills](skill-effectiveness.md) assesses all 14
+skills at revision `94c517b0aac9ba2575086bf9aead1cc828aadb0d`, reviews relevant
+primary studies, and records a frozen ten-run comparison with its protocol,
+derived outcomes and limits. It separates measured task outcomes from structural
+checks, natural discovery and unmeasured savings.
+The companion [comparison guide](../how-to/compare-skills.md) explains how to
+prepare and interpret a new paired study using the existing tools.
 
 [Product-flow mapping](product-flow-mapping.md) records a narrower transfer into a method. [Text skills C1](text-skills-c1.md) records historical candidate corrections and their evaluation limits. These records serve a different purpose from the full foundational studies and remain separate.

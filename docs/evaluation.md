@@ -29,10 +29,16 @@ better.
 
 ## What the gates check
 
-`python tools/eval_assets.py check` validates structure: every declared case has
-an id, every rubric entry points at a case that exists, every referenced input
-path resolves, and no case smuggles a grading field into the input side. It does
-not execute a fixture and it does not run a model.
+`python tools/eval_assets.py check` validates the main and auxiliary input/rubric
+pairs, including `ui-delivery`: matching collections and case IDs, allowed input
+fields and portable inline file paths. It also checks `independent-audit`'s
+separate fixture paths.
+
+The retained labelled trigger formats are checked separately.
+`skills/ui-delivery/evals/trigger-cases.json` has IDs, Boolean labels and rationales;
+`skills/independent-audit/evals/trigger-evals.json` retains prompt/Boolean-label records
+without IDs. These grading labels cannot enter generic `prepare` executor
+inputs. The checker does not execute fixtures or run a model.
 
 Utility suites do execute, without running models. The audit packet suite
 (`skills/independent-audit/evals/test_prepare_case.py`) builds frozen input-only
@@ -51,10 +57,10 @@ grading expectations, effective access isolation or answer quality.
 
 ## What is deliberately not proven
 
-No model is run in CI. There is no score in this repository, no leaderboard and
-no claim that a skill improves outcomes by some percentage. Measuring that needs
-authorized comparable runs against a frozen baseline, and a result would belong to the client,
-model and date it was measured on rather than to the skill.
+No model is run in CI. There is no collection-wide effectiveness score or
+leaderboard. Behavioral findings require authorized comparable runs against a
+frozen baseline. Their scope is the tasks, client, model and date measured;
+recorded outcomes do not establish a general effect for the collection.
 
 Static files also cannot prove discovery. That a skill is installed where a
 client documents its skill root does not prove the client loaded it, and a model
@@ -95,18 +101,32 @@ are public synthetic working inputs and a run protocol, not executed model
 results. Their read-only decision cases do not establish real dispatch or cleanup.
 
 The [small execution comparison](../skills/skill-evaluation/evals/workflow-execution.md)
-adds three tasks requiring delivered changes: a public CLI whose helper test is
-already green, an inert spelling correction and a small authorization repair.
-It separates natural discovery from a diagnostic forced-method run and grades
-actual artifacts and consumer outcomes. Its fixture tests exercise known faulty
-and repaired programs, not a model. This is a prepared pilot, not a completed
-behavioral experiment.
+specifies five edit/review groups: a public CLI whose helper test is already
+green, an inert spelling correction, a small authorization repair, a report with
+successive setup failures and a read-only continuation/evidence assessment.
+Its protocol separates natural discovery from diagnostic forced-method runs and
+grades actual artifacts and consumer outcomes. Its fixture tests exercise known
+faulty and repaired programs, not a model. The corpus was published as a prepared
+pilot; the later executed comparison is recorded below.
 
 For previously captured commands, the optional
 [receipt reuse procedure](how-to/reuse-verification.md) compares exact commands
 and named current inputs without another execution. Matching those inputs does
 not prove environment equivalence, complete input selection or task acceptance.
 Keep raw receipts private and retain their original identity.
+
+## Recorded comparisons — 2026-10-08
+
+The [writing study](../skills/technical-writing/evals/relevance-study.md) retains
+baseline/candidate outputs, adverse results and grading corrections. Its findings
+concern specific Assay writing revisions and tasks; it does not compare a writing
+skill with ordinary prompting without that skill.
+
+The [all-skill evidence assessment](research/skill-effectiveness.md) includes a
+completed ten-run comparison across the five execution/review groups, with and
+without explicit Assay availability under the same host guidance.
+The comparison does not isolate individual skills,
+prove native discovery or establish end-to-end cost savings.
 
 ## Evaluator-only case metadata
 

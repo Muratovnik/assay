@@ -1,0 +1,547 @@
+{
+  "schema_version": 1,
+  "assessment_date": "2026-10-08",
+  "assay_commit": "94c517b0aac9ba2575086bf9aead1cc828aadb0d",
+  "protocol_sha256": "5643723bf27109524b3250f53ae15e74e3b0c9ea3653f7c9bb26afc7eaa9a1ed",
+  "allocated_trials": 10,
+  "completed_trials": 10,
+  "trial_retries": 0,
+  "groups": 5,
+  "observed_required_outcomes_met_by_arm": {
+    "A": 5,
+    "B": 5
+  },
+  "interpretation": "No observed difference in required task outcomes in this diagnostic sample; no superiority, equivalence, native-discovery, individual-skill or savings estimate.",
+  "oracle": {
+    "kind": "independent artifact replay, not original worker execution",
+    "started_at_utc": "2026-10-08T21:03:32.841142+00:00",
+    "completed_at_utc": "2026-10-08T21:03:35.729444+00:00",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "artifact_replay_sha256": "a22ad5e5067c002f6a0dd1c9da75f57a9170603a695c003ba3b3c6afcb271085",
+    "replay_script_sha256": "f2b82a1f84af941f4e704701ae3b4825735d765356789cacff30d53e55f2f0b4",
+    "independent_expected_values": true,
+    "original_projects_not_mutated": true,
+    "runtime_manifest_unchanged": true
+  },
+  "qualitative_grading": {
+    "case_id": "WX-05",
+    "blinded_condition_labels": true,
+    "mapping": {
+      "X": "run-02",
+      "Y": "run-01"
+    },
+    "requested_model": "gpt-6-astra",
+    "requested_reasoning_effort": "ultra",
+    "host_attested_model": null,
+    "verdict": "both answers meet substantive review requirements; process compliance unverified",
+    "frozen_review_sha256": "246b94f460b1e3302f24b400e9b86e252eb20b0bcee4c1fe0703abb30ae61246"
+  },
+  "observable_difference": {
+    "case_id": "WX-04",
+    "observation": "B retained a meaningful public-command regression test; A retained no test file. Both delivered correct output and preserved the input. Replay confirmed the B test rejects the original renderer defect. No cost measurement or causal attribution from one pair."
+  },
+  "residue": {
+    "case_id": "WX-03",
+    "observation": "Both project copies retain two __pycache__ files from their reported python -m unittest runs. These are recorded, not deleted from evidence or counted as source edits."
+  },
+  "evidence_fidelity": "Returned responses and optional command files are coordinator-retained evidence, not complete host-authenticated tool transcripts. Replay confirms delivered artifacts, not every historical worker claim.",
+  "runs": [
+    {
+      "run_id": "run-01",
+      "case_id": "WX-05",
+      "arm": "B",
+      "changed_paths": [],
+      "response_sha256": "e9161e0616b73eeddceeb1b0f4c4247792ec3d7bcc23b7eef30105be2db77450",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "review_content_blind_grade": "met",
+        "unchanged_subtotal_evidence_retained": "met",
+        "stale_and_weak_report_evidence_distinguished": "met",
+        "no_net_project_change": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "project_files": [
+        {
+          "path": "CHECKS.json",
+          "sha256": "949836c2690e2096519cfc0d2c5e3f81593df92e8ddbc4ec8e30bbaab0d223e9"
+        },
+        {
+          "path": "PLAN.md",
+          "sha256": "574b28020e05de1de87d75ea12f74c167fe12f3c813b0ad9e59aa6e6c061cd81"
+        },
+        {
+          "path": "report.py",
+          "sha256": "8835fcfdf5920c48b9e6d152d0d2bab9c452a7ab5e418f31531c293d70ef9742"
+        },
+        {
+          "path": "test_report.py",
+          "sha256": "e360529052e449e2a907fc8791c441a078fa0f8445b3c01ff5f28b4532c0f55e"
+        },
+        {
+          "path": "test_totals.py",
+          "sha256": "67d57e01df61b9f34717e3eab17f8c9ef6c04bb52ccd258d606332154cd87071"
+        },
+        {
+          "path": "totals.py",
+          "sha256": "be065c70cc559f32b6b5aa06578b308fa6219db1c54c975f00d38de9ca948ce3"
+        }
+      ]
+    },
+    {
+      "run_id": "run-02",
+      "case_id": "WX-05",
+      "arm": "A",
+      "changed_paths": [],
+      "response_sha256": "4340d531a35af776f89e461fa2b179bc738dc1c20dd8bc68fc45e22c13a42b58",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "review_content_blind_grade": "met",
+        "unchanged_subtotal_evidence_retained": "met",
+        "stale_and_weak_report_evidence_distinguished": "met",
+        "no_net_project_change": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "project_files": [
+        {
+          "path": "CHECKS.json",
+          "sha256": "949836c2690e2096519cfc0d2c5e3f81593df92e8ddbc4ec8e30bbaab0d223e9"
+        },
+        {
+          "path": "PLAN.md",
+          "sha256": "574b28020e05de1de87d75ea12f74c167fe12f3c813b0ad9e59aa6e6c061cd81"
+        },
+        {
+          "path": "report.py",
+          "sha256": "8835fcfdf5920c48b9e6d152d0d2bab9c452a7ab5e418f31531c293d70ef9742"
+        },
+        {
+          "path": "test_report.py",
+          "sha256": "e360529052e449e2a907fc8791c441a078fa0f8445b3c01ff5f28b4532c0f55e"
+        },
+        {
+          "path": "test_totals.py",
+          "sha256": "67d57e01df61b9f34717e3eab17f8c9ef6c04bb52ccd258d606332154cd87071"
+        },
+        {
+          "path": "totals.py",
+          "sha256": "be065c70cc559f32b6b5aa06578b308fa6219db1c54c975f00d38de9ca948ce3"
+        }
+      ]
+    },
+    {
+      "run_id": "run-03",
+      "case_id": "WX-04",
+      "arm": "A",
+      "changed_paths": [
+        "config.json",
+        "renderer.py",
+        "report.py",
+        "report.txt"
+      ],
+      "response_sha256": "7aac68b2a0a4835031235efd80fc2a23275b9e16ccc4991cec9964e655779eea",
+      "worker_evidence_sha256": {
+        "verification.json": "763b85d3d3b88cc0340a86f0f13d0318764e202cf2d4fedf9f99e7ae59585b6a"
+      },
+      "observed_required_outcome": "met",
+      "checks": {
+        "public_command_and_saved_exact_output": "met",
+        "fixture_and_schema_preserved": "met",
+        "varied_input_not_hardcoded": "met",
+        "stages_distinguished_in_answer": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": false
+      },
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "e1fd83b58e52e2ee6429a5900e0fc0d93061f13c073c41c2e0961134284137d4"
+        },
+        {
+          "path": "config.json",
+          "sha256": "e5fdc1665d13750e7587c7c13c5f5711b366a8f69dfb09b141fbe832330e8606"
+        },
+        {
+          "path": "orders.csv",
+          "sha256": "51d34a5ebede55701cf4c8e053f52fbcda0545100a59005fa850c2df0491f7f3"
+        },
+        {
+          "path": "renderer.py",
+          "sha256": "f64002abbf62fd3b9262ac34168edfc5169e7e7ad81e129846031a67b26d3b24"
+        },
+        {
+          "path": "report.py",
+          "sha256": "5f282342474121d9065da729104be5aa7e16f11d5cb740e10e1a7b633f06ecf0"
+        },
+        {
+          "path": "report.txt",
+          "sha256": "dd49af60114c03aabeeb3093ac06b16b80c35e96d0e569cda7554fffd00caacc"
+        }
+      ]
+    },
+    {
+      "run_id": "run-04",
+      "case_id": "WX-04",
+      "arm": "B",
+      "changed_paths": [
+        "config.json",
+        "renderer.py",
+        "report.py",
+        "report.txt",
+        "test_report.py"
+      ],
+      "response_sha256": "50c5e219d5968b78ab79403dcc082b1f106b8db72e807844b516798b38c781fe",
+      "worker_evidence_sha256": {
+        "baseline.json": "5a45a7dd1c7bcd11790e4640de2995e488aca4c1ac9d0a4412cfd50bd55636bb",
+        "regression-before.json": "f07933921029acf4768a32bc3febf5ca3f05e0262558d5726893f14c22018275",
+        "verification.json": "7f92871ca929fa2d7064f0f7613e52e87699548ffffcd5b4036a1b8bb9fe5f8b"
+      },
+      "observed_required_outcome": "met",
+      "checks": {
+        "public_command_and_saved_exact_output": "met",
+        "fixture_and_schema_preserved": "met",
+        "varied_input_not_hardcoded": "met",
+        "stages_distinguished_in_answer": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": true,
+        "passes_on_delivered_source": true,
+        "rejects_restored_original_fault": true
+      },
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "e1fd83b58e52e2ee6429a5900e0fc0d93061f13c073c41c2e0961134284137d4"
+        },
+        {
+          "path": "config.json",
+          "sha256": "e5fdc1665d13750e7587c7c13c5f5711b366a8f69dfb09b141fbe832330e8606"
+        },
+        {
+          "path": "orders.csv",
+          "sha256": "51d34a5ebede55701cf4c8e053f52fbcda0545100a59005fa850c2df0491f7f3"
+        },
+        {
+          "path": "renderer.py",
+          "sha256": "f64002abbf62fd3b9262ac34168edfc5169e7e7ad81e129846031a67b26d3b24"
+        },
+        {
+          "path": "report.py",
+          "sha256": "5f282342474121d9065da729104be5aa7e16f11d5cb740e10e1a7b633f06ecf0"
+        },
+        {
+          "path": "report.txt",
+          "sha256": "dd49af60114c03aabeeb3093ac06b16b80c35e96d0e569cda7554fffd00caacc"
+        },
+        {
+          "path": "test_report.py",
+          "sha256": "424b7d6ebd6c94d81f3110d2e0d1d8791dbbde902aef7859430380a5cf111248"
+        }
+      ]
+    },
+    {
+      "run_id": "run-05",
+      "case_id": "WX-02",
+      "arm": "B",
+      "changed_paths": [
+        "README.md"
+      ],
+      "response_sha256": "d676bc253fa7b397aec5f2bfc196d44651a0269dfd38311a9c55859f55987d13",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "only_requested_spelling_changed": "met",
+        "exact_command_and_meaning_preserved": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "f92f87b1fc0eb03d69c18a5113a895f5eb2f1483d9cbe3ba3445a56aa2980b90"
+        },
+        {
+          "path": "export.py",
+          "sha256": "4376299953c264bd0e5a4fc6a795205a8e21ddc241a0d8a479d589b6d8382637"
+        }
+      ]
+    },
+    {
+      "run_id": "run-06",
+      "case_id": "WX-02",
+      "arm": "A",
+      "changed_paths": [
+        "README.md"
+      ],
+      "response_sha256": "9e0d4faf521a4b32af098ca4b01e4f7521e437fa5d462c5c59282fba0e2973a3",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "only_requested_spelling_changed": "met",
+        "exact_command_and_meaning_preserved": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "f92f87b1fc0eb03d69c18a5113a895f5eb2f1483d9cbe3ba3445a56aa2980b90"
+        },
+        {
+          "path": "export.py",
+          "sha256": "4376299953c264bd0e5a4fc6a795205a8e21ddc241a0d8a479d589b6d8382637"
+        }
+      ]
+    },
+    {
+      "run_id": "run-07",
+      "case_id": "WX-01",
+      "arm": "B",
+      "changed_paths": [
+        "export.py",
+        "test_export.py"
+      ],
+      "response_sha256": "a22da2a36f3033c85cc4a52bd895de4c44cfd8f81c5d7d9590d8c08270ce716a",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "public_cli_exact_records": "met",
+        "stable_casefold_duplicates_and_fields": "met",
+        "delivered_regression_rejects_original_fault": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": true,
+        "passes_on_delivered_source": true,
+        "rejects_restored_original_fault": true
+      },
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "03a147b1d88dc87b9df7fea081136a5322094a38e3f08a6a24da351637b1313d"
+        },
+        {
+          "path": "export.py",
+          "sha256": "ce88c7e19af6b442b1dd054ec0979f7967a12e8fff64f9af2232f89dddaf6eb9"
+        },
+        {
+          "path": "sample.csv",
+          "sha256": "93d97ecb94a048f2450506ed6f3da0586d0f61e53ba58e103d9afbb105f66dc4"
+        },
+        {
+          "path": "test_export.py",
+          "sha256": "90c828b8d3e4c8671b51c7c6017582b817209ffdb6e7f0e7c0683d1929902883"
+        }
+      ]
+    },
+    {
+      "run_id": "run-08",
+      "case_id": "WX-01",
+      "arm": "A",
+      "changed_paths": [
+        "export.py",
+        "test_export.py"
+      ],
+      "response_sha256": "3b98bc73d574402f6255429c2434467b9a2e31aea7fa6b12fcb10357e4c0b2d5",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "public_cli_exact_records": "met",
+        "stable_casefold_duplicates_and_fields": "met",
+        "delivered_regression_rejects_original_fault": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": true,
+        "passes_on_delivered_source": true,
+        "rejects_restored_original_fault": true
+      },
+      "project_files": [
+        {
+          "path": "README.md",
+          "sha256": "03a147b1d88dc87b9df7fea081136a5322094a38e3f08a6a24da351637b1313d"
+        },
+        {
+          "path": "export.py",
+          "sha256": "ce88c7e19af6b442b1dd054ec0979f7967a12e8fff64f9af2232f89dddaf6eb9"
+        },
+        {
+          "path": "sample.csv",
+          "sha256": "93d97ecb94a048f2450506ed6f3da0586d0f61e53ba58e103d9afbb105f66dc4"
+        },
+        {
+          "path": "test_export.py",
+          "sha256": "ddeae4776671111d3423ca88f12a7f7616ffceff7c2cfbb6c14f3ee1766da3a1"
+        }
+      ]
+    },
+    {
+      "run_id": "run-09",
+      "case_id": "WX-03",
+      "arm": "A",
+      "changed_paths": [
+        "__pycache__/access.cpython-312.pyc",
+        "__pycache__/test_access.cpython-312.pyc",
+        "access.py",
+        "test_access.py"
+      ],
+      "response_sha256": "f6b434632805951ef0ba5cde86b0d261e9b405d10fe88a9084aa5c99ecef1066",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "matching_admin_deletion": "met",
+        "denials_preserve_records": "met",
+        "delivered_regression_rejects_original_fault": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": true,
+        "passes_on_delivered_source": true,
+        "rejects_restored_original_fault": true
+      },
+      "project_files": [
+        {
+          "path": "__pycache__/access.cpython-312.pyc",
+          "sha256": "65e3b6964ec9b139674e884b52c32381230f7cf8455e6dfeb7171a9d05341562"
+        },
+        {
+          "path": "__pycache__/test_access.cpython-312.pyc",
+          "sha256": "af9782c4add1fa135d3de4467e03cbe45f7f79d0a4bb2acd0f47be88cb885c9e"
+        },
+        {
+          "path": "access.py",
+          "sha256": "8bcdd83d72222369aded9c40cf811ad81f5da343341840b03a8192267ff5dad7"
+        },
+        {
+          "path": "test_access.py",
+          "sha256": "e87ccd4f7ce1773832801a657c172ff6d6ea8c9bf10445ee2cb17e4754c73549"
+        }
+      ]
+    },
+    {
+      "run_id": "run-10",
+      "case_id": "WX-03",
+      "arm": "B",
+      "changed_paths": [
+        "__pycache__/access.cpython-312.pyc",
+        "__pycache__/test_access.cpython-312.pyc",
+        "access.py",
+        "test_access.py"
+      ],
+      "response_sha256": "9edc150bac4836f8f473a02820c7d9ca49890a054aa48623b7363b3b456875c5",
+      "worker_evidence_sha256": {},
+      "observed_required_outcome": "met",
+      "checks": {
+        "matching_admin_deletion": "met",
+        "denials_preserve_records": "met",
+        "delivered_regression_rejects_original_fault": "met"
+      },
+      "packet_and_dispatch_integrity": true,
+      "retained_artifact_unchanged_by_replay": true,
+      "actual_skill_loading": "unverified",
+      "complete_process_compliance": "unverified",
+      "billed_tokens": null,
+      "monetary_cost": null,
+      "quota": null,
+      "comparable_latency": null,
+      "regression": {
+        "retained": true,
+        "passes_on_delivered_source": true,
+        "rejects_restored_original_fault": true
+      },
+      "project_files": [
+        {
+          "path": "__pycache__/access.cpython-312.pyc",
+          "sha256": "5802ddb1ac167c36930d43692ab9cd41c7bf658c25f53dc60062260f85aa411d"
+        },
+        {
+          "path": "__pycache__/test_access.cpython-312.pyc",
+          "sha256": "3b1e50b648f5b4339797bb1c7ed81fe8108038e7408d3a0bc4bc3ca057a354cb"
+        },
+        {
+          "path": "access.py",
+          "sha256": "8bcdd83d72222369aded9c40cf811ad81f5da343341840b03a8192267ff5dad7"
+        },
+        {
+          "path": "test_access.py",
+          "sha256": "a609d3d93d7452b16632d5e745089c8f1c73dac0e73667477579784d13c5778e"
+        }
+      ]
+    }
+  ],
+  "raw_evidence": {
+    "status": "Saved as a separate evidence archive for the requesting maintainer; not a public artifact download.",
+    "archive_name": "assay-skill-effectiveness-evidence-2026-10-08.zip",
+    "public_artifact_access": "not provided by this derived JSON; hashes cannot substitute for raw access",
+    "archive_sha256": "3bf22dd1c412c4113f8162cbad49847ac1e4ce2f6d4f4f31a0d5a0d667f51ba5",
+    "archive_bytes": 694499,
+    "archive_entries": 354,
+    "all_archived_hashes_verified": true
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "assay_commit": "94c517b0aac9ba2575086bf9aead1cc828aadb0d",
+  "scope": "Counts of primary case/evals arrays only; excludes auxiliary, trigger, and discovery collections. Authored specifications are not executions, independent tasks, or efficacy scores.",
+  "skill_count": 14,
+  "primary_specifications_total": 449,
+  "skills": [
+    {
+      "skill": "route-subagents",
+      "skill_sha256": "ca779239a8757f866d4624319b8f5ad51b76ccca819eb09cc78fa43b0c595a53",
+      "primary_corpus": "skills/route-subagents/evals/cases.json",
+      "primary_corpus_sha256": "94f717e71b9642294d4d13850ff686b93076150f0fc492e2102431ac780ae9cb",
+      "primary_specifications": 33
+    },
+    {
+      "skill": "ui-delivery",
+      "skill_sha256": "33f4668921eeed5e3574618721917a22833dedd1fcfb3d0c0a81651c413cd027",
+      "primary_corpus": "skills/ui-delivery/evals/cases.json",
+      "primary_corpus_sha256": "b9175e548af5d23b2726cfe910fbfb4268600764ecd4c7bdf9c2c76e4cdc1c7c",
+      "primary_specifications": 122
+    },
+    {
+      "skill": "product-flow-mapping",
+      "skill_sha256": "29a46064e378d4b4dcb3b3e9b52c10aa3a9f8b0ade40dacd4e16969950cbea8e",
+      "primary_corpus": "skills/product-flow-mapping/evals/cases.json",
+      "primary_corpus_sha256": "e0f706d004f6d4fa91f8eb98655520158d5759fe50cc6e78b12fd7832e0d22e1",
+      "primary_specifications": 20
+    },
+    {
+      "skill": "independent-audit",
+      "skill_sha256": "47a435cc851c62d5a0ee562c638b5988235a1dd99e79e49655fce3b3b74ff63b",
+      "primary_corpus": "skills/independent-audit/evals/evals.json",
+      "primary_corpus_sha256": "f97cd6866ea6a79ffb0af5c223af69c45df26befb18f23434879a60ac9ff4d2c",
+      "primary_specifications": 31
+    },
+    {
+      "skill": "skill-evaluation",
+      "skill_sha256": "f317f29b74bc7b9af1c1ef98e4b67422374554967ea68625e6ce7f74ce796569",
+      "primary_corpus": "skills/skill-evaluation/evals/cases.json",
+      "primary_corpus_sha256": "16395e691ce1cccbac6b793ddb8d0a06fe3699e1514c64948b0b1f00a29e9868",
+      "primary_specifications": 24
+    },
+    {
+      "skill": "evidence-research",
+      "skill_sha256": "85c97a8eb23ed137f68ff462ea42ea8623452620811fe6ff9c15cbf07ed68652",
+      "primary_corpus": "skills/evidence-research/evals/cases.json",
+      "primary_corpus_sha256": "148fe10da730573613a18da9be5b1c0719956a7dbd3e72b8afbadfff3ba1d28f",
+      "primary_specifications": 32
+    },
+    {
+      "skill": "research-driven-change",
+      "skill_sha256": "93414e77b9abbd2649770a5f1286d4a13f167e13d7e42a4973622eb4e587bd63",
+      "primary_corpus": "skills/research-driven-change/evals/cases.json",
+      "primary_corpus_sha256": "ebe2295b944e6a7331c6d46f41683a626d99858636ea736d171026ab4139346f",
+      "primary_specifications": 31
+    },
+    {
+      "skill": "test-writing",
+      "skill_sha256": "a7e5ff470b099d80fbbc757a40d0552e6fc9cab565bc5a03c2de8944487181bc",
+      "primary_corpus": "skills/test-writing/evals/cases.json",
+      "primary_corpus_sha256": "814457dc5f994373dd12116a3bd8a0386995ab07285c5153a6f5c86c1d4ac16a",
+      "primary_specifications": 8
+    },
+    {
+      "skill": "test-audit",
+      "skill_sha256": "aa4cc547a1c65934111cffb13bd892f4604e90a0950c3d03b8e7c6daadf17561",
+      "primary_corpus": "skills/test-audit/evals/cases.json",
+      "primary_corpus_sha256": "14c72be7c55d4595c9c9a8770014a38921bda60a4a4a1be4ff98209f7f14a1d0",
+      "primary_specifications": 12
+    },
+    {
+      "skill": "software-architecture",
+      "skill_sha256": "802710434f6e3bf4a3f58ba18a8ea52435e5bcf6d38b3207d1db92340f905f49",
+      "primary_corpus": "skills/software-architecture/evals/cases.json",
+      "primary_corpus_sha256": "94513983ffa813220172ba3b20cc96eb4b9146c991ebc0db1825cf1c819c6085",
+      "primary_specifications": 21
+    },
+    {
+      "skill": "code-change",
+      "skill_sha256": "a35b47637f0c25dc83977bc83c60d0b968fee415e0a57871312fc4cf5f50231e",
+      "primary_corpus": "skills/code-change/evals/cases.json",
+      "primary_corpus_sha256": "82607d9d24ae204dce52ab491774ba8b856b37e3fe3a1a1a169b4371ae6e76a5",
+      "primary_specifications": 14
+    },
+    {
+      "skill": "implementation-planning",
+      "skill_sha256": "398ddab0ed7ac4724161c40955ad0cbf2028b005b5cb2b22019cd0fbe481a828",
+      "primary_corpus": "skills/implementation-planning/evals/cases.json",
+      "primary_corpus_sha256": "e1ebae0e753dc97ef54260716230ceb9218672bc2660936d0c6e213c4823413a",
+      "primary_specifications": 18
+    },
+    {
+      "skill": "technical-writing",
+      "skill_sha256": "e9efe15e313b06723f10c0fe07cef5b46cc56353c3de6c1d41f491c99b8bd48e",
+      "primary_corpus": "skills/technical-writing/evals/cases.json",
+      "primary_corpus_sha256": "6b64f0bfb1f4ee5beaa4d26360d3f6d2dcd53c97d527996ea287a6ca70c63cd3",
+      "primary_specifications": 45
+    },
+    {
+      "skill": "text-writing",
+      "skill_sha256": "b32c390c0254c7d271298b9425a7cf96f576fe7ec5c1d714edc694819543d3a5",
+      "primary_corpus": "skills/text-writing/evals/cases.json",
+      "primary_corpus_sha256": "4abdfcca6a35b34a03e67aad7aaaa7114f8335d4945d34b4a1cf4f58adb558e2",
+      "primary_specifications": 38
+    }
+  ],
+  "retained_writing_integrity": {
+    "record_path": "skills/technical-writing/evals/relevance-evidence.json",
+    "record_sha256": "4ec280d2896b7732f208c97b767a4da745eb114c3095417766ca1b7f73e680c9",
+    "output_texts": 25,
+    "all_output_hashes_match": true,
+    "method_maps": 6,
+    "all_method_map_hashes_match": true,
+    "current_technical_writing_variant": "d",
+    "current_text_writing_variant": "text-correction",
+    "runtime_files_match_selected_variants": true
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-10-08T20:45:16.294663+00:00",
+  "assay_commit": "94c517b0aac9ba2575086bf9aead1cc828aadb0d",
+  "case_file": "skills/skill-evaluation/evals/workflow-execution-cases.json",
+  "case_sha256": "4d988065435869faa2958ca0a2270039ea492aacbe8b422b9d69ac5563c8353c",
+  "rubric_sha256": "21be68bab51ca6c7e30b7e4f46a64d64a430cbadbfa62075a732d8d69c005bfd",
+  "metadata_sha256": "2547e2a3d3264edfe95ed98a31f08d55335a464775b923a55cbabac9d835a89a",
+  "runtime_manifest_sha256": "785730128e0e0f82bcc6f0bc5cb7598c6df2d8f6c6f564bb323255dcac5f1bfd",
+  "contrast": {
+    "A": "common host guidance without Assay in executor packet",
+    "B": "same host guidance plus explicitly loaded current Assay"
+  },
+  "requested_model": "gpt-6-astra",
+  "requested_reasoning_effort": "ultra",
+  "host_attested_model": null,
+  "fork_turns": "none",
+  "allocation_seed": 20261008,
+  "executions": 10,
+  "repeats_per_case_arm": 1,
+  "execution_order": "sequential",
+  "selection": "all five existing public synthetic workflow-execution groups",
+  "measurement_unit": "paired case group; no population-frequency weighting",
+  "decision": "describe sampled differences; no individual-skill/general superiority, equivalence, native discovery or savings claim",
+  "stopping": "execute each allocated run once; retain failures, no tuning or outcome-driven retries",
+  "failure_policy": "report missing results and infrastructure failures separately, never drop them from the allocation denominator",
+  "primary_observations": "root-observed final artifacts and independent consumer probes, per-case rubric; dimensions reported separately",
+  "process_observations": "worker output/retained command files when available; no host-authenticated complete tool trace",
+  "cost": "billed tokens, money and subscription quota unavailable; scheduling time not an efficiency estimate",
+  "isolation": "fresh contexts and separate writable project copies; read restrictions are instructions, not enforced filesystem isolation",
+  "exposure": "public working data; evaluator and designer have read all cases; no held-out/generalization claim",
+  "runtime_snapshot": "complete catalogued skill directories excluding evals and bytecode; frozen packets remain task-only because the stock preparer snapshots a narrower documented method subset",
+  "schedule": [
+    {
+      "run_id": "run-01",
+      "case_id": "WX-05",
+      "arm": "B",
+      "packet": "packets/inline-case-d4rvg6_p",
+      "packet_manifest_sha256": "021551b7106a6f372abef76fed54c9e8123b002ac0330e10d396ea5cc8b59c92",
+      "dispatch_sha256": "b497ec2212d87be6d65074dce864d00d9e8bdd9625d1f668ec28c7dcf11e2cd5"
+    },
+    {
+      "run_id": "run-02",
+      "case_id": "WX-05",
+      "arm": "A",
+      "packet": "packets/inline-case-gm31y4fb",
+      "packet_manifest_sha256": "021551b7106a6f372abef76fed54c9e8123b002ac0330e10d396ea5cc8b59c92",
+      "dispatch_sha256": "c051e063c207702654ce92145876391ac3b2b7b9fed0cecd96eabec3db768272"
+    },
+    {
+      "run_id": "run-03",
+      "case_id": "WX-04",
+      "arm": "A",
+      "packet": "packets/inline-case-59c3yx2g",
+      "packet_manifest_sha256": "76cbd41736c1b7537786b0d063363aafb5652eef85c713ff6c4bdd8efd6fa27b",
+      "dispatch_sha256": "0b4893334547f525b1d25824482b081f85fc96fc55ed43802a4c35ea992d8a0d"
+    },
+    {
+      "run_id": "run-04",
+      "case_id": "WX-04",
+      "arm": "B",
+      "packet": "packets/inline-case-d97tlyuk",
+      "packet_manifest_sha256": "76cbd41736c1b7537786b0d063363aafb5652eef85c713ff6c4bdd8efd6fa27b",
+      "dispatch_sha256": "3279768698acf0ba0a9a188700930915d99aea79973c965aa2bbc8e4f714f613"
+    },
+    {
+      "run_id": "run-05",
+      "case_id": "WX-02",
+      "arm": "B",
+      "packet": "packets/inline-case-5r1dwlqz",
+      "packet_manifest_sha256": "59accc191fe6b456caaaab1d61c5deac29e5bd519104bcfc55ca1b305b3daeae",
+      "dispatch_sha256": "8222951ddf64a7fa8bde706e4a33752b8426dddd778f4e299b682c2d8aa44ff3"
+    },
+    {
+      "run_id": "run-06",
+      "case_id": "WX-02",
+      "arm": "A",
+      "packet": "packets/inline-case-kmeuu5cn",
+      "packet_manifest_sha256": "59accc191fe6b456caaaab1d61c5deac29e5bd519104bcfc55ca1b305b3daeae",
+      "dispatch_sha256": "f21927b59029a4f70983504e3cc788ce6937b79da5350280dd75d12762ba38e4"
+    },
+    {
+      "run_id": "run-07",
+      "case_id": "WX-01",
+      "arm": "B",
+      "packet": "packets/inline-case-y188c12v",
+      "packet_manifest_sha256": "6ebf1d72b1a913c58c7f30e70eb6c6a2ec483aa8d28ae321d9f5005ca75c1858",
+      "dispatch_sha256": "4aa0379f87a36b16fd6e2e36d926da557e7f9c7e8f91c5a8e34cd50e6cf43a0f"
+    },
+    {
+      "run_id": "run-08",
+      "case_id": "WX-01",
+      "arm": "A",
+      "packet": "packets/inline-case-3uyial36",
+      "packet_manifest_sha256": "6ebf1d72b1a913c58c7f30e70eb6c6a2ec483aa8d28ae321d9f5005ca75c1858",
+      "dispatch_sha256": "6209bf2311ceeb46eb4f3ba6bbefcf0e961b4992b174ece01c339d794e18ef46"
+    },
+    {
+      "run_id": "run-09",
+      "case_id": "WX-03",
+      "arm": "A",
+      "packet": "packets/inline-case-8qvj1h8f",
+      "packet_manifest_sha256": "72f4be057faa0eebd5511206bafc920090373633441cbee8f38b26667b6871fe",
+      "dispatch_sha256": "cc82c5815205c104bec246114fdbe2d330dc68c212ef9ed9f29ca3852c4263df"
+    },
+    {
+      "run_id": "run-10",
+      "case_id": "WX-03",
+      "arm": "B",
+      "packet": "packets/inline-case-soxq7ozy",
+      "packet_manifest_sha256": "72f4be057faa0eebd5511206bafc920090373633441cbee8f38b26667b6871fe",
+      "dispatch_sha256": "ce7e5cd011ee258eac77f4e4069c05c34b2b0c8df026390fd47657567d7d0a2c"
+    }
+  ]
+}
