@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.2](https://github.com/Muratovnik/assay/compare/v0.17.1...v0.17.2) (2026-10-08)
+
+### Bug Fixes
+
+* **writing:** select claims and detail for the document's purpose, check delivered review reports for unnecessary repetition, and preserve the narrower scope of copyedits and preserve-all requests ([4812353](https://github.com/Muratovnik/assay/commit/4812353dda751a4818eebff2b50a154262961b83))
+
 ## [0.17.1](https://github.com/Muratovnik/assay/compare/v0.17.0...v0.17.1) (2026-10-07)
 
 Delegation uses task-specific recommendations by default. A binding caller
