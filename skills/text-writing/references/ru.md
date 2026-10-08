@@ -18,8 +18,9 @@ swapping words. Keep normative punctuation and repeated technical terms. The
 pattern pairs below help diagnose a problem, not impose a single Russian voice.
 
 The defects below were written for Russian, not translated from an English
-list. Each one names what the reader loses, shows a defective fragment, and
-shows a nearby fragment that looks similar and must be left alone.
+list. Each one names what the reader loses and shows a nearby valid construction.
+That construction still needs a role in the particular message; grammatical
+legitimacy and source support do not require retaining it in every rewrite.
 
 ## Defects
 
@@ -44,21 +45,24 @@ reader ends the sentence knowing no more than at its start.
 
 > Дефект: «Это не просто инструмент, это философия.»
 
-> Допустимо: «Это не ускорение компилятора, а другой способ хранения кэша: сам
-> компилятор мы не трогали.»
+> Допустимо: «Изменилось расположение кэша, а не компилятор.»
 
-The second fragment removes a specific wrong reading. The construction itself is
-not the defect and must not be banned.
+The second fragment fits a task or surrounding message that actually needs this
+distinction. Otherwise describe the cache change directly. A meaningful contrast
+stays; it does not need another clause repeating what was unchanged.
 
 ### 3. The ceremonial closing
 
-The final paragraph repeats what was said, in a raised voice, and gives the
-reader nothing to do.
+The final paragraph repeats what was said in a raised voice without helping the
+reader understand, remember or use it.
 
 > Дефект: «В конечном счёте, будущее уже здесь.»
 
 > Допустимо: «Если после обновления образа кэш не восстановился, напишите в
 > канал дежурной смены.»
+
+A conclusion can also complete an explanation or help the reader recall an
+argument. Those roles do not require a new instruction or call to action.
 
 ### 4. The unearned intensifier
 

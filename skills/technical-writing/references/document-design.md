@@ -41,6 +41,15 @@ meaningful exception or a useful example. A member of an already clear class doe
 not earn a mention merely because it appears in a test, source note or recent fix.
 Do not replace a precise affected item with a broader claim to make prose shorter.
 
+Keep procedural detail with the operation it qualifies. When an overview links
+to a separate procedure, retain the conditions needed to choose or enter that
+route; leave option meanings, defaults and exceptional branches with the command
+or decision they explain. An isolated parameter warning can introduce a mechanism
+the page never asks the reader to use. Bring it into the overview when it changes
+the present choice or prevents a concrete mistake on that path. Do not add a new
+procedure merely to justify retaining its detail, or move a necessary warning
+past the action it governs.
+
 While composing, keep this selection boundary: a new substantive aside needs the
 same task connection as a main claim. A link can identify its destination without
 selling an imagined use for it. Explain a non-obvious destination or actual choice
@@ -88,6 +97,32 @@ a vague link does not preserve an essential warning. Omit an irrelevant work
 note without inventing a new document just to store it. A copyedit that does not
 open content selection retains its scope and can report a larger recommendation.
 
+## Match precision to the surface
+
+A fact can be correct at this revision and still be a poor standing description.
+Consider a routine product change: which introductory claims would need editing,
+and does their precision help this reader recognize, choose or use the product?
+Do this as a content decision, not a forecast or a new maintenance checklist.
+
+| Statement's role | Appropriate precision |
+| --- | --- |
+| Standing introduction, repository About text or package summary | Identify the product and its useful purpose. Include changing detail when it affects suitability; a snapshot of the repository's size or the writer's latest checks usually does not. |
+| Current catalog, interface reference or compatibility contract | Keep the exact inventory, identifier, limit or supported version the reader needs, with its maintained source. |
+| Dated release note, measurement or acceptance record | Keep the relevant change, date/version, denominator and conditions that make the result interpretable. |
+
+These roles can coexist on one page. A product with a fixed capacity may need
+that capacity in its introduction. A deprecation or support restriction can
+change the first action and belongs before it. A catalog generated from source
+can avoid manual synchronization, but generation alone does not justify copying
+its total into every heading or description.
+
+If precise detail serves no purpose here, remove the claim within the opened
+scope; replacing it with "several", "many" or "recent" can leave the same padding.
+If it matters, keep it exact and put it where the reader can use it. Do not make
+a compatibility bound vague, erase a material limitation, or add a date merely
+to rescue an unnecessary statement. Stable copy still changes when the product's
+identity, suitability or required action changes.
+
 ## Arrange by dependency, not discovery order
 
 During research, files arrive in an arbitrary sequence. Rebuild the document around
@@ -99,6 +134,11 @@ For a README, orientation and a needed first-use path can precede detailed optio
 For a how-to, keep the action path legible and link to explanations that are not
 needed mid-step. For an architectural explanation, show why a component exists
 before listing its internals. Repetition can be correct in a parameter reference.
+
+Describe the work in terms the audience uses. A taxonomy of internal components,
+validation stages or method responsibilities is not automatically an explanation
+of the product. Keep technical names when they identify an interface or a useful
+concept; explain an unfamiliar concept before making the reader act on it.
 
 ## Show one complete path before enumerating options
 
@@ -139,6 +179,14 @@ unsupported. Check affected copies or translations within the authorized scope,
 and report any necessary follow-up outside it. A typo does not require a whole
 documentation audit.
 
+Find the owner of an affected statement, not just its visible copies. A description
+may originate in a generator and appear in package manifests, a README and a
+repository's external metadata. Change canonical source and regenerate through
+the project's authorized mechanism when that is the contract. Editing a generated
+copy alone will not survive regeneration; changing a file does not update a
+GitHub About field. Keep independently maintained surfaces in the scoped update
+or identify the exact remaining change without claiming it was published.
+
 Preserve historical records in their role: do not rewrite an ADR's earlier
 decision or a released changelog entry as though it always described today's
 behavior. Correct current guidance and keep the record's status and chronology.
@@ -170,6 +218,9 @@ defect. Apply the review to the opened scope, without a required checklist file.
    it governs or repeated identity in a reference can have a useful second role.
 3. **Close actual gaps.** Confirm that the reader can answer the page's question
    or follow its route, including real setup and recognizable success where needed.
+   Read the page continuously too: headings, terms and links should carry the
+   intended reader from orientation to the relevant result, without requiring
+   the editor's private context or an unrelated contributor workflow.
    Repair a found defect, then stop when the scoped requirements hold. No deletion
    quota, target word count, mandatory rewrite or recursive self-review follows.
 

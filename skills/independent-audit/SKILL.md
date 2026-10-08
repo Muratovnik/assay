@@ -3,7 +3,7 @@ name: independent-audit
 description: Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change skill-evaluation software-architecture test-audit test-writing ui-delivery"
+  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change skill-evaluation software-architecture technical-writing test-audit test-writing text-writing ui-delivery"
 ---
 
 # Independent audit
@@ -50,13 +50,17 @@ Inspect only the relevant methods:
 | A skill's method, discovery, execution or claimed behavioral improvement | [Skill evaluation](../skill-evaluation/SKILL.md), as read-only criteria; no new campaign or repair authority |
 | Implementation/refactoring quality, conventions, state or effective checks | [Code quality verification](references/code-quality.md) |
 | Architecture proposals, application structure, ownership, migration, discovery, retirement or compatibility | [Architecture and migration](references/architecture-and-migration.md) |
-| Repository readers, onboarding, installation or distribution | [Repository and release](references/repository-and-release.md) |
+| Documentation, README or repository/package descriptions, including reader fit | [Technical writing](../technical-writing/SKILL.md) in review mode; it owns the review's delivery |
+| Ordinary prose requested as part of the reviewed result | [Text writing](../text-writing/SKILL.md) in review mode |
+| Repository readiness, installation lifecycle or distribution across surfaces | [Repository and release](references/repository-and-release.md) |
 | Material custom mechanics or visual states, repeated UI families, dependencies or product-flow choices | [Solution choices and reuse](references/solution-choices-and-reuse.md) |
 | Probe execution, frozen artifact identity, ambiguous absence or completeness claims | [Evidence and probes](references/evidence-and-probes.md) |
 | Authorized audit delegation, or invocation inside a bounded reviewer role | [Bounded review](references/bounded-review.md) |
 
-A scoped source review needs no unrelated release or migration procedure. Use
-multiple references when selected areas or actual claims cross their boundaries.
+A README as the review subject does not itself open repository or release
+qualification. Follow its relevant reader path under the writing method; add
+repository and release criteria when the requested decision or actual claims
+require them. Use multiple references when selected areas cross their boundaries.
 Read the applicable criteria owned by linked skills as review criteria; this
 does not activate their implementation authority. If reuse is applicable, trace
 representative behavior through callers, local handlers and native/library calls
@@ -161,7 +165,14 @@ audit or to repair findings within a bounded reviewer role.
 
 ## Report the decision
 
-Lead with the scoped verdict and decisive reasons. Include actual subject
+Lead with the scoped verdict and decisive reasons. A narrow documentation or
+ordinary-prose review uses the writing owner's delivery contract: findings,
+supporting evidence, useful corrections and limits that affect interpretation.
+Do not append input inventories, passed style checks or cleanup accounts merely
+to fill an audit format. A requested acceptance or release audit still needs its
+applicable coverage and check results.
+
+For other audits, include actual subject
 identity, criteria, independence limits, coverage/exclusions, confirmed findings,
 checks/results, unknowns, side effects and supported remedies. Keep decisive
 references in the final answer or authorized report, not only interim messages.

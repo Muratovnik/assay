@@ -3,6 +3,8 @@
 Defects written for Chinese, with Chinese examples. None of them is a
 translation of an English rule, and no rule from the English profile transfers
 here without its own example.
+The valid examples show possible uses, not phrases exempt from content selection.
+Keep an example's information only when it serves the particular reader and task.
 
 ## Measures that do not apply to Chinese
 
@@ -37,12 +39,20 @@ An opening is legitimate when it names what the section covers.
 
 ### 2. The empty conclusion
 
-A closing paragraph reaches for 总而言之 or 综上所述, repeats the text and asks
-for nothing the reader can do.
+A closing paragraph reaches for 总而言之 or 综上所述 and repeats the text without
+helping the reader understand, recall or use it.
 
 > 缺陷：总而言之，只有不断赋能每一位工程师，才能拥抱更加美好的未来。
 
 > 合格：如果更新镜像后缓存仍未恢复，请在值班频道反馈。
+
+An explanation can also close with its useful distinction, without a new action:
+
+> 合格：因此，相同的文件名并不意味着内容相同。
+
+This fits an explanation of file names and content when gathering that distinction
+helps the reader. A summary opener and the absence of an instruction are not
+defects by themselves.
 
 ### 3. Marketing filler in a text with another job
 
@@ -63,8 +73,9 @@ to colleagues it is padding either way.
 
 > 合格：这不是编译器的改动，而是缓存位置的改动。
 
-The second sentence removes a specific misunderstanding, so the construction
-stays.
+The second sentence fits a task or surrounding passage that gives reason to
+distinguish the compiler from the cache location. Otherwise state the cache
+change directly. The construction is permitted when the distinction is useful.
 
 ### 5. Empty parallelism
 

@@ -32,6 +32,12 @@ An opening should orient the intended reader. A paragraph should develop a point
 or a useful transition. An example should explain a distinction or decision rather
 than decorate the page. The ending may summarize, request action or complete an
 explanation; it must earn that role rather than restate every heading solemnly.
+Judge repetition by meaning, not matching words. Place a necessary qualification
+where it limits the claim or changes the decision. If a nearby conditional claim
+already conveys that limit, another caution can add nothing even when it is true.
+A repeated condition can still belong at a separately used step or help a reader
+recall a developed argument. Its contribution depends on that use, not on being
+brief, cautious or present in the source notes.
 
 Cut generic importance claims, inflated praise, invented third items and staged
 openers when they delay the point. Keep real contrasts, recurring reference

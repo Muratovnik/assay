@@ -64,11 +64,13 @@ attachments now appear before submission in the prototype; no release data.
 
 > Спроектировала подачу заявки так, чтобы сотрудник видел нужные вложения до
 > отправки. Разобрала маршрут согласования и собрала кликабельный прототип для
-> проверки сценария. Изменение пока не выпущено, поэтому данных о числе возвратов нет.
+> проверки сценария.
 
 The action and design reasoning replace an unsupported claim that the work
-"improved efficiency". On a small portfolio card, the release qualification can
-be expressed as "Прототип…" instead of reproducing this whole paragraph.
+"improved efficiency". The word "prototype" identifies the delivered work; no
+measured production outcome is claimed. If the assignment asks about deployment
+or measured results, state the relevant status and evidence limit there. The
+absence of release data in the notes does not itself require a caveat here.
 
 ## Revise the thought before the diction
 

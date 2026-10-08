@@ -53,7 +53,10 @@ user parameters such as a token variable remain legitimate.
 
 ## Compose the page
 
-Start with the job the product helps the reader do. Add a constraint or mechanism
+Identify what the product is and the job it helps the reader do. A collection
+of instructions, a library and a hosted service have different ways to use them;
+the project name alone may not establish which one the reader is looking at.
+Add a constraint or mechanism
 when it changes suitability or explains otherwise unclear behavior. Do not lead
 with the repository inventory or an inflated claim. Give concrete uses instead
 of several restatements of the tagline.
@@ -80,6 +83,11 @@ When a procedure is needed, provide its starting state, ordered actions and
 observable result, with explained placeholders and real platform differences.
 Label illustrative output as an example. A documented supported command needs
 no repetitive personal disclaimer, but do not assert a test that did not happen.
+First use means using the product for this reader's goal. Building, testing or
+packaging the repository belongs here only when it is actually necessary for
+that use; otherwise keep contributor setup with the contributor route. A working
+demonstration can show behavior without replacing instructions for applying the
+product to the reader's own task.
 
 Keep product information, reference detail and contributor tasks distinct. Link
 actual existing documents instead of manufacturing a docs tree. Important limits

@@ -222,7 +222,8 @@ class PreparationTests(unittest.TestCase):
         criteria = [prep.SKILL_ROOT.parent / name for name in (
             "code-change", "test-writing", "test-audit",
             "evidence-research", "ui-delivery", "implementation-planning",
-            "software-architecture", "research-driven-change", "skill-evaluation")]
+            "software-architecture", "research-driven-change", "skill-evaluation",
+            "technical-writing", "text-writing")]
         packet = prep.prepare_case(1, self.parent, criteria_roots=criteria)
         skill = packet / "skill" / "independent-audit"
         for path in skill.rglob("*.md"):

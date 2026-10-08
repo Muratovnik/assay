@@ -1,4 +1,4 @@
 interface:
   display_name: "Technical Writing"
   short_description: "Write, edit or review documentation grounded in the product"
-  default_prompt: "Use $technical-writing to write, edit or review this documentation, checking every command, version and status claim against the project."
+  default_prompt: "Use $technical-writing to write, edit or review this documentation or repository description for its intended reader and publication surface, selecting useful content and checking the retained claims against the project."

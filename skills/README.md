@@ -20,8 +20,8 @@ Declared automatic activation is eligibility, not a successful-run receipt.
 | [software-architecture](software-architecture/SKILL.md) | automatic | Design and assess application, site or library boundaries, contracts and file placement. |
 | [code-change](code-change/SKILL.md) | automatic | Implement or refactor code with clear responsibilities, controlled state and effective quality checks. |
 | [implementation-planning](implementation-planning/SKILL.md) | automatic | Create, review or update implementation plans, from a bounded change to a multi-stage roadmap. |
-| [technical-writing](technical-writing/SKILL.md) | automatic | Write, reshape, translate or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from its sources. |
-| [text-writing](text-writing/SKILL.md) | automatic | Write or reshape ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — or review an existing text. |
+| [technical-writing](technical-writing/SKILL.md) | automatic | Write, edit, translate or review product documentation and repository or package descriptions, including README, guides, references and release notes. |
+| [text-writing](text-writing/SKILL.md) | automatic | Write, edit or review ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — including prose within a larger task. |
 
 The full description, including when the method should **not** run, is in
 each skill's frontmatter. Conditional depth lives in its `references/`, and

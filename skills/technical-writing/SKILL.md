@@ -1,6 +1,6 @@
 ---
 name: technical-writing
-description: Write, reshape, translate or review product documentation — README, how-to, tutorial, reference, explanation, runbook, ADR/RFC and release notes — from its sources. Use the README module for repository presentation and an agreed house style. Skip ordinary messages and articles, code changes, commit records, agent instructions and standalone test runs.
+description: Write, edit, translate or review product documentation and repository or package descriptions, including README, guides, references and release notes. Apply to documentation within larger build or maintenance tasks too. Skip code-only changes, source comments and docstrings, commit records, agent instructions, ordinary messages and standalone test runs.
 license: MIT
 ---
 
@@ -10,6 +10,11 @@ Give the intended reader a usable explanation or working route through the
 product. Choose the right depth and structure, make examples understandable,
 and tie claims to the available sources. This is not a release pipeline.
 
+Use this method for the writing part of a larger task, including a GitHub About
+field or a description stored in a manifest. The file format does not determine
+the prose's purpose. Read only the relevant guidance; a short description does
+not require the README layout or a new documentation task.
+
 ## Choose the reader's path
 
 Identify reader, goal, document type, publication surface and the scope opened
@@ -18,6 +23,10 @@ a repository page need not repeat the same instructions. A feature-list review
 is not a whole-README publication audit.
 Infer version scope from the brief, checkout, release record or versioned site;
 require a visible page version only when its absence creates real ambiguity.
+Choose precision for the statement's role and lifetime too: a standing product
+description, a maintained inventory and a dated result need different detail.
+Keep exact operational requirements; omit incidental snapshot facts from an
+introduction when they do not help recognition, suitability or use.
 
 - `draft`: compose the requested document from the relevant sources.
 - `edit`: a `copyedit` preserves structure, code, identifiers, data and link
@@ -41,9 +50,9 @@ before choosing headings or polishing sentences:
 2. **Select the necessary material and its depth.** Establish the questions this
    document needs to answer from the request, its surface and the reader's actual
    work. Choose the claims and necessary explanations before writing from source
-   notes. A supported fact may still answer an unneeded question or supply an
-   incidental instance of an already clear claim. Ground added context in a real
-   dependency of the task; do not invent a concern to justify it. Keep conditions
+   notes. Use [surface and lifetime](references/document-design.md#match-precision-to-the-surface)
+   when deciding whether changing detail belongs here. Ground added context in a
+   real dependency of the task; do not invent a concern to justify it. Keep conditions
    that limit a claim and examples that make an unfamiliar mechanism intelligible.
 3. **Make the connection explicit.** Pair a command with its purpose, needed
    starting state and recognizable result. Pair an architectural decision with
@@ -83,7 +92,8 @@ all other checks. Do not infer that separate components doing different jobs are
 inconsistent. Source disagreements need their scope described, not a convenient
 winner. Attribute reading a test as reading its expected behavior, not running it.
 
-Preserve quantifiers, negations, numeric bounds and the direction of conditions.
+For retained or explicitly required material, preserve quantifiers, negations,
+numeric bounds and the direction of conditions.
 Permission only when a condition holds is not an obligation whenever it holds.
 Equivalent paraphrases are allowed; exactness belongs to protected content and
 explicit verbatim requirements. Preserve what a number counts and which action,
@@ -124,8 +134,9 @@ polishing loop.
 
 After a substantive update, reconcile the affected claims
 and related exclusions using [document design](references/document-design.md#update-the-semantic-unit).
-Inspect command-to-section relationships, relative links
-from the actual document path, and the rendered form when tools are authorized.
+Inspect command-to-section relationships and relative links from the actual
+document path, including known incoming links when a section's purpose changes.
+Check the rendered form when tools are authorized.
 A Markdown file needs no outer fence; literal source in a reply needs a longer
 outer fence than matching fences inside. An authorized preservation check protects
 only the regions it reports; it does not prove meaning, link existence or successful
@@ -133,6 +144,13 @@ installation. A styled README may contain HTML the preservation checker cannot
 classify: keep that limit visible and use the project's permitted render checks,
 not an unverified-to-pass shortcut. Keep author-facing verification notes outside
 the published document unless the reader needs the limitation to act safely.
+
+When an authorized example check creates files, distinguish requested output from
+temporary check products. Use disposable paths or remove only your own unrequested
+products. After those commands finish, re-read the final file inventory, including
+new paths, separately from the command's success message. Reconcile a discrepancy
+before describing the changes; the intended edit list is not evidence of what
+remains in the delivered workspace.
 
 ## Boundaries
 
