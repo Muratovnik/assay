@@ -2,6 +2,8 @@
 
 **English** · [Русский](ru/evaluation.md) · [简体中文](zh-CN/evaluation.md)
 
+For what external comparisons show and what Assay **has not yet measured**, read the [skill effectiveness evidence review](research/skill-effectiveness.md). The [paired comparison protocol](how-to/compare-skills.md) specifies how to generate actual Assay outcome evidence without confusing structural checks with model execution.
+
 Every skill ships an `evals/` directory. It is worth being precise about what
 those files prove, because the honest answer is narrower than "the skill works".
 
