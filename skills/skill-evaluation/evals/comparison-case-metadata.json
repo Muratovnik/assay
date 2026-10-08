@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "B1-M",
+      "group": "B1",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Delivered code and regression behavior at a public file-format boundary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B1-C",
+      "group": "B1",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B2-M",
+      "group": "B2",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Audit decisions, independently justified test oracles and preservation under read-only authority.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B2-C",
+      "group": "B2",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B3-M",
+      "group": "B3",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Architecture and planning output; execution quality of the proposed implementation remains unmeasured.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B3-C",
+      "group": "B3",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B4-M",
+      "group": "B4",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "An actual local browser artifact and bounded journey mapping; no external design-tool transfer.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B4-C",
+      "group": "B4",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B5-M",
+      "group": "B5",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Source-grounded inference from supplied data; live search acquisition and actual campaign execution are outside this block.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B5-C",
+      "group": "B5",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B6-M",
+      "group": "B6",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Two distinct writing deliverables; the pairing tests composition coverage, not an assumed single-document synergy.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B6-C",
+      "group": "B6",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B7-M",
+      "group": "B7",
+      "purpose": "challenge",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Handoff and evidence decisions only. Native dispatch, lifecycle effects, model routing and end-to-end delivery effectiveness remain untested.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "B7-C",
+      "group": "B7",
+      "purpose": "routine",
+      "source": "New synthetic diagnostic scenario, authored 2026-10-08 before executions; not a production incident.",
+      "rationale": "Nearby bounded valid task checks preservation and unnecessary expansion after forced exposure; not a native should-not-fire estimate.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

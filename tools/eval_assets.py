@@ -1,4 +1,4 @@
-"""Check non-UI evaluation data and freeze input-only inline case packets.
+"""Check evaluation data and freeze input-only inline case packets.
 
 No model execution, installation, rubric grading or result-percentage claims.
 The legacy audit protocol remains authoritative for its file-backed fixtures.
@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PAIRED_SKILLS = ("route-subagents", "code-change", "evidence-research", "test-writing", "test-audit",
                  "technical-writing", "text-writing", "implementation-planning",
                  "software-architecture", "product-flow-mapping",
-                 "research-driven-change", "skill-evaluation")
+                 "research-driven-change", "skill-evaluation", "ui-delivery")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
 COLLECTIONS = ("cases", "discovery_cases", "triggers")
 METADATA_KEYS = {"id", "group", "purpose", "source", "rationale", "split", "exposure"}
@@ -168,11 +168,40 @@ def audit_tools(root: Path = ROOT) -> Any:
     return SimpleNamespace(**runpy.run_path(str(path)))
 
 
+def check_labelled_triggers(path: Path, name: str, *, legacy: bool = False) -> None:
+    """Validate the two retained label formats without admitting them as inputs."""
+    document = load(path)
+    header = {"skill_name", "cases", "execution_status" if legacy else "schema_version"}
+    if set(document) != header or document.get("skill_name") != name:
+        raise ValueError(f"{name}: trigger schema/skill identity mismatch")
+    if legacy:
+        status = document.get("execution_status")
+        if not isinstance(status, str) or not status.strip():
+            raise ValueError(f"{name}: invalid declared trigger execution status")
+    elif type(document.get("schema_version")) is not int or document["schema_version"] != 1:
+        raise ValueError(f"{name}: unsupported trigger schema")
+    records = document.get("cases")
+    if not isinstance(records, list) or not records:
+        raise ValueError(f"{name}: expected nonempty trigger cases")
+    if not legacy:
+        record_ids(records, f"{name}: triggers")
+    fields = {"prompt", "should_trigger"} if legacy else {"id", "prompt", "should_trigger", "rationale"}
+    for record in records:
+        if (not isinstance(record, dict) or set(record) != fields
+                or type(record.get("should_trigger")) is not bool
+                or any(not isinstance(record.get(key), str) or not record[key].strip()
+                       for key in fields - {"should_trigger"})):
+            raise ValueError(f"{name}: invalid labelled trigger")
+
+
 def check(root: Path = ROOT) -> dict[str, str]:
     report = {}
     for name in PAIRED_SKILLS:
         directory = root / "skills" / name / "evals"
-        case_paths = [directory / "cases.json", *sorted(directory.glob("*-cases.json"))]
+        # UI's retained trigger corpus includes labels and has no paired rubric.
+        labelled = directory / "trigger-cases.json" if name == "ui-delivery" else None
+        case_paths = [directory / "cases.json", *(
+            path for path in sorted(directory.glob("*-cases.json")) if path != labelled)]
         expected_metadata = {metadata_path(path) for path in case_paths}
         observed_metadata = set(directory.glob("*-case-metadata.json"))
         if observed_metadata - expected_metadata:
@@ -182,9 +211,13 @@ def check(root: Path = ROOT) -> dict[str, str]:
             rubric = cases.with_name("rubric.json" if cases.name == "cases.json"
                                      else cases.name.removesuffix("-cases.json") + "-rubric.json")
             check_pair(cases, rubric, name, group_splits=group_splits, tracked=True)
+        if labelled is not None:
+            check_labelled_triggers(labelled, name)
         report[name] = "input/rubric structure checked, no model run"
     # Keep the existing, separately tested fixture/file validation path.
     audit_tools(root).load_cases(root / "skills/independent-audit/evals")
+    check_labelled_triggers(root / "skills/independent-audit/evals/trigger-evals.json",
+                           "independent-audit", legacy=True)
     report["independent-audit"] = "legacy fixture paths checked, no model run"
     if not (root / "skills/skill-evaluation/evals/research-and-transfer.md").is_file():
         raise ValueError("skill-evaluation: missing manual evaluation document")

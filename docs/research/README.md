@@ -45,3 +45,8 @@ Do not silently repair a disputed source claim in only one language. A substanti
 ## Other research records
 
 [Product-flow mapping](product-flow-mapping.md) records a narrower transfer into a method. [Text skills C1](text-skills-c1.md) records historical candidate corrections and their evaluation limits. These records serve a different purpose from the full foundational studies and remain separate.
+
+[Catalog diagnostic for Assay skills](skill-effectiveness-diagnostic.md) reviews existing
+behavioral studies, external comparison methods, a catalog diagnostic and a
+demonstrated evaluation-packet repair. It separates observed task outcomes from
+native discovery, cost and population claims that those observations cannot establish.

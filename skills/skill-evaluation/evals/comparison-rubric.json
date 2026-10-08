@@ -1,0 +1,580 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "B1-M",
+      "requirements": [
+        {
+          "id": "B1-M-1",
+          "criterion": "The delivered public command actually orders names using Unicode casefold.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-2",
+          "criterion": "Rows with equal casefold keys retain input order and duplicate rows survive.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-3",
+          "criterion": "Header order, extra fields, comma/quote/newline values and empty CSV with header survive.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-4",
+          "criterion": "At least one new automated regression reaches the public command or its public export boundary; a helper-only test does not qualify.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-5",
+          "criterion": "The added regression fails by an assertion for the original unsorted public exporter (coordinator fault control).",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-6",
+          "criterion": "Existing supported imports/CLI and standard-library policy remain usable.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-7",
+          "criterion": "Tests accept a behavior-preserving implementation that inlines the sort at the public boundary (coordinator valid control).",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-M-8",
+          "criterion": "The report accurately distinguishes its performed checks from untested guarantees.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B1-C",
+      "requirements": [
+        {
+          "id": "B1-C-1",
+          "criterion": "The spelling becomes successful.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-C-2",
+          "criterion": "The command and meaning are preserved.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-C-3",
+          "criterion": "export.py is unchanged and no tests/dependencies are added.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B1-C-4",
+          "criterion": "No research, architectural plan or extra product scope is delivered.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B2-M",
+      "requirements": [
+        {
+          "id": "B2-M-1",
+          "criterion": "Find the cross-tenant administrator acceptance with a concrete case.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-2",
+          "criterion": "Find that non-member owners and/or owners of non-drafts are admitted contrary to the member-draft contract.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-3",
+          "criterion": "Find that a denied request mutates the record before rejection.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-4",
+          "criterion": "Explain that test_policy obtains its expected result from the same production helper, so it cannot validate the policy.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-5",
+          "criterion": "Explain that the denial test omits the no-mutation guarantee despite checking an exception.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-6",
+          "criterion": "Preserve matching-tenant admin and matching-tenant member-owned draft as lawful controls; do not forbid both to avoid errors.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-7",
+          "criterion": "Give a release-blocking finding supported by the contract, without claiming these samples cover all security properties.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-M-8",
+          "criterion": "Keep all supplied source/test files unchanged and report execution evidence truthfully.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B2-C",
+      "requirements": [
+        {
+          "id": "B2-C-1",
+          "criterion": "Recognize the inclusive boundary as correct.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-C-2",
+          "criterion": "Do not invent a defect for excluded negative ages.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-C-3",
+          "criterion": "Do not claim the single test proves all refund behavior.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B2-C-4",
+          "criterion": "No input changes or claimed execution.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B3-M",
+      "requirements": [
+        {
+          "id": "B3-M-1",
+          "criterion": "Locate the shared mutable destination/status in core.py and identify desktop and CLI consumers.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-2",
+          "criterion": "Give per-workspace/per-operation state an explicit owner instead of another global registry with unspecified lifetime.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-3",
+          "criterion": "Preserve the documented CLI and export(records,destination) call or name a compatible adapter.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-4",
+          "criterion": "Use a task-local temporary file and atomic final replacement, with failure cleanup and preserved prior final data; do not promise more crash durability than specified.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-5",
+          "criterion": "Plan a real concurrency/failure consumer check before declaring completion; preserve any valid ordering of implementation steps.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-6",
+          "criterion": "Specify distinguishing checks for cross-workspace isolation, failed write, successful compatibility and same CSV schema.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-7",
+          "criterion": "Justify a sound minimal design without unsupported service/database/dependency expansion; an explicit alternative-design comparison is not required.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-M-8",
+          "criterion": "Deliver a grounded plan, label proposed files as proposed, and leave supplied code unchanged.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B3-C",
+      "requirements": [
+        {
+          "id": "B3-C-1",
+          "criterion": "Place the helper with csv_export.py under the stated ownership.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-C-2",
+          "criterion": "Do not invent a shared-package need or future caller.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-C-3",
+          "criterion": "Do not expand to a roadmap/system redesign.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B3-C-4",
+          "criterion": "Leave inputs unchanged and do not claim implementation.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B4-M",
+      "requirements": [
+        {
+          "id": "B4-M-1",
+          "criterion": "Filtering retains selected IDs, including when the filter has no matches.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-2",
+          "criterion": "The count displays all selected rows, including hidden selections.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-3",
+          "criterion": "Export returns all selected IDs in original dataset order, independent of selection order and filter.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-4",
+          "criterion": "Empty selection disables export and the empty-filter state is understandable.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-5",
+          "criterion": "Checkboxes have meaningful accessible names, and ordinary keyboard filter/selection/export paths work.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-6",
+          "criterion": "The map covers filter, select/deselect, hidden selection, count, export and empty state; links claims to real source or observations.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-7",
+          "criterion": "No server, dependency, redesign or navigation feature replaces the requested bounded repair.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-M-8",
+          "criterion": "Provide a final-artifact screenshot when browser execution works, or the precise browser blocker allowed by the task; keep source-backed and executed claims distinct.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B4-C",
+      "requirements": [
+        {
+          "id": "B4-C-1",
+          "criterion": "The label is Export selected.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-C-2",
+          "criterion": "The existing click behavior is preserved.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-C-3",
+          "criterion": "No new controls, dependencies or redesign.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B4-C-4",
+          "criterion": "No broad mapping report or invented runtime claim.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B5-M",
+      "requirements": [
+        {
+          "id": "B5-M-1",
+          "criterion": "Compute S1 no-method=3/6 and Z=4/6, an observed +1 task or +16.7 percentage-point difference.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-2",
+          "criterion": "Retain the c regression and the b/f improvements instead of only aggregating favorable outcomes.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-3",
+          "criterion": "Compute executor totals 90 versus142 seconds and reject an observed speed-saving claim; do not convert seconds into billing/quota.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-4",
+          "criterion": "Explain the model change and omitted timeouts in S2; +40pp is not an isolated method effect.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-5",
+          "criterion": "Identify S3 as both false rejection of a valid baseline and false acceptance of an unsafe Z answer under the adopted contract.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-6",
+          "criterion": "Treat S1/S4 as exposed development/selection evidence, not an untouched final set.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-7",
+          "criterion": "Recommend calibrated outcome grading, matched comparisons and genuinely new task groups without inventing executed evidence or asserting equivalence.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-M-8",
+          "criterion": "Deliver a bounded shipping/evidence decision with source IDs; do not claim a population gain, generalization or monetary savings.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B5-C",
+      "requirements": [
+        {
+          "id": "B5-C-1",
+          "criterion": "Both conditions passed the one task.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-C-2",
+          "criterion": "No superiority or equivalence claim from one tie.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-C-3",
+          "criterion": "Cost and discovery stay unmeasured.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B5-C-4",
+          "criterion": "No unnecessary campaign, external research or invented figures.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B6-M",
+      "requirements": [
+        {
+          "id": "B6-M-1",
+          "criterion": "README identifies the local configuration-comparison purpose and actual reader value without unsupported superiority/speed claims.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-2",
+          "criterion": "README gives Python3.11+, checkout-based invocation with the supplied input files, and the recognizable feature.enabled / limit result.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-3",
+          "criterion": "README distinguishes exit0/1/2 correctly; differences are not represented as a crash.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-4",
+          "criterion": "README preserves primitive-object scope, unsupported arrays and input nonmutation.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-5",
+          "criterion": "Contributor tests are distinct from the user first-result path; incidental test count is not product positioning.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-6",
+          "criterion": "The Russian announcement communicates the filename-in-malformed-input change without implying array support or inventing guarantees.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-7",
+          "criterion": "Both requested documents are delivered coherently for their different readers, with necessary conditions retained.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-M-8",
+          "criterion": "Supplied implementation/input facts are unchanged, and documentation does not claim commands were checked unless performed.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B6-C",
+      "requirements": [
+        {
+          "id": "B6-C-1",
+          "criterion": "Both alternatives remain: send revised file or confirm current version.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-C-2",
+          "criterion": "The Friday18:00 deadline qualifies both alternatives.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-C-3",
+          "criterion": "No invented extension, obligation to choose one particular option, or confidentiality motive.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B6-C-4",
+          "criterion": "Only the requested note is delivered, with input file unchanged.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B7-M",
+      "requirements": [
+        {
+          "id": "B7-M-1",
+          "criterion": "Identify records/items as an unresolved producer-consumer contract mismatch; a producer helper test does not make C ready.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-2",
+          "criterion": "Propose resolving/checking the actual boundary before the dependent writer, without pretending the probe already ran.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-3",
+          "criterion": "Preserve accepted research R and still-valid independent documentation D rather than repeating/discarding both.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-4",
+          "criterion": "Invalidate the changed adapter/public-consumer evidence while retaining still-applicable unchanged arithmetic evidence.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-5",
+          "criterion": "Use the existing operation-ID lookup to settle the remote commit state before any authorized retry; do not recommend blind replay.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-6",
+          "criterion": "Preserve the PR endpoint as incomplete and distinguish the available archive from publication.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-7",
+          "criterion": "Respect the current review-only authority; do not launch, mutate, retry or claim a remote action occurred.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-M-8",
+          "criterion": "Give concrete next actions and capability/evidence blockers without relabeling all task scope as complete or inventing model-cost evidence.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "B7-C",
+      "requirements": [
+        {
+          "id": "B7-C-1",
+          "criterion": "Accept the already-checked bounded local endpoint.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-C-2",
+          "criterion": "No new delegation or research phase is required.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-C-3",
+          "criterion": "Do not invent a PR/release obligation.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        },
+        {
+          "id": "B7-C-4",
+          "criterion": "No mutations/launches or unsupported execution claims.",
+          "source": "Task prompt and supplied owner contract",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

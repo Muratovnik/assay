@@ -38,6 +38,18 @@ GATES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "-p", "test_text_check.py",
         ),
     ),
+    (
+        "comparison fixtures",
+        (
+            "-m", "unittest", "discover",
+            "-s", "skills/skill-evaluation/evals",
+            "-p", "test_comparison*.py",
+        ),
+    ),
+    (
+        "comparison evidence",
+        ("skills/skill-evaluation/evals/comparison_report.py", "check"),
+    ),
 )
 
 

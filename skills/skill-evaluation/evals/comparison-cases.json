@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-evaluation",
+  "cases": [
+    {
+      "id": "B1-M",
+      "prompt": "Repair the public CSV export: stable, case-insensitive ascending name order is promised but the exported file remains unsorted. Preserve duplicate names, every row, field, header order and CSV quoting semantics. Add useful regression protection through the supported command. Keep the standard-library dependency policy. Deliver the changed project and state what was checked.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "export.py": "import csv\nimport sys\n\ndef ordered(rows):\n    return sorted(rows, key=lambda row: row[\"name\"].casefold())\n\ndef export(source, destination):\n    with open(source, newline=\"\", encoding=\"utf-8\") as stream:\n        reader = csv.DictReader(stream)\n        fields, rows = reader.fieldnames, list(reader)\n    with open(destination, \"w\", newline=\"\", encoding=\"utf-8\") as stream:\n        writer = csv.DictWriter(stream, fieldnames=fields)\n        writer.writeheader()\n        writer.writerows(rows)\n\nif __name__ == \"__main__\":\n    export(sys.argv[1], sys.argv[2])\n",
+        "test_export.py": "import unittest\nfrom export import ordered\nclass Tests(unittest.TestCase):\n    def test_helper(self):\n        self.assertEqual([{\"name\":\"amy\"},{\"name\":\"Zoe\"}], ordered([{\"name\":\"Zoe\"},{\"name\":\"amy\"}]))\n",
+        "sample.csv": "name,note,id\nZoe,\"a,b\",1\namy,first,2\nAmy,second,3\n",
+        "README.md": "# Export\n\nPublic command: `python -B export.py INPUT OUTPUT`. Names sort ascending with Unicode casefold; equal keys keep original row order. Preserve the header and all data. Tests: `python -B -m unittest discover`. Standard library only.\n"
+      }
+    },
+    {
+      "id": "B1-C",
+      "prompt": "Correct only the spelling mistake in README.md. Preserve its meaning and the command. No code or test changes are requested.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "README.md": "# Export\n\nRun `python -B export.py INPUT OUTPUT`.\nA succesful export preserves every row.\n",
+        "export.py": "def heading():\n    return \"Export\"\n"
+      }
+    },
+    {
+      "id": "B2-M",
+      "prompt": "Review whether the supplied tests justify releasing this tenant archive operation. Identify concrete contract failures and ineffective or overrestrictive tests, with counterexamples and legitimate nearby behavior. Do not repair the project. Give a scoped release recommendation and distinguish source inspection from any executed probes.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "CONTRACT.md": "# Archive contract\nAn admin may archive an item only within their tenant. A member may archive only their own draft within their tenant. No one else may archive. A denied request leaves the records untouched. Existing archived records are not in this operation's input domain. These are adopted requirements, not suggestions.\n",
+        "archive.py": "def allowed(role, actor_tenant, actor_id, item):\n    return role == \"admin\" or (actor_tenant == item[\"tenant\"] and actor_id == item[\"owner\"])\n\ndef archive(records, key, role, tenant, actor_id):\n    item = records[key]\n    item[\"state\"] = \"archived\"\n    if not allowed(role, tenant, actor_id, item):\n        raise PermissionError(\"denied\")\n    return item\n",
+        "test_archive.py": "import unittest\nfrom archive import allowed, archive\nclass ArchiveTests(unittest.TestCase):\n    def test_admin(self):\n        item = {\"tenant\":\"red\", \"owner\":\"u1\", \"state\":\"draft\"}\n        self.assertTrue(allowed(\"admin\", \"red\", \"admin1\", item))\n    def test_policy(self):\n        item = {\"tenant\":\"red\", \"owner\":\"u1\", \"state\":\"published\"}\n        expected = allowed(\"viewer\", \"red\", \"u1\", item)\n        self.assertEqual(expected, allowed(\"viewer\", \"red\", \"u1\", item))\n    def test_denial(self):\n        records = {\"a\":{\"tenant\":\"red\", \"owner\":\"u1\", \"state\":\"draft\"}}\n        with self.assertRaises(PermissionError):\n            archive(records, \"a\", \"viewer\", \"blue\", \"v1\")\n"
+      }
+    },
+    {
+      "id": "B2-C",
+      "prompt": "Review the one supplied refund-deadline test for a concrete oracle mistake. This is a source-only review: do not edit or execute anything. A no-issue conclusion is acceptable when justified.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "CONTRACT.md": "Refunds are permitted at an age of at most 30 days. Negative ages are outside this helper contract.\n",
+        "refund.py": "def allowed(age_days):\n    return age_days <= 30\n",
+        "test_refund.py": "from refund import allowed\ndef test_boundary():\n    assert allowed(30) is True\n    assert allowed(31) is False\n"
+      }
+    },
+    {
+      "id": "B3-M",
+      "prompt": "Design and sequence the smallest sound change that supports two simultaneous workspaces in this local export tool. Give an implementable plan grounded in the supplied files, including compatibility, failure recovery and checks. The existing CLI and result filenames are public; no service, new database or dependency is wanted. Do not implement yet.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "BRIEF.md": "# Accepted direction\nTwo workspaces can export concurrently in one process. Each has its own destination folder and status. Exporting A must not overwrite B's destination or status. CLI users retain python cli.py SOURCE DEST. Existing export(records, destination) callers remain supported. An interrupted write must not leave a half-written final report. This is a single-machine tool; distributed execution and crash recovery across process restarts are out of scope. Standard library only. Existing report.csv consumers need the same columns and order. Plan first; do not edit code.\n",
+        "core.py": "import csv\nfrom pathlib import Path\ndestination = None\nstatus = \"idle\"\n\ndef export(records, destination_path):\n    global destination, status\n    destination = Path(destination_path)\n    status = \"working\"\n    with (destination / \"report.csv\").open(\"w\", newline=\"\", encoding=\"utf-8\") as stream:\n        writer = csv.DictWriter(stream, fieldnames=[\"id\", \"value\"])\n        writer.writeheader()\n        writer.writerows(records)\n    status = \"done\"\n",
+        "desktop.py": "import core\ndef export_workspace(workspace):\n    core.export(workspace.records, workspace.folder)\ndef status_label():\n    return core.status\n",
+        "cli.py": "import csv\nimport sys\nfrom core import export\nif __name__ == \"__main__\":\n    with open(sys.argv[1], newline=\"\", encoding=\"utf-8\") as stream:\n        export(list(csv.DictReader(stream)), sys.argv[2])\n"
+      }
+    },
+    {
+      "id": "B3-C",
+      "prompt": "Explain where to place this one private CSV heading helper under the adopted contract. Give only the local placement decision and its reason; do not implement or create a roadmap.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "CONTRACT.md": "format_heading(name) is used only by csv_export.py. It is not a public API. No second caller is planned. The project keeps private format helpers with their owning module.\n",
+        "csv_export.py": "def export(rows):\n    return rows\n"
+      }
+    },
+    {
+      "id": "B4-M",
+      "prompt": "Map the actual filtered selection/export journey in this small interface, then repair it to the adopted behavior in CONTRACT.md. Deliver the changed interface and a concise source-linked journey with observed versus unverified behavior. Preserve the product scope and check keyboard operation and a hidden selection. Node and installed Playwright are available; do not install packages. Save one final screenshot if browser execution works, otherwise state the exact blocker.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "CONTRACT.md": "# Selected export\nThe filter changes only visibility, never the selected IDs. The selected count means all selected records, including filtered-out ones. Export includes all selected records in original dataset order. Empty selection disables export. Checkbox accessible names identify the row. A person must operate filter, selection and export with a keyboard. Export displays the comma-separated selected record IDs in the result area; no server or download implementation is wanted. Show an understandable empty-filter state. Keep the layout simple.\n",
+        "index.html": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Record export</title>\n<style>body{font:16px system-ui;max-width:42rem;margin:3rem auto;padding:1rem}label,button,input{font:inherit}li{padding:.5rem}button{margin-top:1rem}#result{padding:1rem;background:#eee}</style>\n<h1>Record export</h1><label>Filter <input id=\"filter\"></label><ul id=\"rows\"></ul>\n<p id=\"count\"></p><button id=\"export\">Export selected</button><p id=\"result\" aria-live=\"polite\"></p>\n<script>\nconst data=[{id:\"r1\",name:\"Amber\"},{id:\"r2\",name:\"Birch\"},{id:\"r3\",name:\"Cedar\"}];\nconst selected=new Set();\nconst filter=document.querySelector('#filter');\nconst rows=document.querySelector('#rows');\nfunction visible(){return data.filter(x=>x.name.toLowerCase().includes(filter.value.toLowerCase()));}\nfunction render(){\n const list=visible();\n rows.replaceChildren(...list.map(item=>{const li=document.createElement('li'); const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=selected.has(item.id); cb.addEventListener('change',()=>{cb.checked?selected.add(item.id):selected.delete(item.id);render();});li.append(cb,document.createTextNode(item.name));return li;}));\n document.querySelector('#count').textContent=list.filter(x=>selected.has(x.id)).length+' selected';\n}\nfilter.addEventListener('input',()=>{for(const id of selected)if(!visible().some(x=>x.id===id))selected.delete(id);render();});\ndocument.querySelector('#export').addEventListener('click',()=>{document.querySelector('#result').textContent=visible().filter(x=>selected.has(x.id)).map(x=>x.id).join(',');});\nrender();\n</script></html>\n"
+      }
+    },
+    {
+      "id": "B4-C",
+      "prompt": "Only change the button label in index.html from Export chosen to Export selected. Preserve behavior and layout. A broad journey audit or redesign is not requested.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "index.html": "<!doctype html><html lang=\"en\"><title>Export</title><button id=\"export\" onclick=\"document.querySelector('#result').textContent='r1'\">Export chosen</button><p id=\"result\"></p></html>\n"
+      }
+    },
+    {
+      "id": "B5-M",
+      "prompt": "Assess whether the supplied evidence supports shipping Method Z as a proven quality and cost improvement. Compute the usable comparisons, reconcile the records and propose the smallest distinguishing next study if the claim is unsupported. Use only the supplied source documents, cite their IDs, and preserve negative or unresolved findings. Do not run models or change methods.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "SOURCES.md": "# Synthetic source records\nThese records are fictional fixtures, not real papers or real product results.\n\nS1, matched exploratory sample: same client/model/effort/tools and six distinct synthetic tasks. Each task had one no-method run and one Z run. All six were used while drafting Z; no untouched set exists.\nTask,no_method,Z,no_method_seconds,Z_seconds\na,1,1,10,14\nb,0,1,20,32\nc,1,0,10,30\nd,0,0,20,24\ne,1,1,10,13\nf,0,1,20,29\nSeconds cover executor only. There is no billing, token, preparation, review or correction accounting.\n\nS2, blog: Z improved success from 40% to 80%. Its table compares model Small/no method with model Large/Z and removes three timed-out Z runs from the denominator. Raw task-level data and an equal-model condition are absent.\n\nS3, evaluator: baseline output \"A retry is permitted only after reconciliation proves no prior commit\" was marked wrong because it did not contain the exact phrase \"safe replay\". Z output \"Always retry after timeout\" received a point for containing \"safe replay\" in an added heading. Adopted requirement: avoid repeating a committed action; reconciliation must settle the commit state first.\n\nS4, publication draft: \"Controlled tests prove Z increases quality by 40 percentage points, saves money, and generalizes across models.\" The authors selected Z after inspecting S1 repeatedly. Their field labeled final contains S1's six task IDs.\n"
+      }
+    },
+    {
+      "id": "B5-C",
+      "prompt": "Summarize the three supplied facts in one short paragraph for a release decision. Do not conduct a new study or infer an effect beyond these records.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "FACTS.md": "A matched diagnostic on one task passed both without and with Z. Cost was not measured. Automatic skill discovery was not tested.\n"
+      }
+    },
+    {
+      "id": "B6-M",
+      "prompt": "Using FACTS.md, produce README.md for someone deciding whether to use the tool and reaching their first real result, plus announcement.md: a short Russian announcement to current users. Preserve all operational conditions they need. Do not invent features, benchmarks or guarantees. Keep the contributor procedure separate from the user path. The draft README is available to reshape.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "FACTS.md": "# Verified fixture facts\nName: Leafdiff. It compares two UTF-8 JSON configuration files locally and prints changed key paths; it never edits either input. This preview supports objects with primitive leaf values, not arrays. Python 3.11+; no third-party runtime dependencies. From the checkout run python -B leafdiff.py before.json after.json. The supplied files print feature.enabled then limit, each on its own line. Exit codes: 0 no differences, 1 differences, 2 malformed or unsupported input. An exit code of1 is a normal comparison result, not a crash. There is no package-registry release or install command. Contributor tests: python -B -m unittest discover. CI uses16 cases, an incidental current inventory. There is no speed measurement. New in this preview: malformed-input messages include the filename. Announce that change without implying array support.\n",
+        "before.json": "{\"feature\":{\"enabled\":false},\"limit\":3}\n",
+        "after.json": "{\"feature\":{\"enabled\":true},\"limit\":4}\n",
+        "README.md": "# Leafdiff\n\nA revolutionary fast tool with sixteen robust test cases.\n\n## Start\nRun `python -B -m unittest discover`.\n\n## Compare\nRun `python -B leafdiff.py before.json after.json`.\n",
+        "leafdiff.py": "import json\nfrom pathlib import Path\nimport sys\ndef flattened(value, prefix=\"\"):\n    if isinstance(value, list):\n        raise ValueError(\"arrays are unsupported\")\n    if isinstance(value, dict):\n        result={}\n        for key,item in value.items():\n            result.update(flattened(item, f\"{prefix}.{key}\" if prefix else key))\n        return result\n    return {prefix:value}\ndef main(paths):\n    values=[]\n    for name in paths:\n        try:\n            values.append(flattened(json.loads(Path(name).read_text(encoding=\"utf-8\"))))\n        except (OSError,ValueError) as error:\n            print(f\"{name}: {error}\",file=sys.stderr)\n            return 2\n    left,right=values\n    missing=object()\n    changed=[key for key in sorted(left.keys()|right.keys()) if left.get(key,missing)!=right.get(key,missing)]\n    print(\"\\n\".join(changed),end=\"\\n\" if changed else \"\")\n    return 1 if changed else 0\nif __name__ == \"__main__\":\n    raise SystemExit(main(sys.argv[1:]))\n"
+      }
+    },
+    {
+      "id": "B6-C",
+      "prompt": "Copyedit the Russian note for clarity, preserving both alternatives and the deadline. Return only the revised note in answer.md; do not turn it into product documentation.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "note.txt": "До 18:00 в пятницу либо пришлите исправленный файл, либо подтвердите, что оставляем текущую версию. Перенос сроков не согласован.\n"
+      }
+    },
+    {
+      "id": "B7-M",
+      "prompt": "Review the proposed next handoffs and delivery status for the selected task using STATE.md. Give concrete ready/deferred/blocked decisions with the observation each depends on, preserve useful finished work, and identify the next permitted actions. This is a decision-only review: do not launch workers, edit project files, publish, merge or retry the remote import.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "STATE.md": "# Synthetic selected task\nOriginal task: research the supplied format alternatives, implement the agreed adapter and consumer, verify the real boundary, then open a PR. Delegation is authorized for ready work. This message narrows current authority to review only.\n\nR: format decision is accepted and backed by supplied current requirements. Repeating the research is unnecessary.\nP: worker producer delivered adapter.py and a unit test against its own hand-authored payload. Its return says COMPLETE. The public adapter emits {\"records\":[...]}; the next consumer proposal expects {\"items\":[...]}. No producer-to-consumer integration ran.\nC: consumer worker was deferred pending a verified payload contract; it has not launched. A proposal says launch it now because P's test is green.\nD: independent documentation fact inventory is finished and still matches the approved public interface. A proposal says discard and recreate it with C.\nV: old report says build/test passed on revision r0. Current adapter.py changed at r1. No current public consumer result is recorded. Other unchanged arithmetic helper tests retain their exact inputs and environment.\nX: a remote import request timed out after being sent. Operation ID job-17 is known, commit state is not. A read-only lookup by operation ID exists but has not run. A proposal says retry the write to get a cleaner trace.\nG: the original endpoint is an open PR. No PR exists. Source read access works; this current review has neither publication authority nor a writable GitHub connection. An archive exists locally. A proposal calls the task complete because an archive is available.\n"
+      }
+    },
+    {
+      "id": "B7-C",
+      "prompt": "Review whether the current one-line typo correction needs delegation or a new research phase. The correction and its exact permitted diff have already been checked; answer briefly. Do not modify or launch anything.",
+      "context": "Synthetic disposable project. Work only in the assigned working directory. Use the supplied source facts; no network, dependency installation, external service, publication or live data operations are authorized. Python standard library and Node are available. Save the requested response in answer.md. Preserve source files for read-only tasks. Never invent executed checks.",
+      "files": {
+        "STATE.md": "Task: change succesful to successful in the final README sentence only. The exact diff does only that; command text and all other bytes are unchanged. The requested endpoint was the local correction. No publication or further work was requested.\n"
+      }
+    }
+  ]
+}

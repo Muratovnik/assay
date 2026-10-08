@@ -47,12 +47,28 @@ These checks establish structural consistency and the specific utility behavior
 asserted by the tests. They do not establish semantic case independence, correct
 grading expectations, effective access isolation or answer quality.
 
+The catalog comparison adds calibrated CSV and preservation fixtures, plus a
+read-only replay check of retained input/output bytes, complete allocation and
+criterion inventories, and published result arithmetic. Its CI checks do not
+execute saved model outputs or rejudge their semantic quality. The
+[study protocol](../skills/skill-evaluation/evals/comparison-protocol.md) records
+the separate execution and assessment boundaries.
+
 ## What is deliberately not proven
 
-No model is run in CI. There is no score in this repository, no leaderboard and
-no claim that a skill improves outcomes by some percentage. Measuring that needs
-authorized comparable runs against a frozen baseline, and a result would belong to the client,
-model and date it was measured on rather than to the skill.
+No model is run in CI. The repository contains scoped behavioral studies, but no
+catalog-wide effectiveness score or leaderboard. The
+[technical-writing relevance study](../skills/technical-writing/evals/relevance-study.md)
+retains 25 real outputs across several candidate versions, including controls;
+those are not 25 independent trials of the final method. The
+[catalog diagnostic comparison](research/skill-effectiveness-diagnostic.md)
+separates its own runs from that earlier evidence, the unmerged durability study
+in [PR 23](https://github.com/Muratovnik/assay/pull/23), and the full-catalog
+comparison in [PR 24](https://github.com/Muratovnik/assay/pull/24).
+
+Each result belongs to its frozen task, method, client, model, grading policy and
+observed execution conditions. Neither a study's presence nor green CI establishes
+general superiority, native discovery or savings across the catalog.
 
 Static files also cannot prove discovery. That a skill is installed where a
 client documents its skill root does not prove the client loaded it, and a model
@@ -93,8 +109,8 @@ are public synthetic working inputs and a run protocol, not executed model
 results. Their read-only decision cases do not establish real dispatch or cleanup.
 
 The [small execution comparison](../skills/skill-evaluation/evals/workflow-execution.md)
-adds three tasks requiring delivered changes: a public CLI whose helper test is
-already green, an inert spelling correction and a small authorization repair.
+covers delivered CSV, authorization and report-generation repairs, an inert
+spelling correction, and read-only assessment of retained verification.
 It separates natural discovery from a diagnostic forced-method run and grades
 actual artifacts and consumer outcomes. Its fixture tests exercise known faulty
 and repaired programs, not a model. This is a prepared pilot, not a completed

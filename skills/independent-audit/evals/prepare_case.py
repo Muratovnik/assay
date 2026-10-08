@@ -83,14 +83,28 @@ def skill_snapshot(skill_root, name="independent-audit"):
         raise ValueError("Invalid runtime skill name")
     root = plain_path(skill_root)
     relatives = ["SKILL.md"]
-    if (root / "agents" / "openai.yaml").exists():
+    interface = root / "agents" / "openai.yaml"
+    if interface.exists() or interface.is_symlink():
         relatives.append("agents/openai.yaml")
-    if (root / "references").exists():
-        plain_path(root / "references")
-        for path in sorted((root / "references").rglob("*")):
-            plain_path(path)
-            if path.is_file():
-                relatives.append(path.relative_to(root).as_posix())
+    # Runtime resources are needed in a singleton too. Keep evaluator stores
+    # outside this allowlist instead of copying the source package wholesale.
+    for directory in ("references", "assets", "scripts", "templates", "examples"):
+        resource = root / directory
+        if not resource.exists() and not resource.is_symlink():
+            continue
+        resource = plain_path(resource)
+        if not resource.is_dir():
+            raise ValueError(f"Runtime resource root must be a directory: {directory}")
+        pending = [resource]
+        while pending:
+            for path in sorted(pending.pop().iterdir()):
+                checked = plain_path(path)
+                if checked.is_dir():
+                    pending.append(checked)
+                elif checked.is_file():
+                    relatives.append(checked.relative_to(root).as_posix())
+                else:
+                    raise ValueError(f"Unsupported runtime entry: {path.name}")
     return {
         "skill/" + name + "/" + rel: input_file(root, rel).read_bytes()
         for rel in relatives
