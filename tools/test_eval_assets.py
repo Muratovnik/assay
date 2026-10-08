@@ -246,6 +246,21 @@ class CorpusAndPacketTests(unittest.TestCase):
             ea.prepare(cases_path=cases, case_id="one", output_parent=self.outputs)
         self.assertEqual([], list(self.outputs.iterdir()))
 
+    def test_ui_case_prepares_without_exposing_trigger_labels(self) -> None:
+        directory = ROOT / "skills/ui-delivery/evals"
+        source = ea.load(directory / "cases.json")["cases"][0]
+        packet, digest = ea.prepare(cases_path=directory / "cases.json",
+            case_id=source["id"], output_parent=self.outputs)
+        self.assertEqual(source["prompt"] + "\n", (packet / "prompt.txt").read_text(encoding="utf-8"))
+        self.assertEqual(source["context"] + "\n", (packet / "context.txt").read_text(encoding="utf-8"))
+        ea.audit_tools().verify_packet(packet, digest)
+        before = set(self.outputs.iterdir())
+        labelled = ea.load(directory / "trigger-cases.json")["cases"][0]
+        with self.assertRaisesRegex(ValueError, "unsupported fields"):
+            ea.prepare(cases_path=directory / "trigger-cases.json",
+                case_id=labelled["id"], output_parent=self.outputs)
+        self.assertEqual(before, set(self.outputs.iterdir()))
+
 
 class RepositoryGateTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -267,6 +282,47 @@ class RepositoryGateTests(unittest.TestCase):
         write_json(audit / "evals.json", {"skill_name": "independent-audit", "evals": [
             {"id": 1, "prompt": "Inspect the brief.", "expected_output": "A scoped result.",
              "files": ["files/1/brief.md"], "assertions": ["Do not invent evidence."]}]})
+        # UI decisions use the shared input schema; legacy trigger labels do not.
+        ui = self.root / "skills/ui-delivery/evals"
+        write_json(ui / "cases.json", inputs("ui-delivery"))
+        write_json(ui / "rubric.json", rubric(inputs("ui-delivery")))
+        for name, path in (("ui-delivery", ui / "trigger-cases.json"),
+                           ("independent-audit", audit / "trigger-evals.json")):
+            shutil.copyfile(ROOT / "skills" / name / "evals" / path.name, path)
+
+    def test_gate_checks_ui_case_and_rubric_in_both_directions(self) -> None:
+        directory = self.root / "skills/ui-delivery/evals"
+        for field in ("prompt", "rubric_id"):
+            with self.subTest(field=field):
+                source = inputs("ui-delivery")
+                criteria = rubric(source)
+                if field == "prompt":
+                    source["cases"][0]["prompt"] = ""
+                else:
+                    criteria["cases"][0]["id"] = "missing"
+                write_json(directory / "cases.json", source)
+                write_json(directory / "rubric.json", criteria)
+                with self.assertRaises(ValueError):
+                    ea.check(self.root)
+        write_json(directory / "cases.json", inputs("ui-delivery"))
+        write_json(directory / "rubric.json", rubric(inputs("ui-delivery")))
+        self.assertIn("ui-delivery", ea.check(self.root))
+
+    def test_gate_validates_labelled_trigger_formats_without_scoring_them(self) -> None:
+        for name, filename in (("ui-delivery", "trigger-cases.json"),
+                               ("independent-audit", "trigger-evals.json")):
+            path = self.root / "skills" / name / "evals" / filename
+            valid = ea.load(path)
+            for field, value in (("should_trigger", "false"), ("should_trigger", 1),
+                                 ("prompt", " ")):
+                with self.subTest(skill=name, field=field, value=value):
+                    invalid = copy.deepcopy(valid)
+                    invalid["cases"][0][field] = value
+                    write_json(path, invalid)
+                    with self.assertRaises(ValueError):
+                        ea.check(self.root)
+            write_json(path, valid)
+        ea.check(self.root)
 
     def test_gate_checks_new_skill_without_a_manual_only_override(self) -> None:
         report = ea.check(self.root)
