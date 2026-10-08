@@ -140,6 +140,48 @@ No subject was rerun and no criterion status changed. All four actual CSV
 submissions' suites pass. A later repair to measurement is not presented as
 pre-execution code, and the original adverse evidence remains visible.
 
+### Post-study Windows portability repair
+
+The first [hosted qualification run](https://github.com/Muratovnik/assay/actions/runs/37859453187)
+at publication head `f61dcea802572fefcd193ea03c86834f62afc838` passed all ten
+Linux gates, the full-history publication audit and Linux plugin-manifest
+validation. Windows passed nine gates but failed six comparison controls. Five
+failures came from a real public Python invocation being retained as a Windows
+command-line string, while the checker recognized only argument lists. The
+sixth came from fixture construction translating canonical LF source bytes to
+CRLF before a strict source-preservation check.
+
+The post-study repair retains the supplied argument vector, correlates it with
+the actual subprocess audit event and requires a successfully launched process.
+Public-command credit also requires the known Python executable and the exact
+subject script in the script position; a matching filename used as data, a shell
+wrapper or an unclassified string does not establish that boundary. Canonical
+fixture inputs are written as bytes. The raw-byte preservation requirement stays
+strict. The expanded local calibration passes 22 tests, including real spaced-path
+invocations, constructed Windows command representations, deceptive arguments,
+failed launches and a deliberate LF-to-CRLF mutation that remains refuted.
+
+Historical measurement version v2 remains the retained checker with SHA-256
+`89f598c3a1d2a12c0215b95375e06ca15803a5e004cae89b7f871db6642686aa`.
+The working-tree implementation is a separate post-study revision. Historical
+v1/v2 sources, their sixteen receipts, the blinded grading inputs and the frozen
+design, evidence, grades and publication commitments remain unchanged. The
+failed hosted run is retained alongside subsequent validation; it is not removed
+from the qualification history.
+
+A separate [post-study validation record](../../skills/skill-evaluation/evals/comparison-portability-validation.json)
+binds the new checker, exact input inventories and raw receipt digests for all
+eight previously checked artifacts: R23/R24, R33/R34 and R35–R38. One new checker
+invocation per saved artifact, with no retries, reproduces every historical v2
+deterministic verdict: 40 `met`, zero `refuted` and eight `not_verified` over 48
+requirements. All four applicable submitted-suite assessments remain `met`.
+These comparisons use the old deterministic receipts, not the later semantic
+grades. Each checker exits `2` because one criterion remains unverified by that
+deterministic measurement; that expected outcome is not recoded as full delivery
+success.
+The replay was on Linux and does not substitute for hosted Windows qualification.
+Its exact raw receipts remain privately retained under the published digests.
+
 ### Restoration and evidence accounting
 
 The same review found a linked-parent restoration path and insufficient rejection
@@ -519,6 +561,11 @@ The second command executes submitted Python only in disposable copies. It is
 not an operating-system sandbox; review untrusted external submissions before
 using it. Exit `2` means missing evidence, including the worker-history criterion,
 even when observable code behavior passes.
+
+This command uses the current post-study checker. The execution ledger retains
+the exact earlier v1/v2 source blobs and their original receipts for historical
+measurement review; the portability validation record identifies the later
+implementation separately.
 
 Repository structural and utility checks are separate:
 

@@ -17,8 +17,10 @@ import hashlib
 from html.parser import HTMLParser
 import io
 import json
+import ntpath
 import os
 from pathlib import Path
+import posixpath
 import shutil
 import subprocess
 import sys
@@ -32,11 +34,32 @@ IGNORED = {".git", "__pycache__", ".pytest_cache"}
 # This records the existing unittest runner's outcomes and observed public calls.
 # Unknown child invocation forms remain a coverage limit, not a failed assertion.
 UNITTEST_RECEIPT = r'''
-import contextlib, io, json, os, pathlib, sys, threading, unittest
+import contextlib, io, json, os, pathlib, subprocess, sys, threading, unittest
 receipt, root = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]).resolve()
 os.chdir(root)
 sys.path.insert(0, str(root))
-calls, processes = [], []
+calls, processes, invocations = [], [], []
+active_processes = threading.local()
+original_popen_init = subprocess.Popen.__init__
+def observed_popen_init(self, args, *other, **kwargs):
+    # Retain the supplied vector before Windows serializes it for CreateProcess.
+    # A matching audit event and successful constructor are both required below.
+    try:
+        argv = [os.fsdecode(arg) for arg in args] if isinstance(args, (list, tuple)) else None
+    except TypeError:
+        argv = None
+    stack = getattr(active_processes, "stack", None)
+    if stack is None:
+        stack = active_processes.stack = []
+    pending = {"argv": argv, "events": []}
+    stack.append(pending)
+    try:
+        original_popen_init(self, args, *other, **kwargs)
+        for invocation in pending["events"]:
+            invocation["launched"] = isinstance(self.pid, int) and self.pid > 0
+    finally:
+        stack.pop()
+subprocess.Popen.__init__ = observed_popen_init
 def profile(frame, event, arg):
     if event == "call" and frame.f_code.co_name == "export":
         if pathlib.Path(frame.f_code.co_filename).resolve() == root / "export.py":
@@ -44,7 +67,22 @@ def profile(frame, event, arg):
 def audit(event, args):
     if event == "subprocess.Popen":
         command = args[1]
-        processes.append(list(map(str, command)) if isinstance(command, (list, tuple)) else str(command))
+        command = [os.fsdecode(arg) for arg in command] if isinstance(command, (list, tuple)) else str(command)
+        processes.append(command)
+        stack = getattr(active_processes, "stack", [])
+        pending = stack[-1] if stack else None
+        argv = pending["argv"] if pending else None
+        matched = argv is not None and (command == argv or command == subprocess.list2cmdline(argv))
+        invocation = {
+            "argv": argv if matched else None,
+            "process_command_index": len(processes) - 1,
+            "executable": os.fsdecode(args[0]) if args[0] is not None else None,
+            "cwd": str(pathlib.Path(os.fsdecode(args[2]) if args[2] is not None else os.getcwd()).resolve()),
+            "launched": False,
+        }
+        invocations.append(invocation)
+        if pending:
+            pending["events"].append(invocation)
     elif event in {"os.system", "os.exec", "os.posix_spawn"}:
         processes.append({"unclassified_process_event": event})
 sys.addaudithook(audit)
@@ -65,12 +103,17 @@ try:
         "successful": result.wasSuccessful(),
         "public_calls": calls,
         "process_commands": processes,
+        "process_invocations": invocations,
+        "process_os": os.name,
+        "python_executable": sys.executable,
+        "subject_root": str(root),
         "runner_output": runner_output.getvalue()[-4000:],
         "subject_output": captured.getvalue()[-4000:]
     }
 except BaseException as exc:
     data = {"harness_error": type(exc).__name__ + ": " + str(exc)}
 finally:
+    subprocess.Popen.__init__ = original_popen_init
     sys.setprofile(None)
     threading.setprofile(None)
 receipt.write_text(json.dumps(data), encoding="utf-8")
@@ -174,10 +217,56 @@ def passing_suite(run):
 
 def observed_public_boundary(run):
     receipt = run.get("receipt", {})
-    if receipt.get("public_calls"):
+    if "export.py:export" in receipt.get("public_calls", []):
         return True
-    for cmd in receipt.get("process_commands", []):
-        if isinstance(cmd, list) and any(Path(arg).name == "export.py" for arg in cmd):
+    paths = {"nt": ntpath, "posix": posixpath}.get(receipt.get("process_os"))
+    root, python = receipt.get("subject_root"), receipt.get("python_executable")
+    if paths is None or not all(isinstance(value, str) and paths.isabs(value) for value in (root, python)):
+        return False
+    normalized = lambda path: paths.normcase(paths.normpath(path))
+    def contains_parent(path):
+        return ".." in (path.replace("\\", "/") if paths is ntpath else path).split("/")
+    # Lexical collapse cannot establish identity through a runtime-created link.
+    if contains_parent(root) or contains_parent(python):
+        return False
+    target = normalized(paths.join(root, "export.py"))
+    commands = receipt.get("process_commands", [])
+    for invocation in receipt.get("process_invocations", []):
+        argv = invocation.get("argv")
+        index = invocation.get("process_command_index")
+        cwd = invocation.get("cwd")
+        if (invocation.get("launched") is not True or not isinstance(argv, list) or len(argv) < 2
+                or not all(isinstance(arg, str) for arg in argv)
+                or type(index) is not int or not 0 <= index < len(commands)
+                or not isinstance(cwd, str) or not paths.isabs(cwd) or contains_parent(cwd)):
+            continue
+        # Recheck the raw-event binding; unstructured strings are never guessed.
+        if commands[index] != argv and commands[index] != subprocess.list2cmdline(argv):
+            continue
+        executable = invocation.get("executable")
+        if executable is None:
+            executable = argv[0]
+        if (not isinstance(executable, str) or contains_parent(executable)
+                or normalized(executable) != normalized(python)):
+            continue
+        position = 1
+        while position < len(argv):
+            option = argv[position]
+            if option in {"-B", "-E", "-I", "-s", "-S", "-u", "-b", "-bb", "-q", "-P"}:
+                position += 1
+            elif option in {"-W", "-X"}:
+                position += 2
+            elif option.startswith(("-W", "-X")):
+                position += 1
+            elif option == "--":
+                position += 1
+                break
+            else:
+                break
+        # -c/-m, unknown options and export.py used as data are not script runs.
+        if (position < len(argv) and not argv[position].startswith("-")
+                and not contains_parent(argv[position])
+                and normalized(paths.join(cwd, argv[position])) == target):
             return True
     return False
 

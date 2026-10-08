@@ -1,0 +1,567 @@
+{
+  "schema_version": 1,
+  "kind": "post-study-portability-validation",
+  "status": "pass",
+  "scope": "Derived validation of eight already retained artifacts with a later checker revision. No new model or subject execution; no replacement of historical receipts or semantic grades.",
+  "study_source_revision": "94c517b0aac9ba2575086bf9aead1cc828aadb0d",
+  "historical_published_head": "f61dcea802572fefcd193ea03c86834f62afc838",
+  "started_at_utc": "2026-10-08T23:40:47.099898+00:00",
+  "finished_at_utc": "2026-10-08T23:40:51.756593+00:00",
+  "host": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.12.14"
+  },
+  "implementations": {
+    "historical_v1_checker_sha256": "db42f9dd691da76be3f52fd6e6c4be81ff59004c70e1640e702f30f7741e9853",
+    "historical_v2_checker_sha256": "89f598c3a1d2a12c0215b95375e06ca15803a5e004cae89b7f871db6642686aa",
+    "post_study_checker_sha256": "1d4a4860caa26f9513a4128ebb4fabcadaff7823120ac2cd0ad3c747d9eaf0dd",
+    "cases_sha256": "efe84e810b326d45031421ed1d7d5692f29a629505d046497c978ee5c7bf6469",
+    "rubric_sha256": "863a109c26bf177a35b1fa0f59d16068ed315b38f759a2f11d3e4034c8c2a8cd",
+    "replay_recorder_sha256": "d7a7e814a8a4ddc735008b91514b74588e3d25eacf7d542c66edda2d3029a801"
+  },
+  "inventory_hash_definition": "SHA-256 of UTF-8 json.dumps(relative-file-to-SHA-256 mapping, sort_keys=True), with Python default separators.",
+  "raw_receipt_hash_definition": "SHA-256 of the exact subprocess stdout bytes, without normalization or appended provenance fields.",
+  "allocation": {
+    "retained_artifacts": [
+      "R23",
+      "R24",
+      "R33",
+      "R34",
+      "R35",
+      "R36",
+      "R37",
+      "R38"
+    ],
+    "invocations": 8,
+    "retries": 0,
+    "new_subject_runs": 0,
+    "raw_receipts_captured": 8
+  },
+  "comparison_basis": "Historical v2 deterministic receipts, not final semantic judgments.",
+  "historical_criterion_counts": {
+    "met": 40,
+    "not_verified": 8
+  },
+  "post_study_criterion_counts": {
+    "met": 40,
+    "not_verified": 8
+  },
+  "matching_artifact_outcomes": 8,
+  "frozen_file_identities": {
+    "comparison-plan.json": {
+      "before_sha256": "fbdb26a107b90fbff48b7bcf9dba90913c94339dbe1617d559f5ca8754c9ef88",
+      "after_sha256": "fbdb26a107b90fbff48b7bcf9dba90913c94339dbe1617d559f5ca8754c9ef88"
+    },
+    "comparison-cases.json": {
+      "before_sha256": "efe84e810b326d45031421ed1d7d5692f29a629505d046497c978ee5c7bf6469",
+      "after_sha256": "efe84e810b326d45031421ed1d7d5692f29a629505d046497c978ee5c7bf6469"
+    },
+    "comparison-rubric.json": {
+      "before_sha256": "863a109c26bf177a35b1fa0f59d16068ed315b38f759a2f11d3e4034c8c2a8cd",
+      "after_sha256": "863a109c26bf177a35b1fa0f59d16068ed315b38f759a2f11d3e4034c8c2a8cd"
+    },
+    "comparison-case-metadata.json": {
+      "before_sha256": "de5fb7d66d8df7d00389403b98374a6074d21766e020aa425dc9275a6156e87c",
+      "after_sha256": "de5fb7d66d8df7d00389403b98374a6074d21766e020aa425dc9275a6156e87c"
+    },
+    "comparison-protocol.md": {
+      "before_sha256": "02ccc6e55c6271fbaf28eb1ed3c448c2dc44a29a90075d8de273d659e3a4e79b",
+      "after_sha256": "02ccc6e55c6271fbaf28eb1ed3c448c2dc44a29a90075d8de273d659e3a4e79b"
+    },
+    "comparison-evidence.json": {
+      "before_sha256": "308eff4a2a94dae391263db15d7cfa038641f955806ce6398e054aa3b2ad273b",
+      "after_sha256": "308eff4a2a94dae391263db15d7cfa038641f955806ce6398e054aa3b2ad273b"
+    },
+    "comparison-grades.json": {
+      "before_sha256": "8f90112be88ccf80ffb251a42e9f0ce093d83d0954ffe18676c3352ef85d0bf9",
+      "after_sha256": "8f90112be88ccf80ffb251a42e9f0ce093d83d0954ffe18676c3352ef85d0bf9"
+    },
+    "comparison-results.json": {
+      "before_sha256": "7ce879d369594bdc3569fbcf60ebd8c54653fe97185849c87d4d02857767d53f",
+      "after_sha256": "7ce879d369594bdc3569fbcf60ebd8c54653fe97185849c87d4d02857767d53f"
+    },
+    "comparison-publication.json": {
+      "before_sha256": "848ec6cb89c0d88f0b33ab7aa22f065ae647ed3e1318b643a28a84a792fb6e2d",
+      "after_sha256": "848ec6cb89c0d88f0b33ab7aa22f065ae647ed3e1318b643a28a84a792fb6e2d"
+    },
+    "comparison_publication.py": {
+      "before_sha256": "ccab44c3e0c7f6e88b8dbc98775afad8c76f94ca88112de6bd58d3c188e94f11",
+      "after_sha256": "ccab44c3e0c7f6e88b8dbc98775afad8c76f94ca88112de6bd58d3c188e94f11"
+    },
+    "comparison_report.py": {
+      "before_sha256": "efff9cd0792aa42bfcf49a1dbdf15986a5c1b8cbd562be07515ec9112cec2373",
+      "after_sha256": "efff9cd0792aa42bfcf49a1dbdf15986a5c1b8cbd562be07515ec9112cec2373"
+    }
+  },
+  "frozen_files_unchanged": true,
+  "executed_checker_snapshot_unchanged": true,
+  "working_tree_checker_unchanged_during_replay": true,
+  "runs": [
+    {
+      "run_id": "R23",
+      "case_id": "B1-C",
+      "arm": "00",
+      "retained_v2_receipt_sha256": "40fe6fa71120d479fb2a38892eb677012efe34806f29acd990b1af29126230db",
+      "retained_output_inventory_sha256": "9b0898f3cd96040cad9564c23ac159ef895838746bc6e67979b0d63cd8951302",
+      "input_inventory_sha256_before": "9b0898f3cd96040cad9564c23ac159ef895838746bc6e67979b0d63cd8951302",
+      "input_inventory_sha256_after": "9b0898f3cd96040cad9564c23ac159ef895838746bc6e67979b0d63cd8951302",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "215b3852652bc3781ee5dfb03e362421cc6e5365263e5ed0350b8b52c155a34d",
+      "new_raw_receipt_bytes": 1522,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "db4aeea0ef0c4c07bdfe72f1d9cd97204ca2c0b484a5395fccf5b1d5772488ab",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-C-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-4",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": null,
+        "post_study": null,
+        "applicable": false
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R24",
+      "case_id": "B1-C",
+      "arm": "11",
+      "retained_v2_receipt_sha256": "a12f7491fc6a0261cf5b5891f8f381cf5b66ba083a503f352a0b0ac28432ef16",
+      "retained_output_inventory_sha256": "9cea449aa52a1fc7ed4e1e47bfab85e98dbaeb66aee6ee50fe478d0fa1029f26",
+      "input_inventory_sha256_before": "9cea449aa52a1fc7ed4e1e47bfab85e98dbaeb66aee6ee50fe478d0fa1029f26",
+      "input_inventory_sha256_after": "9cea449aa52a1fc7ed4e1e47bfab85e98dbaeb66aee6ee50fe478d0fa1029f26",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "8ab9a1ca769e4e0cea54802ce18cb52697f8610705d5df63cf2eeaed23c87d31",
+      "new_raw_receipt_bytes": 1522,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "b574f8c70099930eab387e87bca971add32db80028485fee69cfaf178b37d079",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-C-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-C-4",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": null,
+        "post_study": null,
+        "applicable": false
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R33",
+      "case_id": "B4-C",
+      "arm": "11",
+      "retained_v2_receipt_sha256": "e87b66e9d1403cf32da99d65fb808ee702e034cbca314c30ee67b200bd6d51fe",
+      "retained_output_inventory_sha256": "bf8077496cdc254bcc8e9babfe836846cafab3488cd325ff8163d40e15d402f1",
+      "input_inventory_sha256_before": "bf8077496cdc254bcc8e9babfe836846cafab3488cd325ff8163d40e15d402f1",
+      "input_inventory_sha256_after": "bf8077496cdc254bcc8e9babfe836846cafab3488cd325ff8163d40e15d402f1",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "df0a463bb2b7823b730b95819e2f8cf9c87a4091ea79f5c562e34168b8f1da42",
+      "new_raw_receipt_bytes": 1503,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "8d2c3ad2bdd90d4c6729ee668f626ce4b51691f541912635c42a08725e261320",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B4-C-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-4",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": null,
+        "post_study": null,
+        "applicable": false
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R34",
+      "case_id": "B4-C",
+      "arm": "00",
+      "retained_v2_receipt_sha256": "3239119808ac50ccbb094b3f9ba93b3eec123afa6e0c2813d16b3f9db890b038",
+      "retained_output_inventory_sha256": "2b3aeac5e9154915479ee2617f24e1e17adf132616f3f1d79ff79c72997f3d26",
+      "input_inventory_sha256_before": "2b3aeac5e9154915479ee2617f24e1e17adf132616f3f1d79ff79c72997f3d26",
+      "input_inventory_sha256_after": "2b3aeac5e9154915479ee2617f24e1e17adf132616f3f1d79ff79c72997f3d26",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "ccc599be39f338162c2522aeb965222b54f2bdd03b51a4b8b66894fea4ff7b86",
+      "new_raw_receipt_bytes": 1503,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "b1ad09d91d74ee28227d15eda663f1ef3bcd14ed11159281f1ab30481962ea6f",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B4-C-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B4-C-4",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": null,
+        "post_study": null,
+        "applicable": false
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R35",
+      "case_id": "B1-M",
+      "arm": "10",
+      "retained_v2_receipt_sha256": "9486ebcdfd0d695ab1c54699666d2bf82496d401121ed68e04c3030a3df7b123",
+      "retained_output_inventory_sha256": "ffbeed4f5a81b68d9922ff1f38f5fd7c04ca64935e7a4076545e24c9cf3cd239",
+      "input_inventory_sha256_before": "ffbeed4f5a81b68d9922ff1f38f5fd7c04ca64935e7a4076545e24c9cf3cd239",
+      "input_inventory_sha256_after": "ffbeed4f5a81b68d9922ff1f38f5fd7c04ca64935e7a4076545e24c9cf3cd239",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "be09590d5a8ab6ccb2992bf7276f438d52aeab33149a5eb1f49dbd69920170d3",
+      "new_raw_receipt_bytes": 21041,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "687d153f158348c82735fa43954f6a3c193335e3db318b47a325d91be7f5daef",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-M-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-4",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-5",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-6",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-7",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-8",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": "met",
+        "post_study": "met",
+        "applicable": true
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R36",
+      "case_id": "B1-M",
+      "arm": "00",
+      "retained_v2_receipt_sha256": "eabf2aef33c2f950e0e9d464d9b020d9ffd0ca126b450cb961827946b5a3b358",
+      "retained_output_inventory_sha256": "fd3fe3317863a838baf2047d2655a6810826ff652649144ed7ec658f6ceb3384",
+      "input_inventory_sha256_before": "fd3fe3317863a838baf2047d2655a6810826ff652649144ed7ec658f6ceb3384",
+      "input_inventory_sha256_after": "fd3fe3317863a838baf2047d2655a6810826ff652649144ed7ec658f6ceb3384",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "159f6a9252682125ed40ac5f3f353c2e3029b116cd23864ab68efb3650c517bc",
+      "new_raw_receipt_bytes": 23061,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "768e72a12a969f4f9dbd3ef521cb341d2f5164a259f565f8c2c39ccbb7016e70",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-M-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-4",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-5",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-6",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-7",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-8",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": "met",
+        "post_study": "met",
+        "applicable": true
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R37",
+      "case_id": "B1-M",
+      "arm": "11",
+      "retained_v2_receipt_sha256": "e4ae765a415effcc3a1f7f71d4131979dd2a705c1c539105173af8f957f88da3",
+      "retained_output_inventory_sha256": "8a289f48be476a26146ea4001f946fc05676ddd6f594225af994134b883991f2",
+      "input_inventory_sha256_before": "8a289f48be476a26146ea4001f946fc05676ddd6f594225af994134b883991f2",
+      "input_inventory_sha256_after": "8a289f48be476a26146ea4001f946fc05676ddd6f594225af994134b883991f2",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "3f0dd3921a32eadba44cf1c9d3b0e2f16d3bddcca03fa6e8c4aeae07aa560267",
+      "new_raw_receipt_bytes": 17402,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "d061aeec9d29c73351e88456d98c7ede4b49f5a35191078e7cd4749727184efa",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-M-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-4",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-5",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-6",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-7",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-8",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": "met",
+        "post_study": "met",
+        "applicable": true
+      },
+      "outcomes_match": true
+    },
+    {
+      "run_id": "R38",
+      "case_id": "B1-M",
+      "arm": "01",
+      "retained_v2_receipt_sha256": "a5e191ccfa71cb059e8b5eb794055a07db4a1e50a4a42ae4826fb47ba82d3bd1",
+      "retained_output_inventory_sha256": "8e3b91cc5ab349846f305b9f90f69798b06e235a8260743cbd180405bc274f52",
+      "input_inventory_sha256_before": "8e3b91cc5ab349846f305b9f90f69798b06e235a8260743cbd180405bc274f52",
+      "input_inventory_sha256_after": "8e3b91cc5ab349846f305b9f90f69798b06e235a8260743cbd180405bc274f52",
+      "input_bytes_match_retained_inventory": true,
+      "new_raw_receipt_sha256": "af964f85fbe216927f4e911aec38ae5184c4f1657f7559ba79755725beb6c175",
+      "new_raw_receipt_bytes": 17296,
+      "new_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "new_stderr_bytes": 0,
+      "invocation_record_sha256": "2361c843c1c0a2fdd178f2c5f23d63527171a1c0523916b1c2cde035901c84fd",
+      "returncode": 2,
+      "receipt_valid": true,
+      "historical_status": "not_verified",
+      "post_study_status": "not_verified",
+      "criteria": [
+        {
+          "id": "B1-M-1",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-2",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-3",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-4",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-5",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-6",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-7",
+          "historical": "met",
+          "post_study": "met"
+        },
+        {
+          "id": "B1-M-8",
+          "historical": "not_verified",
+          "post_study": "not_verified"
+        }
+      ],
+      "suite_assessment": {
+        "historical": "met",
+        "post_study": "met",
+        "applicable": true
+      },
+      "outcomes_match": true
+    }
+  ],
+  "raw_evidence_access": "Exact new stdout/stderr receipts, invocation records and complete before/after inventories are retained privately. This derived record supplies their hashes, not a public raw download.",
+  "limits": [
+    "Replay is on the recorded host only; it does not establish Windows execution or replace Windows CI qualification.",
+    "Fresh checker executions establish artifact behavior now, not earlier subject actions or native method loading.",
+    "Temporary copies are not an operating-system sandbox.",
+    "Unknown historical criteria stay unknown; these outcomes are not a new success rate or additional study subjects.",
+    "Historical v1/v2 receipts, the 42 outputs and grades, protocol and publication commitments remain authoritative and unchanged."
+  ]
+}
