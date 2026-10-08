@@ -18,11 +18,34 @@ a reference can start from the interface it specifies. Neither needs marketing.
 
 ## Select content before arranging it
 
-For each material block, decide whether to keep it, condense it, move it to an
-available destination or remove it within the requested scope. Ask what decision,
-action or understanding the reader would lose without it. A fact can be accurate
-and still be irrelevant here. This is editorial judgment, not a required ledger
-for every sentence or a new round of questions when the brief supplies the context.
+First establish what this document needs to answer. Use the request, publication
+surface and the reader's actual work to bound those questions. Add the prerequisites,
+causal connections and conditions needed to answer them. An explanation can develop
+understanding without prescribing an action. A procedure can anticipate a supported
+failure or recovery step without waiting for the user to ask about it. Do not infer
+a reader's worry, misconception, comparison or new goal just because a sentence
+could answer it.
+
+Choose the information before its wording: the main claims, their necessary
+qualifications and the explanation or evidence serving those questions. Then keep,
+condense, move or remove source material within scope. Topic relevance and factual
+support do not establish a place in that selection. Ask which established question
+or concrete dependency a detail serves; "the reader might appreciate it" does not
+supply one. Apply this directly on small tasks, without a mandatory outline file
+or additional user questions when the brief supplies the context.
+
+Choose the level of detail too. An overview may need a capability, a release note
+the affected class and changed behavior, and a reference an exact item. Name an
+individual instance when it identifies the actual scope, a necessary target, a
+meaningful exception or a useful example. A member of an already clear class does
+not earn a mention merely because it appears in a test, source note or recent fix.
+Do not replace a precise affected item with a broader claim to make prose shorter.
+
+While composing, keep this selection boundary: a new substantive aside needs the
+same task connection as a main claim. A link can identify its destination without
+selling an imagined use for it. Explain a non-obvious destination or actual choice
+when the reader needs that distinction. A real contrast describes relevant behavior
+or alternatives; an invented contrast introduces another question to the document.
 
 Select propositions, not source sentences. An author's suggested wording or account
 of how material was researched, selected or written is not a product property.
@@ -129,10 +152,13 @@ defect. Apply the review to the opened scope, without a required checklist file.
 
 1. **Locate surplus.** Inspect definitions beside familiar terms, adjacent
    paraphrases, repeated features, examples, qualifiers and copied source notes.
-   Identify the exact passage and what new decision, action, distinction, reason
-   or evidence it supplies. If deleting it loses none that this reader needs,
-   remove it. If only part contributes, keep that part and merge the overlap.
-   Do not justify a repetition merely by calling it "clarification" or "context".
+   Check each substantive addition, including a clause inside a useful sentence,
+   against the questions and dependencies established before composition. Name its
+   contribution and the basis for needing it here. A true example can add detail
+   without adding understanding; a benefit or reassurance can invent a new concern.
+   If removing it loses no needed meaning or useful explanatory connection, remove
+   it. Keep the contributing part when a sentence mixes useful and surplus material.
+   Do not justify an addition merely by calling it "clarification" or "context".
    Inspect modifiers too: what supported class, condition, degree or uncertainty
    changes if the word is removed? Keep a technical distinction or intentional
    emphasis the reader needs; cut a modifier that only endorses the author's work.
@@ -170,6 +196,10 @@ phrases to ban:
 | First-use guide for a newcomer who does not know read-only access: the same draft | Keep the explanation, for example "Observers can view the data but cannot change it." The technical label is optional if not needed elsewhere. |
 | The role reference also states that Observers can export restricted rows | Keep that permission. Read-only access does not tell the administrator which rows can be exported. |
 | An acceptance report includes a failed compatibility check and a note that its author rewrote the prose twice | Keep the check's subject, result and unresolved decision; omit the editing history. Evidence needed for acceptance does not make every work note relevant. |
+| A scheduling overview says all overnight jobs resume; a fixture names one job | The fixture name adds no scope or explanation. Keep the class-level behavior. |
+| A scheduling reference says only the `reindex` job can resume | Keep that exact name; dropping it would broaden the claim. |
+| A configuration reference adds an unsolicited argument against editing files by hand | Omit the argument unless the task or actual operation makes that alternative relevant. A supported fact about the editor does not establish a reader objection. |
+| A guide asks how local edits interact with an automatic reload | Explain that interaction and its consequences, including a concrete example if it helps. The contrast now answers the task. |
 
 An already suitable paragraph can remain unchanged. A review finding names the
 passage, the reader's established context and the missing contribution; a mere

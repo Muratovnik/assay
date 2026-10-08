@@ -1,0 +1,1478 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "dimensions": [
+    "source_fidelity",
+    "required_meaning",
+    "task_scope",
+    "content_relevance"
+  ],
+  "assessment_note": "The evaluator-only criteria retain their original local IDs. All published cases are now exposed regressions. Do not include the rubric or metadata in execution packets.",
+  "cases": [
+    {
+      "id": "TWREL01",
+      "assess": [
+        "Identify this as the released Harbor Jobs 2.7.0 update.",
+        "Explain that max_active_jobs caps active jobs across all workers on a queue.",
+        "Preserve the uncapped null default and the fact that existing queues keep that default.",
+        "Explain that lowering a cap does not cancel active jobs; further dispatch waits for room under the cap.",
+        "Present retryAfterMs as a TypeScript retry-delay feature requiring the 2.7 server and 2.7 TypeScript SDK.",
+        "Preserve the distinction between earliest retry eligibility and a guaranteed retry start.",
+        "State that retryAfterMs leaves maxAttempts in force.",
+        "Describe the TypeScript default shutdown grace increase from 30 seconds to 90 seconds.",
+        "Preserve that explicitly configured shutdown grace and per-job timeouts are unchanged.",
+        "Describe the scheduled-job fix as preventing early dispatch caused by the failover clock-offset error.",
+        "Tell operators to complete the server rollout before enabling either new server-dependent feature.",
+        "Scope the supported rolling upgrade to 2.6.x and retain compatibility with existing 2.6 workers.",
+        "Tell TypeScript SDK upgraders to check that platform termination time allows their selected worker grace plus overhead.",
+        "Make the explicit 30000-millisecond shutdownGraceMs setting discoverable as the way to retain the old grace.",
+        "Provide useful routes to the supplied upgrade and feature documentation.",
+        "Reject an output that claims: Queue caps are enabled by default, apply separately per worker, or cancel running work.",
+        "Reject an output that claims: retryAfterMs is available in the Python SDK, guarantees an exact retry time, or grants extra attempts.",
+        "Reject an output that claims: Every worker now has a 90-second job timeout or every operator must change a platform timeout.",
+        "Reject an output that claims: All scheduled jobs now start exactly on time.",
+        "Reject an output that claims: Bulk replay shipped or the release delivers a general 18% throughput improvement.",
+        "Reject an output that claims: queueLimit is the supported configuration key or the new features are supported during a mixed-server rollout.",
+        "Reject an output that claims: The supplied record establishes supported upgrade behavior from versions earlier than 2.6.x.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "assessment_principle": "Assess the response against the actual request and supplied evidence. A true fact is not automatically useful, and an unasked-for explanation is not automatically surplus. Allow source-backed examples, reasons, alternatives, and operational anticipation when they help this audience understand or act. Do not require an exact sentence, heading, length, or document structure.",
+        "how_to_assess_surplus": "Identify each proposed surplus passage, explain what work it does or fails to do for this reader, and consider the space and emphasis it consumes. Do not penalize a necessary literal identifier, a useful worked example, a qualified warning, or modest connective explanation merely for being specific. Distinguish irrelevant specificity from factual error; report both only when both apply.",
+        "grading_dimensions": [
+          "Fidelity to source and preservation of consequential conditions, scope, and uncertainty.",
+          "Coverage of the information needed for the requested document and audience.",
+          "Granularity, organization, and explanations that make the document usable.",
+          "Relevance surplus: unsupported reader stories, decorative named instances, unnecessary process narration, duplicative explanations, and other additions that consume attention without a useful job."
+        ],
+        "id": "w01",
+        "genre": "Public release notes",
+        "source_manifest": [
+          "change-record.md",
+          "upgrade-and-links.md"
+        ],
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Identify this as the released Harbor Jobs 2.7.0 update.",
+            "evidence": [
+              "change-record.md: release metadata"
+            ]
+          },
+          {
+            "id": "R2",
+            "requirement": "Explain that max_active_jobs caps active jobs across all workers on a queue.",
+            "evidence": [
+              "change-record.md: Queue concurrency caps"
+            ]
+          },
+          {
+            "id": "R3",
+            "requirement": "Preserve the uncapped null default and the fact that existing queues keep that default.",
+            "evidence": [
+              "change-record.md: Queue concurrency caps"
+            ]
+          },
+          {
+            "id": "R4",
+            "requirement": "Explain that lowering a cap does not cancel active jobs; further dispatch waits for room under the cap.",
+            "evidence": [
+              "change-record.md: Queue concurrency caps"
+            ],
+            "acceptance_notes": "A compact qualification is sufficient; a worked numeric example is optional."
+          },
+          {
+            "id": "R5",
+            "requirement": "Present retryAfterMs as a TypeScript retry-delay feature requiring the 2.7 server and 2.7 TypeScript SDK.",
+            "evidence": [
+              "change-record.md: TypeScript retry delay"
+            ]
+          },
+          {
+            "id": "R6",
+            "requirement": "Preserve the distinction between earliest retry eligibility and a guaranteed retry start.",
+            "evidence": [
+              "change-record.md: TypeScript retry delay"
+            ]
+          },
+          {
+            "id": "R7",
+            "requirement": "State that retryAfterMs leaves maxAttempts in force.",
+            "evidence": [
+              "change-record.md: TypeScript retry delay"
+            ]
+          },
+          {
+            "id": "R8",
+            "requirement": "Describe the TypeScript default shutdown grace increase from 30 seconds to 90 seconds.",
+            "evidence": [
+              "change-record.md: TypeScript shutdown default"
+            ]
+          },
+          {
+            "id": "R9",
+            "requirement": "Preserve that explicitly configured shutdown grace and per-job timeouts are unchanged.",
+            "evidence": [
+              "change-record.md: TypeScript shutdown default"
+            ]
+          },
+          {
+            "id": "R10",
+            "requirement": "Describe the scheduled-job fix as preventing early dispatch caused by the failover clock-offset error.",
+            "evidence": [
+              "change-record.md: Scheduled-job fix"
+            ]
+          },
+          {
+            "id": "R11",
+            "requirement": "Tell operators to complete the server rollout before enabling either new server-dependent feature.",
+            "evidence": [
+              "upgrade-and-links.md: upgrade paragraph"
+            ]
+          },
+          {
+            "id": "R12",
+            "requirement": "Scope the supported rolling upgrade to 2.6.x and retain compatibility with existing 2.6 workers.",
+            "evidence": [
+              "upgrade-and-links.md: upgrade paragraph"
+            ]
+          },
+          {
+            "id": "R13",
+            "requirement": "Tell TypeScript SDK upgraders to check that platform termination time allows their selected worker grace plus overhead.",
+            "evidence": [
+              "upgrade-and-links.md: termination paragraph"
+            ],
+            "acceptance_notes": "Phrase this as a check, not a universal requirement to raise a timeout."
+          },
+          {
+            "id": "R14",
+            "requirement": "Make the explicit 30000-millisecond shutdownGraceMs setting discoverable as the way to retain the old grace.",
+            "evidence": [
+              "upgrade-and-links.md: termination paragraph"
+            ]
+          },
+          {
+            "id": "R15",
+            "requirement": "Provide useful routes to the supplied upgrade and feature documentation.",
+            "evidence": [
+              "upgrade-and-links.md: Public guide paths"
+            ],
+            "acceptance_notes": "No exact link count or placement is required. Links should support the release notes and relevant upgrade decisions."
+          }
+        ],
+        "must_not_claim": [
+          {
+            "id": "N1",
+            "must_not_claim": "Queue caps are enabled by default, apply separately per worker, or cancel running work.",
+            "evidence": [
+              "change-record.md: Queue concurrency caps"
+            ],
+            "reason": "Each changes the operational meaning of the feature."
+          },
+          {
+            "id": "N2",
+            "must_not_claim": "retryAfterMs is available in the Python SDK, guarantees an exact retry time, or grants extra attempts.",
+            "evidence": [
+              "change-record.md: TypeScript retry delay"
+            ],
+            "reason": "The documented availability and retry semantics say otherwise."
+          },
+          {
+            "id": "N3",
+            "must_not_claim": "Every worker now has a 90-second job timeout or every operator must change a platform timeout.",
+            "evidence": [
+              "change-record.md: TypeScript shutdown default",
+              "upgrade-and-links.md: termination paragraph"
+            ],
+            "reason": "SDK scope, explicit overrides, and timeout types matter."
+          },
+          {
+            "id": "N4",
+            "must_not_claim": "All scheduled jobs now start exactly on time.",
+            "evidence": [
+              "change-record.md: Scheduled-job fix"
+            ],
+            "reason": "Queue capacity can still cause late starts."
+          },
+          {
+            "id": "N5",
+            "must_not_claim": "Bulk replay shipped or the release delivers a general 18% throughput improvement.",
+            "evidence": [
+              "change-record.md: Items not in this release"
+            ],
+            "reason": "The feature is unshipped and the benchmark is unvalidated for publication."
+          },
+          {
+            "id": "N6",
+            "must_not_claim": "queueLimit is the supported configuration key or the new features are supported during a mixed-server rollout.",
+            "evidence": [
+              "upgrade-and-links.md: upgrade paragraph and old draft note"
+            ],
+            "reason": "Both would lead operators to an unsupported configuration."
+          },
+          {
+            "id": "N7",
+            "must_not_claim": "The supplied record establishes supported upgrade behavior from versions earlier than 2.6.x.",
+            "evidence": [
+              "upgrade-and-links.md: upgrade paragraph"
+            ],
+            "reason": "The record only covers the specified version range."
+          }
+        ],
+        "relevance_surplus": {
+          "audience_job": "Understand shipped changes, their scope, and concrete upgrade decisions.",
+          "likely_surplus": [
+            {
+              "content": "The Cedar Finch pilot name, its two queue names, ticket numbers, and walkthrough duration.",
+              "reason": "They establish internal provenance, not public behavior or an upgrade action. A ticket link would need a real reader-facing purpose to justify inclusion."
+            },
+            {
+              "content": "A narrative of how engineering and support revised the old option name.",
+              "reason": "The valid key matters; the drafting history does not help readers configure this release."
+            },
+            {
+              "content": "An invented story about an operator chasing seasonal traffic, saving money, or replacing a competing queue.",
+              "reason": "The source establishes feature behavior, not those particular motivations or comparisons."
+            },
+            {
+              "content": "Repeating each feature once in highlights, once in detail, and once again in an upgrade recap without adding usable information.",
+              "reason": "Some summary/detail overlap can orient readers; mechanical restatement adds reading cost without a new job."
+            }
+          ],
+          "warranted_detail": [
+            "Literal option names, versions, scope qualifiers, and documentation links are operational information.",
+            "A short example showing a queue cap shared by several workers can clarify the most likely semantic confusion.",
+            "An example of retaining the previous shutdown grace, and an explanation of why the platform allowance matters, serve the upgrade task.",
+            "Mentioning no database migration can answer a reasonable operator concern even though the prompt does not ask it separately.",
+            "A concise warning against adopting new features before all servers are upgraded is necessary anticipation."
+          ]
+        },
+        "acceptable_forms": [
+          "Feature sections, concise grouped bullets, or another public release-note structure.",
+          "The release date and no-migration note are useful optional context; omission alone is not a failure.",
+          "The Python limitation may be conveyed through clear TypeScript-only scope rather than a repeated exclusion sentence."
+        ],
+        "grading_notes": [
+          "Do not require every source fact to appear.",
+          "Do not penalize a public-facing link label for differing from the internal section title.",
+          "Assess a cap example by correctness and explanatory value, not whether its numbers appeared in the source."
+        ]
+      }
+    },
+    {
+      "id": "TWREL02",
+      "assess": [
+        "Explain the workspace-to-project relationship and that projects group forms and submissions.",
+        "Explain that forms define collection questions/rules and submissions are completed responses tied to a published form version.",
+        "Orient admins to role assignment and project access as distinct parts of giving people access.",
+        "Differentiate the broad admin, project editor, and collector responsibilities enough to support navigation.",
+        "Explain that publishing changes creates a new form version and does not alter the version attached to existing submissions.",
+        "Explain that offline collection requires an assigned, previously downloaded form and that syncing is needed to upload or receive changes.",
+        "Connect submission review to acceptance and then to export eligibility.",
+        "Preserve that a CSV export is a snapshot of accepted submissions and attachments are available separately.",
+        "Provide a usable link to the project/form creation guide.",
+        "Provide a usable link to the access guide.",
+        "Provide a usable link to the form-version guide.",
+        "Provide a usable link to the review guide.",
+        "Provide a usable link to the export guide.",
+        "Reject an output that claims: Assigning a collector role grants access to every project.",
+        "Reject an output that claims: Publishing edits changes existing submissions or immediately updates offline devices.",
+        "Reject an output that claims: The administration website works offline or collectors can begin using an undownloaded form offline.",
+        "Reject an output that claims: The CSV includes every submission, embeds attachments, or stays live after it is requested.",
+        "Reject an output that claims: Scheduled exports are available on every plan or to every role.",
+        "Reject an output that claims: Campaign Manager or Team Space is the current UI destination, or a fabricated guide path is an available supplied destination.",
+        "Reject an output that claims: The typical onboarding order is enforced by the product.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "assessment_principle": "Assess the response against the actual request and supplied evidence. A true fact is not automatically useful, and an unasked-for explanation is not automatically surplus. Allow source-backed examples, reasons, alternatives, and operational anticipation when they help this audience understand or act. Do not require an exact sentence, heading, length, or document structure.",
+        "how_to_assess_surplus": "Identify each proposed surplus passage, explain what work it does or fails to do for this reader, and consider the space and emphasis it consumes. Do not penalize a necessary literal identifier, a useful worked example, a qualified warning, or modest connective explanation merely for being specific. Distinguish irrelevant specificity from factual error; report both only when both apply.",
+        "grading_dimensions": [
+          "Fidelity to source and preservation of consequential conditions, scope, and uncertainty.",
+          "Coverage of the information needed for the requested document and audience.",
+          "Granularity, organization, and explanations that make the document usable.",
+          "Relevance surplus: unsupported reader stories, decorative named instances, unnecessary process narration, duplicative explanations, and other additions that consume attention without a useful job."
+        ],
+        "id": "w02",
+        "genre": "Documentation repository README: product overview and navigation",
+        "source_manifest": [
+          "product-notes.md",
+          "navigation.md"
+        ],
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Explain the workspace-to-project relationship and that projects group forms and submissions.",
+            "evidence": [
+              "product-notes.md: current product model"
+            ]
+          },
+          {
+            "id": "R2",
+            "requirement": "Explain that forms define collection questions/rules and submissions are completed responses tied to a published form version.",
+            "evidence": [
+              "product-notes.md: current product model"
+            ]
+          },
+          {
+            "id": "R3",
+            "requirement": "Orient admins to role assignment and project access as distinct parts of giving people access.",
+            "evidence": [
+              "product-notes.md: Access"
+            ]
+          },
+          {
+            "id": "R4",
+            "requirement": "Differentiate the broad admin, project editor, and collector responsibilities enough to support navigation.",
+            "evidence": [
+              "product-notes.md: Access"
+            ],
+            "acceptance_notes": "A compact description or navigation explanation is enough; the full permissions matrix is not required."
+          },
+          {
+            "id": "R5",
+            "requirement": "Explain that publishing changes creates a new form version and does not alter the version attached to existing submissions.",
+            "evidence": [
+              "product-notes.md: Form lifecycle and field use"
+            ]
+          },
+          {
+            "id": "R6",
+            "requirement": "Explain that offline collection requires an assigned, previously downloaded form and that syncing is needed to upload or receive changes.",
+            "evidence": [
+              "product-notes.md: Form lifecycle and field use"
+            ]
+          },
+          {
+            "id": "R7",
+            "requirement": "Connect submission review to acceptance and then to export eligibility.",
+            "evidence": [
+              "product-notes.md: Form lifecycle and field use; Data exports"
+            ]
+          },
+          {
+            "id": "R8",
+            "requirement": "Preserve that a CSV export is a snapshot of accepted submissions and attachments are available separately.",
+            "evidence": [
+              "product-notes.md: Data exports"
+            ]
+          },
+          {
+            "id": "R9",
+            "requirement": "Provide a usable link to the project/form creation guide.",
+            "evidence": [
+              "navigation.md: Projects and forms"
+            ],
+            "acceptance_notes": "A clear link label may itself communicate the destination and purpose; an additional benefit or reason sentence is not required."
+          },
+          {
+            "id": "R10",
+            "requirement": "Provide a usable link to the access guide.",
+            "evidence": [
+              "navigation.md: People and permissions"
+            ],
+            "acceptance_notes": "A clear link label may itself communicate the destination and purpose; an additional benefit or reason sentence is not required."
+          },
+          {
+            "id": "R11",
+            "requirement": "Provide a usable link to the form-version guide.",
+            "evidence": [
+              "navigation.md: Publish and update forms"
+            ],
+            "acceptance_notes": "A clear link label may itself communicate the destination and purpose; an additional benefit or reason sentence is not required."
+          },
+          {
+            "id": "R12",
+            "requirement": "Provide a usable link to the review guide.",
+            "evidence": [
+              "navigation.md: Review submissions"
+            ],
+            "acceptance_notes": "A clear link label may itself communicate the destination and purpose; an additional benefit or reason sentence is not required."
+          },
+          {
+            "id": "R13",
+            "requirement": "Provide a usable link to the export guide.",
+            "evidence": [
+              "navigation.md: Export data"
+            ],
+            "acceptance_notes": "A clear link label may itself communicate the destination and purpose; an additional benefit or reason sentence is not required."
+          }
+        ],
+        "must_not_claim": [
+          {
+            "id": "N1",
+            "must_not_claim": "Assigning a collector role grants access to every project.",
+            "evidence": [
+              "product-notes.md: Access"
+            ],
+            "reason": "Project assignment is also required."
+          },
+          {
+            "id": "N2",
+            "must_not_claim": "Publishing edits changes existing submissions or immediately updates offline devices.",
+            "evidence": [
+              "product-notes.md: Form lifecycle and field use"
+            ],
+            "reason": "Version associations persist and offline devices must sync."
+          },
+          {
+            "id": "N3",
+            "must_not_claim": "The administration website works offline or collectors can begin using an undownloaded form offline.",
+            "evidence": [
+              "product-notes.md: Form lifecycle and field use"
+            ],
+            "reason": "Only prepared mobile collection is described as offline-capable."
+          },
+          {
+            "id": "N4",
+            "must_not_claim": "The CSV includes every submission, embeds attachments, or stays live after it is requested.",
+            "evidence": [
+              "product-notes.md: Data exports"
+            ],
+            "reason": "These conflict with export eligibility, format, and snapshot semantics."
+          },
+          {
+            "id": "N5",
+            "must_not_claim": "Scheduled exports are available on every plan or to every role.",
+            "evidence": [
+              "product-notes.md: Data exports"
+            ],
+            "reason": "They are a Pro workspace-admin feature."
+          },
+          {
+            "id": "N6",
+            "must_not_claim": "Campaign Manager or Team Space is the current UI destination, or a fabricated guide path is an available supplied destination.",
+            "evidence": [
+              "product-notes.md: current product model",
+              "navigation.md"
+            ],
+            "reason": "The current names and paths are supplied."
+          },
+          {
+            "id": "N7",
+            "must_not_claim": "The typical onboarding order is enforced by the product.",
+            "evidence": [
+              "navigation.md: typical first project paragraph"
+            ],
+            "reason": "Invitations can happen on either side of project creation."
+          }
+        ],
+        "relevance_surplus": {
+          "audience_job": "Build a simple, accurate product model and choose documentation for an administrative task.",
+          "likely_surplus": [
+            {
+              "content": "A bare list of demo workspace/project/form names, or the training-session duration when it does not aid a guide choice.",
+              "reason": "Listing named records or training provenance without explaining a relationship adds no orientation. Names are permitted when they anchor a useful explanation of the actual object model."
+            },
+            {
+              "content": "A history of the Campaigns and Team Space naming decisions.",
+              "reason": "Using current labels helps navigation; an internal naming history is not an administrative task."
+            },
+            {
+              "content": "A complete permissions matrix, field-by-field export walkthrough, or full sync diagnostic procedure.",
+              "reason": "The landing page should orient and route readers. Limited detail that clarifies an important boundary remains useful."
+            },
+            {
+              "content": "A claim that admins are necessarily managing volunteers, facing grant deadlines, or replacing spreadsheets.",
+              "reason": "These are invented audience situations and comparisons rather than supplied reader context."
+            },
+            {
+              "content": "Restating the same object hierarchy and navigation choice in several sections.",
+              "reason": "An opening model plus a compact task map can work, but repeated definitions with no additional distinction consume attention."
+            }
+          ],
+          "warranted_detail": [
+            "A small source-consistent example of a workspace containing named projects, or a project containing forms and submissions, can make the object relationships easier to grasp.",
+            "An example may use the supplied demo names when they clarify relationships. A bare name list is different from a useful named example; no name blacklist applies.",
+            "Offline-device/version behavior explains why an admin would open the version guide and is useful on an overview page.",
+            "The manual-versus-scheduled export distinction is relevant if scheduling is presented; retain the plan and role condition in that case.",
+            "A flexible typical first-project path can orient a new admin without pretending it is a mandatory setup sequence.",
+            "A brief explanation that accepted data is what reaches exports anticipates a reasonable workflow question.",
+            "A link to the field sync guide is useful optional navigation when it fits the orientation; its inclusion is not a required fact."
+          ]
+        },
+        "acceptable_forms": [
+          "A linked task table, descriptive link list, prose with contextual links, or a combination.",
+          "Object relationships may be explained through a short example or plain definitions.",
+          "Scheduling can be omitted; if included, retain Pro and workspace-admin scope.",
+          "Detailed collector edit states and immutable project slugs are optional; judge their contribution to orientation rather than their mere presence.",
+          "The sync troubleshooting link is optional. Omitting it is not a required-fact or navigation failure."
+        ],
+        "grading_notes": [
+          "Do not demand step-by-step procedures from this landing page.",
+          "The five required guide destinations test usable navigation, not a fixed heading or sentence count. Clear labels can convey purpose without added explanatory prose.",
+          "A brief overview plus a linked task map is not automatically repetitive; assess whether the map adds a choice or route.",
+          "README.md is the requested artifact and is rendered as the guide entry page. Assess orientation and navigation without adding repository conventions, development setup, badges, house-style rules, or a required heading structure.",
+          "Demo names may be retained inside a useful relationship explanation; the scoring target is purposeless listing or irrelevant training history, not names themselves."
+        ]
+      }
+    },
+    {
+      "id": "TWREL03",
+      "assess": [
+        "Distinguish HTTP 202 acceptance, completed indexing, and report-hour completeness.",
+        "Explain that event timestamps, converted to UTC, select report hours rather than upload receipt time.",
+        "Retain the inclusive start and exclusive end hour boundary, including the implication that exactly the next hour belongs there.",
+        "Explain completeness as coverage of all twelve five-minute slots, with good-quality readings required.",
+        "Explain that multiple readings in one slot do not compensate for an empty slot.",
+        "Make the causal mechanism understandable: accepting and indexing the uploaded readings can succeed while a report hour still lacks a distinct good reading in one or more required slots.",
+        "Give a usable diagnostic path that checks import state and retrieves the channel readings for the affected UTC hour.",
+        "Tell readers to inspect slot coverage and quality rather than only the total number of rows.",
+        "Direct corrections toward actual missing or erroneous source readings while preserving the observation time.",
+        "Explain that recent indexed changes may await the ten-minute report refresh.",
+        "Distinguish older-than-24-hour backfills, which require a report rebuild, from data covered by ordinary refresh.",
+        "Provide an actionable route to request a historical rebuild and check completion.",
+        "Explain why an absent valid measurement cannot be fixed merely to make the completeness indicator green.",
+        "Warn that changing a timestamp offset label without converting the clock time changes the represented instant.",
+        "Reject an output that claims: HTTP 202 or import state complete guarantees a Complete hourly report.",
+        "Reject an output that claims: Twelve arbitrary rows, twelve bad-quality rows, or duplicates in one slot suffice for completeness.",
+        "Reject an output that claims: Upload receipt time selects the report hour, or the end boundary is inclusive.",
+        "Reject an output that claims: Every correct reading must occur exactly on a five-minute boundary.",
+        "Reject an output that claims: Reports refresh instantly, or ordinary refresh automatically covers backfills of any age.",
+        "Reject an output that claims: Relabel an offset as Z, shift a good reading into an empty slot, or mark an unverified bad reading good to fix coverage.",
+        "Reject an output that claims: The report estimates missing measurements or an irrecoverable gap can be made complete by retrying the same rows.",
+        "Reject an output that claims: Incident A is a defect in client 1.8 or was caused by the named engineer, request ID, or support process.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "assessment_principle": "Assess the response against the actual request and supplied evidence. A true fact is not automatically useful, and an unasked-for explanation is not automatically surplus. Allow source-backed examples, reasons, alternatives, and operational anticipation when they help this audience understand or act. Do not require an exact sentence, heading, length, or document structure.",
+        "how_to_assess_surplus": "Identify each proposed surplus passage, explain what work it does or fails to do for this reader, and consider the space and emphasis it consumes. Do not penalize a necessary literal identifier, a useful worked example, a qualified warning, or modest connective explanation merely for being specific. Distinguish irrelevant specificity from factual error; report both only when both apply.",
+        "grading_dimensions": [
+          "Fidelity to source and preservation of consequential conditions, scope, and uncertainty.",
+          "Coverage of the information needed for the requested document and audience.",
+          "Granularity, organization, and explanations that make the document usable.",
+          "Relevance surplus: unsupported reader stories, decorative named instances, unnecessary process narration, duplicative explanations, and other additions that consume attention without a useful job."
+        ],
+        "id": "w03",
+        "genre": "Explanation and troubleshooting",
+        "source_manifest": [
+          "report-behavior.md",
+          "incident-extracts.md"
+        ],
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Distinguish HTTP 202 acceptance, completed indexing, and report-hour completeness.",
+            "evidence": [
+              "report-behavior.md: first paragraph"
+            ]
+          },
+          {
+            "id": "R2",
+            "requirement": "Explain that event timestamps, converted to UTC, select report hours rather than upload receipt time.",
+            "evidence": [
+              "report-behavior.md: hour grouping",
+              "incident-extracts.md: Incidents A and B"
+            ]
+          },
+          {
+            "id": "R3",
+            "requirement": "Retain the inclusive start and exclusive end hour boundary, including the implication that exactly the next hour belongs there.",
+            "evidence": [
+              "report-behavior.md: hour grouping"
+            ]
+          },
+          {
+            "id": "R4",
+            "requirement": "Explain completeness as coverage of all twelve five-minute slots, with good-quality readings required.",
+            "evidence": [
+              "report-behavior.md: slot rules"
+            ]
+          },
+          {
+            "id": "R5",
+            "requirement": "Explain that multiple readings in one slot do not compensate for an empty slot.",
+            "evidence": [
+              "report-behavior.md: slot rules",
+              "incident-extracts.md: Incident A"
+            ]
+          },
+          {
+            "id": "R6",
+            "requirement": "Make the causal mechanism understandable: accepting and indexing the uploaded readings can succeed while a report hour still lacks a distinct good reading in one or more required slots.",
+            "evidence": [
+              "report-behavior.md: acceptance and slot rules",
+              "incident-extracts.md: Incident A"
+            ],
+            "acceptance_notes": "A worked example or contrast is welcome when it helps, but no example is mandatory. Clear explanatory prose, an effective diagnostic sequence, or another form can establish the mechanism."
+          },
+          {
+            "id": "R7",
+            "requirement": "Give a usable diagnostic path that checks import state and retrieves the channel readings for the affected UTC hour.",
+            "evidence": [
+              "report-behavior.md: status and readings endpoints"
+            ]
+          },
+          {
+            "id": "R8",
+            "requirement": "Tell readers to inspect slot coverage and quality rather than only the total number of rows.",
+            "evidence": [
+              "report-behavior.md: readings inspection"
+            ]
+          },
+          {
+            "id": "R9",
+            "requirement": "Direct corrections toward actual missing or erroneous source readings while preserving the observation time.",
+            "evidence": [
+              "report-behavior.md: correction guidance"
+            ]
+          },
+          {
+            "id": "R10",
+            "requirement": "Explain that recent indexed changes may await the ten-minute report refresh.",
+            "evidence": [
+              "report-behavior.md: report refresh",
+              "incident-extracts.md: Incident A"
+            ]
+          },
+          {
+            "id": "R11",
+            "requirement": "Distinguish older-than-24-hour backfills, which require a report rebuild, from data covered by ordinary refresh.",
+            "evidence": [
+              "report-behavior.md: report refresh"
+            ]
+          },
+          {
+            "id": "R12",
+            "requirement": "Provide an actionable route to request a historical rebuild and check completion.",
+            "evidence": [
+              "report-behavior.md: rebuild endpoint and guide links"
+            ],
+            "acceptance_notes": "Endpoint syntax and status route, or a well-labeled supplied rebuild guide link with the key trigger, can make this actionable."
+          },
+          {
+            "id": "R13",
+            "requirement": "Explain why an absent valid measurement cannot be fixed merely to make the completeness indicator green.",
+            "evidence": [
+              "report-behavior.md: correction guidance"
+            ],
+            "acceptance_notes": "A concise warning linked to the appropriate correction step suffices; no separate safety section is required."
+          },
+          {
+            "id": "R14",
+            "requirement": "Warn that changing a timestamp offset label without converting the clock time changes the represented instant.",
+            "evidence": [
+              "incident-extracts.md: Incident B"
+            ],
+            "acceptance_notes": "This may be shown with the provided conversion or an equally correct simple example."
+          }
+        ],
+        "must_not_claim": [
+          {
+            "id": "N1",
+            "must_not_claim": "HTTP 202 or import state complete guarantees a Complete hourly report.",
+            "evidence": [
+              "report-behavior.md: first paragraph"
+            ],
+            "reason": "Acceptance and indexing have different meanings from coverage."
+          },
+          {
+            "id": "N2",
+            "must_not_claim": "Twelve arbitrary rows, twelve bad-quality rows, or duplicates in one slot suffice for completeness.",
+            "evidence": [
+              "report-behavior.md: slot rules"
+            ],
+            "reason": "Twelve distinct covered slots with good data are required."
+          },
+          {
+            "id": "N3",
+            "must_not_claim": "Upload receipt time selects the report hour, or the end boundary is inclusive.",
+            "evidence": [
+              "report-behavior.md: hour grouping"
+            ],
+            "reason": "Both would misdiagnose the supplied incidents."
+          },
+          {
+            "id": "N4",
+            "must_not_claim": "Every correct reading must occur exactly on a five-minute boundary.",
+            "evidence": [
+              "report-behavior.md: slot rules"
+            ],
+            "reason": "Readings within a slot cover it; 10:07 is explicitly assigned to 10:05."
+          },
+          {
+            "id": "N5",
+            "must_not_claim": "Reports refresh instantly, or ordinary refresh automatically covers backfills of any age.",
+            "evidence": [
+              "report-behavior.md: report refresh"
+            ],
+            "reason": "The ten-minute cadence and 24-hour horizon are material conditions."
+          },
+          {
+            "id": "N6",
+            "must_not_claim": "Relabel an offset as Z, shift a good reading into an empty slot, or mark an unverified bad reading good to fix coverage.",
+            "evidence": [
+              "report-behavior.md: correction guidance",
+              "incident-extracts.md: Incident B"
+            ],
+            "reason": "These change or falsify the observation instead of recovering correct data."
+          },
+          {
+            "id": "N7",
+            "must_not_claim": "The report estimates missing measurements or an irrecoverable gap can be made complete by retrying the same rows.",
+            "evidence": [
+              "report-behavior.md: slot rules and correction guidance"
+            ],
+            "reason": "No missing slot is created by that action."
+          },
+          {
+            "id": "N8",
+            "must_not_claim": "Incident A is a defect in client 1.8 or was caused by the named engineer, request ID, or support process.",
+            "evidence": [
+              "incident-extracts.md: Incident A"
+            ],
+            "reason": "The source establishes the missing slot and no such causal attribution."
+          }
+        ],
+        "relevance_surplus": {
+          "audience_job": "Understand a counterintuitive status and diagnose the difference between ingestion, data coverage, and report refresh.",
+          "likely_surplus": [
+            {
+              "content": "The engineer name, triage schedule, trace ID, screenshot count, and support-handoff chronology.",
+              "reason": "They neither explain the indicator nor identify a diagnostic input needed for the published guide."
+            },
+            {
+              "content": "A long imaginary account of a facilities manager worried about bills or comparing electricity suppliers.",
+              "reason": "The audience is application engineers and no such motivation is supplied."
+            },
+            {
+              "content": "A broad tutorial on HTTP, UTC history, daylight-saving rules, or time-series database design.",
+              "reason": "Only the distinctions needed to interpret these statuses and timestamps belong in this task."
+            },
+            {
+              "content": "Repeating the same twelve-slot rule and warning after each step without using them to make a new decision.",
+              "reason": "Repetition can obscure the actual branching diagnosis."
+            }
+          ],
+          "warranted_detail": [
+            "A worked example can clarify the mechanism and is not gratuitous specificity merely because it is concrete; it is one acceptable explanatory form, not an explicit output requirement.",
+            "The duplicate 10:30 and missing 10:55 contrast shows why row count misleads.",
+            "The fixed-offset conversion and hour-end contrast explain which hour should contain a measurement.",
+            "Literal endpoint paths, parameter names, statuses, and timestamp bounds are useful technical identifiers.",
+            "An illustrative query may retain roof-east and the incident date, or use clearly marked placeholders.",
+            "Checking quality and correcting only against the upstream record anticipates plausible failure modes supported by the behavior note.",
+            "A decision tree or table separating indexing, coverage, refresh, and historical rebuild can make troubleshooting easier.",
+            "A brief explanation of why waiting will not repair a truly missing observation is useful even if the reader did not ask that exact question."
+          ]
+        },
+        "acceptable_forms": [
+          "An explanation followed by diagnostics, a symptom/cause/action table, or another coherent troubleshooting structure; include examples or contrasts when they help.",
+          "Not every raw row needs to be printed. The mechanism can be made clear without reproducing the incident table or using a worked example.",
+          "A source-consistent new example is valid when clearly illustrative, even if its channel name or numbers differ.",
+          "A link can carry detailed rebuild procedure, provided the text preserves when a rebuild is needed and how readers can proceed."
+        ],
+        "grading_notes": [
+          "Do not reward concision that makes the mechanism unclear or removes material status distinctions or actionable recovery branches. Examples are optional when another form explains the mechanism well.",
+          "Do not treat all concrete timestamps as surplus; judge their explanatory role.",
+          "Distinguish minor optional link omission from an inability to carry out the diagnosis.",
+          "No fixed example, contrast, heading, or length is required."
+        ]
+      }
+    },
+    {
+      "id": "TWREL04",
+      "assess": [
+        "Report the incidental Ulf example: the statement already identifies the changed class of default names for untamed Norsemen NPCs; naming a member adds no scope, action or needed explanation here.",
+        "Report the coverage-link rationale/contrast: selecting a package by screen versus total mod count introduces an unestablished reader comparison and is not needed to identify the coverage reference.",
+        "Keep the untamed/default-name scope, Norsemen identity and preservation of player-assigned names; preserve useful links and material behavior qualifications.",
+        "Do not declare every proper name, example, negative statement or contrast wrong.",
+        "Do not claim that inaccessible linked documentation is broken or product behavior untested/false merely because its source is absent.",
+        "Do not require deleting useful scope qualifications, licensing/attribution or the coverage link to remove its invented rationale.",
+        "Do not rewrite files, claim execution, or audit unrelated installation/source code.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "id": "w04",
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Report the incidental Ulf example: the statement already identifies the changed class of default names for untamed Norsemen NPCs; naming a member adds no scope, action or needed explanation here."
+          },
+          {
+            "id": "R2",
+            "requirement": "Report the coverage-link rationale/contrast: selecting a package by screen versus total mod count introduces an unestablished reader comparison and is not needed to identify the coverage reference."
+          },
+          {
+            "id": "R3",
+            "requirement": "Keep the untamed/default-name scope, Norsemen identity and preservation of player-assigned names; preserve useful links and material behavior qualifications."
+          }
+        ],
+        "must_not_claim": [
+          "Do not declare every proper name, example, negative statement or contrast wrong.",
+          "Do not claim that inaccessible linked documentation is broken or product behavior untested/false merely because its source is absent.",
+          "Do not require deleting useful scope qualifications, licensing/attribution or the coverage link to remove its invented rationale.",
+          "Do not rewrite files, claim execution, or audit unrelated installation/source code."
+        ],
+        "relevance_surplus": "Find the requested editorial problems without inventing a quota or requiring every optional phrasing preference. Identify offending spans and explain their task-level contribution or absence. Other well-supported findings are welcome, but do not require a wholesale rewrite.",
+        "provenance": "User-reported incident; exposed working diagnostic, never final transfer evidence. Excerpts from Muratovnik/Tolmach main b558693326c67d839c948c88126c586cf7c1d482, read 2026-10-08. No new method changes precede these executions."
+      }
+    },
+    {
+      "id": "TWREL05",
+      "assess": [
+        "Distinguish Original, Screen JPEG, and Production TIFF as the three available choices and connect their behavior to the supplied recipient needs.",
+        "Explain that Original preserves the ingested file, including its format, data characteristics, and existing embedded metadata.",
+        "Explain that Original ignores accepted crop and rotation, which can make it differ from the preview.",
+        "Explain that Screen JPEG applies accepted edits, uses 8-bit sRGB JPEG, and has a 2,400-pixel longest-edge cap without enlarging small images.",
+        "Preserve the configurable background behavior when discussing Screen JPEG transparency.",
+        "Explain that Production TIFF applies accepted edits and provides an 8-bit RGB TIFF with sRGB profile and lossless LZW compression.",
+        "Preserve that Production TIFF is a rendered derivative and does not retain all master information merely because its compression is lossless.",
+        "Explain that Production TIFF retains the cropped source dimensions without upscaling and that the supplier must have enough pixels for the intended print size.",
+        "Provide meaningful concrete guidance for the researcher, website, and print-supplier cases.",
+        "Explain the optional, separately delivered catalogue manifest and its role in preserving record associations and selected metadata.",
+        "Explain that updated catalogue metadata is not automatically embedded in the image export.",
+        "Give a usable path from record or selection through choice/options and Request export to Ready status and ZIP download.",
+        "Distinguish permission for originals from permission for derivatives and give a valid next step when selected records are not permitted.",
+        "Retain the 200-record request limit and the split-selection action for larger requests.",
+        "Retain the seven-day download expiry and ability to request a new export.",
+        "Explain that download permission does not provide publication rights approval.",
+        "Reject an output that claims: Original includes the accepted crop, is always TIFF, or automatically receives updated catalogue metadata.",
+        "Reject an output that claims: Production TIFF is the unchanged preservation master or preserves every original bit-depth/color-space characteristic.",
+        "Reject an output that claims: Either derivative enlarges a small source, restores pixels outside the accepted crop, or guarantees suitability for every print size.",
+        "Reject an output that claims: Screen JPEG always has a white background or retains transparency.",
+        "Reject an output that claims: A manifest is always included or is embedded inside the JPEG/TIFF.",
+        "Reject an output that claims: A request silently skips unauthorized records, supports unlimited selections, or returns a direct loose image instead of a ZIP.",
+        "Reject an output that claims: An expired download deletes the master or export availability establishes publication clearance.",
+        "Reject an output that claims: Fast share is the current export label.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "assessment_principle": "Assess the response against the actual request and supplied evidence. A true fact is not automatically useful, and an unasked-for explanation is not automatically surplus. Allow source-backed examples, reasons, alternatives, and operational anticipation when they help this audience understand or act. Do not require an exact sentence, heading, length, or document structure.",
+        "how_to_assess_surplus": "Identify each proposed surplus passage, explain what work it does or fails to do for this reader, and consider the space and emphasis it consumes. Do not penalize a necessary literal identifier, a useful worked example, a qualified warning, or modest connective explanation merely for being specific. Distinguish irrelevant specificity from factual error; report both only when both apply.",
+        "grading_dimensions": [
+          "Fidelity to source and preservation of consequential conditions, scope, and uncertainty.",
+          "Coverage of the information needed for the requested document and audience.",
+          "Granularity, organization, and explanations that make the document usable.",
+          "Relevance surplus: unsupported reader stories, decorative named instances, unnecessary process narration, duplicative explanations, and other additions that consume attention without a useful job."
+        ],
+        "id": "f01",
+        "genre": "Task-oriented choice guide",
+        "source_manifest": [
+          "sources_01.md",
+          "sources_02.md"
+        ],
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Distinguish Original, Screen JPEG, and Production TIFF as the three available choices and connect their behavior to the supplied recipient needs.",
+            "evidence": [
+              "sources_01.md: export choices",
+              "sources_02.md: usage examples"
+            ]
+          },
+          {
+            "id": "R2",
+            "requirement": "Explain that Original preserves the ingested file, including its format, data characteristics, and existing embedded metadata.",
+            "evidence": [
+              "sources_01.md: Original"
+            ]
+          },
+          {
+            "id": "R3",
+            "requirement": "Explain that Original ignores accepted crop and rotation, which can make it differ from the preview.",
+            "evidence": [
+              "sources_01.md: introductory paragraph and Original"
+            ]
+          },
+          {
+            "id": "R4",
+            "requirement": "Explain that Screen JPEG applies accepted edits, uses 8-bit sRGB JPEG, and has a 2,400-pixel longest-edge cap without enlarging small images.",
+            "evidence": [
+              "sources_01.md: Screen JPEG"
+            ]
+          },
+          {
+            "id": "R5",
+            "requirement": "Preserve the configurable background behavior when discussing Screen JPEG transparency.",
+            "evidence": [
+              "sources_01.md: Screen JPEG"
+            ],
+            "acceptance_notes": "The transparency feature itself may be omitted in a compact comparison; if mentioned, do not imply the background is always white."
+          },
+          {
+            "id": "R6",
+            "requirement": "Explain that Production TIFF applies accepted edits and provides an 8-bit RGB TIFF with sRGB profile and lossless LZW compression.",
+            "evidence": [
+              "sources_01.md: Production TIFF"
+            ]
+          },
+          {
+            "id": "R7",
+            "requirement": "Preserve that Production TIFF is a rendered derivative and does not retain all master information merely because its compression is lossless.",
+            "evidence": [
+              "sources_01.md: Production TIFF"
+            ]
+          },
+          {
+            "id": "R8",
+            "requirement": "Explain that Production TIFF retains the cropped source dimensions without upscaling and that the supplier must have enough pixels for the intended print size.",
+            "evidence": [
+              "sources_01.md: Production TIFF",
+              "sources_02.md: print supplier example"
+            ]
+          },
+          {
+            "id": "R9",
+            "requirement": "Provide meaningful concrete guidance for the researcher, website, and print-supplier cases.",
+            "evidence": [
+              "sources_02.md: usage examples",
+              "request.md"
+            ],
+            "acceptance_notes": "Do not demand the exact sample dimensions or source record IDs. A concise worked contrast is enough when it preserves the deciding constraint."
+          },
+          {
+            "id": "R10",
+            "requirement": "Explain the optional, separately delivered catalogue manifest and its role in preserving record associations and selected metadata.",
+            "evidence": [
+              "sources_01.md: Catalogue manifest"
+            ]
+          },
+          {
+            "id": "R11",
+            "requirement": "Explain that updated catalogue metadata is not automatically embedded in the image export.",
+            "evidence": [
+              "sources_01.md: Original, rendering metadata, and Catalogue manifest"
+            ]
+          },
+          {
+            "id": "R12",
+            "requirement": "Give a usable path from record or selection through choice/options and Request export to Ready status and ZIP download.",
+            "evidence": [
+              "sources_02.md: Export workflow"
+            ]
+          },
+          {
+            "id": "R13",
+            "requirement": "Distinguish permission for originals from permission for derivatives and give a valid next step when selected records are not permitted.",
+            "evidence": [
+              "sources_01.md: export permissions",
+              "sources_02.md: permission rejection"
+            ]
+          },
+          {
+            "id": "R14",
+            "requirement": "Retain the 200-record request limit and the split-selection action for larger requests.",
+            "evidence": [
+              "sources_02.md: request limit"
+            ]
+          },
+          {
+            "id": "R15",
+            "requirement": "Retain the seven-day download expiry and ability to request a new export.",
+            "evidence": [
+              "sources_02.md: expiry"
+            ]
+          },
+          {
+            "id": "R16",
+            "requirement": "Explain that download permission does not provide publication rights approval.",
+            "evidence": [
+              "sources_01.md: Rights"
+            ]
+          }
+        ],
+        "must_not_claim": [
+          {
+            "id": "N1",
+            "must_not_claim": "Original includes the accepted crop, is always TIFF, or automatically receives updated catalogue metadata.",
+            "evidence": [
+              "sources_01.md: Original and Catalogue manifest"
+            ],
+            "reason": "It is a byte-identical download in the ingested format."
+          },
+          {
+            "id": "N2",
+            "must_not_claim": "Production TIFF is the unchanged preservation master or preserves every original bit-depth/color-space characteristic.",
+            "evidence": [
+              "sources_01.md: Production TIFF"
+            ],
+            "reason": "It is a specified 8-bit sRGB rendering."
+          },
+          {
+            "id": "N3",
+            "must_not_claim": "Either derivative enlarges a small source, restores pixels outside the accepted crop, or guarantees suitability for every print size.",
+            "evidence": [
+              "sources_01.md: derivative dimensions",
+              "sources_02.md: supplier example"
+            ],
+            "reason": "Format and available dimensions are different constraints."
+          },
+          {
+            "id": "N4",
+            "must_not_claim": "Screen JPEG always has a white background or retains transparency.",
+            "evidence": [
+              "sources_01.md: Screen JPEG"
+            ],
+            "reason": "Transparency is flattened onto a configurable background."
+          },
+          {
+            "id": "N5",
+            "must_not_claim": "A manifest is always included or is embedded inside the JPEG/TIFF.",
+            "evidence": [
+              "sources_01.md: Catalogue manifest"
+            ],
+            "reason": "It is an optional separate JSON file."
+          },
+          {
+            "id": "N6",
+            "must_not_claim": "A request silently skips unauthorized records, supports unlimited selections, or returns a direct loose image instead of a ZIP.",
+            "evidence": [
+              "sources_02.md: workflow and limits"
+            ],
+            "reason": "The rejection, limit, and package behaviors are explicit."
+          },
+          {
+            "id": "N7",
+            "must_not_claim": "An expired download deletes the master or export availability establishes publication clearance.",
+            "evidence": [
+              "sources_02.md: expiry",
+              "sources_01.md: Rights"
+            ],
+            "reason": "The two consequences are explicitly excluded."
+          },
+          {
+            "id": "N8",
+            "must_not_claim": "Fast share is the current export label.",
+            "evidence": [
+              "sources_02.md: internal design note"
+            ],
+            "reason": "That label never shipped."
+          }
+        ],
+        "relevance_surplus": {
+          "audience_job": "Choose an export that matches the recipient, preserve consequential distinctions, and request a usable package.",
+          "likely_surplus": [
+            {
+              "content": "The workshop name, sample record numbers, sample-print purchase count, or the unshipped design label.",
+              "reason": "These track the origin of examples but do not decide a format or complete an export."
+            },
+            {
+              "content": "An invented comparison with a named asset manager or claims that the team must be avoiding storage costs or rushing an exhibition.",
+              "reason": "The task supplies recipient needs, not a software evaluation or those motivations."
+            },
+            {
+              "content": "An extended history of TIFF/JPEG or general color-management theory beyond the available choices.",
+              "reason": "The reader needs the specific effects of this renderer and its useful limits."
+            },
+            {
+              "content": "Repeating a full format table as prose and again as an identically detailed checklist.",
+              "reason": "A summary recommendation and factual comparison can complement each other; repeating the same deciding facts without a new task adds noise."
+            }
+          ],
+          "warranted_detail": [
+            "The three actual export choices and recipient needs make direct comparison a central task requirement.",
+            "A numeric crop example explains why an 8-bit TIFF request can still need a dimension check.",
+            "Lossless compression versus preservation of master information is a necessary contrast, not rhetorical flourish.",
+            "The literal UI labels, manifest filename, permissions, limits, and expiry drive actual export actions.",
+            "A short warning about rights prevents a source-identified misunderstanding of what the export permission means.",
+            "Asking the print supplier for required pixel dimensions is warranted operational anticipation grounded in the supplied print-size limitation.",
+            "An illustrative record name is not automatically wrong, but it must make a relationship clearer to justify its presence."
+          ]
+        },
+        "acceptable_forms": [
+          "A comparison table with contextual examples and a short procedure, or coherent prose organized by recipient need.",
+          "Examples may be paraphrased or use other source-consistent dimensions.",
+          "TIFF alpha retention and derivative metadata stripping can be included when useful; omission alone is not a required-fact failure.",
+          "No fixed amount of format background is required."
+        ],
+        "grading_notes": [
+          "Treat R5 as conditional: omission of transparency discussion is acceptable.",
+          "Do not treat all comparison language as surplus; this task asks readers to make real choices.",
+          "Do not equate a lossless compressed derivative with a preservation original."
+        ]
+      }
+    },
+    {
+      "id": "TWREL06",
+      "assess": [
+        "Проверить, что прошивка старого P420 не ниже 3.0, а P420S — не ниже 3.2, и дать пригодный путь к инструкции по необходимому обновлению.",
+        "Приостановить очередь поста и дождаться завершения текущей этикетки до снятия принтера.",
+        "Экспортировать dock-profile.mprof со старого принтера через меню Profiles на USB-накопитель и сохранить профиль и старое устройство до успешной проверки.",
+        "Записать текущий режим адресации и адрес назначения очереди, пока старый принтер доступен.",
+        "Объяснить состав профиля и исключения настолько, чтобы было понятно: сохранённые настройки переносятся, а учётные данные и калибровка устройства — нет.",
+        "Отключить старый принтер от сети до подключения нового и объяснить риск дублирования статического адреса.",
+        "Импортировать профиль через меню Profiles нового принтера и выполнить перезапуск по запросу.",
+        "Сохранить условие: импорт заменяет настройки профиля нового устройства, а не объединяет профили.",
+        "Различить действия при статическом адресе и при резервировании DHCP, включая изменение резервирования на MAC-адрес нового устройства.",
+        "Сверить фактический адрес нового принтера с адресом назначения очереди и изменить назначение при необходимости.",
+        "Дать условный шаг регистрации устройства для очередей с аутентификацией и сохранить исключение для исключительно локальной печати по USB.",
+        "Загрузить обычный материал поста, выполнить калибровку на устройстве и проверить статус Media ready.",
+        "Дать указанное исправление для Media not found: проверить ориентацию рулона и положение датчика зазора, затем повторить калибровку.",
+        "Выполнить и встроенный Test label, и Send validation label из Dispatch Console, объяснив, что они проверяют разные участки печати.",
+        "До возобновления очереди проверить, что проверочная этикетка вышла на нужном посту из нужного принтера, правильно расположена на одной этикетке и имеет читаемый штрихкод.",
+        "При неудачной проверке оставить очередь приостановленной и дать предоставленный путь к диагностике проверки.",
+        "Reject an output that claims: Совместимы любые версии прошивок или импорт профиля обновляет прошивку нового устройства.",
+        "Reject an output that claims: Профиль переносит сетевые пароли, сертификаты и закрытые ключи устройства или калибровку датчика.",
+        "Reject an output that claims: Копирование старого сертификата и закрытого ключа — способ регистрации или регистрация нужна всем локальным USB-принтерам.",
+        "Reject an output that claims: Можно безопасно подключить оба принтера с импортированным статическим адресом или резервирование DHCP автоматически переносится с профилем.",
+        "Reject an output that claims: Скопированное отображаемое имя очереди автоматически меняет серверную маршрутизацию.",
+        "Reject an output that claims: Сохранённые размеры материала отменяют калибровку или изменение этих размеров устраняет Media not found.",
+        "Reject an output that claims: Встроенная проверка подтверждает соединение с Dispatch Console или для отправки проверочной этикетки нужно сначала возобновить очередь.",
+        "Reject an output that claims: Проверочная этикетка оплачивает отправление или успешная замена гарантированно занимает 11 минут.",
+        "Reject an output that claims: Поддерживаются зашифрованные USB-тома или импорт объединяет новый профиль с уже сохранённым.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "assessment_principle": "Оценивайте ответ по реальному запросу и предоставленным сведениям. Истинный факт не обязательно полезен, а объяснение, которого прямо не просили, не обязательно лишнее. Допускайте подтверждённые источниками примеры, причины, альтернативы и предвосхищение практических вопросов, если они помогают этому читателю понять материал или действовать. Не требуйте конкретной фразы, заголовка, объёма или структуры документа.",
+        "how_to_assess_surplus": "Для каждого предположительно лишнего фрагмента объясните, какую задачу читателя он решает или не решает, и оцените занимаемые им место и внимание. Не штрафуйте необходимый идентификатор, полезный пример, условное предупреждение или краткую связку лишь за конкретность. Различайте нерелевантную детализацию и фактическую ошибку; отмечайте обе только там, где есть обе.",
+        "grading_dimensions": [
+          "Верность источникам и сохранение значимых условий, границ применимости и неопределённости.",
+          "Покрытие сведений, необходимых для запрошенного документа и его аудитории.",
+          "Полезная подробность, организация и объяснения.",
+          "Избыточность: выдуманные истории о читателях, декоративные именованные примеры, ненужный рассказ о процессе, повторные объяснения и другие детали, занимающие внимание без полезной задачи."
+        ],
+        "id": "f02",
+        "genre": "Техническая инструкция по замене оборудования",
+        "source_manifest": [
+          "sources_01.md",
+          "sources_02.md"
+        ],
+        "must_retain": [
+          {
+            "id": "R1",
+            "requirement": "Проверить, что прошивка старого P420 не ниже 3.0, а P420S — не ниже 3.2, и дать пригодный путь к инструкции по необходимому обновлению.",
+            "evidence": [
+              "sources_01.md: поддерживаемое поведение"
+            ]
+          },
+          {
+            "id": "R2",
+            "requirement": "Приостановить очередь поста и дождаться завершения текущей этикетки до снятия принтера.",
+            "evidence": [
+              "sources_02.md: подключение и приёмочная проверка"
+            ]
+          },
+          {
+            "id": "R3",
+            "requirement": "Экспортировать dock-profile.mprof со старого принтера через меню Profiles на USB-накопитель и сохранить профиль и старое устройство до успешной проверки.",
+            "evidence": [
+              "sources_01.md: экспорт профиля",
+              "sources_02.md: снятие и приёмка"
+            ]
+          },
+          {
+            "id": "R4",
+            "requirement": "Записать текущий режим адресации и адрес назначения очереди, пока старый принтер доступен.",
+            "evidence": [
+              "sources_02.md: первый абзац"
+            ]
+          },
+          {
+            "id": "R5",
+            "requirement": "Объяснить состав профиля и исключения настолько, чтобы было понятно: сохранённые настройки переносятся, а учётные данные и калибровка устройства — нет.",
+            "evidence": [
+              "sources_01.md: экспорт профиля"
+            ]
+          },
+          {
+            "id": "R6",
+            "requirement": "Отключить старый принтер от сети до подключения нового и объяснить риск дублирования статического адреса.",
+            "evidence": [
+              "sources_02.md: абзац о статической адресации"
+            ]
+          },
+          {
+            "id": "R7",
+            "requirement": "Импортировать профиль через меню Profiles нового принтера и выполнить перезапуск по запросу.",
+            "evidence": [
+              "sources_01.md: импорт профиля"
+            ]
+          },
+          {
+            "id": "R8",
+            "requirement": "Сохранить условие: импорт заменяет настройки профиля нового устройства, а не объединяет профили.",
+            "evidence": [
+              "sources_01.md: импорт профиля"
+            ]
+          },
+          {
+            "id": "R9",
+            "requirement": "Различить действия при статическом адресе и при резервировании DHCP, включая изменение резервирования на MAC-адрес нового устройства.",
+            "evidence": [
+              "sources_02.md: настройка адресации"
+            ]
+          },
+          {
+            "id": "R10",
+            "requirement": "Сверить фактический адрес нового принтера с адресом назначения очереди и изменить назначение при необходимости.",
+            "evidence": [
+              "sources_02.md: абзац о DHCP и маршрутизации"
+            ]
+          },
+          {
+            "id": "R11",
+            "requirement": "Дать условный шаг регистрации устройства для очередей с аутентификацией и сохранить исключение для исключительно локальной печати по USB.",
+            "evidence": [
+              "sources_01.md: регистрация устройства"
+            ]
+          },
+          {
+            "id": "R12",
+            "requirement": "Загрузить обычный материал поста, выполнить калибровку на устройстве и проверить статус Media ready.",
+            "evidence": [
+              "sources_01.md: калибровка материала"
+            ]
+          },
+          {
+            "id": "R13",
+            "requirement": "Дать указанное исправление для Media not found: проверить ориентацию рулона и положение датчика зазора, затем повторить калибровку.",
+            "evidence": [
+              "sources_01.md: калибровка материала"
+            ]
+          },
+          {
+            "id": "R14",
+            "requirement": "Выполнить и встроенный Test label, и Send validation label из Dispatch Console, объяснив, что они проверяют разные участки печати.",
+            "evidence": [
+              "sources_02.md: приёмочные проверки"
+            ]
+          },
+          {
+            "id": "R15",
+            "requirement": "До возобновления очереди проверить, что проверочная этикетка вышла на нужном посту из нужного принтера, правильно расположена на одной этикетке и имеет читаемый штрихкод.",
+            "evidence": [
+              "sources_02.md: приёмочные проверки"
+            ]
+          },
+          {
+            "id": "R16",
+            "requirement": "При неудачной проверке оставить очередь приостановленной и дать предоставленный путь к диагностике проверки.",
+            "evidence": [
+              "sources_02.md: приёмочные проверки"
+            ]
+          }
+        ],
+        "must_not_claim": [
+          {
+            "id": "N1",
+            "must_not_claim": "Совместимы любые версии прошивок или импорт профиля обновляет прошивку нового устройства.",
+            "evidence": [
+              "sources_01.md: поддерживаемое поведение"
+            ],
+            "reason": "Минимальные версии исходного и нового устройств заданы явно; для обновления есть отдельная процедура."
+          },
+          {
+            "id": "N2",
+            "must_not_claim": "Профиль переносит сетевые пароли, сертификаты и закрытые ключи устройства или калибровку датчика.",
+            "evidence": [
+              "sources_01.md: экспорт профиля"
+            ],
+            "reason": "Эти исключения указаны прямо и влияют на работу."
+          },
+          {
+            "id": "N3",
+            "must_not_claim": "Копирование старого сертификата и закрытого ключа — способ регистрации или регистрация нужна всем локальным USB-принтерам.",
+            "evidence": [
+              "sources_01.md: регистрация устройства"
+            ],
+            "reason": "Учётные данные привязаны к устройству, а требование регистрации условно."
+          },
+          {
+            "id": "N4",
+            "must_not_claim": "Можно безопасно подключить оба принтера с импортированным статическим адресом или резервирование DHCP автоматически переносится с профилем.",
+            "evidence": [
+              "sources_02.md: настройка сети"
+            ],
+            "reason": "Конфликт адресов и привязанное к MAC резервирование требуют отдельных действий."
+          },
+          {
+            "id": "N5",
+            "must_not_claim": "Скопированное отображаемое имя очереди автоматически меняет серверную маршрутизацию.",
+            "evidence": [
+              "sources_02.md: абзац о DHCP и маршрутизации"
+            ],
+            "reason": "Адрес назначения в Dispatch Console задаётся отдельно."
+          },
+          {
+            "id": "N6",
+            "must_not_claim": "Сохранённые размеры материала отменяют калибровку или изменение этих размеров устраняет Media not found.",
+            "evidence": [
+              "sources_01.md: импорт профиля и калибровка"
+            ],
+            "reason": "Калибровка относится к конкретному устройству, а указанное исправление — к положению материала."
+          },
+          {
+            "id": "N7",
+            "must_not_claim": "Встроенная проверка подтверждает соединение с Dispatch Console или для отправки проверочной этикетки нужно сначала возобновить очередь.",
+            "evidence": [
+              "sources_02.md: приёмочные проверки"
+            ],
+            "reason": "Проверки различаются; Send validation label работает при приостановленной очереди."
+          },
+          {
+            "id": "N8",
+            "must_not_claim": "Проверочная этикетка оплачивает отправление или успешная замена гарантированно занимает 11 минут.",
+            "evidence": [
+              "sources_02.md: приёмка и сервисный журнал"
+            ],
+            "reason": "Первое прямо опровергнуто, а второе необоснованно обобщает пилотную замену."
+          },
+          {
+            "id": "N9",
+            "must_not_claim": "Поддерживаются зашифрованные USB-тома или импорт объединяет новый профиль с уже сохранённым.",
+            "evidence": [
+              "sources_01.md: импорт профиля и заметки об USB"
+            ],
+            "reason": "Оба утверждения противоречат сервисным заметкам."
+          }
+        ],
+        "relevance_surplus": {
+          "audience_job": "Заменить устройство без потери настроек и неверной маршрутизации этикеток, выполнить подходящую ветку подключения и проверить работу до возобновления очереди.",
+          "likely_surplus": [
+            {
+              "content": "Место пилотной замены, имя техника, инвентарный код и длительность пилота.",
+              "reason": "Это происхождение сервисных записей и закупочные сведения, а не шаг, входной параметр настройки или критерий проверки в общей инструкции справочника."
+            },
+            {
+              "content": "Выдуманное давление предпраздничных сроков отправки или история о руководителе склада, выбирающем более производительный принтер.",
+              "reason": "Запрос задаёт конкретную замену, но не эти мотивы или сравнения продукции."
+            },
+            {
+              "content": "Учебник по IP-адресации, видам штрихкодов, истории рынка принтеров или криптографии сертификатов.",
+              "reason": "Нужны только различия, меняющие процедуру этой замены."
+            },
+            {
+              "content": "Повторять требование держать очередь на паузе в каждом подпункте без нового условия или решения.",
+              "reason": "Начальная приостановка и условие возобновления выполняют разные задачи; умножение одинаковых напоминаний без цели затрудняет выполнение."
+            }
+          ],
+          "warranted_detail": [
+            "Точные модели, минимальные прошивки, имя файла, названия меню, статусов и адрес назначения — необходимые идентификаторы.",
+            "Предупреждение о статическом адресе уместно до подключения, хотя пользователь отдельно не просил объяснять сетевой риск.",
+            "Ветка DHCP или статического адреса отражает реальную настройку, а не выдуманное противопоставление.",
+            "Причина выполнения двух тестов объясняет, почему успешной локальной печати недостаточно.",
+            "Уточнение VOID и отсутствия оплаты может снять сомнение техника по поводу обязательной проверки и допустимо как полезная необязательная деталь.",
+            "Краткая подготовка с упоминанием подходящего USB-накопителя и обычного материала помогает избежать препятствия во время работы.",
+            "FAT32 и ограничение зашифрованных томов полезны при подготовке USB или как указатель к диагностике.",
+            "Сохранение старого устройства и копии до приёмки — предусмотренная подготовка к восстановлению; выдумывать команду отката не нужно."
+          ]
+        },
+        "acceptable_forms": [
+          "Последовательная инструкция с условными ветками сети и регистрации или другой порядок, соблюдающий зависимости действий.",
+          "Исключительно локальная печать по USB может быть кратким примечанием о применимости, а не отдельной полной процедурой.",
+          "Подробные подпроцедуры обновления прошивки, регистрации и диагностики проверки можно оставить связанным инструкциям.",
+          "Историю моделей, счётчики и полный перечень содержимого профиля можно не повторять, если сохранена значимая граница между переносимыми настройками и данными конкретного устройства."
+        ],
+        "grading_notes": [
+          "Можно импортировать профиль на новом принтере без сетевого подключения; подключать его заранее ради удобства не требуется.",
+          "Оценивайте порядок по зависимостям, а не по точному следованию абзацам источника.",
+          "Не требуйте неподтверждённой оценки времени или гарантии непрерывной работы.",
+          "Начальная подготовка и последующее условие приёмки не являются повтором автоматически."
+        ]
+      }
+    },
+    {
+      "id": "TWREL07",
+      "assess": [
+        "F1: The draft presents the museum portal's change process as available to individual admission bookings generally, omitting the direct-purchase eligibility condition and the route for CityPass purchasers. Scope portal eligibility and instructions to bookings bought directly from Lantern Museum, and give CityPass purchasers an appropriate route to the supplied partner-booking help. Exact wording and placement are open.",
+        "F2: The historical account of selecting the icon adds a true but unhelpful detail to the action step. Remove the design-history material while keeping the instruction and exact Change visit label. Keeping or omitting the current icon description is a reasonable editorial choice.",
+        "Finding precision: claims about defects and their evidence are correct; no unnecessary mandatory edits are invented.",
+        "Finding coverage: the consequential eligibility omission and the local irrelevant history are identified, with importance distinguished.",
+        "Meaning preservation: proposed edits retain consequential conditions and useful relationships.",
+        "Report usefulness and relevance: the author can act without sorting through redundant diagnoses, unfounded demands, or exhaustive defence of unchanged text.",
+        "Assess relevance separately from truth and required meaning. Locate the surplus and explain why it contributes no needed decision, action, distinction or understanding. A useful clause does not justify an adjacent surplus clause. Do not use length, a phrase blacklist, or the number of findings as the score."
+      ],
+      "criteria": {
+        "case_id": "f03",
+        "genre": "Pre-publication editorial review of a visitor help article",
+        "language": "en",
+        "source_manifest": [
+          "input/request.md",
+          "input/product-contract.md",
+          "input/article-draft.md"
+        ],
+        "assessment_principle": "Evaluate whether the editorial report helps the author publish an accurate, useful article. Judge findings against the supplied request, draft, and complete product contract. Assess the review itself as well as its diagnosis. Do not require a target number of findings, prescribed headings, a word count, a full rewrite, or exact replacement language. A longer explanation is acceptable when it resolves a real editorial decision.",
+        "expected_content_findings": [
+          {
+            "id": "F1",
+            "issue": "The draft presents the museum portal's change process as available to individual admission bookings generally, omitting the direct-purchase eligibility condition and the route for CityPass purchasers.",
+            "evidence": [
+              "input/product-contract.md: first paragraph",
+              "input/article-draft.md: opening eligibility statement and Choose a new visit time"
+            ],
+            "consequence": "A CityPass purchaser can reasonably follow these instructions but will not have the Change visit control.",
+            "useful_editorial_action": "Scope portal eligibility and instructions to bookings bought directly from Lantern Museum, and give CityPass purchasers an appropriate route to the supplied partner-booking help. Exact wording and placement are open.",
+            "acceptance_notes": [
+              "Identifying the missing purchase-channel condition is essential. A concise description of the alternate route is sufficient; a detailed partner procedure is not required.",
+              "Adding the name CityPass serves eligibility and routing. It is not arbitrary named specificity.",
+              "Do not invent partner deadlines, fees, exceptions, or an assertion that partner bookings cannot be changed at all."
+            ],
+            "importance": "Consequential correctness and usability problem."
+          },
+          {
+            "id": "F2",
+            "issue": "The historical account of selecting the icon adds a true but unhelpful detail to the action step.",
+            "evidence": [
+              "input/product-contract.md: control description",
+              "input/article-draft.md: Choose a new visit time, step 3"
+            ],
+            "target_span": "chosen from twelve designs during the museum's 2024 website refresh",
+            "consequence": "The design-selection count and website-refresh history do not help the visitor locate the control, decide eligibility, or complete the change.",
+            "useful_editorial_action": "Remove the design-history material while keeping the instruction and exact Change visit label. Keeping or omitting the current icon description is a reasonable editorial choice.",
+            "acceptance_notes": [
+              "Do not classify this history as fabricated; it is supported by the contract.",
+              "The useful button label or current visual cue does not justify the adjacent history.",
+              "A review may correctly present this as a smaller editorial issue than F1. It need not exaggerate the practical harm or supply a rewritten article."
+            ],
+            "importance": "Local content-selection problem."
+          }
+        ],
+        "meanings_to_preserve_if_edits_are_proposed": [
+          "Eligibility for the museum portal depends on direct purchase; CityPass purchasers have a separate route.",
+          "The current entry time must be at least 24 hours away when the change is confirmed.",
+          "The visitor chooses an available replacement slot for the same admission category.",
+          "The change has no fee and preserves the amount paid, visitor names, ticket quantities, and booking reference.",
+          "The old booking remains valid until confirmation; inspecting availability alone does not commit a change.",
+          "Confirmation produces replacement tickets, invalidates the original QR codes, and leaves a download route through My bookings."
+        ],
+        "useful_material_not_to_treat_as_an_error": [
+          "Lantern Museum, CityPass when added to the eligibility correction, current interface labels, and supplied guide paths are functional identifiers.",
+          "The distinction between changing an entry time and cancelling a booking helps explain what persists.",
+          "The explanation that original QR codes stop working despite an unchanged booking reference explains why replacement tickets matter.",
+          "The sentence about looking at availability without choosing a replacement accurately explains the confirmation boundary and supports a visitor's immediate action.",
+          "The 24-hour condition is operational information. Neither its presence nor its placement is a defect on stylistic grounds alone."
+        ],
+        "review_report_quality": {
+          "useful_report": [
+            "Locates actionable problems with enough quotation or section reference for the author to find them.",
+            "Explains the reader consequence or content-selection reason, and gives an implementable editing direction.",
+            "Keeps findings distinct from optional stylistic preferences and calibrates their importance.",
+            "May give a local replacement phrase or discuss a tradeoff when that makes the edit easier to apply."
+          ],
+          "potential_report_surplus": [
+            {
+              "behavior": "Repeating the same eligibility or icon-history finding in a summary, issue list, action plan, and closing recap without another useful function.",
+              "assessment": "A concise navigation summary or a separate concrete edit can add value; do not penalize every recurrence automatically. Identify the repetition and explain what it fails to add."
+            },
+            {
+              "behavior": "Defending every unchanged paragraph, label, contrast, or explanatory sentence at length when no proposed edit places it in doubt.",
+              "assessment": "A targeted preservation note can prevent a damaging edit. A catalogue of praise or assurances about all valid material creates extra reading without helping the author's decisions."
+            },
+            {
+              "behavior": "Inventing mandatory additions such as cancellation/refund policy, group-booking rules, visitor motivations, partner fees, accessibility procedures, or website implementation details.",
+              "assessment": "The contract is complete for this article. An unsupported demand is a false-positive finding even if the suggested topic might be useful in a different article."
+            },
+            {
+              "behavior": "Recommending broad structural replacement or a complete rewrite without explaining a problem that requires it.",
+              "assessment": "The draft has a workable structure. A justified local edit or optional alternative is acceptable; the author did not request a newly generated article."
+            }
+          ]
+        },
+        "evaluation_dimensions": [
+          "Finding precision: claims about defects and their evidence are correct; no unnecessary mandatory edits are invented.",
+          "Finding coverage: the consequential eligibility omission and the local irrelevant history are identified, with importance distinguished.",
+          "Meaning preservation: proposed edits retain consequential conditions and useful relationships.",
+          "Report usefulness and relevance: the author can act without sorting through redundant diagnoses, unfounded demands, or exhaustive defence of unchanged text."
+        ],
+        "grading_notes": [
+          "Do not infer report quality from its length or number of sections.",
+          "Failure to identify F1 is a substantive review failure. Missing F2 is a content-selection omission; report it separately rather than equating it with sending an ineligible purchaser down the wrong path.",
+          "Unsupported additional mandatory edits count against precision. Harmless optional preferences are not equivalent to false factual findings, but repeated or distracting preferences can reduce report usefulness.",
+          "A review need not explicitly endorse or restate every correct product fact.",
+          "There is no ideal report text or required final verdict phrase."
+        ]
+      }
+    }
+  ]
+}

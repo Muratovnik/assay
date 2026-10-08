@@ -38,12 +38,13 @@ before choosing headings or polishing sentences:
 1. **Start from the reader's next need.** A README helps decide whether to use
    the product and reach a first result; an explanation builds understanding;
    a reference makes an exact answer easy to locate.
-2. **Select the necessary material.** Keep, condense, move or remove material
-   according to the reader's task. A supported fact does not automatically
-   belong on this page. Separate the main path from reference detail,
-   contributor tasks and the author's work record. Completeness covers this
-   reader's unresolved needs; it does not require teaching an explicitly known
-   concept again for a hypothetical newcomer.
+2. **Select the necessary material and its depth.** Establish the questions this
+   document needs to answer from the request, its surface and the reader's actual
+   work. Choose the claims and necessary explanations before writing from source
+   notes. A supported fact may still answer an unneeded question or supply an
+   incidental instance of an already clear claim. Ground added context in a real
+   dependency of the task; do not invent a concern to justify it. Keep conditions
+   that limit a claim and examples that make an unfamiliar mechanism intelligible.
 3. **Make the connection explicit.** Pair a command with its purpose, needed
    starting state and recognizable result. Pair an architectural decision with
    its reason and consequence. Describe real limitations where they affect use.
@@ -107,15 +108,19 @@ without turning a clean document into a service log. For `review`, report real
 findings and consequential limits, or a brief no-issue conclusion. Do not invent
 a quota, restore every wording preference or narrate the method.
 
-For a draft, rewrite or content review, apply the
-[final content review](references/document-design.md#review-the-finished-content)
-to the completed draft after composing it. For a file edit, reread the saved text;
-the plan or change summary is not the review subject. Then
-locate unnecessary passages, remove or merge them in an edit, then check the
-remaining claims against their conditions. A review reports the specific finding;
-a copyedit checks only its opened passage. Factual accuracy alone does not settle
-whether an explanation belongs. Finish the requested artifact without a visible
-self-review transcript or repeated polishing of already suitable text.
+Apply the [content review](references/document-design.md#review-the-finished-content)
+to the finished artifact. For a draft or rewrite, this is the document; for a file
+edit, reread the saved text. A plan or change summary does not substitute for it.
+For a content review, inspect the source and then the report you will deliver.
+The report's reader needs findings and their consequences: explain each problem
+and proposed correction once, keeping a condition where it qualifies the finding.
+Discuss unchanged material when the request asks for acceptance or when it resolves
+a question raised by a finding; do not inventory protected passages by default.
+A copyedit checks only its opened passage. Locate surplus, remove or merge it in
+an edit, and check the remaining meaning against its conditions. Factual accuracy
+alone does not settle whether an explanation belongs. Keep this check out of the
+delivered prose and stop when the scoped requirements hold; it is not a recurring
+polishing loop.
 
 After a substantive update, reconcile the affected claims
 and related exclusions using [document design](references/document-design.md#update-the-semantic-unit).

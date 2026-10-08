@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "TXTREL01",
+      "group": "REL-volunteer-email",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Select recipient-facing commitments from mixed notes and retain their conditions.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

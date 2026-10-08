@@ -456,3 +456,18 @@ installation or access and first use. This renames blocks the table already
 defines and was not executed. The merged runtime map digest is
 `197e3f394a50c46407956b716b5e1a5fa39f8b2bd5e3df1665386be4dcaa7851`, not
 candidate 3's; no other runtime file changed.
+
+## Grounded relevance follow-up — 2026-10-08
+
+The [follow-up study](relevance-study.md) reviews the later Tolmach incident,
+compares source alignment with grounded content selection, and records 25 fresh
+writing executions. The selected revision also applies the final content check
+to the delivered review report. All outputs, adverse results, oracle corrections,
+method patches and packet hashes are in [the evidence record](relevance-evidence.json).
+
+The study adds seven public technical regressions in `relevance-cases.json`, with
+separate criteria and exposure metadata. Existing inputs and criteria are intact.
+The selected revision passes its exercised material requirements, including a
+new paired review and a later exposed export regression; the record retains a
+minor source-footer note and distinguishes these from broader C results. It does
+not establish automatic activation, a population success rate or flawless prose.
