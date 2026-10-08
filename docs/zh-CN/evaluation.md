@@ -2,6 +2,8 @@
 
 [English](../evaluation.md) · [Русский](../ru/evaluation.md) · **简体中文**
 
+有关外部比较证据以及 Assay 目前尚未测量的效果，请参阅[技能有效性证据综述](../research/skill-effectiveness.md)（英文）。[配对比较方法](../how-to/compare-skills.md)（英文）说明如何区分模型实际运行与结构检查。
+
 英文版本为准。命令输出、规则名称与配置键不作翻译。
 
 每个技能都带有一个 `evals/` 目录。有必要说清楚这些文件到底能证明什么，因为诚实的
