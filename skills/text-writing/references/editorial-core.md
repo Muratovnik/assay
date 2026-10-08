@@ -6,8 +6,10 @@ the absence of a blacklist of expressions.
 
 ## Meaning before style
 
-Preserve supported facts and their relationships: who did what, negations,
-units, bounds, uncertainty, conditions, commitments and release status. A change
+For retained or explicitly required material, preserve the facts and their
+relationships: who did what, negations, units, bounds, uncertainty, conditions,
+commitments and release status. Source support alone does not make a fact relevant
+to a draft or rewrite; a copyedit does not authorize that content selection. A change
 from a necessary condition to a sufficient one changes the instruction. An upper
 bound, approximate value and measured result are not interchangeable. Meaningful
 paraphrase is allowed unless the task, quotation or identifier requires exact text.

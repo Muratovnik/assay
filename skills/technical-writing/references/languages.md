@@ -36,14 +36,17 @@ Defective:
 > Осуществляется выполнение операции по установке пакета, что позволяет в
 > кратчайшие сроки приступить к работе с продуктом.
 
-Legitimate, and not to be flagged:
+Natural wording when this information is needed:
 
 > Установите пакет: `pip install widgetctl`. Команда ставит CLI и его
 > зависимости — отдельная установка зависимостей не нужна.
 
 These are illustrative claims, usable only when the product sources support
-them; examples do not supply facts about the user's product. The second example keeps the em dash, keeps the Latin command untouched and
-repeats the term «команда» rather than hunting for a synonym. Normative Russian
+them and the reader needs the information. In an installation guide for readers
+who must otherwise obtain dependencies separately, the consequence answers a
+real setup question. If the established installation route already settles that
+question, omit the extra reassurance. These examples illustrate language, not
+mandatory content. The example keeps the em dash and the Latin command unchanged. Normative Russian
 punctuation, including the em dash and the dash in an elliptical sentence, is
 correct; a rule borrowed from an English style guide that bans dashes does not
 apply here. Do not chop sentences into verbless fragments to look brisk, and do
@@ -61,12 +64,14 @@ Defective:
 > Our powerful CLI seamlessly empowers you to simply manage everything you
 > need, right out of the box.
 
-Legitimate, and not to be flagged:
+Natural wording when this information is needed:
 
 > `widgetctl sync` copies the local catalogue to the server. It is idempotent,
 > so a repeated run after a network failure is safe.
 
-Formal words are not banned: "therefore", "however" and the passive voice are
+The retry consequence belongs in a recovery explanation where the reader needs
+to know what repeating the operation does. It need not accompany every mention
+of this command. Formal words are not banned: "therefore", "however" and the passive voice are
 all fine where they read naturally, and a passive is often the right choice when
 the actor is irrelevant ("the token is rotated every 24 hours"). English rules
 stay in this section; they are not the source of the Russian or Chinese ones.
@@ -83,12 +88,13 @@ Defective:
 > 随着技术的不断发展，本工具为广大用户提供了强大而全面的解决方案,帮助您轻松应对
 > 各种复杂场景。
 
-Legitimate, and not to be flagged:
+Natural wording when this information is needed:
 
 > 运行 `widgetctl sync --dry-run` 可以先查看将要上传的文件，不会写入服务器。
 > 该命令是幂等的，网络中断后重复执行是安全的。
 
-The second example is correct as it stands. Full-width punctuation（，。、：；「」）
+The preview and retry details are useful when the task calls for those operations.
+They are not required additions to every command description. Full-width punctuation（，。、：；「」）
 in the prose is normative, a four-character idiom used accurately is normal
 technical Chinese, and a parallel construction that lists three real options is
 not "machine-like". Do not convert full-width prose punctuation to half-width,

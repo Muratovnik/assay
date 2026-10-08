@@ -53,9 +53,10 @@ user parameters such as a token variable remain legitimate.
 
 ## Compose the page
 
-Start with the job the product helps the reader do and a distinguishing supported
-constraint or mechanism. Do not lead with the repository inventory or an inflated
-claim. Give concrete uses instead of several restatements of the tagline.
+Start with the job the product helps the reader do. Add a constraint or mechanism
+when it changes suitability or explains otherwise unclear behavior. Do not lead
+with the repository inventory or an inflated claim. Give concrete uses instead
+of several restatements of the tagline.
 Use the audience's established terms and keep distinct uses separate. Apply the
 [content review](document-design.md#review-the-finished-content) to the opening
 and feature list together so a property is not restated as another capability.

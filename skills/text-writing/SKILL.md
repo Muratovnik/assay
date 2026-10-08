@@ -70,8 +70,11 @@ neutral prose with fake intimacy, jokes, confessions or a sequence of fragments.
 
 ## Preserve what the text says
 
-Keep facts, names, quotations, units, bounds, negations, conditions, uncertainty
-and commitments. Preserve quantifiers and the direction of a condition:
+When drafting or rewriting, select material for the purpose; source support does
+not require including every fact. Preserve the meaning of retained or explicitly
+required material: names, quotations, units, bounds, negations, conditions,
+uncertainty and commitments. A copyedit or preserve-all request keeps its narrower
+authorization. Preserve quantifiers and the direction of a condition:
 permission subject to a condition is not an instruction to act whenever it holds.
 Keep what a number counts and which actions or alternatives share a deadline;
 do not attach a general requirement to only one option. Do not turn missing

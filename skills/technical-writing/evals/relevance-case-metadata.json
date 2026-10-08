@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWREL01",
+      "group": "REL-release-operations",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Preserve limits and conditional upgrade actions while selecting release-worthy facts.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL02",
+      "group": "REL-admin-guide-navigation",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Explain object relationships and route readers without inventing a reader motive.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL03",
+      "group": "REL-report-completeness",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Explain upload, indexing and completeness while preserving recovery branches.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL04",
+      "group": "REL-tolmach-review",
+      "purpose": "regression",
+      "source": "Tolmach README/CHANGELOG excerpts at b558693326c67d839c948c88126c586cf7c1d482, observed 2026-10-08; see relevance-NOTICE.md.",
+      "rationale": "Detect incidental specificity and an invented comparison in an ordinary editorial review.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL05",
+      "group": "REL-image-export-choice",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Retain useful format comparisons, examples and metadata distinctions without clause-level repetition.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL06",
+      "group": "REL-printer-replacement",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Preserve operational prerequisites, both network branches and success/failure gates.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWREL07",
+      "group": "REL-museum-booking-review",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-08; historical exposure and execution roles are recorded in the relevance study.",
+      "rationale": "Find an eligibility omission and a true irrelevant aside; assess the delivered review itself.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

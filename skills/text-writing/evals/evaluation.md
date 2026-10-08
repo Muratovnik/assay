@@ -78,3 +78,23 @@ python -B -m unittest discover -s skills/technical-writing/evals -p "test_*.py"
 Inspect tests before execution. This runs only the bundled check against known
 fixtures; it does not run a model or arbitrary shell examples. Include this
 suite in the real repository's gate if that gate does not already discover it.
+
+## Selection and preservation alignment — 2026-10-08
+
+The UI prompt previously required every supported fact, while drafting needs
+selection for a reader's purpose. The corrected prompt and two preservation
+passages protect the meaning of retained or explicitly required material and
+keep copyedit and preserve-all scope intact.
+
+The [shared relevance study](../../technical-writing/evals/relevance-study.md)
+records a paired Russian volunteer-email task with the UI prompt explicitly
+loaded, plus the existing `TW-EN-01-D` preservation control. Both the baseline
+and correction select appropriate recipient-facing facts; the baseline was
+already clean, so this pair establishes no comparative behavioral gain. The
+corrected preservation control retains every required fact. These are explicit
+invocation checks, not natural-discovery measurements.
+
+`relevance-cases.json` publishes the ordinary email as TXTREL01, with a separate
+rubric and public working metadata. Earlier cases and criteria are unchanged.
+The [shared evidence record](../../technical-writing/evals/relevance-evidence.json)
+contains the three outputs as runs 10-12, with source, method and packet hashes.
