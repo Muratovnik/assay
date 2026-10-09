@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.4](https://github.com/Muratovnik/assay/compare/v0.17.3...v0.17.4) (2026-10-09)
+
+### Bug Fixes
+
+* **routing:** preserve adequate selection, dispatch identity and complete cost evidence ([bd39402](https://github.com/Muratovnik/assay/commit/bd39402379bc54e6d4d6fae8039010a79b518ea3))
+
 ## [0.17.3](https://github.com/Muratovnik/assay/compare/v0.17.2...v0.17.3) (2026-10-09)
 
 ### Bug Fixes
