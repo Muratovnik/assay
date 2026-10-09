@@ -243,8 +243,11 @@ publication verifies that those bytes match the final tree.
 
 The [observation receipt](routing-quality-cost-observations.json) records public
 URLs, response hashes, adapter revisions, scope checks and precise limits.
-Twelve of thirteen configured production acquisitions succeeded in fresh caches
-and reread identically offline:
+The initial local pass completed twelve of thirteen configured production
+acquisitions in fresh caches with identical offline rereads. A subsequent
+isolated hosted run completed the remaining FrontierCode acquisition through
+the same production adapter, so all thirteen now have successful acquisition
+and offline-reread observations. The two runs retain separate receipts:
 
 | Source | Live normalized observations | Expense/uncertainty result |
 | --- | --- | --- |
@@ -253,7 +256,20 @@ and reread identically offline:
 | Terminal-Bench public Hub API | 35 rows, complete board | Intervals and aggregate totals retained; no invented per-task expense. |
 | SWE Atlas QnA / Test Writing / Refactoring | 24 / 24 / 17 rows | Quality intervals retained; unpublished costs remain unknown. |
 | Six vendor guides | Two selected sections each | Current configured extraction and cache paths passed. |
-| FrontierCode | Static HTTP 200, no HTML tables | Its rendered production capture could not run without Chromium. |
+| FrontierCode, subsequent hosted run | 260 rows: 130 Main and 130 Extended | Published API cost per rollout and output tokens retained for all rows; no score intervals in the captured result. |
+
+The [FrontierCode acquisition run](https://github.com/Muratovnik/assay/actions/runs/37910374737)
+used the unchanged production `Fetcher`, browser capture, parser and cache on
+the corrective code. It observed the selected FrontierCode 1.1 revision and
+both dataset subsets, retained hashes of the rendered capture and normalized
+snapshot, and verified a new cache instance's exact offline reread with zero
+network acquisitions. The operation took approximately 4.4 seconds inside a
+90-second owned process scope; browser operations were bounded to 15 seconds.
+Returned capture and worker output were each limited to 8 MiB. The production
+browser has no total network-transfer byte cap, and the receipt says so.
+The original failed local observation remains intact beside this later success.
+The temporary probe workflow was removed from its separate audit branch after
+the run; it does not change the PR's production code or install a recurring job.
 
 All 35 rows in this live Terminal-Bench snapshot have 330 trials. Unequal trial
 counts are therefore not a finding about that snapshot. The browser table still
@@ -283,9 +299,10 @@ events and configuration inspection cannot close that requirement.
 
 Local Playwright Chromium installation failed: the first mirror supplied a
 truncated archive and another returned HTTP 400; a later attempt also failed its
-lock wait. Browser-dependent tests remain visibly skipped locally. Passing
-hosted browser and Windows checks covers their fixtures; it does not establish
-a signed-in native model session or every current public layout.
+lock wait. Browser-dependent tests remain visibly skipped locally. The hosted
+FrontierCode run closes that concrete public-acquisition gap. Hosted fixture
+checks and a public-page capture do not establish a signed-in native model
+session or future publisher-layout stability.
 
 No comparable accepted-task matrix with complete model/effort and billing/quota
 receipts was available. Consequently the review cannot establish either

@@ -480,7 +480,6 @@
     ]
   },
   "unresolved": [
-    "FrontierCode native browser capture",
     "source per-row evaluation dates/budgets where absent",
     "actual native worker model/effort and subscription quota attribution",
     "task-specific predictive quality/economy"
@@ -543,6 +542,136 @@
       ],
       "verified_boundary": "Root session/thread identity, copied and referenced inherited history, owner markers and inherited cumulative usage.",
       "method": "Inspect pinned public source and exercise synthetic importer fixtures; no native worker run or automatic ancestor-file discovery."
+    }
+  },
+  "post_review_public_acquisition": {
+    "workflow_run_url": "https://github.com/Muratovnik/assay/actions/runs/37910374737",
+    "workflow_job_id": 113753814308,
+    "workflow_conclusion": "success",
+    "probe_branch": "audit/frontiercode-public-24671e3",
+    "retirement_commit": "d2bfc30c5558cd84fef5aab9cfd61123ac162b05",
+    "retirement_tree": "488f60e03491652d143cea5d868d8f6862863534",
+    "receipt": {
+      "bounds": {
+        "acquisition_wall_seconds": 90,
+        "browser_network_transfer_byte_cap": null,
+        "browser_operation_seconds": 15,
+        "capture_payload_bytes": 8388608,
+        "normalized_rows": 10000,
+        "receipt_bytes": 65536,
+        "worker_response_bytes": 8388608
+      },
+      "cache": {
+        "fetch_calls": {
+          "offline": 0,
+          "online": 1
+        },
+        "initial_empty": true,
+        "offline_refresh": "offline",
+        "offline_snapshot_equal": true,
+        "persisted_data_hash_equal": true
+      },
+      "capture": {
+        "capture_bytes": 20044,
+        "capture_encoding": "canonical JSON from core.encoded",
+        "capture_sha256": "b79d108f98b134dbb5cfe630c0fba25dfc2953f67ae819d70e3fe422735a741f",
+        "identity": {
+          "heading": "FrontierCode Leaderboard",
+          "selected_version": "FrontierCode 1.1"
+        },
+        "parts": [
+          {
+            "captured_data_rows": 130,
+            "headers": [
+              "#",
+              "Model",
+              "Score\n▼",
+              "Pass rate\n▼",
+              "Flag rate\n▼",
+              "Cost / rollout\n▼",
+              "Output tokens\n▼",
+              "Harness"
+            ],
+            "observed_subset": "main",
+            "subset": "main"
+          },
+          {
+            "captured_data_rows": 130,
+            "headers": [
+              "#",
+              "Model",
+              "Score\n▼",
+              "Pass rate\n▼",
+              "Flag rate\n▼",
+              "Cost / rollout\n▼",
+              "Output tokens\n▼",
+              "Harness"
+            ],
+            "observed_subset": "extended",
+            "subset": "extended"
+          }
+        ]
+      },
+      "code": {
+        "browser_blob": "831c34a640c83bae8422fef6afd5af0071a68853",
+        "head": "034d5953c06c93fda4cb15cfa06ff4dafff6a6ff",
+        "probe_sha256": "39abc9c917b30696e84d0e47b7258524dc21f020142de85b761f7706f1b8a7db",
+        "provider_blob": "31f117461e9001828104a89ff073c0832fcafa42",
+        "tree": "620e3da6e267d5e98f72ce7e43a0e08ba7934dc0"
+      },
+      "interpretation": "Rendered capture and normalized measurement hashes; no native task execution or subscription-cost measurement.",
+      "method": "Actual Fetcher/browser capture, fresh task Cache, separate Cache instance offline reread",
+      "normalized": {
+        "expenses": {
+          "complete_task_chain_cost_measured": false,
+          "normalized_cost_basis_counts": {
+            "published API cost per rollout; not subscription quota": 260
+          },
+          "rows_with_aggregate_usage": 0,
+          "rows_with_value": {
+            "cost_usd": 260,
+            "output_tokens": 260,
+            "reported_tokens": 0,
+            "steps": 0
+          },
+          "subscription_quota_measured": false
+        },
+        "intervals": {
+          "confidence_level_inferred": false,
+          "rows_with_published_bounds": 0,
+          "rows_without_bounds": 260,
+          "scale": "0..1"
+        },
+        "metrics": [
+          "mergeability"
+        ],
+        "rows": 260,
+        "rows_by_subset": {
+          "extended": 130,
+          "main": 130
+        },
+        "snapshot_bytes": 116008,
+        "snapshot_sha256": "2837b27d8041faa0d4890162a239951b80f8ba08c592eb9bf156c1387e04fc70"
+      },
+      "online": {
+        "availability": "fresh",
+        "error": null,
+        "last_attempt_at": "2026-10-09T09:18:36.290879Z",
+        "last_success_at": "2026-10-09T09:18:40.694096Z",
+        "refresh": "updated"
+      },
+      "probe": "frontiercode_public_production_acquisition",
+      "schema_version": 1,
+      "source": {
+        "adapter": "browser",
+        "adapter_revision": 5,
+        "benchmark": "FrontierCode",
+        "definition_sha256": "b385a959f55327bb18aadec0326ca719e98429e51c08f4568cf0c8cfac185e38",
+        "id": "frontiercode",
+        "url": "https://cognition.com/frontiercode",
+        "version": "1.1"
+      },
+      "status": "passed"
     }
   }
 }
