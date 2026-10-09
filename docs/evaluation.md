@@ -19,6 +19,9 @@ paired JSON files. `skill-evaluation` now has paired decision and discovery case
 separate evaluator-only metadata and a run protocol. Its manual
 `research-and-transfer.md` specifications remain available for source-backed
 transfer scenarios; those specifications are not executed results.
+The workflow corpus covers CSV analysis, typo fixes, authentication changes,
+report generation and read-only verification. Corpus files define tasks and
+protocols; they are not records of completed executions.
 
 They are evaluation data, not runtime instructions. A skill's own text says so:
 while performing a user's task, the skill must not read its own cases or rubrics.
@@ -27,15 +30,27 @@ better.
 
 ## What the gates check
 
-`python tools/eval_assets.py check` validates structure: every declared case has
-an id, every rubric entry points at a case that exists, every referenced input
-path resolves, and no case smuggles a grading field into the input side. It does
-not execute a fixture and it does not run a model.
+`python tools/eval_assets.py check` validates primary and auxiliary input/rubric
+pairs, including `ui-delivery`: case ids, rubric references, allowed fields and
+portable inline input paths. It also checks `independent-audit` fixture paths
+through the existing file-backed protocol.
+
+Labelled triggers are checked separately. `skills/ui-delivery/evals/trigger-cases.json`
+requires unique ids, nonempty prompts and rationales, and boolean labels. The
+legacy `skills/independent-audit/evals/trigger-evals.json` format keeps prompt/boolean records
+without ids and declares an execution status. These labels are evaluator data;
+generic `prepare` rejects them before allocating an executor packet. Validation
+does not execute fixtures or run a model.
 
 Utility suites do execute, without running models. The audit packet suite
 (`skills/independent-audit/evals/test_prepare_case.py`) builds frozen input-only
 packets and verifies that preparation excludes rubrics, other cases and previous
 answers, and that a packet's manifest digest matches what was actually written.
+Skill snapshots preserve exact bytes of `SKILL.md`, the optional
+`agents/openai.yaml` adapter and resources under `references`, `assets`, `scripts`,
+`templates` and `examples`, in singleton and composed packets. Evaluator stores
+such as `evals` stay outside the resource allowlist. Linked resources and special
+files are rejected before packet allocation.
 The preservation suite (`skills/technical-writing/evals/test_text_check.py`) runs
 that skill's shipped `text_check.py` against fixture pairs and holds it to its
 documented contract: which regions each mode compares, which exit code each

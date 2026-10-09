@@ -18,6 +18,8 @@
 `skill-evaluation` 现在有成对的决策用例与发现用例、单独的仅供评测者使用的元数据
 和运行协议。它的人工 `research-and-transfer.md` 规格仍然保留，用于有来源依据的迁移
 场景；这些规格不是已执行的结果。
+工作流用例涵盖 CSV 分析、错字修复、身份验证修改、报告生成和只读验证。
+用例集合文件定义任务与协议，并不是已完成执行的记录。
 
 它们是评测数据，不是运行时指令。技能自身的文本也这样写明：在执行用户任务时，技能
 不得读取自己的用例与评分标准。读评分标准，正是一个方法开始拿高分却并没有变好的
@@ -25,14 +27,23 @@
 
 ## 校验检查了什么
 
-`python tools/eval_assets.py check` 校验结构：每个声明的用例都有 id，每条评分标准
-都指向确实存在的用例，每个被引用的输入路径都能解析，且没有任何用例把评分字段夹带
-到输入一侧。它不执行夹具，也不运行模型。
+`python tools/eval_assets.py check` 校验主输入/评分标准文件对与辅助文件对，包括
+`ui-delivery`：用例 ID、评分标准引用、允许的字段和可移植的内联输入路径。
+`independent-audit` 的夹具路径由现有的文件型用例协议校验。
+
+带标签的触发用例单独校验。`skills/ui-delivery/evals/trigger-cases.json` 要求唯一的 ID、非空的
+提示与理由，以及布尔标签。旧式 `skills/independent-audit/evals/trigger-evals.json` 保留没有 ID
+的 prompt/boolean 记录，并声明执行状态。这些标签属于评测者数据；通用 `prepare`
+在分配执行者材料包之前拒绝它们。校验不执行夹具，也不运行模型。
 
 工具测试集确实会执行，且都不运行模型。审计材料包测试集
 （`skills/independent-audit/evals/test_prepare_case.py`）构建只含输入的冻结材料包，
 并验证准备过程排除了评分标准、其他用例与既往回答，且材料包清单的摘要与实际写入的
-内容一致。保全性测试集（`skills/technical-writing/evals/test_text_check.py`）以夹具
+内容一致。技能快照在单技能和组合材料包中保留 `SKILL.md`、可选的
+`agents/openai.yaml` 适配器，以及 `references`、`assets`、`scripts`、`templates` 和
+`examples` 中资源的原始字节。`evals` 等评测者存储不在资源允许列表内。
+链接资源和特殊文件在分配材料包之前被拒绝。
+保全性测试集（`skills/technical-writing/evals/test_text_check.py`）以夹具
 文件对运行该技能随附的 `text_check.py`，并按其文档约定核对：每种模式比较哪些区域、
 每种结果给出哪个退出码，以及该检查不会改动两个输入文件。
 

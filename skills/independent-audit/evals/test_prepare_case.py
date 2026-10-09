@@ -11,6 +11,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import tomllib
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -216,24 +217,88 @@ class PreparationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "within their fixture"):
             prep.load_cases(root)
 
-    def test_current_runtime_markdown_links_resolve_inside_snapshot(self):
-        import re
+    def test_current_runtime_resources_are_complete_in_singletons_and_collection(self):
+        repository = prep.SKILL_ROOT.parents[1]
+        catalog = tomllib.loads((repository / "catalog.toml").read_text(encoding="utf-8"))
+        sources = [repository / asset["path"] for asset in catalog["assets"]
+                   if asset["kind"] == "skill"]
+        for selected in [[source] for source in sources] + [sources]:
+            with self.subTest(selection=[source.name for source in selected]):
+                packet = prep.prepare_case(
+                    1, self.parent, with_skill=prep.SKILL_ROOT in selected,
+                    criteria_roots=[source for source in selected if source != prep.SKILL_ROOT])
+                self.assertEqual({path.name for path in (packet / "skill").iterdir()},
+                                 {source.name for source in selected})
+                for source in selected:
+                    expected = {name: digest for name, digest in hashes(source).items()
+                                if name.split("/", 1)[0] != "evals"}
+                    self.assertEqual(hashes(packet / "skill" / source.name), expected)
+                prep.verify_packet(packet, self.pin_manifest(packet))
 
-        criteria = [prep.SKILL_ROOT.parent / name for name in (
-            "code-change", "test-writing", "test-audit",
-            "evidence-research", "ui-delivery", "implementation-planning",
-            "software-architecture", "research-driven-change", "skill-evaluation",
-            "technical-writing", "text-writing")]
-        packet = prep.prepare_case(1, self.parent, criteria_roots=criteria)
-        skill = packet / "skill" / "independent-audit"
-        for path in skill.rglob("*.md"):
-            content = path.read_text(encoding="utf-8")
-            for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", content):
-                if target.startswith(("https://", "http://", "#")):
-                    continue
-                linked = (path.parent / target.split("#", 1)[0]).resolve()
-                linked.relative_to((packet / "skill").resolve())
-                self.assertTrue(linked.is_file(), f"Unresolved link in {path}: {target}")
+    def test_runtime_resources_preserve_bytes_without_copying_evaluator_data(self):
+        frozen = self.owned_root / "frozen" / "technical-writing"
+        runtime = {
+            "SKILL.md": b"Frozen method\n",
+            "agents/openai.yaml": b"interface: {}\n",
+            "references/procedure.md": b"Use the local runtime resources.\n",
+            "scripts/check.py": b"from support import check\n",
+            "scripts/support/__init__.py": b"",
+            "scripts/support/check.py": b"def check(): return True\n",
+            "scripts/requirements.txt": b"",
+            "assets/example.bin": b"\x00\xff\r\n",
+            "templates/report.md": b"# Report\n",
+            "examples/reader.md": b"A supported consumer example.\n",
+        }
+        evaluator = {
+            "evals/rubric.json": b"Hidden rubric",
+            "evals/runs/previous-answer.txt": b"Previous answer",
+            "results/output.txt": b"Previous output",
+            "answers.json": b"Coordinator answers",
+        }
+        for relative, data in (runtime | evaluator).items():
+            target = frozen / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+        before = hashes(frozen)
+        packet = prep.prepare_case(18, self.parent, with_skill=False, criteria_roots=[frozen])
+        self.assertEqual(hashes(packet / "skill" / frozen.name), {
+            name: hashlib.sha256(data).hexdigest() for name, data in runtime.items()
+        })
+        self.assertEqual(hashes(frozen), before)
+        prep.verify_packet(packet, self.pin_manifest(packet))
+
+    def test_runtime_resource_links_are_rejected_before_packet_allocation(self):
+        for relative, directory in (("assets", True), ("scripts/support.py", False)):
+            with self.subTest(resource=relative):
+                frozen = self.owned_root / relative.replace("/", "-") / "technical-writing"
+                frozen.mkdir(parents=True)
+                (frozen / "SKILL.md").write_text("Frozen method\n", encoding="utf-8")
+                evaluator = frozen / "evals"
+                evaluator.mkdir()
+                answer = evaluator / "answers.json"
+                answer.write_text("Hidden answer", encoding="utf-8")
+                linked = frozen / relative
+                linked.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    os.symlink(evaluator if directory else answer, linked,
+                               target_is_directory=directory)
+                except (OSError, NotImplementedError) as exc:
+                    self.skipTest(f"Host cannot create test symlink: {exc}")
+                before = set(self.parent.iterdir())
+                with self.assertRaisesRegex(ValueError, "Linked"):
+                    prep.prepare_case(18, self.parent, with_skill=False, criteria_roots=[frozen])
+                self.assertEqual(set(self.parent.iterdir()), before)
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "Host has no named-pipe fixture")
+    def test_runtime_special_files_are_rejected_before_packet_allocation(self):
+        frozen = self.owned_root / "special" / "technical-writing"
+        (frozen / "assets").mkdir(parents=True)
+        (frozen / "SKILL.md").write_text("Frozen method\n", encoding="utf-8")
+        os.mkfifo(frozen / "assets" / "pipe")
+        before = set(self.parent.iterdir())
+        with self.assertRaisesRegex(ValueError, "Unsupported runtime entry"):
+            prep.prepare_case(18, self.parent, with_skill=False, criteria_roots=[frozen])
+        self.assertEqual(set(self.parent.iterdir()), before)
 
     def test_explicit_criteria_snapshot_preserves_old_bytes_and_hides_evals(self):
         frozen = self.owned_root / "frozen" / "code-change"
