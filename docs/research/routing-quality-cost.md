@@ -148,6 +148,7 @@ only checking its own output shape.
 | R16: concurrent completion | Two services sharing SQLite could each finalize different answers in memory/history before one overwrote the other. | Validate/finalize and commit the bounded local result under one store transaction. Equal submissions share one result; conflicting submissions have one winner and one classified rejection. No model or network call occurs under this transaction. |
 | R17: semantic cache identity | Packet IDs were canonicalized at the top level but retained inside attached task evidence, causing avoidable cache misses and repeat advice for a semantically identical renamed request. | Canonicalize the attached evidence IDs in the cache projection only and rebind the result to the actual request. Renamed/swapped IDs hit; changed task, objective, corpus or source revision still misses. |
 | R18: evidence budget | The new all-pairs comparison pushed a four-route summary above the existing 6 KiB cap, dropping all its evidence. The committed regression's full summary is 7,728 bytes. | When needed, remove only per-category cost distributions and mark `cost_detail: "totals_only"`. That regression becomes 5,752 bytes with all six pair comparisons and complete quality/total-cost/unknown/cohort fields. Larger summaries still fail visibly at the unchanged cap. |
+| R19: shared test-fixture cleanup | A pre-existing decision test manually initialized an asynchronous test helper, then called its cleanup dispatcher without a unittest runner. That dispatcher swallowed its own assertion, so the test passed while leaving its temporary directory for garbage collection. | Forward the helper's cleanup registrations to the active test before setup, including resources allocated before setup failure. A real-test ownership probe retained both directory objects: before the fix one directory survived test cleanup; afterward neither did. No production cleanup defect is inferred from this test-only finding. |
 
 Regression owners are
 [policy and dispatch cases](../../tools/test_routing_policy_guards.py),
@@ -158,6 +159,8 @@ the affected existing integration and compatibility suites. PR-review repairs
 add [whole-caveat cases](../../tools/test_routing_guide_caveats.py),
 [summary budget controls](../../tools/test_routing_summary_budget.py), and
 [shared-store/invocation tests](../../tools/test_routing_pipeline.py).
+The final CI warning investigation also corrects the shared helper cleanup in
+[decision lifecycle tests](../../tools/test_routing_decisions.py).
 
 The baseline's initial 768-test run reported two Linux process-test failures.
 Those two assertions inspected host-mounted `/proc` using namespace-local PIDs,
@@ -166,6 +169,16 @@ so they could read an unrelated process. The fixture now records its own
 cleanup change. The separate successful-parent orphan test still failed before
 the cleanup repair and passed afterward. A fixture defect was not presented as
 proof of a production cancellation failure.
+
+The final CI run exposed a separate `TemporaryDirectory` warning. Source review
+found the unchanged baseline helper-cleanup defect in R19. A bounded real-test
+probe reproduced it while keeping both directory objects alive: the unittest
+result was successful, but one directory still existed after its cleanup phase.
+After the correction both directories were gone. This confirms the fixture
+defect independently of garbage-collection timing; the original CI log did not
+identify the allocating test, so attribution of that specific warning remains
+an inference. The original production code and public-acquisition receipts are
+unaffected by this test-only correction.
 
 For the original six fixed-path tests, the base produced two assertion failures
 and three missing-marker errors. The corrected path passed all six; a seventh

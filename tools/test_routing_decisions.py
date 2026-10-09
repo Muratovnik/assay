@@ -334,8 +334,9 @@ class DecisionLifecycleTests(unittest.IsolatedAsyncioTestCase):
     async def test_required_claude_consumes_named_answers_without_root_evidence(self):
         from test_routing_pipeline import PipelineTests
         fixture = PipelineTests("runTest")
+        # Register resources on the running test, even if helper setup fails.
+        fixture.addCleanup = self.addCleanup
         fixture.setUp()
-        self.addCleanup(fixture.doCleanups)
         fixture.config["schema_version"] = 4
         fixture.config["policy"] = {"schema_version": 3}
         fixture.configure()
