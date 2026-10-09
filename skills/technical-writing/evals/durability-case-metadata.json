@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWDUR01",
+      "group": "durability_game_design",
+      "purpose": "regression",
+      "source": "Pinned Game Design public source at a0db5af71146586cf861881670c991ad94d87e2b, plus the separately captured GitHub About field. See durability-NOTICE.md.",
+      "rationale": "Real-incident diagnostic with an extended criterion set on unchanged source inputs; reader identity, appropriate depth, application route, dependencies, notices, and a known incoming contributor link.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR02",
+      "group": "durability_reader_entry",
+      "purpose": "regression",
+      "source": "Synthetic source fixture, prepared 2026-10-08.",
+      "rationale": "Complete release-folder onboarding, useful descriptions and actual delivery scope.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR03",
+      "group": "durability_generated_reference",
+      "purpose": "challenge",
+      "source": "Synthetic source fixture, prepared 2026-10-08.",
+      "rationale": "Mixed code, source-owned description and generated reference update; preserve computed counts and test a later source mutation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR04",
+      "group": "durability_generated_reference",
+      "purpose": "challenge",
+      "source": "Synthetic later state of TWDUR03, prepared 2026-10-08; not a previous executor output.",
+      "rationale": "Within-group rename and reference-title update; ordinary generation must follow authoritative fields.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR05",
+      "group": "durability_generated_reference",
+      "purpose": "should-not-fire",
+      "source": "Synthetic source fixture, prepared 2026-10-08.",
+      "rationale": "A bounded code-only fix with prose present but no writing task.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR06",
+      "group": "durability_recovery_guide",
+      "purpose": "routine",
+      "source": "Synthetic source fixture, prepared 2026-10-08.",
+      "rationale": "A causal explanation needs retention limits, event identity, transaction boundaries and a worked recovery example.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR07",
+      "group": "durability_reader_entry",
+      "purpose": "regression",
+      "source": "Synthetic editorial review of the TWDUR02 fixture; prepared before its first execution.",
+      "rationale": "Audit-to-writing handoff and the relevance of the review report itself; preserve source-only authority.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR08",
+      "group": "durability_generated_reference",
+      "purpose": "challenge",
+      "source": "Synthetic multi-stage task on the TWDUR03 fixture; prepared before its first execution.",
+      "rationale": "Research, plan, code and documentation update followed by requested maintainer evidence; not an additional independent group.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR09",
+      "group": "durability_local_snapshot_restore",
+      "purpose": "challenge",
+      "source": "Independent synthetic technical fixture prepared after F selection; see extension allocation and subsequent F withdrawal in shared evidence.",
+      "rationale": "Substantial restoration runbook with generation guards, retained old data, temporal precision and conditional rollback. The F paired allocation was cancelled after an unrelated final failure; completed baseline output remains.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR10",
+      "group": "durability_audio_replacement",
+      "purpose": "routine",
+      "source": "Independent synthetic technical fixture prepared after F selection; see extension allocation and subsequent F withdrawal in shared evidence.",
+      "rationale": "Customer help with a complete replacement route, meaningful comment controls, temporal boundaries and successful-publication conditions. The baseline paired allocation was cancelled after F acceptance was withdrawn; completed F output remains.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDUR11",
+      "group": "durability_upload_protocol",
+      "purpose": "challenge",
+      "source": "Fresh independent fictional source package sealed after working repairs; H selected before requests, source contents and criteria were opened. See filename-only exposure and allocation records.",
+      "rationale": "Complete API integration guide with byte-consistent examples, authorization, idempotency, concurrency, checksums, expiration, publication, cancellation and useful reference depth.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

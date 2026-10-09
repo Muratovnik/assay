@@ -1,7 +1,9 @@
 ---
 name: text-writing
-description: Write or reshape ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — or review an existing text. Skip product documentation, code changes, commit records, agent instructions and standalone test runs.
+description: Write, edit or review ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — including prose within a larger task. Skip product documentation and repository or package descriptions, code-only changes, commit records, agent instructions and standalone test runs.
 license: MIT
+metadata:
+  assay-optional-skills: "technical-writing"
 ---
 
 # Text writing
@@ -9,6 +11,10 @@ license: MIT
 Give the reader a text they can use: a clear point, enough context, a coherent
 sequence and an appropriate voice. Preserve facts and intent while making
 choices about emphasis and form. Removing stock phrases alone is not writing.
+
+Product documentation and repository or package descriptions use
+[technical-writing](../technical-writing/SKILL.md). For a mixed request, choose
+the owner by the text's purpose; ordinary correspondence remains here.
 
 ## Understand the assignment
 
@@ -33,8 +39,10 @@ For drafting or a substantive rewrite:
    Lead with the information that gets them there. An article may open with a
    concrete situation when it earns the explanation that follows.
 2. **Select and order.** Use the facts needed for that purpose; source-note order
-   is not an outline. Bring a reason next to its consequence and a request next
-   to its deadline. Develop a paragraph around one useful question or idea.
+   is not an outline. A supported detail still needs a role in this reader's
+   understanding or decision. Bring a reason next to its consequence and a
+   request next to its deadline. Develop a paragraph around one useful question
+   or idea.
 3. **Explain the connections.** Show how an action, mechanism or example supports
    the point. Supply a missing conceptual bridge instead of merely replacing
    difficult words. Do not invent a causal link the material does not support.
@@ -42,8 +50,13 @@ For drafting or a substantive rewrite:
    natural complete sentences. Adjust emphasis and rhythm to the subject and
    any supplied sample, rather than giving every genre the same polished shape.
 5. **Read as the recipient.** Can they follow the thought without the editor's
-   private context? Repair unclear references, missing context and repeated
-   conclusions. Stop once the requested artifact works; do not regenerate on a
+   private context? Inspect the complete text, including supporting clauses and
+   the ending. Check what each substantive addition contributes where it appears.
+   If nearby wording already expresses the same condition, uncertainty or
+   consequence, combine or remove the repetition. A conditional conclusion needs
+   no further caveat merely to repeat its limit. Keep a repeat when it serves a
+   distinct reader need, such as a warning at a separate action or a useful recap
+   of a long argument. Repair actual gaps, then stop; do not regenerate on a
    schedule or attach the working outline unless requested.
 
 For a short task, do this directly. For a difficult opening, article structure

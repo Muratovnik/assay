@@ -1,6 +1,9 @@
 # Repository, onboarding, and release
 
-A full prerelease audit covers files and consumer journeys even when gates pass. A narrow README review follows relevant entry points without silently expanding into qualification of every platform.
+Use this procedure for repository readiness, installation lifecycle or distribution
+claims. A full prerelease audit covers files and consumer journeys even when gates
+pass. For a narrow documentation review, use the writing method's reader-path and
+delivery guidance; the presence of a README does not open every procedure below.
 
 ## Review files as product interfaces
 
@@ -64,4 +67,10 @@ Recheck current documentation before prescribing behavior or versions. Framework
 
 ## Report this mode
 
-Include actual file/audience coverage, significant purpose/disposition decisions, broken or confusing journeys, and the applicable source/artifact/platform evidence matrix. A green gate does not excuse omitted surfaces; missing evidence follows the main verdict rules.
+For a repository or release readiness decision, include actual file/audience
+coverage, significant purpose/disposition decisions, broken or confusing journeys,
+and the applicable source/artifact/platform evidence matrix. A green gate does
+not excuse omitted in-scope surfaces; missing evidence follows the main verdict
+rules. When this reference supplies evidence for a narrow writing review, carry
+that evidence into the relevant finding or consequential limit instead of adding
+a separate readiness report.

@@ -15,6 +15,9 @@ The pattern pairs below diagnose local problems, not the whole quality of a text
 Defects observed in English writing, with their own examples. This profile is
 not the source of the Russian or Chinese ones: each language has its own
 defects and its own legitimate neighbours.
+"Legitimate" describes a possible use, not text to preserve in every rewrite.
+The example still needs a role in this reader's message; source support alone
+does not supply that role.
 
 ## Defects
 
@@ -42,18 +45,22 @@ evaluation instead.
 > Legitimate: "This is not a compiler change; it is a change in where the cache
 > lives."
 
-The second sentence rules out one specific misreading, which is what the shape
-is for.
+The second sentence is useful when the surrounding message or task gives reason
+to distinguish a compiler change from a cache change. Without that question,
+state the cache change directly. The contrast is allowed, not compulsory.
 
 ### 3. The ceremonial closer
 
-A final paragraph restates the text in a raised voice and leaves the reader
-without a next step.
+A final paragraph restates the text in a raised voice without helping the reader
+understand, recall or act on it.
 
 > Defective: "At the end of the day, the future of shipping is already here."
 
 > Legitimate: "If the cache is still cold after the image update, post in the
 > on-call channel."
+
+A useful recap or an ending that completes an explanation is also legitimate.
+It need not give the reader another action.
 
 ### 4. The unearned intensifier
 

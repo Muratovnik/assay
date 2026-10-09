@@ -4,20 +4,22 @@ Read this only for a genre whose job is to help someone decide: a product page,
 a landing section, a feature announcement, a portfolio entry, a conference bio,
 an offer. Everything here stays inside those genres.
 
-## Tie a capability to an outcome the user recognises
+## Use an outcome when it helps the decision
 
-A feature list tells the reader what the product contains. A decision needs what
-changes for them. Name the situation, the thing that happens now, and who it
-happens to.
+State what the product is and does. When the reader's choice depends on a
+consequence, connect the capability to that supported outcome. An identifying
+card can already be complete with its purpose; it does not always need a benefit
+story. Do not invent an anxiety, comparison or goal to justify a "so that" clause.
 
 > Weak: "Advanced rule-based routing engine with a flexible policy layer."
 
 > Better: "Route an incoming ticket to the team that owns the product area, so
 > the first reply does not wait for a triage round."
 
-The second version is still a claim. It earns its place only if the product
-actually does it; a sharpened sentence about a capability that does not exist is
-worse than a vague one, because it is more convincing.
+The second version fits a reader deciding how to handle incoming tickets and
+triage delay, provided the product supports the consequence. Without that task
+connection, the added benefit may be unnecessary even when true. A sharper
+unsupported claim is worse than a vague one because it is more convincing.
 
 ## Every claim carries its basis
 

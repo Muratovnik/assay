@@ -1,5 +1,20 @@
 title = "assay secret scanning"
 betterleaksMinVersion = "1.8.1"
 
+# Verified SHA-256 identities in the durability evidence, not credentials:
+# d49 and d51 decision memos; the synthetic Spanport OpenAPI source.
+# Keep detection active for every other value and outside these evidence files.
+filter = '''
+finding["rule_id"] == "generic-api-key" &&
+filter.matchesAny(attributes["path"], [
+  `(?:^|[/\\])skills[/\\]technical-writing[/\\]evals[/\\]durability-(?:evidence|outputs|judgments)\.json$`
+]) &&
+finding["secret"] in [
+  "f533835c0b0edc2aa26e57fedd64f54812faac293a7cc0181ab5e57daf2cae0c",
+  "701061330237271a93bb5502ad196648b91ed17f0409cb034fd5158e8d2c3c2d",
+  "c193d255ade5e1f54643202e2d0899f52d8ea84160cb4daeeaecc0fc59ac48b9"
+]
+'''
+
 [extend]
 useDefault = true

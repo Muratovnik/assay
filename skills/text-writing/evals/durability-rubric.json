@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "TXTDUR01",
+      "assess": [
+        "visitors.md identifies the activity, quiet reading and optional final-half-hour discussion in natural Chinese.",
+        "The visitor route preserves Wednesday 18:30–20:00, second-floor Qinghe room, the website seat-reservation entry, 17:00 same-day cutoff and no additional on-site seats.",
+        "The enduring public introduction omits incidental volunteer and print totals and internal scheduling-tool history.",
+        "helpers.md answers the recorded question by clearly distinguishing a seat reservation from reserving a specific library book and explains their independence.",
+        "The helper reply preserves that visitors may bring their own books and need not borrow library books; the needed contrast is not erased as a forbidden rhetorical form.",
+        "Both artifacts remain usable plain Markdown Chinese prose, without unsupported motives, reassurance, or extra operational claims."
+      ],
+      "allow": [
+        "The visitor card may mention bringing a book as part of the actual participation route.",
+        "Headings, short paragraphs or useful lists are valid; no exact phrasing is required.",
+        "The necessary contrast can use affirmative wording or a natural negative construction."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TXTDUR02",
+      "assess": [
+        "The welcome panel accurately introduces a free, quiet indoor place for reading beside plants in prose that suits arriving visitors.",
+        "The welcome panel selects the enduring purpose and a useful welcome rather than defining the place by the current pot, plant-type or booklet inventory.",
+        "The first-visit handout directs visitors through the level courtyard entrance rather than the closed street-facing door.",
+        "The handout makes the individual arrival route usable, including that no booking or check-in is needed and how an available chair is identified.",
+        "If the drafts mention booking, they preserve the distinction between individual visitors and groups of more than eight, with the supplied reception route.",
+        "The drafts give helpful reading or settling-in guidance, such as the booklet basket and return point or keeping the aisle clear, without presenting staff upkeep as visitor work.",
+        "Any hours, permissions, thresholds or physical directions included are accurate and preserve their relevant conditions.",
+        "The prose uses a welcoming, clear public voice without inventing visitor anxieties, promises of guided service, or unsupported qualities of the place.",
+        "The two artifacts have distinct useful roles and do not repeat staff inventories, rota details or storage facts as filler.",
+        "Both requested files contain complete plain Markdown drafts suitable for a designer without editorial grading notes or fabricated external contacts."
+      ],
+      "allow": [
+        "Accurate current opening hours are useful in the practical handout and may appear on the welcome panel if the design remains coherent.",
+        "Mentioning reserved chairs, water bottles or food is helpful when brief and connected to settling in; exhaustive rule reproduction is unnecessary.",
+        "A short welcome panel and a more detailed handout are natural, but exact word counts and sentence structures are not prescribed.",
+        "Ordinary headings, short paragraphs or compact bullets may all work."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TXTDUR03",
+      "assess": [
+        "The note is coherent Russian prose for colleagues making a schedule decision and accurately describes the trial change from 10:30 to 9:30 with closing time unchanged.",
+        "It communicates the positive feedback with its actual unit and scope: 13 of 18 forms, not a count or proportion of unique residents or all visitors.",
+        "When using attendance totals, it distinguishes visits from unique people and does not turn the observed 26 visits into an unsupported increase over the preceding 28.",
+        "The statement about shorter queues is attributed to the attendants' observations, with the absence of measurements conveyed where necessary to assess its evidential strength.",
+        "The note makes the decisive uncertainty understandable: two trial days and convenience feedback do not establish the benefit of a permanent early schedule, and the current forms do not reveal use of the extra hour.",
+        "The proposed next step is concrete and grounded in the available two additional staffed trial dates and a useful way to observe the extra hour, or is a comparably sound proposal tied to those constraints.",
+        "A proposal, staff report and measured record are not presented as interchangeable kinds of evidence; the note does not present the coordinator's unapproved suggestion as an adopted policy.",
+        "The prose avoids causal claims about rain, queues, turnout or satisfaction that the materials do not establish.",
+        "It leaves out paper color, folder name and furniture logistics when they do not help colleagues make the schedule decision.",
+        "The file is a complete useful note in ordinary Markdown, without generic reassurance, invented reader concerns, or a surplus caveat that merely repeats the already explained evidential limit."
+      ],
+      "allow": [
+        "The recommendation may favor continuing the trial or postponing a permanent change, provided the evidence and staffing constraint support the reasoning.",
+        "All feedback categories may be included, or the note may foreground the 13 of 18 forms and summarize the alternatives accurately.",
+        "The note need not reproduce every date, baseline count or suggested tracking mechanism if its decision remains well grounded.",
+        "A concise sectioned memo, connected paragraphs or a short evidence list are acceptable.",
+        "Meaningful uncertainty should remain specific; no mandatory stock disclaimer or exact Russian phrase is required."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TXTDUR04",
+      "assess": [
+        "notices/thursday.md replaces East Room with Garden Room.",
+        "The rest of the notice, including title, times, requested items and plain Markdown structure, is preserved.",
+        "The task produces the requested small edit without adding directions, capacity, storage explanations, shared-scissors information or a new writing artifact."
+      ],
+      "allow": [
+        "A concise completion message is acceptable.",
+        "No particular editing tool or test is required; validation effort should stay proportionate."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TXTDUR05",
+      "assess": [
+        "审阅以简体中文写入 review.md，围绕所供短文的清楚、相关和连贯程度提出可定位、带理由的意见。",
+        "识别第二节首段中“也就是说，只有编号和长度两项都填写的条目才进入计算，任何一项留空的条目都不进入计算。”与其紧邻前句重复：两句给出的纳入条件和缺项后果完全相同，后句没有新增条件、对照、例证或本次读者任务需要的解释功能；应给出合并、删减等可行处理方向。",
+        "不得仅因第一节末句以“总的来说”开头、没有引出下一步行动，或没有新增独立事实，就把它判为应删的赘述。该句把前面分开展开的共同平均值和不同逐株分布联系起来，回应标题所问并完成解释；若主张调整，理由须落在本材料具体的理解或衔接问题上。",
+        "任何删改建议不得损坏数值关系或推论边界：甲组3、5、7厘米，乙组4、5、6厘米，两组均值5厘米，极差分别4厘米和2厘米；这些只是同一次测量中这六株的记录，不能推出生长速度、种法优劣或一般规律。",
+        "任何删改建议不得损坏记录纳入条件：编号和长度均填写才纳入，任一缺项即排除，空白不能当作0；文中两组均完整，各按三株计算。",
+        "重要编辑判断应能由来源简报中的读者理解任务和短文实际上下文支持，不因偏好而要求增加操作建议、删除所有收束句或扩写成全文重写。"
+      ],
+      "allow": [
+        "可以只列需要调整的位置，不必逐段评价，也不必专门表扬第一节的收束句；只要没有按无行动、总结开头等表面特征误判它即可。",
+        "可以对第一节末句提出有根据的措辞简化、位置调整或与邻句整合，但须说明具体的读者理解负担或衔接问题，并保留将相同平均值与不同分布联系起来的解释功能。单说“只是总结”或“没有下一步”不构成依据。",
+        "处理第二节首段的近邻复述时，可以删后句、删前句或合并；不要求固定保留哪一句，也不要求使用某种优选改写。须明确识别这组实际重复及其无新增功能之处。",
+        "可以提出其他由所供材料支持的清楚、相关或连贯问题；不设发现数量、目标篇幅、固定术语或固定措辞要求。",
+        "可以保留第二节后段的缺项示例；它把“排除”和“记作零”的差别落到具体条目上，不能只因重用前文概念就自动算作赘述。"
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TXTDUR06",
+      "assess": [
+        "The expected artifact exists and contains a completed decision memo in Russian for the stated director and meeting.",
+        "The memo makes an explicit recommendation for securing the confirmed production program and explains the causal connection between the chosen action, usable cooling, and deliverable accepted output.",
+        "The recommendation accounts for the first shipment of 600 kits on 20 October before noon, including that only the 16 and 19 October shifts can supply it and no finished stock is available.",
+        "The memo accurately represents the full commitment of 8,500 kits by the November shipment and the inadequacy of continued restricted operation; any production arithmetic uses accepted kits and the supplied shift calendar.",
+        "When comparing viable output, the memo uses the planned normal rate of 320 kits per shift rather than the nameplate figure of 380 or an invented additional shift.",
+        "The rental comparison uses the current revision 2 commercial terms, with 572,000 rubles of six-week service expense, rather than the expired 49,000-ruble weekly offer.",
+        "The separate 180,000-ruble security payment is distinguished from service expense, with its return conditional on inspection and possible deductions.",
+        "The proposed financial authorization correctly distinguishes the 610,000-ruble expense limit from the 780,000-ruble cash limit; the rental entails 752,000 rubles at peak and fits both before extensions or additional work.",
+        "The explanation does not treat the planned 910,000 rubles of contribution at risk as an automatic cash fine or a certain realized loss.",
+        "The repair option is assessed using its unconfirmed price and timing, and the memo recognizes that neither supplied repair scenario meets the first shipment without a separate change to the customer commitment.",
+        "The purchase option is assessed using its earliest confirmed 30 November commissioning date and full 1,658,000-ruble entry cost, so it is not presented as a timely solution to the confirmed shipments.",
+        "Acceptance of rental capacity is conditional on the simultaneous-load trial specified by the engineer, not solely on the advertised 47 kW; the trial may be described directly or assigned by an unambiguous reference to the engineering protocol.",
+        "The capacity claim remains conditional on accepted operating conditions; the memo does not turn the recent temperature observations or the restricted-mode plan into a guarantee against later cooling failure.",
+        "The memo provides a concrete action and owner for obtaining the decision, signed order, and payment in time for the 13 October 16:00 reservation deadline.",
+        "The memo assigns responsibility for installation and acceptance on 15 October and explains what happens to production and customer commitments if the trial fails.",
+        "The plan does not assume that the possible transfer of 700 customer kits has been accepted; any dependence on altered delivery dates is expressly conditional on written customer agreement.",
+        "The temporary plan has an explicit end or review point, including a permanent-equipment decision by 16 November and readiness for the agreed return window on 27 November before noon.",
+        "If continued rental is discussed, the memo represents the extra started-week charge and need for new approval accurately; it does not imply automatic availability or room for a seventh week within the existing expense limit.",
+        "The memo does not silently authorize parallel repair within the existing temporary budget or count unvalidated electricity savings as a proven financial benefit.",
+        "The explanation is usable by the non-specialist director: important technical or financial distinctions are connected to their decision consequences, with enough connective reasoning to understand why the recommendation follows.",
+        "Pivotal figures, dates, and limits are traceable to supplied evidence through source names, file references, or working relative links, and any additional assumptions are clearly conditional."
+      ],
+      "allow": [
+        "Headings, prose organization, tables, a short opening recommendation, and the placement of source notes may vary; no exact wording or prescribed length is required.",
+        "A rental recommendation is well supported, but another recommendation is acceptable if it explicitly resolves or conditions every consequential deadline, capacity, funding, and acceptance obstacle using the supplied evidence without inventing customer or supplier consent.",
+        "Rounded monetary figures are acceptable when their precision and meaning remain clear and they do not change a budget conclusion.",
+        "The memo may cite the exact engineering acceptance protocol instead of reproducing each numerical test threshold, provided the responsible person and pass-before-accept condition are unambiguous.",
+        "It need not reproduce every rental line item, manufacturing observation, correspondence detail, or repair scenario if the relevant decision implications remain accurate.",
+        "An action list may name supplied individuals or their unambiguous organizational roles; it describes proposed instructions, not proof that any future action occurred."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWDUR01",
+      "assess": [
+        "G1: Deliver an English README.md and a GitHub About proposal in about.txt, within the authorized output scope.",
+        "G2: The opening and About identify the product as agent skills or equivalent actionable instructions for designing/revising games, rather than only an inventory or abstract methodology.",
+        "G3: A reader who wants to apply a method to a game can locate a supported first action with the game/artifact, relevant goal and allowed scope; do not make contributor setup or release preparation a prerequisite for using plain methods.",
+        "G4: A reader who wants to inspect an example gets a direct and intelligible route. Any runnable demonstration retains its real prerequisites, paths, parameters and recognizable result.",
+        "G5: Preserve the supported full-bundle/sibling-resource condition and direct use of an applicable entry; do not invent a mandatory central router or require every general method for every design task.",
+        "G6: Keep dependency and native-client claims within the supplied source scope. Assay is separately obtained and conditional on the operation; do not imply automatic installation, discovery or unsupported successful client execution. Exact source requirements remain precise wherever that operation is documented.",
+        "G7: Keep required license/notice attribution and the adopted applicable README presentation. Do not invent assets, support promises, demonstrated human outcomes or source links.",
+        "G8: Select introductory facts for identity, suitability and use. A snapshot inventory total or build/test detail does not belong in standing introductory copy merely because it is verified. Do not replace an unnecessary exact total with an equally unnecessary vague quantity. An applicable catalog table, fixed package boundary or dated measurement may retain precision.",
+        "G9: Assess the whole reading sequence and substantive additions. Internal maintenance vocabulary, author verification narration, repeated capability claims, invented reader objections and link-sales rationales need an actual reader function. Preserve meaningful distinctions, actual limitations, necessary explanations and useful examples; do not grade against a phrase list or a preferred sentence.",
+        "G10: The final handoff must accurately describe the saved outputs and any consequential unresolved issue, without claiming execution or external updates. An implementation checklist or editing explanation is not a substitute for the requested artifacts.",
+        "G11: The supplied release guide sends maintainers to README.md#quick-start for isolated environment setup. Preserve a usable route from that entry to the setup or its complete contributor instructions while keeping product first use separate; do not silently repurpose the anchor into a dead end for that existing reader."
+      ],
+      "assessment": "Assess each requirement with a verdict, artifact span and task/source-grounded reason. Truth, completeness, relevance, readability and scope are distinct. A confirmed relevance defect blocks case acceptance even if brief; an alternate acceptable expression remains preference. This is an exposed real-incident diagnostic, not final transfer evidence. The exact required wording is not prescribed.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR02",
+      "assess": [
+        "README.md accurately identifies Foldnote as a tool for assembling a folder of Markdown notes into one Markdown handout.",
+        "README.md gives an executable first-use command with a valid input folder and an output path outside that folder, and makes the resulting file's location understandable.",
+        "README.md gives the relevant Python prerequisite without making source checkout, packaging work, or the contributor test routine a required user step.",
+        "README.md gives enough guidance to substitute the reader's own notes and deal safely with an already existing output, either locally or through the supplied usage link.",
+        "The repository.json and pyproject.toml descriptions convey the project's useful capability without promoting the sample inventory, test inventory, release history, or housekeeping history into its identity.",
+        "README.md selects details that help a new organizer understand or use the tool; it does not retain incidental counts or internal history as filler.",
+        "The prose does not invent concerns, emotions, assurances, capabilities, installation steps, or external destinations for the reader.",
+        "The edited artifacts remain coherent plain Markdown and valid metadata; unrelated metadata fields and executable source behavior are preserved.",
+        "Any internal links added or retained resolve to supplied files, and their labels make the user/contributor destination clear enough for the task."
+      ],
+      "allow": [
+        "A concise note on sorting, unchanged input notes, image references, or Markdown versus PDF may be helpful when integrated with use; none is required verbatim.",
+        "An optional contributing section or link is welcome if it is clearly a separate route.",
+        "Python version, example paths, command flags and output behavior are useful precision, not forbidden detail.",
+        "Headings, compact lists and short paragraphs are all acceptable; no particular heading names or length are required."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR03",
+      "assess": [
+        "catalog.json contains a vial preset with width_mm 40, height_mm 20 and display_order 25; existing presets retain their data.",
+        "list_presets() orders presets by display_order, so the CLI and generated reference agree even when identifier order differs.",
+        "The project summary in the authoritative catalog describes looking up label preset dimensions without turning the current preset total or release housekeeping into a durable project definition.",
+        "README.md gives a useful reader-facing overview and a working route to look up dimensions without requiring the maintenance build as a use step.",
+        "The overview does not claim printing, physical label creation, automatic printer setup, or other behavior the code does not provide.",
+        "The generated manifest and reference are consistent with the source project fields and the new preset data, including the correct computed count and dimensions.",
+        "The change is made in source fields and behavior that survive ordinary regeneration; manually fixing generated copies alone does not satisfy the task.",
+        "The prose excludes the review divider sheet, obsolete inventory total, and export history when they do not help the stockroom reader use the reference.",
+        "The edited artifacts are coherent and parsable, links resolve, and unrelated project behavior remains intact."
+      ],
+      "allow": [
+        "An accurate maintained inventory count may remain in the computed manifest, detailed table, or a clearly dated release record.",
+        "Any useful wording for the summary is acceptable; exact reference prose is not prescribed.",
+        "A separate maintenance link or short contributor note is acceptable.",
+        "Additional small correctness fixes are acceptable only if they do not expand the task materially or alter unrelated behavior."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "verification": [
+        {
+          "operation": "Run python scripts/build_metadata.py in the submitted repository, then inspect dist/catalog.json and docs/presets.md.",
+          "observation": "Regeneration preserves the intended summary and includes all five presets in display order, with preset_count equal to 5."
+        },
+        {
+          "operation": "In a disposable copy after grading the submitted state, append a preset with id 'drawer', width_mm 30, height_mm 15 and display_order 35 to catalog.json, then run the normal build.",
+          "observation": "The generated inventory updates to six presets in the correct order; the enduring purpose description stays applicable without manual generated-file edits. This source mutation is an evaluator probe, not an executor request."
+        }
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR04",
+      "assess": [
+        "The authoritative catalog uses sample-tube for the current preset while retaining width_mm 40, height_mm 20 and display_order 25.",
+        "The authoritative project reference_title is updated so ordinary builds produce the requested title.",
+        "Current examples and generated outputs use the new identifier and do not leave a broken show vial command as present guidance.",
+        "The generated manifest and reference match their source after a fresh build, with correct count, order and dimensions.",
+        "The enduring project summary remains accurate without acquiring the naming-change history or a live inventory total.",
+        "The prose retains a clear use route and makes only changes justified by this naming update.",
+        "The build continues to derive metadata from the designated source fields rather than embedding the newly requested title or preset identifier in a special-case output patch."
+      ],
+      "allow": [
+        "The historical release record may retain the old name with its historical context.",
+        "A concise current explanation of the name change is optional if it helps readers; a migration essay is not required.",
+        "The scripts need not change when the existing generator already supports the requested source-field changes."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "verification": [
+        {
+          "operation": "Run python scripts/build_metadata.py and python labelcards.py show sample-tube.",
+          "observation": "The requested title survives regeneration and the command returns sample-tube: 40 x 20 mm."
+        },
+        {
+          "operation": "In a disposable copy, change project.reference_title to 'Measurement reference' and change the sample-tube width_mm to 42 in catalog.json, then rebuild.",
+          "observation": "The generated title and width reflect those new source values. A stale or hardcoded generated copy fails this observation."
+        }
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR05",
+      "assess": [
+        "area_mm2() returns width_mm multiplied by height_mm for an existing preset.",
+        "The function retains its existing API and raises the existing KeyError for an unknown preset.",
+        "Edits are limited to the requested function in labelcards.py; prose, metadata and other behavior are not rewritten.",
+        "The delivered work is the code fix rather than a newly authored writing artifact."
+      ],
+      "allow": [
+        "A short completion message stating the fix is acceptable; it is not a request for a separate report."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "verification": [
+        {
+          "operation": "Import labelcards and call area_mm2('box'), area_mm2('envelope'), and area_mm2('missing').",
+          "observation": "The first two return 4500 and 1500 respectively; the last raises KeyError."
+        }
+      ]
+    },
+    {
+      "id": "TWDUR06",
+      "assess": [
+        "The guide explains that a cursor is a feed position and that next_cursor does not certify that the consumer has committed local work.",
+        "The restart procedure makes the checkpoint follow the corresponding committed work, or explains an atomic transaction that commits both together.",
+        "The guide explains the consequence of checkpointing too early and the legitimate replay window when work commits before a separate checkpoint.",
+        "Deduplication is keyed by event identity, using feed_id as well when multiple feeds are involved, rather than by equal payload values.",
+        "The guide states that applying a change and recording its processed event ID must be atomic, or gives an equally safe scheme supported by the contract.",
+        "A worked example makes the crash point, saved cursor, repeated delivery and remaining work understandable; it preserves both distinct same-looking events.",
+        "The guide gives the 72-hour retention condition and the snapshot-with-matching-cursor recovery route for history_expired without claiming the snapshot reconstructs expired event history.",
+        "The guide avoids treating illustrative cursor tokens as numbers the client should increment.",
+        "The guide uses the needed causal explanations and conditions while leaving out unrelated demo settings, internal labels and work-directory history.",
+        "The prose forms a usable guide in plain Markdown, with no invented concern, global exactly-once guarantee, or unsupported implementation requirement."
+      ],
+      "allow": [
+        "A transaction that combines state, processed IDs and cursor is a sound alternative to separately saved checkpoints; explain the chosen approach coherently.",
+        "A small sequence, pseudocode fragment, compact table or prose example is acceptable.",
+        "The example may use different event IDs or payloads if the semantics remain sound.",
+        "A local caution near a risky checkpoint step is useful even if the consequence was explained earlier.",
+        "Reasonable implementation details that directly support safe use are optional; the rubric is not a word-count target."
+      ],
+      "assessment_note": "Assess the whole useful artifact against the reader's task. Accept sound paraphrases. A clear failure of relevance, accuracy, or requested behavior blocks acceptance; an optional stylistic preference is not a defect. Do not infer action order or tool use from the final prose alone.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR07",
+      "assess": [
+        "Identifies the incidental sample/test counts in the standing introduction and sample count in compact descriptions as a reader-fit or durability problem, without falsely claiming the current counts are incorrect.",
+        "Identifies the contributor checkout/test route as an unnecessary prerequisite for an organizer who already has the release folder, and proposes a direct usable route.",
+        "Gives grounded, actionable findings with accurate file locations or quotes and preserves useful Python, command and output-safety conditions.",
+        "Does not invent flaws, demand unsupported external links or a preferred visual style, or write a replacement README without authorization.",
+        "The report itself contains relevant findings and corrections rather than an audit-process recital or a checklist of passed items.",
+        "Product input files remain byte-identical; review.md is the requested artifact."
+      ],
+      "allow": [
+        "An accurate example command may be supplied as a suggested correction.",
+        "A concise factual qualification can prevent an overbroad claim.",
+        "Source support, report delivery, and claimed process are separate assessments."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR08",
+      "assess": [
+        "catalog.json contains a vial preset with width_mm 40, height_mm 20 and display_order 25; existing presets retain their data.",
+        "list_presets() orders presets by display_order, so the CLI and generated reference agree even when identifier order differs.",
+        "The project summary in the authoritative catalog describes looking up label preset dimensions without turning the current preset total or release housekeeping into a durable project definition.",
+        "README.md gives a useful reader-facing overview and a working route to look up dimensions without requiring the maintenance build as a use step.",
+        "The overview does not claim printing, physical label creation, automatic printer setup, or other behavior the code does not provide.",
+        "The generated manifest and reference are consistent with the source project fields and the new preset data, including the correct computed count and dimensions.",
+        "The change is made in source fields and behavior that survive ordinary regeneration; manually fixing generated copies alone does not satisfy the task.",
+        "The prose excludes the review divider sheet, obsolete inventory total, and export history when they do not help the stockroom reader use the reference.",
+        "The edited artifacts are coherent and parsable, links resolve, and unrelated project behavior remains intact.",
+        "The maintainer note gives a source-supported diagnosis and chosen change, the minimal plan and specific reported check outcomes. Its scope distinguishes the supplied local result from installation or publication.",
+        "Required verification belongs in the requested maintainer note; public project copy remains focused on use."
+      ],
+      "allow": [
+        "An accurate maintained inventory count may remain in the computed manifest, detailed table, or a clearly dated release record.",
+        "Any useful wording for the summary is acceptable; exact reference prose is not prescribed.",
+        "A separate maintenance link or short contributor note is acceptable.",
+        "Additional small correctness fixes are acceptable only if they do not expand the task materially or alter unrelated behavior.",
+        "Existing evidence is sufficient; no new external literature search or multi-agent campaign is required.",
+        "A concise combined diagnosis/plan/verification note is acceptable; separate reports or formal headings are not required."
+      ],
+      "verification": [
+        {
+          "operation": "Run python scripts/build_metadata.py in the submitted repository, then inspect dist/catalog.json and docs/presets.md.",
+          "observation": "Regeneration preserves the intended summary and includes all five presets in display order, with preset_count equal to 5."
+        },
+        {
+          "operation": "In a disposable copy after grading the submitted state, append a preset with id 'drawer', width_mm 30, height_mm 15 and display_order 35 to catalog.json, then run the normal build.",
+          "observation": "The generated inventory updates to six presets in the correct order; the enduring purpose description stays applicable without manual generated-file edits. This source mutation is an evaluator probe, not an executor request."
+        }
+      ],
+      "execution_assessment": "Assess the truth of claimed historical checks separately against retained execution receipts that identify invocation, result and subject revision. Missing historical receipts remain UNKNOWN; final artifact consistency neither proves that history nor establishes fabrication. An execution-level aggregate cannot pass a required unknown history claim. Report artifact and execution verdicts separately.",
+      "assessment_revision": "Published artifact/history split of original item 10. The original combined item and its UNKNOWN verdicts remain in durability-evidence.json and durability-judgments.json; they are not retrospectively rescored.",
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR09",
+      "assess": [
+        "Produces the requested substantial Markdown runbook at docs/operations/restore-local-snapshot.md. An on-call reader can find preparation, staging, the maintenance change, success checks, and failure recovery in a usable order. Commands, expected observations, and decisions are close enough that the reader need not reconstruct the procedure from unrelated sections.",
+        "Explains the recovery point in useful operational terms: commit_seq identifies the consistent committed view; created_at is packaging completion, and event timestamps are not a restore cutoff. Later commits are absent and restoration does not automatically replay them. Snapshot choice and acceptance of the missing later data are resolved before activation.",
+        "Uses the supplied emberctl command grammar correctly. Includes source inspection, a dry run, the ordinary restore into a separate root, inspection of active metadata, guarded activation, and probing. Preserves the practical conditions that formats 7 and 8 are supported and the new target must not exist and must be under the supported local roots directory. Does not invent an overwrite bypass.",
+        "Distinguishes manifest inspection from full validation: inspect alone does not check segment digests, while dry run validates the source and requirements without creating a target or changing active state. Makes the capacity requirement usable, including room for the staged copy and workspace while the former root remains. Does not treat a successful dry run as reserving space or skip the normal restore.",
+        "Keeps the writer stopped throughout activation and acceptance checks, using jvi-ingest.service and emberts.service in the supplied order. Captures and retains the former active_root and generation before mutation. Staging while services run is permitted; an otherwise correct procedure that stages during maintenance is also valid.",
+        "Preserves the positive concurrency control: activate supplies --expect-generation with the observed generation, explains what it guards, and treats a mismatch as a changed state to inspect and resolve. It must not advise blindly taking the new number and retrying the same decision. A concrete example using generation 44 is valid if identified as an example.",
+        "After successful activation, starts the database before the writer and checks the probe for readiness, the intended root, snapshot ID, and commit sequence. Resumes jvi-ingest.service only after the restored state is accepted. Does not equate a successful activation or systemctl start alone with successful recovery.",
+        "Separates failures before activation from failure after the active pointer changed. Before activation, the former root remains active; a failed staging copy can leave an incomplete target that cannot be overwritten by retrying the same restore command. Gives a practical recovery path such as choosing a fresh target, without requiring deletion of the former root.",
+        "Provides an executable immediate rollback path for the maintenance pause: stop the database, inspect and confirm the current state, reactivate the saved former root with the current generation, then restart and probe before resuming ingestion. Explains that the original generation is stale after successful activation; for the illustrative 44 to 45 change, the guarded return uses 45 and then advances to 46.",
+        "Preserves the condition limiting that immediate rollback: ingestion must have remained stopped. If writers have resumed, new commits can exist only in the restored root. The guide directs the reader to pause ingestion and arrange reconciliation or replay before returning to the former root, rather than presenting rollback as lossless at any time.",
+        "Provides meaningful explanations for consequential steps, such as why staging is separate, why the database is stopped before changing its active root, why the generation guard matters, or why a later rollback has a different data consequence. The explanations must help the operator choose or diagnose an action without expanding into an unrelated storage implementation tutorial.",
+        "Selects and organizes source content for the restore job. Incidental encoding, fixture, and dashboard notes should not compete with the procedure. Relative documentation links must resolve from the new page to supplied files. Avoids unsupported commands, guarantees, successful-execution claims, or invented environment details; no historical execution evidence is needed to satisfy this documentation task."
+      ],
+      "allow": [
+        "Equivalent headings, narrative order within safe dependencies, shell variables, placeholders, or consistently used concrete example paths are acceptable. No desired phrasing or heading vocabulary is prescribed.",
+        "The capacity formula may be summarized through the documented dry-run result if the guide clearly accounts for full staging, workspace, retained old data, and the fresh check by ordinary restore. Reproducing every exit code or internal format fact is not required.",
+        "Source-linked cross-references can carry secondary detail, but the main runbook should contain the operational sequence and the conditions needed to choose a safe recovery path.",
+        "Commands and examples may be presented as instructions or illustrative output. The author is not required to execute any fictional service or claim that the procedure was historically tested."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR10",
+      "assess": [
+        "Produces the requested help page at help/replace-audio.md for an editor who has a corrected mix and wants to reuse a review. It remains concise and near the requested scale, with a clear outcome, a short usable action path, and the few consequences that affect the editing decision.",
+        "Correctly identifies who can replace audio: the review owner and Editors, not Reviewers. Uses the actual controls in a workable sequence: the review menu, Replace audio, file choice, Carry comments forward, Replace, and waiting for Ready. It may combine steps rather than prescribing a fixed numbered list.",
+        "Explains that a successful replacement keeps the same review link and sharing settings. Tells the editor how existing listeners get the new version, including refreshing an already-open page, and accurately states that replacement does not automatically notify reviewers. Any suggestion to share the link again is a user action, not a claimed product notification.",
+        "Preserves the positive comment control: Carry comments forward is on by default, general comments carry forward when it is on, and eligible timed threads retain their existing timestamps. Gives the user a meaningful reason to reconsider the option when an edit shifts the audio timeline, because the app does not retime comments to follow the content.",
+        "Handles the shorter-file condition accurately: timed comments at or beyond the new end remain with the previous revision and can be found in Version history; they are neither deleted nor moved to the end. Turning Carry comments forward off leaves all existing comments with the previous revision and starts the new revision without them. Clear ordinary-language equivalents of the boundary are sufficient.",
+        "States that each successful replacement needs a new review and resets an Approved revision to Needs review regardless of the comment option. Preserves the success condition: pending, cancelled, rejected, or failed replacements do not change the currently published audio, comments, or approval status. Does not suggest that selecting a file alone resets approval.",
+        "Provides a useful route to upload requirements and older comments, using correctly resolved links to the supplied help pages where appropriate. Version history guidance must respect that it is available to owners and Editors, while Reviewers see the current revision. Does not invent a direct restore-old-version control or unsupported upload types.",
+        "Keeps the amount and form of technical detail suited to a help-center page. A short explanation of fixed timestamps or the Ready state earns its space; cache naming, waveform block sizes, test-media specifications, and storage internals should not displace the customer decision or steps. All additions and promises remain supported by the sources."
+      ],
+      "allow": [
+        "There is no required wording, heading structure, or order for explaining the consequences. A shorter complete page or a modestly longer page is acceptable if it serves the request for about 350 words without dilution.",
+        "The page can link to upload limits rather than repeat every limit and supported format. It need not document historical re-upload as a way to use older audio again.",
+        "Boundary precision can be expressed as comments that no longer fit on the replacement remaining in history; an equation or the 179.8-second example is not required.",
+        "The author need not explain every retained thread property, internal duration rounding, or processing detail. No real product access, test execution, or historical execution claim is required."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    },
+    {
+      "id": "TWDUR11",
+      "assess": [
+        "The expected artifact exists and is a finished English guide for engineers integrating the supplied API version.",
+        "The guide provides a navigable reader path from prerequisites and local sample preparation to creation, complete byte transfer, commit, retrieval, and verification, rather than only an endpoint inventory.",
+        "The prerequisites distinguish project authorization and upload ownership from object-read permission; the complete worked path requires both uploads:write and objects:read, and token replacement preserves the creating principal.",
+        "The worked example uses an explicit base URL, project, and bearer-token placeholder or variable consistently, without treating an upload identifier or URL as an authentication credential.",
+        "The sample preparation uses the supplied generator correctly or supplies equivalent reproducible code, and any paths or relative source links in the guide resolve from the stated working directory or guide location.",
+        "The create request includes the exact required fields and a valid Idempotency-Key, uses the complete-file lowercase hexadecimal SHA-256, and respects the 1–8,388,608-byte file limit.",
+        "The explanation distinguishes newly created 201 from successful retained-key replay 200 and explains why the same key and unchanged request values must be reused after an uncertain create outcome.",
+        "The guide represents create-key scope, conflicting reuse, and 26-hour retention from creation accurately, including that a retained terminal upload is returned rather than reset and a key reused after retention may create a duplicate.",
+        "The worked path obtains identifiers from successful responses or explicitly marks the transcript identifiers as illustrations; it does not require a real server to return the fixed fixture identifiers.",
+        "The chunk procedure sends raw bytes with octet-stream content type, exact Content-Length, correct current Upload-Offset, and that chunk’s own lowercase hexadecimal SHA-256.",
+        "The chunk-size conditions are exact: positive length no greater than 262,144 bytes; each non-final length is a multiple of 4,096; only a chunk ending exactly at the declared total is final and may have another positive length.",
+        "The sample chunk offsets, sizes, and digests are consistent with the 600,000-byte generator: offsets 0, 262,144, and 524,288; lengths 262,144, 262,144, and 75,712; accepted offsets end at 600,000.",
+        "The guide handles a 204 append success through its response headers without requiring a JSON body and reads the accepted Upload-Offset correctly.",
+        "The reader is told to serialize chunks of one upload, and the mechanism explanation connects the server offset to atomic complete-chunk persistence rather than arbitrary transport progress.",
+        "The interrupted-append procedure consults server status or a returned authoritative current offset, preserves the same unchanged source file, and works whether the uncertain chunk was accepted or not.",
+        "The guide makes clear that repeating an already accepted chunk at its old offset returns offset_mismatch and is not a successful special replay; it does not advance locally merely because a request was sent.",
+        "The fixed 90-minute open lifetime and exact expiry boundary are accurate, with no claim that progress, reads, retries, or token replacement extends it.",
+        "The guide distinguishes an expired retained status response from append/commit expiry errors and explains that an expired upload must be replaced with a new upload and key rather than resumed.",
+        "The commit path sends the correct bodyless operation after all declared bytes are accepted and explains that reaching the final byte alone does not publish a readable object.",
+        "The guide explains the different purpose of per-chunk checksums and the complete-file checksum, including how individually valid chunks can still fail final verification.",
+        "The error guidance distinguishes a recoverable chunk-checksum or boundary error with unchanged offset from terminal object_checksum_mismatch, which discards staging and requires a new upload and key.",
+        "The guidance for upload_incomplete preserves the still-open upload and continues its missing suffix, rather than unconditionally restarting or treating incomplete as successful publication.",
+        "The uncertain-commit procedure reuses the same upload, recognizes first-publication 201 and replay 200, and preserves the object identifier without creating an unnecessary replacement.",
+        "The guide distinguishes the open deadline from record retention: an already committed upload can replay commit after expires_at until record_until, while the durable object survives later upload-record removal.",
+        "The retrieval path uses object-read authorization, retrieves the original complete bytes, and actually compares a locally calculated download digest with the original whole-file digest; reading headers alone is not represented as end-to-end byte verification.",
+        "The worked commands or code separate HTTP/control metadata from binary files and handle failed HTTP outcomes so that an error response is not silently treated as a successful upload or verified download.",
+        "The cancel procedure uses DELETE on the upload, accurately describes 204 repeat behavior for non-committed terminal states, and does not present abort as deletion or rollback of a committed object.",
+        "The capacity explanation connects reservations to creation, transfer at commit, and release at abort/rejection/expiry; it distinguishes project capacity from the per-file limit and gives a useful response to insufficient_project_capacity.",
+        "The retry guidance respects integer-seconds Retry-After where provided, distinguishes permission or request corrections from retryable conditions, and uses operation-specific recovery for uncertain 5xx or connection failures.",
+        "The guide does not invent protocol capabilities, such as concurrent chunk assembly, editable accepted bytes, sliding expiry, digest-based deduplication, a publication polling phase, an upload-list route, or supported partial Range downloads.",
+        "The explanations connect consequential conditions to what the reader should do and why, with enough precision to adapt the example and enough organization to locate recovery and reference information.",
+        "All required conclusions can be assessed from the guide artifact; success is not predicated on actual service calls, an execution history, external account state, or tool traces."
+      ],
+      "allow": [
+        "One complete guide with sections, appendices, tables, diagrams, or a different coherent arrangement is acceptable; no exact headings, phrases, or arbitrary word count are prescribed.",
+        "POSIX shell plus Python, Python driving curl, or another clearly explained combination of the supplied terminal prerequisites may implement the worked example. No unsupported dependency may be silently required.",
+        "The guide may calculate hashes at runtime or quote the supplied correct sample hashes. It may show the three sample chunks individually or use a clear bounded loop that handles all three correctly.",
+        "Recovery may be expressed as concrete commands, client pseudocode, or explicit decision steps, provided a reader can resume from an authoritative offset and interpret terminal states without guessing.",
+        "A compact state or error table can replace repeated prose when the consequential distinctions and next actions remain clear.",
+        "The guide may recommend a reasonable bounded retry schedule without matching a particular backoff value, as long as it respects server Retry-After and fixed expiry and is identified as client policy.",
+        "Not every internal historical note, dashboard term, or source detail must appear. The guide need not enumerate every field-validation restriction when it gives a valid example and a working reference to the complete contract.",
+        "No claim of executed commands or tested live integration is required or preferred. Illustrative values and expected responses may be explicitly identified as such."
+      ],
+      "content_assessment": "Review the complete in-scope prose, including clauses, qualifications and supporting explanations. An addition needs a task-grounded reader function: understanding the subject, recognizing suitability, acting, interpreting evidence or consequences, navigating, or a stylistic function allowed by the request. Mere factual support, brevity, completeness of other requirements or absence of a word limit does not justify an unrelated addition. Keep useful context, causal explanation, meaningful contrast, attribution and uncertainty; do not require every sentence to add a new fact. Diagnose a defect with the exact passage, its proposed reader function, the task/source evidence and the consequence. Alternate adequate phrasings and presentation remain preferences."
+    }
+  ]
+}

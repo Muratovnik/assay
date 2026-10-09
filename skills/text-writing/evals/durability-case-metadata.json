@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "TXTDUR01",
+      "group": "durability_chinese_copy",
+      "purpose": "routine",
+      "source": "Synthetic Chinese source fixture, prepared 2026-10-08.",
+      "rationale": "Visitor-facing selection and a helper reply that needs the real seat-versus-book contrast.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TXTDUR02",
+      "group": "durability_final_public_place",
+      "purpose": "routine",
+      "source": "Synthetic fixture prepared 2026-10-08 before candidate selection; historical seal/exposure recorded in shared evidence.",
+      "rationale": "Distinct physical visitor journey with welcome and first-visit print artifacts; needed booking threshold and applicable operational details. Reuses some calibration source motifs; the two-artifact task operation and practical requirements differ.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TXTDUR03",
+      "group": "durability_final_russian_evidence",
+      "purpose": "challenge",
+      "source": "Synthetic fixture prepared 2026-10-08 before candidate selection; historical seal/exposure recorded in shared evidence.",
+      "rationale": "Russian internal decision note with necessary numerical units, attribution, uncertainty and a concrete next step. Partly calibration-related: criterion 4 repeats the c07 attributed, unmeasured queue observation; not a wholly independent final group.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TXTDUR04",
+      "group": "durability_final_narrow_edit",
+      "purpose": "routine",
+      "source": "Synthetic fixture prepared 2026-10-08 before candidate selection; historical seal/exposure recorded in shared evidence.",
+      "rationale": "Bounded room-name correction with nearby true details that must not expand the requested edit. Reuses a venue/time fact from calibration; that task did not expose this bounded-edit operation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TXTDUR05",
+      "group": "durability_explanatory_recap",
+      "purpose": "challenge",
+      "source": "Independent synthetic source fixture prepared to test a known closing-rule conflict; exposed working control, not final transfer evidence.",
+      "rationale": "Chinese editorial review distinguishes a useful explanatory recap from a nearby duplicate condition, while preserving quantities, inference limits and missing-record treatment.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TXTDUR06",
+      "group": "durability_equipment_decision",
+      "purpose": "challenge",
+      "source": "Fresh independent fictional source package sealed after working repairs; H selected before requests, source contents and criteria were opened. See filename-only exposure and allocation records.",
+      "rationale": "Russian decision memo connects accepted production, calendar, current offers, expense versus cash limits, acceptance tests, contingencies and the end of a temporary arrangement.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

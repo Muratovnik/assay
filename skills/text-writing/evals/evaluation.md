@@ -98,3 +98,19 @@ invocation checks, not natural-discovery measurements.
 rubric and public working metadata. Earlier cases and criteria are unchanged.
 The [shared evidence record](../../technical-writing/evals/relevance-evidence.json)
 contains the three outputs as runs 10-12, with source, method and packet hashes.
+
+## Reader purpose and cross-method handoffs — 2026-10-08
+
+The [shared durability study](../../technical-writing/evals/durability-study.md)
+qualifies product-copy and language examples by the reader's actual task and
+clarifies the writing owner inside larger work. It includes a Chinese public
+card and helper reply where an actual seat-versus-book question requires the
+contrast. That bounded execution is reported separately from earlier Chinese
+coverage and does not establish general language qualification. Ordinary-prose
+cases and their exposure records accompany this study's technical cases.
+
+A later final failure in that study prompted a complete-text contribution check
+for ordinary prose and correction of a portfolio example's unnecessary caveat.
+The language profiles also retain useful explanatory endings without requiring
+a next action. The study preserves the failed output, subsequent method identities
+and a Chinese control that distinguishes a useful recap from a nearby duplicate.

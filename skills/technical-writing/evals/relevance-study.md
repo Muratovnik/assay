@@ -268,3 +268,14 @@ The repository's full check and release audit remain separate structural gates.
 They validate packaging, evaluation assets and preservation fixtures; they do not
 run these model comparisons or establish natural activation, cross-model
 portability, subjective human preference or a guarantee of surplus-free prose.
+
+## Later adjudication — 2026-10-08
+
+The [durability follow-up](durability-study.md#review-of-the-previous-repair)
+reassessed the saved source footers in runs 18 and 25 without candidate identities.
+Both were accepted as concise provenance in their source-based guide. The earlier
+description of run 25's footer as confirmed editorial surplus is therefore
+withdrawn; it is not a small defect being waived while relevance passes. The
+original outputs, verdicts and disagreement remain in the historical record and
+the follow-up evidence. This adjudication adds no execution of the old selected
+runtime and does not broaden its original coverage.

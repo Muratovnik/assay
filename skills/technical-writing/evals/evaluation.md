@@ -471,3 +471,16 @@ The selected revision passes its exercised material requirements, including a
 new paired review and a later exposed export regression; the record retains a
 minor source-footer note and distinguishes these from broader C results. It does
 not establish automatic activation, a population success rate or flawless prose.
+The later [durability study](durability-study.md#review-of-the-previous-repair)
+records a blinded reassessment that accepted both compared footers as provenance;
+the original confirmed-surplus interpretation is withdrawn, with the original
+outputs and judgments preserved.
+
+## Public entry and durability follow-up — 2026-10-08
+
+The [durability study](durability-study.md) investigates the later Game Design
+incident, metadata ownership, statement lifetime, complete README reader paths
+and writing inside research, implementation and review. It retains failed
+variants, scope mismatches and the separate adjudication of the earlier source
+footers. Published cases, criteria and evidence are linked from that study;
+their recorded historical reserved status does not make their future reuse unseen.
