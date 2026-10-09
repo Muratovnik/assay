@@ -9,18 +9,22 @@ returning nothing.
 from __future__ import annotations
 
 import re
+from bisect import bisect_right
 
 from .core import EvidenceError, digest, identity, text, validate_guide_applicability
 
-EXTRACTOR_VERSION = 3
+EXTRACTOR_VERSION = 4
 MAX_EXCERPT = 1500
 MAX_CAVEAT = 800
 MAX_CAVEATS = 6
 MAX_SECTIONS = 4
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+QUOTE = re.compile(r"^ {0,3}> ?")
+LIST_ITEM = re.compile(r"^( *)(?:[-+*]|\d{1,9}[.)]) +(.*)$")
 HEADING = re.compile(r"^(#{1,4})\s+(\S.*?)\s*$")
-CALLOUT = re.compile(r"<(Note|Warning|Tip|Info|Danger|Check)>(.*?)</\1>", re.S)
+CALLOUT_TAG = re.compile(r"<(/?)(Note|Warning|Tip|Info|Danger|Check)>")
+QUOTED_MARKER = re.compile(r"`+|<!--")
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
 
 
@@ -123,7 +127,7 @@ def section_text(body, heading):
             if other_level <= level:
                 end = other_start
                 break
-        return "\n".join(lines[start + 1:end]).strip()
+        return "\n".join(lines[start + 1:end]).strip("\r\n")
     return None
 
 
@@ -136,33 +140,154 @@ def preamble(body):
 
 def callouts(value):
     """Publisher warnings and notes, kept whole and separate from the prose."""
-    found = []
-    for match in CALLOUT.finditer(value):
-        inner = " ".join(match.group(2).split())
-        if inner:
-            if len(inner) > MAX_CAVEAT:
-                raise EvidenceError("guide_caveat_size_limit_exceeded")
-            found.append({"kind": match.group(1).lower(), "text": inner, "truncated": False})
+    lines = value.splitlines(keepends=True)
+    code, _ = code_lines([line.rstrip("\r\n") for line in lines])
+    starts, position = [], 0
+    for line in lines:
+        starts.append(position)
+        position += len(line)
+    quoted, comments = quoted_spans(value, lines, starts, code)
+    quoted_starts = [start for start, _ in quoted]
+    found, spans, stack = [], list(comments), []
+    for match in CALLOUT_TAG.finditer(value):
+        quoted_index = bisect_right(quoted_starts, match.start()) - 1
+        if (code[bisect_right(starts, match.start()) - 1] or escaped(value, match.start())
+                or (quoted_index >= 0 and match.start() < quoted[quoted_index][1])):
+            continue
+        closing, kind = match.groups()
+        if not closing:
+            if not stack:
+                opening = match
+            stack.append(kind)
+        elif stack:
+            if stack.pop() != kind:
+                raise EvidenceError("guide_callout_nesting_changed")
+            if stack:
+                continue
+            # Keep the raw inner span, including code and its whitespace. A
+            # fenced closing-tag example must not end this actual callout.
+            inner = value[opening.end():match.start()].strip()
+            if inner:
+                if len(inner) > MAX_CAVEAT:
+                    raise EvidenceError("guide_caveat_size_limit_exceeded")
+                found.append({"kind": kind.lower(), "text": inner, "truncated": False})
+            spans.append((opening.start(), match.end()))
+    if stack:
+        raise EvidenceError("guide_callout_unclosed")
     if len(found) > MAX_CAVEATS:
         raise EvidenceError("guide_caveat_count_limit_exceeded")
-    return found, CALLOUT.sub("", value)
+    kept, previous = [], 0
+    for start, end in sorted(spans):
+        if start > previous:
+            kept.append(value[previous:start])
+        previous = max(previous, end)
+    return found, "".join(kept) + value[previous:]
+
+
+def escaped(value, position):
+    before = position
+    while before and value[before - 1] == "\\":
+        before -= 1
+    return (position - before) % 2 == 1
+
+
+def quoted_spans(value, lines, starts, code):
+    """Source offsets keep literal tags distinct without rewriting real caveats."""
+    markers = [match for match in QUOTED_MARKER.finditer(value)
+               if not code[bisect_right(starts, match.start()) - 1]]
+    next_tick, latest = {}, {}
+    for match in reversed(markers):
+        if match[0][0] == "`":
+            next_tick[match.start()] = latest.get(len(match[0]))
+            latest[len(match[0])] = match
+    # Inline spans cannot cross a paragraph, heading or fenced/indented block.
+    boundaries = [start for line, start, blocked in zip(lines, starts, code)
+                  if blocked or not line.strip() or HEADING.match(line)]
+    spans, comments, position = [], [], 0
+    for match in markers:
+        if match.start() < position or escaped(value, match.start()):
+            continue
+        if match[0] == "<!--":
+            end = value.find("-->", match.end())
+            if end < 0:
+                raise EvidenceError("guide_comment_unclosed")
+            position = end + 3
+            comments.append((match.start(), position))
+        else:
+            closing = next_tick[match.start()]
+            boundary = bisect_right(boundaries, match.start())
+            if closing is None or (boundary < len(boundaries) and boundaries[boundary] < closing.start()):
+                continue
+            position = closing.end()
+        spans.append((match.start(), position))
+    return spans, comments
+
+
+def quote_content(line, maximum=None):
+    depth = 0
+    while maximum is None or depth < maximum:
+        quote = QUOTE.match(line)
+        if not quote:
+            break
+        line = line[quote.end():]
+        depth += 1
+    return line, depth
 
 
 def code_lines(lines):
-    """A closing fence must match its opener's character and minimum length."""
+    """Mask code in the configured Markdown excerpts, retaining container bounds."""
     code, opening, blocks = [], None, 0
-    for line in lines:
-        fence = FENCE.match(line)
-        if opening is None:
-            if fence and (fence[1][0] != "`" or "`" not in fence[2]):
-                opening = fence[1]
-                blocks += 1
-            code.append(opening is not None)
+    list_indents, quote_depth, indented, paragraph = [], 0, False, False
+    for raw in lines:
+        line = raw.expandtabs(4)
+        if opening is not None:
+            marker, depth, base = opening
+            body, observed_depth = quote_content(line, depth)
+            indentation = len(body) - len(body.lstrip(" "))
+            if observed_depth == depth and (not body.strip() or indentation >= base):
+                code.append(True)
+                fence = FENCE.match(body[base:])
+                if (fence and fence[1][0] == marker[0] and len(fence[1]) >= len(marker)
+                        and not fence[2].strip()):
+                    opening = None
+                continue
+            # A fenced block cannot continue outside its quote/list container.
+            opening, list_indents, paragraph = None, [], False
+        body, depth = quote_content(line)
+        if depth != quote_depth:
+            list_indents, indented, paragraph = [], False, False
+        quote_depth = depth
+        indentation = len(body) - len(body.lstrip(" "))
+        item = LIST_ITEM.match(body)
+        container = next((level for level in reversed(list_indents) if level <= indentation), 0)
+        if indentation - container >= 4:
+            item = None
+        if item:
+            while list_indents and len(item[1]) < list_indents[-1]:
+                list_indents.pop()
+            base = item.start(2)
+            list_indents.append(base)
+            body = body[base:]
         else:
+            if body.strip():
+                while list_indents and indentation < list_indents[-1]:
+                    list_indents.pop()
+            base = list_indents[-1] if list_indents else 0
+            body = body[base:]
+        fence = FENCE.match(body)
+        if fence and (fence[1][0] != "`" or "`" not in fence[2]):
+            opening = (fence[1], depth, base)
+            blocks += 1
+            indented, paragraph = False, False
             code.append(True)
-            if (fence and fence[1][0] == opening[0] and len(fence[1]) >= len(opening)
-                    and not fence[2].strip()):
-                opening = None
+        elif (body.startswith("    ") and (indented or not paragraph)) or (indented and not body.strip()):
+            blocks += not indented
+            indented, paragraph = True, False
+            code.append(True)
+        else:
+            indented = False
+            paragraph = bool(body.strip()) and HEADING.match(body) is None
+            code.append(False)
     return code, blocks
 
 
@@ -211,7 +336,7 @@ def guide_snapshot(source: dict, body: str) -> dict:
         raise EvidenceError("guide canonical url must use HTTPS")
     # Page-level warnings sit above the first section (deprecations, model
     # applicability). Selecting sections must not silently drop them.
-    document_caveats, _ = callouts(drop_code(preamble(content))[0])
+    document_caveats, _ = callouts(preamble(content))
     sections = []
     for heading in source["sections"][:MAX_SECTIONS]:
         raw = section_text(content, heading)
@@ -219,8 +344,8 @@ def guide_snapshot(source: dict, body: str) -> dict:
             # Layout drift must fail loudly: a quietly missing section would
             # remove the publisher's exceptions without anyone noticing.
             raise EvidenceError("guide_section_missing: %s/%s" % (source["id"], heading))
-        prose, blocks = drop_code(raw)
-        caveats, prose = callouts(prose)
+        caveats, prose = callouts(raw)
+        prose, blocks = drop_code(prose)
         excerpt, truncated = trim(condense(prose))
         sections.append({"section": heading, "anchor": anchor(heading),
                          "url": canonical + "#" + anchor(heading), "excerpt": excerpt,

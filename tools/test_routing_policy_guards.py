@@ -533,6 +533,62 @@ class CostObjectiveLifecycleGuards(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(replayed["decisions"][0]["economic_assessment"]["objective_unit"], "quota_units")
         self.assertEqual(replayed["decisions"][0]["economic_assessment"]["selection_unit"], "api_usd")
 
+    async def test_attached_task_evidence_reuses_advice_and_rebinds_swapped_packet_ids(self):
+        self.fixture.config = {"schema_version": 4, "telemetry": {"mode": "off"},
+                               "task_evidence": {"enabled": True, "auto_download": False}}
+        service = self.fixture.service()
+        self.addCleanup(service.advisor_workflow.task_evidence.provisioner.close)
+        packets = decisions.packets(2)
+        for packet, unit in zip(packets, ("quota_units", "api_usd")):
+            packet["cost_objective"] = {"unit": unit, "unit_basis": "owner-tariff", "overhead": None}
+        prepared, snapshot = await self.prepare(service, packets=packets)
+        original = copy.deepcopy(snapshot)
+        evidence = snapshot["evidence"]["task_similarity_evidence"]
+        self.assertEqual([p["packet_id"] for p in evidence["packets"]], ["work-0", "work-1"])
+        self.assertEqual([p["status"] for p in evidence["packets"]], ["no_match", "no_match"])
+        answer = decisions.answer(snapshot)
+        service.complete_routing(prepared["decision_id"], answer)
+        renamed = copy.deepcopy(packets)
+        for packet, packet_id in zip(renamed, ("work-1", "work-0")):
+            packet["packet_id"] = packet_id
+        cached = await service.prepare_routing(renamed, advisor_route=decisions.ROUTE, portable=True)
+        self.assertTrue(cached.get("cache_hit", False))
+        self.assertEqual(cached["status"], "decided")
+        self.assertEqual([d["packet_id"] for d in cached["decisions"]], ["work-1", "work-0"])
+        self.assertEqual([a["packet_id"] for a in cached["advisor_result"]["assessments"]], ["work-1", "work-0"])
+        self.assertEqual(cached["advisor_result"]["snapshot_id"], cached["snapshot_id"])
+        self.assertEqual([a["name"] for a in cached["advisor_result"]["answers"]], [a["name"] for a in answer["answers"]])
+        self.assertEqual([d["economic_assessment"]["objective_unit"] for d in cached["decisions"]],
+                         ["quota_units", "api_usd"])
+        self.assertEqual(snapshot, original)
+
+    async def test_attached_task_evidence_cache_still_checks_changed_tasks_objectives_and_sources(self):
+        self.fixture.config = {"schema_version": 4, "telemetry": {"mode": "off"},
+                               "task_evidence": {"enabled": True, "auto_download": False}}
+        service = self.fixture.service()
+        self.addCleanup(service.advisor_workflow.task_evidence.provisioner.close)
+        packets = decisions.packets()
+        packets[0]["cost_objective"] = {"unit": "quota_units", "unit_basis": "owner-tariff", "overhead": None}
+        prepared, snapshot = await self.prepare(service, packets=packets)
+        service.complete_routing(prepared["decision_id"], decisions.answer(snapshot))
+        cached = await service.prepare_routing(copy.deepcopy(packets), advisor_route=decisions.ROUTE)
+        self.assertTrue(cached.get("cache_hit", False))
+        changes = [("task_spec", "goal", "Implement a decimal parser with an additional alternate notation."),
+                   ("cost_objective", "unit", "api_usd"),
+                   ("cost_objective", "unit_basis", "other-tariff"),
+                   ("cost_objective", "overhead", .125)]
+        for section, key, value in changes:
+            with self.subTest(section=section, key=key):
+                changed = copy.deepcopy(packets)
+                changed[0][section][key] = value
+                fresh, _ = await self.prepare(service, packets=changed)
+                self.assertFalse(fresh.get("cache_hit", False))
+        revised = decisions.context()
+        revised["tasks"][0]["primary_comparisons"][0]["version"] = "source-revision-2"
+        service.context.return_value = revised
+        fresh, _ = await self.prepare(service, packets=copy.deepcopy(packets))
+        self.assertFalse(fresh.get("cache_hit", False))
+
     def test_every_objective_field_changes_semantic_identity_and_packet_normalization(self):
         objective = {"unit": "quota_units", "unit_basis": "owner-tariff", "overhead": None}
         packets = decisions.packets()

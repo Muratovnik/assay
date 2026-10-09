@@ -487,8 +487,11 @@ def semantic_projection(snapshot) -> dict:
     canonical_ids = {packet["packet_id"]: f"packet-{index}"
                      for index, packet in enumerate(projection["packets"])}
     projection["packet_ids"] = [canonical_ids[packet_id] for packet_id in projection["packet_ids"]]
-    for packet in projection["packets"]:
-        packet["packet_id"] = canonical_ids[packet["packet_id"]]
+    attached_packets = projection["evidence"].get("task_similarity_evidence", {}).get("packets", [])
+    for packet in [*projection["packets"], *attached_packets]:
+        packet_id = packet.get("packet_id")
+        if isinstance(packet_id, str) and packet_id in canonical_ids:
+            packet["packet_id"] = canonical_ids[packet_id]
     return projection
 
 

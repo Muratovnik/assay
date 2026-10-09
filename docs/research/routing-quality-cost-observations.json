@@ -484,5 +484,65 @@
     "source per-row evaluation dates/budgets where absent",
     "actual native worker model/effort and subscription quota attribution",
     "task-specific predictive quality/economy"
-  ]
+  ],
+  "post_review_revalidation": {
+    "date_utc": "2026-10-09",
+    "method": "Reextract the six saved primary guide response bodies after verifying their original SHA-256 hashes; no new network acquisition.",
+    "guides": [
+      {
+        "source_id": "openai-reasoning",
+        "response_sha256": "a561487dd41db8828b5b9920d77275bdced3c3c07ba1fb9f3c3230c5aaeb925b",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      },
+      {
+        "source_id": "claude-thinking",
+        "response_sha256": "607214f48d5e2a94dc37ed6603c301357cf6e63057e72136d83a057660f7eb8a",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      },
+      {
+        "source_id": "claude-model-choice",
+        "response_sha256": "65643ea61fe386151ec11d2246cda4433d59968de594af0aac4c7b82684abed0",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      },
+      {
+        "source_id": "openai-gpt-6",
+        "response_sha256": "ad1aeb3d87e2e61a91233447f7c54b7b18ebfecc4315eeefab15bf5861b3a5c7",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      },
+      {
+        "source_id": "openai-gpt-6-astra-skills",
+        "response_sha256": "a1deee4c0b3ca16a20385c27f0692e22d5150fdec81710c04742dd5da29f0468",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      },
+      {
+        "source_id": "claude-opus-5-5",
+        "response_sha256": "37c6216c30e91cc2238758386e31ed1fba69988363d366438d11a81424f648d5",
+        "original_extractor_version": 3,
+        "extractor_version": 4,
+        "snapshot_equal_except_extractor_version": true
+      }
+    ],
+    "native_history_format": {
+      "repository": "https://github.com/openai/codex",
+      "revision": "2351d9e1b608e6f9d9a3699b71d7eb39ee41cfa4",
+      "sources": [
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/thread_settings.rs",
+        "codex-rs/protocol/src/protocol.rs",
+        "codex-rs/app-server/tests/common/rollout.rs"
+      ],
+      "verified_boundary": "Root session/thread identity, copied and referenced inherited history, owner markers and inherited cumulative usage.",
+      "method": "Inspect pinned public source and exercise synthetic importer fixtures; no native worker run or automatic ancestor-file discovery."
+    }
+  }
 }

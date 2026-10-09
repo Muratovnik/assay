@@ -125,14 +125,41 @@ def _observe_unrouted(tx, event, clock):
         observe_alias(tx, alias, model, clock())
 
 
+def _same_worker_scope(left, right):
+    return (left["role"] == right["role"] == "worker"
+            and all(left[key] == right[key] for key in
+                    ("session_id", "config_hash", "decision_id", "packet_id", "agent_id", "route", "variant")))
+
+
 def _save(tx, session, run, clock):
     tx.put("attempt", run["attempt_id"], run, clock() + DAY)
     if run.get("agent_id"):
-        tx.put("agent", session + ":" + run["agent_id"], run, clock() + DAY)
+        agent_key = session + ":" + run["agent_id"]
+        current = tx.get("agent", agent_key)
+        if current and current["attempt_id"] != run["attempt_id"] and current.get("continuation_of"):
+            # Dispatch owns the newest invocation of a continuing worker.
+            # Older observations update their own attempt, never its activity.
+            if _same_worker_scope(run, current) and run.get("route_mismatch"):
+                current.setdefault("prior_route_mismatch", run["attempt_id"])
+                current["route_mismatch"] = True
+                tx.put("attempt", current["attempt_id"], current, clock() + DAY)
+                tx.put("agent", agent_key, current, clock() + DAY)
+            return
+        tx.put("agent", agent_key, run, clock() + DAY)
 
 
 def _bind_start(tx, session, config_hash, agent, agent_type, clock):
     if not agent:
+        return
+    continuing = tx.get("agent", session + ":" + agent)
+    if (continuing and continuing["config_hash"] == config_hash and continuing["state"] == "reserved"
+            and continuing["variant"]["name"] == agent_type
+            and continuing.get("continuation_of") and continuing.get("input", {}).get("resume") == agent):
+        # A resume already names its known worker. Its start must still consume
+        # the reservation so a delayed denial cannot make live work retryable.
+        continuing.update(state="started", binding="unique")
+        continuing.pop("input", None)
+        _save(tx, session, continuing, clock)
         return
     candidates = [r for r in tx.values("attempt") if r["session_id"] == session
                   and r["config_hash"] == config_hash and r["state"] == "reserved" and not r.get("agent_id")
@@ -170,18 +197,24 @@ def _rebind(tx, session, dispatched, observed_id, clock):
     """Attribute the agent the host names to the call that actually started it."""
     other = tx.get("agent", session + ":" + observed_id)
     if other and other["attempt_id"] != dispatched["attempt_id"]:
-        sibling = tx.get("attempt", other["attempt_id"])
-        if sibling and (sibling["variant"]["name"] != dispatched["variant"]["name"] or sibling.get("binding") == "host_result"):
-            raise EvidenceError("host_agent_binding_conflict")
-        if sibling and sibling["variant"]["name"] == dispatched["variant"]["name"]:
-            # Start order gave this agent to a sibling launch of the same
-            # definition. Exchange what each actually ran; a sibling left
-            # without an agent is still awaiting its own start event.
-            _swap_runtime(dispatched, sibling)
-            if "agent_id" not in sibling:
-                sibling["state"] = "reserved"
-            _recheck_observed(sibling)
-            _save(tx, session, sibling, clock)
+        if other.get("continuation_of"):
+            if dispatched.get("agent_id") != observed_id or not _same_worker_scope(dispatched, other):
+                raise EvidenceError("host_agent_binding_conflict")
+            # A late result names an older invocation of this same worker.
+            # Its continuation already owns the index; no sibling swap applies.
+        else:
+            sibling = tx.get("attempt", other["attempt_id"])
+            if sibling and (sibling["variant"]["name"] != dispatched["variant"]["name"] or sibling.get("binding") == "host_result"):
+                raise EvidenceError("host_agent_binding_conflict")
+            if sibling and sibling["variant"]["name"] == dispatched["variant"]["name"]:
+                # Start order gave this agent to a sibling launch of the same
+                # definition. Exchange what each actually ran; a sibling left
+                # without an agent is still awaiting its own start event.
+                _swap_runtime(dispatched, sibling)
+                if "agent_id" not in sibling:
+                    sibling["state"] = "reserved"
+                _recheck_observed(sibling)
+                _save(tx, session, sibling, clock)
     if dispatched.get("agent_id") != observed_id:
         dispatched["agent_id"] = observed_id
     if dispatched["state"] in {"prepared", "reserved"}:
@@ -201,7 +234,7 @@ def _recheck_observed(run):
     model = run.get("observed_model")
     used = run.get("models_used", [])
     levels = run.get("efforts_used", [level] if level else [])
-    if (any(value != run["route"]["effort"] for value in levels)
+    if (run.get("prior_route_mismatch") or any(value != run["route"]["effort"] for value in levels)
             or (expected not in CLAUDE_MODEL_ALIASES and
                 ((model is not None and model != expected) or any(m != expected for m in used)))
             or (expected in CLAUDE_MODEL_ALIASES and model and any(m != model for m in used))):
@@ -283,11 +316,38 @@ def _release(tx, event, session, config_hash, clock):
     """Auto mode denied a reserved launch before it ran; it may be sent again."""
     for run in tx.values("attempt"):
         if (run.get("tool_use_id") == event.get("tool_use_id") and run["session_id"] == session
-                and run["config_hash"] == config_hash and run["state"] == "reserved" and not run.get("agent_id")):
+                and run["config_hash"] == config_hash and run["state"] == "reserved"):
+            if run.get("agent_id"):
+                agent_key = session + ":" + run["agent_id"]
+                current = tx.get("agent", agent_key)
+                previous = tx.get("attempt", run.get("continuation_of", ""))
+                if (not current or current["attempt_id"] != run["attempt_id"] or not previous
+                        or run.get("input", {}).get("resume") != run["agent_id"]
+                        or previous.get("agent_id") != run["agent_id"] or previous["role"] != "worker"
+                        or any(previous[key] != run[key] for key in
+                               ("session_id", "config_hash", "decision_id", "packet_id"))):
+                    continue
+                # Dispatch temporarily owns the worker index. Restore only
+                # that exact predecessor; another invocation may now own it.
+                if run.get("prior_route_mismatch") and not previous.get("route_mismatch"):
+                    previous.update(prior_route_mismatch=run["prior_route_mismatch"], route_mismatch=True)
+                    tx.put("attempt", previous["attempt_id"], previous, clock() + DAY)
+                tx.put("agent", agent_key, previous, clock() + DAY)
+                run.pop("agent_id", None)
+            reservation = {key: run[key] for key in ("tool_use_id", "reserved_at") if key in run}
             run["state"] = "prepared"
             run.pop("tool_use_id", None)
             run.pop("reserved_at", None)
-            tx.put("attempt", run["attempt_id"], run, run["expires"])
+            try:
+                tx.put("attempt", run["attempt_id"], run, run["expires"])
+            except EvidenceError as exc:
+                if str(exc) != "pipeline_record_expired":
+                    raise
+                # A delayed denial restores worker ownership even after the
+                # executable permission ended. Retain metadata, not a new grant.
+                run.update(state="expired", **reservation)
+                run.pop("input", None)
+                tx.put("attempt", run["attempt_id"], run, clock() + DAY)
     return {}
 
 
@@ -334,11 +394,19 @@ def _dispatch(tx, event, session, config_hash, mode, clock, environment, config)
     resume = dispatched["input"].get("resume")
     if resume is not None:
         original = tx.get("agent", session + ":" + resume)
+        if (original and original["attempt_id"] == dispatched["attempt_id"]
+                and dispatched["state"] == "reserved"):
+            # Redelivery of this same unstarted tool call is idempotent. The
+            # reservation owns the index, but its predecessor owns the scope.
+            original = tx.get("attempt", dispatched.get("continuation_of", ""))
         if (not original or original["role"] != "worker" or original["decision_id"] != dispatched["decision_id"]
+                or original["session_id"] != session or original["config_hash"] != config_hash
+                or original.get("agent_id") != resume
                 or original["packet_id"] != dispatched["packet_id"]
                 or original["attempt_id"] != dispatched.get("continuation_of")):
             return deny("continuation identity or scope changed")
-        if original.get("binding") == "start_order" or original.get("route_mismatch") or original["state"] != "finished":
+        if (original.get("binding") == "start_order" or original.get("route_mismatch")
+                or dispatched.get("route_mismatch") or original["state"] != "finished"):
             return deny("continuation requires an idle worker with a verified binding and no observed route mismatch")
         dispatched["agent_id"] = resume
     dispatched.update(state="reserved", tool_use_id=tool_id)

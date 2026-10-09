@@ -304,7 +304,10 @@ replaces only its text-content blocks while preserving the native output shape
 and telemetry; native handback reports are sanitized too. This does not rewrite
 host transcripts or provider telemetry. The primary reads `get_routing_decision`
 after the host returns the advisor invocation; submission alone cannot authorize
-workers or seed the shared semantic cache.
+workers or seed the shared semantic cache. Completion is serialized across
+processes sharing the rendezvous: an identical submission returns the registered
+submission status, while a conflicting submission is rejected before local
+finalization.
 
 Then call `authorize_routing_launch(decision_id, packet_id)` and send the exact
 returned Agent input. It is a stub without the prompt, and for an alias route it
@@ -326,7 +329,13 @@ start order alone proves neither the final packet nor its model. Continuation
 requires authoritative call-to-agent binding, and dispatch rechecks that binding
 and the latest route observations. A stop event cannot promote a provisional
 identity into continuation authority. A launch that auto mode denies is released and
-may be sent again. A launch rejected in an interactive permission dialog produces
+may be sent again before its executable deadline. For continuation, that denial
+restores the exact idle predecessor. At or after expiry it instead retires the
+expired attempt without renewing its permission; authorize a fresh continuation.
+An observed continuation start consumes the reservation, so a later denial
+cannot release work already observed running. Redelivery of the same unstarted
+tool call is idempotent; a distinct call cannot share its reservation. A launch
+rejected in an interactive permission dialog produces
 no host event: its attempt stays consumed, so prepare that packet again.
 
 `retry_of` permits a fresh attempt only after the host observed the earlier
@@ -339,6 +348,11 @@ It may outlive the original decision or inventory timestamp. However, explicitly
 withdrawing its model/effort from the current configured inventory blocks both
 continuation authorization and dispatch. Unrelated inventory additions and
 evidence-name changes do not reroute that already observed worker.
+Late or redelivered results for an earlier invocation update its historical
+observations without displacing a newer continuation or marking it finished.
+A newly observed mismatch in the same worker remains blocking across later
+completion and denied-launch recovery, including multiple continuation
+generations.
 
 ## Observations, failure and privacy boundaries
 

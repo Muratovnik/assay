@@ -135,22 +135,29 @@ only checking its own output shape.
 | R3: conflict, quality and units | A/B contradicted each other while unrelated C beat D; C was presented with no uncertainty. Equal full-chain price ignored strictly better paired quality. Tradeoff-only local evidence carried a cost-winner label. API and quota preferences could share one graph. | Keep disconnected/conflicting evidence visible; honor paired quality improvement at equal cost; distinguish an unresolved tie-break from a supported preference. Select in the requested measured unit, retaining an API fallback as explicitly quota-unknown when necessary. |
 | R4: unnecessary routing work | Explicit complete choices, genuine singletons and no-eligible packets still acquired sources and could be blocked by pending-advisor capacity. | Preflight with the normal eligibility/policy validators. Skip acquisition only when evidence cannot change the decision. Numeric limits, partial choices, forced refresh and offline replay retain their required paths. |
 | R5: expense scope and uncertainty | Terminal-Bench browser run totals became comparable per-task cost/tokens, while the preferred API retained them separately. Browser score intervals were discarded before Pareto analysis. | Both paths preserve run totals in `aggregate_usage`; unknown per-task expense stays unknown. Preserve percentage intervals. Bump affected adapter revisions to invalidate old derived cache entries. |
-| R6: vendor exceptions | More than six callouts or an overlong callout silently lost text. Fenced examples could become apparent publisher caveats; mismatched fences could expose code as prose. | Keep complete caveats or report an explicit guide failure; parse matching fences before extracting callouts. Version the extractor. |
+| R6: vendor exceptions | More than six callouts or an overlong callout silently lost text. Code examples could become apparent publisher caveats. The initial repair also removed code that was a condition inside an actual warning. | Retain the complete raw inner warning span, including code. Locate actual tags outside fenced/indented/container code, inline literals, comments and escaped markup; enforce bounds on the whole caveat or fail explicitly. Extractor revision 4 invalidates old derived cache entries. |
 | R7: historical evidence | Local retrieval bypassed history identity validation and admitted foreign/wrong-schema or future-dated records. | Reuse owned record/filename validation and enforce creation/expiry time at persisted timestamp precision. Valid current history continues to match. |
-| R8: usage identity | Distinct sessions sharing usage/timestamp values, or reusing an explicit event identifier, collapsed into one event. | Include client/session identity in event keys and actual normalized route fields in fallback keys. Reimporting the same event still deduplicates. |
+| R8: usage identity | Distinct sessions sharing usage/timestamp values, or reusing an explicit event identifier, collapsed into one event. Native Codex usage records often omit header identities; copied and referenced forks also require ownership and inherited-counter boundaries. | Scope identities by client/root session/thread using observed native headers and owner markers. Keep per-thread context and deduplicate copied parent usage. Never infer missing ancestor cost or route settings; unresolved nested ownership and missing cumulative baselines produce partial/unknown totals. Reimports, direct request usage and properly marked forks remain valid. |
 | R9: partial choices | A model-only explicit choice skipped local evidence even when several efforts remained. | Resolve the actual remaining candidates; skip only a genuinely fixed/empty choice. |
 | R10: execution binding | A provisional start-order sibling could be resumed under another packet/model before the authoritative Agent return. Later observations could invalidate a continuation already prepared. | Require authoritative packet/worker binding for continuation and revalidate the latest observations at dispatch. Preserve valid idle same-worker continuation. |
 | R11: withdrawn inventory | Removing a configured route after preparation did not invalidate authorization or an already authorized dispatch. A continuation also ignored explicit withdrawal. | Reread inventory/evidence bindings for new decisions and dispatch. Continuation separately requires its exact pair to remain listed, while allowing old timestamps and unrelated inventory changes. Reconfirmation of an unchanged inventory remains valid. |
 | R12: decision reporting | Required-mode compact results discarded economic uncertainty, adequacy and fallback detail. | Preserve bounded qualifications and provenance without private measurements or explanation text. |
 | R13: legacy malformed advice | A list in legacy packet IDs/rankings or a hosted choice raised raw `TypeError`, bypassing documented invalid-result fallback. | Validate types before set/dictionary operations and use the existing error/fallback path; retain valid legacy behavior. |
 | R14: resource cleanup | A successful worker could leave a descendant with redirected pipes; the parent was removed from the process registry, so later cancellation missed it. | Release the owned group before unregistering success, timeout or failure. Verify a detached-pipe child stops while an unrelated process stays alive. |
+| R15: invocation lifecycle | Auto-permission denial left a continuation reserved; expiry could roll back its release. A late predecessor result could displace the newer invocation and falsely complete it, permitting duplicate continuation. | Restore the exact idle predecessor on denied launch and retire expired authorization without extending it. Consume an observed start; keep newer invocation ownership across late/redelivered results and preserve inherited route-mismatch evidence. Exercise denial on both sides of expiry and delayed results across multiple generations. |
+| R16: concurrent completion | Two services sharing SQLite could each finalize different answers in memory/history before one overwrote the other. | Validate/finalize and commit the bounded local result under one store transaction. Equal submissions share one result; conflicting submissions have one winner and one classified rejection. No model or network call occurs under this transaction. |
+| R17: semantic cache identity | Packet IDs were canonicalized at the top level but retained inside attached task evidence, causing avoidable cache misses and repeat advice for a semantically identical renamed request. | Canonicalize the attached evidence IDs in the cache projection only and rebind the result to the actual request. Renamed/swapped IDs hit; changed task, objective, corpus or source revision still misses. |
+| R18: evidence budget | The new all-pairs comparison pushed a four-route summary above the existing 6 KiB cap, dropping all its evidence. The committed regression's full summary is 7,728 bytes. | When needed, remove only per-category cost distributions and mark `cost_detail: "totals_only"`. That regression becomes 5,752 bytes with all six pair comparisons and complete quality/total-cost/unknown/cohort fields. Larger summaries still fail visibly at the unchanged cap. |
 
 Regression owners are
 [policy and dispatch cases](../../tools/test_routing_policy_guards.py),
 [evidence boundaries](../../tools/test_routing_evidence_boundaries.py),
 [fixed-route paths](../../tools/test_routing_fast_paths.py), and
 [process lifecycle cases](../../tools/test_benchmark_service.py), together with
-the affected existing integration and compatibility suites.
+the affected existing integration and compatibility suites. PR-review repairs
+add [whole-caveat cases](../../tools/test_routing_guide_caveats.py),
+[summary budget controls](../../tools/test_routing_summary_budget.py), and
+[shared-store/invocation tests](../../tools/test_routing_pipeline.py).
 
 The baseline's initial 768-test run reported two Linux process-test failures.
 Those two assertions inspected host-mounted `/proc` using namespace-local PIDs,
@@ -167,14 +174,70 @@ retrieval occurs. Evidence-boundary and policy probes likewise exercised the
 old defects before their targeted repairs. These are deterministic behavior
 checks, not a paired trial of language-model quality.
 
+### Independent PR review and corrections
+
+[PR #26](https://github.com/Muratovnik/assay/pull/26) first published candidate
+`dfeaa3a29c7784ec4b89a2470bd2bd56e595c18d`. Separate reviewers examined decision
+economics/evidence, execution/concurrency, and the implementation corrections.
+The review found additional defects, including regressions in the initial
+guide and summary repairs. These were reproduced and corrected before final
+delivery; initial green CI was not treated as proof that the review was finished.
+The late-predecessor invocation defect also exists before this PR, whereas the
+summary-size regression was introduced by the all-pairs addition.
+
+Shared-store completion was independently exercised with two real service
+instances in separate processes, SQLite and history enabled. Equal answers
+finalized once; competing answers produced one winner, matching retained
+history and semantic-cache data. Acquisition remained fixture-controlled.
+This verifies the local commit protocol, not
+a live model's answer quality. A separate review repeated cache identity and
+budget controls using a nonempty corpus.
+
+Native-history fixtures were derived from the pinned public
+[Codex session initialization](https://github.com/openai/codex/blob/2351d9e1b608e6f9d9a3699b71d7eb39ee41cfa4/codex-rs/core/src/session/mod.rs)
+and [protocol definitions](https://github.com/openai/codex/blob/2351d9e1b608e6f9d9a3699b71d7eb39ee41cfa4/codex-rs/protocol/src/protocol.rs).
+Those sources distinguish root sessions from threads, preserve copied history,
+seed inherited counters, and record owner switches; referenced ancestors may
+remain outside the selected file. Synthetic fixtures check same/different
+roots, direct/cumulative usage, nested copied forks, reimport order and missing
+boundaries. A missing owner remains unknown. These are source-grounded importer
+checks, not a captured native execution or an automatic ancestor search.
+
+The corrected guide extractor was rerun on the six saved primary response
+bodies, with their original SHA-256 hashes verified. Normalized results were
+identical apart from extractor revision 4. This revalidation is recorded
+separately from the original network acquisition in the observation receipt.
+The implementation is a bounded parser for the configured excerpts, not a
+general CommonMark/MDX renderer.
+
+The review began with an implementation-independent decision frame. Two PR
+reviewers later disclosed an overbroad filename-only search for instruction
+files; no out-of-scope file contents or evaluation answers were opened. The
+entire process is therefore not described as perfectly blinded or as wholly
+repository-contained discovery.
+
 ## Verification and remaining acceptance boundary
 
-The integrated candidate passed all eight `python -B tools/check.py --all`
+The corrective candidate passed all eight `python -B tools/check.py --all`
 gates: source, unit suite, compatibility, catalog, evaluation data, rendered
-clients, audit packets and preservation. `python -B tools/assay.py render`
-reported no changes, and the working-tree publication audit passed. The history
-audit requires a clean committed tree and is checked after commit. PR creation,
-hosted checks and the separate fresh PR review are the next delivery steps.
+clients, audit packets and preservation. Verification used a clean detached
+worktree with all 17 corrective paths checked byte-for-byte against the reviewed
+candidate. This isolated three untracked bytecode files that reappeared in the
+original workspace after deletion with their old modification times. Their
+restoring process was not identified; the source check was kept intact.
+`python -B tools/assay.py render` reported no changes, and the working-tree
+publication audit passed. A clean-history publication audit is also a required
+gate. The final commit/tree, that audit and the corrective head's own hosted
+results are recorded in [PR #26](https://github.com/Muratovnik/assay/pull/26).
+
+The first published candidate independently passed both Ubuntu/Windows jobs in
+[Check](https://github.com/Muratovnik/assay/actions/runs/37903425222) and
+[Routing integrations](https://github.com/Muratovnik/assay/actions/runs/37903425223).
+The latter installed real Chromium and required the SDK/browser fixtures;
+Linux also passed native Claude plugin-manifest CLI validation. Those initial
+results are identified separately from the corrective head. Independent
+re-review closed the reproduced implementation findings on frozen file hashes;
+publication verifies that those bytes match the final tree.
 
 ### Live public evidence and corpus check
 
@@ -220,9 +283,9 @@ events and configuration inspection cannot close that requirement.
 
 Local Playwright Chromium installation failed: the first mirror supplied a
 truncated archive and another returned HTTP 400; a later attempt also failed its
-lock wait. Browser-dependent tests must remain visibly skipped locally. Hosted
-browser and Windows checks, when executed, cover their fixtures rather than a
-signed-in native model session or every current public layout.
+lock wait. Browser-dependent tests remain visibly skipped locally. Passing
+hosted browser and Windows checks covers their fixtures; it does not establish
+a signed-in native model session or every current public layout.
 
 No comparable accepted-task matrix with complete model/effort and billing/quota
 receipts was available. Consequently the review cannot establish either

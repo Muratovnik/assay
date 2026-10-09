@@ -158,6 +158,172 @@ class LocalHistoryBoundaryTests(unittest.TestCase):
                 self.assertEqual(result["summary"]["duplicates"], 1)
                 self.assertEqual(result["summary"]["usage"]["total_tokens"], 30)
 
+    def test_codex_header_identity_scopes_events_without_repeated_ids(self):
+        usage = {"type": "event_msg", "timestamp": "2026-10-09T00:00:01Z", "payload": {
+            "type": "token_count", "info": {"last_token_usage": {"input_tokens": 10, "output_tokens": 5}}}}
+        for fields in (("session_id",), ("id",), ("session_id", "id")):
+            paths = []
+            for name in ("a", "b"):
+                meta = {field: f"{field}-{name}" for field in fields}
+                events = [{"type": "session_meta", "payload": meta},
+                          {"type": "turn_context", "payload": {"model": "same-model"}}, usage]
+                path = self.root / f"header-{name}.jsonl"
+                path.write_text("".join(json.dumps(event) + "\n" for event in events))
+                paths.append(path)
+            result = import_history([*paths, paths[0]])
+            with self.subTest(fields=fields):
+                self.assertEqual(result["summary"]["request_events"], 2)
+                self.assertEqual(result["summary"]["duplicates"], 1)
+                self.assertEqual(result["summary"]["usage"]["total_tokens"], 30)
+                key = "session_id" if "session_id" in fields else "id"
+                self.assertEqual({r["session_id"] for r in result["requests"]}, {f"{key}-a", f"{key}-b"})
+                self.assertEqual([r["requested"]["model"] for r in result["requests"]], ["same-model", "same-model"])
+
+    def test_codex_sibling_threads_keep_distinct_usage_and_context(self):
+        events = []
+        for name, total in (("a", 10), ("b", 10), ("a", 15)):
+            events.extend([
+                {"type": "session_meta", "payload": {"session_id": "root", "id": f"thread-{name}"}},
+                {"type": "turn_context", "payload": {"model": f"model-{name}"}},
+                {"id": f"event-{total}", "type": "event_msg", "payload": {
+                    "info": {"total_token_usage": {"input_tokens": total, "output_tokens": 0}}}},
+            ])
+        path = self.root / "siblings.jsonl"
+        path.write_text("".join(json.dumps(event) + "\n" for event in events))
+        result = import_history([path, path])
+        self.assertEqual(result["summary"]["request_events"], 3)
+        self.assertEqual(result["summary"]["duplicates"], 3)
+        self.assertEqual(result["summary"]["usage"]["input_tokens"], 25)
+        self.assertEqual([r["thread_id"] for r in result["requests"]], ["thread-a", "thread-b", "thread-a"])
+        self.assertEqual([r["requested"]["model"] for r in result["requests"]], ["model-a", "model-b", "model-a"])
+
+    def test_codex_header_does_not_override_an_explicit_other_session(self):
+        usage = {"type": "event_msg", "payload": {"session_id": "other", "info": {
+            "last_token_usage": {"input_tokens": 10, "output_tokens": 5}}}}
+        path = self.root / "explicit-other.jsonl"
+        path.write_text("".join(json.dumps(event) + "\n" for event in [
+            {"type": "session_meta", "payload": {"session_id": "root", "id": "root-thread"}},
+            {"type": "turn_context", "payload": {"model": "root-model"}}, usage]))
+        result = import_history([path])
+        self.assertEqual(result["requests"][0]["session_id"], "other")
+        self.assertIsNone(result["requests"][0].get("thread_id"))
+        self.assertEqual(result["requests"][0]["requested"], {})
+
+    def test_native_fork_owner_marker_preserves_prefix_dedup_and_cumulative_baseline(self):
+        for child_session in ("parent-root", "new-root"):
+            parent = {"type": "session_meta", "payload": {"session_id": "parent-root", "id": "parent"}}
+            child = {"type": "session_meta", "payload": {
+                "session_id": child_session, "id": "child", "forked_from_id": "parent"}}
+            def total(ref, amount):
+                return {"type": "event_msg", "id": ref, "payload": {"type": "token_count", "info": {
+                    "total_token_usage": {"input_tokens": amount, "output_tokens": 0}}}}
+            owner = {"type": "event_msg", "payload": {"type": "thread_settings_applied", "thread_id": "child"}}
+            paths = []
+            for name, events in (("parent", [parent, total("parent-call", 100)]),
+                                 ("child", [child, parent, total("parent-call", 100), owner,
+                                            total("child-call", 130), owner, total("child-next", 140)])):
+                path = self.root / f"native-{name}.jsonl"
+                path.write_text("".join(json.dumps(event) + "\n" for event in events))
+                paths.append(path)
+            for selected in (paths, paths[1:]):
+                result = import_history(selected)
+                with self.subTest(session=child_session, files=len(selected)):
+                    self.assertEqual(result["status"], "complete")
+                    self.assertEqual(result["summary"]["usage"]["input_tokens"], 140)
+                    self.assertEqual(result["summary"]["request_events"], 3)
+                    self.assertEqual(result["summary"]["duplicates"], len(selected) - 1)
+                    self.assertEqual([r["thread_id"] for r in result["requests"]], ["parent", "child", "child"])
+                    self.assertEqual([r["session_id"] for r in result["requests"]],
+                                     ["parent-root", child_session, child_session])
+                    self.assertEqual([r["usage"]["input_tokens"] for r in result["requests"]], [100, 30, 10])
+
+    def test_referenced_history_without_a_local_counter_baseline_stays_unknown(self):
+        meta = {"type": "session_meta", "payload": {"id": "child", "session_id": "root",
+            "history_base": {"thread_id": "unnamed-ancestor", "end_ordinal_exclusive": 10, "end_byte_offset": 123}}}
+        first = {"type": "event_msg", "payload": {"info": {
+            "total_token_usage": {"input_tokens": 100, "output_tokens": 0}}}}
+        second = {"type": "event_msg", "payload": {"info": {
+            "total_token_usage": {"input_tokens": 130, "output_tokens": 0}}}}
+        path = self.root / "referenced-history.jsonl"
+        path.write_text("".join(json.dumps(event) + "\n" for event in (meta, first, second)))
+        result = import_history([path])
+        self.assertEqual(result["status"], "partial")
+        self.assertIn("inherited_usage_baseline_unknown", [e["code"] for e in result["errors"]])
+        self.assertIsNone(result["summary"]["usage"]["input_tokens"])
+        self.assertEqual([r["usage"]["input_tokens"] for r in result["requests"]], [30])
+        # Direct request usage is sufficient even when the cumulative prefix
+        # lives in an explicitly unnamed ancestor file.
+        first["payload"]["info"]["last_token_usage"] = {"input_tokens": 10, "output_tokens": 0}
+        path.write_text("".join(json.dumps(event) + "\n" for event in (meta, first, second)))
+        direct = import_history([path])
+        self.assertEqual(direct["status"], "complete")
+        self.assertEqual(direct["summary"]["usage"]["input_tokens"], 40)
+
+    def test_nested_fork_requires_each_observed_owner_boundary(self):
+        def meta(owner, parent=None):
+            payload = {"id": owner, "session_id": "root"}
+            if parent:
+                payload["forked_from_id"] = parent
+            return {"type": "session_meta", "payload": payload}
+        def total(ref, amount, direct=None):
+            info = {"total_token_usage": {"input_tokens": amount, "output_tokens": 0}}
+            if direct is not None:
+                info["last_token_usage"] = {"input_tokens": direct, "output_tokens": 0}
+            return {"type": "event_msg", "id": ref, "payload": {"type": "token_count", "info": info}}
+        for owner in ("parent", None, "omitted"):
+            events = [meta("child", "parent"), meta("parent", "grandparent"), meta("grandparent"),
+                      total("grand-call", 100)]
+            if owner != "omitted":
+                payload = {"type": "thread_settings_applied"}
+                if owner:
+                    payload["thread_id"] = owner
+                events.append({"type": "event_msg", "payload": payload})
+            events.extend([total("parent-call", 130),
+                {"type": "event_msg", "payload": {"type": "thread_settings_applied", "thread_id": "child"}},
+                total("child-call", 140, 10)])
+            path = self.root / "nested-fork.jsonl"
+            path.write_text("".join(json.dumps(event) + "\n" for event in events))
+            result = import_history([path])
+            with self.subTest(owner=owner):
+                if owner == "parent":
+                    self.assertEqual(result["status"], "complete")
+                    self.assertEqual(result["summary"]["usage"]["input_tokens"], 140)
+                    self.assertEqual([r["thread_id"] for r in result["requests"]], ["grandparent", "parent", "child"])
+                else:
+                    self.assertEqual(result["status"], "partial")
+                    self.assertIn("inherited_owner_boundary_unknown", [e["code"] for e in result["errors"]])
+                    self.assertIsNone(result["summary"]["usage"]["input_tokens"])
+                    self.assertEqual(result["requests"], [])
+
+    def test_unmarked_copied_fork_does_not_claim_complete_owner_or_total(self):
+        events = [
+            {"type": "session_meta", "payload": {"id": "child", "forked_from_id": "parent"}},
+            {"type": "session_meta", "payload": {"id": "parent"}},
+            {"type": "event_msg", "payload": {"info": {
+                "total_token_usage": {"input_tokens": 100, "output_tokens": 0}}}},
+            {"type": "event_msg", "payload": {"info": {
+                "total_token_usage": {"input_tokens": 130, "output_tokens": 0}}}},
+        ]
+        path = self.root / "unmarked-fork.jsonl"
+        path.write_text("".join(json.dumps(event) + "\n" for event in events))
+        result = import_history([path])
+        self.assertEqual(result["status"], "partial")
+        self.assertIn("inherited_owner_boundary_unknown", [e["code"] for e in result["errors"]])
+        self.assertIsNone(result["summary"]["usage"]["input_tokens"])
+        self.assertEqual(result["summary"]["unattributed_usage_events"], 2)
+        self.assertEqual(result["requests"], [])
+        # A malformed ownership boundary cannot erase another client's known
+        # observations in a combined export or poison the later parent's IDs.
+        claude = {"type": "assistant", "sessionId": "claude-session", "uuid": "claude-call",
+                  "message": {"usage": {"input_tokens": 7, "output_tokens": 3}}}
+        path.write_text("".join(json.dumps(event) + "\n" for event in [*events, claude, claude]))
+        parent = self.root / "independent-parent.jsonl"
+        parent.write_text("".join(json.dumps(event) + "\n" for event in events[1:3]))
+        mixed = import_history([path, parent])
+        self.assertEqual([r["client"] for r in mixed["requests"]], ["claude", "codex"])
+        self.assertEqual(mixed["summary"]["duplicates"], 1)
+        self.assertEqual(mixed["requests"][1]["thread_id"], "parent")
+
 
 class TaskChoiceBoundaryTests(unittest.TestCase):
     def test_model_only_choice_keeps_effort_evidence(self):

@@ -265,7 +265,7 @@ def table_snapshot(source, body):
     page = parse_page(body)
     heading_identity(source, page.headings[0] if page.headings else "")
     return snapshot(source, parse_tables(source, page.tables), warnings=[
-        "Point estimates only; small differences may be noise.",
+        "Small score differences may be noise; uncertainty intervals are preserved where published.",
         "Tokens column semantics are unspecified; stored as reported_tokens, not output or total tokens.",
         "Source does not supply per-row evaluation dates or a machine-readable revision timestamp."])
 

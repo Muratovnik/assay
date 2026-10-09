@@ -372,8 +372,19 @@ scheduler. User exports have a separate lifetime.
 
 History import reads only explicitly named Codex/Claude JSONL files. It returns
 usage events and an account quota timeline separately, handles cumulative
-deltas/resets and inherited prefixes, and labels unknown attribution. Cached
-tokens are inside input; reasoning is inside output. API prices are not quota,
+deltas/resets and labels unknown attribution. Codex session headers supply the
+root session and thread identities when usage events omit them. Copied fork
+prefixes retain their observed owners; `thread_settings_applied.thread_id`
+marks the switch to each child. Deduplication includes client, session and
+thread, and inherited counters do not carry a parent's model/effort into a child.
+The importer does not discover or open referenced ancestor files. A missing
+inherited counter baseline, or a copied segment without its owner boundary,
+makes the result `partial`, increments `unattributed_usage_events`, and leaves
+affected aggregate token totals null. Uncertain copied Codex contributions are
+omitted without suppressing independently attributable input files or Claude
+events in the same export. A direct observed request or a later measurable
+delta remains usable when its ownership is known. Cached tokens are inside
+input; reasoning is inside output. API prices are not quota,
 and missing prices do not become zero. Import does not read credentials, change
 client databases, train a router or fabricate old routing snapshots.
 

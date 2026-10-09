@@ -423,8 +423,10 @@ class RoutingPipeline:
             envelope = state.get("envelope")
             if envelope is None:
                 raise EvidenceError("native_advice_not_pending")
-        result = self.service.complete_routing(**params, envelope=envelope, cache=False)
-        with self.store.transaction() as tx:
+            # Completion performs bounded local validation and history writes,
+            # never acquisition or native execution. Serialize that finalization
+            # too: a losing service must not retain/cache a conflicting result.
+            result = self.service.complete_routing(**params, envelope=envelope, cache=False)
             state = self._decision(tx, params["decision_id"], host)
             state["response"] = compact(result)
             state["response"]["advisor_provenance"] = {

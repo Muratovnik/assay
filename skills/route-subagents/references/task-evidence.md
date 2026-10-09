@@ -322,7 +322,14 @@ evaluate future native/Jev responses. Do not tune thresholds on its test results
 Returned `task_similarity_evidence` has schema version 1, retrieval/settings and
 corpus identities, separate public/local groups, and explicit status. Maximum
 32 neighbors, 3 hashed example references and 6 KiB for **all** packets together,
-within the existing snapshot budget. Over-budget evidence is explicitly omitted.
+within the existing snapshot budget. If the full summary exceeds that bound,
+`cost_detail: "totals_only"` removes only per-category `cost_components`
+distributions from public/local estimates. Total expenses, quality, unknown and
+partial counts, every route and pair comparison, cohorts and measurement units
+remain. The complete estimate/comparison APIs and stored history retain their
+detail. If this projection still exceeds the same bound, the whole summary is
+explicitly omitted with `summary_budget_exceeded`; routes are not silently cut
+to fit.
 No-match, unavailable and insufficient-coverage preserve the original workflow.
 Explicit routes and a sole candidate skip corpus work. Cost comparisons remain
 advisor evidence: a nonpositive expense benefit cannot skip the quality

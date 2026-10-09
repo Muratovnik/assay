@@ -10,6 +10,8 @@ import sys
 import tempfile
 import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from unittest.mock import AsyncMock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,7 +19,7 @@ SCRIPTS = ROOT / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache
 from route_evidence.claude_agents import alias_efforts, generate, resolve_variant
-from route_evidence.core import EvidenceError, timestamp
+from route_evidence.core import EvidenceError, digest, timestamp
 from route_evidence.pipeline import RoutingPipeline
 from route_evidence.pipeline_config import configured_inventory, confirm_inventory, inventory_ttl_seconds, settings
 from route_evidence.pipeline_store import PipelineStore
@@ -160,6 +162,78 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
                 self.rpc(tool, args)
         with self.assertRaisesRegex(EvidenceError, "receipt"):
             self.pipeline.complete({"decision_id": prepared["decision_id"], "advisor_result": {}})
+
+    async def test_shared_store_completion_preserves_the_first_result(self):
+        # Two real service instances can overlap while sharing the hook store.
+        # The barrier controls only scheduling; parsing and SQLite remain real.
+        for conflicting in (False, True):
+            with self.subTest(conflicting=conflicting):
+                host = PipelineTests("runTest")
+                host.setUp()
+                try:
+                    host.config["telemetry"] = {"mode": "metadata"}
+                    host.configure()
+                    prepared = await host.prepare()
+                    host.launch(prepared["handoff"])
+                    answer = host.synthetic_answer(host.private_input(prepared["decision_id"]))
+                    other = copy.deepcopy(answer)
+                    if conflicting:
+                        other["rankings"][0]["ranking"].reverse()
+                    answers, calls = [answer, other], []
+                    barrier = Barrier(2, timeout=5)
+                    for result in answers:
+                        service = host.make_service()
+                        pipeline = RoutingPipeline(service)
+                        original = pipeline.host
+
+                        def attested(tool, *args, _original=original, **kwargs):
+                            receipt = _original(tool, *args, **kwargs)
+                            if tool == "complete_routing":
+                                barrier.wait()
+                            return receipt
+
+                        pipeline.host = attested
+                        receipt = host.rpc("complete_routing", {
+                            "decision_id": prepared["decision_id"], "advisor_result": result}, agent="advisor-a")
+                        calls.append((pipeline, receipt))
+                    submitted, failures = [], []
+                    with ThreadPoolExecutor(max_workers=2) as pool:
+                        futures = [pool.submit(pipeline.complete, receipt) for pipeline, receipt in calls]
+                        for index, future in enumerate(futures):
+                            try:
+                                self.assertEqual(future.result(timeout=10)["status"], "submitted")
+                                submitted.append(index)
+                            except EvidenceError as exc:
+                                failures.append(str(exc))
+                    self.assertEqual(len(submitted), 1 if conflicting else 2)
+                    self.assertEqual(failures, ["conflicting_completion"] if conflicting else [])
+                    with host.pipeline.store.transaction() as tx:
+                        state = tx.get("decision", prepared["decision_id"])
+                    self.assertEqual(state["completion_hash"], digest(answers[submitted[0]]))
+                    selected = state["response"]["decisions"][0]["selected"]["candidate_id"]
+                    self.assertEqual(selected, answers[submitted[0]]["rankings"][0]["ranking"][0])
+                    finalized = [index for index, (pipeline, _) in enumerate(calls)
+                                 if pipeline.service.advisor_workflow.pending_state(prepared["decision_id"]) is not None]
+                    self.assertEqual(len(finalized), 1)
+                    history = calls[finalized[0]][0].service.advisor_workflow.history
+                    record = json.loads(history._path(prepared["decision_id"], "decision").read_text())
+                    self.assertEqual(record["decisions"][0]["selected"]["candidate_id"], selected)
+                    host.returned("call-a", "advisor-a", ROUTE["model"])
+                    for index, (pipeline, _) in enumerate(calls):
+                        registered = pipeline.decision(host.rpc("get_routing_decision", {
+                            "decision_id": prepared["decision_id"]}))
+                        self.assertEqual(registered["decisions"][0]["selected"]["candidate_id"], selected)
+                        next_result = await pipeline.prepare(host.rpc("prepare_routing", {
+                            "packets": copy.deepcopy(PACKETS), "launch_requests": {
+                                "work": {"profile": "general-purpose", "prompt": "bounded work"}}}))
+                        if index in finalized:
+                            self.assertTrue(next_result["cache_hit"])
+                            self.assertEqual(next_result["decisions"][0]["selected"]["candidate_id"], selected)
+                        else:
+                            self.assertEqual(next_result["status"], "awaiting_native_advice")
+                            self.assertNotIn("cache_hit", next_result)
+                finally:
+                    host.tmp.cleanup()
 
     async def test_receipt_is_one_use_argument_bound_and_session_bound(self):
         receipt = self.rpc("prepare_routing", {"packets": PACKETS, "launch_requests": {}})
@@ -843,6 +917,229 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         with self.pipeline.store.transaction() as tx:
             attempt = tx.get("attempt", worker["attempt_id"])
             self.assertEqual((attempt["tool_use_id"], attempt["agent_id"]), ("retry-call", "worker-a"))
+
+    async def prepared_continuation(self):
+        decision = await self.decided()
+        worker = self.authorize(decision)
+        self.launch(worker, agent="worker-a", tool_id="original-worker")
+        self.event("SubagentStop", agent="worker-a", effort={"level": worker["requested_effort"]})
+        self.returned("original-worker", "worker-a", worker["requested_model"])
+        return decision, worker, self.authorize(decision, resume_agent_id="worker-a")
+
+    async def test_auto_mode_denial_restores_a_continuations_idle_worker(self):
+        decision, worker, continuation = await self.prepared_continuation()
+        other_decision = await self.prepare(packets=[{
+            **PACKETS[0], "explicit_source": "user", "explicit": BASELINE}])
+        other = self.authorize(other_decision["decision_id"])
+        self.launch(other, agent="worker-b", tool_id="unrelated-worker")
+        with self.pipeline.store.transaction() as tx:
+            unrelated = tx.get("agent", "session-a:worker-b")
+        self.dispatched(continuation, "denied-resume")
+        self.event("PermissionDenied", tool_name="Agent", tool_use_id="foreign-call")
+        with self.pipeline.store.transaction() as tx:
+            self.assertEqual(tx.get("agent", "session-a:worker-a")["attempt_id"], continuation["attempt_id"])
+        self.event("PermissionDenied", tool_name="Agent", tool_use_id="denied-resume")
+        with self.pipeline.store.transaction() as tx:
+            restored = tx.get("agent", "session-a:worker-a")
+            attempt = tx.get("attempt", continuation["attempt_id"])
+            self.assertEqual((restored["attempt_id"], restored["state"]), (worker["attempt_id"], "finished"))
+            self.assertEqual(attempt["state"], "prepared")
+            self.assertNotIn("tool_use_id", attempt)
+            self.assertNotIn("agent_id", attempt)
+            self.assertEqual(tx.get("agent", "session-a:worker-b"), unrelated)
+        self.assertEqual(self.authorize(decision, resume_agent_id="worker-a")["attempt_id"], continuation["attempt_id"])
+        self.dispatched(continuation, "retry-resume")
+        self.event("PermissionDenied", tool_name="Agent", tool_use_id="denied-resume")
+        with self.pipeline.store.transaction() as tx:
+            current = tx.get("agent", "session-a:worker-a")
+            self.assertEqual((current["attempt_id"], current["state"], current["tool_use_id"]),
+                             (continuation["attempt_id"], "reserved", "retry-resume"))
+
+    async def test_continuation_start_and_returns_prevent_late_denial_release(self):
+        decision, worker, continuation = await self.prepared_continuation()
+        self.dispatched(continuation, "resume-worker")
+        name = continuation["input"]["subagent_type"]
+        for agent, agent_type in (("another-worker", name), ("worker-a", "unrelated-definition")):
+            self.event("SubagentStart", agent=agent, agent_type=agent_type)
+            with self.pipeline.store.transaction() as tx:
+                self.assertEqual(tx.get("attempt", continuation["attempt_id"])["state"], "reserved")
+        self.event("SubagentStart", agent="worker-a", agent_type=name)
+        with self.pipeline.store.transaction() as tx:
+            attempt = tx.get("attempt", continuation["attempt_id"])
+            self.assertEqual(attempt["state"], "started")
+            self.assertNotIn("input", attempt)
+        for state in ("started", "running", "finished"):
+            if state != "started":
+                self.returned("resume-worker", "worker-a", worker["requested_model"],
+                              status="async_launched" if state == "running" else "completed")
+            self.event("PermissionDenied", tool_name="Agent", tool_use_id="resume-worker")
+            with self.pipeline.store.transaction() as tx:
+                current = tx.get("agent", "session-a:worker-a")
+                self.assertEqual((current["attempt_id"], current["state"]), (continuation["attempt_id"], state))
+            denied = self.event("PreToolUse", tool_name="Agent", tool_use_id="replayed-resume",
+                                tool_input=continuation["input"])
+            self.assertEqual(denied["hookSpecificOutput"]["permissionDecision"], "deny")
+        self.assertNotEqual(self.authorize(decision, resume_agent_id="worker-a")["attempt_id"], continuation["attempt_id"])
+
+    async def test_reserved_continuation_call_is_idempotent(self):
+        _, _, continuation = await self.prepared_continuation()
+        registered = self.dispatched(continuation, "resume-worker")
+        self.assertEqual(self.dispatched(continuation, "resume-worker"), registered)
+        denied = self.event("PreToolUse", tool_name="Agent", tool_use_id="another-call",
+                            tool_input=continuation["input"])
+        self.assertEqual(denied["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    async def test_delayed_continuation_start_still_consumes_its_reservation(self):
+        _, _, continuation = await self.prepared_continuation()
+        self.dispatched(continuation, "delayed-resume")
+        self.now += 601
+        self.event("SubagentStart", agent="worker-a", agent_type=continuation["input"]["subagent_type"])
+        self.event("PermissionDenied", tool_name="Agent", tool_use_id="delayed-resume")
+        with self.pipeline.store.transaction() as tx:
+            current = tx.get("agent", "session-a:worker-a")
+            self.assertEqual((current["attempt_id"], current["state"]), (continuation["attempt_id"], "started"))
+            self.assertNotIn("input", current)
+
+    async def test_denied_attempt_expiry_retires_permission_and_preserves_recovery(self):
+        for resume in (False, True):
+            for offset in (-1, 0, 1):
+                with self.subTest(resume=resume, expiry_offset=offset):
+                    host = PipelineTests("runTest")
+                    host.setUp()
+                    try:
+                        if resume:
+                            decision, worker, launch = await host.prepared_continuation()
+                        else:
+                            decision = await host.decided()
+                            launch = host.authorize(decision)
+                        host.dispatched(launch, "denied-call")
+                        with host.pipeline.store.transaction() as tx:
+                            expires = tx.get("attempt", launch["attempt_id"])["expires"]
+                            previous = tx.get("attempt", worker["attempt_id"]) if resume else None
+                        host.now = expires + offset
+                        host.event("PermissionDenied", tool_name="Agent", tool_use_id="foreign-call")
+                        with host.pipeline.store.transaction() as tx:
+                            self.assertEqual(tx.get("attempt", launch["attempt_id"])["state"], "reserved")
+                        host.event("PermissionDenied", tool_name="Agent", tool_use_id="denied-call")
+                        with host.pipeline.store.transaction() as tx:
+                            attempt = tx.get("attempt", launch["attempt_id"])
+                            if resume:
+                                self.assertEqual(tx.get("agent", "session-a:worker-a"), previous)
+                        self.assertEqual(attempt["expires"], expires)
+                        self.assertNotIn("agent_id", attempt)
+                        self.assertEqual(attempt["state"], "prepared" if offset < 0 else "expired")
+                        if offset >= 0:
+                            self.assertNotIn("input", attempt)
+                            denied = host.event("PreToolUse", tool_name="Agent", tool_use_id="old-retry",
+                                                tool_input=launch["input"])
+                            self.assertEqual(denied["hookSpecificOutput"]["permissionDecision"], "deny")
+                        if resume:
+                            retry = host.authorize(decision, resume_agent_id="worker-a")
+                        elif offset < 0:
+                            retry = launch
+                        else:
+                            prepared = await host.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
+                                "explicit": {"model": launch["requested_model"], "effort": launch["requested_effort"]}}])
+                            retry = host.authorize(prepared["decision_id"])
+                        self.assertEqual(retry["attempt_id"] == launch["attempt_id"], offset < 0)
+                        host.dispatched(retry, "retry-call")
+                        host.event("PermissionDenied", tool_name="Agent", tool_use_id="denied-call")
+                        with host.pipeline.store.transaction() as tx:
+                            current = tx.get("attempt", retry["attempt_id"])
+                            self.assertEqual((current["state"], current["tool_use_id"]), ("reserved", "retry-call"))
+                            if resume:
+                                self.assertEqual(tx.get("agent", "session-a:worker-a")["attempt_id"], retry["attempt_id"])
+                    finally:
+                        host.tmp.cleanup()
+
+    async def test_predecessor_returns_do_not_finish_or_replace_a_continuation(self):
+        for redelivered in (False, True):
+            for stage in ("reserved", "started", "running"):
+                with self.subTest(redelivered=redelivered, stage=stage):
+                    host = PipelineTests("runTest")
+                    host.setUp()
+                    try:
+                        decision = await host.decided()
+                        worker = host.authorize(decision)
+                        host.launch(worker, agent="worker-a", tool_id="original-worker")
+                        host.event("SubagentStop", agent="worker-a", effort={"level": worker["requested_effort"]})
+                        if redelivered:
+                            host.returned("original-worker", "worker-a", worker["requested_model"])
+                        continuation = host.authorize(decision, resume_agent_id="worker-a")
+                        host.dispatched(continuation, "resume-worker")
+                        if stage != "reserved":
+                            host.event("SubagentStart", agent="worker-a", agent_type=continuation["input"]["subagent_type"])
+                        if stage == "running":
+                            host.returned("resume-worker", "worker-a", worker["requested_model"], status="async_launched")
+                        with host.pipeline.store.transaction() as tx:
+                            owned = tx.get("agent", "session-a:worker-a")
+                        host.returned("original-worker", "worker-a", worker["requested_model"])
+                        with host.pipeline.store.transaction() as tx:
+                            self.assertEqual(tx.get("agent", "session-a:worker-a"), owned)
+                            self.assertEqual(tx.get("attempt", continuation["attempt_id"]), owned)
+                            previous = tx.get("attempt", worker["attempt_id"])
+                            self.assertEqual((previous["binding"], previous["state"]), ("host_result", "finished"))
+                            self.assertEqual(previous["observed_model"], worker["requested_model"])
+                        with self.assertRaisesRegex(EvidenceError, "continuation_requires_idle_worker"):
+                            host.authorize(decision, resume_agent_id="worker-a")
+                        host.returned("resume-worker", "worker-a", worker["requested_model"])
+                        latest = host.authorize(decision, resume_agent_id="worker-a")
+                        host.dispatched(latest, "latest-worker")
+                        if stage != "reserved":
+                            host.event("SubagentStart", agent="worker-a", agent_type=latest["input"]["subagent_type"])
+                        if stage == "running":
+                            host.returned("latest-worker", "worker-a", worker["requested_model"], status="async_launched")
+                        host.returned("original-worker", "worker-a", worker["requested_model"])
+                        with host.pipeline.store.transaction() as tx:
+                            current = tx.get("agent", "session-a:worker-a")
+                            self.assertEqual((current["attempt_id"], current["state"]), (latest["attempt_id"], stage))
+                        with self.assertRaisesRegex(EvidenceError, "continuation_requires_idle_worker"):
+                            host.authorize(decision, resume_agent_id="worker-a")
+                        host.event("PermissionDenied", tool_name="Agent", tool_use_id="latest-worker")
+                        with host.pipeline.store.transaction() as tx:
+                            if stage == "reserved":
+                                previous = tx.get("attempt", continuation["attempt_id"])
+                                self.assertEqual(tx.get("agent", "session-a:worker-a"), previous)
+                                self.assertEqual(previous["state"], "finished")
+                            else:
+                                self.assertEqual(tx.get("agent", "session-a:worker-a"), current)
+                    finally:
+                        host.tmp.cleanup()
+
+    async def test_late_predecessor_mismatch_blocks_the_current_worker_without_rebinding(self):
+        decision, worker, continuation = await self.prepared_continuation()
+        self.launch(continuation, agent="worker-a", tool_id="resume-worker")
+        self.returned("original-worker", "worker-a", worker["requested_model"],
+                      modelsUsed=[worker["requested_model"], "unexpected-model"])
+        with self.pipeline.store.transaction() as tx:
+            current = tx.get("agent", "session-a:worker-a")
+            previous = tx.get("attempt", worker["attempt_id"])
+            self.assertEqual((current["attempt_id"], current["state"]), (continuation["attempt_id"], "started"))
+            self.assertTrue(previous["route_mismatch"])
+            self.assertTrue(current["route_mismatch"])
+        self.returned("resume-worker", "worker-a", worker["requested_model"])
+        with self.assertRaisesRegex(EvidenceError, "continuation_observed_route_mismatch"):
+            self.authorize(decision, resume_agent_id="worker-a")
+
+    async def test_denial_preserves_mismatch_from_an_earlier_worker_invocation(self):
+        decision, worker, first = await self.prepared_continuation()
+        self.launch(first, agent="worker-a", tool_id="resume-a")
+        self.returned("resume-a", "worker-a", worker["requested_model"])
+        latest = self.authorize(decision, resume_agent_id="worker-a")
+        self.dispatched(latest, "resume-b")
+        self.returned("original-worker", "worker-a", worker["requested_model"],
+                      modelsUsed=[worker["requested_model"], "unexpected-model"])
+        repeat = self.event("PreToolUse", tool_name="Agent", tool_use_id="resume-b", tool_input=latest["input"])
+        self.assertEqual(repeat["hookSpecificOutput"]["permissionDecision"], "deny")
+        with self.pipeline.store.transaction() as tx:
+            previous = tx.get("attempt", first["attempt_id"])
+        self.event("PermissionDenied", tool_name="Agent", tool_use_id="resume-b")
+        with self.pipeline.store.transaction() as tx:
+            restored = tx.get("agent", "session-a:worker-a")
+            self.assertEqual(restored, {**previous, "prior_route_mismatch": worker["attempt_id"], "route_mismatch": True})
+            self.assertEqual(tx.get("attempt", first["attempt_id"]), restored)
+        with self.assertRaisesRegex(EvidenceError, "continuation_observed_route_mismatch"):
+            self.authorize(decision, resume_agent_id="worker-a")
 
     def use_aliases(self, **pipeline):
         """Per-call routing: alias models in the inventory and a routed profile."""

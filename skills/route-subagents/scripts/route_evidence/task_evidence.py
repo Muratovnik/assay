@@ -37,9 +37,11 @@ def validate_summary(value):
     if len(encoded(value)) > MAX_SUMMARY:
         raise EvidenceError("task_summary_budget_exceeded")
     allowed = {"schema_version", "mode", "packets", "cost_units_are_not_interchangeable", "status",
-               "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash", "acquisition"}
+               "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash", "acquisition", "cost_detail"}
     if set(value) - allowed or not isinstance(value.get("packets"), list) or len(value["packets"]) > 8:
         raise EvidenceError("invalid task evidence fields")
+    if "cost_detail" in value and value["cost_detail"] != "totals_only":
+        raise EvidenceError("invalid task cost detail projection")
     for packet in value["packets"]:
         if not isinstance(packet, dict):
             raise EvidenceError("invalid task evidence packet")
@@ -477,6 +479,15 @@ class TaskEvidence:
         except (EvidenceError, OSError, ValueError, KeyError, TypeError) as exc:
             return {**base, "packets": [], "status": "unavailable", "reason": _failure_reason(exc)}
         if len(encoded(base)) > MAX_SUMMARY:
+            # Keep total costs and every comparison when per-category detail cannot fit.
+            for packet in base["packets"]:
+                for layer in ("public", "local"):
+                    for route in packet.get(layer, []):
+                        for group in route["groups"]:
+                            group.pop("cost_components", None)
+            base["cost_detail"] = "totals_only"
+            if len(encoded(base)) <= MAX_SUMMARY:
+                return base
             return {"schema_version": 1, "status": "insufficient_coverage", "reason": "summary_budget_exceeded",
                     "mode": self.config["mode"], "packets": [], "cost_units_are_not_interchangeable": True}
         return base
