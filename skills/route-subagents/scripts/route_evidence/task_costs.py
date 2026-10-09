@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import math
 from collections import defaultdict
+from itertools import combinations
 from statistics import mean
 
 from .core import EvidenceError, number
@@ -118,47 +119,61 @@ def estimates(rows, candidates, *, minimum=3):
 
 
 def compare(rows, candidates, baseline, unit, overhead, *, minimum=3, unit_basis=None):
-    """Paired observed tasks only; no cheap recommendation from incomparable samples."""
+    """Exact paired chain evidence is independent of a caller's fallback route."""
     fallback = {"status": "insufficient_evidence", "baseline": baseline, "recommended": None,
-                "unit": unit, "net_benefit": None}
-    if not baseline or unit not in {"api_usd", "quota_units"} or overhead is None:
+                "unit": unit, "net_benefit": None, "pairwise_comparisons": []}
+    if unit not in {"api_usd", "quota_units"}:
         return fallback
-    number(overhead, "routing overhead")
+    if overhead is not None:
+        number(overhead, "routing overhead")
     pair_by_id = {c["candidate_id"]: (c["model"], c["effort"]) for c in candidates}
-    if baseline not in pair_by_id:
-        return fallback
     indexed = defaultdict(dict)
     ambiguous = set()
     for r in rows:
-        if r.get("complete") and r.get("score") is not None and r["costs"].get(unit) is not None:
-            key = (r["task_id"], r["comparison_basis"], r["metric"], r["cost_scope"], r.get("unit_basis", {}).get(unit))
+        basis = r.get("unit_basis", {}).get(unit)
+        if (r.get("complete") and r.get("score") is not None and r["costs"].get(unit) is not None
+                and r["cost_scope"] == "chain" and basis is not None
+                and (unit_basis is None or basis == unit_basis)):
+            key = (r["task_id"], r["comparison_basis"], r["metric"], basis)
             pair = (r["model"], r["effort"])
             if key in indexed[pair]:
                 ambiguous.add((pair, key))
             indexed[pair][key] = r
     for pair, key in ambiguous:
         del indexed[pair][key]
-    base = indexed[pair_by_id[baseline]]
-    comparisons = []
-    for ref, pair in pair_by_id.items():
-        if ref == baseline:
-            continue
-        other = indexed[pair]
-        keys = base.keys() & other.keys()
-        # Comparing response observations cannot prove agent-chain economy.
-        keys = [k for k in keys if k[3] == "chain" and k[4] is not None
-                and (unit_basis is None or k[4] == unit_basis)]
+    paired = []
+    for left_id, right_id in combinations(sorted(pair_by_id), 2):
+        left, right = indexed[pair_by_id[left_id]], indexed[pair_by_id[right_id]]
         cohorts = defaultdict(list)
-        for k in keys:
+        for k in sorted(left.keys() & right.keys()):
             cohorts[k[1:]].append(k)
-        for cohort, common in cohorts.items():
+        for cohort, common in sorted(cohorts.items()):
             if len(common) < minimum:
                 continue
-            quality_delta = mean(other[k]["score"] - base[k]["score"] for k in common)
-            saving = mean(base[k]["costs"][unit] - other[k]["costs"][unit] for k in common) - overhead
-            comparisons.append({"candidate_id": ref, "n": len(common), "quality_delta": quality_delta,
-                "net_benefit": saving, "comparison_basis": cohort[0], "metric": cohort[1], "unit_basis": cohort[-1],
-                "supported": quality_delta >= 0 and saving > 0 and mean(other[k]["score"] for k in common) > 0})
+            paired.append({"left_candidate_id": left_id, "right_candidate_id": right_id,
+                "n": len(common), "comparison_basis": cohort[0], "metric": cohort[1], "unit_basis": cohort[2],
+                "quality_delta": mean(right[k]["score"] - left[k]["score"] for k in common),
+                "cost_delta": mean(right[k]["costs"][unit] - left[k]["costs"][unit] for k in common),
+                "left_quality": mean(left[k]["score"] for k in common),
+                "right_quality": mean(right[k]["score"] for k in common)})
+    fallback["pairwise_comparisons"] = paired
+    # Measured chain costs already include their observed routing events. New
+    # incremental overhead belongs only in this legacy baseline-benefit report.
+    if baseline not in pair_by_id or overhead is None:
+        return fallback
+    comparisons = []
+    for pair in paired:
+        if baseline == pair["left_candidate_id"]:
+            ref, sign, quality = pair["right_candidate_id"], 1, pair["right_quality"]
+        elif baseline == pair["right_candidate_id"]:
+            ref, sign, quality = pair["left_candidate_id"], -1, pair["left_quality"]
+        else:
+            continue
+        quality_delta = sign * pair["quality_delta"]
+        saving = -sign * pair["cost_delta"] - overhead
+        comparisons.append({"candidate_id": ref, "n": pair["n"], "quality_delta": quality_delta,
+            "net_benefit": saving, "comparison_basis": pair["comparison_basis"], "metric": pair["metric"],
+            "unit_basis": pair["unit_basis"], "supported": quality_delta >= 0 and saving > 0 and quality > 0})
     supported = [c for c in comparisons if c["supported"]]
     # Never select a winner by comparing distinct tariffs/metrics/cohorts.
     if supported and len({(c["comparison_basis"], c["metric"], c["unit_basis"]) for c in comparisons}) == 1:

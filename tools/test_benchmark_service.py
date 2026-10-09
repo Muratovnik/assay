@@ -204,6 +204,24 @@ class CLITests(unittest.TestCase):
 
 
 class ProcessTests(unittest.TestCase):
+    # /proc may be mounted from a parent PID namespace. The child reports the
+    # identity visible through that mount, rather than Popen's namespace PID.
+    READY_CHILD = ("import sys,time; from pathlib import Path; "
+                   "Path(sys.argv[1]).write_text(Path('/proc/self/stat').read_text().split()[0]); "
+                   "time.sleep(30)")
+
+    def assert_process_stopped(self, pid):
+        until = time.monotonic() + 2
+        while True:
+            try:
+                state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+            except (FileNotFoundError, ProcessLookupError):
+                state = None
+            if state in (None, "Z") or time.monotonic() >= until:
+                break
+            time.sleep(.01)
+        self.assertIn(state, (None, "Z"), "owned descendant still executing")
+
     def test_deadline_terminates_process(self):
         scope = ProcessScope(.2)
         start = time.monotonic()
@@ -224,7 +242,9 @@ class ProcessTests(unittest.TestCase):
         from concurrent.futures import ThreadPoolExecutor
         with tempfile.TemporaryDirectory() as tmp:
             pidfile = Path(tmp) / "pid"
-            code = "import subprocess,sys,time; from pathlib import Path; p=subprocess.Popen([sys.executable,'-S','-c','import time; time.sleep(30)']); Path(sys.argv[1]).write_text(str(p.pid)); time.sleep(30)"
+            code = ("import subprocess,sys,time; "
+                    f"subprocess.Popen([sys.executable,'-S','-c',{self.READY_CHILD!r},sys.argv[1]]); "
+                    "time.sleep(30)")
             scope = ProcessScope(20)
             with ThreadPoolExecutor(max_workers=1) as pool:
                 future = pool.submit(scope.run, [sys.executable, "-S", "-c", code, str(pidfile)])
@@ -238,43 +258,44 @@ class ProcessTests(unittest.TestCase):
                     scope.cancel()
                 with self.assertRaises(FetchError):
                     future.result(timeout=4)
-            # A reaped entry and a zombie both mean the group was killed. The
-            # read can lose that race after the entry was seen, and Linux
-            # answers that with ESRCH rather than with a missing file.
-            try:
-                state = Path(f"/proc/{pid}/stat").read_text().split()[2]
-            except (FileNotFoundError, ProcessLookupError):
-                state = None
-            if state is not None:
-                self.assertEqual(state, "Z", "descendant still executing after cancellation")
+            self.assert_process_stopped(pid)
 
     @unittest.skipIf(os.name == "nt" or not Path("/proc").exists(), "Linux process inspection")
     def test_timeout_kills_group_after_worker_parent_exited(self):
         with tempfile.TemporaryDirectory() as tmp:
             pidfile = Path(tmp) / "pid"
-            code = "import subprocess,sys; from pathlib import Path; p=subprocess.Popen([sys.executable,'-S','-c','import time; time.sleep(30)']); Path(sys.argv[1]).write_text(str(p.pid))"
+            code = ("import subprocess,sys; "
+                    f"subprocess.Popen([sys.executable,'-S','-c',{self.READY_CHILD!r},sys.argv[1]])")
             start = time.monotonic()
             with self.assertRaisesRegex(FetchError, "deadline"):
                 ProcessScope(2).run([sys.executable, "-S", "-c", code, str(pidfile)])
             self.assertLess(time.monotonic() - start, 6)
             pid = int(pidfile.read_text())
-            # The descendant sleeps far longer than this test runs, so it cannot
-            # have exited on its own: a zombie and a reaped entry both mean the
-            # group was killed. The kill is queued rather than synchronous, so
-            # the state gets a bounded moment to change. Reading can lose the
-            # race, and that is the same answer rather than a failure: the open
-            # reports it as ENOENT and the read, once the open has succeeded, as ESRCH.
-            until = time.monotonic() + 2
-            while True:
-                try:
-                    state = Path(f"/proc/{pid}/stat").read_text().split()[2]
-                except (FileNotFoundError, ProcessLookupError):
-                    state = None
-                if state in (None, "Z") or time.monotonic() >= until:
-                    break
-                time.sleep(.01)
-            if state is not None:
-                self.assertEqual(state, "Z")
+            self.assert_process_stopped(pid)
+
+    @unittest.skipIf(os.name == "nt" or not Path("/proc").exists(), "Linux process inspection")
+    def test_success_releases_owned_descendants_without_stopping_foreign_process(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pidfile = Path(tmp) / "pid"
+            code = ("import subprocess,sys,time; from pathlib import Path; "
+                    f"subprocess.Popen([sys.executable,'-S','-c',{self.READY_CHILD!r},sys.argv[1]], "
+                    "stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); "
+                    "p=Path(sys.argv[1]); "
+                    "\nwhile not p.exists() or not p.stat().st_size: time.sleep(.01)"
+                    "\nprint('complete')")
+            foreign = subprocess.Popen([sys.executable, "-S", "-c", "import time; time.sleep(30)"],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                       start_new_session=True)
+            try:
+                scope = ProcessScope(5)
+                self.assertEqual(scope.run([sys.executable, "-S", "-c", code, str(pidfile)]), b"complete\n")
+                scope.cancel()
+                self.assert_process_stopped(int(pidfile.read_text()))
+                self.assertIsNone(foreign.poll(), "unrelated process must remain alive")
+                self.assertFalse(scope._processes)
+            finally:
+                foreign.kill()
+                foreign.wait(timeout=3)
 
 
 if __name__ == "__main__":

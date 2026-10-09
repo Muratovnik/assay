@@ -8,8 +8,9 @@ from pathlib import Path
 
 from .claude_agents import (ADVISOR_PROFILE, ALIAS_KIND, launch_model, resolve_variant,
                             unconfirmed_changes)
-from .core import EvidenceError, digest, epoch, timestamp
-from .pipeline_config import ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory, settings
+from .core import EvidenceError, digest, effort, epoch, timestamp
+from .pipeline_config import (ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory,
+                              inventory_ttl_seconds, settings)
 from .pipeline_store import PipelineStore
 
 MAX_PROMPT_BYTES = 64 * 1024
@@ -24,7 +25,7 @@ def arguments(value: dict) -> dict:
 def compact(response: dict) -> dict:
     keep = {"schema_version", "status", "usage", "decision_id", "snapshot_id", "expires_at",
             "cache_hit", "launch_verified", "task_evidence_status", "telemetry_status", "reason",
-            "inventory_warnings"}
+            "inventory_warnings", "evidence_acquisition"}
     result = {k: copy.deepcopy(v) for k, v in response.items() if k in keep}
     result["schema_version"] = PROTOCOL
     if "decisions" in response:
@@ -33,10 +34,45 @@ def compact(response: dict) -> dict:
                                for d in response["decisions"]]
         for original, decision in zip(response["decisions"], result["decisions"]):
             provenance = original.get("selection_provenance", {})
-            if "caller_override" in provenance:
+            if provenance:
                 decision["selection_provenance"] = {k: copy.deepcopy(v) for k, v in provenance.items()
                     if k in {"source", "verification", "explicit_source", "caller_override"}}
+            assessment = original.get("economic_assessment")
+            if assessment:
+                decision["economic_assessment"] = {
+                    "status": assessment["status"], "unknowns": copy.deepcopy(assessment["unknowns"]),
+                    **{key: assessment[key] for key in ("objective_unit", "selection_unit", "selection_basis")
+                       if key in assessment},
+                    **{key + "_count": len(assessment[key]) for key in ("adequate", "inadequate", "unknown")}}
+            fallback = original.get("fallback")
+            if fallback:
+                decision["fallback"] = {k: copy.deepcopy(v) for k, v in fallback.items() if k in {"status", "reason"}}
     return result
+
+
+def validate_launch_inventory(config, expected, alias_records, *, clock):
+    """Recheck owner availability and evidence bindings at a live dispatch boundary."""
+    current = configured_inventory(config)
+    if not current or not current.get("available"):
+        raise EvidenceError("configured_host_inventory_required")
+    if not -60 <= clock() - epoch(current["observed_at"]) < inventory_ttl_seconds(config):
+        raise EvidenceError("configured_inventory_expired")
+    changes = unconfirmed_changes(alias_records, epoch(current["observed_at"]))
+    for item in current["available"]:
+        if item["model"] in changes:
+            item.pop("evidence_names", None)
+    if not expected or current["available"] != expected["available"]:
+        raise EvidenceError("inventory_changed_reprepare_required")
+
+
+def validate_continuation_availability(config, route):
+    """A continuing worker keeps its route unless the owner withdraws that pair."""
+    current = configured_inventory(config)
+    if not current or not current.get("available"):
+        raise EvidenceError("configured_host_inventory_required")
+    if not any(item["model"] == route["model"] and route["effort"] in map(effort, item["efforts"])
+               for item in current["available"]):
+        raise EvidenceError("continuation_route_unavailable")
 
 
 def launch_requests(value, packet_ids):
@@ -209,6 +245,7 @@ class RoutingPipeline:
         state = tx.get("decision", decision_id)
         if (not state or state["session_id"] != host["session_id"] or state["config_hash"] != self.config_hash):
             raise EvidenceError("decision_expired_or_session_mismatch")
+        validate_launch_inventory(self.raw_config, state.get("inventory"), tx.values(ALIAS_KIND), clock=self.clock)
         return state
 
     def _authority_inventory(self):
@@ -289,6 +326,8 @@ class RoutingPipeline:
                "input": native_input, "input_hash": digest(stub), "route": dict(route),
                "variant": variant, "state": "prepared", "expires": state["expires"],
                "observed_model": None, "observed_effort": None}
+        if "inventory" in state:
+            run["inventory"] = copy.deepcopy(state["inventory"])
         tx.put("attempt", attempt_id, run, state["expires"])
         return {"attempt_id": attempt_id, "tool": "Agent", "input": stub,
                 "requested_model": route["model"], "requested_effort": route["effort"],
@@ -384,8 +423,10 @@ class RoutingPipeline:
             envelope = state.get("envelope")
             if envelope is None:
                 raise EvidenceError("native_advice_not_pending")
-        result = self.service.complete_routing(**params, envelope=envelope, cache=False)
-        with self.store.transaction() as tx:
+            # Completion performs bounded local validation and history writes,
+            # never acquisition or native execution. Serialize that finalization
+            # too: a losing service must not retain/cache a conflicting result.
+            result = self.service.complete_routing(**params, envelope=envelope, cache=False)
             state = self._decision(tx, params["decision_id"], host)
             state["response"] = compact(result)
             state["response"]["advisor_provenance"] = {
@@ -452,14 +493,17 @@ class RoutingPipeline:
         if (not previous or previous["role"] != "worker" or previous["config_hash"] != self.config_hash
                 or previous["decision_id"] != supplied["decision_id"] or previous["packet_id"] != supplied["packet_id"]):
             raise EvidenceError("continuation_requires_observed_matching_worker")
-        prepared = [a for a in tx.values("attempt") if a.get("continuation_of") == previous["attempt_id"]
-                    and a["state"] == "prepared"]
-        if len(prepared) == 1:
-            return self._reply(prepared[0])
+        if previous.get("binding") == "start_order":
+            raise EvidenceError("continuation_requires_authoritative_binding")
         if previous.get("route_mismatch"):
             raise EvidenceError("continuation_observed_route_mismatch")
         if previous["state"] != "finished":
             raise EvidenceError("continuation_requires_idle_worker")
+        validate_continuation_availability(self.raw_config, previous["route"])
+        prepared = [a for a in tx.values("attempt") if a.get("continuation_of") == previous["attempt_id"]
+                    and a["state"] == "prepared"]
+        if len(prepared) == 1:
+            return self._reply(prepared[0])
         variant = resolve_variant(self.config, previous["variant"]["profile"], previous["route"])
         if variant != previous["variant"]:
             raise EvidenceError("continuation_definition_changed")
@@ -488,9 +532,6 @@ class RoutingPipeline:
             state = self._decision(tx, decision_id, host)
             if not self._advisor_readiness(tx, state):
                 raise EvidenceError("advisor_completion_not_observed")
-            current = self.service.inventory
-            if current and current["available"] != state["inventory"]["available"]:
-                raise EvidenceError("inventory_changed_reprepare_required")
             decisions = state["response"].get("decisions", [])
             selected = next((d.get("selected") for d in decisions if d["packet_id"] == packet_id), None)
             if not selected:

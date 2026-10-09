@@ -263,6 +263,27 @@ jobs. Duplicate pairs abstain. All-fail samples cannot justify cheaper routing.
 Unknown alternatives remain unknown, not failures. These observations do not
 authorize new duplicate executions to fill the matrix.
 
+The summary's `comparison.pairwise_comparisons` retains all supported exact pairs
+independently of `baseline`: candidate IDs, observation count, comparison/metric/
+unit basis, paired quality means and right-minus-left cost and quality deltas.
+The separate legacy `comparisons`/`recommended` fields describe incremental
+benefit against a supplied baseline and require known incremental overhead.
+Changing that baseline does not reverse the policy-v3 comparison between the
+same adequate routes. Pairwise deltas include observed chain costs without
+subtracting new overhead a second time; none predicts an unobserved alternative.
+
+The existing `cost_objectives` map is validated before preparation acquires
+evidence, including when this extension is disabled. Its value is retained as
+the packet's `cost_objective` independently of retrieval success or summary size.
+A contradictory map and packet declaration is an input error. A missing quota
+comparison must remain visible even when benchmark API costs can still inform
+a qualified choice; API USD is not converted to quota.
+
+Retrieval validates the same record identity and filename binding as history
+reads, and rejects future-dated as well as expired records. A model-only explicit
+choice still retrieves evidence when several supported efforts remain. Fully
+fixed routes skip corpus acquisition and local-history retrieval.
+
 Separate consent `retain_descriptions: true` permits a minimal `task_description`
 on a terminal receipt. Full telemetry alone is not consent. Expired decisions
 and outcomes never participate, even before physical retention cleanup. On
@@ -301,7 +322,14 @@ evaluate future native/Jev responses. Do not tune thresholds on its test results
 Returned `task_similarity_evidence` has schema version 1, retrieval/settings and
 corpus identities, separate public/local groups, and explicit status. Maximum
 32 neighbors, 3 hashed example references and 6 KiB for **all** packets together,
-within the existing snapshot budget. Over-budget evidence is explicitly omitted.
+within the existing snapshot budget. If the full summary exceeds that bound,
+`cost_detail: "totals_only"` removes only per-category `cost_components`
+distributions from public/local estimates. Total expenses, quality, unknown and
+partial counts, every route and pair comparison, cohorts and measurement units
+remain. The complete estimate/comparison APIs and stored history retain their
+detail. If this projection still exceeds the same bound, the whole summary is
+explicitly omitted with `summary_budget_exceeded`; routes are not silently cut
+to fit.
 No-match, unavailable and insufficient-coverage preserve the original workflow.
 Explicit routes and a sole candidate skip corpus work. Cost comparisons remain
 advisor evidence: a nonpositive expense benefit cannot skip the quality

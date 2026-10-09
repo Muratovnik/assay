@@ -719,16 +719,24 @@ class HistoryStore:
             parts = _file_parts(path.name)
             if parts is None or parts[0] != "outcome" or parts[1] != key:
                 continue
-            record = _read_json(path)
-            self._validate_record(record, decision_id, "outcome")
-            if (record.get("attempt_key") != parts[2]
-                    or record.get("execution", {}).get("status") != parts[3]):
-                raise EvidenceError("history outcome filename does not match status")
-            result.append(record)
+            result.append(self._read_outcome_record(path, decision_id=decision_id))
         order = {"launched": 0, "completed": 1, "failed": 1, "interrupted": 1, "unknown": 1}
         return sorted(result, key=lambda item: (item["packet_id"], item["attempt_key"],
                                                 order[item["execution"]["status"]],
                                                 item["created_at"]))
+
+    def _read_outcome_record(self, path: Path, *, decision_id=None) -> dict:
+        """Use the same owned-file identity for history reads and task retrieval."""
+        parts = _file_parts(path.name)
+        if parts is None or parts[0] != "outcome":
+            raise EvidenceError("invalid history outcome filename")
+        record = _read_json(path)
+        owner = _identifier(record.get("decision_id"), "decision_id")
+        self._validate_record(record, decision_id if decision_id is not None else owner, "outcome")
+        if (_record_key(owner) != parts[1] or record.get("attempt_key") != parts[2]
+                or record.get("execution", {}).get("status") != parts[3]):
+            raise EvidenceError("history outcome filename does not match identity or status")
+        return record
 
     def read(self, decision_id: str) -> dict | None:
         _identifier(decision_id, "decision_id")
@@ -748,14 +756,18 @@ class HistoryStore:
         return result
 
     @staticmethod
-    def _validate_record(record: dict, decision_id: str, kind: str) -> None:
+    def _validate_record(record: dict, decision_id: str, kind: str, *, not_after=None) -> None:
         if (record.get("history_schema") != HISTORY_SCHEMA
                 or record.get("namespace") != NAMESPACE
                 or record.get("record_type") != kind
                 or record.get("decision_id") != decision_id):
             raise EvidenceError("history record identity mismatch")
-        epoch(record.get("created_at"))
-        epoch(record.get("expires_at"))
+        created = epoch(record.get("created_at"))
+        expires = epoch(record.get("expires_at"))
+        if not_after is not None and created > epoch(timestamp(not_after)):
+            raise EvidenceError("history record is future-dated")
+        if created > expires:
+            raise EvidenceError("history record expires before creation")
 
     def _prune_locked(self) -> dict:
         counts = {"scanned": 0, "deleted": 0, "invalid": 0, "skipped": 0,
@@ -819,9 +831,12 @@ def _event_identity(value: dict, normalized: dict, source_index: int, line_numbe
     observed = _dig(value, ("uuid",), ("id",), ("message", "id"),
                     ("payload", "id"), ("payload", "turn_id"), ("request_id",))
     if isinstance(observed, str) and observed:
-        return "id:" + normalized.get("client", "unknown") + ":" + observed
+        identity = {"client": normalized.get("client"),
+                    "session_id": normalized.get("session_id"),
+                    "thread_id": normalized.get("thread_id"), "id": observed}
+        return "id:" + hashlib.sha256(encoded(identity)).hexdigest()
     stable = {key: normalized.get(key) for key in
-              ("client", "timestamp", "request_id", "actual_model", "usage")}
+              ("client", "session_id", "thread_id", "timestamp", "request_id", "requested", "observed", "usage")}
     if any(item is not None for item in stable.values()):
         return "hash:" + hashlib.sha256(encoded(stable)).hexdigest()
     return f"position:{source_index}:{line_number}"
@@ -882,16 +897,64 @@ def _client(value: dict) -> str | None:
     return None
 
 
+def _stream_context(value: dict, states: dict, source_index: int, client: str) -> tuple:
+    source = states.setdefault((source_index, client), {
+        "identity": (None, None), "contexts": {}, "sessions": {}, "forks": {}, "pending_forks": set(),
+        "issues": set(), "unknown_units": set(), "observed_units": set(),
+        "usage_events": 0, "unknown_events": 0})
+    previous_identity = source["identity"]
+    session_id = _dig(value, ("sessionId",), ("session_id",), ("payload", "session_id"))
+    thread_id = _dig(value, ("thread_id",), ("payload", "thread_id"))
+    session_id = session_id if isinstance(session_id, str) and session_id else None
+    thread_id = thread_id if isinstance(thread_id, str) and thread_id else None
+    if client == "codex" and value.get("type") == "session_meta":
+        observed = _dig(value, ("payload", "id"))
+        thread_id = observed if isinstance(observed, str) and observed else thread_id
+        # Older Codex headers identify only the thread; root sessions were
+        # introduced separately. Never use a usage event's payload.id here.
+        session_id = session_id or thread_id
+        source["identity"] = (session_id, thread_id)
+        if thread_id:
+            source["sessions"][thread_id] = session_id
+            parent = _dig(value, ("payload", "forked_from_id"))
+            if isinstance(parent, str) and parent:
+                source["forks"][thread_id] = parent
+            source["pending_forks"].discard(thread_id)
+            source["pending_forks"].update(owner for owner, parent in source["forks"].items()
+                                           if parent == thread_id)
+    elif (client == "codex" and value.get("type") == "event_msg"
+          and _dig(value, ("payload", "type")) == "thread_settings_applied" and thread_id):
+        # Copied settings retain their original owner; the new child's marker
+        # switches back using its own observed root, not the last parent header.
+        session_id = source["sessions"].get(thread_id, session_id)
+        source["identity"] = (session_id, thread_id)
+        source["pending_forks"].discard(thread_id)
+    else:
+        header_session, header_thread = source["identity"]
+        if session_id is None or session_id == header_session:
+            session_id = session_id or header_session
+            thread_id = thread_id or header_thread
+    state = source["contexts"].setdefault((session_id, thread_id), {})
+    if (client == "codex" and value.get("type") == "session_meta"
+            and (thread_id in source["forks"] or _dig(value, ("payload", "history_base")))):
+        state.setdefault("inherited_baseline_unknown", True)
+    previous = source["contexts"].get(previous_identity, {})
+    if (previous_identity[1] is not None and source["forks"].get(thread_id) == previous_identity[1]
+            and "cumulative" not in state and "cumulative" in previous):
+        # Native forks seed their total counter from the copied prefix. Carry
+        # only that observed counter; parent model/effort is not child evidence.
+        state["cumulative"] = copy.deepcopy(previous["cumulative"])
+    return session_id, thread_id, state, source
+
+
 def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dict | None, dict | None]:
     client = _client(value)
     if client is None:
         return None, None
     when = _dig(value, ("timestamp",), ("created_at",), ("payload", "timestamp"))
     quota = _quota(value, client, when)
-    stream_id = _dig(value, ("sessionId",), ("session_id",), ("payload", "session_id"))
-    stream_key = (source_index, stream_id if isinstance(stream_id, str) else "default")
+    stream_id, thread_id, state, source = _stream_context(value, states, source_index, client)
     route = _context_route(value)
-    state = states.setdefault(stream_key, {})
     state.update({key: item for key, item in route.items() if item is not None})
     direct = _dig(value, ("message", "usage"), ("usage",),
                   ("payload", "usage"), ("payload", "info", "last_token_usage"))
@@ -913,7 +976,13 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
             fields = [key for key in current if key.endswith("_tokens")]
             reset = previous is not None and any(current.get(key, 0) < previous.get(key, 0)
                                                   for key in fields)
-            if previous is None or reset:
+            if previous is None and state.get("inherited_baseline_unknown"):
+                # A referenced ancestor was not one of the explicitly supplied
+                # logs. The first total establishes a baseline, not a request.
+                source["issues"].add("inherited_usage_baseline_unknown")
+                source["unknown_units"].update(fields)
+                source["unknown_events"] += 1
+            elif previous is None or reset:
                 usage = current
             else:
                 usage = {key: max(0, current.get(key, 0) - previous.get(key, 0))
@@ -930,6 +999,8 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
         provenance = "result_aggregate"
     if usage is None:
         return None, quota
+    source["usage_events"] += 1
+    source["observed_units"].update(key for key in usage if key.endswith("_tokens"))
     merged = {**state, **{key: item for key, item in route.items() if item is not None}}
     request_id = _dig(value, ("request_id",), ("message", "id"), ("payload", "turn_id"))
     decision_id = _dig(value, ("decision_id",), ("payload", "decision_id"),
@@ -939,6 +1010,7 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
         "timestamp": when if isinstance(when, str) else None,
         "request_id": request_id if isinstance(request_id, str) else None,
         "session_id": stream_id if isinstance(stream_id, str) else None,
+        "thread_id": thread_id,
         "requested": {key.removeprefix("requested_"): item for key, item in merged.items()
                       if key.startswith("requested_")},
         "observed": {key.removeprefix("actual_"): item for key, item in merged.items()
@@ -971,8 +1043,10 @@ def import_history(paths: list[Path]) -> dict:
     seen: set[str] = set()
     seen_quota: set[str] = set()
     states: dict = {}
+    unknown_units: set[str] = set()
     counters = {"files_requested": len(paths), "files_read": 0, "lines": 0,
-                "duplicates": 0, "malformed": 0, "unsupported": 0, "bytes": 0}
+                "duplicates": 0, "malformed": 0, "unsupported": 0, "bytes": 0,
+                "unattributed_usage_events": 0}
     stop = False
     for source_index, supplied in enumerate(paths):
         path = Path(supplied)
@@ -986,6 +1060,7 @@ def import_history(paths: list[Path]) -> dict:
             errors.append({"source_index": source_index, "code": "missing_or_unsafe_file"})
             continue
         counters["files_read"] += 1
+        request_start, source_duplicates, source_identities = len(requests), 0, []
         with handle:
             for line_number, raw in enumerate(handle, 1):
                 counters["lines"] += 1
@@ -1023,15 +1098,33 @@ def import_history(paths: list[Path]) -> dict:
                 identity = _event_identity(value, normalized, source_index, line_number)
                 if identity in seen:
                     counters["duplicates"] += 1
+                    source_duplicates += normalized["client"] == "codex"
                     continue
                 seen.add(identity)
+                if normalized["client"] == "codex":
+                    source_identities.append(identity)
                 normalized["event_id"] = hashlib.sha256(identity.encode("utf-8")).hexdigest()
                 requests.append(normalized)
-    totals: dict[str, int | float] = {}
+        source = states.get((source_index, "codex"), {})
+        if source.get("pending_forks"):
+            # Without an owner boundary, a copied prefix and later child usage
+            # cannot be separated. Do not publish guessed request identities or
+            # let them suppress a later, independently attributable source.
+            source["issues"].add("inherited_owner_boundary_unknown")
+            source["unknown_units"].update(source["observed_units"])
+            source["unknown_events"] += source["usage_events"]
+            requests[request_start:] = [r for r in requests[request_start:] if r["client"] != "codex"]
+            seen.difference_update(source_identities)
+            counters["duplicates"] -= source_duplicates
+        unknown_units.update(source.get("unknown_units", ()))
+        counters["unattributed_usage_events"] += source.get("unknown_events", 0)
+        errors.extend({"source_index": source_index, "code": code} for code in sorted(source.get("issues", ())))
+    totals: dict[str, int | float | None] = {}
     for request in requests:
         for key, value in request["usage"].items():
             if key.endswith("_tokens") and isinstance(value, (int, float)):
                 totals[key] = totals.get(key, 0) + value
+    totals.update({unit: None for unit in unknown_units})
     return {
         "schema_version": 1,
         "status": "partial" if errors else "complete",

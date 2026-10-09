@@ -11,11 +11,12 @@ import uuid
 from collections import OrderedDict
 
 from .advice import build_snapshot, decide, semantic_key
-from .advice_contracts import validate_packets, validate_result
+from .advice_contracts import (AdviceLimitError, SUPPORTED_CONSTRAINTS, validate_cost_objectives,
+                              validate_packets, validate_result)
 from .advisor_config import settings
 from .core import EvidenceError, digest, encoded, epoch, timestamp
 from .history import HistoryStore
-from .routing import brief
+from .routing import brief, build_context
 
 
 class AdvisorWorkflow:
@@ -87,6 +88,8 @@ class AdvisorWorkflow:
                     "usage": "diagnostic_only" if self.service.offline else "routing",
                     "decisions": decisions, "expires_at": snapshot["expires_at"],
                     "advisor_result": result, "launch_verified": False}
+        if state.get("fixed_route"):
+            response["evidence_acquisition"] = "not_required"
         if "task_evidence_status" in state:
             response["task_evidence_status"] = state["task_evidence_status"]
         if reason:
@@ -119,9 +122,37 @@ class AdvisorWorkflow:
         while len(self._cache) > 64:
             self._cache.popitem(last=False)
 
+    def _fixed_context(self, request, packets, now):
+        """Avoid acquisition only when evidence cannot change the decision."""
+        if self.service.offline or self.service.force:
+            return None
+        if any(request.get(key) is not None for key in SUPPORTED_CONSTRAINTS):
+            return None
+        if any(packet["requirements"]["constraints"] for packet in packets):
+            return None
+        context = build_context(request, [])
+        context.update(data_status="not_required", usage="routing",
+                       data_message="The fixed route needs no benchmark comparison; sources were not requested.")
+        try:
+            snapshot = build_snapshot(context, packets, policy=self.policy, client=self.service.client,
+                                      created_at=timestamp(now),
+                                      expires_at=timestamp(now + self.advisor["pending_seconds"]))
+        except AdviceLimitError:
+            return None
+        decisions = decide(snapshot, reason="advisor_required")
+        fixed = {"explicit_user_choice", "caller_choice", "configured_choice", "single_eligible"}
+        if all(d["decision_type"] in fixed or not p["eligible"]
+               for d, p in zip(decisions, snapshot["packets"])):
+            return context
+        return None
+
     async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
                               task_queries=None, cost_objectives=None, native_delivery="handoff"):
         packets = validate_packets(packets, require_caller_override=True)
+        cost_objectives = validate_cost_objectives(cost_objectives, packets)
+        for packet in packets:
+            if packet["packet_id"] in cost_objectives:
+                packet["cost_objective"] = cost_objectives[packet["packet_id"]]
         from .task_evidence import validate_queries
         task_queries = validate_queries(task_queries, [p["packet_id"] for p in packets])
         task_types = list(dict.fromkeys(t for packet in packets for t in packet["task_types"]))
@@ -129,19 +160,20 @@ class AdvisorWorkflow:
         if "status" in request:
             return {**request, "usage": "setup_required"}
         now = self.clock()
+        fixed_context = self._fixed_context(request, packets, now)
         with self._lock:
             self._expire()
             pending = sum(s["state"] in ("prepared", "awaiting_native_advice", "requesting_provider")
                           for s in self._states.values())
-            if pending >= self.advisor["max_pending"]:
+            if fixed_context is None and pending >= self.advisor["max_pending"]:
                 return {"status": "busy", "reason": "pending_limit", "usage": "setup_required"}
             decision_id = uuid.uuid4().hex
             state = {"id": decision_id, "state": "prepared", "expires": now + self.advisor["pending_seconds"],
                      "inventory": copy.deepcopy(self.service._inventory), "request": request,
-                     "settings_hash": digest(self.settings)}
+                     "settings_hash": digest(self.settings), "fixed_route": fixed_context is not None}
             self._states[decision_id] = state
         try:
-            context = brief(await self.service.context(request))
+            context = brief(fixed_context if fixed_context is not None else await self.service.context(request))
             now = self.clock()
             deadlines = [state["expires"], epoch(state["inventory"]["observed_at"]) + self.service.inventory_ttl]
             # Only known source freshness has a deadline. Missing measurements

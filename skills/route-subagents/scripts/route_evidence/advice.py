@@ -422,6 +422,11 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             base["economic_assessment"] = assessment
             base["selection_provenance"] = {"source": "native_task_adequacy_and_measured_cost",
                                             "verification": "task_inference_not_attested"}
+            if (fallback["status"] == "available"
+                    and fallback["selected"]["candidate_id"] in assessment["inadequate"]):
+                fallback = {"status": "needs_caller_selection", "selected": None,
+                            "reason": "baseline_task_inadequate"}
+                base["fallback"] = fallback
             if selected_id is not None:
                 decisions.append({**base, "status": "chosen", "decision_type": "advisor",
                                   "selected": _selection(candidates[selected_id]), "reason_codes": codes})
@@ -451,8 +456,11 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             decisions.append({**base, "status": "chosen", "decision_type": "fallback",
                               "selected": fallback["selected"], "reason_codes": [cause, "caller_baseline"]})
         else:
+            codes = [cause, "needs_caller_selection"]
+            if fallback["reason"] == "baseline_task_inadequate":
+                codes.insert(1, "baseline_task_inadequate")
             decisions.append({**base, "status": "no_decision", "decision_type": "fallback",
-                              "selected": None, "reason_codes": [cause, "needs_caller_selection"]})
+                              "selected": None, "reason_codes": codes})
     return decisions
 
 
@@ -479,8 +487,11 @@ def semantic_projection(snapshot) -> dict:
     canonical_ids = {packet["packet_id"]: f"packet-{index}"
                      for index, packet in enumerate(projection["packets"])}
     projection["packet_ids"] = [canonical_ids[packet_id] for packet_id in projection["packet_ids"]]
-    for packet in projection["packets"]:
-        packet["packet_id"] = canonical_ids[packet["packet_id"]]
+    attached_packets = projection["evidence"].get("task_similarity_evidence", {}).get("packets", [])
+    for packet in [*projection["packets"], *attached_packets]:
+        packet_id = packet.get("packet_id")
+        if isinstance(packet_id, str) and packet_id in canonical_ids:
+            packet["packet_id"] = canonical_ids[packet_id]
     return projection
 
 

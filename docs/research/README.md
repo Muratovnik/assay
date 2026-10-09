@@ -44,4 +44,8 @@ Do not silently repair a disputed source claim in only one language. A substanti
 
 ## Other research records
 
+[Routing quality and total cost](routing-quality-cost.md) compares routing
+alternatives, records reproduced defects and repairs, and separates executable
+contract checks from still-unmeasured task quality and complete cost.
+
 [Product-flow mapping](product-flow-mapping.md) records a narrower transfer into a method. [Text skills C1](text-skills-c1.md) records historical candidate corrections and their evaluation limits. These records serve a different purpose from the full foundational studies and remain separate.

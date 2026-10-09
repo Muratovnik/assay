@@ -45,7 +45,9 @@ validation rejects common credential/path forms and code fences, but does not
 establish that arbitrary prose contains no sensitive information. Do not place
 prose in `features` or use task types for every incidental action of one task.
 
-Explicit full choices and singleton packets still require no advisor. Otherwise
+Explicit full choices and singleton packets require no advisor and, when no
+numeric evidence constraint can change eligibility, no source acquisition.
+Otherwise
 missing `task_spec` produces `needs_task_details`, without launching advice or
 claiming an optimal route. Any available caller fallback remains explicitly a
 fallback. Jev's external projection excludes `task_spec`, including after a
@@ -110,12 +112,13 @@ reports the result boundary; it never removes questions or trims evidence.
 
 ## Economic policy and consumers
 
-The advisor assesses adequacy independently of price. Code then compares
-`adequate` pairs using known `cost_usd` in matching primary cohorts, falling back
+The advisor assesses adequacy independently of price. The default benchmark
+comparison uses known `cost_usd` for `adequate` pairs in matching primary cohorts, falling back
 to supporting cost cohorts when no primary comparison is available. It compares
 only within a cohort and equal cost basis, excludes stale cost observations,
 and does not average incompatible harnesses, units or revisions. Single cost
 observations are retained but do not establish a comparative winner.
+An explicit quota objective follows the separate-unit rule below.
 
 At sufficient quality, lower comparable expense wins. Preserve every strict
 within-group preference and retain candidates that have no cheaper competitor
@@ -132,12 +135,35 @@ concrete unmet criteria for cheaper alternatives; a larger score or generic high
 impact alone is insufficient. API USD does not establish subscription quota or
 actual full-chain cost.
 
-When existing local task evidence supplies a supported paired full-chain
-comparison for two adequate exact routes, code can use its net benefit to change
-the benchmark choice. Keep its cohort, unit basis and observation count; report
-observational transfer and unpaired alternatives as unknown. This does not turn
-historical receipts into a measured cost for the new assignment, and no such
-history is required to use benchmark cost.
+When existing local task evidence supplies paired full-chain observations for
+two adequate exact routes, code compares that pair independently of the supplied
+baseline. A cheaper route with no observed quality regression is preferred;
+equal cost with strictly better paired quality also establishes a preference.
+A quality/cost tradeoff remains unresolved. The paired preference replaces only
+that same pair's benchmark comparison, leaving other alternatives in the
+decision. Preserve conflicting and disconnected comparisons as uncertainty,
+including a conflict in a component separate from a surviving candidate.
+
+Keep cohort, unit basis and observation count; report observational transfer and
+unpaired alternatives as unknown. Observed complete chains already include their
+historical routing events: incremental overhead for a new decision is separate
+from these pairwise cost deltas. No baseline, or unknown incremental overhead,
+does not erase the paired observations. This does not turn historical receipts
+into measured cost for the new assignment, and no such history is required to
+use benchmark cost.
+
+An explicit cost objective retains its `unit`, `unit_basis` and incremental
+`overhead` in the packet even when optional task retrieval is disabled, fails or
+does not fit the summary budget. API-dollar and quota preferences never form a
+single economic order. With comparable quota observations, choose within that
+axis and retain API comparisons as context. Without them, a known API-cost
+choice is qualified by `quota_cost_unknown`; the assessment reports both the
+objective and actual selection units. An adequacy-only tie-break claims no cost
+preference. Required-mode compact results preserve those units and qualifications.
+
+If no candidate is assessed adequate, code never falls back to a baseline that
+the validated answer assessed inadequate. An unknown eligible baseline can
+remain a qualified fallback; otherwise the result contains no executable choice.
 
 New native decisions retain an empty compatibility `ranking` and carry
 `economic_assessment`; no full order is invented. Old result v1 and Jev rankings
