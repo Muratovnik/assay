@@ -6,6 +6,13 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.3](https://github.com/Muratovnik/assay/compare/v0.17.2...v0.17.3) (2026-10-09)
+
+### Bug Fixes
+
+* **evals:** validate UI case/rubric pairs and labelled trigger formats, and preserve complete runtime resources in frozen skill packets while excluding evaluator data ([dd57baf](https://github.com/Muratovnik/assay/commit/dd57baf243b2c4f5a9fec5694efeab26a7c64afd))
+* **writing:** match content and detail to the document's purpose, distinguish durable records from transient prose, and keep examples and review reports within the reader's needs ([a9a7b74](https://github.com/Muratovnik/assay/commit/a9a7b746c382be1f57cd960be1635ec6b005fc85))
+
 ## [0.17.2](https://github.com/Muratovnik/assay/compare/v0.17.1...v0.17.2) (2026-10-08)
 
 ### Bug Fixes
