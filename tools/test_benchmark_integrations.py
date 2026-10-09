@@ -110,8 +110,11 @@ class BrowserIntegrationTests(unittest.TestCase):
         result = captured_snapshot(SOURCES["terminal-bench"], capture_page(self.page, SOURCES["terminal-bench"], timeout=1))
         row = result["rows"][0]
         self.assertEqual((row["model"], row["effort"], row["harness"]), ("Example", "max", "Codex"))
-        self.assertEqual((row["cost_usd"], row["reported_tokens"]), (3300, 1500000000))
-        self.assertNotIn("per task", row["cost_basis"])
+        self.assertIsNone(row["cost_usd"])
+        self.assertIsNone(row["reported_tokens"])
+        self.assertEqual(row["aggregate_usage"], {"total_cost_usd": 3300, "total_tokens": 1500000000})
+        self.assertAlmostEqual(row["score_low"], .554)
+        self.assertAlmostEqual(row["score_high"], .61)
         self.page.get_by_role("combobox", name="Benchmark").evaluate("(e)=>e.textContent='5.0'")
         with self.assertRaises(EvidenceError):
             capture_page(self.page, SOURCES["terminal-bench"], timeout=1)

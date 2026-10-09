@@ -263,6 +263,27 @@ jobs. Duplicate pairs abstain. All-fail samples cannot justify cheaper routing.
 Unknown alternatives remain unknown, not failures. These observations do not
 authorize new duplicate executions to fill the matrix.
 
+The summary's `comparison.pairwise_comparisons` retains all supported exact pairs
+independently of `baseline`: candidate IDs, observation count, comparison/metric/
+unit basis, paired quality means and right-minus-left cost and quality deltas.
+The separate legacy `comparisons`/`recommended` fields describe incremental
+benefit against a supplied baseline and require known incremental overhead.
+Changing that baseline does not reverse the policy-v3 comparison between the
+same adequate routes. Pairwise deltas include observed chain costs without
+subtracting new overhead a second time; none predicts an unobserved alternative.
+
+The existing `cost_objectives` map is validated before preparation acquires
+evidence, including when this extension is disabled. Its value is retained as
+the packet's `cost_objective` independently of retrieval success or summary size.
+A contradictory map and packet declaration is an input error. A missing quota
+comparison must remain visible even when benchmark API costs can still inform
+a qualified choice; API USD is not converted to quota.
+
+Retrieval validates the same record identity and filename binding as history
+reads, and rejects future-dated as well as expired records. A model-only explicit
+choice still retrieves evidence when several supported efforts remain. Fully
+fixed routes skip corpus acquisition and local-history retrieval.
+
 Separate consent `retain_descriptions: true` permits a minimal `task_description`
 on a terminal receipt. Full telemetry alone is not consent. Expired decisions
 and outcomes never participate, even before physical retention cleanup. On

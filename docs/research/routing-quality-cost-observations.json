@@ -1,0 +1,488 @@
+{
+  "schema_version": 1,
+  "observed_date_utc": "2026-10-09",
+  "checkout_base": "bffd9ccefa0d41683bf0c7dc2a9ed645cb9ad1b7",
+  "checkout_state": "Candidate implementation over the stated base; commit identity is recorded in the accompanying PR.",
+  "access": "anonymous public reads; no paid APIs, credentials, native sessions, model calls, or encoder training",
+  "limits": {
+    "adapter_timeout_seconds": 15,
+    "adapter_response_bytes": 8388608,
+    "per_adapter_process_seconds": 40
+  },
+  "sources": [
+    {
+      "source_id": "deepswe",
+      "source_url": "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json",
+      "adapter": "deepswe",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:08.027001Z",
+      "source_updated_at": "2026-09-22T06:27:15.860279+00:00",
+      "row_count": 70,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 94758,
+          "sha256": "a7c15d66288fd249c020b9931c017b92d1a3b90e480b3ff34974b752bd030019"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 70,
+        "comparable_api_cost_rows": 70,
+        "aggregate_usage_rows": 0,
+        "missing_effort_rows": 1,
+        "cost_scope": "scored_attempt"
+      }
+    },
+    {
+      "source_id": "cursorbench",
+      "source_url": "https://prod.cursor.com/evals",
+      "adapter": "table",
+      "adapter_revision": 6,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:09.427073Z",
+      "source_updated_at": null,
+      "row_count": 68,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://prod.cursor.com/evals",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 370470,
+          "sha256": "b63dcbd358b89a96af473e0c6c46c76e8d0280e4cff613fe8fbdd2a6a094f816"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 0,
+        "comparable_api_cost_rows": 68,
+        "aggregate_usage_rows": 0,
+        "missing_effort_rows": 1,
+        "cost_scope": "task"
+      }
+    },
+    {
+      "source_id": "frontiercode",
+      "source_url": "https://cognition.com/frontiercode",
+      "adapter": "browser",
+      "adapter_revision": 5,
+      "availability": "missing",
+      "refresh": "failed",
+      "error": "FetchError: browser_disabled: this source needs the optional browser adapter",
+      "last_success_at": null,
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "missing",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [],
+      "static_read": {
+        "status": 200,
+        "bytes_read": 152891,
+        "sha256": "27849ab45fccba7c335f2bfc16da1d4a609b118d5205b25723936c3db0c52f4c",
+        "heading_matches": true,
+        "version_marker": "FrontierCode 1.1",
+        "html_table_count": 0
+      },
+      "unresolved_boundary": "browser_capture_not_executed; Chromium installation unavailable in parent environment"
+    },
+    {
+      "source_id": "terminal-bench",
+      "source_url": "https://www.tbench.ai/",
+      "adapter": "browser",
+      "adapter_revision": 6,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:11.450727Z",
+      "source_updated_at": "2026-10-06T23:20:25.572485+00:00",
+      "row_count": 35,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://ofhuhcpkvzjlejydnvyd.supabase.co/functions/v1/leaderboard-read",
+          "method": "POST",
+          "status": 200,
+          "bytes_read": 43009,
+          "sha256": "13678220dcf73850be7e6702e6e2d730b84be19ef74538196df9463ea00f5bb8"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 35,
+        "comparable_api_cost_rows": 0,
+        "aggregate_usage_rows": 35,
+        "missing_effort_rows": 0,
+        "cost_scope": "aggregate_run"
+      }
+    },
+    {
+      "source_id": "swe-atlas-qna",
+      "source_url": "https://labs.scale.com/leaderboard/sweatlas-qna",
+      "adapter": "atlas",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:12.482503Z",
+      "source_updated_at": null,
+      "row_count": 24,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://labs.scale.com/leaderboard/sweatlas-qna",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 142331,
+          "sha256": "5ba4483c421ea1d240d464a01b96abd5747acf45800b2d8b3549b3ed465a3fe0"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 24,
+        "comparable_api_cost_rows": 0,
+        "aggregate_usage_rows": 0,
+        "missing_effort_rows": 13,
+        "cost_scope": "unmeasured"
+      }
+    },
+    {
+      "source_id": "swe-atlas-tw",
+      "source_url": "https://labs.scale.com/leaderboard/sweatlas-tw",
+      "adapter": "atlas",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:12.464244Z",
+      "source_updated_at": null,
+      "row_count": 24,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://labs.scale.com/leaderboard/sweatlas-tw",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 159809,
+          "sha256": "9840a7694db52d225f23bd5b30d32d02ee237f6a4583a43e44836e5a1aa568d6"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 24,
+        "comparable_api_cost_rows": 0,
+        "aggregate_usage_rows": 0,
+        "missing_effort_rows": 13,
+        "cost_scope": "unmeasured"
+      }
+    },
+    {
+      "source_id": "swe-atlas-refactoring",
+      "source_url": "https://labs.scale.com/leaderboard/sweatlas-refactoring",
+      "adapter": "atlas",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:14.545787Z",
+      "source_updated_at": null,
+      "row_count": 17,
+      "guide_sections": 0,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://labs.scale.com/leaderboard/sweatlas-refactoring",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 150849,
+          "sha256": "06c929f04ce4309c3b9d3063cde3b1d26b3c979e0693002c683b963b9a043640"
+        }
+      ],
+      "measurements": {
+        "score_interval_rows": 17,
+        "comparable_api_cost_rows": 0,
+        "aggregate_usage_rows": 0,
+        "missing_effort_rows": 11,
+        "cost_scope": "unmeasured"
+      }
+    },
+    {
+      "source_id": "openai-reasoning",
+      "source_url": "https://developers.openai.com/api/docs/guides/reasoning.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:16.293450Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://developers.openai.com/api/docs/guides/reasoning.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 70779,
+          "sha256": "a561487dd41db8828b5b9920d77275bdced3c3c07ba1fb9f3c3230c5aaeb925b"
+        }
+      ]
+    },
+    {
+      "source_id": "claude-thinking",
+      "source_url": "https://platform.claude.com/docs/en/build-with-claude/thinking.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:15.512376Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://platform.claude.com/docs/en/build-with-claude/thinking.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 82650,
+          "sha256": "607214f48d5e2a94dc37ed6603c301357cf6e63057e72136d83a057660f7eb8a"
+        }
+      ]
+    },
+    {
+      "source_id": "claude-model-choice",
+      "source_url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:16.962345Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 8486,
+          "sha256": "65643ea61fe386151ec11d2246cda4433d59968de594af0aac4c7b82684abed0"
+        }
+      ]
+    },
+    {
+      "source_id": "openai-gpt-6",
+      "source_url": "https://developers.openai.com/api/docs/guides/latest-model.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:18.506715Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://developers.openai.com/api/docs/guides/latest-model.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 19325,
+          "sha256": "ad1aeb3d87e2e61a91233447f7c54b7b18ebfecc4315eeefab15bf5861b3a5c7"
+        }
+      ]
+    },
+    {
+      "source_id": "openai-gpt-6-astra-skills",
+      "source_url": "https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:18.464594Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 6517,
+          "sha256": "a1deee4c0b3ca16a20385c27f0692e22d5150fdec81710c04742dd5da29f0468"
+        }
+      ]
+    },
+    {
+      "source_id": "claude-opus-5-5",
+      "source_url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5.md",
+      "adapter": "guide",
+      "adapter_revision": 3,
+      "availability": "fresh",
+      "refresh": "updated",
+      "error": null,
+      "last_success_at": "2026-10-09T07:53:19.643754Z",
+      "source_updated_at": null,
+      "row_count": 0,
+      "guide_sections": 2,
+      "offline_reread": {
+        "availability": "fresh",
+        "refresh": "offline",
+        "snapshot_equal": true
+      },
+      "responses": [
+        {
+          "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5.md",
+          "method": "GET",
+          "status": 200,
+          "bytes_read": 28491,
+          "sha256": "37c6216c30e91cc2238758386e31ed1fba69988363d366438d11a81424f648d5"
+        }
+      ]
+    }
+  ],
+  "schema_checks": {
+    "deepswe": {
+      "raw_to_normalized_score_interval_cost_count_parity": "passed",
+      "rows": 70,
+      "task_counts": {
+        "113": 69,
+        "111": 1
+      },
+      "explicit_tariff_description_rows": 5,
+      "rows_without_explicit_tariff_description": 65,
+      "price_date_supplied": false,
+      "cost_population": "every scored attempt; context-window and timeout failures included; provider/verifier/network failures excluded"
+    },
+    "cursorbench": {
+      "raw_to_normalized_score_cost_token_parity": "passed",
+      "identical_responsive_tables_deduplicated": 2,
+      "publisher_cost_definition": "per-task tokens priced by input, cache-read, cache-write, and output API tariffs",
+      "published_score_intervals": false
+    },
+    "terminal-bench": {
+      "raw_to_normalized_score_interval_aggregate_parity": "passed",
+      "complete_pages": 1,
+      "reported_rows": 35,
+      "trial_counts": {
+        "330": 35
+      },
+      "dataset_version_count": 1,
+      "uniform_per_row_budget": "not supplied",
+      "aggregate_cost_normalized_into_task_expense": false
+    },
+    "swe-atlas": {
+      "quality_intervals_present": "all normalized rows",
+      "comparable_api_costs": "none published"
+    }
+  },
+  "corpus": {
+    "source_url": "https://huggingface.co/datasets/NPULH/LLMRouterBench/tree/0e5af1b",
+    "info_url": "https://huggingface.co/api/datasets/NPULH/LLMRouterBench/revision/0e5af1b",
+    "archive_url": "https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/0e5af1b/bench-release.tar.gz",
+    "resolved_revision": "0e5af1b84bf73437a01a1849c0f1d2468baa93fc",
+    "private": false,
+    "gated": false,
+    "archive_head_status": 200,
+    "archive_size_bytes": 1283503080,
+    "published_archive_lfs_sha256": "b79f8cde1a6f029c2efa663a3a3b6f7748defb22341fe59f328cebef6648c8f1",
+    "archive_range_status": 206,
+    "range_content": "bytes 0-262143/1283503080",
+    "range_bytes_read": 262144,
+    "production_bootstrap_status": "ready",
+    "bootstrap_seconds": 24.192,
+    "compressed_limit_bytes": 2147483648,
+    "expanded_limit_bytes": 8589934592,
+    "member_limit_bytes": 67108864,
+    "setup_limit_seconds": 180,
+    "compressed_bytes_streamed": 224880640,
+    "selected_members_verified": 13,
+    "member_hash_and_row_count_validation": "passed for all selected members",
+    "imported_tasks_before_split": 1055,
+    "split": "normalized-query-sha256-alternating-train",
+    "installed_tasks": 528,
+    "reloaded_tasks": 528,
+    "installed_observations": 6864,
+    "unknown_effort_observations": 6864,
+    "unknown_api_cost_observations": 1584,
+    "whole_archive_hash_recomputed": false,
+    "stop_reason": "all selected pinned members verified; unneeded archive tail was not read",
+    "license": "unspecified; no card/license metadata or license file in the pinned repository tree; download.md gives download instructions only",
+    "remaining_provenance_limits": [
+      "embedded licensing outside selected members not assessed",
+      "no source effort declarations",
+      "priced_models remains a local reviewed manifest declaration; no dated tariff/provider billing receipt was available in repository metadata",
+      "historical response observations do not establish current-model or full-chain cost"
+    ]
+  },
+  "unresolved": [
+    "FrontierCode native browser capture",
+    "source per-row evaluation dates/budgets where absent",
+    "actual native worker model/effort and subscription quota attribution",
+    "task-specific predictive quality/economy"
+  ]
+}

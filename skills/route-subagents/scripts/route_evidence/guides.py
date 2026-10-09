@@ -12,13 +12,13 @@ import re
 
 from .core import EvidenceError, digest, identity, text, validate_guide_applicability
 
-EXTRACTOR_VERSION = 2
+EXTRACTOR_VERSION = 3
 MAX_EXCERPT = 1500
 MAX_CAVEAT = 800
 MAX_CAVEATS = 6
 MAX_SECTIONS = 4
 
-FENCE = re.compile(r"^\s*(```|~~~)")
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 HEADING = re.compile(r"^(#{1,4})\s+(\S.*?)\s*$")
 CALLOUT = re.compile(r"<(Note|Warning|Tip|Info|Danger|Check)>(.*?)</\1>", re.S)
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
@@ -101,12 +101,10 @@ def anchor(heading):
 
 def outline(body):
     """Headings with their line spans, ignoring anything inside a code fence."""
-    lines, fenced, found = body.splitlines(), False, []
+    lines, found = body.splitlines(), []
+    code, _ = code_lines(lines)
     for index, line in enumerate(lines):
-        if FENCE.match(line):
-            fenced = not fenced
-            continue
-        if fenced:
+        if code[index]:
             continue
         match = HEADING.match(line)
         if match:
@@ -142,21 +140,36 @@ def callouts(value):
     for match in CALLOUT.finditer(value):
         inner = " ".join(match.group(2).split())
         if inner:
-            found.append({"kind": match.group(1).lower(), "text": inner[:MAX_CAVEAT],
-                          "truncated": len(inner) > MAX_CAVEAT})
-    return found[:MAX_CAVEATS], CALLOUT.sub("", value)
+            if len(inner) > MAX_CAVEAT:
+                raise EvidenceError("guide_caveat_size_limit_exceeded")
+            found.append({"kind": match.group(1).lower(), "text": inner, "truncated": False})
+    if len(found) > MAX_CAVEATS:
+        raise EvidenceError("guide_caveat_count_limit_exceeded")
+    return found, CALLOUT.sub("", value)
+
+
+def code_lines(lines):
+    """A closing fence must match its opener's character and minimum length."""
+    code, opening, blocks = [], None, 0
+    for line in lines:
+        fence = FENCE.match(line)
+        if opening is None:
+            if fence and (fence[1][0] != "`" or "`" not in fence[2]):
+                opening = fence[1]
+                blocks += 1
+            code.append(opening is not None)
+        else:
+            code.append(True)
+            if (fence and fence[1][0] == opening[0] and len(fence[1]) >= len(opening)
+                    and not fence[2].strip()):
+                opening = None
+    return code, blocks
 
 
 def drop_code(value):
-    kept, fenced, blocks = [], False, 0
-    for line in value.splitlines():
-        if FENCE.match(line):
-            fenced = not fenced
-            blocks += 1 if fenced else 0
-            continue
-        if not fenced:
-            kept.append(line)
-    return "\n".join(kept), blocks
+    lines = value.splitlines()
+    code, blocks = code_lines(lines)
+    return "\n".join(line for line, omitted in zip(lines, code) if not omitted), blocks
 
 
 def condense(value):
@@ -198,7 +211,7 @@ def guide_snapshot(source: dict, body: str) -> dict:
         raise EvidenceError("guide canonical url must use HTTPS")
     # Page-level warnings sit above the first section (deprecations, model
     # applicability). Selecting sections must not silently drop them.
-    document_caveats, _ = callouts(preamble(content))
+    document_caveats, _ = callouts(drop_code(preamble(content))[0])
     sections = []
     for heading in source["sections"][:MAX_SECTIONS]:
         raw = section_text(content, heading)
@@ -206,8 +219,8 @@ def guide_snapshot(source: dict, body: str) -> dict:
             # Layout drift must fail loudly: a quietly missing section would
             # remove the publisher's exceptions without anyone noticing.
             raise EvidenceError("guide_section_missing: %s/%s" % (source["id"], heading))
-        caveats, prose = callouts(raw)
-        prose, blocks = drop_code(prose)
+        prose, blocks = drop_code(raw)
+        caveats, prose = callouts(prose)
         excerpt, truncated = trim(condense(prose))
         sections.append({"section": heading, "anchor": anchor(heading),
                          "url": canonical + "#" + anchor(heading), "excerpt": excerpt,

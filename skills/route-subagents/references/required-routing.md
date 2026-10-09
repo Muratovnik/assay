@@ -131,7 +131,10 @@ sources name it and up to five candidate spellings from sources that do not.
 Candidates are advice for the owner: nothing binds a benchmark row until it is
 confirmed, and a source that does not name a model may simply not measure it.
 
-Preparation rereads the file. An observation older than `inventory_ttl_hours`
+Preparation and subsequent new-route decision/dispatch operations reread the file. A
+changed candidate inventory or evidence-name binding requires preparation again;
+refreshing only the confirmation timestamp of an unchanged inventory does not
+invalidate the decision. An observation older than `inventory_ttl_hours`
 (1 to 720, default 24) refuses preparation; a caller repeating an old list cannot
 renew it. An inline `inventory` is still accepted, but changing it changes the
 policy configuration, so hosts and the MCP server must reconnect.
@@ -279,6 +282,9 @@ For example, with no unverified capability claim:
 The root gets only decision identifiers, expiry, compact reasons and either a
 completed decision or a small `handoff`. A full approved or explicit choice,
 single eligible pair or valid exact cache hit avoids an extra advisor invocation.
+Compact decisions retain adequacy counts, economic uncertainty/status,
+selection provenance and fallback reasons without private measurements or prose.
+Fixed decisions report when evidence acquisition was unnecessary.
 The hook inserts a short-lived, one-use receipt tied to the actual host session,
 tool and argument hash; it is not a parameter for the model to manufacture. A
 receipt lives five minutes, enough for an ordinary permission prompt; allow the
@@ -315,9 +321,11 @@ foreground defaults avoid relying on anything else.
 Several packets may use the same definition and start in one message. The start
 event does not name the parent's tool call, so start order binds provisionally
 and the Agent result, which names both the call and the agent, corrects the
-attribution. Model, effort and permissions are identical for such siblings, so
-only the packet identity can be provisional, and it is settled before continuation
-or outcome recording can use it. A launch that auto mode denies is released and
+attribution. Siblings sharing an effort definition may use different model aliases;
+start order alone proves neither the final packet nor its model. Continuation
+requires authoritative call-to-agent binding, and dispatch rechecks that binding
+and the latest route observations. A stop event cannot promote a provisional
+identity into continuation authority. A launch that auto mode denies is released and
 may be sent again. A launch rejected in an interactive permission dialog produces
 no host event: its attempt stays consumed, so prepare that packet again.
 
@@ -327,6 +335,10 @@ the same observed idle worker, same definition and original packet, without
 replaying completed writes or changing scope. An advisor cannot be resumed this
 way. A new task, changed constraints, replacement or reviewer needs preparation;
 continuation of an existing worker is not a new model-selection decision.
+It may outlive the original decision or inventory timestamp. However, explicitly
+withdrawing its model/effort from the current configured inventory blocks both
+continuation authorization and dispatch. Unrelated inventory additions and
+evidence-name changes do not reroute that already observed worker.
 
 ## Observations, failure and privacy boundaries
 
@@ -356,7 +368,8 @@ report `setup_required` with the `baseline` gap, routing operations fail with
 exempt type with its own model or `inherit`. Abstention, invalid advice, an advisor that ends without a
 result and a disabled advisor select the eligible baseline as a `fallback`
 decision whose reason codes name the cause. A baseline that a packet's hard
-constraints exclude still means no decision, not root-side selection.
+constraints exclude, or a validated policy-v3 answer classifies inadequate,
+still means no executable fallback.
 Expiry or configuration/inventory change requires preparation again.
 
 The guard fails closed only where it is the gate. When it cannot load the

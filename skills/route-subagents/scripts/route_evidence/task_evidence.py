@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .cache import atomic_write, source_lock
 from .core import EvidenceError, digest, encoded, epoch, number
-from .advice_contracts import _safe_name, validate_packets
+from .advice_contracts import _safe_name, validate_cost_objective, validate_cost_objectives, validate_packets
 from .history import _refuse_link_ancestors, _read_json
 from .task_costs import estimates, compare, chain_totals, UNITS
 
@@ -40,6 +40,44 @@ def validate_summary(value):
                "reason", "corpus_fingerprint", "source", "retrieval_version", "settings_hash", "acquisition"}
     if set(value) - allowed or not isinstance(value.get("packets"), list) or len(value["packets"]) > 8:
         raise EvidenceError("invalid task evidence fields")
+    for packet in value["packets"]:
+        if not isinstance(packet, dict):
+            raise EvidenceError("invalid task evidence packet")
+        if "cost_objective" in packet:
+            validate_cost_objective(packet["cost_objective"])
+        comparison = packet.get("comparison", {})
+        if not isinstance(comparison, dict):
+            raise EvidenceError("invalid task cost comparison")
+        pairs = comparison.get("pairwise_comparisons", [])
+        if not isinstance(pairs, list):
+            raise EvidenceError("invalid paired chain comparisons")
+        unit = comparison.get("unit")
+        if unit is not None and (not isinstance(unit, str) or unit not in {"api_usd", "quota_units"}):
+            raise EvidenceError("invalid task cost comparison unit")
+        if pairs and unit is None:
+            raise EvidenceError("paired chain comparison requires a priced unit")
+        seen = set()
+        for pair in pairs:
+            fields = {"left_candidate_id", "right_candidate_id", "n", "comparison_basis", "metric", "unit_basis",
+                      "quality_delta", "cost_delta", "left_quality", "right_quality"}
+            if not isinstance(pair, dict) or set(pair) != fields:
+                raise EvidenceError("invalid paired chain comparison fields")
+            for key in ("left_candidate_id", "right_candidate_id", "comparison_basis", "metric", "unit_basis"):
+                _safe_name(pair[key], "paired " + key)
+            if pair["left_candidate_id"] >= pair["right_candidate_id"] or type(pair["n"]) is not int or pair["n"] < 1:
+                raise EvidenceError("invalid paired chain identity or sample count")
+            identity = tuple(pair[key] for key in ("left_candidate_id", "right_candidate_id", "comparison_basis", "metric", "unit_basis"))
+            if identity in seen:
+                raise EvidenceError("duplicate paired chain comparison")
+            seen.add(identity)
+            for key in ("left_quality", "right_quality"):
+                number(pair[key], key, upper=1)
+            for key in ("cost_delta", "quality_delta"):
+                if isinstance(pair[key], bool) or not isinstance(pair[key], (int, float)):
+                    raise EvidenceError("invalid paired delta")
+                number(abs(pair[key]), key, upper=1 if key == "quality_delta" else None)
+            if not math.isclose(pair["quality_delta"], pair["right_quality"] - pair["left_quality"], abs_tol=1e-12):
+                raise EvidenceError("paired quality delta disagrees with observations")
     def check(node, depth=0):
         if depth > 14:
             raise EvidenceError("task projection nesting limit")
@@ -114,7 +152,9 @@ def validate_queries(value, packet_ids):
 
 def packet_candidates(packet, candidates):
     eligible = packet.get("eligible")
-    return [c for c in candidates if eligible is None or c["candidate_id"] in eligible]
+    explicit = packet.get("explicit") or {}
+    return [c for c in candidates if (eligible is None or c["candidate_id"] in eligible)
+            and all(c[key] == value for key, value in explicit.items())]
 
 
 def tokens(value):
@@ -254,7 +294,8 @@ class TaskEvidence:
         import sys
         from .processes import ProcessScope
         validate_queries(queries, [p["packet_id"] for p in packets])
-        if not self.config["enabled"] or all(p.get("explicit") or len(packet_candidates(p, candidates)) <= 1 for p in packets):
+        objectives = validate_cost_objectives(objectives, packets)
+        if not self.config["enabled"] or all(len(packet_candidates(p, candidates)) <= 1 for p in packets):
             return self.summarize(packets, candidates, queries, objectives)
         acquisition = None
         if self.provisioner:
@@ -321,7 +362,8 @@ class TaskEvidence:
         for i, path in enumerate(sorted(self.history.root.glob("outcome-*.json"))):
             if i >= 2048 or time.monotonic() >= deadline:
                 raise EvidenceError("local history budget exceeded")
-            record = _read_json(path)
+            record = self.history._read_outcome_record(path)
+            self.history._validate_record(record, record["decision_id"], "outcome", not_after=self.clock())
             if epoch(record["expires_at"]) <= self.clock():
                 continue
             execution = record.get("execution", {})
@@ -333,6 +375,7 @@ class TaskEvidence:
             if not decision.exists():
                 continue
             prior = _read_json(decision)
+            self.history._validate_record(prior, record["decision_id"], "decision", not_after=self.clock())
             if epoch(prior["expires_at"]) <= self.clock():
                 continue
             meta = next((p for p in prior["snapshot"]["packets"] if p["packet_id"] == record["packet_id"]), {})
@@ -364,15 +407,7 @@ class TaskEvidence:
 
     def summarize(self, packets, candidates, queries=None, objectives=None):
         queries = validate_queries(queries, [p["packet_id"] for p in packets])
-        objectives = objectives or {}
-        if not isinstance(objectives, dict) or set(objectives) - {p["packet_id"] for p in packets}:
-            raise EvidenceError("objectives require known packet IDs")
-        for obj in objectives.values():
-            if not isinstance(obj, dict) or set(obj) != {"unit", "unit_basis", "overhead"} or obj["unit"] not in {"api_usd", "quota_units"}:
-                raise EvidenceError("objective requires unit, unit_basis and incremental overhead")
-            _safe_name(obj["unit_basis"], "unit_basis")
-            if obj["overhead"] is not None:
-                number(obj["overhead"], "overhead")
+        objectives = validate_cost_objectives(objectives, packets)
         base = {"schema_version": 1, "mode": self.config["mode"], "packets": [],
                 "cost_units_are_not_interchangeable": True, "retrieval_version": 2,
                 "settings_hash": digest(self.config)}
@@ -380,7 +415,7 @@ class TaskEvidence:
             return {**base, "status": "disabled"}
         deadline = time.monotonic() + self.config["deadline_seconds"]
         try:
-            if all(p.get("explicit") or len(packet_candidates(p, candidates)) <= 1 for p in packets):
+            if all(len(packet_candidates(p, candidates)) <= 1 for p in packets):
                 return {**base, "status": "available", "packets": [
                     {"packet_id": p["packet_id"], "status": "skipped_fixed_route"} for p in packets]}
             document = self.load()
@@ -388,7 +423,7 @@ class TaskEvidence:
                 if time.monotonic() >= deadline:
                     raise EvidenceError("task evidence deadline exceeded")
                 eligible = packet_candidates(packet, candidates)
-                if packet.get("explicit") or len(eligible) <= 1:
+                if len(eligible) <= 1:
                     base["packets"].append({"packet_id": packet["packet_id"], "status": "skipped_fixed_route"})
                     continue
                 local = self.local_rows(packet, deadline, queries.get(packet["packet_id"], ""))

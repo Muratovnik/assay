@@ -306,6 +306,9 @@ Extraction rules:
 - Publisher callouts (`Note`, `Warning`, …) inside a section are kept whole and
   separated from the prose. Page-level callouts above the first section are kept
   as `document_caveats`, because selecting sections must not drop a deprecation.
+  Exceeding the caveat count or size bound reports a guide failure instead of
+  silently dropping or clipping an exception. Fenced examples are removed before
+  extracting callouts; a different or shorter fence does not close an example.
 - Only prose is shortened, on a paragraph boundary, and `truncated` says so.
   Code examples are removed and counted in `code_blocks_omitted`.
 - A registered section that is no longer present is a loud `guide_section_missing`
@@ -336,7 +339,7 @@ describes the Terminal-Bench route and the remaining discovery gaps.
 | [DeepSWE 1.1](https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json) | Public JSON | pass@1, API cost, output tokens, duration, steps, CI; not pass@4 |
 | [CursorBench 4.0](https://prod.cursor.com/evals) | HTML, optional browser fallback | Generic Tokens is `reported_tokens`, not known output/total |
 | [FrontierCode 1.1](https://cognition.com/frontiercode) | Opt-in rendered tables | Main/Extended and all reasoning levels; harness tooltip, cost per rollout, output tokens |
-| [Terminal-Bench 4.0](https://www.tbench.ai/) | Anonymous publisher JSON API; opt-in browser fallback | Exact board/version and full paging; API run totals kept outside per-task expense comparisons |
+| [Terminal-Bench 4.0](https://www.tbench.ai/) | Anonymous publisher JSON API; opt-in browser fallback | Exact board/version and full paging; both adapters keep run totals outside per-task expense comparisons and retain published score intervals |
 | [SWE Atlas QnA](https://labs.scale.com/leaderboard/sweatlas-qna) | Score cards, optional browser | Quality-only; unknown effort stays unknown |
 | [SWE Atlas Test Writing](https://labs.scale.com/leaderboard/sweatlas-tw) | Score cards, optional browser | Specialized quality-only evidence |
 | [SWE Atlas Refactoring](https://labs.scale.com/leaderboard/sweatlas-refactoring) | Score cards, optional browser | Specialized quality-only evidence |

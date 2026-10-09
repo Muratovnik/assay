@@ -97,7 +97,7 @@ Features are bounded scalars or identifier lists, each with `caller`, `observed`
 or `unknown` provenance. `features: {}` is valid; missing facts remain unknown.
 Do not send task prose, code, paths, credentials or raw tool outputs. Optional
 packet fields are `explicit` (model and/or effort), `explicit_source`, `caller_override`, `baseline` (both),
-`requirements` and `capabilities`. A requirement can declare:
+`requirements`, `capabilities` and `cost_objective`. A requirement can declare:
 
 ```json
 {
@@ -114,6 +114,15 @@ excluded with a reason. Unknown measurements warn by default; use
 `policy.unknown_evidence="strict"` applies strict handling to all declared numeric
 constraints. A required capability always needs a positive declaration.
 The original benchmark response is unchanged by advisor filtering.
+
+Declare a cost objective as `{"unit":"quota_units","unit_basis":"observed-plan-v1","overhead":null}`
+on the packet, or under its ID in the top-level `cost_objectives` map. The unit
+is `api_usd` or `quota_units`; basis is a bounded identifier and overhead is a
+nonnegative incremental cost in that unit or null when unknown. Conflicting
+packet/map declarations are rejected. The objective survives disabled or failed
+task retrieval. Quota and API prices remain separate; a dollar-based fallback
+does not establish savings in an unknown quota axis. See the
+[economic decision contract](native-decision-contract.md#economic-policy-and-consumers).
 
 Supply the complete confirmed host inventory once per connection. The server
 cannot enumerate MCP host models or prove the caller supplied every pair; this
@@ -162,7 +171,12 @@ readable for diagnostic replay and confer no new execution authority. Legacy
 policy v1 keeps its historical decision label with `legacy_unspecified` provenance.
 
 An authorized explicit full choice or a single eligible pair finishes without advisor
-inference. Otherwise `awaiting_native_advice` returns `decision_id`, expiry and
+inference. When numeric evidence constraints cannot affect eligibility, these
+fixed decisions also skip source acquisition and pending-advisor capacity;
+`evidence_acquisition: "not_required"` reports that omission. Hard capability
+checks still apply. A model-only choice with several eligible efforts needs
+comparison. Explicit refresh and offline diagnostics keep their evidence path.
+Otherwise `awaiting_native_advice` returns `decision_id`, expiry and
 `handoff`. Launch exactly that bounded handoff through the primary's native
 subagent mechanism. The prompt instructs the advisor to rank only supplied data,
 use no tools and create no agents; that instruction is not an enforced sandbox.
@@ -301,6 +315,9 @@ completion is idempotent; conflicting completion is rejected.
 
 Abstention, provider failure or missing bootstrap yields the eligible baseline:
 the caller's in evidence-only mode, only the configured one in required mode.
+For validated policy-v3 judgments, a baseline classified `inadequate` cannot be
+that fallback. Unknown adequacy remains an explicit uncertainty; invalid answer
+fragments do not establish a judgment in either direction.
 Otherwise policy reports `needs_caller_selection`. In required mode that means no
 executable decision; it is not permission for the primary to read benchmarks and
 choose. Changed inventory,

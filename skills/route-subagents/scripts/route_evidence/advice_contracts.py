@@ -233,13 +233,36 @@ def _caller_override(value: Any, field: str) -> dict:
             **({"reference": _safe_name(value["reference"], field + ".reference")} if "reference" in value else {})}
 
 
+def validate_cost_objective(value: Any, field="cost_objective") -> dict:
+    fields = {"unit", "unit_basis", "overhead"}
+    value = _object(value, field, fields, fields)
+    if not isinstance(value["unit"], str) or value["unit"] not in {"api_usd", "quota_units"}:
+        raise EvidenceError(field + ": expected api_usd or quota_units")
+    return {"unit": value["unit"], "unit_basis": _safe_name(value["unit_basis"], field + ".unit_basis"),
+            "overhead": None if value["overhead"] is None else number(value["overhead"], field + ".overhead")}
+
+
+def validate_cost_objectives(value: Any, packets: list[dict]) -> dict:
+    """Reconcile declared objectives without silently replacing a packet's unit."""
+    value = _object({} if value is None else value, "cost_objectives", {p["packet_id"] for p in packets})
+    result = {key: validate_cost_objective(obj, "cost_objectives." + key) for key, obj in value.items()}
+    for packet in packets:
+        if "cost_objective" in packet:
+            packet_id = packet["packet_id"]
+            objective = validate_cost_objective(packet["cost_objective"])
+            if packet_id in result and result[packet_id] != objective:
+                raise EvidenceError("conflicting_cost_objective:" + packet_id)
+            result[packet_id] = objective
+    return result
+
+
 def validate_packets(packets: Any, *, require_caller_override=False) -> list[dict]:
     """Validate and normalize caller-supplied structured task packets."""
     if not isinstance(packets, list) or not packets or len(packets) > MAX_PACKETS:
         raise EvidenceError(f"packets: expected 1..{MAX_PACKETS} packets")
     result, seen = [], set()
     allowed = {"packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-               "requirements", "capabilities", "task_spec", "caller_override"}
+               "requirements", "capabilities", "task_spec", "caller_override", "cost_objective"}
     for index, raw in enumerate(copy.deepcopy(packets)):
         field = f"packets[{index}]"
         raw = _object(raw, field, allowed, {"packet_id", "task_types", "features"})
@@ -296,6 +319,8 @@ def validate_packets(packets: Any, *, require_caller_override=False) -> list[dic
             **({"explicit_source": source} if source is not None else {}),
             **({"caller_override": override} if override is not None else {}),
             **({"task_spec": _task_spec(raw["task_spec"], field + ".task_spec")} if "task_spec" in raw else {}),
+            **({"cost_objective": validate_cost_objective(raw["cost_objective"], field + ".cost_objective")}
+               if "cost_objective" in raw else {}),
         })
     return result
 
@@ -616,7 +641,7 @@ def validate_routing_snapshot(snapshot: Any) -> RoutingSnapshot:
             raise EvidenceError("snapshot packet must be an object")
         source_packets.append({key: raw[key] for key in
                                ("packet_id", "task_types", "features", "explicit", "explicit_source", "baseline",
-                                "requirements", "capabilities", "task_spec", "caller_override") if key in raw})
+                                "requirements", "capabilities", "task_spec", "caller_override", "cost_objective") if key in raw})
     normalized = validate_packets(source_packets)
     derived = [derive_packet(packet, candidates, snapshot["evidence"], policy) for packet in normalized]
     if raw_packets != derived:
@@ -687,12 +712,13 @@ def validate_result(snapshot: Any, result: Any) -> AdvisorResult:
         item = _object(item, f"rankings[{index}]", allowed,
                        allowed - {"ties"})
         packet_id = item["packet_id"]
-        if packet_id not in packet_map or packet_id in seen:
+        if not isinstance(packet_id, str) or packet_id not in packet_map or packet_id in seen:
             raise EvidenceError("advisor result has unknown or duplicate packet_id")
         seen.add(packet_id)
         packet = packet_map[packet_id]
         eligible = packet["eligible"]
-        if not isinstance(item["abstained"], bool) or not isinstance(item["ranking"], list):
+        if (not isinstance(item["abstained"], bool) or not isinstance(item["ranking"], list)
+                or any(not isinstance(candidate, str) for candidate in item["ranking"])):
             raise EvidenceError("ranking requires array and boolean abstained")
         ranking = item["ranking"]
         if item["abstained"]:
@@ -706,7 +732,8 @@ def validate_result(snapshot: Any, result: Any) -> AdvisorResult:
         tied, positions = set(), {candidate: pos for pos, candidate in enumerate(ranking)}
         normalized_ties = []
         for group in ties:
-            if not isinstance(group, list) or len(group) < 2 or len(set(group)) != len(group):
+            if (not isinstance(group, list) or len(group) < 2 or any(not isinstance(candidate, str) for candidate in group)
+                    or len(set(group)) != len(group)):
                 raise EvidenceError("tie group requires at least two unique candidates")
             if any(candidate not in positions or candidate in tied for candidate in group):
                 raise EvidenceError("tie group contains unknown or repeated candidate")

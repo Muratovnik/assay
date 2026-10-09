@@ -137,6 +137,7 @@ def _external_state(snapshot: dict[str, Any]) -> dict[str, Any]:
         for packet in task.get("packets", []):
             packet.pop("local", None)
             packet.pop("comparison", None)
+            packet.pop("cost_objective", None)
             packet.get("unknown_current_candidates", {}).pop("local", None)
     packets = []
     for packet in snapshot["packets"]:
@@ -213,7 +214,8 @@ def _normalize_answer(packet: dict[str, Any], answer: Any) -> dict[str, Any]:
     choice = _answer_value(answer, "choice")
     probabilities = _answer_value(answer, "probabilities")
     confidence = _answer_value(answer, "confidence")
-    if choice not in expected or not isinstance(probabilities, Mapping) or set(probabilities) != expected:
+    if (not isinstance(choice, str) or choice not in expected or not isinstance(probabilities, Mapping)
+            or set(probabilities) != expected):
         raise AdapterError("jev_invalid_choice_response")
     normalized: dict[str, float] = {}
     for candidate_id in [*eligible, "abstain"]:

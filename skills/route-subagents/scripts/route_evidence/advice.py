@@ -422,6 +422,11 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             base["economic_assessment"] = assessment
             base["selection_provenance"] = {"source": "native_task_adequacy_and_measured_cost",
                                             "verification": "task_inference_not_attested"}
+            if (fallback["status"] == "available"
+                    and fallback["selected"]["candidate_id"] in assessment["inadequate"]):
+                fallback = {"status": "needs_caller_selection", "selected": None,
+                            "reason": "baseline_task_inadequate"}
+                base["fallback"] = fallback
             if selected_id is not None:
                 decisions.append({**base, "status": "chosen", "decision_type": "advisor",
                                   "selected": _selection(candidates[selected_id]), "reason_codes": codes})
@@ -451,8 +456,11 @@ def decide(snapshot, result=None, *, reason=None, offline=False) -> list[dict]:
             decisions.append({**base, "status": "chosen", "decision_type": "fallback",
                               "selected": fallback["selected"], "reason_codes": [cause, "caller_baseline"]})
         else:
+            codes = [cause, "needs_caller_selection"]
+            if fallback["reason"] == "baseline_task_inadequate":
+                codes.insert(1, "baseline_task_inadequate")
             decisions.append({**base, "status": "no_decision", "decision_type": "fallback",
-                              "selected": None, "reason_codes": [cause, "needs_caller_selection"]})
+                              "selected": None, "reason_codes": codes})
     return decisions
 
 

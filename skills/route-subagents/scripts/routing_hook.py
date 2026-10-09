@@ -20,10 +20,11 @@ import time
 # `python -I` intentionally ignores the working directory and PYTHONPATH. Import
 # only this installed script's sibling package, not files from the user's cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from route_evidence.claude_agents import CLAUDE_MODEL_ALIASES, check_record, observe_alias, resolve_variant, unrouted_model
+from route_evidence.claude_agents import ALIAS_KIND, CLAUDE_MODEL_ALIASES, check_record, observe_alias, resolve_variant, unrouted_model
 from route_evidence.claude_output import redact_agent_output
 from route_evidence.core import EvidenceError, digest
-from route_evidence.pipeline import RECEIPT_SECONDS, arguments
+from route_evidence.pipeline import (RECEIPT_SECONDS, arguments, validate_continuation_availability,
+                                     validate_launch_inventory)
 from route_evidence.pipeline_config import ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings, runtime_overrides
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.service import load_config
@@ -290,7 +291,7 @@ def _release(tx, event, session, config_hash, clock):
     return {}
 
 
-def _dispatch(tx, event, session, config_hash, mode, clock, environment):
+def _dispatch(tx, event, session, config_hash, mode, clock, environment, config):
     supplied = event["tool_input"]
     candidates = [r for r in tx.values("attempt") if r["session_id"] == session
                   and r["config_hash"] == config_hash and r["input_hash"] == digest(supplied)
@@ -318,6 +319,14 @@ def _dispatch(tx, event, session, config_hash, mode, clock, environment):
         return deny("launch attempt already consumed")
     if "input" not in dispatched:
         return deny("launch attempt already started")
+    try:
+        if dispatched["input"].get("resume"):
+            validate_continuation_availability(config, dispatched["route"])
+        else:
+            validate_launch_inventory(config=config,
+                                      expected=dispatched.get("inventory"), alias_records=tx.values(ALIAS_KIND), clock=clock)
+    except EvidenceError as exc:
+        return deny(str(exc))
     current = resolve_variant(mode, dispatched["variant"]["profile"], dispatched["route"], environment=environment)
     if current != dispatched["variant"]:
         return deny("agent definition changed; prepare routing again")
@@ -329,6 +338,8 @@ def _dispatch(tx, event, session, config_hash, mode, clock, environment):
                 or original["packet_id"] != dispatched["packet_id"]
                 or original["attempt_id"] != dispatched.get("continuation_of")):
             return deny("continuation identity or scope changed")
+        if original.get("binding") == "start_order" or original.get("route_mismatch") or original["state"] != "finished":
+            return deny("continuation requires an idle worker with a verified binding and no observed route mismatch")
         dispatched["agent_id"] = resume
     dispatched.update(state="reserved", tool_use_id=tool_id)
     dispatched.setdefault("reserved_at", clock())
@@ -447,7 +458,7 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
             if run.get("route_mismatch"):
                 return deny("observed agent effort differs from the registered route")
         if tool in SPAWN_TOOLS:
-            return _dispatch(tx, event, session, config_hash, mode, clock, environment)
+            return _dispatch(tx, event, session, config_hash, mode, clock, environment, config)
         if operation in ROOT_TOOLS and agent:
             return deny("root-only routing operation")
         if operation in ADVISOR_TOOLS and (not run or run.get("binding") == "start_order" or run["role"] != "advisor"

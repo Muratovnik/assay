@@ -21,11 +21,11 @@ SOURCES = {
                 "url": "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json",
                 "page": "https://deepswe.datacurve.ai/", "adapter": "deepswe", "revision": 3},
     "cursorbench": {"id": "cursorbench", "benchmark": "CursorBench", "version": "4.0",
-                    "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 5},
+                    "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 6},
     "frontiercode": {"id": "frontiercode", "benchmark": "FrontierCode", "version": "1.1",
-                     "url": "https://cognition.com/frontiercode", "adapter": "browser", "revision": 4},
+                     "url": "https://cognition.com/frontiercode", "adapter": "browser", "revision": 5},
     "terminal-bench": {"id": "terminal-bench", "benchmark": "Terminal-Bench", "version": "4.0",
-                       "url": "https://www.tbench.ai/", "adapter": "browser", "revision": 5,
+                       "url": "https://www.tbench.ai/", "adapter": "browser", "revision": 6,
                        "preferred_data": "harbor-public-api"},
 }
 for key, name in (("qna", "Codebase QnA"), ("tw", "Test Writing"), ("refactoring", "Refactoring")):
@@ -144,14 +144,25 @@ def quantity(value: str, *, percent=False):
     if value in ("", "—", "-", "N/A", "n/a"):
         return None
     if percent:
-        found = re.fullmatch(r"(\d+(?:\.\d+)?)\s*%(?:\s*[±].*)?", value)
-        if not found:
-            raise EvidenceError("score must have an explicit percentage unit")
-        return float(found[1]) / 100
+        return score_measurement(value)[0]
     found = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([kKmMbB]?)", value)
     if not found:
         raise EvidenceError("unrecognized numeric cell")
     return float(found[1]) * {"": 1, "k": 1000, "m": 1000000, "b": 1000000000}[found[2].lower()]
+
+
+def score_measurement(value: str):
+    """Preserve a published percentage interval; never discard its uncertainty."""
+    if value.strip() in ("", "—", "-", "N/A", "n/a"):
+        return None, None, None
+    found = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*%(?:\s*±\s*(\d+(?:\.\d+)?)\s*%)?\s*", value)
+    if not found:
+        raise EvidenceError("score and confidence width must have explicit percentage units")
+    score = number(float(found[1]) / 100, "score", upper=1)
+    if found[2] is None:
+        return score, None, None
+    width = number(float(found[2]) / 100, "confidence width", upper=1)
+    return score, max(0, score - width), min(1, score + width)
 
 
 def table_header(label):
@@ -213,19 +224,28 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
                 reasoning = effort(cells[header["effort"]])
             default_harness = "Cursor" if source["id"] == "cursorbench" else "publisher-harness-unspecified"
             harness = cells[header["harness"]] if "harness" in header else default_harness
-            row = base_row(model, reasoning, harness, subset, metric={"frontiercode": "mergeability", "cursorbench": "task_score"}.get(source["id"], "resolve_rate"))
+            row = base_row(model, reasoning, harness, subset, metric={"frontiercode": "mergeability", "cursorbench": "task_score",
+                                                                    "terminal-bench": "accuracy"}.get(source["id"], "resolve_rate"))
             if source["id"] == "cursorbench":
                 # Keep the publisher label; the annotation is source-scoped and
                 # routing rechecks it against the current reviewed alias table.
                 row["model_identity"] = model_identity("cursorbench", model)
-            row["score"] = quantity(cells[header["score"]], percent=True)
+            row["score"], row["score_low"], row["score_high"] = score_measurement(cells[header["score"]])
             for key in ("cost_usd", "reported_tokens", "output_tokens", "steps"):
                 row[key] = quantity(cells[header[key]]) if key in header else None
             row["cost_basis"] = "published API cost per task; not subscription quota"
             if source["id"] == "frontiercode":
                 row["cost_basis"] = "published API cost per rollout; not subscription quota"
             elif source["id"] == "terminal-bench":
-                row["cost_basis"] = "published aggregate run cost; normalization and budget unspecified; not subscription quota"
+                # The publisher's board schema binds these columns to run totals,
+                # just as the preferred API does. Without comparable trial counts
+                # they cannot become per-task cost limits or Pareto expense axes.
+                row["aggregate_usage"] = {
+                    target: number(row[field], target)
+                    for field, target in (("cost_usd", "total_cost_usd"), ("reported_tokens", "total_tokens"))
+                    if row[field] is not None}
+                row["cost_usd"] = row["reported_tokens"] = None
+                row["cost_basis"] = None
             row["protocol"] = "publisher-table; harness version and evaluation budget not supplied"
             # Responsive copies of the same table are common. Reject conflicting duplicates.
             key = (model, reasoning, harness, subset)
@@ -416,6 +436,9 @@ def captured_snapshot(source, capture):
         if not isinstance(tables, list) or len(tables) != 1:
             raise FetchError("browser_capture_ambiguous_table")
         rows.extend(parse_tables(source, tables, subset=part["subset"]))
-    return snapshot(source, rows, warnings=[
-        "Rendered-table integration; no stable publisher API or guaranteed selector compatibility.",
-        "No per-row evaluation dates; API costs are not subscription-quota measurements."])
+    warnings = [
+        "Rendered-table acquisition; publisher layout and selectors may change.",
+        "No per-row evaluation dates; API costs are not subscription-quota measurements."]
+    if source["id"] == "terminal-bench":
+        warnings.append("Aggregate run cost/tokens are retained in aggregate_usage, not compared as per-task expenses.")
+    return snapshot(source, rows, warnings=warnings)

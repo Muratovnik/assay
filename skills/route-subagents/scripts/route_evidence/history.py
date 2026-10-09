@@ -719,16 +719,24 @@ class HistoryStore:
             parts = _file_parts(path.name)
             if parts is None or parts[0] != "outcome" or parts[1] != key:
                 continue
-            record = _read_json(path)
-            self._validate_record(record, decision_id, "outcome")
-            if (record.get("attempt_key") != parts[2]
-                    or record.get("execution", {}).get("status") != parts[3]):
-                raise EvidenceError("history outcome filename does not match status")
-            result.append(record)
+            result.append(self._read_outcome_record(path, decision_id=decision_id))
         order = {"launched": 0, "completed": 1, "failed": 1, "interrupted": 1, "unknown": 1}
         return sorted(result, key=lambda item: (item["packet_id"], item["attempt_key"],
                                                 order[item["execution"]["status"]],
                                                 item["created_at"]))
+
+    def _read_outcome_record(self, path: Path, *, decision_id=None) -> dict:
+        """Use the same owned-file identity for history reads and task retrieval."""
+        parts = _file_parts(path.name)
+        if parts is None or parts[0] != "outcome":
+            raise EvidenceError("invalid history outcome filename")
+        record = _read_json(path)
+        owner = _identifier(record.get("decision_id"), "decision_id")
+        self._validate_record(record, decision_id if decision_id is not None else owner, "outcome")
+        if (_record_key(owner) != parts[1] or record.get("attempt_key") != parts[2]
+                or record.get("execution", {}).get("status") != parts[3]):
+            raise EvidenceError("history outcome filename does not match identity or status")
+        return record
 
     def read(self, decision_id: str) -> dict | None:
         _identifier(decision_id, "decision_id")
@@ -748,14 +756,18 @@ class HistoryStore:
         return result
 
     @staticmethod
-    def _validate_record(record: dict, decision_id: str, kind: str) -> None:
+    def _validate_record(record: dict, decision_id: str, kind: str, *, not_after=None) -> None:
         if (record.get("history_schema") != HISTORY_SCHEMA
                 or record.get("namespace") != NAMESPACE
                 or record.get("record_type") != kind
                 or record.get("decision_id") != decision_id):
             raise EvidenceError("history record identity mismatch")
-        epoch(record.get("created_at"))
-        epoch(record.get("expires_at"))
+        created = epoch(record.get("created_at"))
+        expires = epoch(record.get("expires_at"))
+        if not_after is not None and created > epoch(timestamp(not_after)):
+            raise EvidenceError("history record is future-dated")
+        if created > expires:
+            raise EvidenceError("history record expires before creation")
 
     def _prune_locked(self) -> dict:
         counts = {"scanned": 0, "deleted": 0, "invalid": 0, "skipped": 0,
@@ -819,9 +831,11 @@ def _event_identity(value: dict, normalized: dict, source_index: int, line_numbe
     observed = _dig(value, ("uuid",), ("id",), ("message", "id"),
                     ("payload", "id"), ("payload", "turn_id"), ("request_id",))
     if isinstance(observed, str) and observed:
-        return "id:" + normalized.get("client", "unknown") + ":" + observed
+        identity = {"client": normalized.get("client"),
+                    "session_id": normalized.get("session_id"), "id": observed}
+        return "id:" + hashlib.sha256(encoded(identity)).hexdigest()
     stable = {key: normalized.get(key) for key in
-              ("client", "timestamp", "request_id", "actual_model", "usage")}
+              ("client", "session_id", "timestamp", "request_id", "requested", "observed", "usage")}
     if any(item is not None for item in stable.values()):
         return "hash:" + hashlib.sha256(encoded(stable)).hexdigest()
     return f"position:{source_index}:{line_number}"

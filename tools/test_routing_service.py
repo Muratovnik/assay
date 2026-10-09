@@ -219,7 +219,7 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(diagnostic["decisions"][0]["selected"], result["decisions"][0]["selected"])
                 self.assertFalse(diagnostic["execution_authorized"])
 
-    async def test_expired_evidence_cannot_select_even_an_explicit_route(self):
+    async def test_expired_evidence_cannot_satisfy_a_numeric_constraint_on_an_explicit_route(self):
         old_context = self.service.context.side_effect
         async def stale(request):
             context = await old_context(request)
@@ -227,7 +227,8 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
             return context
         self.service.context.side_effect = stale
         result = await self.prepare(packets=[{**PACKETS[0], "explicit_source": "user",
-                                             "explicit": {"model": "worker-alpha", "effort": "high"}}])
+                                             "explicit": {"model": "worker-alpha", "effort": "high"},
+                                             "requirements": {"constraints": {"max_cost_usd": 1}}}])
         self.assertEqual(result["status"], "no_decision")
         self.assertIsNone(result["decisions"][0]["selected"])
         self.assertIn("snapshot_expired", result["decisions"][0]["reason_codes"])

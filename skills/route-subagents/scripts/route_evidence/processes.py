@@ -112,6 +112,9 @@ class ProcessScope:
             raise
         finally:
             with self._lock:
+                # A successful parent may leave descendants with redirected
+                # pipes. Release the entire owned group before forgetting it.
+                stop_tree(process, job)
                 self._processes.pop(process, None)
                 if job is not None:
                     job.close()
