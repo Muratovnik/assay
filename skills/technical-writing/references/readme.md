@@ -14,11 +14,20 @@ installation method. Read relevant manifests, entry points/help, existing docs,
 release evidence, licence, workflows and available visual assets. Do not scan the
 whole repository when the needed facts are already bounded.
 
-Choose an available user route, not the route easiest to infer from a manifest.
-A declared console entry point does not disprove another invocation. A manifest
-alone does not establish registry publication. State the actual prerequisites,
-working directory, files or access before the first action. Do not make a reader
-inherit conditions known only to the editor's environment.
+Determine how this reader obtains the product and uses it in its normal supported
+environment. Verify relevant distribution and native integration sources before
+choosing the route. A declared console entry point does not disprove another
+invocation; a manifest alone does not establish registry publication. A working
+source command or demonstration does not establish the acquisition and native-use
+path. Lead with that supported path when this audience needs it; source-based use
+can be primary when it is the actual intended route.
+
+For every retained procedure, including developer instructions, use
+[procedure conditions](document-design.md#establish-procedure-conditions) to establish
+setup from sufficient authoritative sources, following delegated checks when needed.
+Place prerequisites, directories, files and access before the first action that
+needs them, allowing earlier steps or usable prerequisite handoffs to supply them.
+Do not inherit conditions known only to the editor's environment.
 
 ## Select a presentation contract
 
@@ -83,11 +92,12 @@ When a procedure is needed, provide its starting state, ordered actions and
 observable result, with explained placeholders and real platform differences.
 Label illustrative output as an example. A documented supported command needs
 no repetitive personal disclaimer, but do not assert a test that did not happen.
-First use means using the product for this reader's goal. Building, testing or
-packaging the repository belongs here only when it is actually necessary for
-that use; otherwise keep contributor setup with the contributor route. A working
-demonstration can show behavior without replacing instructions for applying the
-product to the reader's own task.
+First use means applying the acquired product to this reader's own task through
+its supported interface, including native integration where applicable. Building,
+testing or packaging the repository belongs here only when necessary for that use;
+otherwise keep contributor setup with the contributor route. A demonstration can
+teach that first use when it supplies the same route; a separate demo needs its own
+role and cannot fill a missing normal-use path.
 
 Keep product information, reference detail and contributor tasks distinct. Link
 actual existing documents instead of manufacturing a docs tree. Important limits
@@ -106,10 +116,13 @@ Use [presentation details](readme-presentation.md) when adding badges, images,
 HTML, diagrams, a table of contents or community modules. For a text-only README
 with no such elements, the profile and selected skeleton are enough.
 
-Verify the document from its actual repository path and on its intended renderer
-when permitted. The first command should not be separated from necessary setup
-by collapsible content or a wall of decorative material. Link captions should say
-what the reader will find; an icon or badge must not be the only statement of a
+Review the full saved README within the opened scope, including retained opening
+claims and connected procedures. Reconcile their [canonical owners and projections](document-design.md#update-the-semantic-unit).
+Use an available permitted project renderer or check path, with the bounded fallback
+and reporting limits in [delivery checks](../SKILL.md#deliver-and-check-the-artifact).
+Verify from the actual repository path. The first dependent action should not be
+separated from necessary setup by collapsible content or a wall of decorative
+material. Link captions should say what the reader will find; an icon or badge must not be the only statement of a
 critical limitation. Verify renamed heading anchors and inbound links within the
 opened scope. Do not fabricate a full inbound-link audit.
 

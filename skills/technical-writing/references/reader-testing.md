@@ -26,30 +26,40 @@ newcomer could not answer — and say that no independent reader was used.
 
 ## The protocol
 
-1. Freeze the reader packet: the document and the version/site context a real
-   reader has. Exclude the repository, private chat, prior drafts and author
-   explanations that are not available to that reader.
+1. Freeze the reader packet: the saved document, the version/site context a real
+   reader has, and prerequisites reachable through its documented handoffs. Exclude
+   private chat, prior drafts and repository or author explanations unavailable on
+   that reader's route. Establish expected task coverage from the original brief
+   and [source-derived procedure conditions](document-design.md#establish-procedure-conditions),
+   separately from the prose being tested; keep those author associations out of
+   the reader packet.
 2. Give the reader the goal a real reader would arrive with, phrased as
-   questions: "What do you run first?", "What do you need before starting?",
-   "How do you know it worked?". Ask about version only if applicability is
-   part of the reader's decision, and provide the same versioned-site context
-   a real reader has. Do not force a version header into every page.
-3. **The reader answers only from the document.** Every answer carries the
-   quoted fragment it comes from. When the document does not answer, the reader
-   writes "not in the document" — never a reconstruction from general knowledge,
-   and never a guess with a hedge.
+   questions: "What do you run first?", "What must be in place when you run this
+   step, and what supplies it?", "How do you know it worked?". Ask about version
+   only if applicability affects the reader's decision, using the versioned-site
+   context a real reader has. Do not force a version header into every page.
+3. **The reader answers only from the packet.** Every answer carries the quoted
+   fragment and location it comes from, including an earlier setup or prerequisite
+   handoff when applicable. When the route supplies no answer, write "not in the
+   document" — never reconstruct it from general knowledge or a guess with a hedge.
 4. Use one pass by default. Collect the answers without arguing or starting an
    approval loop. A separately authorized repeated reading can confirm a repair,
    but it is no longer fresh-reader evidence.
 
 ## Reading the result
 
+Assess prerequisite answers against the applicable conditions at their first
+dependent actions, following [condition review](document-design.md#establish-procedure-conditions).
+A quotation is evidence of what the route says, not automatic proof that it supplies
+the necessary setup. Accept concrete earlier setup, usable handoffs and genuinely
+guaranteed reader context; a merely related passage does not establish coverage.
+
 A "not in the document" on a load-bearing question is a `warning`, or an `error`
 when it blocks the reader's task — a missing prerequisite or an unstated working
 directory required for the commands. An unnamed version matters only when it
-changes applicability. A quoted answer that is correct but hard to find
-is a structure finding, not a wording one. A wrong answer with a quotation can indicate ambiguity or a reader error.
-Compare it with the actual passage before deciding to edit.
+changes applicability. A correct answer that is hard to find is a structure
+finding. A wrong answer with a quotation can indicate ambiguity or a reader error;
+compare it with the actual passage and applicable source before deciding to edit.
 
 Do not treat disagreement as a mandate to rewrite. Fix the gap the reader hit,
 keep the rest, and note any finding you consciously declined.
@@ -60,5 +70,8 @@ Reader testing checks whether a document is followable. It does not check
 whether the product behaves as described: a reader who can quote the install
 command has not installed anything. Technical verification stays with the
 project's own means — its tests, its build, an authorized run in a prepared
-environment. Passing one of the two never substitutes for the other, and a
-report that blurs them overstates both.
+environment — with available paths and truthful limits as described in
+[delivery checks](../SKILL.md#deliver-and-check-the-artifact). Source inspection
+can establish an applicable condition without executing the operation. Passing
+one kind of verification never substitutes for the other, and a report that
+blurs them overstates both.

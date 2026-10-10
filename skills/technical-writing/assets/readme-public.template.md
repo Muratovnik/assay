@@ -1,5 +1,6 @@
 <!-- Authoring template only. Resolve all {{slots}} and remove these comments.
-Select content for this reader and publication surface before using the profile.
+Establish the reader's requested result and supported use path before using the
+profile; the existing outline does not establish completeness.
 Every section below is conditional. Omit inapplicable sections and their headings;
 do not invent metadata or actions to fill a slot.
 The hero is plain Markdown here; apply the selected renderer's header treatment.
@@ -21,15 +22,22 @@ needed first-use example once, or remove this slot.}}
 
 ## Install
 
-{{Or Access for a hosted product. Include this section only for setup, prerequisites
-or a route this audience still needs. Do not repeat a catalog's supplied install
-steps. A repository page may need a download link. Verify any exact commands.}}
+{{Or Access for a hosted product. Give the verified supported acquisition or
+native installation route this audience still needs, with necessary setup. Do not
+repeat a catalog's supplied steps. A repository page may need a download link.
+Use source-based setup as primary when that is the intended supported route.
+Verify exact commands.}}
 
 ## Quick start
 
 {{Only when first use requires an action or setup; omit for automatic operation.
-Starting directory/files/access, ordered actions, and recognizable result.
-Put a relevant warning before an action. Label illustrative output accurately.}}
+Apply the acquired product to the reader's own task through its supported interface,
+including native integration where applicable. Derive needed directories, files,
+access and other conditions from the applicable sources. Earlier setup or a usable
+prerequisite handoff can supply them before their first dependent actions. Give
+ordered steps and a recognizable result; put relevant warnings before their actions.
+A separate demonstration does not replace this route. Label illustrative output
+accurately.}}
 
 ## Documentation
 
@@ -42,7 +50,8 @@ Put a relevant warning before an action. Label illustrative output accurately.}}
 ## Contributing
 
 {{A relevant existing contribution guide or actual contribution instructions;
-omit if inapplicable, preserve existing notices.}}
+omit if inapplicable, preserve existing notices. Retained procedures also need
+source-derived setup or usable prerequisite handoffs before dependent actions.}}
 
 ## License
 
