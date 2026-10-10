@@ -1,0 +1,59 @@
+{
+  "archive_bytes": 10576095,
+  "archive_encoding": {
+    "level": 9,
+    "method": "ZIP_DEFLATED",
+    "python_version": "3.12.14",
+    "zlib_compile_version": "1.3.2",
+    "zlib_runtime_version": "1.3.2"
+  },
+  "archive_metadata": [
+    {
+      "bytes": 2286,
+      "logical_path": "RECONSTRUCT.txt",
+      "sha256": "91d59118e1dabf2e16b9d496adb5f666f638e737ddf6a8177f7caa0570ece0e6"
+    },
+    {
+      "bytes": 43996,
+      "logical_path": "assemble.py",
+      "sha256": "13a09fa03196ed8419fadf98cd85ef282aa9efb1def9753d03954e15ac06786c"
+    },
+    {
+      "bytes": 6552003,
+      "logical_path": "manifest.json",
+      "sha256": "2866e004e8119cf52421582e2a7e9609af6d7e7a36a685bd49541a7221a3fe4a"
+    },
+    {
+      "bytes": 4526,
+      "logical_path": "reviewed-web-captures.json",
+      "sha256": "59ae139e7d9f80b68ff22f77d6dcef310eb18bbf7413b4e2f216537443c6f4f9"
+    }
+  ],
+  "archive_sha256": "4e4e6cc6f8bd0c07fa475669dbda982250e78e3bedc2cbc190aafb4a1c2eb227",
+  "archives": [
+    {
+      "bytes": 10576095,
+      "name": "task-completion-evidence.zip",
+      "sha256": "4e4e6cc6f8bd0c07fa475669dbda982250e78e3bedc2cbc190aafb4a1c2eb227"
+    },
+    {
+      "bytes": 10576095,
+      "name": "task-completion-evidence-2.zip",
+      "sha256": "593b9537b9d68823ff845ceeb05bf81903fddb914805075bd5e121fb0729a2ec"
+    }
+  ],
+  "excluded_files": 4269,
+  "exclusions_by_reason": {
+    "Confirmed third-party webpage capture bodies excluded; any unmodified surrounding JSON bytes preserved": 34,
+    "Mutable copy is byte-identical to frozen final snapshot": 4234,
+    "Publication connector response excluded; separate local command receipts and study metadata retained": 1
+  },
+  "reconstruction_note": "RECONSTRUCT.txt",
+  "retained_logical_bytes": 269268805,
+  "retained_logical_files": 18807,
+  "schema": "assay-exact-byte-evidence-v1-index",
+  "scope": "Named study plus allocation-referenced immutable packets only",
+  "unique_blob_bytes": 66095064,
+  "unique_blobs": 2698,
+  "verified_manifest_count": 47
+}

@@ -484,3 +484,25 @@ and writing inside research, implementation and review. It retains failed
 variants, scope mismatches and the separate adjudication of the earlier source
 footers. Published cases, criteria and evidence are linked from that study;
 their recorded historical reserved status does not make their future reuse unseen.
+
+## Complete reader tasks — 2026-10-10
+
+The [task-completion study](task-completion-study.md) reviews the later Game
+Design documentation rewrite, from acquisition and first use through examples,
+metadata ownership and maintainer procedures. It follows relevant source
+conditions and artifact handoffs, and evaluates retained prose in the context
+of the reader's task.
+
+The study preserves first submissions, failed complete workflows, ties,
+measurement corrections and separately identified repairs. Its evidence is
+scoped to the recorded methods, tasks and reviewed outputs; ordinary review
+approval and structural test totals do not establish complete acceptance.
+
+The public [cases](task-completion-cases.json),
+[criteria](task-completion-rubric.json) and
+[exposure metadata](task-completion-case-metadata.json) support reuse as working
+regressions. The [evidence archive](task-completion-evidence.zip),
+[index](task-completion-evidence.index.json) and
+[notices](task-completion-NOTICE.md) retain the study's source and result records.
+The study explains verification and restoration. Public reuse is exposed work,
+not a new unseen-case evaluation.

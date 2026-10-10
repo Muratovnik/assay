@@ -69,8 +69,17 @@ class CLIRequestTests(unittest.TestCase):
 
 def is_running(pid):
     if os.name != "nt":
+        # Popen and kill use the current PID namespace. A mounted procfs may
+        # instead expose an ancestor namespace with unrelated numeric PIDs.
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
         stat = Path(f"/proc/{pid}/stat")
         try:
+            proc_self_pid = int(Path("/proc/self/stat").read_text().split()[0])
+            if proc_self_pid != os.getpid():
+                return True  # A live syscall result cannot use foreign proc state.
             return stat.read_text().split()[2] != "Z"
         except (FileNotFoundError, ProcessLookupError):
             # Reaped between the lookup and the read: the entry can vanish
@@ -118,23 +127,49 @@ class ProcessProbeTests(unittest.TestCase):
     disappears while it is being observed must answer it rather than raise."""
 
     def test_an_entry_vanishing_mid_call_answers_instead_of_raising(self):
+        own_stat = "11 (python3) R 1 11 11 0 -1"
         for error in (FileNotFoundError(2, "No such file or directory"),
                       ProcessLookupError(3, "No such process")):
             with (
                 self.subTest(errno=error.errno),
-                patch.object(Path, "read_text", side_effect=error),
-                patch.object(os, "kill", side_effect=ProcessLookupError(3, "gone")),
+                patch.object(os, "getpid", return_value=11),
+                patch.object(Path, "read_text", side_effect=[own_stat, error]),
+                patch.object(os, "kill", side_effect=[None, ProcessLookupError(3, "gone")]),
             ):
                 self.assertFalse(is_running(4242))
 
     def test_a_readable_entry_still_separates_live_from_zombie(self):
+        own_stat = "11 (python3) R 1 11 11 0 -1"
         line = "4242 (python3) {} 1 4242 4242 0 -1"
         for state, expected in (("R", True), ("S", True), ("Z", False)):
             with (
                 self.subTest(state=state),
-                patch.object(Path, "read_text", return_value=line.format(state)),
+                patch.object(os, "getpid", return_value=11),
+                patch.object(os, "kill", return_value=None),
+                patch.object(Path, "read_text", side_effect=[own_stat, line.format(state)]),
             ):
                 self.assertIs(is_running(4242), expected)
+
+    def test_nonexistent_namespace_pid_wins_over_foreign_live_proc(self):
+        with (
+            patch.object(os, "kill", side_effect=ProcessLookupError(3, "gone")),
+            patch.object(Path, "read_text",
+                         return_value="4242 (foreign) S 1 4242 4242 0 -1") as proc_read,
+        ):
+            self.assertFalse(is_running(4242))
+            proc_read.assert_not_called()
+
+    def test_live_namespace_pid_ignores_foreign_zombie_proc(self):
+        with (
+            patch.object(os, "getpid", return_value=11),
+            patch.object(os, "kill", return_value=None),
+            patch.object(Path, "read_text", side_effect=[
+                "90011 (python3) R 1 90011 90011 0 -1",
+                "4242 (foreign) Z 1 4242 4242 0 -1",
+            ]) as proc_read,
+        ):
+            self.assertTrue(is_running(4242))
+            self.assertEqual(proc_read.call_count, 1)
 
 
 class ProcessOwnershipTests(unittest.TestCase):

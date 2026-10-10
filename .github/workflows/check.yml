@@ -29,6 +29,12 @@ jobs:
         run: python -B tools/check.py --all
       - name: Publication audit
         run: python .github/relkit.pyz audit --history
+      - name: Evidence scanner controls
+        env:
+          ASSAY_REQUIRE_SCANNER_CONTROLS: "1"
+        run: >-
+          python -B -m unittest
+          tools.test_audit_regressions.PublicationFixtureRegressionTests.test_secret_filter_keeps_unknown_values_other_paths_and_other_rules
       - name: Claude plugin manifests
         if: runner.os == 'Linux'
         run: |
