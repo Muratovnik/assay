@@ -96,6 +96,11 @@ def build_server(service):
         Explicit/single/cache decisions avoid an unnecessary advisor invocation.
         Unavailable setup, expired evidence and offline mode cannot authorize
         live dispatch. This server never launches agents or changes root settings.
+        In evidence-only mode preserve telemetry_links[packet_id] as its own line in the
+        worker prompt/message. With opted-in native hooks this explicitly links
+        dispatch and completion to the decision without retaining the launch
+        prompt. Repeated launches get distinct host tool-use attempt identities.
+        Required mode uses its existing host binding; keep authorized input unchanged.
         """
         try:
             return await pipeline.prepare(dict(packets=packets, available=available, constraints=constraints,
@@ -175,6 +180,13 @@ def build_server(service):
         coordination, retries and verification; do not infer subscription quota
         from API prices. No raw outputs or credentials belong in an execution
         receipt. Raw task description retention requires its separate opt-in.
+        Always supply execution_ref for the exact attempt and runtime with the
+        native client, session_id and worker thread_id/agent_id. An explicitly
+        supplied worker transcript_path imports attributable execution evidence
+        locally without retaining the path or message content. Requested settings
+        never become provider observations. assessment records criterion IDs,
+        pass/fail/unknown and evidence_refs separately; completion alone is not
+        acceptance. Missing identity/context is returned in telemetry_gaps.
         Evidence references are bounded IDs, not URLs; objects use evidence_id,
         source_id or id. Unsupported fields and invalid references are errors.
         Accepted without evidence remains unknown; a reference is provenance,

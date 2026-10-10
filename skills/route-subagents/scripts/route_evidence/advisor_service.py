@@ -88,6 +88,8 @@ class AdvisorWorkflow:
                     "usage": "diagnostic_only" if self.service.offline else "routing",
                     "decisions": decisions, "expires_at": snapshot["expires_at"],
                     "advisor_result": result, "launch_verified": False}
+        response["telemetry_links"] = {d["packet_id"]: f"[assay-routing:{state['id']}/{d['packet_id']}]"
+                                       for d in decisions}
         if state.get("fixed_route"):
             response["evidence_acquisition"] = "not_required"
         if "task_evidence_status" in state:
@@ -424,4 +426,48 @@ class AdvisorWorkflow:
     def record_routing_outcome(self, decision_id, execution):
         if self.service.offline:
             return {"status": "diagnostic_only", "decision_id": decision_id, "recorded": False}
-        return self.history.record_outcome(decision_id, execution)
+        if not isinstance(execution, dict):
+            raise EvidenceError("execution must be an object")
+        execution = copy.deepcopy(execution)
+        transcript = execution.pop("transcript_path", None)
+        assessment = execution.pop("assessment", None)
+        if transcript is not None and not isinstance(transcript, str):
+            raise EvidenceError("transcript_path must be an absolute file path")
+        if assessment is not None and not isinstance(assessment, dict):
+            raise EvidenceError("assessment must be an object")
+        if execution.get("runtime"):
+            from .telemetry import bound_attempts
+            from .history import runtime_identity
+            runtime = runtime_identity(execution["runtime"])
+            linked = bound_attempts(self.history, runtime.get("client"), runtime.get("session_id"),
+                                    runtime.get("agent_id") or runtime.get("thread_id"),
+                                    execution_ref=execution.get("execution_ref"))
+            linked = [a for a in linked if a["decision_id"] == decision_id
+                      and (execution.get("packet_id") is None or a["packet_id"] == execution["packet_id"])]
+            if len(linked) == 1:
+                execution["execution_ref"] = linked[0]["execution_ref"]
+                execution["packet_id"] = linked[0]["packet_id"]
+                execution["runtime"] = linked[0]["runtime"]
+        record = self.history.record_outcome(decision_id, execution)
+        if record.get("persisted") is False:
+            return record
+        gaps = []
+        if not record.get("execution", {}).get("runtime"):
+            gaps.append("native_identity_missing")
+        if not record.get("execution", {}).get("execution_ref"):
+            gaps.append("attempt_identity_missing")
+        decision = self.history.read(decision_id)
+        packet = next((p for p in decision["snapshot"]["packets"]
+                       if p["packet_id"] == record["packet_id"]), {})
+        if "task_spec" not in packet:
+            gaps.append("task_acceptance_context_not_retained")
+        if transcript is not None:
+            from .telemetry import observe_transcript
+            observe_transcript(self.history, {"decision_id": decision_id, "packet_id": record["packet_id"],
+                "execution_ref": execution.get("execution_ref"), "runtime": execution.get("runtime"),
+                "transcript_path": transcript}, status=execution.get("status"))
+        if assessment is not None:
+            from .telemetry import assess
+            assess(self.history, {**assessment, "decision_id": decision_id, "packet_id": record["packet_id"],
+                                 "execution_ref": execution.get("execution_ref")})
+        return {**record, "telemetry_gaps": gaps}

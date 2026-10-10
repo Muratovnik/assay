@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback
+from runtime import state, feedback, routing_telemetry
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence.service import load_config
@@ -125,6 +125,12 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
 
 def process(event, client, environment, *, root=ROOT, clock=None):
     result, error = _process(event, client, environment, root=root, clock=clock)
+    try:
+        if result.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+            routing_telemetry.capture(event, client, environment, **({"clock": clock} if clock else {}))
+    except Exception:
+        diagnostic = "Assay: routing execution telemetry unavailable; hook decision retained. Check telemetry binding and native identity."
+        error = "\n".join(part for part in (error, diagnostic) if part)
     if event.get("hook_event_name") != "UserPromptSubmit":
         return result, error
     # Feedback may append context, never merge into a permission decision or
@@ -173,6 +179,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "feedback_trigger": settings["feedback_trigger"],
               "feedback_record": record_command(environment, settings, root),
               "native_execution": "unverified", "model_compliance": "unverified",
+              "routing_telemetry_bound": routing_telemetry.configuration(environment) is not None,
               "settings_modified": False, "conflicts": []}
     if settings_path:
         supplied = read_json(settings_path).get("hooks", {})

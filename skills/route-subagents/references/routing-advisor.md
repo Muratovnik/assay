@@ -363,12 +363,16 @@ precedence when both forms are supplied. `accepted` without references remains
 `unknown`. References record provenance, not verification of their contents.
 
 `telemetry.mode` is `off`, `metadata` (default), or `full`. Metadata stores
-identifiers, pairs, policy/evidence references and bounded outcomes without task
-text. Full mode explicitly retains a redacted structured snapshot/result for
+identifiers, task types and structured features, pairs, policy/evidence references
+and bounded outcomes. Separate `retain_descriptions` consent permits the validated
+task goal and acceptance criteria. Full mode explicitly retains a redacted structured snapshot/result for
 diagnostic replay. Records use a separate `routing-advisor` namespace under the
 cache, atomic writes and locks. Default retention is 30 days; bounded pruning
 touches only owned records, refuses linked paths and runs on writes without a
 scheduler. User exports have a separate lifetime.
+
+For linked native execution capture, criterion assessments and coverage-aware
+local reports, use [retrospective telemetry](routing-telemetry.md).
 
 History import reads only explicitly named Codex/Claude JSONL files. It returns
 usage events and an account quota timeline separately, handles cumulative

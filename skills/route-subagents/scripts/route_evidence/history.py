@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import io
 import math
 import re
 import time
@@ -32,6 +33,7 @@ _OUTCOME_FILE = re.compile(
     r"^outcome-([0-9a-f]{64})-([0-9a-f]{64})-"
     r"(launched|completed|failed|interrupted|unknown)\.json$"
 )
+_SUPPLEMENT_FILE = re.compile(r"^(observation|assessment)-([0-9a-f]{64})-([0-9a-f]{64})\.json$")
 _EXECUTION_STATUSES = {"launched", "completed", "failed", "interrupted", "unknown"}
 _TERMINAL_STATUSES = _EXECUTION_STATUSES - {"launched"}
 _CODE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$")
@@ -47,7 +49,7 @@ _EXECUTION_KEYS = {
     "observed_model", "observed_effort", "observed_service_tier",
     "actual_model", "actual_effort", "actual_service_tier", "usage",
     "usage_provenance", "outcome", "outcome_basis", "evidence", "evidence_refs",
-    "cost_observation", "task_description",
+    "cost_observation", "task_description", "runtime",
 }
 _USAGE_ALIASES = {
     "input_tokens": ("input_tokens", "inputTokens"),
@@ -140,6 +142,9 @@ def _file_parts(name: str) -> tuple[str, str, str | None, str | None] | None:
     match = _OUTCOME_FILE.fullmatch(name)
     if match:
         return "outcome", match.group(1), match.group(2), match.group(3)
+    match = _SUPPLEMENT_FILE.fullmatch(name)
+    if match:
+        return match.group(1), match.group(2), None, None
     return None
 
 
@@ -229,7 +234,7 @@ def _packet_metadata(value: Any, field: str, candidates: list[dict], *, include_
     }
 
 
-def _snapshot_metadata(snapshot: Any, *, include_task_features=False) -> dict:
+def _snapshot_metadata(snapshot: Any, *, include_task_features=False, retain_descriptions=False) -> dict:
     if not isinstance(snapshot, dict) or snapshot.get("schema_version") != 1:
         raise EvidenceError("snapshot: expected schema_version=1")
     candidates = snapshot.get("candidates")
@@ -255,6 +260,12 @@ def _snapshot_metadata(snapshot: Any, *, include_task_features=False) -> dict:
         if value is not None:
             epoch(value)
             result[key] = value
+    result["policy_version"] = snapshot.get("policy", {}).get("policy_version")
+    if retain_descriptions:
+        from .advice_contracts import _task_spec
+        for raw, retained in zip(packets, result["packets"]):
+            if "task_spec" in raw:
+                retained["task_spec"] = _task_spec(raw["task_spec"], "task_spec")
     return result
 
 
@@ -557,6 +568,22 @@ def _outcome(execution: Any, *, retain_descriptions=False) -> dict:
             raise EvidenceError("task description retention requires explicit local opt-in")
         from .task_evidence import query_text
         result["task_description"] = query_text(execution["task_description"])
+    if "runtime" in execution:
+        result["runtime"] = runtime_identity(execution["runtime"])
+        if result["execution_ref"] is None:
+            raise EvidenceError("native runtime binding requires execution_ref")
+    return result
+
+
+def runtime_identity(value: Any) -> dict:
+    if not isinstance(value, dict):
+        raise EvidenceError("runtime must be an object")
+    _supported_fields(value, {"client", "session_id", "thread_id", "agent_id", "tool_use_id"}, "runtime")
+    if value.get("client") not in {"codex", "claude"}:
+        raise EvidenceError("runtime.client must be codex or claude")
+    result = {key: _identifier(item, "runtime." + key) for key, item in value.items() if item is not None}
+    if not result.get("session_id") or not (result.get("thread_id") or result.get("agent_id")):
+        raise EvidenceError("runtime requires session_id and a worker thread_id or agent_id")
     return result
 
 
@@ -564,7 +591,7 @@ class HistoryStore:
     """Immutable per-decision telemetry records in a dedicated local namespace."""
 
     def __init__(self, root: Path, *, mode: str = "metadata", retention_days: int = 30,
-                 clock: Callable[[], float] = time.time, retain_descriptions=False):
+                 clock: Callable[[], float] = time.time, retain_descriptions=False, dataset="unspecified"):
         if mode not in MODES:
             raise EvidenceError("telemetry mode must be off, metadata, or full")
         if (isinstance(retention_days, bool) or not isinstance(retention_days, int)
@@ -575,6 +602,9 @@ class HistoryStore:
         self.retention_days = retention_days
         self.clock = clock
         self.retain_descriptions = retain_descriptions
+        if dataset not in {"production", "test", "smoke", "unspecified"}:
+            raise EvidenceError("unknown telemetry dataset")
+        self.dataset = dataset
         if mode != "off":
             _refuse_link_ancestors(self.root)
             self.root.mkdir(parents=True, exist_ok=True)
@@ -598,6 +628,7 @@ class HistoryStore:
             "created_at": timestamp(now),
             "expires_at": timestamp(now + self.retention_days * 86400),
             "privacy_mode": self.mode,
+            "dataset": self.dataset,
         }
 
     def _write_immutable(self, path: Path, record: dict) -> dict:
@@ -619,6 +650,8 @@ class HistoryStore:
                         if key not in {"created_at", "expires_at"}}
                 right = {key: value for key, value in record.items()
                          if key not in {"created_at", "expires_at"}}
+                left.setdefault("dataset", "unspecified")
+                right.setdefault("dataset", "unspecified")
                 if left == right:
                     return {**copy.deepcopy(current), "write_status": "unchanged"}
                 raise EvidenceError("conflicting immutable history record")
@@ -631,7 +664,8 @@ class HistoryStore:
             return {"status": "disabled", "persisted": False}
         if not isinstance(decisions, list) or not decisions or len(decisions) > 64:
             raise EvidenceError("decisions must be a list with 1..64 items")
-        metadata = _snapshot_metadata(snapshot, include_task_features="task_similarity_evidence" in snapshot.get("evidence", {}))
+        metadata = _snapshot_metadata(snapshot, include_task_features=True,
+                                      retain_descriptions=self.retain_descriptions)
         advisor = _result_metadata(result)
         if advisor is not None and advisor["snapshot_id"] != metadata["snapshot_id"]:
             raise EvidenceError("advisor result snapshot_id does not match snapshot")
@@ -675,6 +709,7 @@ class HistoryStore:
         record = self._base(decision_id, "outcome")
         # One decision and all of its lifecycle receipts share a retention unit.
         record["expires_at"] = decision_record["expires_at"]
+        record["dataset"] = decision_record.get("dataset", "unspecified")
         record["execution"] = _outcome(execution, retain_descriptions=self.retain_descriptions)
         record["packet_id"] = packet_id
         execution_ref = record["execution"]["execution_ref"]
@@ -693,12 +728,22 @@ class HistoryStore:
                                               for item in all_existing):
                 raise EvidenceError("execution_ref is required for multiple attempts")
             existing = [item for item in all_existing if item["attempt_key"] == attempt_key]
+            identities = [item["execution"]["runtime"] for item in existing if "runtime" in item["execution"]]
+            if identities:
+                if any(identity != identities[0] for identity in identities):
+                    raise EvidenceError("conflicting attempt runtime identities")
+                supplied_runtime = record["execution"].get("runtime", identities[0])
+                if supplied_runtime != identities[0]:
+                    raise EvidenceError("execution runtime identity changed within attempt")
+                record["execution"]["runtime"] = identities[0]
             if path.exists():
                 current = _read_json(path)
                 left = {key: value for key, value in current.items()
                         if key not in {"created_at", "expires_at"}}
                 right = {key: value for key, value in record.items()
                          if key not in {"created_at", "expires_at"}}
+                left.setdefault("dataset", "unspecified")
+                right.setdefault("dataset", "unspecified")
                 if left == right:
                     return {**copy.deepcopy(current), "write_status": "unchanged"}
                 raise EvidenceError("conflicting immutable history record")
@@ -905,6 +950,8 @@ def _stream_context(value: dict, states: dict, source_index: int, client: str) -
     previous_identity = source["identity"]
     session_id = _dig(value, ("sessionId",), ("session_id",), ("payload", "session_id"))
     thread_id = _dig(value, ("thread_id",), ("payload", "thread_id"))
+    if client == "claude" and thread_id is None:
+        thread_id = _dig(value, ("agentId",), ("agent_id",))
     session_id = session_id if isinstance(session_id, str) and session_id else None
     thread_id = thread_id if isinstance(thread_id, str) and thread_id else None
     if client == "codex" and value.get("type") == "session_meta":
@@ -1033,7 +1080,7 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
     return normalized, quota
 
 
-def import_history(paths: list[Path]) -> dict:
+def import_history(paths: list[Path], *, _contents: dict[int, bytes] | None = None) -> dict:
     """Read explicitly named Codex/Claude JSONL files without changing them."""
     if not isinstance(paths, list) or not paths or len(paths) > MAX_IMPORT_FILES:
         raise EvidenceError(f"history import requires 1..{MAX_IMPORT_FILES} paths")
@@ -1055,7 +1102,7 @@ def import_history(paths: list[Path]) -> dict:
         try:
             if path.is_symlink() or _is_reparse(path) or not path.is_file():
                 raise OSError("not a regular file")
-            handle = path.open("rb")
+            handle = io.BytesIO(_contents[source_index]) if _contents is not None else path.open("rb")
         except OSError:
             errors.append({"source_index": source_index, "code": "missing_or_unsafe_file"})
             continue

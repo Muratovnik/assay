@@ -2,7 +2,7 @@
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, StrictFloat, StrictInt
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, Required
 
 from .history import _CODE
 
@@ -51,6 +51,29 @@ class ReceiptUsage(TypedDict, total=False):
     totalTokens: Amount
 
 
+class RuntimeIdentity(TypedDict, total=False):
+    __pydantic_config__ = {"extra": "forbid"}
+    client: Required[Literal["codex", "claude"]]
+    session_id: Required[Identifier]
+    thread_id: Identifier | None
+    agent_id: Identifier | None
+    tool_use_id: Identifier | None
+
+
+class CriterionResult(TypedDict, total=False):
+    __pydantic_config__ = {"extra": "forbid"}
+    id: Required[Identifier]
+    status: Required[Literal["pass", "fail", "unknown"]]
+    evidence_refs: References
+
+
+class AcceptanceAssessment(TypedDict):
+    __pydantic_config__ = {"extra": "forbid"}
+    assessment_id: Identifier
+    source: Literal["user", "verification"]
+    criteria: Annotated[list[CriterionResult], Field(min_length=1, max_length=8)]
+
+
 class ExecutionReceipt(TypedDict, total=False):
     __pydantic_config__ = {"extra": "forbid"}
     status: Literal["launched", "completed", "failed", "interrupted", "unknown"]
@@ -75,6 +98,9 @@ class ExecutionReceipt(TypedDict, total=False):
     evidence_refs: References
     cost_observation: dict[str, Any]
     task_description: str
+    runtime: RuntimeIdentity
+    transcript_path: str
+    assessment: AcceptanceAssessment
 
 
 class OutcomeResult(TypedDict, total=False):
@@ -93,3 +119,5 @@ class OutcomeResult(TypedDict, total=False):
     packet_id: str
     attempt_key: str
     write_status: Literal["written", "unchanged"]
+    dataset: str
+    telemetry_gaps: list[str]

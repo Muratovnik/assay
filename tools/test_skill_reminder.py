@@ -130,7 +130,7 @@ class ReminderTests(unittest.TestCase):
                 self.assertIn(b"invalid or oversized", result.stderr)
                 self.assertNotIn(b"PRIVATE_SENTINEL", result.stderr)
 
-    def test_packaged_matchers_only_cover_reminder_and_guard_boundaries(self):
+    def test_packaged_matchers_cover_reminders_guards_and_worker_stop_telemetry(self):
         for client, filename in (("claude", "hooks.json"), ("codex", "codex.json")):
             hooks = json.loads((ROOT / "hooks" / filename).read_text())["hooks"]
             common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "SessionEnd"}
@@ -159,7 +159,7 @@ class ReminderTests(unittest.TestCase):
             for event in ("SubagentStart", "SubagentStop"):
                 self.assertEqual(unified, commands(event, "assay-general-purpose-0123456789abcdef"))
                 for agent_type in ("Explore", "general-purpose", ""):
-                    self.assertEqual([], commands(event, agent_type))
+                    self.assertEqual(unified if event == "SubagentStop" else [], commands(event, agent_type))
             for source in ("startup", "resume", "clear", "compact"):
                 self.assertEqual(unified, commands("SessionStart", source))
             self.assertEqual(unified if client == "claude" else [], commands("SessionStart", "fork"))

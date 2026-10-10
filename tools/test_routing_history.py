@@ -101,8 +101,8 @@ class HistoryStoreTests(unittest.TestCase):
         self.assertEqual(written["write_status"], "written")
         self.assertNotIn("full", written)
         serialized = json.dumps(written)
-        self.assertNotIn("task_types", serialized)
-        self.assertNotIn("features", serialized)
+        self.assertIn("task_types", serialized)
+        self.assertIn("features", serialized)
         self.assertIn("gpt-5.6-luna", serialized)
 
         full = HistoryStore(self.root / "full-root", mode="full", clock=lambda: self.now)

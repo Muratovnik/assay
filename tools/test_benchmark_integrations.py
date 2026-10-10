@@ -330,6 +330,76 @@ build_server(service).run(transport="stdio")
                             self.assertTrue(error.is_error)
                     self.assertFalse((await client.call_tool("routing_status", {})).is_error)
 
+    async def test_stdio_retrospective_context_native_observation_and_acceptance(self):
+        from mcp import Client, StdioServerParameters
+        from route_evidence.history import HistoryStore
+        from route_evidence.telemetry import report
+        from jsonschema import Draft202012Validator
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / "config.json"
+            config.write_text(json.dumps({"schema_version": 4, "client": "claude",
+                "advisor": {"enabled": False}, "task_evidence": {"enabled": False, "retain_descriptions": True},
+                "telemetry": {"mode": "full", "dataset": "smoke"}}), encoding="utf-8")
+            bootstrap = root / "server.py"
+            bootstrap.write_text("""
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from route_evidence.routing import build_context
+from route_evidence.service import RoutingService, load_config
+from route_evidence.cache import Cache
+from benchmark_mcp import build_server
+root = Path(sys.argv[2])
+async def context(request):
+    return {**build_context(request, []), "sources": [], "data_status": "unavailable",
+            "data_message": "synthetic acquisition fixture", "usage": "routing"}
+service = RoutingService(Cache(root / "cache"), client="claude", advisor_config=load_config(root / "config.json"))
+service.context = context
+build_server(service).run(transport="stdio")
+""", encoding="utf-8")
+            native = root / "worker.jsonl"
+            native.write_text(json.dumps({"type": "assistant", "uuid": "native-request",
+                "sessionId": "wire-session", "agentId": "wire-worker", "message": {
+                    "model": "worker-alpha", "content": "PRIVATE_OUTPUT_SENTINEL",
+                    "usage": {"input_tokens": 12, "output_tokens": 4}}}) + "\n", encoding="utf-8")
+            params = StdioServerParameters(command=sys.executable,
+                args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
+            async with asyncio.timeout(30):
+                async with Client(params) as client:
+                    prepared = await client.call_tool("prepare_routing", {"available": [
+                        {"model": "worker-alpha", "efforts": ["low"]}], "packets": [{
+                        "packet_id": "parser", "task_types": ["implementation"], "features": {}, "task_spec": {
+                            "goal": "Repair parser", "criteria": [{"id": "reject", "description": "Reject malformed input"}],
+                            "verification": "Run parser check", "error_impact": "medium", "ambiguity": "low", "provenance": "caller"}}]})
+                    self.assertFalse(prepared.is_error, prepared)
+                    value = prepared.structured_content
+                    self.assertEqual(value["status"], "decided")
+                    self.assertEqual(value["telemetry_links"]["parser"], f'[assay-routing:{value["decision_id"]}/parser]')
+                    receipt = {"decision_id": value["decision_id"], "execution": {
+                        "packet_id": "parser", "execution_ref": "wire-attempt", "status": "completed",
+                        "runtime": {"client": "claude", "session_id": "wire-session", "agent_id": "wire-worker"},
+                        "transcript_path": str(native), "assessment": {"assessment_id": "wire-review", "source": "verification",
+                            "criteria": [{"id": "reject", "status": "pass", "evidence_refs": ["parser-check"]}]}}}
+                    advertised = next(t for t in (await client.list_tools()).tools if t.name == "record_routing_outcome")
+                    Draft202012Validator(advertised.input_schema).validate(receipt)
+                    result = await client.call_tool("record_routing_outcome", receipt)
+                    self.assertFalse(result.is_error, result)
+                    Draft202012Validator(advertised.output_schema).validate(result.structured_content)
+                    self.assertEqual(result.structured_content["telemetry_gaps"], [])
+                    self.assertFalse((await client.call_tool("record_routing_outcome", receipt)).is_error)
+                    invalid = json.loads(json.dumps(receipt))
+                    invalid["execution"]["runtime"] = "invalid-runtime"
+                    self.assertTrue((await client.call_tool("record_routing_outcome", invalid)).is_error)
+            retrospective = report(HistoryStore(root / "cache", mode="full"), dataset="smoke")
+            summary = retrospective["summary"]
+            self.assertEqual(summary["context_retained"], 1)
+            self.assertEqual(summary["with_provider_model"], 1)
+            self.assertEqual(summary["first_attempt_acceptance_rate"], 1)
+            attempt = retrospective["packets"][0]["attempts"][0]
+            self.assertEqual(attempt["usage"]["input_tokens"], 12)
+            self.assertNotIn("PRIVATE_OUTPUT_SENTINEL", json.dumps(retrospective))
+
     async def test_native_advisor_protocol_roundtrip_without_inference(self):
         from mcp import Client, StdioServerParameters
         from route_evidence.claude_agents import generate

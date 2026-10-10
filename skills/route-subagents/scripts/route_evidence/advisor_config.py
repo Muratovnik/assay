@@ -72,9 +72,11 @@ def settings(config=None):
                 raise EvidenceError("conflicting advisor/policy bound")
             policy[key] = advisor[key]
     policy = default_policy(policy)
-    telemetry = _object(config.get("telemetry", {}), {"mode", "retention_days"}, "telemetry")
+    telemetry = _object(config.get("telemetry", {}), {"mode", "retention_days", "dataset"}, "telemetry")
     telemetry.setdefault("mode", "metadata")
     telemetry.setdefault("retention_days", 30)
+    if telemetry.get("dataset", "unspecified") not in {"production", "test", "smoke", "unspecified"}:
+        raise EvidenceError("unknown telemetry dataset")
     if telemetry["mode"] not in ("off", "metadata", "full"):
         raise EvidenceError("unknown telemetry mode")
     if type(telemetry["retention_days"]) is not int or not 1 <= telemetry["retention_days"] <= 365:

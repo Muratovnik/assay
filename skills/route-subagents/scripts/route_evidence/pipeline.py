@@ -25,7 +25,7 @@ def arguments(value: dict) -> dict:
 def compact(response: dict) -> dict:
     keep = {"schema_version", "status", "usage", "decision_id", "snapshot_id", "expires_at",
             "cache_hit", "launch_verified", "task_evidence_status", "telemetry_status", "reason",
-            "inventory_warnings", "evidence_acquisition"}
+            "inventory_warnings", "evidence_acquisition", "telemetry_links"}
     result = {k: copy.deepcopy(v) for k, v in response.items() if k in keep}
     result["schema_version"] = PROTOCOL
     if "decisions" in response:
@@ -563,6 +563,7 @@ class RoutingPipeline:
 
     def outcome(self, supplied):
         host = self.host("record_routing_outcome", supplied)
+        execution = copy.deepcopy(supplied["execution"])
         if self.required:
             with self.store.transaction() as tx:
                 state = tx.get("decision", supplied["decision_id"])
@@ -573,4 +574,21 @@ class RoutingPipeline:
                                 for a in tx.values("attempt"))
                 if not owned:
                     raise EvidenceError("outcome_has_no_owned_decision_or_attempt")
-        return self.service.record_routing_outcome(supplied["decision_id"], supplied["execution"])
+                attempts = [a for a in tx.values("attempt") if a["decision_id"] == supplied["decision_id"]
+                            and a["session_id"] == host["session_id"] and a["config_hash"] == self.config_hash
+                            and a["role"] == "worker" and a["state"] not in {"prepared", "reserved"}
+                            and (execution.get("packet_id") is None or a["packet_id"] == execution["packet_id"])]
+                exact = [a for a in attempts if a["attempt_id"] == execution.get("execution_ref")]
+                if not exact and execution.get("execution_ref"):
+                    runtime = execution.get("runtime", {})
+                    exact = [a for a in attempts if a.get("agent_id") and a["agent_id"] == runtime.get("agent_id")]
+                if not exact and not execution.get("execution_ref") and len(attempts) == 1:
+                    exact = attempts
+                if len(exact) == 1 and exact[0].get("agent_id") and exact[0].get("binding") != "start_order":
+                    run = exact[0]
+                    identity = {"client": self.service.client, "session_id": run["session_id"], "agent_id": run["agent_id"]}
+                    if execution.get("runtime") and any(execution["runtime"].get(k) != v for k, v in identity.items()):
+                        raise EvidenceError("outcome_runtime_identity_conflicts_with_host")
+                    execution.update(packet_id=run["packet_id"], execution_ref=run["attempt_id"], runtime=identity)
+                    execution.setdefault("requested", {k: v for k, v in run["route"].items() if k in {"model", "effort"}})
+        return self.service.record_routing_outcome(supplied["decision_id"], execution)

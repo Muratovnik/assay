@@ -939,7 +939,7 @@ def reminder_hooks(client: str = "claude") -> bytes:
         "UserPromptSubmit": [{"hooks": [hook]}],
         "PreToolUse": [{"matcher": f"^({pre})$", "hooks": [hook]}],
         "SubagentStart": [{"matcher": "^assay-", "hooks": [hook]}],
-        "SubagentStop": [{"matcher": "^assay-", "hooks": [hook]}],
+        "SubagentStop": [{"matcher": ".*", "hooks": [hook]}],
         "PostToolUse": [{"matcher": f"^({spawn})$", "hooks": [hook]}],
         "SessionEnd": [{"hooks": [session_end_hook]}],
     }

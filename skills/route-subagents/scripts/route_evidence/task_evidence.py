@@ -12,7 +12,7 @@ from pathlib import Path
 from .cache import atomic_write, source_lock
 from .core import EvidenceError, digest, encoded, epoch, number
 from .advice_contracts import _safe_name, validate_cost_objective, validate_cost_objectives, validate_packets
-from .history import _refuse_link_ancestors, _read_json
+from .history import _refuse_link_ancestors, _read_json, _file_parts
 from .task_costs import estimates, compare, chain_totals, UNITS
 
 MAX_INDEX_BYTES = 32 * 1024 * 1024
@@ -272,7 +272,7 @@ class TaskEvidence:
         self.provisioner = None
 
     def purge_descriptions(self):
-        """Explicit opt-out cleanup; only removes the optional field from owned receipts."""
+        """Remove opted-in task descriptions and diagnostic snapshots from owned history."""
         if self.history is None or not self.history.root.exists():
             return {"status": "purged", "records": 0}
         _refuse_link_ancestors(self.history.root)
@@ -281,11 +281,25 @@ class TaskEvidence:
         with source_lock(self.history.root / ".write.lock") as acquired:
             if not acquired:
                 raise EvidenceError("history is busy")
-            for path in self.history.root.glob("outcome-*.json"):
+            for path in self.history.root.glob("*.json"):
+                parts = _file_parts(path.name)
+                if parts is None or parts[0] not in {"decision", "outcome"}:
+                    continue
                 record = _read_json(path)
-                self.history._validate_record(record, record.get("decision_id"), "outcome")
+                self.history._validate_record(record, record.get("decision_id"), parts[0])
+                changed = False
                 if "task_description" in record.get("execution", {}):
                     del record["execution"]["task_description"]
+                    changed = True
+                for packet in record.get("snapshot", {}).get("packets", []):
+                    if "task_spec" in packet:
+                        del packet["task_spec"]
+                        changed = True
+                if "full" in record:
+                    del record["full"]
+                    record["full_unavailable_reason"] = "task_context_purged"
+                    changed = True
+                if changed:
                     atomic_write(path, record)
                     count += 1
         return {"status": "purged", "records": count}

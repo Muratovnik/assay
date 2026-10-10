@@ -82,6 +82,13 @@ def main(argv=None):
     rp = subs.add_parser("replay")
     rp.add_argument("--record", type=Path, required=True, help="retained advisor record; never invokes a model")
     rp.add_argument("--policy", type=Path, help="optional pure-policy overrides")
+    tr = subs.add_parser("telemetry-report", help="local retrospective with execution and acceptance coverage; no network")
+    tr.add_argument("--dataset", choices=("production", "test", "smoke", "unspecified"))
+    tr.add_argument("--since", help="decision timestamp inclusive, ISO 8601 UTC")
+    tr.add_argument("--until", help="decision timestamp exclusive, ISO 8601 UTC")
+    for name in ("telemetry-observe", "telemetry-assess"):
+        tr = subs.add_parser(name, help="append local runtime evidence or acceptance criteria assessment")
+        tr.add_argument("--request", required=True, help="JSON object file, or - for stdin")
     mp = subs.add_parser("migrate-config")
     mp.add_argument("--source", type=Path, required=True)
     mp.add_argument("--output", type=Path, required=True, help="new file only; never replaces the source")
@@ -149,7 +156,13 @@ def main(argv=None):
         if args.command in {"prepare", "context", "task-context"}:
             service.advisor_workflow.task_evidence.provisioner.wait = True
         code = 0
-        if args.command == "task-setup":
+        if args.command.startswith("telemetry-"):
+            from route_evidence.telemetry import report, observe_transcript, assess
+            history = service.advisor_workflow.history
+            result = (report(history, dataset=args.dataset, since=args.since, until=args.until) if args.command == "telemetry-report" else
+                      observe_transcript(history, request_document(args.request)) if args.command == "telemetry-observe" else
+                      assess(history, request_document(args.request)))
+        elif args.command == "task-setup":
             from route_evidence.task_bootstrap import setup
             result = setup(service.advisor_workflow.task_evidence, offline=args.offline)
             code = 0 if result["status"] == "ready" else 2
@@ -255,7 +268,7 @@ def main(argv=None):
                 # Caller uses --force; refuse misleading offline smoke success.
                 code = 0 if all(s.get("snapshot") and s.get("refresh") in ("updated", "validated_not_modified")
                                 for s in result["sources"]) else 2
-        if not args.details and not args.command.startswith("task-"):
+        if not args.details and not args.command.startswith(("task-", "telemetry-")):
             # Raw rows are dropped; candidates, gaps and limits stay complete.
             result = brief(result)
         print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
