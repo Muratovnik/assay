@@ -124,6 +124,19 @@ def observe_transcript(store, request, *, source="explicit_native_log", status=N
                  and r["execution"].get("execution_ref") == request["execution_ref"]]
         if not bound or any(r["execution"].get("runtime") != runtime for r in bound):
             raise EvidenceError("native import requires an exact previously bound execution identity")
+    peers = bound_attempts(store, runtime["client"], runtime["session_id"],
+                          runtime.get("agent_id") or runtime.get("thread_id"),
+                          execution_ref=request["execution_ref"], allow_ambiguous=True)
+    if any(a["decision_id"] != request["decision_id"] or a["packet_id"] != request["packet_id"]
+           or a["execution_ref"] != request["execution_ref"] for a in peers):
+        # A resumed worker log can contain earlier calls. Without a native call
+        # boundary its complete transcript cannot be attributed to one attempt.
+        data = {"source": source, "runtime": runtime, "import_status": "partial", "requests": [],
+                "effective_settings": [], "gaps": ["native_identity_reused_across_attempts"]}
+        if status is not None:
+            data["status"] = status
+        return append(store, "observation", request["decision_id"], request["packet_id"], request["execution_ref"],
+                      "boundary-" + digest({"runtime": runtime, "execution_ref": request["execution_ref"], "status": status}), data)
     path = Path(request["transcript_path"])
     if not path.is_absolute():
         raise EvidenceError("execution transcript must be an absolute explicitly supplied file")
@@ -189,7 +202,7 @@ def observe_transcript(store, request, *, source="explicit_native_log", status=N
     return append(store, "observation", request["decision_id"], request["packet_id"], request["execution_ref"], ident, data)
 
 
-def bound_attempts(store, client, session_id, agent_id, *, execution_ref=None):
+def bound_attempts(store, client, session_id, agent_id, *, execution_ref=None, allow_ambiguous=False):
     if not agent_id or not session_id:
         return []
     result = {}
@@ -206,6 +219,8 @@ def bound_attempts(store, client, session_id, agent_id, *, execution_ref=None):
             if ref:
                 key = record["decision_id"], record["packet_id"], ref
                 result[key] = {"decision_id": key[0], "packet_id": key[1], "execution_ref": key[2], "runtime": runtime}
+    if allow_ambiguous:
+        return list(result.values())
     exact = [a for a in result.values() if a["execution_ref"] == execution_ref]
     if exact:
         return exact
@@ -274,10 +289,9 @@ def report(store, *, dataset=None, since=None, until=None):
             provider = [route for a in ordered for route in a["provider_routes"]]
             effective = [c["route"] for a in ordered for c in a["effective_settings"]]
             def mismatch(routes):
-                if not selected.get("model") or not routes:
-                    return None
-                return any(route.get("model") != selected["model"] or
-                           (route.get("effort") is not None and route["effort"] != selected.get("effort")) for route in routes)
+                comparisons = [route[key] != selected[key] for route in routes for key in ("model", "effort")
+                               if route.get(key) is not None and selected.get(key) is not None]
+                return any(comparisons) if comparisons else None
             rows.append({"decision_id": did, "packet_id": pid, "created_at": decision["created_at"],
                          "dataset": decision.get("dataset", "unspecified"), "task": task,
                          "selection": chosen, "advisor": decision.get("advisor_result"), "attempts": ordered,

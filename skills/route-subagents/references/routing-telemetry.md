@@ -43,6 +43,8 @@ In evidence-only mode, preserve `telemetry_links[packet_id]` as a separate line
 in the worker prompt or message. It looks like `[assay-routing:decision-id/packet-id]`.
 The hook associates that explicit link with the native session and tool-use ID,
 then with the returned worker ID. Each launch has its own attempt reference.
+The pending launch identity expires after one day or the decision's expiry,
+whichever comes first; ordinary long foreground calls remain attributable.
 The launch prompt and outputs are not copied to history. An unrelated or unbound
 worker transcript is never opened. Required routing can use its existing
 host-bound attempt records directly.
@@ -55,6 +57,13 @@ transcript path in history, permissions, code or messages. Claude response model
 prove the provider's resolved model. A missing model stays unknown. Partial
 imports leave aggregate usage unknown. Hook failures preserve the existing
 permission result and report a telemetry diagnostic.
+Native stop effort and returned `resolvedModel`, when present, are retained as
+host settings with their event provenance. Comparisons use only observed fields;
+effort alone does not imply that a model was observed.
+If the same native worker is reused across attempts, its cumulative transcript
+has no verified per-call boundary. Request models and usage for the later attempt
+stay unknown with `native_identity_reused_across_attempts`; native return timing,
+aggregate usage and host settings remain available. Earlier attempts are preserved.
 
 When a synchronous worker stops before the launch tool returns its worker ID,
 the hook gives the stop path in its private rendezvous database a ten-minute

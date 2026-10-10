@@ -266,6 +266,22 @@ class RetrospectiveTests(unittest.TestCase):
         self.assertEqual(result["summary"]["with_provider_model"], 0)
         self.assertNotIn("PRIVATE_REPORT", json.dumps(result))
 
+    def test_native_effort_only_is_compared_without_inventing_model_mismatch(self):
+        self.decision()
+        env = self.hook_binding()
+        launch = {"session_id": "session-one", "tool_use_id": "native-tool-one", "tool_name": "Agent",
+                  "tool_input": {"prompt": "[assay-routing:d1/p1]"}}
+        routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "claude", env, clock=lambda: self.now)
+        routing_telemetry.capture({"session_id": "session-one", "agent_id": "worker-one", "hook_event_name": "SubagentStop",
+            "effort": {"level": "low"}, "agent_transcript_path": str(self.transcript())}, "claude", env, clock=lambda: self.now)
+        routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse", "tool_response": {"agentId": "worker-one"}},
+                                  "claude", env, clock=lambda: self.now)
+        row = report(self.store)["packets"][0]
+        self.assertIs(row["effective_route_mismatch"], False)
+        self.assertEqual(row["attempts"][0]["effective_settings"][0]["route"]["effort"], "low")
+        self.assertEqual(row["attempts"][0]["effective_settings"][0]["provenance"], "native:SubagentStop")
+        self.assertIsNone(row["attempts"][0]["effective_settings"][0]["route"].get("model"))
+
     def test_foreground_stop_before_return_is_attributed_after_exact_worker_id(self):
         self.decision()
         env = self.hook_binding()
@@ -304,6 +320,53 @@ class RetrospectiveTests(unittest.TestCase):
             expected = "worker-one" if row["decision_id"] == "d1" else "worker-two"
             imported = next(o for o in row["attempts"][0]["observations"] if "requests" in o)
             self.assertEqual(imported["runtime"]["agent_id"], expected)
+
+    def test_reused_worker_cumulative_transcript_does_not_rewrite_prior_attempt(self):
+        self.decision(); self.decision("d2")
+        env = self.hook_binding()
+        path = self.transcript()
+        for did, tool in (("d1", "first-call"), ("d2", "resume-call")):
+            launch = {"session_id": "session-one", "tool_use_id": tool, "tool_name": "Agent",
+                      "tool_input": {"prompt": f"[assay-routing:{did}/p1]"}}
+            if did == "d2":
+                launch["tool_input"]["resume"] = "worker-one"
+            routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "claude", env, clock=lambda: self.now)
+            routing_telemetry.capture({"session_id": "session-one", "agent_id": "worker-one", "hook_event_name": "SubagentStop",
+                "agent_transcript_path": str(path)}, "claude", env, clock=lambda: self.now)
+            routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse", "tool_response": {"agentId": "worker-one"}},
+                                      "claude", env, clock=lambda: self.now)
+            self.now += 1
+        rows = {r["decision_id"]: r for r in report(self.store)["packets"]}
+        self.assertEqual(rows["d1"]["attempts"][0]["usage"]["input_tokens"], 10)
+        self.assertEqual(rows["d2"]["attempts"][0]["provider_routes"], [])
+        self.assertIsNone(rows["d2"]["attempts"][0]["usage"])
+        self.assertTrue(any("native_identity_reused_across_attempts" in o.get("gaps", [])
+                            for o in rows["d2"]["attempts"][0]["observations"]))
+
+    def test_bound_background_stop_is_not_lost_during_another_launch(self):
+        self.decision(); self.decision("d2")
+        self.store.record_outcome("d1", {"packet_id": "p1", "execution_ref": "background", "status": "launched", "runtime": IDENTITY})
+        env = self.hook_binding()
+        routing_telemetry.capture({"session_id": "session-one", "tool_use_id": "different-worker", "tool_name": "Agent",
+            "hook_event_name": "PreToolUse", "tool_input": {"prompt": "[assay-routing:d2/p1]"}}, "claude", env, clock=lambda: self.now)
+        routing_telemetry.capture({"session_id": "session-one", "agent_id": "worker-one", "hook_event_name": "SubagentStop",
+            "agent_transcript_path": str(self.transcript())}, "claude", env, clock=lambda: self.now)
+        rows = {r["decision_id"]: r for r in report(self.store)["packets"]}
+        self.assertEqual(rows["d1"]["attempts"][0]["usage"]["input_tokens"], 10)
+        self.assertEqual(rows["d2"]["attempts"], [])
+
+    def test_foreground_launch_can_run_longer_than_ten_minutes(self):
+        self.decision()
+        env = self.hook_binding()
+        launch = {"session_id": "session-one", "tool_use_id": "long-call", "tool_name": "Agent",
+                  "tool_input": {"prompt": "[assay-routing:d1/p1]"}}
+        routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "claude", env, clock=lambda: self.now)
+        self.now += 1800
+        routing_telemetry.capture({"session_id": "session-one", "agent_id": "worker-one", "hook_event_name": "SubagentStop",
+            "agent_transcript_path": str(self.transcript())}, "claude", env, clock=lambda: self.now)
+        routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse", "tool_response": {"agentId": "worker-one"}},
+                                  "claude", env, clock=lambda: self.now)
+        self.assertEqual(report(self.store)["summary"]["with_provider_model"], 1)
 
     def test_telemetry_failure_preserves_hook_permission_reply(self):
         from unittest.mock import patch

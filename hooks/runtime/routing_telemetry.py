@@ -7,8 +7,8 @@ from pathlib import Path
 import time
 
 from route_evidence.advisor_config import settings
-from route_evidence.core import EvidenceError, digest, read_document, number
-from route_evidence.history import HistoryStore, _refuse_link_ancestors, _identifier, _usage
+from route_evidence.core import EvidenceError, digest, read_document, number, epoch
+from route_evidence.history import HistoryStore, _refuse_link_ancestors, _identifier, _usage, _route
 from route_evidence.pipeline_config import settings as pipeline_settings
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.service import load_config
@@ -70,6 +70,9 @@ def capture(event, client, environment, *, clock=time.time):
             return
         _identifier(session, "native.session_id")
         _identifier(tool_id, "native.tool_use_id")
+        resume = supplied.get("resume")
+        if resume is not None:
+            _identifier(resume, "native.resume")
         if len(links) != 1:
             raise EvidenceError("launch must contain one unambiguous routing telemetry link")
         did, pid = links[0]
@@ -79,7 +82,8 @@ def capture(event, client, environment, *, clock=time.time):
             raise EvidenceError("launch telemetry link does not name a retained client packet")
         with pending_store.transaction() as tx:
             tx.put("launch-link", digest({"session": session, "tool": tool_id}),
-                   {"decision_id": did, "packet_id": pid, "session_id": session, "tool_use_id": tool_id}, clock() + 600)
+                   {"decision_id": did, "packet_id": pid, "session_id": session, "tool_use_id": tool_id,
+                    "resume": resume}, min(epoch(decision["expires_at"]), clock() + 86400))
         return
     if name != "SubagentStop":
         if event.get("tool_name") not in {"Agent", "Task", "spawn_agent"}:
@@ -110,6 +114,25 @@ def capture(event, client, environment, *, clock=time.time):
                 tx.delete("launch-link", digest({"session": session, "tool": tool_id}))
         return
     _identifier(agent, "native.agent_id")
+    returned = event.get("tool_response")
+    raw_effort = event.get("effort")
+    host_route = _route({"observed": {
+        "model": returned.get("resolvedModel") if isinstance(returned, dict) else None,
+        "effort": raw_effort.get("level") if isinstance(raw_effort, dict) else None}}, "observed")
+    host_settings = ([{"route": host_route, "provenance": "native:" + name}]
+                     if host_route else [])
+    if name == "SubagentStop" and event.get("agent_transcript_path") and pending_store.directory.exists():
+        with pending_store.transaction() as tx:
+            launches = [v for v in tx.values("launch-link") if v["session_id"] == session]
+            resuming = any(v.get("resume") == agent for v in launches)
+            known = bound_attempts(store, client, session, agent, allow_ambiguous=True)
+            pending = bool(launches) and (resuming or not known)
+            if pending:
+                tx.put("pending-stop", digest({"session": session, "agent": agent}),
+                       {"session_id": session, "agent_id": agent, "transcript_path": event["agent_transcript_path"],
+                        "effective_settings": host_settings}, clock() + 600)
+        if pending:
+            return
     pipeline = pipeline_settings(config)
     if not attempts and pipeline["mode"] == "required" and pipeline["state_dir"]:
         with PipelineStore(Path(pipeline["state_dir"]), clock=clock).transaction() as tx:
@@ -120,20 +143,13 @@ def capture(event, client, environment, *, clock=time.time):
                          "runtime": {"client": client, "session_id": session, "agent_id": agent}}]
     if not attempts:
         attempts = bound_attempts(store, client, session, agent)
-    if not attempts and name == "SubagentStop" and event.get("agent_transcript_path"):
-        if pending_store.directory.exists():
-            with pending_store.transaction() as tx:
-                pending = any(v["session_id"] == session for v in tx.values("launch-link"))
-                if pending:
-                    tx.put("pending-stop", digest({"session": session, "agent": agent}),
-                           {"session_id": session, "agent_id": agent, "transcript_path": event["agent_transcript_path"]}, clock() + 600)
-        return
-    returned = event.get("tool_response")
     completed_return = name == "PostToolUse" and isinstance(returned, dict) and returned.get("status") == "completed"
     status = "completed" if name == "SubagentStop" or completed_return else "failed" if name == "PostToolUseFailure" else "launched"
     for attempt in attempts:
         ident = "hook-" + digest({"attempt": attempt, "event": name, "tool_use_id": event.get("tool_use_id")})
         data = {"source": "native_hook", "runtime": attempt["runtime"], "status": status}
+        if host_settings:
+            data["effective_settings"] = host_settings
         if completed_return:
             if returned.get("totalDurationMs") is not None:
                 data["duration_seconds"] = number(returned["totalDurationMs"], "native.totalDurationMs") / 1000
@@ -149,5 +165,10 @@ def capture(event, client, environment, *, clock=time.time):
                 tx.delete("launch-link", digest({"session": session, "tool": tool_id}))
                 tx.delete("pending-stop", digest({"session": session, "agent": agent}))
             if stopped:
+                if stopped.get("effective_settings"):
+                    append(store, "observation", attempt["decision_id"], attempt["packet_id"], attempt["execution_ref"],
+                           "settings-" + digest({"attempt": attempt, "settings": stopped["effective_settings"]}),
+                           {"source": "native_hook", "runtime": attempt["runtime"], "status": "completed",
+                            "effective_settings": stopped["effective_settings"]})
                 observe_transcript(store, {**attempt, "transcript_path": stopped["transcript_path"]},
                                    source="native_hook", status="completed")
