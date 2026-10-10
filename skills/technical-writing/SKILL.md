@@ -137,6 +137,12 @@ alone does not settle whether an explanation belongs. Keep this check out of the
 delivered prose and stop when the scoped requirements hold; it is not a recurring
 polishing loop.
 
+When an independent complete writing review is already part of the task, include
+[both review dimensions](references/reader-testing.md#complete-writing-review)
+in its brief: whether the reader can finish and whether the selected content
+contributes to that outcome. A followability-only review covers only its stated
+scope; it is not complete editorial approval.
+
 After a substantive update, reconcile the affected claims
 and related exclusions using [document design](references/document-design.md#update-the-semantic-unit).
 Inspect command-to-section relationships and relative links from the actual

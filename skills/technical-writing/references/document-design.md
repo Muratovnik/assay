@@ -185,6 +185,13 @@ selected artifact and route. Credit state the invoked tool creates before use,
 earlier setup and genuinely guaranteed inputs; repair the setup, transfer or
 consumer path only where that chain is broken.
 
+When a route is given as substitutions or a platform or format adaptation,
+apply the stated changes to the complete command or procedure in its target
+context. Check the resulting syntax, inputs and sequence, without silently
+supplying an unstated repair. A concise recipe is sufficient when it supplies
+every necessary change; inspect the distinct forms it covers without requiring
+duplicated variants.
+
 Ask: could a reader follow this route as written and still reach that first
 dependent action with a known applicable condition missing? If so, repair the
 setup or handoff before that action. A check that merely reports missing state

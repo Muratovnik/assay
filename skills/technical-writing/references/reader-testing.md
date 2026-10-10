@@ -64,6 +64,36 @@ compare it with the actual passage and applicable source before deciding to edit
 Do not treat disagreement as a mandate to rewrite. Fix the gap the reader hit,
 keep the rest, and note any finding you consciously declined.
 
+## Complete writing review
+
+When an independent review is already planned to assess the finished writing,
+include content contribution alongside followability in that review. Use the
+[finished-content review](document-design.md#review-the-finished-content) against
+the original brief, including retained and source-supported prose. Correct task
+answers alone do not establish that every explanation belongs.
+
+For a relevance finding, quote the passage and the reader context it adds nothing
+to. Explain what removing or merging it would change for the reader's understanding,
+choice or action. Check the condition, necessary limit or notice that the proposed
+edit might weaken. A qualification needs an actual claim or action to constrain;
+an already-established distinction needs a separate useful role to appear again.
+Propose the smallest supported repair. A wording preference or "could be shorter"
+is insufficient; a scoped no-finding result is valid.
+
+Keep the real-reader packet separate from the original brief and any authoritative
+sources needed for editorial judgment. If one reviewer performs both checks, save
+the reader-route answers before supplying editorial source context. A fact learned
+from that later context cannot fill an earlier gap in the documented route. Do not
+supply previous diagnoses, desired findings or the author's defense of a passage.
+
+Use the existing review response and one localized check of accepted repairs,
+including their affected conditions and neighboring claims. Do not add a reviewer
+or repeat the whole review until it passes. Resolve a disagreement against the
+same evidence and report any unresolved material issue. A repair reread is not
+fresh-reader evidence. An explicitly followability-only review keeps its mandate;
+without a planned independent review, use the author's existing saved-result
+check within the opened scope.
+
 ## What it does not establish
 
 Reader testing checks whether a document is followable. It does not check
