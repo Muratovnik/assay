@@ -1,0 +1,1837 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWCOMP01",
+      "source_case_id": "W1",
+      "historical_key": {
+        "id": "W1",
+        "partition": "working",
+        "task_kind": "narrow_rewrite",
+        "construct": "Preserve an explicitly supplied applicable condition even when broad draft wording sounds reassuring.",
+        "expected_disposition": "A correction is necessary.",
+        "task_scope": "Replace only Send one trace capture. Keep the 40-second setting and the retention rule with its reason.",
+        "hard_requirements": [
+          {
+            "id": "W1-H1",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The replacement establishes that sample.trc must be sealed before transmission.",
+            "meaning_equivalent_acceptance": [
+              "Add tracepack seal sample.trc before tracepush send.",
+              "State an unambiguous prerequisite to send only a sealed capture; these experienced operators need not be given the sealing command verbatim.",
+              "An equivalent operational formulation is acceptable if it unambiguously establishes the same state before the send."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "`tracepush send` accepts only SEALED captures.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W1-H2",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "Sampling is stopped before any sealing action in the procedure.",
+            "meaning_equivalent_acceptance": [
+              "Retain the initial stop-sampling step and place sealing after it.",
+              "Combine stop and seal in a correctly ordered instruction."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "`tracepack seal PATH` requires sampling to be stopped.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W1-H3",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The sender still uses the chosen 40-second timeout.",
+            "meaning_equivalent_acceptance": [
+              "Retain --timeout 40 in the command.",
+              "An executable equivalent with the same wait is acceptable; merely describing an unspecified timeout is not."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "tracepush send sample.trc --timeout 40",
+                "line_start": 9,
+                "line_end": 9
+              }
+            ]
+          },
+          {
+            "id": "W1-H4",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The operator keeps the local capture until the collector confirms complete storage with Stored.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing retention instruction.",
+              "Equivalent wording that waits for the collector’s complete-storage confirmation is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "The collector replies Stored after it has saved the complete capture.",
+                "line_start": 11,
+                "line_end": 11
+              }
+            ]
+          },
+          {
+            "id": "W1-H5",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The brief explanation preserves why the local copy is retained.",
+            "meaning_equivalent_acceptance": [
+              "Explain that the copy is available if the transfer times out or is interrupted.",
+              "Explain that retaining the copy permits another attempt after a connection problem."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "Keeping the local copy until Stored permits another transfer attempt after a connection problem.",
+                "line_start": 11,
+                "line_end": 11
+              }
+            ]
+          },
+          {
+            "id": "W1-H6",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The answer does not claim that Ready establishes sealing.",
+            "meaning_equivalent_acceptance": [
+              "Ready may remain as a reachability check.",
+              "Ready may be omitted if the procedure still has the supported stop, seal, and send sequence."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "It says nothing about the state of a local capture.",
+                "line_start": 7,
+                "line_end": 7
+              }
+            ]
+          },
+          {
+            "id": "W1-H7",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response stays within the requested subsection.",
+            "meaning_equivalent_acceptance": [
+              "Return a replacement for the target subsection without reviewing or rewriting the rename procedure."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "Do not review or rewrite “Rename a local capture.”",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W1-H8",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The answer does not claim that stopping sampling alone seals the capture.",
+            "meaning_equivalent_acceptance": [
+              "Stopping may remain the first step; a distinct sealed-state requirement still applies."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "The capture remains in the OPEN state so an operator can still edit its notes.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W1-H9",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The answer and any available action trace respect the source-only task.",
+            "meaning_equivalent_acceptance": [
+              "Read sources and provide text without executing the example commands or changing product files."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "read the supplied files, but do not run their example commands or change the product.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          }
+        ],
+        "negative_controls": [
+          {
+            "id": "W1-N1",
+            "behavior": "Only adds a generic instruction to verify readiness or complete preparation.",
+            "judgement": "fail W1-H1",
+            "rationale": "That does not establish sealing; the needed condition was explicitly provided, so the failure is coverage, not source discovery."
+          },
+          {
+            "id": "W1-N2",
+            "behavior": "Correctly establishes sealing without repeating the term SEALED verbatim.",
+            "judgement": "accept",
+            "rationale": "Judge the stated state and ordering, not a keyword."
+          },
+          {
+            "id": "W1-N3",
+            "behavior": "Does not mention the white status dot or rename syntax.",
+            "judgement": "accept",
+            "rationale": "These details do not affect the scoped transfer procedure."
+          },
+          {
+            "id": "W1-N4",
+            "behavior": "Adds a supported short explanation of sealing without changing the chosen procedure.",
+            "judgement": "accept",
+            "rationale": "No word count or stylistic blacklist applies."
+          }
+        ],
+        "incidental_detail": [
+          "Status-dot color",
+          "Rename syntax outside the named subsection"
+        ],
+        "grading_notes": [
+          "Evaluate every hard item separately.",
+          "A requirement satisfied by meaning is a pass even if its wording differs.",
+          "Do not reward merely finding a condition unless the replacement preserves it in the actionable procedure."
+        ],
+        "schema_version": 1,
+        "source_status": "Original fictional primary sources; public-domain dedication in inputs/NOTICE.txt.",
+        "semantic_grading": {
+          "literal_word_matching": false,
+          "arbitrary_word_limit": null,
+          "prose_blacklist": null,
+          "hard_items_are_atomic": true,
+          "no_hidden_example_generalization": true
+        }
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance."
+    },
+    {
+      "id": "TWCOMP02",
+      "source_case_id": "W2",
+      "historical_key": {
+        "id": "W2",
+        "partition": "working",
+        "task_kind": "source_only_review_or_rewrite",
+        "construct": "Discover a necessary input condition by following a configured wrapper to its invoked check, then preserve that condition in the guide.",
+        "expected_disposition": "A correction is necessary.",
+        "task_scope": "Build a shift digest with the documented wrapper and the reader’s own readings.",
+        "hard_requirements": [
+          {
+            "id": "W2-H1",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The revised procedure requires at least 4 readings for every zone to be reported before running the shift digest.",
+            "meaning_equivalent_acceptance": [
+              "State the minimum per zone in the data-preparation step.",
+              "A prerequisite or validation instruction is acceptable if it clearly establishes the same lower bound for each zone."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/tools/shift_digest.py",
+                "anchor": "profile_name=\"shift\"",
+                "line_start": 11,
+                "line_end": 11
+              },
+              {
+                "path": "inputs/profiles.json",
+                "anchor": "\"minimum_readings_per_zone\": 4",
+                "line_start": 8,
+                "line_end": 8
+              },
+              {
+                "path": "inputs/room_digest.py",
+                "anchor": "check_reading_counts(groups, profile[\"minimum_readings_per_zone\"])",
+                "line_start": 46,
+                "line_end": 46
+              },
+              {
+                "path": "inputs/room_digest.py",
+                "anchor": "if len(values) < minimum:",
+                "line_start": 25,
+                "line_end": 25
+              }
+            ]
+          },
+          {
+            "id": "W2-H5",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The guide keeps a useful reason for the digest’s aggregation.",
+            "meaning_equivalent_acceptance": [
+              "Explain that the averages help compare zones without examining every reading.",
+              "An equivalent explanation of comparing summarized zone readings is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "so you can compare the zones without working through every reading.",
+                "line_start": 12,
+                "line_end": 12
+              }
+            ]
+          },
+          {
+            "id": "W2-H2",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The workflow retains the configured shift wrapper.",
+            "meaning_equivalent_acceptance": [
+              "Invoke python3 tools/shift_digest.py.",
+              "An equivalent invocation of that same configured entry point is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/tools/shift_digest.py",
+                "anchor": "profile_name=\"shift\"",
+                "line_start": 11,
+                "line_end": 11
+              }
+            ]
+          },
+          {
+            "id": "W2-H3",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The data-preparation step preserves the exact zone,celsius CSV header.",
+            "meaning_equivalent_acceptance": [
+              "Keep the header text.",
+              "An equivalent explicit schema with zone first and celsius second is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/room_digest.py",
+                "anchor": "if reader.fieldnames != [\"zone\", \"celsius\"]:",
+                "line_start": 11,
+                "line_end": 11
+              }
+            ]
+          },
+          {
+            "id": "W2-H4",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The result remains a per-zone arithmetic mean.",
+            "meaning_equivalent_acceptance": [
+              "Describe an average for each zone.",
+              "An equivalent correct mathematical explanation is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/room_digest.py",
+                "anchor": "sum(values) / len(values)",
+                "line_start": 33,
+                "line_end": 33
+              }
+            ]
+          },
+          {
+            "id": "W2-H6",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response stays within the named subsection and its short correction rationale.",
+            "meaning_equivalent_acceptance": [
+              "Do not edit or assess Read a saved digest or propose implementation changes."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "Do not edit “Read a saved digest” or propose implementation changes.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W2-H7",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The workflow keeps readings.csv as its input file.",
+            "meaning_equivalent_acceptance": [
+              "Preserve readings.csv in the invocation and preparation step."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "python3 tools/shift_digest.py readings.csv digest.txt",
+                "line_start": 9,
+                "line_end": 9
+              }
+            ]
+          },
+          {
+            "id": "W2-H8",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The workflow keeps digest.txt as its output destination.",
+            "meaning_equivalent_acceptance": [
+              "Preserve digest.txt in the invocation and inspection step."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "python3 tools/shift_digest.py readings.csv digest.txt",
+                "line_start": 9,
+                "line_end": 9
+              }
+            ]
+          },
+          {
+            "id": "W2-H9",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The input description retains one reading per CSV row.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing row-granularity instruction.",
+              "An equivalent schema description is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "one reading per row",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W2-H10",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The input description retains numeric Celsius values.",
+            "meaning_equivalent_acceptance": [
+              "Keep numeric Celsius as the value field.",
+              "An equivalent unit-aware description is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "numeric Celsius values",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W2-H11",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The output explanation retains rounding to one decimal place.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing rounding description.",
+              "An equivalent description of a single decimal digit in displayed means is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/room_digest.py",
+                "anchor": ":.1f} C",
+                "line_start": 33,
+                "line_end": 33
+              }
+            ]
+          },
+          {
+            "id": "W2-H12",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response and any available action trace respect the source-only task.",
+            "meaning_equivalent_acceptance": [
+              "Do not execute the utility or example commands and do not change implementation files."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "This is a source-only review: do not execute the utility or its example commands.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          }
+        ],
+        "negative_controls": [
+          {
+            "id": "W2-N1",
+            "behavior": "Requires four readings in the file without making the requirement per zone.",
+            "judgement": "fail W2-H1",
+            "rationale": "A mixed file can have more than four rows while one zone still fails the invoked check."
+          },
+          {
+            "id": "W2-N2",
+            "behavior": "Requires exactly four readings per zone or no more than four.",
+            "judgement": "fail W2-H1",
+            "rationale": "The check is a lower bound; extra readings are valid."
+          },
+          {
+            "id": "W2-N3",
+            "behavior": "Uses the quick profile’s one-reading behavior or replaces the wrapper with the generic entry point.",
+            "judgement": "fail W2-H1 and W2-H2 as applicable",
+            "rationale": "The documented wrapper selects shift explicitly."
+          },
+          {
+            "id": "W2-N4",
+            "behavior": "States only that the CSV must be valid or complete.",
+            "judgement": "fail W2-H1",
+            "rationale": "Neither statement conveys the per-zone lower bound."
+          },
+          {
+            "id": "W2-N5",
+            "behavior": "Omits the report heading, alphabetical ordering, function names, or the quick profile.",
+            "judgement": "accept",
+            "rationale": "These details are not necessary procedure conditions for this task."
+          },
+          {
+            "id": "W2-N6",
+            "behavior": "Describes the lower bound with any clear equivalent words or digits.",
+            "judgement": "accept",
+            "rationale": "Use semantic grading rather than number-token matching."
+          }
+        ],
+        "incidental_detail": [
+          "Alphabetical output order",
+          "Printed profile heading",
+          "Internal function and variable names",
+          "Unused quick-profile behavior"
+        ],
+        "grading_notes": [
+          "The prompt intentionally does not identify the missing condition.",
+          "The case uses the reader’s own data; it is not a fixed valid example.",
+          "Source-only restrictions apply to writers. The author separately executed the small source for self-validation."
+        ],
+        "schema_version": 1,
+        "source_status": "Original fictional primary sources; public-domain dedication in inputs/NOTICE.txt.",
+        "semantic_grading": {
+          "literal_word_matching": false,
+          "arbitrary_word_limit": null,
+          "prose_blacklist": null,
+          "hard_items_are_atomic": true,
+          "no_hidden_example_generalization": true
+        }
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance."
+    },
+    {
+      "id": "TWCOMP03",
+      "source_case_id": "W3",
+      "historical_key": {
+        "id": "W3",
+        "partition": "working",
+        "task_kind": "source_only_review_or_rewrite",
+        "construct": "Recognize sufficient conditions established by an earlier action, a known role, and an exact setup; preserve useful explanation in a valid fixed example.",
+        "expected_disposition": "The supplied procedure is complete and valid for the stated context.",
+        "task_scope": "Produce the exact shelf-card PNG at 72 mm and 120 dpi, then inspect line breaks.",
+        "hard_requirements": [
+          {
+            "id": "W3-H1",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response does not diagnose a missing FROZEN-state prerequisite for the existing sequence.",
+            "meaning_equivalent_acceptance": [
+              "Leave the procedure unchanged with a correct rationale.",
+              "Preserve locking before proof in any rewrite; a separate state inspection is not required."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/locking-reference.md",
+                "anchor": "`label lock LABEL` changes the label from EDITABLE to FROZEN and returns only after that change is complete.",
+                "line_start": 3,
+                "line_end": 3
+              },
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "label lock shelf-card",
+                "line_start": 8,
+                "line_end": 8
+              }
+            ]
+          },
+          {
+            "id": "W3-H4",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement retains the explanation that locking holds text and dimensions steady for rendering.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing explanation.",
+              "An equivalent short account of a stable label during proof generation is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/locking-reference.md",
+                "anchor": "A FROZEN label’s text and dimensions cannot change during rendering.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W3-H6",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement preserves the conditional relation between later text edits and unlocking.",
+            "meaning_equivalent_acceptance": [
+              "Retain the optional after-proof unlock instruction.",
+              "Explain that unlock is needed if the reader wants to edit afterward; do not make it a prerequisite to render the proof."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/locking-reference.md",
+                "anchor": "Use it before changing text after a proof.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W3-H7",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The answer stays a review of the fixed task and does not replace it with a settings-selection exercise or require a general reference to validate the fixed example.",
+            "meaning_equivalent_acceptance": [
+              "No-replacement-needed is acceptable.",
+              "A short optional reference or clarification is acceptable if the fixed task remains complete and no unsupported deficiency is claimed."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "This page is specifically for the exact shelf-card PNG in the guide, not a general guide to proof settings.",
+                "line_start": 3,
+                "line_end": 3
+              },
+              {
+                "path": "context.txt",
+                "anchor": "The task does not ask them to choose a role, create a workspace, select a different label, or choose settings for some future proof.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W3-H2",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response treats the established Proof Maker role as sufficient for the required capabilities.",
+            "meaning_equivalent_acceptance": [
+              "Rely on the supplied role definition.",
+              "A supported optional clarification is acceptable; do not require acquiring capabilities or switching roles."
+            ],
+            "evidence": [
+              {
+                "path": "context.txt",
+                "anchor": "staff assigned the Proof Maker role",
+                "line_start": 1,
+                "line_end": 1
+              },
+              {
+                "path": "inputs/roles-and-workspaces.md",
+                "anchor": "The Proof Maker role grants `label.read`, `label.lock`, `label.proof`, and `label.unlock`.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W3-H3",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement keeps shelf-card as the label to prove.",
+            "meaning_equivalent_acceptance": [
+              "Retain the fixed label name rather than a placeholder requiring another choice."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "label proof shelf-card",
+                "line_start": 16,
+                "line_end": 16
+              }
+            ]
+          },
+          {
+            "id": "W3-H5",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement keeps line-break inspection as the proof’s purpose.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing layout-review instruction.",
+              "An equivalent explanation of reviewing line breaks is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/proof-reference.md",
+                "anchor": "A proof supports layout review, such as checking line breaks.",
+                "line_start": 13,
+                "line_end": 13
+              }
+            ]
+          },
+          {
+            "id": "W3-H8",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response treats the standard Preview workspace as sufficient for rendering availability.",
+            "meaning_equivalent_acceptance": [
+              "Rely on the given setup.",
+              "A supported optional clarification is acceptable; do not require enabling rendering or selecting another workspace."
+            ],
+            "evidence": [
+              {
+                "path": "context.txt",
+                "anchor": "in the standard Preview workspace",
+                "line_start": 1,
+                "line_end": 1
+              },
+              {
+                "path": "inputs/roles-and-workspaces.md",
+                "anchor": "The standard Preview workspace has rendering enabled.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "W3-H9",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement establishes the successful lock before proof generation.",
+            "meaning_equivalent_acceptance": [
+              "Retain label lock shelf-card before label proof.",
+              "A semantically equivalent ordered instruction is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/locking-reference.md",
+                "anchor": "`label lock LABEL` changes the label from EDITABLE to FROZEN and returns only after that change is complete.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "W3-H10",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement preserves a proof width of 72 mm.",
+            "meaning_equivalent_acceptance": [
+              "Keep --width-mm 72 or an executable equivalent.",
+              "Keep the physical unit clear."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--width-mm 72",
+                "line_start": 16,
+                "line_end": 16
+              }
+            ]
+          },
+          {
+            "id": "W3-H11",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement preserves 120 dpi.",
+            "meaning_equivalent_acceptance": [
+              "Keep --dpi 120 or an executable equivalent."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--dpi 120",
+                "line_start": 16,
+                "line_end": 16
+              }
+            ]
+          },
+          {
+            "id": "W3-H12",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement preserves proofs/shelf-card.png as the output destination.",
+            "meaning_equivalent_acceptance": [
+              "Keep the destination in the command and the inspection instruction."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--out proofs/shelf-card.png",
+                "line_start": 16,
+                "line_end": 16
+              }
+            ]
+          },
+          {
+            "id": "W3-H13",
+            "severity": "hard",
+            "applies_when": "if a replacement is supplied",
+            "criterion": "Any replacement states that the PNG cannot establish a physical printer’s final colors.",
+            "meaning_equivalent_acceptance": [
+              "Preserve the existing qualification.",
+              "Equivalent wording is acceptable; a claim of complete physical print fidelity is not."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/proof-reference.md",
+                "anchor": "It does not establish the final colors from a physical printer.",
+                "line_start": 13,
+                "line_end": 13
+              }
+            ]
+          },
+          {
+            "id": "W3-H14",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response and any available action trace respect the source-only task.",
+            "meaning_equivalent_acceptance": [
+              "Do not execute the example commands or modify product files."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "do not run the commands or change any product files.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          }
+        ],
+        "negative_controls": [
+          {
+            "id": "W3-N1",
+            "behavior": "Says the guide must separately tell the reader to make the label FROZEN despite the successful lock step.",
+            "judgement": "fail W3-H1",
+            "rationale": "The previous command establishes that state."
+          },
+          {
+            "id": "W3-N2",
+            "behavior": "Demands separate eligibility or setup actions already entailed by Proof Maker and Preview.",
+            "judgement": "fail W3-H2 or W3-H8 as applicable",
+            "rationale": "The given reader and setup satisfy the documented conditions."
+          },
+          {
+            "id": "W3-N3",
+            "behavior": "Accepts the fixed numeric arguments without listing all accepted widths or DPI values.",
+            "judgement": "accept",
+            "rationale": "A fixed valid example needs no general argument reference."
+          },
+          {
+            "id": "W3-N4",
+            "behavior": "Adds a brief accurate optional explanation of an implicit condition.",
+            "judgement": "accept",
+            "rationale": "The test does not blacklist repetition or impose a word count; failure requires a false deficiency, unsupported burden, scope replacement, or lost meaning."
+          },
+          {
+            "id": "W3-N5",
+            "behavior": "Removes the color qualification or locking explanation merely to be concise.",
+            "judgement": "fail the corresponding preservation item",
+            "rationale": "These statements explain what the result can establish and why the earlier action is useful."
+          },
+          {
+            "id": "W3-N6",
+            "behavior": "Returns a correct concise finding that no replacement is needed.",
+            "judgement": "accept",
+            "rationale": "The intact original remains the deliverable; rewrite-only preservation items do not require quoting it back."
+          }
+        ],
+        "incidental_detail": [
+          "Other role and workspace choices",
+          "Unused width or DPI values",
+          "General settings-selection advice"
+        ],
+        "grading_notes": [
+          "Do not treat every source precondition as a required separate sentence.",
+          "Do not infer a task to generalize the example.",
+          "Supported light editing is allowed; style is not a hard criterion."
+        ],
+        "schema_version": 1,
+        "source_status": "Original fictional primary sources; public-domain dedication in inputs/NOTICE.txt.",
+        "semantic_grading": {
+          "literal_word_matching": false,
+          "arbitrary_word_limit": null,
+          "prose_blacklist": null,
+          "hard_items_are_atomic": true,
+          "no_hidden_example_generalization": true
+        }
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance."
+    },
+    {
+      "id": "TWCOMP04",
+      "source_case_id": "W4",
+      "historical_key": {
+        "schema_version": 1,
+        "case_id": "W4",
+        "assessment_kind": "authored_working_regression_challenge",
+        "assessment_scope": "Assess the submitted documentation edits against the supplied project source and recorded history. This key is not part of the writer input and is not an empirical estimate of general performance.",
+        "mandatory_criteria": [
+          {
+            "id": "W4-M1",
+            "property": "Avoid an incidental current inventory fact while preserving meaningful quantities and history.",
+            "requirement": "Remove or generalize the present-tense statement that the bundled demo covers four rooms. The count is presently correct but contributes nothing to running, validating, or handing off the demo, and the supported tool accepts rooms from the data rather than requiring a fixed number. Do not merely substitute another current snapshot total or move the same incidental current total into another guidance page.",
+            "grounding": [
+              {
+                "file": "README.md",
+                "line_start": 15,
+                "line_end": 15,
+                "excerpt": "The bundled demo covers four rooms."
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 12,
+                "line_end": 21,
+                "excerpt": "DEMO_ROWS = [\n    (\"Cedar\", 10, 690),\n    (\"Cedar\", 10, 710),\n    (\"Gallery\", 10, 640),\n    (\"Gallery\", 10, 680),\n    (\"Workshop\", 10, 820),\n    (\"Workshop\", 10, 800),\n    (\"Lounge\", 10, 600),\n    (\"Lounge\", 10, 620),\n]"
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 51,
+                "line_end": 58,
+                "excerpt": "    by_room = {}\n    for row in observations:\n        by_room.setdefault(row[\"room\"], []).append(row[\"co2_ppm\"])\n    rooms = [\n        {\"room\": room, \"mean_ppm\": round(sum(by_room[room]) / len(by_room[room]), 2)}\n        for room in sorted(by_room)\n    ]\n    overview = {\"format\": PANEL_FORMAT, \"window_minutes\": WINDOW_MINUTES, \"rooms\": rooms}"
+              }
+            ],
+            "accepted_equivalent_routes": [
+              "Delete the standalone current room-count sentence.",
+              "Replace it with a task-useful description such as an included example of room observations, without a fixed current inventory total.",
+              "Reorganize onboarding so the current count disappears while retaining usable demo instructions."
+            ],
+            "insufficient": [
+              "Change four to another demo inventory count or report an exact row total instead.",
+              "Treat the current count as a fixed input requirement.",
+              "Erase the dated pilot quantities or the required observation window merely because they are numbers."
+            ]
+          },
+          {
+            "id": "W4-M2",
+            "property": "Preserve producer, staging selection, and consumer agreement for the selected artifact.",
+            "requirement": "Make the handoff procedure stage the generated room-aggregate panel payload from overview.json as panel.json in the directory actually passed to preview.py --root. Correct the adjoining artifact-selection prose as well. The trace export has a different format and cannot satisfy this consumer contract. All retained instructions for this handoff must agree with the documented producer output and consumer path, without changing Python behavior.",
+            "grounding": [
+              {
+                "file": "docs/handoff.md",
+                "line_start": 8,
+                "line_end": 11,
+                "excerpt": "python tools/packet.py demo --out build/demo\nmkdir -p handoff\ncp build/demo/trace.json handoff/panel.json\npython tools/preview.py --root handoff"
+              },
+              {
+                "file": "docs/handoff.md",
+                "line_start": 14,
+                "line_end": 14,
+                "excerpt": "Select `trace.json` as the payload for the recipient's room panel and stage it under the name `panel.json`. The `overview.json` export can remain in the build directory."
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 9,
+                "line_end": 10,
+                "excerpt": "PANEL_FORMAT = \"ventrail.panel.v1\"\nTRACE_FORMAT = \"ventrail.trace.v1\""
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 58,
+                "line_end": 62,
+                "excerpt": "    overview = {\"format\": PANEL_FORMAT, \"window_minutes\": WINDOW_MINUTES, \"rooms\": rooms}\n    trace = {\"format\": TRACE_FORMAT, \"input\": str(input_path), \"observations\": observations}\n    out.mkdir(parents=True, exist_ok=True)\n    write_json(out / \"overview.json\", overview)\n    write_json(out / \"trace.json\", trace)"
+              },
+              {
+                "file": "tools/preview.py",
+                "line_start": 12,
+                "line_end": 23,
+                "excerpt": "    payload = json.loads((root / \"panel.json\").read_text(encoding=\"utf-8\"))\n    if payload.get(\"format\") != PANEL_FORMAT:\n        raise ValueError(f\"panel.json must use format {PANEL_FORMAT}\")\n    if payload.get(\"window_minutes\") != WINDOW_MINUTES:\n        raise ValueError(f\"panel.json must use a {WINDOW_MINUTES}-minute window\")\n    rooms = payload.get(\"rooms\")\n    if not isinstance(rooms, list) or not rooms:\n        raise ValueError(\"panel.json must contain a nonempty rooms list\")\n    table_rows = []\n    for room in rooms:\n        label = html.escape(str(room[\"room\"]))\n        mean = float(room[\"mean_ppm\"])"
+              },
+              {
+                "file": "docs/layout.md",
+                "line_start": 7,
+                "line_end": 8,
+                "excerpt": "| `overview.json` | Aggregate room results with the panel format identifier, reporting window, and per-room means. |\n| `trace.json` | Diagnostic observations with the trace format identifier and the input filename. |"
+              },
+              {
+                "file": "docs/layout.md",
+                "line_start": 10,
+                "line_end": 10,
+                "excerpt": "The output directory is a build location. A handoff directory is the directory supplied to the preview command with `--root`; the preview command opens the file named `panel.json` there."
+              }
+            ],
+            "accepted_equivalent_routes": [
+              "With the existing directories, copy build/demo/overview.json to handoff/panel.json and retain python tools/preview.py --root handoff; adjust the selection explanation to match.",
+              "Choose different build and handoff directories, provided the selected producer file is overview.json, the staged filename is panel.json, and --root names that same staging directory.",
+              "Use a different shell command or standard-library copy/rename step that places the exact generated aggregate payload at the consumer path; no literal cp spelling is required.",
+              "Use the supported build command with an explicitly available CSV, or retain the demo producer, provided the aggregate selection and final consumer path remain valid and onboarding still offers a usable demo."
+            ],
+            "insufficient": [
+              "Change prose alone while leaving the command to stage trace.json.",
+              "Change the command alone while retaining contradictory artifact-selection prose.",
+              "Copy overview.json into the handoff under its original filename while leaving the consumer to open panel.json.",
+              "Change --root without ensuring that the selected aggregate is staged as panel.json in that root.",
+              "Rename the trace export or describe it as a panel without providing the aggregate payload the supplied consumer requires.",
+              "Modify the consumer or producer to accept the old handoff instead of repairing the requested documentation."
+            ]
+          },
+          {
+            "id": "W4-C1",
+            "property": "Protect a useful precise operational requirement.",
+            "requirement": "Retain the exact 10-minute observation-window requirement and its role as a validated contract. Its placement and wording may change; the supplied code does not permit arbitrary window sizes.",
+            "grounding": [
+              {
+                "file": "README.md",
+                "line_start": 23,
+                "line_end": 23,
+                "excerpt": "Every observation must represent a **10-minute window**. The compiler rejects rows with a different `window_minutes` value; the panel also checks this window contract."
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 8,
+                "line_end": 8,
+                "excerpt": "WINDOW_MINUTES = 10"
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 31,
+                "line_end": 34,
+                "excerpt": "            if int(row[\"window_minutes\"]) != WINDOW_MINUTES:\n                raise ValueError(\n                    f\"CSV line {line_number}: window_minutes must be {WINDOW_MINUTES}\"\n                )"
+              },
+              {
+                "file": "tools/preview.py",
+                "line_start": 15,
+                "line_end": 16,
+                "excerpt": "    if payload.get(\"window_minutes\") != WINDOW_MINUTES:\n        raise ValueError(f\"panel.json must use a {WINDOW_MINUTES}-minute window\")"
+              }
+            ],
+            "accepted_equivalent_routes": [
+              "Keep the current requirement as written.",
+              "State that window_minutes must equal 10 in a concise input-contract table or example with an explicit requirement.",
+              "Relocate the requirement to an accessible input-contract section without weakening its exactness."
+            ]
+          },
+          {
+            "id": "W4-C2",
+            "property": "Protect an explicitly historical observation and decision.",
+            "requirement": "Keep the pilot record accurate: it was recorded on 2025-03-18, describes three rooms and twelve CSV rows in that pilot exercise, and records the reason to retain diagnostic observations alongside aggregates. Do not rewrite these historical facts to match the current demo or delete them as if they were present-day inventory guidance.",
+            "grounding": [
+              {
+                "file": "docs/decisions/2025-03-18-pilot.md",
+                "line_start": 3,
+                "line_end": 4,
+                "excerpt": "Recorded: 2025-03-18  \nStatus: accepted pilot decision"
+              },
+              {
+                "file": "docs/decisions/2025-03-18-pilot.md",
+                "line_start": 8,
+                "line_end": 8,
+                "excerpt": "The pilot exercise used three rooms and twelve CSV rows. During the review, a facilities maintainer needed to inspect an individual reading after looking at a room aggregate."
+              },
+              {
+                "file": "docs/decisions/2025-03-18-pilot.md",
+                "line_start": 12,
+                "line_end": 12,
+                "excerpt": "Keep a row-level diagnostic export beside the aggregate export so that a maintainer can investigate the input behind a room result. The aggregate remains the compact presentation of the room results."
+              },
+              {
+                "file": "docs/decisions/2025-03-18-pilot.md",
+                "line_start": 14,
+                "line_end": 14,
+                "excerpt": "This note records the pilot exercise and its decision. Its observed room and row totals describe that exercise, rather than the contents of later demos."
+              },
+              {
+                "file": "README.md",
+                "line_start": 33,
+                "line_end": 33,
+                "excerpt": "The [pilot decision recorded on 2025-03-18](docs/decisions/2025-03-18-pilot.md) explains why an aggregate export and a diagnostic export are kept separately."
+              }
+            ],
+            "accepted_equivalent_routes": [
+              "Leave the dated note unchanged and preserve an accessible reference to the historical decision.",
+              "Make cosmetic or organizational edits while preserving the date, pilot quantities, and recorded rationale as historical facts."
+            ]
+          },
+          {
+            "id": "W4-C3",
+            "property": "Protect a valid procedure whose input is established automatically.",
+            "requirement": "Retain a usable demo path and the fact that the demo command creates its example CSV and directories before building. Do not add a mandatory manual CSV creation, input download, package installation, or prior build step to make this already valid demo available. A separate optional route for an existing user-provided CSV remains acceptable.",
+            "grounding": [
+              {
+                "file": "README.md",
+                "line_start": 10,
+                "line_end": 10,
+                "excerpt": "python tools/packet.py demo --out build/demo"
+              },
+              {
+                "file": "README.md",
+                "line_start": 13,
+                "line_end": 13,
+                "excerpt": "The demo command creates its example CSV at `build/demo/inputs/readings.csv` before compiling the exports. It creates the output directories too, so there is no separate input download or setup step."
+              },
+              {
+                "file": "README.md",
+                "line_start": 25,
+                "line_end": 28,
+                "excerpt": "For a CSV that you already have, use:\n\n```sh\npython tools/packet.py build --input readings.csv --out build/local"
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 65,
+                "line_end": 72,
+                "excerpt": "def create_demo(out: Path) -> None:\n    input_path = out / \"inputs\" / \"readings.csv\"\n    input_path.parent.mkdir(parents=True, exist_ok=True)\n    with input_path.open(\"w\", encoding=\"utf-8\", newline=\"\") as handle:\n        writer = csv.writer(handle)\n        writer.writerow(FIELDNAMES)\n        writer.writerows(DEMO_ROWS)\n    build_packet(input_path, out)"
+              },
+              {
+                "file": "tools/packet.py",
+                "line_start": 85,
+                "line_end": 88,
+                "excerpt": "        if args.command == \"demo\":\n            create_demo(args.out)\n        else:\n            build_packet(args.input, args.out)"
+              }
+            ],
+            "accepted_equivalent_routes": [
+              "Keep the current demo invocation and automatic-setup explanation.",
+              "Change the demo output path or wording while preserving its self-contained behavior and keeping subsequent paths consistent.",
+              "Add clearly optional custom-input instructions without imposing them as prerequisites for the demo."
+            ]
+          }
+        ],
+        "protected_legitimate_controls": [
+          {
+            "criterion_id": "W4-C1",
+            "control": "The exact 10-minute input and consumer window contract is useful and enforced."
+          },
+          {
+            "criterion_id": "W4-C2",
+            "control": "The explicitly historical date, pilot quantities, and decision remain accurate even though the later demo has different contents."
+          },
+          {
+            "criterion_id": "W4-C3",
+            "control": "The demo invocation automatically creates its input and output directories using standard-library code."
+          }
+        ],
+        "grading_boundaries": [
+          "Evaluate semantic adequacy, not an exact replacement sentence, command spelling, heading order, or dependency inventory.",
+          "The required consumer input is visible in tools/preview.py and the producer schema is visible in tools/packet.py; no evaluator-only contract is needed.",
+          "No particular amount of rewriting is required. A focused README edit and a focused handoff edit can satisfy the task.",
+          "Other compatible clarity improvements are allowed, but they cannot substitute for either principal repair or damage a protected control.",
+          "Do not infer that all counts, dates, examples, installation sections, or explanations of automatic setup are undesirable.",
+          "No claim is made that the working case is sealed from its author or independently sampled from a deployment population."
+        ]
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance."
+    },
+    {
+      "id": "TWCOMP05",
+      "source_case_id": "W5",
+      "historical_key": {
+        "schema_version": 1,
+        "case_id": "W5",
+        "skill_name": "technical-writing",
+        "evidence_status": "Independently authored working evidence for a predeclared comparison; not a held-out case, random sample, or deployment estimate.",
+        "input_delivery": "Only the W5 entry in cases.json, including its four files, is candidate-facing. This key, author notes, diagnostics, derived inputs, snapshots, and manifest are separate author material.",
+        "source_files_sha256": {
+          "docs/manifest-guide-draft.md": "d4f9a78af566ac59678d1ba0339be89dc839d7d27c87d9f6d724eef5a284d326",
+          "docs/fixture-contract.md": "18797f033a12c0becc71f7cfbfa2dd78437d3ea614ba3d5195342e7415b4bffb",
+          "examples/morning.json": "7e418e07eaac3ccf18c2a4887f65df3b8c3e45d67842995bf7ccf3fc1ab7da81",
+          "tools/check_manifest.py": "8f0c2731ab8234fc0ddb64401b67b0cc6c65e5dbba1e9842b059638ea1aa37db"
+        },
+        "evidence_digest_convention": "One-based inclusive line ranges. exact_quote joins source lines with LF and has no additional terminal newline; quote_sha256 hashes those exact UTF-8 bytes.",
+        "evidence": [
+          {
+            "id": "E1",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 3,
+            "line_end": 3,
+            "exact_quote": "Harborpack's loading-manifest fixture lets contributors rehearse input files before documentation changes are reviewed. This walkthrough uses two invented loads. All commands run locally against supplied files; the fixture does not contact a depot service or create a loading job. Run the commands from the package root with Python 3 available.",
+            "quote_sha256": "7651501585850b4af0768f63b51db16d32bbb511aa33c3bb00cec4900e269e78"
+          },
+          {
+            "id": "E2",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 9,
+            "line_end": 9,
+            "exact_quote": "The checker first parses the selected input format, then checks the records as a complete manifest. This separates a broken file representation from a well-formed record with an unusable value. A successful check should not be read as evidence that Harborpack can eliminate human error across an entire warehouse operation.",
+            "quote_sha256": "e2bcb9eb71189734a4f32716cc0dbca1b808e6d473a4d9dabafb1c0bc35e845b"
+          },
+          {
+            "id": "E3",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 31,
+            "line_end": 35,
+            "exact_quote": "1. Copy `examples/morning.json` to `examples/morning.jsonl`.\n2. Delete the array's opening `[` line and closing `]` line.\n3. Delete the commas immediately after the records' closing `}` characters.\n\nKeep the existing physical lines and indentation inside each record. The field values stay unchanged. Check the result with:",
+            "quote_sha256": "c805630b997b0662690c50718168abe6be3ab017ba7b98eeb1bdb020280eac9a"
+          },
+          {
+            "id": "E4",
+            "file": "docs/fixture-contract.md",
+            "line_start": 14,
+            "line_end": 14,
+            "exact_quote": "- `jsonl`: each nonblank physical line is independently parsed as one complete JSON object. Blank physical lines are ignored. A record cannot span physical lines. JSON string escapes, including an escaped newline, remain part of that record's single physical line.",
+            "quote_sha256": "b106e6115b696fb32a00b1355236fabf5352dd7072ab70f55145d7ed7622b9f0"
+          },
+          {
+            "id": "E5",
+            "file": "tools/check_manifest.py",
+            "line_start": 23,
+            "line_end": 32,
+            "exact_quote": "    for line_number, line in enumerate(content.splitlines(), 1):\n        if not line.strip():\n            continue\n        try:\n            records.append(json.loads(line))\n        except json.JSONDecodeError as error:\n            raise ManifestError(\n                \"jsonl physical line {}: {}\".format(line_number, error.msg)\n            ) from error\n    return records",
+            "quote_sha256": "476a1c8786f8e79c3562b2216b499c7f5ecd2328680e08e0a2affea44b10f938"
+          },
+          {
+            "id": "E6",
+            "file": "examples/morning.json",
+            "line_start": 1,
+            "line_end": 12,
+            "exact_quote": "[\n  {\n    \"load_id\": \"am-14\",\n    \"cartons\": 4,\n    \"note\": \"Tea, green\"\n  },\n  {\n    \"load_id\": \"am-15\",\n    \"cartons\": 8,\n    \"note\": \"Keep label \\\"UP\\\" visible\"\n  }\n]",
+            "quote_sha256": "028d7889d1c407958f27781c091fe2e120ee07cb03cb885f838f8ec650a63e40"
+          },
+          {
+            "id": "E7",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 45,
+            "line_end": 45,
+            "exact_quote": "For a machine-readable summary, change only `--report text` to `--report json` in either check command. The input path and `--format` value still describe the input file. The successful summary is one JSON object containing `records` and `cartons`.",
+            "quote_sha256": "1e261572b318e9cd1c1fde64afd5b7723444ab53ff8a5d837398d6d5924a9dff"
+          },
+          {
+            "id": "E8",
+            "file": "docs/fixture-contract.md",
+            "line_start": 7,
+            "line_end": 7,
+            "exact_quote": "Run `python3 tools/check_manifest.py --input PATH --format json|jsonl [--report text|json]` from the package root. Python's standard library is sufficient. `--input` and `--format` are required. `--report` defaults to `text`. The report option affects output representation only; it neither converts the input nor chooses an input parser.",
+            "quote_sha256": "c21a9ffc70ed78d7b19ead473232ef14d234329ca51bfb8ef9f2451d66ae77ad"
+          },
+          {
+            "id": "E9",
+            "file": "tools/check_manifest.py",
+            "line_start": 81,
+            "line_end": 86,
+            "exact_quote": "    summary = {\"records\": len(records), \"cartons\": sum(row[\"cartons\"] for row in records)}\n    if args.report == \"json\":\n        print(json.dumps(summary, ensure_ascii=False))\n    else:\n        print(\"OK: {records} records, {cartons} cartons\".format(**summary))\n    return 0",
+            "quote_sha256": "a5ca31de65190f1085a002fb0dacdbf41e93b11f5b581dd10072b2dc97e0fd91"
+          },
+          {
+            "id": "E10",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 49,
+            "line_end": 49,
+            "exact_quote": "A manifest must contain between 1 and 50 records. Split a larger manifest into files of at most 50 records before checking them. Identifier uniqueness is checked within each input file, so this split does not perform a cross-file duplicate check.",
+            "quote_sha256": "fc3b55e5247b71cd399c86ff4bbf845bae3232c9738516d735bf713e610f7021"
+          },
+          {
+            "id": "E11",
+            "file": "tools/check_manifest.py",
+            "line_start": 36,
+            "line_end": 37,
+            "exact_quote": "    if not 1 <= len(records) <= 50:\n        return [\"manifest has {} records; allowed range is 1..50\".format(len(records))]",
+            "quote_sha256": "d74798dad81d33c94ec69d98144f061fc7c16b58332c6105fab81bb71de2287f"
+          },
+          {
+            "id": "E12",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 51,
+            "line_end": 51,
+            "exact_quote": "A successful check exits with status 0 and writes its summary to standard output. A rejected manifest exits with status 2, writes diagnostics to standard error, and produces no partial total. JSON Lines syntax diagnostics name the physical line; record-validation diagnostics use a one-based record position. Correct the indicated representation or field and rerun the command before using the summary.",
+            "quote_sha256": "6b5f9b45f1080a9f2e8856762dffed03cd35565cd1dd28a228ebd26eed33321a"
+          },
+          {
+            "id": "E13",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 53,
+            "line_end": 53,
+            "exact_quote": "The fixture does not verify stock availability. Confirm the planned carton counts against current inventory before using them for an actual loading job.",
+            "quote_sha256": "fd885ffed2e0385723d172969ec334db45e5ef1096b2149053089a6af544581d"
+          },
+          {
+            "id": "E14",
+            "file": "docs/fixture-contract.md",
+            "line_start": 26,
+            "line_end": 26,
+            "exact_quote": "No cross-file duplicate detection is performed. Syntax errors stop parsing. For parsed input, validation runs before any summary is emitted. The fixture checks representation and stated counts, not whether stock exists. Operational use of planned quantities requires checking current inventory separately.",
+            "quote_sha256": "b36f283711f6581e34062796898de76d6e380e0b2dec2218b46ce7b8530fb4f4"
+          },
+          {
+            "id": "E15",
+            "file": "docs/manifest-guide-draft.md",
+            "line_start": 7,
+            "line_end": 7,
+            "exact_quote": "Each record describes a planned load. A `load_id` is a unique string of 1–24 lowercase letters, digits, or hyphens. `cartons` is an integer from 1 through 200; a numeric-looking string is rejected. An optional `note` is a string of at most 120 characters. The fixture rejects fields outside these three names so that a misspelled field does not silently disappear.",
+            "quote_sha256": "7404d5546b8b94a409af6bd388e5463b47659fa2017cc8ebff2cd7ea2fb90c86"
+          },
+          {
+            "id": "E16",
+            "file": "docs/fixture-contract.md",
+            "line_start": 32,
+            "line_end": 32,
+            "exact_quote": "On invalid input, exit status is 2, standard output is empty, and diagnostics go to standard error. JSON Lines syntax errors identify a physical line. Record-validation errors identify a one-based record position. There is no partial success total. Unreadable files and invalid UTF-8 also fail with status 2.",
+            "quote_sha256": "20aa2d8dd88844b0b883879f98c9c3f95b9bbd5d4e102b536e80cf075a2bda4f"
+          },
+          {
+            "id": "E17",
+            "file": "docs/fixture-contract.md",
+            "line_start": 34,
+            "line_end": 34,
+            "exact_quote": "`examples/morning.json` contains two invented loads, with 4 and 8 cartons. Neither identifier refers to an actual loading job.",
+            "quote_sha256": "5935444f31319e58045ff6e321f2d9533f9518ff6638018d933f242e45b7b0e1"
+          },
+          {
+            "id": "E18",
+            "file": "tools/check_manifest.py",
+            "line_start": 35,
+            "line_end": 62,
+            "exact_quote": "def validate(records):\n    if not 1 <= len(records) <= 50:\n        return [\"manifest has {} records; allowed range is 1..50\".format(len(records))]\n    problems = []\n    seen_ids = set()\n    for position, record in enumerate(records, 1):\n        prefix = \"record {}: \".format(position)\n        if not isinstance(record, dict):\n            problems.append(prefix + \"must be an object\")\n            continue\n        unknown = set(record) - {\"load_id\", \"cartons\", \"note\"}\n        if unknown:\n            problems.append(prefix + \"unknown fields: \" + \", \".join(sorted(unknown)))\n        load_id = record.get(\"load_id\")\n        if not isinstance(load_id, str) or re.fullmatch(r\"[a-z0-9-]{1,24}\", load_id) is None:\n            problems.append(prefix + \"load_id must match [a-z0-9-]{1,24}\")\n        elif load_id in seen_ids:\n            problems.append(prefix + \"duplicate load_id \" + load_id)\n        else:\n            seen_ids.add(load_id)\n        cartons = record.get(\"cartons\")\n        if type(cartons) is not int or not 1 <= cartons <= 200:\n            problems.append(prefix + \"cartons must be an integer from 1 through 200\")\n        if \"note\" in record:\n            note = record[\"note\"]\n            if not isinstance(note, str) or len(note) > 120:\n                problems.append(prefix + \"note must be a string of at most 120 characters\")\n    return problems",
+            "quote_sha256": "bd39bd7fca7ea3831a875e14d536bd0e7a5ae91d106c83905f1e5a610c07d50b"
+          }
+        ],
+        "mandatory_criteria": [
+          {
+            "id": "M1",
+            "name": "Repair the complete input-format transformation",
+            "source_evidence": [
+              "E3",
+              "E4",
+              "E5",
+              "E6"
+            ],
+            "decision": "The draft removes the array wrapper and inter-record commas but explicitly preserves the multiline objects. Its resulting file is invalid for the supplied JSON Lines parser, which parses each nonblank physical line independently.",
+            "required_result": "The revised page gives an actionable JSON Lines path that produces one complete JSON object per nonblank physical line, preserves both supplied records in order with their values and types, and uses the supported --format jsonl invocation. The original JSON path remains usable.",
+            "accepted_equivalent_repairs": [
+              "Provide a small standard-library converter that parses the JSON array and serializes each complete object to its own physical line, then run the documented JSON Lines check.",
+              "Provide the two correct single-line JSON objects for readers to save at the path referenced by the check command, preserving the comma in the first note and escaped quotation marks in the second note.",
+              "Give a concise, unambiguous manual recipe for this supplied example that removes the array punctuation and joins each entire object onto one physical line without changing string contents or field types.",
+              "Any other fully supported local transformation that satisfies the same framing, data-preservation, file-path, and invocation requirements. No particular wording or converter implementation is mandated."
+            ],
+            "insufficient_repairs": [
+              "Keep the original physical-line preservation instruction, even if its punctuation edits are explained more carefully.",
+              "Add a generic instruction to validate or consult the contract while leaving the actual conversion incomplete.",
+              "Only change the suffix or parser flag, compact the whole array onto a single line, or invent an unsupported conversion flag.",
+              "Remove the JSON Lines workflow altogether; the task asks to retain both supported input formats.",
+              "Produce the same aggregate total by changing, omitting, or merging record data. Matching totals alone does not establish equivalent records."
+            ],
+            "contextual_judgment": "Judge the entire resulting representation together with its command. A correct short adaptation is sufficient. Do not demand execution, unseen edge-case testing, a universal converter, or expanded commands when the candidate gives an unambiguous recipe scoped to the supplied example."
+          },
+          {
+            "id": "M2",
+            "name": "Remove or replace a defensive qualification that contributes no local guidance",
+            "source_evidence": [
+              "E1",
+              "E2",
+              "E13",
+              "E14",
+              "E17"
+            ],
+            "target_sentence": "A successful check should not be read as evidence that Harborpack can eliminate human error across an entire warehouse operation.",
+            "decision": "The sentence is true, but it rebuts a warehouse-wide error-elimination claim that the surrounding guide does not make. The guide already identifies invented loads and local-only execution, and it separately gives a concrete inventory boundary. The sentence changes no documented step, input interpretation, or troubleshooting decision.",
+            "required_result": "The revised page removes this unsupported defensive detour or replaces it with source-grounded, in-scope guidance that makes a concrete contribution. The actual inventory caveat and useful local-scope information remain.",
+            "accepted_equivalent_repairs": [
+              "Delete the sentence while retaining the parsing-versus-validation explanation around it.",
+              "Merge the relevant local interpretation into the existing inventory or validation explanation without repeating an unclaimed broad assurance.",
+              "Replace it with a supported operational distinction or action that is useful at that location and does not merely restate information already adequately established."
+            ],
+            "insufficient_repairs": [
+              "Retain the same warehouse-wide disclaimer under softer or more elaborate wording.",
+              "Introduce an implied promise elsewhere so that the warning appears necessary.",
+              "Remove all qualifications indiscriminately, including the actionable inventory boundary or record limit."
+            ],
+            "contextual_judgment": "Score the sentence by what it contributes in the complete page, not by the presence or absence of particular words, negation, confidence language, or numbers. A materially new, supported local contribution can justify a replacement; a paraphrase of the same unclaimed broad warning cannot."
+          },
+          {
+            "id": "M3",
+            "name": "Deliver a faithful and usable complete guide",
+            "source_evidence": [
+              "E1",
+              "E6",
+              "E7",
+              "E8",
+              "E10",
+              "E12",
+              "E13",
+              "E15",
+              "E16",
+              "E18"
+            ],
+            "required_result": "Return a complete replacement page and brief editorial note. Preserve the useful technical depth and operational facts captured by the positive controls below. Commands and any new snippets must be internally coherent, supported by the supplied sources, and usable from the stated package root without changing the fixture or contract.",
+            "contextual_judgment": "Organization, headings, prose, table layout, command formatting, and explanation length may vary. The page need not reproduce every contract detail, but it must preserve the material rules, boundaries, and troubleshooting guidance that the existing draft usefully supplies. Do not penalize lack of optional local execution."
+          }
+        ],
+        "positive_controls": [
+          {
+            "id": "P1",
+            "name": "Keep the valid concise report substitution",
+            "source_evidence": [
+              "E7",
+              "E8",
+              "E9"
+            ],
+            "preserve": "Changing only --report text to --report json produces a machine-readable summary while the input file path and --format still select the input representation. The result contains integer records and cartons fields.",
+            "judgment": "The one-sentence adaptation is already sufficient. Equivalent succinct guidance is accepted; no repeated full command, broad warning, or extra validation ritual is required. Do not claim --report json converts the manifest itself."
+          },
+          {
+            "id": "P2",
+            "name": "Keep a real record limit and a workable response",
+            "source_evidence": [
+              "E10",
+              "E11",
+              "E14"
+            ],
+            "preserve": "The 1–50-record limit, splitting larger manifests into files of at most 50 records, and the fact that identifier uniqueness is checked within each input file rather than across those files.",
+            "judgment": "This is actionable scope information. Preserve its concrete meaning; replacing it with a vague statement that large files may fail loses useful guidance."
+          },
+          {
+            "id": "P3",
+            "name": "Keep the inventory caveat tied to action",
+            "source_evidence": [
+              "E13",
+              "E14"
+            ],
+            "preserve": "The fixture does not verify stock availability, so planned quantities must be checked against current inventory before an actual loading job.",
+            "judgment": "This qualification changes the reader’s next operational step and remains relevant even though the broader warehouse-error disclaimer is removed. Equivalent phrasing is accepted."
+          },
+          {
+            "id": "P4",
+            "name": "Keep operational diagnostics and useful field detail",
+            "source_evidence": [
+              "E12",
+              "E15",
+              "E16",
+              "E18"
+            ],
+            "preserve": "The distinction between parsing and record validation; load_id syntax, length, and within-file uniqueness; integer carton counts from 1 through 200; optional note strings of at most 120 characters; rejection of unknown fields; success status 0 and summary on stdout; failure status 2, diagnostics on stderr, and no partial total; physical-line locations for JSON Lines syntax versus one-based record locations for validation.",
+            "judgment": "Tables, concise prose, and regrouped explanations are equally valid. Preserve these meanings without requiring verbatim phrasing or every implementation detail. Additional accurate contract details are optional."
+          },
+          {
+            "id": "P5",
+            "name": "Keep established example status and reproducibility",
+            "source_evidence": [
+              "E1",
+              "E6",
+              "E8",
+              "E17"
+            ],
+            "preserve": "The example consists of two invented local loads, uses the supplied Python fixture from the package root, contacts no depot service, creates no loading job, and has 2 records totaling 12 cartons.",
+            "judgment": "Keep the example’s status clear once in a useful place. Do not demand extra hypothetical production claims, native-client instructions, installation steps, or repeated disclaimers."
+          }
+        ],
+        "fixture_evidence": {
+          "log": "author-fixture-check.json",
+          "check_count": 1,
+          "subprocess_count": 5,
+          "per_subprocess_timeout_seconds": 10,
+          "observed_expected_paths": [
+            "Original JSON + text report: exit 0, 2 records, 12 cartons.",
+            "Literal complete draft conversion + jsonl parser: exit 2 at physical line 1, empty stdout.",
+            "Parse-and-reserialize JSON Lines repair: exit 0, 2 records, 12 cartons; records equal the original in order and value.",
+            "Original JSON with only the report option changed: exit 0, JSON summary {records: 2, cartons: 12}.",
+            "51 otherwise valid records: exit 2 for the record limit, empty stdout."
+          ],
+          "scope_limit": "The author check demonstrates these finite paths only. It is not native-client, service, release, deployment, full-parser, or universal-converter validation."
+        },
+        "scoring_scope": "W5 is fully satisfied when both target decisions and the complete-guide requirement are met without material damage to the preservation controls. Use source-grounded semantic judgments, not word bans, number bans, mandated replacement text, exact-output prose matching, or stylistic preference."
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance.",
+      "later_adjudication": "The study's original keyed passes missed a redundant example-status proposition in both outputs. The separately saved adjudication requires a localized relevance repair under the original direct/proportionate task. This is a proposition-in-context judgment, not an exact occurrence-count or word ban; retain a qualification when a distinct claim or action needs it."
+    },
+    {
+      "id": "TWCOMP06",
+      "source_case_id": "R1",
+      "historical_key": {
+        "id": "R1",
+        "partition": "reserved",
+        "task_kind": "source_only_review_or_rewrite",
+        "construct": "Independently combine textual condition discovery, already-satisfied state and access conditions, a valid fixed argument, and an explicit scope boundary beside a real defect.",
+        "expected_disposition": "A correction to the named subsection is necessary; the neighboring procedure must remain outside the answer.",
+        "task_scope": "Only Write one difference table; the procedure ends at reviewing reports/delta.csv.",
+        "hard_requirements": [
+          {
+            "id": "R1-H7",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response neither assesses nor changes Forward a table and adds no warning or side note about that procedure.",
+            "meaning_equivalent_acceptance": [
+              "Return only the requested subsection and a reason about its own correction."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "Do not assess, rewrite, or add notes about that neighboring procedure.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "R1-H8",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response remains about the fixed paired example rather than requiring selection of another mode or a general precision reference.",
+            "meaning_equivalent_acceptance": [
+              "Keep paired mode and the valid digits 2 example.",
+              "A brief optional supported note is acceptable if it does not replace the task or assert a missing reference."
+            ],
+            "evidence": [
+              {
+                "path": "context.txt",
+                "anchor": "This page covers the particular paired difference table shown in the guide; it is not a general reference for other table modes or precision settings.",
+                "line_start": 1,
+                "line_end": 1
+              }
+            ]
+          },
+          {
+            "id": "R1-H1",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "Before the paired table runs, every station must have exactly one baseline reading.",
+            "meaning_equivalent_acceptance": [
+              "State that exact per-station baseline condition.",
+              "Require an OK result from survey check-pairs sweep.svy before proceeding; that documented result establishes the condition."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/table-reference.md",
+                "anchor": "every station in the capture must have exactly one baseline reading and exactly one check reading",
+                "line_start": 11,
+                "line_end": 11
+              },
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "It reports OK only when every station has exactly one baseline reading and exactly one check reading.",
+                "line_start": 7,
+                "line_end": 7
+              }
+            ]
+          },
+          {
+            "id": "R1-H2",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "A successful freeze remains before table generation.",
+            "meaning_equivalent_acceptance": [
+              "Retain survey freeze sweep.svy before survey table.",
+              "Pair validation may occur before or after freeze; both conditions must hold before table generation."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/table-reference.md",
+                "anchor": "A table requires a FROZEN capture",
+                "line_start": 9,
+                "line_end": 9
+              },
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "changes a capture to FROZEN and waits until the change is complete.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "R1-H3",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response treats the Survey Analyst role as sufficient for the task’s required capabilities.",
+            "meaning_equivalent_acceptance": [
+              "Rely on the stated role and its source definition.",
+              "A supported optional clarification is acceptable; do not require a role change or capability-acquisition action."
+            ],
+            "evidence": [
+              {
+                "path": "context.txt",
+                "anchor": "The reader is a Survey Analyst",
+                "line_start": 1,
+                "line_end": 1
+              },
+              {
+                "path": "inputs/roles-and-workspaces.md",
+                "anchor": "The Survey Analyst role grants `capture.read`, `capture.freeze`, `capture.inspect`, and `table.write`.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          },
+          {
+            "id": "R1-H4",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The replacement uses paired mode for the table.",
+            "meaning_equivalent_acceptance": [
+              "Keep --mode paired or an executable equivalent."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--mode paired",
+                "line_start": 14,
+                "line_end": 14
+              }
+            ]
+          },
+          {
+            "id": "R1-H5",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The explanation retains that each difference is check minus baseline.",
+            "meaning_equivalent_acceptance": [
+              "Keep the definition.",
+              "An equivalent mathematical relation is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/table-reference.md",
+                "anchor": "Each output difference is check minus baseline.",
+                "line_start": 11,
+                "line_end": 11
+              }
+            ]
+          },
+          {
+            "id": "R1-H6",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The output explanation retains rounding to 2 decimal places.",
+            "meaning_equivalent_acceptance": [
+              "Keep the stated display precision.",
+              "An equivalent explanation of two decimal digits is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "Values are rounded to 2 decimal places for display",
+                "line_start": 17,
+                "line_end": 17
+              }
+            ]
+          },
+          {
+            "id": "R1-H9",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "Before the paired table runs, every station must have exactly one check reading.",
+            "meaning_equivalent_acceptance": [
+              "State that exact per-station check condition.",
+              "Require an OK result from survey check-pairs sweep.svy before proceeding; that documented result establishes the condition."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/table-reference.md",
+                "anchor": "every station in the capture must have exactly one baseline reading and exactly one check reading",
+                "line_start": 11,
+                "line_end": 11
+              },
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "It reports OK only when every station has exactly one baseline reading and exactly one check reading.",
+                "line_start": 7,
+                "line_end": 7
+              }
+            ]
+          },
+          {
+            "id": "R1-H10",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response does not claim that freezing validates measurement pairs.",
+            "meaning_equivalent_acceptance": [
+              "Keep the freeze action and pair condition distinct.",
+              "A short accurate description of stability is sufficient."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/capture-reference.md",
+                "anchor": "It does not add, remove, or validate measurement pairs.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "R1-H11",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response treats the standard Analysis workspace as sufficient for table-output availability.",
+            "meaning_equivalent_acceptance": [
+              "Rely on the established workspace.",
+              "A supported optional clarification is acceptable; do not require enabling table output or changing workspaces."
+            ],
+            "evidence": [
+              {
+                "path": "context.txt",
+                "anchor": "in the standard Analysis workspace",
+                "line_start": 1,
+                "line_end": 1
+              },
+              {
+                "path": "inputs/roles-and-workspaces.md",
+                "anchor": "The standard Analysis workspace has table output enabled.",
+                "line_start": 5,
+                "line_end": 5
+              }
+            ]
+          },
+          {
+            "id": "R1-H12",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The replacement keeps sweep.svy as the capture used for the fixed task.",
+            "meaning_equivalent_acceptance": [
+              "Keep the same capture in preparation, freeze, and table generation."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "survey table sweep.svy",
+                "line_start": 14,
+                "line_end": 14
+              }
+            ]
+          },
+          {
+            "id": "R1-H13",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The replacement keeps the table command’s digits setting at 2.",
+            "meaning_equivalent_acceptance": [
+              "Keep --digits 2 or an executable equivalent."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--digits 2",
+                "line_start": 14,
+                "line_end": 14
+              }
+            ]
+          },
+          {
+            "id": "R1-H14",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The replacement keeps reports/delta.csv as the output destination.",
+            "meaning_equivalent_acceptance": [
+              "Keep the destination in table generation and review."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "--out reports/delta.csv",
+                "line_start": 14,
+                "line_end": 14
+              }
+            ]
+          },
+          {
+            "id": "R1-H15",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The explanation retains that a positive difference means the check reading is higher.",
+            "meaning_equivalent_acceptance": [
+              "Keep the sign interpretation.",
+              "An equivalent explanation connecting sign to the two readings is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/operator-guide.md",
+                "anchor": "so a positive value means the check is higher.",
+                "line_start": 17,
+                "line_end": 17
+              }
+            ]
+          },
+          {
+            "id": "R1-H16",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The explanation retains that display rounding leaves stored source readings unchanged.",
+            "meaning_equivalent_acceptance": [
+              "Keep the existing qualification.",
+              "An equivalent distinction between output formatting and source data is acceptable."
+            ],
+            "evidence": [
+              {
+                "path": "inputs/table-reference.md",
+                "anchor": "leaves the stored source measurements unchanged.",
+                "line_start": 15,
+                "line_end": 15
+              }
+            ]
+          },
+          {
+            "id": "R1-H17",
+            "severity": "hard",
+            "applies_when": "always",
+            "criterion": "The response and any available action trace respect the source-only task.",
+            "meaning_equivalent_acceptance": [
+              "Do not execute example commands or modify the product."
+            ],
+            "evidence": [
+              {
+                "path": "prompt.txt",
+                "anchor": "do not run the example commands or modify the product.",
+                "line_start": 3,
+                "line_end": 3
+              }
+            ]
+          }
+        ],
+        "negative_controls": [
+          {
+            "id": "R1-N1",
+            "behavior": "Treats freezing as proof that all station pairs are valid.",
+            "judgement": "fail R1-H1, R1-H9, or R1-H10 as applicable",
+            "rationale": "Freezing establishes stability but does not validate pair membership or counts."
+          },
+          {
+            "id": "R1-N2",
+            "behavior": "Requires only that each station has some baseline and check readings, or that the file has one of each somewhere.",
+            "judgement": "fail R1-H1 or R1-H9 as applicable",
+            "rationale": "Repeated kinds and per-station omissions are real failure cases."
+          },
+          {
+            "id": "R1-N3",
+            "behavior": "Corrects or calls out the neighboring Queued/Received handoff error.",
+            "judgement": "fail R1-H7",
+            "rationale": "The adjacent defect is real but explicitly outside the authorized review scope."
+          },
+          {
+            "id": "R1-N4",
+            "behavior": "Does not enumerate the full digit range or the access capabilities in the rewritten guide.",
+            "judgement": "accept",
+            "rationale": "The chosen argument and the established reader/setup already satisfy those conditions."
+          },
+          {
+            "id": "R1-N5",
+            "behavior": "Uses a successful check-pairs gate rather than spelling out the pair rule in prose.",
+            "judgement": "accept",
+            "rationale": "That documented check enforces the same complete condition; an unexplained command that permits proceeding on failure does not."
+          },
+          {
+            "id": "R1-N6",
+            "behavior": "Changes paired mode to stack to avoid the pair condition.",
+            "judgement": "fail R1-H4 and R1-H8",
+            "rationale": "That changes the requested output relationship rather than repairing its procedure."
+          }
+        ],
+        "incidental_detail": [
+          "Unused stack mode",
+          "Other role/workspace choices",
+          "Other valid digit settings",
+          "The neighboring relay procedure and its real defect"
+        ],
+        "grading_notes": [
+          "The neighboring issue is deliberately genuine so detecting an issue cannot itself authorize a scope expansion.",
+          "Do not reveal this key before the reserved task is selected under the parent protocol.",
+          "Judge operational meaning and relationships, not literal phrasing."
+        ],
+        "schema_version": 1,
+        "source_status": "Original fictional primary sources; public-domain dedication in inputs/NOTICE.txt.",
+        "semantic_grading": {
+          "literal_word_matching": false,
+          "arbitrary_word_limit": null,
+          "prose_blacklist": null,
+          "hard_items_are_atomic": true,
+          "no_hidden_example_generalization": true
+        }
+      },
+      "scope": "Assess the complete saved response and original task, with source-derived materiality. Preserve required limits, operational precision, meaningful explanation and allowed equivalent solutions. A key total does not substitute for full task acceptance."
+    }
+  ]
+}

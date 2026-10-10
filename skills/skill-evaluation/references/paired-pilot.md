@@ -26,6 +26,15 @@ not just the final explanation. A project issue or historical change can supply
 a task only after its original requirement is recovered and its solution, grading
 keys and private data are excluded from the executor's input.
 
+For a full writing, review or repair task, retain the complete saved document or
+review report and its actual handoff. Assess that result against the original
+brief, including functional completeness, retained material, necessary setup and
+whether the handoff truthfully reflects saved files and verification.
+Passing a small content-selection exercise, local checks or a reviewer verdict
+does not replace inspecting and accepting the complete delivered artifact. Keep
+a candidate unaccepted when the full result still fails the task; later successes
+on isolated decisions do not close that failure.
+
 Do not put grading keys, earlier answers or evaluation-only instructions in the
 executor's packet. Preserve raw outputs, artifacts and failures separately from
 future inputs. Authorized work copies and frozen evidence packets serve different
@@ -56,8 +65,9 @@ establish. A harness failure is not evidence against the method.
 
 A small pilot can reveal a regression or an obviously wasteful instruction. It
 cannot establish general quality, universal model portability or a savings rate.
-Keep uncertainty and adverse results. Do not rerun unchanged cases until they
-pass, average incompatible conditions or substitute successful discovery for
+Keep uncertainty and adverse results. Report a tie or unresolved comparison as
+no demonstrated improvement on that criterion. Do not rerun unchanged cases until
+they pass, average incompatible conditions or substitute successful discovery for
 successful delivery. Remove or narrow guidance only when the protected outcome
 and the legitimate control remain represented.
 

@@ -12,6 +12,13 @@ page and publication surface serve. Explain only the gap between the audience's 
 what they need to do or understand. A working editor environment does not establish
 that a new reader has the same files, permissions or dependencies.
 
+For a substantial rewrite, establish the requested outcome before assessing the
+existing outline. Trace the route from the reader's starting point to that outcome:
+which functional gaps need new material, which sections still serve it, and which
+belong on another route? Polishing the current sections cannot resolve a missing
+way to obtain or use the product. Retained contributor or operator procedures
+within scope also need usable paths. A local copyedit does not open these decisions.
+
 Start with enough orientation to choose the page. Avoid a separate list of every
 excluded topic. An explanation can start from the behavior that puzzles the reader;
 a reference can start from the interface it specifies. Neither needs marketing.
@@ -110,11 +117,21 @@ Do this as a content decision, not a forecast or a new maintenance checklist.
 | Current catalog, interface reference or compatibility contract | Keep the exact inventory, identifier, limit or supported version the reader needs, with its maintained source. |
 | Dated release note, measurement or acceptance record | Keep the relevant change, date/version, denominator and conditions that make the result interpretable. |
 
-These roles can coexist on one page. A product with a fixed capacity may need
-that capacity in its introduction. A deprecation or support restriction can
-change the first action and belongs before it. A catalog generated from source
-can avoid manual synchronization, but generation alone does not justify copying
-its total into every heading or description.
+These roles can coexist on one page. Determine the role from what the passage
+helps the reader do or understand and whether it describes current guidance or
+a past state, not from a filename or date alone. An explanation of how the
+product is organized now remains current guidance when it gives the reasons for
+earlier choices. A passage recording what was decided or observed then keeps
+that historical role. Apply the content review to current guidance throughout
+the opened scope, including retained headings and introductions; respect
+explicit preservation requirements.
+
+A product with a fixed capacity may need that capacity in its introduction.
+A deprecation or support restriction can change the first action and belongs
+before it. A catalog generated from source can avoid manual synchronization,
+but generation alone does not justify copying its total into every heading or
+description. When removing an incidental snapshot fact from a useful explanation,
+retain the relationships, reasons and exact items the reader still needs.
 
 If precise detail serves no purpose here, remove the claim within the opened
 scope; replacing it with "several", "many" or "recent" can leave the same padding.
@@ -139,6 +156,56 @@ Describe the work in terms the audience uses. A taxonomy of internal components,
 validation stages or method responsibilities is not automatically an explanation
 of the product. Keep technical names when they identify an interface or a useful
 concept; explain an unfamiliar concept before making the reader act on it.
+
+## Establish procedure conditions
+
+For each retained in-scope procedure, establish the conditions needed for its
+documented result before judging the prose. An authoritative interface or
+configuration contract can supply them; otherwise trace the available implementation
+and relevant configured branch. When an inspected entry point delegates applicable
+checks, follow those calls far enough to identify the conditions. Bound this
+reading to the selected route and result. A diagnostic may legitimately report
+absent state; do not inventory every source assertion or possible environment.
+
+Relate each condition to the first documented action whose execution needs it,
+including requirements enforced by calls inside that action. Read the route from
+its stated starting point through that action. Account for conditions genuinely
+guaranteed to this reader, established by preceding steps, or supplied by a usable
+prerequisite handoff. The handoff must be reachable before the dependent action
+and identify the setup the reader needs. A related passage or vague assurance of
+readiness does not establish a concrete condition. One concrete setup can satisfy
+several conditions without enumerating each separately.
+
+When a route passes an artifact between steps, trace its actual location through
+the relevant source contract or implementation: where it is produced, what an
+intervening copy or selection includes, and where the consuming action looks
+after working-directory or argument changes. A prior command's success alone
+does not establish availability at the consumer's path. Bound the trace to the
+selected artifact and route. Credit state the invoked tool creates before use,
+earlier setup and genuinely guaranteed inputs; repair the setup, transfer or
+consumer path only where that chain is broken.
+
+When a route is given as substitutions or a platform or format adaptation,
+apply the stated changes to the complete command or procedure in its target
+context. Check the resulting syntax, inputs and sequence, without silently
+supplying an unstated repair. A concise recipe is sufficient when it supplies
+every necessary change; inspect the distinct forms it covers without requiring
+duplicated variants.
+
+Ask: could a reader follow this route as written and still reach that first
+dependent action with a known applicable condition missing? If so, repair the
+setup or handoff before that action. A check that merely reports missing state
+does not establish readiness. A documented setup or repair step, or a usable
+remediation handoff, can supply the condition before the dependent action. Do not
+require a condition before the step that creates it, import an inactive branch's
+requirements, or repeat setup genuinely guaranteed by the reader's context.
+
+Keep the source-to-condition-to-action associations in working reasoning or
+existing evidence, outside the product text; no new record is mandatory. Use
+authorized source reading to document a procedure even when performing its live
+action is outside the task's authority. Recheck these associations against the
+saved route after editing; plausible setup prose or a passing preservation check
+cannot establish condition coverage.
 
 ## Show one complete path before enumerating options
 
@@ -171,21 +238,25 @@ limitation where it changes suitability, rather than hiding it after a long pitc
 
 ## Update the semantic unit
 
-After adding or changing behavior, reread the affected explanation together with
-its prerequisites, tables, examples, exceptions and related exclusions. Replace
-the old account of current behavior instead of appending each development delta.
+After a substantive rewrite or change to a current claim, reread the affected
+explanation together with its prerequisites, tables, examples, exceptions and
+related exclusions. Include retained introductions, headings and summaries that
+describe the same current behavior. Replace the old account instead of appending
+each development delta.
 If a table now lists support, reconcile a nearby claim that the feature is still
 unsupported. Check affected copies or translations within the authorized scope,
 and report any necessary follow-up outside it. A typo does not require a whole
 documentation audit.
 
-Find the owner of an affected statement, not just its visible copies. A description
-may originate in a generator and appear in package manifests, a README and a
-repository's external metadata. Change canonical source and regenerate through
-the project's authorized mechanism when that is the contract. Editing a generated
-copy alone will not survive regeneration; changing a file does not update a
-GitHub About field. Keep independently maintained surfaces in the scoped update
-or identify the exact remaining change without claiming it was published.
+Locate the canonical owner of an affected statement. For generated text, follow
+its generation rule to the source text that creates it; a package manifest or
+README may be another generated copy. Inspect the applicable generator or template
+to locate the actual owner. Change canonical source and regenerate through the
+project's authorized mechanism when that is the contract, then reread the resulting
+projections within scope. Editing a generated copy alone will not survive
+regeneration. Keep independently maintained surfaces
+in the scoped update or identify the exact remaining change. Proposed GitHub About
+text and updated local metadata do not establish that the remote field was updated.
 
 Preserve historical records in their role: do not rewrite an ADR's earlier
 decision or a released changelog entry as though it always described today's
@@ -193,36 +264,40 @@ behavior. Correct current guidance and keep the record's status and chronology.
 
 ## Review the finished content
 
-Review the actual draft against the reader and task before delivery. Checking that
-each statement is supported covers only one direction: also check why it is here.
-Use this pass for content reviews too; a true sentence can still be an editorial
-defect. Apply the review to the opened scope, without a required checklist file.
+Review the saved result against the original reader outcome and opened scope,
+including material retained without changes. Checking that each statement is
+supported covers only one direction: also check why it is here. Use this pass
+for content reviews too; a true sentence can still be an editorial defect.
+No additional checklist file is required.
 
-1. **Locate surplus.** Inspect definitions beside familiar terms, adjacent
-   paraphrases, repeated features, examples, qualifiers and copied source notes.
-   Check each substantive addition, including a clause inside a useful sentence,
-   against the questions and dependencies established before composition. Name its
-   contribution and the basis for needing it here. A true example can add detail
-   without adding understanding; a benefit or reassurance can invent a new concern.
-   If removing it loses no needed meaning or useful explanatory connection, remove
-   it. Keep the contributing part when a sentence mixes useful and surplus material.
-   Do not justify an addition merely by calling it "clarification" or "context".
-   Inspect modifiers too: what supported class, condition, degree or uncertainty
-   changes if the word is removed? Keep a technical distinction or intentional
-   emphasis the reader needs; cut a modifier that only endorses the author's work.
-   A wording suggestion in notes is not evidence of such a distinction.
-2. **Check the remaining meaning.** Read the shortened passage with its conditions,
-   exceptions and the relevant source. It must still say who can do what, when,
-   with which limits and result. Keep explanations the audience needs, required
-   notices, and evidence used by the document's decision. A warning at the action
-   it governs or repeated identity in a reference can have a useful second role.
-3. **Close actual gaps.** Confirm that the reader can answer the page's question
-   or follow its route, including real setup and recognizable success where needed.
-   Read the page continuously too: headings, terms and links should carry the
-   intended reader from orientation to the relevant result, without requiring
-   the editor's private context or an unrelated contributor workflow.
-   Repair a found defect, then stop when the scoped requirements hold. No deletion
-   quota, target word count, mandatory rewrite or recursive self-review follows.
+1. **Confirm the reader can finish.** Read the page continuously from orientation
+   to the requested result. Check all retained in-scope routes, including connected
+   developer procedures, using the [condition review](#establish-procedure-conditions).
+   Headings, terms, links, setup and recognizable success must carry this reader
+   without the editor's private context or an unrelated contributor workflow.
+   Resolve functional gaps even when no existing sentence states them incorrectly.
+2. **Compare contribution with omission.** Determine the passage's
+   [role and lifetime](#match-precision-to-the-surface), then inspect retained
+   and added material: introductions, inventories and counts, whole passages,
+   definitions, examples, repetitions, qualifiers and modifiers. Compare what the reader can understand,
+   choose or do with and without each detail. Losing a true fact alone does not establish a lost
+   task contribution. Identify the established question, necessary dependency,
+   useful explanation, meaningful distinction or required notice that removal would
+   weaken. Calling material "inventory", "clarification" or "context" supplies no
+   such connection. A true example can add facts without adding understanding;
+   a benefit or reassurance can invent a new concern. Keep useful precision,
+   examples and explanatory depth; remove or merge material whose omission loses
+   no contribution. Keep the contributing part of a mixed sentence. For modifiers,
+   check the supported class, condition, degree, uncertainty or needed emphasis
+   they convey; a wording suggestion in notes does not establish that distinction.
+3. **Recheck the edited meaning and route.** Read changed passages with their
+   conditions, exceptions and relevant sources. They must still say who can do
+   what, when, with which limits and result, and supply prerequisites before the
+   first dependent action. Preserve explanations this audience needs, required
+   notices and evidence used by the document's decision. A warning at its action
+   or repeated identity in a reference can have a useful second role. Repair a
+   found defect, then stop when the scoped requirements hold. No deletion quota,
+   target word count, mandatory rewrite or recursive polishing follows.
 
 Compare claims across prose, headings and tables, not just within sentences.
 Give each table column a distinct information role. A column that paraphrases

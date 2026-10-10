@@ -39,6 +39,8 @@ LITERAL_MACHINE_PATH = re.compile(
 GENERATED_DEFAULTS = {".git", "__pycache__"}
 # A pinned publication-gate zipapp is tracked bytes, not source text.
 BINARY_SUFFIXES = frozenset({".pyz"})
+# Evaluation evidence may be an archive; runtime skill files stay under text rules.
+EVALUATION_BINARY_SUFFIXES = frozenset({".zip"})
 UNTEXT_DECLARATION = "* -text"
 PROFILE_KEYS = {"schema_version", "name", "description", "capabilities", "instructions"}
 FORBIDDEN_PROFILE_KEYS = {
@@ -662,10 +664,17 @@ def check(root: Path = ROOT) -> list[str]:
     for required in BASE_FILES:
         if required not in known:
             problems.append(f"{required}: required source file is missing")
+    evaluation_roots = tuple(
+        root / asset.path / "evals"
+        for asset in catalog.assets if asset.kind == "skill"
+    )
     declarations: dict[Path, set[str] | None] = {}
     for path in files:
         relative = path.relative_to(root).as_posix()
-        if path.suffix.lower() in BINARY_SUFFIXES:
+        if path.suffix.lower() in BINARY_SUFFIXES or (
+            path.suffix.lower() in EVALUATION_BINARY_SUFFIXES
+            and any(evaluation_root in path.parents for evaluation_root in evaluation_roots)
+        ):
             continue
         if path.parent not in declarations:
             declarations[path.parent] = still_text(path.parent)

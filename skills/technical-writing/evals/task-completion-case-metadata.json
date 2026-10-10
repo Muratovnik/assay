@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWCOMP01",
+      "group": "task-completion-20261010-w1",
+      "purpose": "regression",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published working fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWCOMP02",
+      "group": "task-completion-20261010-w2",
+      "purpose": "regression",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published working fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWCOMP03",
+      "group": "task-completion-20261010-w3",
+      "purpose": "routine",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published working fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWCOMP04",
+      "group": "task-completion-20261010-w4",
+      "purpose": "regression",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published working fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWCOMP05",
+      "group": "task-completion-20261010-w5",
+      "purpose": "regression",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published working fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWCOMP06",
+      "group": "task-completion-20261010-r1",
+      "purpose": "regression",
+      "source": "Independently authored fictional fixture retained in the 2026-10-10 documentation-completion study",
+      "rationale": "Published post-selection reserve fixture; group denotes its source scenario, not statistical independence or general deployment representativeness.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

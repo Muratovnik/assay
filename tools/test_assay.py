@@ -4,6 +4,7 @@ import json
 import os
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest import mock
 
@@ -179,6 +180,77 @@ class AgentAssetsTests(unittest.TestCase):
                 aa.still_text(root),
                 "a declaration that is not `* -text` exempts nothing",
             )
+
+    def test_evaluation_zip_archives_are_data_and_stay_in_inventory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            archives = []
+            for name in ("evidence.zip", "saved/result.ZIP"):
+                path = root / "skills/route-subagents/evals" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(path, "w") as archive:
+                    archive.writestr("original.bin", b"\xff\r\n")
+                archives.append((path, path.read_bytes()))
+
+            self.assertEqual([], aa.check(root))
+            files, problems = aa.source_paths(root, aa.load_catalog(root))
+            self.assertEqual([], problems)
+            for path, original in archives:
+                with self.subTest(path=path.relative_to(root)):
+                    self.assertIn(path, files)
+                    self.assertEqual(original, path.read_bytes())
+
+    def test_evaluation_archive_support_keeps_other_data_under_text_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            evaluation = root / "skills/route-subagents/evals"
+            evaluation.mkdir()
+            payloads = {
+                "notes.txt": (b"\xff\n", "invalid UTF-8 at byte 0"),
+                "raw.bin": (b"\xff\n", "invalid UTF-8 at byte 0"),
+                "README.md": (b"# Evidence\r\n", "CR characters are forbidden; use LF"),
+                "evidence.index.json": (b"{}", "missing final LF"),
+            }
+            for name, (data, _) in payloads.items():
+                (evaluation / name).write_bytes(data)
+
+            problems = aa.check(root)
+            for name, (_, expected) in payloads.items():
+                with self.subTest(name=name):
+                    self.assertIn(
+                        f"skills/route-subagents/evals/{name}: {expected}", problems
+                    )
+
+    def test_zip_suffix_does_not_exempt_runtime_or_uncatalogued_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            relatives = (
+                "skills/route-subagents/references/evidence.zip",
+                "skills/route-subagents/assets/evidence.zip",
+                "skills/route-subagents/references/evals/evidence.zip",
+                "skills/uncatalogued/evals/evidence.zip",
+                "docs/evals/evidence.zip",
+                "evals/evidence.zip",
+            )
+            for relative in relatives:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(path, "w") as archive:
+                    archive.writestr("original.bin", b"\xff\r\n")
+
+            problems = aa.check(root)
+            for relative in relatives:
+                with self.subTest(path=relative):
+                    self.assertTrue(
+                        any(problem.startswith(f"{relative}: invalid UTF-8")
+                            for problem in problems), problems
+                    )
 
     def test_repository_check_and_inventory_are_exact(self) -> None:
         self.assertEqual([], aa.check(aa.ROOT))

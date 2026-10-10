@@ -25,9 +25,15 @@ review. Attribute it rather than pretending to have independently run the produc
 
 If a claim is not covered, preserve the distinction between unknown and false.
 In a draft, do not invent it. In an edit, do not remove a potentially necessary
-warning, bound or version restriction just to avoid an unknown. Request the
-missing material when it changes the user's decision, or report the narrow
-verification limit. Do not attach speculative error labels to unrelated sections.
+warning, bound or version restriction just to avoid an unknown. Establish what
+retained claim, reader action or explicit reporting requirement depends on the
+limit, reading that material in context. An existing label or scope may already
+supply the distinction. Do not add a denial solely to rule out a stronger claim
+the document does not state or imply. Request missing material or report the
+narrow verification limit when the unresolved issue changes the user's decision.
+Use [content selection](document-design.md#select-content-before-arranging-it)
+to decide whether a qualification belongs and where to put it; required notices
+remain required. Do not attach speculative error labels to unrelated sections.
 
 When sources conflict, state the claims and their scope. Do not always prefer a
 test over code: the test may be stale, skipped, or about another path. Correct

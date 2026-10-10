@@ -18,9 +18,9 @@ not require the README layout or a new documentation task.
 ## Choose the reader's path
 
 Identify reader, goal, document type, publication surface and the scope opened
-by the request. Use the audience's known starting context; a package listing and
-a repository page need not repeat the same instructions. A feature-list review
-is not a whole-README publication audit.
+by the request, independently of the current outline. Use the audience's known
+starting context; a package listing and a repository page need not repeat the
+same instructions. A feature-list review is not a whole-README publication audit.
 Infer version scope from the brief, checkout, release record or versioned site;
 require a visible page version only when its absence creates real ambiguity.
 Choose precision for the statement's role and lifetime too: a standing product
@@ -44,9 +44,10 @@ For a new document or substantial rewrite, read
 [document design](references/document-design.md) to select and place content
 before choosing headings or polishing sentences:
 
-1. **Start from the reader's next need.** A README helps decide whether to use
-   the product and reach a first result; an explanation builds understanding;
-   a reference makes an exact answer easy to locate.
+1. **Start from the requested reader outcome.** A README helps decide whether
+   to use the product and reach a first result; an explanation builds understanding;
+   a reference makes an exact answer easy to locate. A substantial rewrite must
+   resolve functional gaps in that outcome, even when the existing outline omits them.
 2. **Select the necessary material and its depth.** Establish the questions this
    document needs to answer from the request, its surface and the reader's actual
    work. Choose the claims and necessary explanations before writing from source
@@ -55,8 +56,10 @@ before choosing headings or polishing sentences:
    real dependency of the task; do not invent a concern to justify it. Keep conditions
    that limit a claim and examples that make an unfamiliar mechanism intelligible.
 3. **Make the connection explicit.** Pair a command with its purpose, needed
-   starting state and recognizable result. Pair an architectural decision with
-   its reason and consequence. Describe real limitations where they affect use.
+   state and recognizable result. For each retained in-scope procedure, establish
+   [applicable conditions, artifact handoffs and first dependent actions](references/document-design.md#establish-procedure-conditions)
+   from sources before judging whether its setup is sufficient. Pair an architectural
+   decision with its reason and consequence. Describe limits where they affect use.
 4. **Use examples for a decision or unfamiliar action.** When an example helps,
    give it supported inputs, outputs and explained placeholders. Preserve the
    difference between an example, a default and a measured or executed result.
@@ -119,8 +122,10 @@ findings and consequential limits, or a brief no-issue conclusion. Do not invent
 a quota, restore every wording preference or narrate the method.
 
 Apply the [content review](references/document-design.md#review-the-finished-content)
-to the finished artifact. For a draft or rewrite, this is the document; for a file
-edit, reread the saved text. A plan or change summary does not substitute for it.
+to the finished artifact against the original brief. For a draft or substantial
+rewrite, read the full result within scope, including retained introductions,
+related claims and connected procedures; for a file edit, reread the saved text.
+A plan, changed-sentence review or change summary does not substitute for it.
 For a content review, inspect the source and then the report you will deliver.
 The report's reader needs findings and their consequences: explain each problem
 and proposed correction once, keeping a condition where it qualifies the finding.
@@ -132,11 +137,22 @@ alone does not settle whether an explanation belongs. Keep this check out of the
 delivered prose and stop when the scoped requirements hold; it is not a recurring
 polishing loop.
 
+When an independent complete writing review is already part of the task, include
+[both review dimensions](references/reader-testing.md#complete-writing-review)
+in its brief: whether the reader can finish and whether the selected content
+contributes to that outcome. A followability-only review covers only its stated
+scope; it is not complete editorial approval.
+
 After a substantive update, reconcile the affected claims
 and related exclusions using [document design](references/document-design.md#update-the-semantic-unit).
 Inspect command-to-section relationships and relative links from the actual
 document path, including known incoming links when a section's purpose changes.
-Check the rendered form when tools are authorized.
+Choose an available, authorized project render or check path for the relevant
+concern. If the usual tool is missing, use a bounded permitted alternative when
+it can answer that concern; report what it establishes and what remains unchecked.
+Distinguish observed results from checks not performed. Repeat a check to verify
+a repair or resolve a specific remaining uncertainty; do not rerun unchanged work
+merely to obtain a pass.
 A Markdown file needs no outer fence; literal source in a reply needs a longer
 outer fence than matching fences inside. An authorized preservation check protects
 only the regions it reports; it does not prove meaning, link existence or successful

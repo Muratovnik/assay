@@ -19,6 +19,15 @@ forbid_ai_attribution = true
 forbid_internal_planning = true
 forbid_machine_observations = true
 betterleaks_config = ".betterleaks.toml"
+# These exact evaluation fixtures preserve fictional task inputs and frozen
+# synthetic evidence, including upstream binary probes and rendered review text.
+# Structural deployment rules have no meaning for these records. Independent
+# secret scanning and non-excludable owner checks remain active.
+exclude = [
+  "skills/technical-writing/evals/task-completion-cases.json",
+  "skills/technical-writing/evals/task-completion-evidence.zip",
+  "skills/technical-writing/evals/task-completion-evidence-2.zip",
+]
 
 [changelog]
 # The published notes are the entry a person wrote and committed, read from

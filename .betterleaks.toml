@@ -4,16 +4,51 @@ betterleaksMinVersion = "1.8.1"
 # Verified SHA-256 identities in the durability evidence, not credentials:
 # d49 and d51 decision memos; the synthetic Spanport OpenAPI source.
 # Keep detection active for every other value and outside these evidence files.
+# Task-completion evidence adds 15 recomputed file digests and six recomputed
+# canonical JSON digests. These exact values are public provenance, and are
+# filtered only inside the two named evidence archives and only for generic-api-key.
 filter = '''
 finding["rule_id"] == "generic-api-key" &&
-filter.matchesAny(attributes["path"], [
-  `(?:^|[/\\])skills[/\\]technical-writing[/\\]evals[/\\]durability-(?:evidence|outputs|judgments)\.json$`
-]) &&
-finding["secret"] in [
-  "f533835c0b0edc2aa26e57fedd64f54812faac293a7cc0181ab5e57daf2cae0c",
-  "701061330237271a93bb5502ad196648b91ed17f0409cb034fd5158e8d2c3c2d",
-  "c193d255ade5e1f54643202e2d0899f52d8ea84160cb4daeeaecc0fc59ac48b9"
-]
+(
+  (
+    filter.matchesAny(attributes["path"], [
+      `(?:^|[/\\])skills[/\\]technical-writing[/\\]evals[/\\]durability-(?:evidence|outputs|judgments)\.json$`
+    ]) &&
+    finding["secret"] in [
+      "f533835c0b0edc2aa26e57fedd64f54812faac293a7cc0181ab5e57daf2cae0c",
+      "701061330237271a93bb5502ad196648b91ed17f0409cb034fd5158e8d2c3c2d",
+      "c193d255ade5e1f54643202e2d0899f52d8ea84160cb4daeeaecc0fc59ac48b9"
+    ]
+  ) ||
+  (
+    filter.matchesAny(attributes["path"], [
+      `(?:^|[/\\])skills[/\\]technical-writing[/\\]evals[/\\]task-completion-evidence(?:-2)?\.zip![^\r\n]+$`
+    ]) &&
+    finding["secret"] in [
+      "062d6c82ee202075674f157fcddea989c270fc0b599eec0bf90be946c824bc14",
+      "522fd40c52b4103026a4ad595c4cf9df79994d7f5d7ae941a9745b493a56dfda",
+      "62da75dc4caf826321f4a0bd02b1ee647ffca972a273405355ff9984f7ca4e70",
+      "67e0b7b73ddfb1cc4bdd31c5a29eaff196393e94524959f2e9b3f08178315d8b",
+      "71f86d7f6bb0ffa31c21b80f89b3ab92284828042cff54f35afd7ae033c200ca",
+      "7c1f4c2a6c2862787c182f72f8ca9aa272126d23b5b38172a53be605010f50e1",
+      "93e07540cf701e285320fdda4cba3c24a41e8398b0dfbf6a083c6dd3e0df6946",
+      "98884c4609261cfc1d5f29e317033ed73c15df7230d1bd08a61251eb105a7536",
+      "98de3ed3463347badd0e4b06d7ddfe7bfbaf8e7b4fa4cc3afdf5b9d3da8b4af3",
+      "9e4832685024f12c66edb4af1069dc1b9b3528698b9fad399e516358629c5a3f",
+      "a3e3b545cf1621b895929bab983d33ee2bfd1bc1f51684ab344bc30c56d16ad5",
+      "aa0a5ab4ba7ed021006461b3ea86db4b06040eac3101852b928ca7928173c313",
+      "ab8a817f4cfe7adc69a14c1654d72c53dc2b69276d569e6b0ed0c82280be95ac",
+      "ada1198aba08da6fbed1d9e1c2c682ba4bb2f8928500afa48a5b1987a2ad1b1e",
+      "b5c1f1d289a00240a2d6fbca856c3668cb0303005e2d4f6d104627c58b82975f",
+      "c48530a8a25c3833447cf57fb4709045e79965538810e9e5cec165ebc8e749b5",
+      "cee452d68dd3b4892881a704e8979f205984f9a7673aa62a7c8a1b0d2e798495",
+      "d864f05438eb878047eb857d250f1126223c93b102e08ef68af20cabeaa8f0a5",
+      "e59c6592784d749c929110328f7cf66bcc07e3d09417f118adbcb1373a755bda",
+      "ea6168a7d390c64201e51ed30aa4279009097d40f464d8309efa4967623a25bb",
+      "f208b2f80725e618a1c1cd3cd13c1aa4de7b1f5a509fe719fa118fc7e2460037"
+    ]
+  )
+)
 '''
 
 [extend]
