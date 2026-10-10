@@ -15,7 +15,7 @@ PROMPT_VERSIONS = {"handoff": "native-routing-v11", "private": "native-routing-v
 PROMPT_VERSION = PROMPT_VERSIONS["handoff"]
 DECISION_VERSIONS = {"handoff": "native-decisions-v2", "private": "native-decisions-private-v2"}
 SUPPORTED_DECISION_VERSIONS = set(DECISION_VERSIONS.values()) | {"native-decisions-v1", "native-decisions-private-v1"}
-_BASIS_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}\Z")
+_BASIS_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:+/-]{0,127}$")
 ASSESSMENT_PLACEHOLDER = "Replace with task adequacy, same-cohort quality/cost tradeoff and uncertainty."
 
 
@@ -94,11 +94,14 @@ def _available_pairs(available: Any) -> set[tuple[str, str]]:
 
 def _validate_basis(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict) or set(value) - {"source", "reason_code", "evidence_refs"}:
-        raise EvidenceError("native_selection_basis_invalid")
+        raise EvidenceError("native_selection_basis_invalid: advisor_route.selection_basis: "
+                            "expected only source, reason_code, evidence_refs")
     if value.get("source") not in {"caller", "client_role", "evidence"}:
-        raise EvidenceError("native_selection_basis_invalid")
+        raise EvidenceError("native_selection_basis_invalid: advisor_route.selection_basis.source: "
+                            "expected caller, client_role or evidence")
     if value.get("reason_code") != "bounded_ranking":
-        raise EvidenceError("native_selection_basis_invalid")
+        raise EvidenceError("native_selection_basis_invalid: advisor_route.selection_basis.reason_code: "
+                            "expected bounded_ranking")
     refs = value.get("evidence_refs", [])
     if (
         not isinstance(refs, list)
@@ -106,8 +109,24 @@ def _validate_basis(value: Any) -> dict[str, Any]:
         or any(not isinstance(ref, str) or not _BASIS_ID.fullmatch(ref) for ref in refs)
         or len(set(refs)) != len(refs)
     ):
-        raise EvidenceError("native_selection_basis_invalid")
+        raise EvidenceError("native_selection_basis_invalid: advisor_route.selection_basis.evidence_refs: "
+                            "expected up to 16 unique bounded identifiers")
     return copy.deepcopy(value)
+
+
+def validate_advisor_route(advisor_route: Any, *, available=None) -> None:
+    """Reject malformed bootstrap before acquisition; check availability when used."""
+    if advisor_route is None:
+        return
+    if not isinstance(advisor_route, dict) or set(advisor_route) != {"model", "effort", "selection_basis"}:
+        raise EvidenceError("native_advisor_route_invalid: advisor_route: expected model, effort, selection_basis")
+    for field in ("model", "effort"):
+        value = advisor_route[field]
+        if not isinstance(value, str) or not value or value != value.strip():
+            raise EvidenceError(f"native_advisor_route_invalid: advisor_route.{field}: expected a nonempty trimmed string")
+    _validate_basis(advisor_route["selection_basis"])
+    if available is not None and (advisor_route["model"], advisor_route["effort"]) not in _available_pairs(available):
+        raise EvidenceError("native_advisor_route_unavailable: advisor_route: model/effort is absent from available")
 
 
 def _delivery(value: str) -> str:
@@ -302,16 +321,9 @@ def prepare_native(
         raise EvidenceError("native_snapshot_too_large")
     if advisor_route is None:
         return _needs_route(snapshot["snapshot_id"], "missing_advisor_route")
-    if not isinstance(advisor_route, dict) or set(advisor_route) != {"model", "effort", "selection_basis"}:
-        raise EvidenceError("native_advisor_route_invalid")
-    model, level = advisor_route.get("model"), advisor_route.get("effort")
-    if not isinstance(model, str) or not model or model != model.strip():
-        raise EvidenceError("native_advisor_route_invalid")
-    if not isinstance(level, str) or not level or level != level.strip():
-        raise EvidenceError("native_advisor_route_invalid")
+    validate_advisor_route(advisor_route, available=available)
+    model, level = advisor_route["model"], advisor_route["effort"]
     basis = _validate_basis(advisor_route.get("selection_basis"))
-    if (model, level) not in _available_pairs(available):
-        raise EvidenceError("native_advisor_route_unavailable")
     delivery = _delivery(delivery)
     decisions = snapshot["policy"]["schema_version"] == 3
     if decisions:

@@ -16,6 +16,7 @@ def build_server(service):
     from mcp.server import MCPServer
     from mcp.server.mcpserver.exceptions import ToolError
     from route_evidence.receipt_types import ExecutionReceipt, OutcomeResult
+    from route_evidence.advisor_types import AdvisorRoute
 
     pipeline = RoutingPipeline(service)
 
@@ -63,7 +64,7 @@ def build_server(service):
         packets: list[dict[str, Any]],
         available: list[dict[str, Any]] | None = None,
         constraints: dict[str, Any] | None = None,
-        advisor_route: dict[str, Any] | None = None,
+        advisor_route: AdvisorRoute | None = None,
         task_queries: dict[str, str] | None = None,
         cost_objectives: dict[str, Any] | None = None,
         launch_requests: dict[str, dict[str, Any]] | None = None,

@@ -77,9 +77,11 @@ class AdvisorWorkflow:
     def _finish(self, state, result=None, *, reason=None, cache=False):
         snapshot = state["snapshot"]
         decisions = decide(snapshot, result, reason=reason, offline=self.service.offline)
-        if reason in ("snapshot_expired", "inventory_changed", "configuration_changed"):
-            # A baseline validated against old state is no longer an executable
-            # fallback. Reprepare instead of quietly authorizing the old pair.
+        if reason in ("snapshot_expired", "inventory_changed", "configuration_changed",
+                      "needs_advisor_route", "needs_task_details", "invalid_advisor_result",
+                      "advisor_ended_without_result"):
+            # Stale state and an incomplete advisor exchange cannot authorize
+            # a baseline. A corrected submission or new preparation is required.
             for decision in decisions:
                 decision.update(status="no_decision", selected=None, reason_codes=[reason, "reprepare_required"],
                                 fallback={"status": "needs_revalidation", "selected": None, "reason": reason})
@@ -150,6 +152,8 @@ class AdvisorWorkflow:
 
     async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
                               task_queries=None, cost_objectives=None, native_delivery="handoff"):
+        from .advisors.native import validate_advisor_route
+        validate_advisor_route(advisor_route)
         packets = validate_packets(packets, require_caller_override=True)
         cost_objectives = validate_cost_objectives(cost_objectives, packets)
         for packet in packets:
@@ -222,12 +226,8 @@ class AdvisorWorkflow:
                     return self._finish(state, reason="advisor_disabled")
             if self.advisor["backend"] == "native-economy":
                 from .advisors.native import prepare_native
-                try:
-                    handoff = prepare_native(snapshot, advisor_route, available=request["available"],
-                                             delivery=native_delivery)
-                except EvidenceError as exc:
-                    state.update(failure_stage="native_prepare", failure_detail={"validation_error": str(exc)[:500]})
-                    return self._finish(state, reason="invalid_advisor_route_or_payload")
+                handoff = prepare_native(snapshot, advisor_route, available=request["available"],
+                                         delivery=native_delivery)
                 if handoff.get("status") in {"needs_advisor_route", "needs_task_details"}:
                     response = self._finish(state, reason=handoff["status"])
                     response.update(status=handoff["status"], setup=handoff)
@@ -252,7 +252,7 @@ class AdvisorWorkflow:
                 if portable:
                     response["envelope"] = self._envelope(state)
                 return response
-            from .advisors.jev import JevAdapter
+            from .advisors.jev import AdapterError, JevAdapter
             if self._jev is None:
                 self._jev = JevAdapter(self.advisor["jev"], clock=self.clock)
             descriptor = self._jev.descriptor()
@@ -264,9 +264,11 @@ class AdvisorWorkflow:
             state["state"] = "requesting_provider"
             try:
                 result = await self._jev.recommend(snapshot)
-                result = validate_result(snapshot, result)
-            except EvidenceError as exc:
-                return self._finish(state, reason=getattr(exc, "code", "advisor_failed"))
+            except AdapterError as exc:
+                if not exc.fallback_allowed:
+                    raise
+                return self._finish(state, reason=exc.code)
+            result = validate_result(snapshot, result)
             if self.clock() >= state["expires"]:
                 return self._finish(state, reason="snapshot_expired")
             if self.service._inventory and self.service._inventory["available"] != state["inventory"]["available"]:
@@ -372,12 +374,14 @@ class AdvisorWorkflow:
         with self._lock:
             return self._envelope(self._states[decision_id])
 
-    def finish_unanswered(self, decision_id, envelope, *, reason):
+    def finish_unanswered(self, decision_id, envelope):
         """Close a decision whose advisor ended without a valid submission."""
         with self._lock:
             state = self._states.get(decision_id)
             if state is None:
                 state = self._restore(decision_id, envelope)
+            reason = ("invalid_advisor_result" if state.get("failure_stage") == "native_result_validation"
+                      else "advisor_ended_without_result")
             return self._finish(state, reason=reason)
 
     def remember_completed(self, decision_id, expires):
@@ -420,7 +424,8 @@ class AdvisorWorkflow:
                     "validation_error": str(exc)[:500], "snapshot_id": state["snapshot"]["snapshot_id"],
                     "prompt_version": state["descriptor"]["prompt_version"],
                 })
-                return self._finish(state, reason="invalid_advisor_result")
+                raise EvidenceError(f"invalid_advisor_result: {exc}; correct advisor_result and retry "
+                                    "complete_routing for the same decision before expires_at") from exc
             return self._finish(state, result, cache=cache)
 
     def record_routing_outcome(self, decision_id, execution):

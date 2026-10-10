@@ -31,6 +31,11 @@ MAX_IO_BYTES = 24 * 1024
 MAX_WIRE_BYTES = 64 * 1024
 _MODEL = re.compile(r"jev-[0-9]+\.[0-9]+\.[0-9]+\Z")
 _CODE = re.compile(r"[a-z][a-z0-9_]{0,63}\Z")
+_FALLBACK_FAILURES = frozenset({
+    "jev_sdk_unavailable", "jev_cooldown", "jev_timeout", "jev_rate_limited", "jev_overloaded",
+    "jev_transport_error", "jev_provider_error", "jev_packet_limit", "jev_candidate_limit",
+    "jev_request_too_large",
+})
 _CONFIG_KEYS = {
     "enabled",
     "model",
@@ -51,6 +56,11 @@ class AdapterError(EvidenceError):
             raise ValueError("invalid adapter error code")
         self.code = code
         super().__init__(code)
+
+    @property
+    def fallback_allowed(self) -> bool:
+        """Only named operational failures and valid resource bounds permit fallback."""
+        return self.code in _FALLBACK_FAILURES
 
 
 class RetryAfter(AdapterError):

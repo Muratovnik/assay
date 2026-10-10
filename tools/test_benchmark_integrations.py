@@ -330,6 +330,78 @@ build_server(service).run(transport="stdio")
                             self.assertTrue(error.is_error)
                     self.assertFalse((await client.call_tool("routing_status", {})).is_error)
 
+    async def test_stdio_bootstrap_errors_and_corrected_submission_never_authorize_a_fallback(self):
+        import copy
+        from mcp import Client, StdioServerParameters
+        from jsonschema import Draft202012Validator
+        from route_evidence.history import HistoryStore
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "config.json").write_text(json.dumps({"schema_version": 3,
+                "task_evidence": {"enabled": False, "retain_descriptions": True},
+                "telemetry": {"mode": "full", "dataset": "smoke"}}), encoding="utf-8")
+            bootstrap = root / "server.py"
+            bootstrap.write_text('''
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from route_evidence.routing import build_context
+from route_evidence.service import RoutingService, load_config
+from route_evidence.cache import Cache
+from benchmark_mcp import build_server
+root = Path(sys.argv[2])
+async def context(request):
+    (root / "acquired").write_text("yes")
+    return {**build_context(request, []), "sources": [], "data_status": "unavailable",
+            "guidance": {"documents": [{"sections": [{"excerpt": "First line\\nSecond line\\tEvidence"}]}]},
+            "data_message": "synthetic acquisition fixture", "usage": "routing"}
+service = RoutingService(Cache(root / "cache"), client="codex", advisor_config=load_config(root / "config.json"))
+service.context = context
+build_server(service).run(transport="stdio")
+''', encoding="utf-8")
+            route = {"model": "worker-beta", "effort": "medium",
+                     "selection_basis": {"source": "evidence", "reason_code": "bounded_ranking"}}
+            args = {"available": [{"model": "worker-alpha", "efforts": ["low"]},
+                                  {"model": "worker-beta", "efforts": ["medium"]}],
+                    "advisor_route": route, "packets": [{"packet_id": "wire-error", "task_types": ["investigation"],
+                        "features": {}, "baseline": {"model": "worker-alpha", "effort": "low"}}]}
+            params = StdioServerParameters(command=sys.executable, args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
+            async with asyncio.timeout(30):
+                async with Client(params) as client:
+                    tool = next(t for t in (await client.list_tools()).tools if t.name == "prepare_routing")
+                    validator = Draft202012Validator(tool.input_schema)
+                    validator.validate(args)
+                    bad = copy.deepcopy(args)
+                    bad["advisor_route"]["selection_basis"]["reason"] = "Bounded assessment"
+                    self.assertTrue(list(validator.iter_errors(bad)))
+                    rejected = await client.call_tool("prepare_routing", bad)
+                    self.assertTrue(rejected.is_error)
+                    self.assertFalse((root / "acquired").exists())
+                    self.assertEqual((await client.call_tool("routing_status", {})).structured_content["advisor"]["pending"], 0)
+                    prepared = await client.call_tool("prepare_routing", args)
+                    self.assertFalse(prepared.is_error, prepared)
+                    value = prepared.structured_content
+                    self.assertEqual(value["status"], "awaiting_native_advice")
+                    answer = copy.deepcopy(value["handoff"]["result_contract"])
+                    for assessment in answer["metadata"].get("assessments", []):
+                        assessment["basis"] = "Bounded fixture assessment with no measurement claim."
+                    malformed = copy.deepcopy(answer)
+                    malformed["rankings"][0]["ranking"].pop()
+                    rejected = await client.call_tool("complete_routing", {
+                        "decision_id": value["decision_id"], "advisor_result": malformed})
+                    self.assertTrue(rejected.is_error)
+                    self.assertIn("correct advisor_result", str(rejected.content))
+                    history = HistoryStore(root / "cache", mode="full")
+                    self.assertIsNone(history.read(value["decision_id"]))
+                    result = await client.call_tool("complete_routing", {
+                        "decision_id": value["decision_id"], "advisor_result": answer})
+                    self.assertFalse(result.is_error, result)
+                    self.assertEqual(result.structured_content["status"], "decided")
+                    self.assertNotIn("telemetry_status", result.structured_content)
+                    stored = history.read(value["decision_id"])
+                    self.assertEqual(stored["full"]["snapshot"]["evidence"]["guidance"]["documents"][0]["sections"][0]["excerpt"],
+                                     "First line\nSecond line\tEvidence")
+
     async def test_stdio_retrospective_context_native_observation_and_acceptance(self):
         from mcp import Client, StdioServerParameters
         from route_evidence.history import HistoryStore

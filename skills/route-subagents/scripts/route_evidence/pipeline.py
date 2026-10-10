@@ -475,11 +475,10 @@ class RoutingPipeline:
             advisors = [a for a in tx.values("attempt") if a["decision_id"] == state["decision_id"]
                         and a["role"] == "advisor"]
             if state.get("envelope") and len(advisors) == 1 and advisors[0]["state"] in {"finished", "failed"}:
-                # The advisor actually ended without submitting. An eligible,
-                # configured baseline is the only possible fallback; never ask
-                # the root to inspect evidence or fabricate an advisor answer.
+                # No valid submission means no executable route, including
+                # after a restart restored the pending envelope.
                 result = self.service.advisor_workflow.finish_unanswered(
-                    state["decision_id"], state["envelope"], reason="advisor_ended_without_result")
+                    state["decision_id"], state["envelope"])
                 state["response"] = compact(result)
                 state.pop("envelope", None)
                 tx.put("decision", state["decision_id"], state, state["expires"])

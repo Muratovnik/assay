@@ -101,10 +101,10 @@ def _optional_identifier(value: Any, field: str) -> str | None:
     return None if value is None else _identifier(value, field)
 
 
-def _safe_string(value: Any, field: str, *, limit: int = 300) -> str:
+def _safe_string(value: Any, field: str, *, limit: int = 300, multiline: bool = False) -> str:
     if not isinstance(value, str) or not value.strip() or len(value) > limit:
         raise EvidenceError(f"{field}: expected a nonempty bounded string")
-    if any(ord(char) < 32 for char in value):
+    if any(ord(char) < 32 and not (multiline and char in "\r\n\t") for char in value):
         raise EvidenceError(f"{field}: control characters are not allowed")
     return value.strip()
 
@@ -407,7 +407,9 @@ def _redacted_json(value: Any, field: str = "full", *, allow_evidence_text: bool
             raise EvidenceError(f"{field}: non-finite number")
         return value
     if isinstance(value, str):
-        return _safe_string(value, field, limit=65536 if allow_evidence_text else 4096 if ".task_spec." in field else 1000)
+        prose = allow_evidence_text and field.rsplit(".", 1)[-1] in _EVIDENCE_TEXT_KEYS
+        return _safe_string(value, field, limit=65536 if allow_evidence_text else 4096 if ".task_spec." in field else 1000,
+                            multiline=prose)
     if isinstance(value, list):
         if len(value) > 512:
             raise EvidenceError(f"{field}: list exceeds limit")

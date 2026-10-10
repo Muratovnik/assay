@@ -313,11 +313,27 @@ configuration and unexpired decision. A root-supplied portable envelope is not
 authorization. Expiry does not stop a running provider process. Identical child
 completion is idempotent; conflicting completion is rejected.
 
-Abstention, provider failure or missing bootstrap yields the eligible baseline:
+Valid abstention, an explicitly disabled advisor or a named operational provider
+failure yields the eligible baseline:
 the caller's in evidence-only mode, only the configured one in required mode.
 For validated policy-v3 judgments, a baseline classified `inadequate` cannot be
 that fallback. Unknown adequacy remains an explicit uncertainty; invalid answer
 fragments do not establish a judgment in either direction.
+Malformed `advisor_route` is rejected before evidence acquisition or decision
+creation. Its `selection_basis` accepts only `source`, `reason_code` and optional
+`evidence_refs`; the MCP schema exposes those fields and rejects extras. Missing
+bootstrap or required task details returns a setup outcome without selected
+routes. Invalid native advice returns a tool error: correct `advisor_result`
+and retry `complete_routing` for the same decision before its original expiry.
+No result or cache entry is created by that error. A native advisor ending
+without a valid submission closes with `no_decision`, even after restart.
+Unknown hosted errors, invalid answers, missing consent and authentication
+errors are surfaced for correction rather than selecting a baseline. Named
+transport, timeout, rate, overload, SDK availability and valid adapter resource
+bounds retain fallback with their cause.
+Full history preserves CR/LF/tab in bounded evidence `excerpt`, `text` and
+`content` fields. Other control characters, task text boundaries and prohibited
+prompt/source/output fields retain their existing validation.
 Otherwise policy reports `needs_caller_selection`. In required mode that means no
 executable decision; it is not permission for the primary to read benchmarks and
 choose. Changed inventory,

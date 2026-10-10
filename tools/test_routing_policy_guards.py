@@ -408,23 +408,22 @@ class AdvisorFallbackLifecycleGuards(unittest.IsolatedAsyncioTestCase):
         prepared, snapshot = await self.prepare(service)
         malformed = decisions.answer(snapshot, {"model-00": "inadequate", "model-01": "inadequate"})
         malformed["answers"][0]["name"] = []
-        result = service.complete_routing(prepared["decision_id"], malformed)
-        self.assertIsNone(result["advisor_result"])
-        self.assertEqual(result["decisions"][0]["decision_type"], "fallback")
-        self.assertEqual(result["decisions"][0]["selected"]["model"], "model-00")
-        self.assertIn("invalid_advisor_result", result["decisions"][0]["reason_codes"])
-        self.assertNotIn("economic_assessment", result["decisions"][0])
+        with self.assertRaisesRegex(EvidenceError, "invalid_advisor_result"):
+            service.complete_routing(prepared["decision_id"], malformed)
+        self.assertEqual(service.advisor_workflow.status()["pending"], 1)
+        result = service.complete_routing(prepared["decision_id"], decisions.answer(snapshot,
+            {"model-00": "inadequate", "model-01": "inadequate"}))
+        self.assertIsNone(result["decisions"][0]["selected"])
+        self.assertEqual(result["decisions"][0]["fallback"]["reason"], "baseline_task_inadequate")
 
-    async def test_malformed_legacy_result_and_valid_abstention_keep_the_eligible_fallback(self):
+    async def test_malformed_legacy_result_is_correctable_and_valid_abstention_keeps_fallback(self):
         self.fixture.config = {"schema_version": 3, "telemetry": {"mode": "off"}}
         service = self.fixture.service()
         prepared, _ = await self.prepare(service)
         malformed = copy.deepcopy(prepared["handoff"]["result_contract"])
         malformed["rankings"][0]["packet_id"] = []
-        result = service.complete_routing(prepared["decision_id"], malformed)
-        self.assertEqual(result["decisions"][0]["selected"]["model"], "model-00")
-        self.assertIn("invalid_advisor_result", result["decisions"][0]["reason_codes"])
-        prepared, _ = await self.prepare(service)
+        with self.assertRaisesRegex(EvidenceError, "invalid_advisor_result"):
+            service.complete_routing(prepared["decision_id"], malformed)
         abstained = copy.deepcopy(prepared["handoff"]["result_contract"])
         abstained["rankings"][0].update(abstained=True, ranking=[])
         abstained["metadata"]["assessments"][0]["basis"] = "Fixture abstention; no task adequacy conclusion."

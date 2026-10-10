@@ -379,11 +379,17 @@ mismatch.
 Required mode is not set up without a configured baseline. Status and doctor
 report `setup_required` with the `baseline` gap, routing operations fail with
 `required_routing_setup_incomplete`, and the hook refuses every launch except an
-exempt type with its own model or `inherit`. Abstention, invalid advice, an advisor that ends without a
-result and a disabled advisor select the eligible baseline as a `fallback`
+exempt type with its own model or `inherit`. Valid abstention and a disabled
+advisor select the eligible baseline as a `fallback`
 decision whose reason codes name the cause. A baseline that a packet's hard
 constraints exclude, or a validated policy-v3 answer classifies inadequate,
 still means no executable fallback.
+Invalid advice returns a tool error and leaves the same decision pending until
+its original expiry. The advisor may correct and resubmit it. If the advisor
+ends without a valid submission, `get_routing_decision` returns `no_decision`
+and launch authorization fails, including after an MCP restart. Prepare again
+when correction is no longer possible; an empty or failed return cannot authorize
+the baseline.
 Expiry or configuration/inventory change requires preparation again.
 
 The guard fails closed only where it is the gate. When it cannot load the

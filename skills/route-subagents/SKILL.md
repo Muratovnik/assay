@@ -132,8 +132,9 @@ not treat missing measurements as proof that cheaper pairs cannot do the task.
 Policy validates the advisor result and preserves explicit choices and hard
 constraints. Use its selected route. Veto only for a concrete missed capability,
 incorrect input or changed goal, and record that reason; do not repeat the full
-ranking analysis by default. An abstention or invalid answer uses only an
-already supplied eligible baseline. Without one, select a route through the
+ranking analysis by default. A valid abstention uses only an already supplied
+eligible baseline. Correct invalid input or advice and retry the failed call;
+validation errors never authorize a baseline. Without one, select a route through the
 existing evidence workflow or keep the work local. No paid comparison campaign
 or duplicate task execution is required.
 

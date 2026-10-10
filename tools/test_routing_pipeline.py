@@ -412,20 +412,25 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(decision["reason_codes"], [cause, "caller_baseline"])
         self.assertNotIn('"ranking"', json.dumps(result))
 
-    async def test_failed_advisor_uses_only_configured_baseline(self):
+    def assert_unanswered(self, result, cause="advisor_ended_without_result"):
+        self.assertEqual(result["status"], "no_decision")
+        self.assertIsNone(result["decisions"][0]["selected"])
+        self.assertEqual(result["decisions"][0]["reason_codes"], [cause, "reprepare_required"])
+        with self.assertRaises(EvidenceError):
+            self.authorize(result["decision_id"])
+
+    async def test_failed_advisor_does_not_authorize_the_baseline(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.event("PostToolUseFailure", tool_name="Agent", tool_use_id="call-a")
-        self.assert_fallback(self.decision(prepared["decision_id"]), "advisor_ended_without_result")
+        self.assert_unanswered(self.decision(prepared["decision_id"]))
 
-    async def test_advisor_ending_without_result_falls_back_instead_of_inheriting_parent(self):
+    async def test_advisor_ending_without_result_blocks_worker(self):
         prepared = await self.prepare()
         self.launch(prepared["handoff"])
         self.event("SubagentStop", agent="advisor-a")
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
-        self.assert_fallback(self.decision(prepared["decision_id"]), "advisor_ended_without_result")
-        launch = self.authorize(prepared["decision_id"])
-        self.assertEqual((launch["requested_model"], launch["requested_effort"]), (BASELINE["model"], BASELINE["effort"]))
+        self.assert_unanswered(self.decision(prepared["decision_id"]))
 
     async def test_abstaining_advisor_falls_back_to_the_baseline(self):
         prepared = await self.prepare()
@@ -532,11 +537,37 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.launch(prepared["handoff"])
         answer = self.synthetic_answer(self.private_input(prepared["decision_id"]))
         answer["rankings"][0]["confidence"] = 0.9
+        with self.assertRaisesRegex(EvidenceError, "native_numeric_confidence_forbidden"):
+            self.submit(prepared["decision_id"], answer)
+        self.event("SubagentStop", agent="advisor-a")
+        self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
+        self.assert_unanswered(self.decision(prepared["decision_id"]), "invalid_advisor_result")
+
+    async def test_invalid_submission_can_be_corrected_before_advisor_returns(self):
+        prepared = await self.prepare()
+        self.launch(prepared["handoff"])
+        answer = self.synthetic_answer(self.private_input(prepared["decision_id"]))
+        bad = copy.deepcopy(answer)
+        bad["rankings"][0]["confidence"] = .9
+        with self.assertRaises(EvidenceError):
+            self.submit(prepared["decision_id"], bad)
         self.submit(prepared["decision_id"], answer)
         self.event("SubagentStop", agent="advisor-a")
         self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
-        # The advice is discarded; only the configured baseline remains.
-        self.assert_fallback(self.decision(prepared["decision_id"]), "invalid_advisor_result")
+        self.assertEqual(self.decision(prepared["decision_id"])["status"], "decided")
+        self.assertIsNotNone(self.authorize(prepared["decision_id"])["requested_model"])
+
+    async def test_invalid_submission_then_restart_and_return_blocks_worker(self):
+        prepared = await self.prepare()
+        self.launch(prepared["handoff"])
+        bad = self.synthetic_answer(self.private_input(prepared["decision_id"]))
+        bad["rankings"][0]["confidence"] = .9
+        with self.assertRaises(EvidenceError):
+            self.submit(prepared["decision_id"], bad)
+        self.configure()
+        self.event("SubagentStop", agent="advisor-a")
+        self.event("PostToolUse", tool_name="Agent", tool_use_id="call-a", tool_response={"status": "completed", "content": []})
+        self.assert_unanswered(self.decision(prepared["decision_id"]))
 
     async def test_retry_requires_host_observed_failure(self):
         decision = await self.decided()

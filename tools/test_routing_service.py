@@ -165,12 +165,14 @@ class AdvisorServiceTests(unittest.IsolatedAsyncioTestCase):
         prepared = await self.prepare()
         answer = self.answer(prepared)
         answer["rankings"][0]["ranking"].pop()
-        result = self.service.complete_routing(prepared["decision_id"], answer)
-        self.assertEqual(result["status"], "no_decision")
-        self.assertIsNone(result["decisions"][0]["selected"])
-        self.assertEqual(result["fallback_context"]["stage"], "native_result_validation")
-        self.assertIn("every eligible candidate", result["fallback_context"]["validation_error"])
-        self.assertEqual(result["fallback_context"]["snapshot_id"], prepared["snapshot_id"])
+        with self.assertRaisesRegex(EvidenceError, "every eligible candidate.*correct advisor_result"):
+            self.service.complete_routing(prepared["decision_id"], answer)
+        workflow = self.service.advisor_workflow
+        self.assertEqual(workflow.status()["pending"], 1)
+        self.assertNotIn("response", workflow._states[prepared["decision_id"]])
+        result = self.service.complete_routing(prepared["decision_id"], self.answer(prepared))
+        self.assertEqual(result["status"], "decided")
+        self.assertEqual(workflow.status()["pending"], 0)
 
     async def test_portable_envelope_restarts_without_model_calls(self):
         prepared = await self.prepare(portable=True)
