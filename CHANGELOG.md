@@ -6,6 +6,16 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.5](https://github.com/Muratovnik/assay/compare/v0.17.4...v0.17.5) (2026-10-10)
+
+### Bug Fixes
+
+* **technical-writing:** trace acquisition, prerequisites and first use through the reader's own task and actual artifact handoffs; clarify delegated checks and validate evidence reconstruction metadata before writing files ([e8a7732](https://github.com/Muratovnik/assay/commit/e8a7732aeb7b228d971ad168c42c696913f779f4))
+
+The retained study distinguishes failed original workflows from a separately
+corrected derivative. Its reserved comparison is a tie; it does not establish a
+general improvement in effectiveness or autonomous reliability.
+
 ## [0.17.4](https://github.com/Muratovnik/assay/compare/v0.17.3...v0.17.4) (2026-10-09)
 
 ### Bug Fixes
