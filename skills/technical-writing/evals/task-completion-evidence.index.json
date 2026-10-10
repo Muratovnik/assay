@@ -1,11 +1,11 @@
 {
-  "archive_bytes": 10576095,
+  "archive_bytes": 10576195,
   "archive_encoding": {
     "level": 9,
     "method": "ZIP_DEFLATED",
-    "python_version": "3.12.14",
-    "zlib_compile_version": "1.3.2",
-    "zlib_runtime_version": "1.3.2"
+    "python_version": "3.11.9",
+    "zlib_compile_version": "1.3.1",
+    "zlib_runtime_version": "1.3.1"
   },
   "archive_metadata": [
     {
@@ -14,14 +14,14 @@
       "sha256": "91d59118e1dabf2e16b9d496adb5f666f638e737ddf6a8177f7caa0570ece0e6"
     },
     {
-      "bytes": 43996,
+      "bytes": 44548,
       "logical_path": "assemble.py",
-      "sha256": "13a09fa03196ed8419fadf98cd85ef282aa9efb1def9753d03954e15ac06786c"
+      "sha256": "99fdccfda1110fa926b313149f8e5629dea06697f46c3324c1dab036ab492d48"
     },
     {
-      "bytes": 6552003,
+      "bytes": 6552002,
       "logical_path": "manifest.json",
-      "sha256": "2866e004e8119cf52421582e2a7e9609af6d7e7a36a685bd49541a7221a3fe4a"
+      "sha256": "34b48404e47f77f7b382d8ee598484cf549866b92a4f6f514b4b4b751154cb54"
     },
     {
       "bytes": 4526,
@@ -29,12 +29,12 @@
       "sha256": "59ae139e7d9f80b68ff22f77d6dcef310eb18bbf7413b4e2f216537443c6f4f9"
     }
   ],
-  "archive_sha256": "4e4e6cc6f8bd0c07fa475669dbda982250e78e3bedc2cbc190aafb4a1c2eb227",
+  "archive_sha256": "d165aa8d61ed4d6db7b033523ef0ec2db788d977b05e3a0d6e4b9deb1b5ae994",
   "archives": [
     {
-      "bytes": 10576095,
+      "bytes": 10576195,
       "name": "task-completion-evidence.zip",
-      "sha256": "4e4e6cc6f8bd0c07fa475669dbda982250e78e3bedc2cbc190aafb4a1c2eb227"
+      "sha256": "d165aa8d61ed4d6db7b033523ef0ec2db788d977b05e3a0d6e4b9deb1b5ae994"
     },
     {
       "bytes": 10576095,

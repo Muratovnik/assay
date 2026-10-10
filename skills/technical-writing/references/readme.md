@@ -24,7 +24,8 @@ can be primary when it is the actual intended route.
 
 For every retained procedure, including developer instructions, use
 [procedure conditions](document-design.md#establish-procedure-conditions) to establish
-setup from sufficient authoritative sources, following delegated checks when needed.
+setup from sufficient authoritative sources, following checks delegated by the
+inspected entry point when needed.
 Place prerequisites, directories, files and access before the first action that
 needs them, allowing earlier steps or usable prerequisite handoffs to supply them.
 Do not inherit conditions known only to the editor's environment.
