@@ -117,11 +117,21 @@ Do this as a content decision, not a forecast or a new maintenance checklist.
 | Current catalog, interface reference or compatibility contract | Keep the exact inventory, identifier, limit or supported version the reader needs, with its maintained source. |
 | Dated release note, measurement or acceptance record | Keep the relevant change, date/version, denominator and conditions that make the result interpretable. |
 
-These roles can coexist on one page. A product with a fixed capacity may need
-that capacity in its introduction. A deprecation or support restriction can
-change the first action and belongs before it. A catalog generated from source
-can avoid manual synchronization, but generation alone does not justify copying
-its total into every heading or description.
+These roles can coexist on one page. Determine the role from what the passage
+helps the reader do or understand and whether it describes current guidance or
+a past state, not from a filename or date alone. An explanation of how the
+product is organized now remains current guidance when it gives the reasons for
+earlier choices. A passage recording what was decided or observed then keeps
+that historical role. Apply the content review to current guidance throughout
+the opened scope, including retained headings and introductions; respect
+explicit preservation requirements.
+
+A product with a fixed capacity may need that capacity in its introduction.
+A deprecation or support restriction can change the first action and belongs
+before it. A catalog generated from source can avoid manual synchronization,
+but generation alone does not justify copying its total into every heading or
+description. When removing an incidental snapshot fact from a useful explanation,
+retain the relationships, reasons and exact items the reader still needs.
 
 If precise detail serves no purpose here, remove the claim within the opened
 scope; replacing it with "several", "many" or "recent" can leave the same padding.
@@ -165,6 +175,15 @@ prerequisite handoff. The handoff must be reachable before the dependent action
 and identify the setup the reader needs. A related passage or vague assurance of
 readiness does not establish a concrete condition. One concrete setup can satisfy
 several conditions without enumerating each separately.
+
+When a route passes an artifact between steps, trace its actual location through
+the relevant source contract or implementation: where it is produced, what an
+intervening copy or selection includes, and where the consuming action looks
+after working-directory or argument changes. A prior command's success alone
+does not establish availability at the consumer's path. Bound the trace to the
+selected artifact and route. Credit state the invoked tool creates before use,
+earlier setup and genuinely guaranteed inputs; repair the setup, transfer or
+consumer path only where that chain is broken.
 
 Ask: could a reader follow this route as written and still reach that first
 dependent action with a known applicable condition missing? If so, repair the
@@ -250,9 +269,10 @@ No additional checklist file is required.
    Headings, terms, links, setup and recognizable success must carry this reader
    without the editor's private context or an unrelated contributor workflow.
    Resolve functional gaps even when no existing sentence states them incorrectly.
-2. **Compare contribution with omission.** Inspect retained and added material:
-   introductions, inventories and counts, whole passages, definitions, examples,
-   repetitions, qualifiers and modifiers. Compare what the reader can understand,
+2. **Compare contribution with omission.** Determine the passage's
+   [role and lifetime](#match-precision-to-the-surface), then inspect retained
+   and added material: introductions, inventories and counts, whole passages,
+   definitions, examples, repetitions, qualifiers and modifiers. Compare what the reader can understand,
    choose or do with and without each detail. Losing a true fact alone does not establish a lost
    task contribution. Identify the established question, necessary dependency,
    useful explanation, meaningful distinction or required notice that removal would

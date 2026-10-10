@@ -57,7 +57,7 @@ before choosing headings or polishing sentences:
    that limit a claim and examples that make an unfamiliar mechanism intelligible.
 3. **Make the connection explicit.** Pair a command with its purpose, needed
    state and recognizable result. For each retained in-scope procedure, establish
-   [applicable conditions and their first dependent actions](references/document-design.md#establish-procedure-conditions)
+   [applicable conditions, artifact handoffs and first dependent actions](references/document-design.md#establish-procedure-conditions)
    from sources before judging whether its setup is sufficient. Pair an architectural
    decision with its reason and consequence. Describe limits where they affect use.
 4. **Use examples for a decision or unfamiliar action.** When an example helps,
