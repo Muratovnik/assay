@@ -30,7 +30,7 @@ dependencies from this field. The source gate copies the collection and each
 singleton into temporary layouts to check Markdown resource boundaries; it does
 not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
-Hook-backed features — prompt hints, the session reminder, the routing guard and
+Hook-backed features — the per-request skill check, the session reminder, the routing guard and
 the [feedback recorder](how-to/feedback-capture.md) — exist only where
 `hooks/runtime` and `skills/route-subagents/scripts` are present: the two plugin
 routes and a full checkout. On a skills-only route, invoke a method explicitly in
@@ -56,14 +56,26 @@ else needs installing to continue.
 
 The full plugin ships separate generated manifests for Claude Code
 ([`hooks/hooks.json`](../hooks/hooks.json)) and Codex
-([`hooks/codex.json`](../hooks/codex.json)). `UserPromptSubmit` supplies bounded,
-English/Russian, catalogue-backed suggestions. Session and delegation reminders
-remain available. These hints do not authorize edits/delegation or prove compliance.
+([`hooks/codex.json`](../hooks/codex.json)). `UserPromptSubmit` adds a short
+[skill check](how-to/hooks.md#the-skill-check) to every request: the agent states
+which Assay skills apply and loads them, judging the task in any language. Session
+and delegation reminders remain available. None of this authorizes
+edits/delegation or proves compliance.
 
-Python 3.11+ must be available as `python`. Prompt classification additionally uses
-`hooks/requirements.txt` in that interpreter's isolated environment; no dependency
-is installed automatically. Hooks make no model/network calls. The strict Claude
-routing guard does not depend on the prompt parser and takes precedence over hints.
+Python 3.11+ must be available as `python`. Recognizing an explicit skill choice
+additionally uses `hooks/requirements.txt` in that interpreter's isolated
+environment; no dependency is installed automatically. Hooks make no model/network
+calls. The strict Claude routing guard does not depend on the prompt parser and
+takes precedence over the check.
+
+With many installed skills, Claude Code drops the descriptions of the least-used
+ones from its skill listing to fit a
+[character budget](https://code.claude.com/docs/en/skills#skill-descriptions-are-cut-short),
+and a skill without its description is rarely chosen. If `/context` or the
+listing shows Assay skills without descriptions, set rarely used skills from
+other plugins to `"name-only"` in `skillOverrides`, disable plugins you do not
+use, or raise `skillListingBudgetFraction`. The skill check names every Assay
+skill either way, but the descriptions carry when to use and when to skip each one.
 
 Enable the full plugin and review its native hook/trust diagnostics after updates.
 Skills CLI and `install-links` do not register hooks or edit personal AGENTS.md.

@@ -1,75 +1,61 @@
-schema = 1
-# Match an imperative in the first top-level paragraph, not words anywhere in a
-# pasted document. These are hints, never authorization or required-mode gates.
-[[rules]]
-id = "test-audit"
-skill = "skill/test-audit"
-priority = 100
-patterns = ['^(?:audit|review)\s+(?:the\s+)?tests?\b', '^(?:проведи\s+)?(?:ревью|аудит|проверь)\s+тест']
+schema = 2
+# One short cue per catalog skill for the per-request skill check. The model
+# judges which skills apply, in whatever language the request uses; nothing
+# here matches the user's words. Every catalog skill appears exactly once, and
+# the order is the order of the check.
 
-[[rules]]
-id = "test-writing"
-skill = "skill/test-writing"
-priority = 100
-patterns = ['^(?:write|add|repair|fix)\s+(?:the\s+)?tests?\b', '^(?:напиши|добавь|исправь)\s+тест']
-
-[[rules]]
-id = "research"
+[[skills]]
 skill = "skill/evidence-research"
-priority = 90
-patterns = ['^(?:research|compare|investigate alternatives)\b', '^find\s+(?:existing|alternative)\b', '^(?:исследуй|сравни|изучи\s+(?:аналоги|существующие)|найди\s+(?:аналоги|готовые))\b', '^проведи\s+исследование\b']
+cue = "current external facts, existing solutions or comparing options"
 
-# A lookup for an existing solution phrased as a check or a reuse question is
-# still a request; explanation forms stay excluded. Each rule can be disabled
-# separately through `disabled_rules`.
-[[rules]]
-id = "reuse-lookup"
-skill = "skill/evidence-research"
-priority = 90
-patterns = ['^(?:посмотри|проверь),?\s+есть\s+ли\s+готов\w*\s+(?:реализаци|решени|библиотек|поведени|код|компонент|модул|пакет|инструмент|парсер|валидатор|алгоритм|механизм|ассет|спрайт|шаблон|утилит|функци|класс|плагин|аналог)']
-
-[[rules]]
-id = "reuse-question"
-skill = "skill/evidence-research"
-priority = 90
-patterns = ['^можно\s+ли\s+(?:переиспользовать|(?:взять|использовать)\s+готов\w*\s+(?:реализаци|решени|библиотек|поведени|код|компонент|модул|пакет|инструмент|парсер|валидатор|алгоритм|механизм|ассет|спрайт|шаблон|утилит|функци|класс|плагин|аналог))']
-
-[[rules]]
-id = "planning"
-skill = "skill/implementation-planning"
-priority = 80
-patterns = ['^(?:plan\s+(?:the\s+)?(?:implementation|migration|changes)|(?:write|create|update)\s+(?:an?\s+|the\s+)?(?:implementation\s+)?plan)\b', '^(?:составь|подготовь|обнови|пересмотри)\s+(?:подробный\s+)?план\b']
-
-[[rules]]
-id = "audit"
-skill = "skill/independent-audit"
-priority = 70
-patterns = ['^(?:audit|review)\b', '^(?:проведи\s+(?:(?:полное|полный)\s+)?)?(?:ревью|аудит)\b', '^проверь\s+(?:реализацию|изменения|репозиторий)\b']
-
-[[rules]]
-id = "ui-delivery"
-skill = "skill/ui-delivery"
-priority = 60
-patterns = ['^(?:build|redesign|implement)\s+(?:(?:a|an|the)\s+)?(?:interface|screen|dashboard|website)\b', '^(?:сделай|реализуй|создай)\s+(?:редизайн|интерфейс|экран|сайт)\b']
-
-[[rules]]
-id = "code-change"
+[[skills]]
 skill = "skill/code-change"
-priority = 40
-patterns = ['^(?:implement|refactor|fix the bug)\b', '^(?:реализуй|отрефактори|исправь\s+(?:код|ошибку)|внеси\s+(?:правки|изменения))\b']
+cue = "changing code, tooling, comments or docstrings"
 
-# Supplemental to the first workflow; selection never grants spawn authority.
-# Suffix modifiers still require an imperative, not a descriptive sentence.
-# A period inside a token is data; a period followed by whitespace ends a clause.
-[[rules]]
-id = "delegation"
+[[skills]]
+skill = "skill/test-writing"
+cue = "writing or repairing tests"
+
+[[skills]]
+skill = "skill/test-audit"
+cue = "reviewing tests or regression-protection claims"
+
+[[skills]]
+skill = "skill/implementation-planning"
+cue = "plans, sequencing or resuming planned work"
+
+[[skills]]
+skill = "skill/software-architecture"
+cue = "boundaries, contracts or file placement"
+
+[[skills]]
+skill = "skill/technical-writing"
+cue = "documentation, README, guides or release notes"
+
+[[skills]]
+skill = "skill/text-writing"
+cue = "messages, articles or other prose for a reader"
+
+[[skills]]
+skill = "skill/ui-delivery"
+cue = "UI screens, components or design artifacts"
+
+[[skills]]
+skill = "skill/product-flow-mapping"
+cue = "tracing existing product journeys, screens and states"
+
+[[skills]]
+skill = "skill/independent-audit"
+cue = "an audit or review the user asks for"
+
+[[skills]]
+skill = "skill/skill-evaluation"
+cue = "a skill misfires or a skill change needs evidence"
+
+[[skills]]
+skill = "skill/research-driven-change"
+cue = "research that leads to a planned, delivered change"
+
+[[skills]]
 skill = "skill/route-subagents"
-priority = 0
-patterns = [
-  '^(?:please[ ,]+)?(?:use|launch|spawn)\s+(?:(?:some|the)\s+)?sub[- ]?agents?\b',
-  '^(?:пожалуйста[, ]+)?(?:используй|запусти|подключи)\s+субагент(?:а|ов)?\b',
-  '^delegate\s+(?:[^.;!?]|\.(?!\s)){0,200}\bto\s+(?:a\s+)?sub[- ]?agents?\b',
-  '^делегируй\s+(?:(?:[^.;!?]|\.(?!\s)){0,200}\s+)?субагент(?:у|ам)\b',
-  '^(?:research|compare|investigate|find|plan|create|update|implement|refactor|fix|audit|review|build|redesign|write|add|repair|use|apply)\b(?:[^.;!?]|\.(?!\s))+?\b(?:using|with)\s+sub[- ]?agents?[.!]?$',
-  '^(?:исследуй|сравни|изучи|найди|составь|подготовь|обнови|пересмотри|реализуй|исправь|проверь|проведи|сделай|создай|напиши|добавь|используй|примени)\b(?:[^.;!?]|\.(?!\s))+?\s+(?:с\s+помощью\s+субагентов|через\s+субагентов|с\s+субагентами)[.!]?$',
-]
+cue = "the user asks for subagents (grants no authority)"

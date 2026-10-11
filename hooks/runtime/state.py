@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import time
 
-from .activation import context, continuation_request
+from .activation import context, continuation_request, skill_check
 from .events import event_key, identity
 
 TTL = 24 * 3600
@@ -53,7 +53,8 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
                 # Explicit tasks/modifiers still replace it, including no-match.
                 retained = [identifier for identifier in previous["rules"]
                             if any(rule["id"] == identifier for rule in rules)][:2]
-                decision = {"rule_ids": retained, "context": context(retained, rules, restored=True)}
+                restored = (context(retained, rules, restored=True), skill_check(rules))
+                decision = {"rule_ids": retained, "context": "\n".join(part for part in restored if part)}
             _put(tx, "hook-context", key, {"rules": decision["rule_ids"], "fingerprint": fingerprint}, now)
         elif name == "PostCompact":
             # Codex accepts common output only, not additionalContext here.

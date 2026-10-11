@@ -90,12 +90,12 @@ Example of an allowed example linked to a reviewed correction:
 
 ## What a record can and cannot identify
 
-Each record stores the release `VERSION`, the hint-rule fingerprint and, for
+Each record stores the release `VERSION`, the skill-map fingerprint and, for
 reported methods, SHA-256 digests of those files as present in the recorder's own
 installation (`recorder_root_bytes`). These are pointers, not proof:
 
 - `VERSION` does not identify exact method bytes.
-- The rule fingerprint covers hint rules and `SKILL.md` bytes, not `references/`.
+- The fingerprint covers the skill map and `SKILL.md` bytes, not `references/`.
   A change to a reference alone can leave version and fingerprint unchanged.
 - The digests describe this installation's files at record time; the agent may
   have read another installed copy. A caller-supplied revision is labelled as such.

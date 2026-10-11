@@ -41,7 +41,7 @@ class TaskContinuityTests(unittest.TestCase):
         self.rules, self.fingerprint = activation.load_rules(ROOT)
         self.event = {"hook_event_name": "UserPromptSubmit", "session_id": "session",
                       "cwd": str(self.directory / "work"), "transcript_path": "root-trace",
-                      "turn_id": "turn-1", "prompt": "Implement the agreed repair"}
+                      "turn_id": "turn-1", "prompt": "Use code-change for the agreed repair"}
 
     def apply(self, event=None, client="codex", **options):
         event = self.event if event is None else event
@@ -49,24 +49,32 @@ class TaskContinuityTests(unittest.TestCase):
                            self.rules, self.fingerprint, self.directory,
                            clock=lambda: self.now, **options)
 
+    # The skill check names every skill on every prompt, so a retained
+    # suggestion is identified by its own sentence, not by a skill name.
+    RESTORED = "Previous request suggested "
+
     def test_continue_retains_suggestion_through_compaction_for_both_clients(self):
         for client in ("claude", "codex"):
             with self.subTest(client=client):
                 first = self.apply(client=client)
+                self.assertEqual(["explicit:skill/code-change"], first["rule_ids"])
                 continued = self.apply({**self.event, "turn_id": "turn-2", "prompt": "Продолжай"}, client)
                 self.assertEqual(first["rule_ids"], continued["rule_ids"])
-                self.assertIn("code-change", continued["context"])
+                self.assertIn(self.RESTORED + "code-change", continued["context"])
+                self.assertIn("Assay skill check", continued["context"])
                 restored = self.apply({**self.event, "hook_event_name": "SessionStart",
                                        "source": "compact"}, client)
-                self.assertIn("code-change", restored["context"])
+                self.assertIn(self.RESTORED + "code-change", restored["context"])
 
     def test_new_task_and_narrowed_request_replace_old_hint(self):
         self.apply()
         narrowed = self.apply({**self.event, "turn_id": "turn-2",
                                "prompt": "Continue, but only prepare a plan"})
-        self.assertEqual(["planning"], narrowed["rule_ids"])
-        fresh = self.apply({**self.event, "turn_id": "turn-3", "prompt": "Review this implementation"})
-        self.assertEqual(["audit"], fresh["rule_ids"])
+        self.assertEqual([], narrowed["rule_ids"])
+        self.assertNotIn(self.RESTORED, narrowed["context"])
+        fresh = self.apply({**self.event, "turn_id": "turn-3",
+                            "prompt": "Use independent-audit for this implementation"})
+        self.assertEqual(["explicit:skill/independent-audit"], fresh["rule_ids"])
         # Unknown new requests clear rather than resurrect an earlier authority.
         cleared = self.apply({**self.event, "turn_id": "turn-4", "prompt": "A different question"})
         self.assertEqual([], cleared["rule_ids"])
@@ -74,29 +82,31 @@ class TaskContinuityTests(unittest.TestCase):
 
     def test_continue_without_matching_live_state_is_silent(self):
         continued = {**self.event, "turn_id": "turn-2", "prompt": "continue"}
-        self.assertEqual("", self.apply(continued)["context"])
+        self.assertNotIn(self.RESTORED, self.apply(continued)["context"])
         self.apply({**self.event, "turn_id": "turn-3"})
         self.now += state.TTL + 1
-        self.assertEqual("", self.apply({**continued, "turn_id": "turn-4"})["context"])
+        late = self.apply({**continued, "turn_id": "turn-4"})
+        self.assertEqual([], late["rule_ids"])
+        self.assertNotIn(self.RESTORED, late["context"])
 
     def test_changed_method_bytes_and_clear_retire_suggestion(self):
         self.apply()
         continued = {**self.event, "turn_id": "turn-2", "prompt": "continue"}
         changed = state.apply(continued, "codex", activation.evaluate(continued, self.rules),
                               self.rules, "new-fingerprint", self.directory, clock=lambda: self.now)
-        self.assertEqual("", changed["context"])
+        self.assertNotIn(self.RESTORED, changed["context"])
         self.apply({**self.event, "turn_id": "turn-3"})
         self.apply({**self.event, "hook_event_name": "SessionStart", "source": "clear"})
-        self.assertEqual("", self.apply({**continued, "turn_id": "turn-4"})["context"])
+        self.assertNotIn(self.RESTORED, self.apply({**continued, "turn_id": "turn-4"})["context"])
 
     def test_duplicate_continue_cannot_revert_a_new_task(self):
         self.apply()
         continued = {**self.event, "turn_id": "turn-2", "prompt": "continue"}
         self.apply(continued)
-        self.apply({**self.event, "turn_id": "turn-3", "prompt": "Review this implementation"})
+        self.apply({**self.event, "turn_id": "turn-3", "prompt": "Use independent-audit for this implementation"})
         self.assertEqual("", self.apply(continued)["context"])
         restored = self.apply({**self.event, "hook_event_name": "SessionStart", "source": "compact"})
-        self.assertIn("independent-audit", restored["context"])
+        self.assertIn(self.RESTORED + "independent-audit", restored["context"])
         self.assertNotIn("code-change", restored["context"])
 
     def test_other_workspaces_and_agents_cannot_inherit(self):
@@ -105,13 +115,13 @@ class TaskContinuityTests(unittest.TestCase):
                         {"transcript_path": "worker-trace"}, {"transcript_path": None}):
             event = {**self.event, "turn_id": "turn-2", "prompt": "continue", **changed}
             with self.subTest(changed=changed):
-                self.assertEqual("", self.apply(event)["context"])
+                self.assertNotIn(self.RESTORED, self.apply(event)["context"])
 
     def test_guard_does_not_consume_or_authorize_continuation(self):
         self.apply()
         continued = {**self.event, "turn_id": "turn-2", "prompt": "continue"}
         self.assertEqual("", self.apply(continued, outcome="deny")["context"])
-        self.assertIn("code-change", self.apply(continued)["context"])
+        self.assertIn(self.RESTORED + "code-change", self.apply(continued)["context"])
 
     def test_event_processing_reuses_existing_state_without_storing_prompt(self):
         settings = self.directory / "settings.json"
@@ -126,7 +136,7 @@ class TaskContinuityTests(unittest.TestCase):
                 output, error = process(continued, client, environment, clock=lambda: self.now)
                 self.assertIsNone(error)
                 self.assertEqual({"hookEventName", "additionalContext"}, set(output["hookSpecificOutput"]))
-                self.assertIn("code-change", output["hookSpecificOutput"]["additionalContext"])
+                self.assertIn(self.RESTORED + "code-change", output["hookSpecificOutput"]["additionalContext"])
         with PipelineStore(self.directory / "events", clock=lambda: self.now).transaction() as tx:
             saved = json.dumps([tx.values(kind) for kind in state.KINDS])
         self.assertNotIn(self.event["prompt"], saved)

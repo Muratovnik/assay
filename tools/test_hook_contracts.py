@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -22,32 +23,56 @@ from route_evidence.core import EvidenceError
 from route_evidence.pipeline_store import PipelineStore
 
 
+SUGGESTS = 'The request suggests '
+CHECK = 'Assay skill check:'
+
+
 class ActivationTests(unittest.TestCase):
     def setUp(self):
         self.rules, self.fingerprint = activation.load_rules(ROOT)
 
     def test_independent_bilingual_positive_negative_and_explicit_fixtures(self):
         cases = json.loads((ROOT / 'tools/fixtures/hooks/prompts.json').read_text(encoding='utf-8'))
+        check = activation.skill_check(self.rules)
         for case in cases:
             with self.subTest(prompt=case['prompt']):
                 decision = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':case['prompt']}, self.rules)
                 self.assertEqual(case['rules'], decision['rule_ids'])
-                self.assertLessEqual(len(decision['context']), activation.MAX_CONTEXT)
                 self.assertLessEqual(len(decision['rule_ids']), 2)
+                self.assertTrue(decision['context'].endswith(check))
+                self.assertEqual(bool(case['rules']), SUGGESTS in decision['context'])
+                self.assertLessEqual(len(decision['context']), activation.MAX_CONTEXT + 1 + activation.MAX_CHECK)
+
+    def test_skill_check_names_every_enabled_skill_once_within_its_bound(self):
+        check = activation.skill_check(self.rules)
+        self.assertTrue(check.startswith(CHECK))
+        self.assertTrue(check.isascii())
+        self.assertLessEqual(len(check), activation.MAX_CHECK)
+        listed = [entry.split(' - ', 1)[0] for entry in check.split('Skills: ', 1)[1].rstrip('.').split('; ')]
+        self.assertEqual([r['skill'].split('/', 1)[1] for r in self.rules], listed)
+        catalog = tomllib.loads((ROOT / 'catalog.toml').read_text(encoding='utf-8'))
+        self.assertEqual(sorted(a['id'] for a in catalog['assets'] if a['kind'] == 'skill'),
+                         sorted(r['skill'] for r in self.rules))
+        for prompt in ('2 + 2', 'Составь план', 'Use code-change'):
+            with self.subTest(prompt=prompt):
+                context = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt}, self.rules)['context']
+                self.assertEqual(1, context.count(CHECK))
+                self.assertTrue(context.endswith(check))
 
     def test_bounds_and_non_prompt_events_abstain(self):
-        for prompt in (None, {}, 'Implement '+ 'x' * activation.MAX_PROMPT):
+        for prompt in (None, {}, 'Use code-change '+ 'x' * activation.MAX_PROMPT):
             self.assertEqual([], activation.select(prompt, self.rules))
-        self.assertEqual({'rule_ids':[], 'context':''}, activation.evaluate({'hook_event_name':'PreToolUse','prompt':'Implement'}, self.rules))
+        self.assertEqual({'rule_ids':[], 'context':''}, activation.evaluate({'hook_event_name':'PreToolUse','prompt':'Use code-change'}, self.rules))
 
     def test_no_permissions_no_input_echo_and_does_not_mutate_event(self):
-        event = {'hook_event_name':'UserPromptSubmit','prompt':'Implement SECRET_SENTINEL'}
+        event = {'hook_event_name':'UserPromptSubmit','prompt':'Use code-change for SECRET_SENTINEL'}
         original = copy.deepcopy(event)
         output, error = cli.process(event, 'claude', {})
         self.assertIsNone(error)
         self.assertEqual(original, event)
         self.assertEqual({'hookEventName','additionalContext'}, set(output['hookSpecificOutput']))
         self.assertNotIn('SECRET_SENTINEL', json.dumps(output))
+        self.assertIn(SUGGESTS + 'code-change.', output['hookSpecificOutput']['additionalContext'])
         self.assertIn('read-only', output['hookSpecificOutput']['additionalContext'])
 
     def test_disabled_missing_and_modified_skills(self):
@@ -60,46 +85,58 @@ class ActivationTests(unittest.TestCase):
             target.parent.mkdir(parents=True)
             target.write_text('revision-one\n', encoding='utf-8')
             rules, first = activation.load_rules(root)
-            self.assertEqual(['code-change'], [r['id'] for r in rules])
+            self.assertEqual(['explicit:skill/code-change'], [r['id'] for r in rules])
             target.write_text('revision-two\n', encoding='utf-8')
             self.assertNotEqual(first, activation.load_rules(root)[1])
             self.assertEqual([], activation.load_rules(root, disabled_skills=['skill/code-change'])[0])
-            self.assertEqual([], activation.load_rules(root, disabled_rules=['code-change'])[0])
-            with self.assertRaises(ValueError):
-                activation.load_rules(root, disabled_skills=['missing'])
+            # Retired rule ids in old settings are accepted and change nothing.
+            retired = activation.load_rules(root, disabled_rules=['code-change', 'delegation'])
+            self.assertEqual(activation.load_rules(root), retired)
+            unchecked, fingerprint = activation.load_rules(root, disabled_rules=['skill-check'])
+            self.assertEqual(['explicit:skill/code-change'], [r['id'] for r in unchecked])
+            self.assertEqual('', activation.skill_check(unchecked))
+            self.assertNotEqual(retired[1], fingerprint)
+            decision = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':'Use code-change'}, unchecked)
+            self.assertEqual(['explicit:skill/code-change'], decision['rule_ids'])
+            self.assertNotIn(CHECK, decision['context'])
+            for disabled in ({'disabled_skills': ['missing']}, {'disabled_rules': ['unknown-rule']}):
+                with self.subTest(disabled=disabled), self.assertRaises(ValueError):
+                    activation.load_rules(root, **disabled)
             target.unlink()
             self.assertEqual([], activation.load_rules(root)[0])
 
-    def test_delegation_modifiers_preserve_workflow_through_both_clients(self):
+    def test_hook_settings_disable_skills_and_check_through_both_clients(self):
         cases = (
-            ("Use subagents; review this PR", {"disabled_rules": ["delegation"]}, False),
-            ("Use subagents; review this PR", {"disabled_skills": ["skill/route-subagents"]}, False),
-            ("Use subagents; review this PR. Without any subagents", {}, False),
-            ("Review activation.py with subagents", {}, True),
-            ("Review activation.py with subagents. Do not delegate verification of activation.py to subagents", {}, False),
-            ("Review https://github.com/Muratovnik/assay/pull/15 with subagents", {}, True),
+            ({}, ['explicit:skill/route-subagents'], True),
+            ({'disabled_skills': ['skill/route-subagents']}, [], True),
+            ({'disabled_rules': ['skill-check']}, ['explicit:skill/route-subagents'], False),
+            ({'disabled_rules': ['delegation']}, ['explicit:skill/route-subagents'], True),
         )
         with tempfile.TemporaryDirectory() as temporary:
-            config = Path(temporary) / "hooks.json"
-            for client in ("codex", "claude"):
-                for prompt, settings, delegated in cases:
-                    with self.subTest(client=client, prompt=prompt, settings=settings):
-                        config.write_text(json.dumps(settings), encoding="utf-8")
-                        event = {"hook_event_name": "UserPromptSubmit", "prompt": prompt}
+            config = Path(temporary) / 'hooks.json'
+            for client in ('codex', 'claude'):
+                for settings, selected, checked in cases:
+                    with self.subTest(client=client, settings=settings):
+                        config.write_text(json.dumps(settings), encoding='utf-8')
+                        event = {'hook_event_name': 'UserPromptSubmit', 'prompt': '$route-subagents'}
                         before = copy.deepcopy(event)
-                        result, error = cli.process(event, client, {"ASSAY_HOOK_CONFIG": str(config)})
+                        result, error = cli.process(event, client, {'ASSAY_HOOK_CONFIG': str(config)})
                         self.assertIsNone(error)
                         self.assertEqual(before, event)
-                        self.assertEqual({"hookEventName", "additionalContext"}, set(result.get("hookSpecificOutput", {})))
-                        context = result.get("hookSpecificOutput", {}).get("additionalContext", "")
-                        self.assertIn("independent-audit", context)
-                        self.assertEqual(delegated, "route-subagents" in context)
+                        context = result.get('hookSpecificOutput', {}).get('additionalContext', '')
+                        self.assertEqual(bool(selected), SUGGESTS + 'route-subagents.' in context)
+                        self.assertEqual(checked, CHECK in context)
+                        if checked:
+                            self.assertEqual(not selected, 'route-subagents - ' not in context)
 
-    def test_unknown_duplicate_and_invalid_patterns_are_errors(self):
+    def test_invalid_skill_map_documents_are_errors(self):
         original = (ROOT/'hooks/activation-rules.toml').read_text(encoding='utf-8')
         for replacement in (original.replace('skill/code-change', 'skill/unknown'),
-                            original.replace('id = "code-change"', 'id = "audit"'),
-                            original.replace("'^(?:implement", "'(?:implement")):
+                            original.replace('skill = "skill/test-writing"', 'skill = "skill/code-change"'),
+                            original.replace('schema = 2', 'schema = 1'),
+                            original.replace('cue = "writing or repairing tests"', 'cue = "тесты"'),
+                            original.replace('cue = "writing or repairing tests"', 'cue = "' + 'x' * (activation.MAX_CUE + 1) + '"'),
+                            original + '\n[[rules]]\nid = "code-change"\n'):
             with self.subTest(replacement=replacement[-100:]), tempfile.TemporaryDirectory() as tmp:
                 root=Path(tmp); (root/'hooks').mkdir()
                 shutil.copyfile(ROOT/'catalog.toml', root/'catalog.toml')
@@ -181,25 +218,29 @@ class StateTests(unittest.TestCase):
         self.directory=Path(self.tmp.name)/'data'; self.now=1000.
         self.rules,self.fp=activation.load_rules(ROOT)
         self.event={'hook_event_name':'UserPromptSubmit','session_id':'session', 'cwd':str(Path(self.tmp.name)/'work'),
-                    'transcript_path':'transcript-parent', 'turn_id':'turn-1','prompt':'Implement SECRET_SENTINEL'}
+                    'transcript_path':'transcript-parent', 'turn_id':'turn-1','prompt':'Use code-change for SECRET_SENTINEL'}
     def apply(self, event=None, client='codex', **kwargs):
         event=self.event if event is None else event
         return state.apply(event, client, activation.evaluate(event,self.rules), self.rules,self.fp,
                            self.directory, clock=lambda:self.now, **kwargs)
 
+    # The check is in every delivered prompt context, so delivery of the hint
+    # itself is asserted by its sentence; suppression leaves the context empty.
+    SUGGESTS = 'The request suggests code-change'
+
     def test_duplicates_real_turns_and_no_text_based_deduplication(self):
-        self.assertTrue(self.apply()['context'])
+        self.assertIn(self.SUGGESTS, self.apply()['context'])
         self.assertEqual('', self.apply()['context'])
-        self.assertTrue(self.apply({**self.event,'turn_id':'turn-2'})['context'])
+        self.assertIn(self.SUGGESTS, self.apply({**self.event,'turn_id':'turn-2'})['context'])
         # Claude's identical text may be a new request: no guessed turn id.
-        self.assertTrue(self.apply(client='claude')['context'])
-        self.assertTrue(self.apply(client='claude')['context'])
+        self.assertIn(self.SUGGESTS, self.apply(client='claude')['context'])
+        self.assertIn(self.SUGGESTS, self.apply(client='claude')['context'])
 
     def test_scope_does_not_merge_session_worktree_worker_or_transcript(self):
         self.apply()
         for change in ({'session_id':'different'}, {'cwd':'different'}, {'agent_id':'child'}, {'transcript_path':'child'}):
             with self.subTest(change=change):
-                self.assertTrue(self.apply({**self.event,**change})['context'])
+                self.assertIn(self.SUGGESTS, self.apply({**self.event,**change})['context'])
         self.assertIsNone(events.identity({'session_id':'s','cwd':'c'}, 'codex'))
         self.assertIsNone(events.identity({**self.event,'transcript_path':{}}, 'codex'))
 
@@ -208,10 +249,10 @@ class StateTests(unittest.TestCase):
         post={**self.event,'hook_event_name':'PostCompact'}
         self.assertEqual('', self.apply(post)['context'])
         pre={**self.event,'hook_event_name':'PreToolUse','tool_name':'spawn_agent','tool_use_id':'next-call'}
-        self.assertIn('Previous request', self.apply(pre)['context'])
+        self.assertIn('Previous request suggested code-change', self.apply(pre)['context'])
         self.assertEqual('', self.apply(pre)['context'])
         compact={**self.event,'hook_event_name':'SessionStart','source':'resume'}
-        self.assertIn('Previous request', self.apply(compact)['context'])
+        self.assertIn('Previous request suggested code-change', self.apply(compact)['context'])
         self.assertEqual('', state.apply(compact,'codex',{'rule_ids':[],'context':''}, self.rules,'changed', self.directory,clock=lambda:self.now)['context'])
         self.apply({**self.event,'prompt':'What does this mean?','turn_id':'turn-2'})
         self.assertEqual('', self.apply(compact)['context'])
@@ -327,7 +368,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertIsNone(events.normalize({'hook_event_name':'PermissionDenied'},'codex'))
 
     def test_process_output_and_invalid_input_do_not_echo(self):
-        result=self.invoke(b'{"hook_event_name":"UserPromptSubmit","prompt":"Implement SECRET_SENTINEL"}')
+        result=self.invoke(b'{"hook_event_name":"UserPromptSubmit","prompt":"Use code-change for SECRET_SENTINEL"}')
         self.assertEqual(0,result.returncode,result.stderr)
         self.assertEqual(b'', result.stderr)
         self.assertEqual({'hookEventName','additionalContext'},set(json.loads(result.stdout)['hookSpecificOutput']))
@@ -384,7 +425,7 @@ class RuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             env={'PLUGIN_DATA':str(Path(tmp)/'data')}
             event={'hook_event_name':'UserPromptSubmit','session_id':'s','cwd':'work',
-                   'transcript_path':'root','turn_id':'1','prompt':'Implement'}
+                   'transcript_path':'root','turn_id':'1','prompt':'Use code-change'}
             cli.process(event,'codex',env)
             result,error=cli.process({**event,'hook_event_name':'PostCompact'},'codex',env)
             self.assertEqual({},result); self.assertIsNone(error)
@@ -392,7 +433,7 @@ class RuntimeTests(unittest.TestCase):
             result,error=cli.process(pre,'codex',env)
             context=result['hookSpecificOutput']['additionalContext']
             self.assertIn('route-subagents',context)
-            self.assertIn('code-change',context)
+            self.assertIn('Previous request suggested code-change',context)
             self.assertLess(len(context),1000)
 
     def test_rebinding_cannot_erase_an_earlier_effort_mismatch(self):

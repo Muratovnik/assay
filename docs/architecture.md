@@ -156,10 +156,11 @@ evaluation notes say what such a run does and does not establish.
 
 ## Plugin hook ownership
 
-`hooks/runtime/` owns bounded prompt suggestions, client event normalization and
-optional hook state; `route-subagents` still owns all mandatory routing decisions,
-client capability facts and the existing transactional store. Declarative
-`hooks/activation-rules.toml` references catalogue IDs, not duplicate methods.
+`hooks/runtime/` owns the per-request skill check, explicit-choice suggestions,
+client event normalization and optional hook state; `route-subagents` still owns
+all mandatory routing decisions, client capability facts and the existing
+transactional store. `hooks/activation-rules.toml` maps each catalogue skill ID
+to a one-line cue for the check; it duplicates no method and matches no wording.
 `tools/assay.py render` generates both native manifests with one command per event.
 It also owns the optional [feedback recorder](how-to/feedback-capture.md): explicit
 records of corrections and allowed examples, with correction-grammar capture off

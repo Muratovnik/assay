@@ -1,4 +1,4 @@
-"""Offline hint contracts; these checks do not exercise model delegation."""
+"""Offline skill-check and reminder contracts; no model delegation is exercised."""
 from __future__ import annotations
 
 import copy
@@ -24,7 +24,7 @@ activation = load_module("delegation_activation", ROOT / "hooks/runtime/activati
 reminders = load_module("delegation_reminders", ROOT / "skills/route-subagents/scripts/skill_reminder.py")
 
 
-class DelegationActivationTests(unittest.TestCase):
+class SkillCheckActivationTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -33,8 +33,9 @@ class DelegationActivationTests(unittest.TestCase):
         for path in ("catalog.toml", "hooks/activation-rules.toml"):
             shutil.copyfile(ROOT / path, self.root / path)
         catalog = tomllib.loads((self.root / "catalog.toml").read_text(encoding="utf-8"))
-        # Simulate installed entries using the real catalog and rules. Content
-        # is immaterial to selection; discovery in a native client is not tested.
+        self.skills = [asset["id"] for asset in catalog["assets"] if asset["kind"] == "skill"]
+        # Simulate installed entries using the real catalog and skill map.
+        # Content is immaterial to the check; native discovery is not tested.
         for asset in catalog["assets"]:
             if asset["kind"] == "skill":
                 target = self.root / asset["path"] / "SKILL.md"
@@ -48,245 +49,117 @@ class DelegationActivationTests(unittest.TestCase):
             self.rules if rules is None else rules,
         )
 
-    def test_request_fixtures_and_existing_explicit_selection_contract(self):
+    def listed(self, text):
+        section = text.split("Skills: ", 1)[1].rstrip(".")
+        return [entry.split(" - ", 1)[0] for entry in section.split("; ")]
+
+    def write_map(self, transform):
+        path = self.root / "hooks/activation-rules.toml"
+        path.write_text(transform(path.read_text(encoding="utf-8")), encoding="utf-8")
+
+    def test_request_fixtures_select_only_explicit_skills(self):
         cases = json.loads((ROOT / "tools/fixtures/hooks/prompts.json").read_text(encoding="utf-8"))
         self.assertTrue(cases)
         for case in cases:
             with self.subTest(prompt=case["prompt"]):
                 result = self.decide(case["prompt"])
                 self.assertEqual(case["rules"], result["rule_ids"])
+                self.assertIn("Assay skill check", result["context"])
                 self.assertLessEqual(len(result["rule_ids"]), 2)
-                self.assertLessEqual(len(result["context"]), activation.MAX_CONTEXT)
 
-    def test_disabled_rule_or_skill_preserves_the_primary_workflow(self):
-        for options in ({"disabled_rules": ["delegation"]},
-                        {"disabled_skills": ["skill/route-subagents"]}):
-            with self.subTest(options=options):
-                rules, fingerprint = activation.load_rules(self.root, **options)
-                self.assertNotEqual(self.fingerprint, fingerprint)
-                self.assertEqual(["research"], self.decide("Research alternatives with subagents", rules)["rule_ids"])
-                for prompt, primary in (
-                    ("Use subagents; research alternatives", "research"),
-                    ("Use subagents to review this PR", "audit"),
-                    ("Используй субагентов и составь план", "planning"),
-                    ("Use subagents. Use code-change", "code-change"),
-                ):
-                    with self.subTest(prompt=prompt):
-                        self.assertEqual([primary], self.decide(prompt, rules)["rule_ids"])
-                self.assertEqual([], self.decide("Use subagents; explain the options; implement later", rules)["rule_ids"])
-                self.assertEqual([], self.decide("Use subagents", rules)["rule_ids"])
-                self.assertEqual([], self.decide("$route-subagents", rules)["rule_ids"])
+    def test_ordinary_wording_in_any_language_gets_the_same_check_and_no_selection(self):
+        prompts = ("Research alternatives using subagents", "Найди готовые плагины для этого",
+                   "Поищи, есть ли что-то готовое", "Encuentra complementos existentes",
+                   "既存のプラグインを探して", "Как это сделать в десктопном приложении?", "2 + 2",
+                   "Implement SECRET_SENTINEL")
+        results = [self.decide(prompt) for prompt in prompts]
+        for prompt, result in zip(prompts, results):
+            with self.subTest(prompt=prompt):
+                self.assertEqual([], result["rule_ids"])
+                self.assertEqual(results[0]["context"], result["context"])
+        text = results[0]["context"]
+        self.assertTrue(text.isascii())
+        self.assertNotIn("SECRET_SENTINEL", text)
+        self.assertIn('"Assay: none"', text)
+        self.assertIn("grants no authority", text)
+        self.assertLessEqual(len(text), activation.MAX_CHECK)
 
-    def test_missing_optional_skill_never_produces_a_delegation_hint(self):
+    def test_check_names_every_installed_skill_once(self):
+        listed = self.listed(self.decide("anything")["context"])
+        self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(listed))
+        self.assertEqual(len(listed), len(set(listed)))
+
+    def test_disabled_or_missing_skill_leaves_the_check_and_its_explicit_choice(self):
+        rules, fingerprint = activation.load_rules(self.root, disabled_skills=["skill/route-subagents"])
+        self.assertNotEqual(self.fingerprint, fingerprint)
+        self.assertNotIn("route-subagents", self.listed(self.decide("x", rules)["context"]))
+        self.assertEqual([], self.decide("$route-subagents", rules)["rule_ids"])
         (self.root / "skills/route-subagents/SKILL.md").unlink()
         rules, _ = activation.load_rules(self.root)
-        self.assertEqual(["planning"], self.decide("Create a plan; use subagents", rules)["rule_ids"])
-        for prompt, primary in (
-            ("Use subagents; research alternatives", "research"),
-            ("Use subagents to review this PR", "audit"),
-            ("Используй субагентов и составь план", "planning"),
+        self.assertNotIn("route-subagents", self.listed(self.decide("x", rules)["context"]))
+        self.assertEqual(["explicit:skill/code-change"], self.decide("Use code-change", rules)["rule_ids"])
+
+    def test_check_can_be_disabled_and_retired_rule_ids_stay_valid(self):
+        rules, fingerprint = activation.load_rules(self.root, disabled_rules=["skill-check"])
+        self.assertNotEqual(self.fingerprint, fingerprint)
+        self.assertEqual({"rule_ids": [], "context": ""}, self.decide("Найди готовые плагины", rules))
+        selected = self.decide("Use code-change", rules)
+        self.assertEqual(["explicit:skill/code-change"], selected["rule_ids"])
+        self.assertNotIn("Assay skill check", selected["context"])
+        retired, _ = activation.load_rules(self.root, disabled_rules=["delegation", "research", "reuse-lookup"])
+        self.assertIn("Assay skill check", self.decide("x", retired)["context"])
+        with self.assertRaises(ValueError):
+            activation.load_rules(self.root, disabled_rules=["no-such-rule"])
+
+    def test_skill_map_must_cover_the_catalog_with_short_ascii_cues(self):
+        for label, transform in (
+            ("missing", lambda text: text.replace('skill = "skill/code-change"', 'skill = "skill/test-writing"')),
+            ("schema", lambda text: text.replace("schema = 2", "schema = 1")),
+            ("non-ascii", lambda text: text.replace("writing or repairing tests", "написание тестов")),
+            ("long", lambda text: text.replace("writing or repairing tests", "x" * (activation.MAX_CUE + 1))),
+            ("patterns", lambda text: text.replace('cue = "writing or repairing tests"',
+                                                   "cue = \"tests\"\npatterns = ['^x']")),
         ):
-            with self.subTest(prompt=prompt):
-                self.assertEqual([primary], self.decide(prompt, rules)["rule_ids"])
-        self.assertEqual([], self.decide("Use subagents", rules)["rule_ids"])
+            with self.subTest(label=label):
+                original = (self.root / "hooks/activation-rules.toml").read_text(encoding="utf-8")
+                self.write_map(transform)
+                with self.assertRaises(ValueError):
+                    activation.load_rules(self.root)
+                (self.root / "hooks/activation-rules.toml").write_text(original, encoding="utf-8")
 
-    def test_leading_directive_cannot_restore_a_disabled_primary_skill(self):
-        for options in (
-            {"disabled_rules": ["delegation", "audit"]},
-            {"disabled_skills": ["skill/route-subagents", "skill/independent-audit"]},
-        ):
-            with self.subTest(options=options):
-                rules, _ = activation.load_rules(self.root, **options)
-                self.assertEqual([], self.decide("Use subagents; review this PR", rules)["rule_ids"])
-
-    def test_primary_selection_uses_catalog_grammar_even_when_hint_is_disabled(self):
-        rules, before = activation.load_rules(self.root, disabled_rules=["delegation"])
-        self.assertEqual(["research"], self.decide("Use subagents; research alternatives", rules)["rule_ids"])
-        path = self.root / "hooks/activation-rules.toml"
-        path.write_text(path.read_text(encoding="utf-8").replace("use|launch|spawn", "dispatch|launch|spawn"), encoding="utf-8")
-        rules, after = activation.load_rules(self.root, disabled_rules=["delegation"])
-        self.assertNotEqual(before, after)
-        self.assertEqual([], self.decide("Use subagents; research alternatives", rules)["rule_ids"])
-        self.assertEqual(["research"], self.decide("Dispatch subagents; research alternatives", rules)["rule_ids"])
-
-    def test_early_context_is_english_bounded_and_not_authorization(self):
-        event = {"hook_event_name": "UserPromptSubmit", "prompt": "Используй субагентов для SECRET_SENTINEL"}
+    def test_explicit_context_is_english_bounded_and_not_authorization(self):
+        event = {"hook_event_name": "UserPromptSubmit", "prompt": "Используй route-subagents для SECRET_SENTINEL"}
         original = copy.deepcopy(event)
         result = activation.evaluate(event, self.rules)
         self.assertEqual(original, event)
         self.assertEqual({"rule_ids", "context"}, set(result))
-        self.assertEqual(["delegation"], result["rule_ids"])
-        text = result["context"]
-        self.assertIn("before substantial solo work", text)
-        self.assertIn("already-authorized", text)
-        self.assertIn("read-only", text)
-        self.assertIn("not", text)
-        self.assertNotIn("SECRET_SENTINEL", text)
-        self.assertFalse(any("\u0400" <= character <= "\u04ff" for character in text))
-        self.assertLessEqual(len(text), activation.MAX_CONTEXT)
+        self.assertEqual(["explicit:skill/route-subagents"], result["rule_ids"])
+        hint = activation.context(result["rule_ids"], self.rules)
+        self.assertIn("before substantial solo work", hint)
+        self.assertIn("already-authorized", hint)
+        self.assertIn("read-only", hint)
+        self.assertNotIn("SECRET_SENTINEL", result["context"])
+        self.assertTrue(result["context"].isascii())
+        self.assertLessEqual(len(hint), activation.MAX_CONTEXT)
 
     def test_restore_preserves_relevance_check_not_authority(self):
-        text = activation.context(["research", "delegation"], self.rules, restored=True)
+        text = activation.context(["explicit:skill/evidence-research", "explicit:skill/route-subagents"],
+                                  self.rules, restored=True)
         self.assertIn("Previous request", text)
         self.assertIn("Recheck relevance", text)
         self.assertIn("already-authorized", text)
         self.assertLessEqual(len(text), activation.MAX_CONTEXT)
 
-    def test_delegation_does_not_select_all_downstream_workflows(self):
-        result = self.decide("Research alternatives using subagents; implement the result; review it")
-        self.assertEqual(["research", "delegation"], result["rule_ids"])
-
     def test_non_prompt_events_do_not_create_new_intent(self):
         for name in ("PreToolUse", "PostToolUse", "SessionStart", "PostCompact"):
             with self.subTest(name=name):
-                result = activation.evaluate({"hook_event_name": name, "prompt": "Use subagents"}, self.rules)
+                result = activation.evaluate({"hook_event_name": name, "prompt": "Use code-change"}, self.rules)
                 self.assertEqual({"rule_ids": [], "context": ""}, result)
 
     def test_modified_method_invalidates_the_fingerprint(self):
         path = self.root / "skills/route-subagents/SKILL.md"
         path.write_text(path.read_text(encoding="utf-8") + "Changed procedure\n", encoding="utf-8")
         self.assertNotEqual(self.fingerprint, activation.load_rules(self.root)[1])
-
-
-    def test_descriptions_and_reported_commands_do_not_request_workers(self):
-        for text in (
-            "Documentation about working with subagents",
-            "The report describes work with subagents",
-            "Документ описывает работу с субагентами",
-            "Read this example and use subagents as a phrase in it",
-            "Document the instruction and use subagents as an example",
-            "Write a guide about working with subagents",
-            "Write a note on using subagents",
-            "Напиши руководство о работе с субагентами",
-        ):
-            with self.subTest(text=text):
-                self.assertEqual([], self.decide(text)["rule_ids"])
-                self.assertEqual(["code-change"], self.decide("Implement the parser. " + text)["rule_ids"])
-
-    def test_reviewing_a_delegation_guide_does_not_request_delegation(self):
-        for text in (
-            "Review documentation about using subagents",
-            "Review examples of working with subagents",
-            "Review how to work with subagents",
-        ):
-            with self.subTest(text=text):
-                self.assertEqual(["audit"], self.decide(text)["rule_ids"])
-        for text in ("Use subagents as an example", "Используй субагентов как пример"):
-            with self.subTest(text=text):
-                self.assertEqual([], self.decide(text)["rule_ids"])
-        self.assertEqual(["delegation"], self.decide("Use subagents as reviewers")["rule_ids"])
-
-    def test_opaque_data_cannot_join_a_delegation_command(self):
-        for opening, closing in (("`", "`"), ('"', '"'), ("«", "»"), ("“", "”"), ("‘", "’")):
-            with self.subTest(opening=opening):
-                self.assertEqual([], self.decide(f"Use {opening}not{closing} subagents")["rule_ids"])
-                self.assertEqual([], self.decide(f"Используй {opening}не{closing} субагентов")["rule_ids"])
-                result = self.decide(f"Research {opening}Package A{closing} using subagents")
-                self.assertEqual(["research", "delegation"], result["rule_ids"])
-        # Excluding a payload must not reveal a second command inside that payload.
-        result = self.decide('Implement the parser; “example and use subagents” is data')
-        self.assertEqual(["code-change"], result["rule_ids"])
-
-    def test_conflicting_prohibitions_suppress_only_the_delegation_hint(self):
-        prohibitions = (
-            "Don't launch any subagents yet",
-            "Don’t launch any subagents yet",
-            "Do not use the subagents",
-            "Never spawn any more agents",
-            "Do not delegate verification to subagents",
-            "Without the help of subagents",
-            "Не нужно запускать субагентов",
-            "Не надо использовать субагентов",
-            "Не следует делегировать проверку субагентам",
-            "Не используйте субагентов",
-            "Без использования субагентов",
-        )
-        for prohibition in prohibitions:
-            with self.subTest(prohibition=prohibition):
-                self.assertEqual([], self.decide("Use subagents. " + prohibition)["rule_ids"])
-                self.assertEqual(["research"], self.decide("Research alternatives using subagents. " + prohibition)["rule_ids"])
-                self.assertEqual(["research"], self.decide("Use subagents; research alternatives. " + prohibition)["rule_ids"])
-                self.assertEqual(["audit"], self.decide("Use subagents; review this PR. " + prohibition)["rule_ids"])
-        for restriction in ("Don't modify files", "Do not repeat the workers' research", "Не меняй файлы"):
-            with self.subTest(restriction=restriction):
-                self.assertEqual(["research", "delegation"],
-                                 self.decide("Research alternatives using subagents. " + restriction)["rule_ids"])
-
-    def test_possessives_are_not_unmatched_quotations(self):
-        for text in (
-            "Research alternatives with subagents; preserve workers' budgets",
-            "Research alternatives with subagents; preserve workers’ budgets",
-            "Research the client's options using subagents",
-            "Research the client’s options using subagents",
-        ):
-            with self.subTest(text=text):
-                self.assertEqual(["research", "delegation"], self.decide(text)["rule_ids"])
-        for opening in ('"', "«", "“", "‘"):
-            self.assertEqual(["research"],
-                             self.decide("Research alternatives; " + opening + "use subagents")["rule_ids"])
-
-    def test_leading_delegation_preserves_the_first_workflow(self):
-        for text, expected in (
-            ("Use subagents; research alternatives; implement the result", ["research", "delegation"]),
-            ("Use subagents to research alternatives", ["research", "delegation"]),
-            ("Используй субагентов и составь план", ["planning", "delegation"]),
-            ("Use subagents. Use code-change", ["code-change", "delegation"]),
-            ("Use subagents; explain the tradeoffs; implement later", ["delegation"]),
-            ("Use subagents; 'research alternatives' is an example", ["delegation"]),
-        ):
-            with self.subTest(text=text):
-                self.assertEqual(expected, self.decide(text)["rule_ids"])
-
-    def test_other_rules_for_the_same_skill_do_not_mask_a_match(self):
-        extra = {"id": "other-delegation", "skill": "skill/route-subagents",
-                 "priority": 1000, "patterns": [r"^Dispatch workers$"]}
-        rules = [extra, *self.rules]
-        self.assertEqual(["delegation"], self.decide("Use subagents", rules)["rule_ids"])
-        self.assertEqual(["other-delegation"], self.decide("Dispatch workers", rules)["rule_ids"])
-
-    def test_technical_arguments_preserve_direct_delegation_requests(self):
-        for prompt in (
-            "Review activation.py with subagents",
-            "Review README.md using subagents",
-            "Review https://github.com/Muratovnik/assay/pull/15 with subagents",
-            "Review version 1.2 with subagents",
-            "Проведи ревью activation.py с помощью субагентов",
-            "Проведи ревью https://github.com/Muratovnik/assay/pull/15 с помощью субагентов",
-            "Проведи ревью версии 1.2 с субагентами",
-        ):
-            with self.subTest(prompt=prompt):
-                self.assertEqual(["audit", "delegation"], self.decide(prompt)["rule_ids"])
-        for prompt in (
-            "Delegate the review of activation.py to subagents",
-            "Делегируй ревью activation.py субагентам",
-        ):
-            with self.subTest(prompt=prompt):
-                self.assertEqual(["delegation"], self.decide(prompt)["rule_ids"])
-
-    def test_technical_arguments_do_not_turn_mentions_into_delegation(self):
-        for prompt in (
-            "Review README.md about using subagents",
-            "Review version 1.2 without subagents",
-            "Review activation.py with subagents. Do not launch any subagents",
-            "Review activation.py with subagents. Do not delegate verification of activation.py to subagents",
-            "Review README.md. Documentation with subagents",
-            'Review README.md. "Use subagents" is an example',
-            "Review README.md. `Use subagents` is an example",
-            "Проведи ревью activation.py без использования субагентов",
-            "Проведи ревью activation.py с помощью субагентов. Не следует делегировать проверку activation.py субагентам",
-        ):
-            with self.subTest(prompt=prompt):
-                self.assertEqual(["audit"], self.decide(prompt)["rule_ids"])
-
-    def test_subject_conjunctions_do_not_hide_the_workflow_modifier(self):
-        for text in (
-            "Research X and Y using subagents",
-            "Research alternatives and use subagents",
-            "Сравни X и Y с помощью субагентов",
-            "Сравни варианты и используй субагентов",
-        ):
-            with self.subTest(text=text):
-                self.assertEqual(["research", "delegation"], self.decide(text)["rule_ids"])
 
 
 class DelegationReminderTests(unittest.TestCase):

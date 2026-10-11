@@ -19,12 +19,13 @@ The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
 per matching event; ordinary Read/Edit/Bash calls do not start this plugin hook.
 Generated definitions used by required routing retain their existing lifecycle.
 
-Use Python 3.11+ as `python` in the client's environment. Prompt classification
-also needs `markdown-it-py` from `hooks/requirements.txt`, installed in an isolated
-environment used by that command. Repository contributors already get this from
-`requirements-tools.txt`. Assay never installs it automatically. A missing parser
-makes prompt hints unavailable, not permission to bypass a required routing check;
-session/delegation reminders and the guard do not need the Markdown parser.
+Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
+skill choice also needs `markdown-it-py` from `hooks/requirements.txt`, installed in
+an isolated environment used by that command. Repository contributors already get
+this from `requirements-tools.txt`. Assay never installs it automatically. A missing
+parser makes explicit choices unrecognized, not permission to bypass a required
+routing check; the skill check, the session/delegation reminders and the guard do
+not need the Markdown parser.
 Optional rule/configuration/state failures retain the basic reminders and never
 replace a routing guard response.
 
@@ -58,64 +59,58 @@ Persistent plugin data has its own lifetime and is not an install-state database
 ## Input language and model-facing language
 
 All Assay-authored hook instructions, restored reminders and diagnostics are in
-English, matching the skills. English/Russian patterns only recognize **user
-input**; they are not translated prompts sent to a model. Equivalent requests
-selecting the same skill produce the same English context. Do not localize hook
-output based on the detected input language or force user-facing replies into
-English. The user's reply-language preference is unchanged.
+English, matching the skills. The hooks never match the user's wording to pick a
+method, so a request in any language receives the same English context. Do not
+localize hook output based on the input language or force user-facing replies
+into English. The user's reply-language preference is unchanged.
 
 Explicit selections accept forms such as `Use the skill code-change`,
 `Apply the skills independent-audit and code-change` and inline-code native names
 such as `assay:code-change`, `$code-change` or `/assay:code-change`. Unknown names
 are not installed or guessed. These input aliases do not change canonical names.
 
+## The skill check
+
+Every `UserPromptSubmit` adds the same short **skill check**: before acting, the
+agent decides which Assay skills apply, states them in one line such as
+`Assay: code-change, test-writing` or `Assay: none`, and loads each chosen skill
+it has not loaded yet before the stage that skill governs. The check lists every
+installed, enabled skill with a one-line cue from `hooks/activation-rules.toml`.
+The model judges relevance from the task in whatever language it is written; the
+hook reads nothing in the prompt to build the check.
+
+The check exists because a skill's description is the only automatic route to it,
+and that route is unreliable on its own. Claude Code drops the descriptions of the
+least-used skills when its listing exceeds the
+[character budget](https://code.claude.com/docs/en/skills#skill-descriptions-are-cut-short),
+and a model that sees a description can still decide to answer without the skill.
+The one-line statement commits the agent to a judgment it can be held to. In a
+[published comparison](https://scottspence.com/posts/measuring-claude-code-skill-activation-with-sandboxed-evals),
+a hook that made the model evaluate each skill before acting activated skills far
+more reliably than no hook or a plain reminder. That was one author's small,
+English-only sample, so treat it as a reason to measure, not as a guarantee.
+
+Phrase rules that matched English/Russian wording were retired: they missed
+paraphrases and every other language and needed a rule per phrasing. Only an
+explicit skill choice is still recognized deterministically. It adds a short
+suggestion naming that skill in front of the check. Explanations, quoted commands
+and negative requests do not count as a choice. The CommonMark parser excludes
+blockquotes, fenced/indented code, lists and headings, and only the first request
+paragraph can make a choice.
+
 ## Hints do not grant authority
 
-`UserPromptSubmit` chooses a method from anchored English/Russian request patterns
-or a leading explicit skill selection. Heuristics select one initial method;
-a direct delegation request can add `route-subagents` in the second slot.
-After a leading `Use subagents`, the first immediate task still selects its
-method when the delegation hint is disabled, unavailable or negated. Filenames,
-URLs and versions can contain periods without ending that request. Two explicit
-skill selections fill both slots. The catalogue supplies identifiers and
-installed paths. Missing/disabled skills are not installed or advertised.
-
-A direct `for now only prepare a plan` / `пока только составь план` modifier in
-that request paragraph selects planning before ordinary implementation hints.
-Quoted/inline-code examples cannot supply the modifier; explicit skill choices
-keep priority. This bounded endpoint hint does not parse the full task graph or
-enforce a write prohibition. The actual request still controls authority.
-
-The CommonMark parser excludes blockquotes, fenced/indented code, lists and
-headings. Explanations, quoted commands and negative requests normally abstain.
-Only the first request paragraph is considered. This deliberately misses some
-indirect requests rather than inventing a universal intent classifier. It is
-still a heuristic, not an authorization mechanism or prompt-injection boundary.
-
-Two rules accept non-imperative lookups for an existing solution: `reuse-lookup`
-(`посмотри/проверь, есть ли готов…`) and `reuse-question` (`можно ли
-переиспользовать…` or `…использовать/взять готов…`). After `готов…` both require
-a named kind of solution — implementation, solution, library, behavior, code,
-component, module, package, tool, parser, validator, algorithm, mechanism, asset,
-sprite, template, utility, function, class, plugin or analogue — because
-`готовый` also means "finished", as in a finished build or a ready token. Both
-select evidence-research and can be disabled separately. Other question forms
-still abstain. Replay of a wording shows what this grammar recognizes, not which
-method a client selects from skill descriptions.
-
-A suggestion asks to reuse sufficient existing research/plans and preserve the
-user's scope. It never turns a plan/review into permission to edit. It does not
-claim to load a skill or assume that a particular MCP tool exists. Even an
-observed Skill load would not prove compliance with its method.
+Neither the check nor an explicit-choice suggestion authorizes edits, delegation,
+installation or tool use beyond the request; both say so. A suggestion asks to
+reuse sufficient existing research/plans and preserve the user's scope. It does
+not claim to load a skill or assume that a particular MCP tool exists. Even an
+observed Skill load or an `Assay:` line would not prove compliance with a method.
 
 The session reminder is three sentences: use matching installed skills; when the
 user requests subagents, use `route-subagents` before substantial solo work; no
-delegation is authorized by it. The planning step stays in every session because
-the delegation hint recognizes only narrow imperatives such as "use subagents",
-and the reminder before a launch arrives after solo work may have started. The
-rest of the routing checklist is added at session start only when
-`ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the reminder before each
-launch.
+delegation is authorized by it. The rest of the routing checklist is added at
+session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the
+reminder before each launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
 failures. There is no universal blocking Stop hook. Assay does not ship a hook
@@ -130,17 +125,19 @@ Without a data directory, suggestions are stateless. The runtime uses the client
 
 ```json
 {
-  "disabled_rules": ["ui-delivery"],
-  "disabled_skills": [],
+  "disabled_rules": [],
+  "disabled_skills": ["skill/ui-delivery"],
   "record_events": false
 }
 ```
 
 An optional `state_dir` must be absolute. Skill IDs use the catalogue's
-`skill/<name>` form. Rule IDs are in `hooks/activation-rules.toml`; there is no
-second list of skill definitions. Explicit-only skill selections are derived
-from the catalogue. Disabling a rule also suppresses its explicit suggestion;
-that does not prevent the user or model from using the skill directly.
+`skill/<name>` form; a disabled skill leaves the check and cannot be chosen
+explicitly, which does not prevent the user or model from using it directly.
+`disabled_rules: ["skill-check"]` turns the per-request check off and keeps
+explicit choices. The IDs of the retired phrase rules (`research`, `delegation`,
+`planning` and the rest) are still accepted and do nothing, so an existing
+configuration keeps working; any other unknown ID is an error.
 
 Small namespaced technical reminder records reuse the existing `PipelineStore`
 SQLite transactions, path checks and expiry, not a new storage engine. Each such
@@ -165,12 +162,12 @@ not forever and not across unidentified deliveries. Claude prompt text is never 
 can be a legitimate new task. Consequently duplicate Claude prompt deliveries
 without IDs cannot be reliably suppressed.
 
-An explicit task or an unrecognized new request replaces the active suggestion,
-even when no rule matches. A whole plain continuation such as `continue`, `resume`
-or `продолжай` can instead retain an unexpired suggestion for the same identity
-and fingerprint. Quoted/code/list examples, extra paragraphs and scope modifiers
-are not this continuation form. `continue, but only prepare a plan` goes through
-ordinary selection; an unrecognized restriction clears rather than inherits.
+A new request replaces the active suggestion, even when it names no skill. A
+whole plain continuation such as `continue`, `resume` or `продолжай` can instead
+retain an unexpired suggestion for the same identity and fingerprint; the check
+is added again either way. Quoted/code/list examples, extra paragraphs and scope
+modifiers are not this continuation form. `continue, but only prepare a plan` is
+a new request; it clears rather than inherits.
 The hook stores only a suggestion, not the task, permission or a `skills_used`
 claim. The agent still reconciles the actual work and current authority through
 [continuation](../../skills/implementation-planning/references/continuation.md).
@@ -304,16 +301,14 @@ model adherence or quota savings. No model benchmark/eval is required by this ch
 Use ordinary work incidents to add sanitized regressions, and keep native observation
 and human assessment separate from a green unit suite.
 
-To see how the hint grammar covers your own wording, collect the first paragraphs
-of 30–50 real requests, remove code, paths, names and secrets, and write one
-`{"hook_event_name":"UserPromptSubmit","session_id":"replay","cwd":".","prompt":"..."}`
-object per line. Replay it and compare each result with the method you expected.
-A missed request becomes a candidate rule only together with a nearby
-should-not-fire wording, both added to `tools/fixtures/hooks/prompts.json` and
-checked against the existing controls. The share of hinted requests describes the
-grammar on that sample, not which skill a client selects from descriptions; if
-methods are still chosen late with good coverage, examine the cases rather than
-widening the grammar further.
+Replay shows only what the hook emits; the skill check is the same for every
+prompt, so it cannot show which skills an agent then chooses. To measure that,
+run real requests through the client, for example with a
+[`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals) suite whose
+cases grade `tool_used: Skill`, in the languages you actually use and with nearby
+cases where no skill should load. Such a suite loads only this plugin, so it
+measures the check and the descriptions, not competition for the listing budget
+in your full installation; check that with `/context` and the listing itself.
 
 ## Sources and adopted mechanisms
 
@@ -328,8 +323,13 @@ release must requalify affected claims rather than silently inheriting this date
 - [Codex hooks](https://developers.openai.com/codex/hooks) and
   [subagents](https://developers.openai.com/codex/subagents): trust, aliases,
   PostCompact output, rewrite permissions, coverage and custom config precedence.
-- [diet103 hook README](https://github.com/diet103/claude-code-infrastructure-showcase/blob/main/.claude/hooks/README.md):
-  declarative prompt suggestions; not its two-attempt edit bypass or optional AI mode.
+- [Claude skills](https://code.claude.com/docs/en/skills): description-based
+  invocation and the listing budget that drops descriptions of rarely used skills.
+- [Skill activation comparison](https://scottspence.com/posts/measuring-claude-code-skill-activation-with-sandboxed-evals)
+  (blog, 2026-02): a hook that makes the model evaluate each skill before acting,
+  measured against no hook and a plain reminder. Its keyword-free design replaced
+  the earlier declarative phrase suggestions modelled on the
+  [diet103 hook README](https://github.com/diet103/claude-code-infrastructure-showcase/blob/main/.claude/hooks/README.md).
 - [Superpowers session hook](https://github.com/obra/superpowers/blob/main/hooks/session-start):
   client-specific output and avoiding double injection; not a full-skill dump.
 

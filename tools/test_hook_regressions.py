@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import sys
 import tempfile
-import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -19,35 +18,55 @@ from runtime import activation, events, state
 from route_evidence.pipeline_store import PipelineStore
 from skill_reminder import reminder
 
+# The skill check names every skill on every prompt, so a selection is
+# identified by its own sentence or rule ids, never by a skill name alone.
+SUGGESTS = "The request suggests "
+RESTORED = "Previous request suggested "
+CHECK = "Assay skill check:"
+
 
 def rule_fixture():
-    # Actual input matchers; the expected selections below are authored separately.
-    return tomllib.loads((ROOT / "hooks/activation-rules.toml").read_text(encoding="utf-8"))["rules"]
+    return activation.load_rules(ROOT)[0]
+
+
+def prompt_event(prompt):
+    return {"hook_event_name": "UserPromptSubmit", "prompt": prompt}
 
 
 class HookLanguageTests(unittest.TestCase):
     def setUp(self):
         self.rules = rule_fixture()
 
-    def test_input_languages_produce_identical_english_model_context(self):
+    def test_ordinary_english_and_russian_prompts_produce_identical_context_and_no_selection(self):
         pairs = (
-            ("Review tests", "Проведи ревью тестов", "test-audit"),
-            ("Write tests", "Напиши тесты", "test-writing"),
-            ("Research existing solutions", "Исследуй существующие решения", "research"),
-            ("Create an implementation plan", "Составь план реализации", "planning"),
-            ("Review the implementation", "Проведи ревью реализации", "audit"),
-            ("Build an interface", "Создай интерфейс", "ui-delivery"),
-            ("Implement the changes", "Внеси изменения", "code-change"),
+            ("Review tests", "Проведи ревью тестов"),
+            ("Write tests", "Напиши тесты"),
+            ("Research existing solutions", "Исследуй существующие решения"),
+            ("Create an implementation plan", "Составь план реализации"),
+            ("Build an interface", "Создай интерфейс"),
+            ("Implement the changes", "Внеси изменения"),
+            ("Use subagents", "Используй субагентов"),
         )
-        for english, russian, expected in pairs:
-            with self.subTest(rule=expected):
-                outputs = [activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, self.rules)
-                           for prompt in (english, russian)]
-                self.assertEqual([expected], outputs[0]["rule_ids"])
+        for english, russian in pairs:
+            with self.subTest(prompt=english):
+                outputs = [activation.evaluate(prompt_event(prompt), self.rules) for prompt in (english, russian)]
                 self.assertEqual(outputs[0], outputs[1])
-                self.assertIn("Preserve the user's scope", outputs[1]["context"])
-                self.assertNotRegex(outputs[1]["context"], r"[\u0400-\u04ff]")
-                self.assertLessEqual(len(outputs[1]["context"]), activation.MAX_CONTEXT)
+                self.assertEqual([], outputs[0]["rule_ids"])
+                self.assertNotIn(SUGGESTS, outputs[0]["context"])
+                self.assertTrue(outputs[0]["context"].startswith(CHECK))
+                self.assertTrue(outputs[0]["context"].isascii())
+
+    def test_explicit_choice_selects_the_same_skill_in_both_languages(self):
+        for english, russian, expected in (
+            ("Use code-change", "Используй code-change", "code-change"),
+            ("Apply the skill test-audit", "Примени навык test-audit", "test-audit"),
+        ):
+            with self.subTest(skill=expected):
+                outputs = [activation.evaluate(prompt_event(prompt), self.rules) for prompt in (english, russian)]
+                self.assertEqual(["explicit:skill/" + expected], outputs[0]["rule_ids"])
+                self.assertEqual(outputs[0], outputs[1])
+                self.assertIn(SUGGESTS + expected + ".", outputs[1]["context"])
+                self.assertTrue(outputs[1]["context"].isascii())
 
     def test_english_explicit_selection_and_native_identifier_spellings(self):
         for prompt in (
@@ -55,35 +74,11 @@ class HookLanguageTests(unittest.TestCase):
             "Use `assay:code-change`", "Use `$code-change`", "Use `/assay:code-change`",
         ):
             with self.subTest(prompt=prompt):
-                self.assertEqual(["code-change"], [r["id"] for r in activation.select(prompt, self.rules)])
+                self.assertEqual(["explicit:skill/code-change"],
+                                 [r["id"] for r in activation.select(prompt, self.rules)])
         selected = activation.select("Apply the skills `independent-audit` and `code-change`", self.rules)
-        self.assertEqual(["audit", "code-change"], [r["id"] for r in selected])
-
-    def test_explicit_plan_only_endpoint_limits_a_multi_stage_hint(self):
-        for prompt in (
-            "Implement the changes; for now, only prepare a plan.",
-            "Build an interface. For now only create an implementation plan.",
-            "Реализуй изменения. Пока только составь план.",
-            "Создай интерфейс; пока только подготовь подробный план.",
-        ):
-            with self.subTest(prompt=prompt):
-                result = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, self.rules)
-                self.assertEqual(["planning"], result["rule_ids"])
-                self.assertIn("read-only", result["context"])
-
-    def test_plan_only_data_does_not_replace_a_request_or_explicit_method(self):
-        for prompt in (
-            'Implement the parser; "for now only prepare a plan" is sample text.',
-            "Implement the parser; `for now only prepare a plan` is sample text.",
-            "Implement the parser.\n\n> For now only prepare a plan.",
-            "Implement the parser.\n\nFor now only prepare a plan.",
-        ):
-            with self.subTest(prompt=prompt):
-                self.assertEqual(["code-change"], activation.evaluate(
-                    {"hook_event_name": "UserPromptSubmit", "prompt": prompt}, self.rules)["rule_ids"])
-        self.assertEqual(["code-change"], activation.evaluate(
-            {"hook_event_name": "UserPromptSubmit", "prompt": "Use code-change; for now only prepare a plan."},
-            self.rules)["rule_ids"])
+        self.assertEqual(["explicit:skill/independent-audit", "explicit:skill/code-change"],
+                         [r["id"] for r in selected])
 
     def test_explicit_selection_still_abstains_for_quoted_and_negative_requests(self):
         for prompt in (
@@ -105,8 +100,8 @@ class HookLanguageTests(unittest.TestCase):
             text = reminder(event, environment)["hookSpecificOutput"]["additionalContext"]
             self.assertIn(expected, text)
             self.assertNotRegex(text, r"[\u0400-\u04ff]")
-        text = activation.context(["audit"], self.rules, restored=True)
-        self.assertIn("Previous request suggested independent-audit", text)
+        text = activation.context(["explicit:skill/independent-audit"], self.rules, restored=True)
+        self.assertIn(RESTORED + "independent-audit", text)
         self.assertNotRegex(text, r"[\u0400-\u04ff]")
 
 
@@ -136,63 +131,63 @@ class HookDeliveryTests(unittest.TestCase):
         return self.apply({"hook_event_name": "PreToolUse", "tool_name": "spawn_agent", "tool_use_id": "fresh"})
 
     def test_old_prompt_redelivery_cannot_replace_current_task(self):
-        self.prompt("old", ["research"])
+        self.prompt("old", ["explicit:skill/evidence-research"])
         self.now += 1
-        self.prompt("new", ["code-change"])
+        self.prompt("new", ["explicit:skill/code-change"])
         before = self.stored()
         self.now += 1
-        self.assertEqual("", self.prompt("old", ["research"])["context"])
+        self.assertEqual("", self.prompt("old", ["explicit:skill/evidence-research"])["context"])
         self.assertEqual(before, self.stored())
-        self.assertEqual(["code-change"], self.restore()["rule_ids"])
+        self.assertEqual(["explicit:skill/code-change"], self.restore()["rule_ids"])
 
     def test_silent_prompt_redelivery_cannot_clear_current_task(self):
         self.prompt("explanation")
-        self.prompt("implementation", ["code-change"])
+        self.prompt("implementation", ["explicit:skill/code-change"])
         before = self.stored()
         self.prompt("explanation")
         self.assertEqual(before, self.stored())
-        self.assertEqual(["code-change"], self.restore()["rule_ids"])
+        self.assertEqual(["explicit:skill/code-change"], self.restore()["rule_ids"])
 
     def test_delivery_identity_is_not_changed_by_rule_revision(self):
-        self.prompt("old", ["research"])
-        self.prompt("new", ["code-change"], fingerprint="revision-two")
+        self.prompt("old", ["explicit:skill/evidence-research"])
+        self.prompt("new", ["explicit:skill/code-change"], fingerprint="revision-two")
         before = self.stored()
-        replayed = self.prompt("old", ["audit"], fingerprint="revision-two")
+        replayed = self.prompt("old", ["explicit:skill/independent-audit"], fingerprint="revision-two")
         self.assertEqual("", replayed["context"])
         self.assertEqual(before, self.stored())
 
     def test_replay_cannot_cancel_pending_compaction_restore(self):
-        self.prompt("turn", ["research"])
+        self.prompt("turn", ["explicit:skill/evidence-research"])
         self.apply({"hook_event_name": "PostCompact"})
-        self.prompt("turn", ["research"])
+        self.prompt("turn", ["explicit:skill/evidence-research"])
         self.assertTrue(self.stored().get("pending_restore"))
         output = self.apply({"hook_event_name": "PreToolUse", "tool_name": "spawn_agent", "tool_use_id": "next"})
-        self.assertIn("evidence-research", output["context"])
+        self.assertIn(RESTORED + "evidence-research", output["context"])
 
     def test_guard_response_does_not_consume_an_undelivered_hint(self):
         for outcome in ("deny", "guard"):
             with self.subTest(outcome=outcome):
-                self.prompt(outcome, ["audit"])
+                self.prompt(outcome, ["explicit:skill/independent-audit"])
                 self.apply({"hook_event_name": "PostCompact"})
                 event = {"hook_event_name": "PreToolUse", "tool_name": "spawn_agent", "tool_use_id": outcome}
                 self.assertEqual("", self.apply(event, outcome=outcome)["context"])
                 self.assertTrue(self.stored().get("pending_restore"))
                 # A later valid delivery is not suppressed by the earlier guard.
-                self.assertIn("independent-audit", self.apply(event)["context"])
+                self.assertIn(RESTORED + "independent-audit", self.apply(event)["context"])
 
     def test_new_turn_and_claude_without_turn_identity_are_not_suppressed(self):
-        self.assertTrue(self.prompt("one", ["audit"])["context"])
-        self.assertTrue(self.prompt("two", ["audit"])["context"])
+        self.assertTrue(self.prompt("one", ["explicit:skill/independent-audit"])["context"])
+        self.assertTrue(self.prompt("two", ["explicit:skill/independent-audit"])["context"])
         for _ in range(2):
             result = self.apply({"hook_event_name": "UserPromptSubmit", "prompt": "same words"},
-                                ["audit"], client="claude")
+                                ["explicit:skill/independent-audit"], client="claude")
             self.assertTrue(result["context"])
 
     def test_guard_does_not_replace_the_required_session_message(self):
-        self.prompt("one", ["audit"])
+        self.prompt("one", ["explicit:skill/independent-audit"])
         result = self.apply({"hook_event_name": "SessionStart", "source": "resume"}, outcome="guard")
         self.assertEqual("", result["context"])
-        self.assertEqual(["audit"], self.stored()["rules"])
+        self.assertEqual(["explicit:skill/independent-audit"], self.stored()["rules"])
 
 
 class HookCommandTests(unittest.TestCase):
@@ -214,7 +209,7 @@ class HookCommandTests(unittest.TestCase):
     def test_session_restore_keeps_baseline_with_or_without_a_matching_prompt(self):
         for client in ("claude", "codex"):
             for source in ("resume", "compact"):
-                for prompt, suggested in (("Explain this text", False), ("Implement the change", True)):
+                for prompt, suggested in (("Explain this text", False), ("Use code-change for this repair", True)):
                     with self.subTest(client=client, source=source, prompt=prompt), tempfile.TemporaryDirectory() as temporary:
                         env = {"PLUGIN_DATA": temporary}
                         base = {"session_id": "s", "cwd": "work", "transcript_path": "parent"}
@@ -224,34 +219,35 @@ class HookCommandTests(unittest.TestCase):
                         context = result["hookSpecificOutput"]["additionalContext"]
                         self.assertIn("Assay is installed.", context)
                         self.assertIn("does not authorize delegation", context)
-                        self.assertEqual(suggested, "Previous request suggested code-change" in context)
+                        self.assertEqual(suggested, RESTORED + "code-change" in context)
 
     def test_session_compact_restore_consumes_pending_hint_once(self):
         with tempfile.TemporaryDirectory() as temporary:
             env = {"PLUGIN_DATA": temporary}
             base = {"session_id": "s", "cwd": "work", "transcript_path": "parent"}
-            self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "prompt": "Implement the change"}, "codex", env)
+            self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "prompt": "Use code-change for this repair"}, "codex", env)
             self.cli.process({**base, "hook_event_name": "PostCompact"}, "codex", env)
             result, error = self.cli.process({**base, "hook_event_name": "SessionStart", "source": "compact"}, "codex", env)
             self.assertIsNone(error)
-            self.assertIn("Previous request suggested code-change", result["hookSpecificOutput"]["additionalContext"])
+            self.assertIn(RESTORED + "code-change", result["hookSpecificOutput"]["additionalContext"])
             result, error = self.cli.process({**base, "hook_event_name": "PreToolUse", "tool_name": "spawn_agent",
                                              "tool_use_id": "next"}, "codex", env)
             self.assertIsNone(error)
             self.assertIn("route-subagents", result["hookSpecificOutput"]["additionalContext"])
-            self.assertNotIn("Previous request", result["hookSpecificOutput"]["additionalContext"])
+            self.assertNotIn(RESTORED, result["hookSpecificOutput"]["additionalContext"])
 
     def test_narrowed_request_replaces_pending_implementation_hint_in_both_clients(self):
         for client in ("codex", "claude"):
             for narrow, expected in (
-                ("Реализуй изменения; пока только составь план.", "implementation-planning"),
+                ("Используй implementation-planning; пока только план.", "implementation-planning"),
+                ("Пока только составь план.", None),
                 ("Do not change files. Explain the current state.", None),
             ):
                 with self.subTest(client=client, narrow=narrow), tempfile.TemporaryDirectory() as temporary:
                     env = {"PLUGIN_DATA": temporary}
                     base = {"session_id": "narrowed", "cwd": "work", "transcript_path": "parent"}
                     self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "turn_id": "old",
-                                      "prompt": "Implement the change"}, client, env)
+                                      "prompt": "Use code-change for this repair"}, client, env)
                     self.cli.process({**base, "hook_event_name": "PostCompact"}, client, env)
                     self.cli.process({**base, "hook_event_name": "UserPromptSubmit", "turn_id": "new",
                                       "prompt": narrow}, client, env)
@@ -260,11 +256,11 @@ class HookCommandTests(unittest.TestCase):
                                                       "source": "resume"}, client, env)
                     self.assertIsNone(error)
                     context = result["hookSpecificOutput"]["additionalContext"]
-                    self.assertNotIn("Previous request suggested code-change", context)
+                    self.assertNotIn(RESTORED + "code-change", context)
                     if expected:
-                        self.assertIn("Previous request suggested " + expected, context)
+                        self.assertIn(RESTORED + expected, context)
                     else:
-                        self.assertNotIn("Previous request suggested", context)
+                        self.assertNotIn(RESTORED, context)
 
     def test_optional_rule_failure_preserves_session_and_launch_reminders(self):
         for event in (
@@ -281,7 +277,7 @@ class HookCommandTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             environment = {"PLUGIN_DATA": str(Path(temporary) / "state")}
             event = {"hook_event_name": "UserPromptSubmit", "session_id": "session", "cwd": "work",
-                     "transcript_path": "parent", "turn_id": "turn", "prompt": "Review changes"}
+                     "transcript_path": "parent", "turn_id": "turn", "prompt": "Use independent-audit for this review"}
             self.cli.process(event, "codex", environment)
             self.cli.process({**event, "hook_event_name": "PostCompact"}, "codex", environment)
             pre = {**event, "hook_event_name": "PreToolUse", "tool_name": "spawn_agent", "tool_use_id": "spawn"}
@@ -292,7 +288,7 @@ class HookCommandTests(unittest.TestCase):
             self.assertEqual(protected, result)
             result, error = self.cli.process(pre, "codex", environment)
             self.assertIsNone(error)
-            self.assertIn("independent-audit", result["hookSpecificOutput"]["additionalContext"])
+            self.assertIn(RESTORED + "independent-audit", result["hookSpecificOutput"]["additionalContext"])
 
     def test_optional_state_failure_preserves_basic_reminder(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -333,11 +329,14 @@ class HookCommandTests(unittest.TestCase):
         self.assertEqual(2, code)
         self.assertNotIn("SECRET", stdout)
 
-    def test_valid_silent_replay_is_not_confused_with_no_evidence(self):
+    def test_valid_unselected_replay_is_not_confused_with_no_evidence(self):
         code, stdout, stderr = self.run_command("replay", '{"hook_event_name":"UserPromptSubmit","prompt":"Explain hooks"}\n')
         self.assertEqual(0, code, stderr)
         report = json.loads(stdout)
-        self.assertEqual({}, report["result"])
+        self.assertIsNone(report["error"])
+        context = report["result"]["hookSpecificOutput"]["additionalContext"]
+        self.assertTrue(context.startswith(CHECK))
+        self.assertNotIn(SUGGESTS, context)
         self.assertEqual("synthetic_replay", report["evidence"])
 
     def test_hook_json_reuses_strict_decoder(self):

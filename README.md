@@ -48,7 +48,7 @@ primary documentation. Neither pins a model.
 
 The instructions are Markdown. The **Claude Code and Codex plugin reminders**
 require Python 3.11+ available as `python`. Basic session/delegation reminders use
-the standard library; prompt classification additionally needs `markdown-it-py`
+the standard library; recognizing an explicit skill choice additionally needs `markdown-it-py`
 from `hooks/requirements.txt` in the isolated interpreter used by the hook.
 See [hook setup and diagnostics](docs/how-to/hooks.md). The symlink installer and
 repository checks need `requirements-tools.txt`. Optional skill scripts declare
