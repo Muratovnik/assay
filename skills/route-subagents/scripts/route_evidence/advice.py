@@ -70,7 +70,7 @@ def _compact_cohort(comparison: dict, pair_refs: dict[tuple[str, str], int]) -> 
     rows = []
     expected = {"model", "effort", "score", "score_low", "score_high", "quality_delta_pp",
                 "expenses", "expense_evidence", "unmeasured_expenses", "cost_basis", "evaluated_at",
-                "frontier", "dominated_by", "stale", "constraints", "source_url"}
+                "frontier", "dominated_by", "stale", "constraints", "source_url", "measured_below"}
     for candidate in candidates:
         if not isinstance(candidate, dict) or set(candidate) - expected:
             raise EvidenceError("context cohort candidate has unsupported fields")

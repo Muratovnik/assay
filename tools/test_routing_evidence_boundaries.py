@@ -50,10 +50,31 @@ class MeasurementBoundaryTests(unittest.TestCase):
         result = build_context(request, [{"source_id": source["id"], "snapshot": data, "stale": False}])
         candidates = result["tasks"][0]["supporting_comparisons"][0]["candidates"]
         self.assertEqual([c["dominated_by"] for c in candidates], [[], []])
+        self.assertEqual([c["measured_below"] for c in candidates], [[], []])
         self.assertEqual(candidates[0]["expenses"]["cost_usd"], 1)
         table[1][1] = "81% ± invalid"
         with self.assertRaises(EvidenceError):
             measured_snapshot(source, parse_tables(source, [table]))
+
+
+class QualityIntervalTests(unittest.TestCase):
+    def candidates(self, rows):
+        source = SOURCES["cursorbench"]
+        table = [["Model", "Score", "Cost / Task", "Tokens / Task", "Steps / Task"], *[[*row, "100", "1"] for row in rows]]
+        request = {"client": "codex", "task_types": ["implementation"],
+                   "available": [{"model": c["model"], "efforts": [c["effort"]]} for c in CANDIDATES]}
+        data = measured_snapshot(source, parse_tables(source, [table]))
+        result = build_context(request, [{"source_id": source["id"], "snapshot": data, "stale": False}])
+        return {c["model"]: c for c in result["tasks"][0]["supporting_comparisons"][0]["candidates"]}
+
+    def test_only_a_wholly_higher_published_interval_marks_a_route_measured_below(self):
+        separated = self.candidates([["economy (low)", "60% ± 5%", "$1"], ["capable (high)", "80% ± 5%", "$2"]])
+        self.assertEqual(separated["economy"]["measured_below"], [{"model": "capable", "effort": "high"}])
+        self.assertEqual(separated["capable"]["measured_below"], [])
+        overlapping = self.candidates([["economy (low)", "72% ± 5%", "$1"], ["capable (high)", "80% ± 5%", "$2"]])
+        self.assertEqual(overlapping["economy"]["measured_below"], [])
+        point_only = self.candidates([["economy (low)", "40%", "$1"], ["capable (high)", "80%", "$2"]])
+        self.assertEqual(point_only["economy"]["measured_below"], [])
 
 
 class GuidanceBoundaryTests(unittest.TestCase):

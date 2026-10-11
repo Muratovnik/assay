@@ -255,6 +255,7 @@ candidate; none is dropped by ranking, policy or response size.
 | `expense_evidence` | `measured`, `partial` or `none` — never a substituted value |
 | `frontier` | Axes on which nothing in this cohort dominates it |
 | `dominated_by` | Who dominates it, per axis |
+| `measured_below` | Routes whose published interval lies wholly above its own |
 | `constraints` | Each declared limit as `within`, `exceeds` or `unknown` |
 | `stale` | The observation came from data that is past its freshness window |
 
@@ -262,7 +263,10 @@ Pareto holds **inside one cohort and one axis**. Expense axes are never merged
 into a single number, and no cross-benchmark cost or averaged percentage is
 invented. Overlapping published confidence intervals prevent a dominance claim;
 `quality_delta_pp` uses point estimates and is labeled accordingly. A small
-difference is not statistical evidence of equivalence.
+difference is not statistical evidence of equivalence. A candidate is measurably
+worse in that cohort than each route its `measured_below` names; without
+published intervals the list stays empty rather than reading a point gap as a
+difference.
 
 Coverage is tracked for **every primary cohort and configuration** and is an
 intersection, never a union across sources. A singleton is not comparative

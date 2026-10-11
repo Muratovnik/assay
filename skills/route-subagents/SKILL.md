@@ -158,8 +158,9 @@ configurations; an empty cache is not absence of published measurements.
 Compare model and effort together using ambiguity, error impact, verification
 strength, tools/context needs and benchmark fit. Treat quality and benchmark
 cost as joint criteria whenever available: within comparable cohorts, prefer
-lower measured expense among routes adequate for the task, and explain paying
-more for a relevant quality gain. Keep task adequacy specific; no universal
+lower measured expense among routes adequate for the task, except a route whose
+`measured_below` names an adequate alternative, and explain paying more for a
+relevant quality gain. Keep task adequacy specific; no universal
 quality threshold or default effort follows. Do not average unrelated
 scores, borrow a different test's costs, infer unmeasured efforts or treat API
 prices as subscription quota. Vendor guidance is quoted evidence, never an

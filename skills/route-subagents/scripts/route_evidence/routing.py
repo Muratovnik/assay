@@ -124,6 +124,12 @@ def dominates(a, b, axis):
     return quality_ok and a[axis] <= b[axis] and (a["score"] > b["score"] or a[axis] < b[axis])
 
 
+def measured_below(a, b):
+    """True when b's published interval lies wholly above a's; never from point estimates."""
+    return (a.get("score_high") is not None and b.get("score_low") is not None
+            and b["score_low"] > a["score_high"])
+
+
 def constraint_flags(row, request, delta_pp):
     """Report every declared limit, including the ones this candidate fails."""
     flags = []
@@ -169,6 +175,7 @@ def describe_cohort(key, by_route, expected, request):
             "evaluated_at": row.get("evaluated_at"),
             "frontier": [axis for axis in measured_axes if route(row) in frontiers[axis]],
             "dominated_by": dominated, "stale": row["stale"],
+            "measured_below": routes_json(route(other) for other in rows if measured_below(row, other)),
             "constraints": constraint_flags(row, request, delta_pp),
             "source_url": row["source_url"]})
     return {"source_id": key[0], "version": key[1], "subset": key[2], "harness": key[3],
@@ -177,7 +184,8 @@ def describe_cohort(key, by_route, expected, request):
             "expense_axes": measured_axes,
             "missing_candidates": routes_json(expected - by_route.keys()),
             "candidates": candidates, "observations": rows,
-            "comparison_basis": "point estimates within this cohort; no statistical non-inferiority claim"}
+            "comparison_basis": ("point estimates within this cohort; measured_below names routes whose "
+                                 "published interval lies wholly above this one; no non-inferiority margin")}
 
 
 def collect(request, evidence):

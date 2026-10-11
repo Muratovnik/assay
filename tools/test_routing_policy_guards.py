@@ -356,6 +356,94 @@ class PairedCostSelectionGuards(unittest.TestCase):
         self.assertNotIn("cost_cohort_conflict", result["economic_assessment"]["unknowns"])
 
 
+class QualityFloorGuards(unittest.TestCase):
+    """A cheaper route measurably worse than an adequate alternative is not selected."""
+
+    def context(self, costs, intervals, routes=None):
+        ctx = decisions.context(costs, tuple((i[0] + i[1]) / 2 if i else .5 for i in intervals), len(costs))
+        cohort = ctx["tasks"][0]["primary_comparisons"][0]
+        for index, (candidate, interval) in enumerate(zip(cohort["candidates"], intervals)):
+            if interval:
+                candidate["score_low"], candidate["score_high"] = interval
+            if routes:
+                candidate["model"], candidate["effort"] = routes[index]
+                ctx["inventory"][index] = {"model": routes[index][0], "effort": routes[index][1]}
+        return ctx
+
+    def decide(self, ctx, choices=None):
+        snapshot = decisions.snapshot(ctx=ctx)
+        return decide(snapshot, parse_native(snapshot, decisions.answer(snapshot, choices)))[0]
+
+    def test_a_cheaper_route_below_an_adequate_interval_is_excluded(self):
+        result = self.decide(self.context((.1, .3, .5), ((.40, .50), (.70, .80), (.72, .82))))
+        self.assertEqual(result["selected"]["model"], "model-01")
+        self.assertIn("quality_floor_applied", result["reason_codes"])
+        self.assertIn("benchmark_cost_selected", result["reason_codes"])
+        excluded = result["economic_assessment"]["quality_floor"]["excluded"]
+        self.assertEqual(1, len(excluded))
+        result = self.decide(self.context((.1, .5), ((.40, .50), (.70, .80))))
+        self.assertEqual(result["selected"]["model"], "model-01")
+        self.assertEqual(["task_adequate", "quality_floor_applied"], result["reason_codes"])
+        self.assertEqual("quality_floor", result["economic_assessment"]["selection_basis"])
+
+    def test_overlap_missing_intervals_and_inadequate_alternatives_exclude_nothing(self):
+        for intervals, choices in ((((.60, .75), (.70, .80)), None), ((None, None), None),
+                                   (((.40, .50), (.70, .80)), {"model-01": "inadequate"})):
+            with self.subTest(intervals=intervals, choices=choices):
+                result = self.decide(self.context((.1, .5), intervals), choices)
+                self.assertEqual(result["selected"]["model"], "model-00")
+                self.assertNotIn("quality_floor_applied", result["reason_codes"])
+
+    def test_without_cost_a_lower_effort_of_one_model_precedes_measured_quality(self):
+        routes = [("model-00", "low"), ("model-00", "high"), ("model-01", "low")]
+        result = self.decide(self.context((None, None, None), ((.60, .80), (.65, .85), (.30, .55)), routes))
+        self.assertEqual((result["selected"]["model"], result["selected"]["effort"]), ("model-00", "low"))
+        self.assertIn("comparable_cost_unknown", result["reason_codes"])
+        self.assertIn("quality_floor_applied", result["reason_codes"])
+        self.assertNotIn("economic_tie", result["reason_codes"])
+        self.assertEqual(result["economic_assessment"]["selection_basis"], "measured_quality_without_cost")
+
+    def test_without_cost_different_models_are_ordered_by_measured_quality(self):
+        for intervals, expected in ((((.50, .70), (.55, .75)), "model-01"), (((.55, .75), (.50, .70)), "model-00")):
+            with self.subTest(intervals=intervals):
+                result = self.decide(self.context((None, None), intervals))
+                self.assertEqual(result["selected"]["model"], expected)
+                self.assertIn("economic_tie", result["reason_codes"])
+
+    def test_cohorts_that_disagree_leave_every_adequate_route_eligible(self):
+        ctx = self.context((.1, .5), ((.40, .50), (.70, .80)))
+        reverse = copy.deepcopy(ctx["tasks"][0]["primary_comparisons"][0])
+        reverse["version"] = "fixture-reversed"
+        for candidate, interval in zip(reverse["candidates"], ((.70, .80), (.40, .50))):
+            candidate["score_low"], candidate["score_high"] = interval
+            candidate["score"] = sum(interval) / 2
+        ctx["tasks"][0]["primary_comparisons"].append(reverse)
+        result = self.decide(ctx)
+        self.assertNotIn("quality_floor_applied", result["reason_codes"])
+        self.assertIn("quality_interval_conflict", result["economic_assessment"]["unknowns"])
+
+    def test_a_disputed_pair_does_not_hand_the_choice_to_an_unordered_route(self):
+        ctx = self.context((.1, .5, .3), ((.40, .50), (.70, .80), None))
+        reverse = copy.deepcopy(ctx["tasks"][0]["primary_comparisons"][0])
+        reverse["version"] = "fixture-reversed"
+        for candidate, interval in zip(reverse["candidates"], ((.70, .80), (.40, .50))):
+            candidate["score_low"], candidate["score_high"] = interval
+            candidate["score"] = sum(interval) / 2
+        ctx["tasks"][0]["primary_comparisons"].append(reverse)
+        result = self.decide(ctx)
+        self.assertEqual(result["selected"]["model"], "model-00")
+        self.assertNotIn("quality_floor_applied", result["reason_codes"])
+        self.assertIn("quality_interval_conflict", result["economic_assessment"]["unknowns"])
+
+    def test_effort_spend_order_covers_other_clients_and_ignores_unknown_levels(self):
+        for routes, expected in (([("model-00", "minimal"), ("model-00", "high")], ("model-00", "minimal")),
+                                 ([("model-00", "turbo"), ("model-00", "low")], ("model-00", "turbo"))):
+            with self.subTest(routes=routes):
+                intervals = ((.50, .70), (.55, .75)) if routes[0][1] == "minimal" else ((.55, .75), (.50, .70))
+                result = self.decide(self.context((None, None), intervals, routes))
+                self.assertEqual((result["selected"]["model"], result["selected"]["effort"]), expected)
+
+
 class AdvisorResultTypeGuards(unittest.TestCase):
     def test_legacy_native_malformed_ids_raise_the_classified_validation_error(self):
         from test_routing_adapters import native_result, routing_snapshot

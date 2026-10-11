@@ -135,6 +135,20 @@ concrete unmet criteria for cheaper alternatives; a larger score or generic high
 impact alone is insufficient. API USD does not establish subscription quota or
 actual full-chain cost.
 
+Before price, code applies a quality floor from published intervals. An adequate
+route whose interval lies wholly below another adequate route's in a primary
+cohort is measurably worse than an alternative judged able to do the task, so a
+lower price does not select it. The assessment's `quality_floor` names it with
+the cohort, and the decision carries `quality_floor_applied`; a single remaining
+route is selected with status `quality_floor_selected`. Overlapping or missing
+intervals exclude nothing, and cohorts that disagree leave every adequate route
+eligible with `quality_interval_conflict`. Without comparable cost, the choice
+is no longer the stable candidate ID: a model's lowest eligible effort comes
+first, because it passed the floor and spends fewer reasoning tokens, then the
+measured score in the primary cohort covering most remaining routes
+(`measured_quality_without_cost`). An `economic_tie` remains visible when
+different models are left.
+
 When existing local task evidence supplies paired full-chain observations for
 two adequate exact routes, code compares that pair independently of the supplied
 baseline. A cheaper route with no observed quality regression is preferred;

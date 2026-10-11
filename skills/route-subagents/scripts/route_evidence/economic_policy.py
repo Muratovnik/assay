@@ -9,6 +9,71 @@ from .advice_contracts import _compact_candidate
 from .core import digest
 from .decision_contracts import packet_cohort_ids, question_bindings
 
+# Reasoning levels by spend, across clients. A level outside it orders nothing.
+EFFORT_SPEND = ("none", "minimal", "low", "medium", "high", "xhigh", "max")
+
+
+def _primary_measurements(snapshot, packet, refs, candidates):
+    """Fresh primary rows of the given routes, one mapping per cohort."""
+    measured = []
+    for cohort in snapshot["evidence"]["cohorts"]:
+        if cohort["cohort_id"] not in packet_cohort_ids(snapshot, packet, "primary"):
+            continue
+        rows = {}
+        for candidate in sorted(candidates):
+            row = _compact_candidate(cohort, refs[candidate]) or {}
+            score = row.get("score")
+            if isinstance(score, (int, float)) and not isinstance(score, bool) and not row.get("stale"):
+                rows[candidate] = row
+        if rows:
+            measured.append((cohort["cohort_id"], rows))
+    return measured
+
+
+def _quality_floor(measured, adequate):
+    """Adequate routes whose interval lies wholly below another adequate route's.
+
+    Such a route is measurably worse than an alternative judged able to do the
+    task, so a lower price cannot select it. Overlapping or missing intervals
+    exclude nothing: a point gap is not evidence of a real difference. A pair
+    that cohorts order both ways excludes neither route.
+    """
+    found = {}
+    for cohort_id, rows in measured:
+        for candidate, row in rows.items():
+            for other, theirs in rows.items():
+                if (row.get("score_high") is not None and theirs.get("score_low") is not None
+                        and theirs["score_low"] > row["score_high"]):
+                    found.setdefault((candidate, other), []).append(cohort_id)
+    conflicts = {pair for pair in found if pair[::-1] in found}
+    below = {}
+    for (candidate, other), cohorts in sorted(found.items()):
+        if (candidate, other) not in conflicts:
+            below.setdefault(candidate, []).extend({"cohort_id": c, "measured_below": other} for c in cohorts)
+    unknowns = ["quality_interval_conflict"] if conflicts else []
+    if below and set(below) >= adequate:
+        return {}, ["quality_interval_conflict"]
+    return below, unknowns
+
+
+def _unpriced_choice(snapshot, measured, eligible):
+    """Without comparable cost: lower effort within a model, then measured quality.
+
+    A model's lower effort spends fewer reasoning tokens and, having passed the
+    quality floor, is not measurably worse. Between models only quality is
+    known, read in the one primary cohort that measures most of them.
+    """
+    routes = {c["candidate_id"]: (c["model"], c["effort"]) for c in snapshot["candidates"]}
+    rank = lambda candidate: (EFFORT_SPEND.index(routes[candidate][1]) if routes[candidate][1] in EFFORT_SPEND
+                              else None)
+    lowest = {candidate for candidate in eligible
+              if not any(routes[other][0] == routes[candidate][0] and None not in (rank(other), rank(candidate))
+                         and rank(other) < rank(candidate) for other in eligible)}
+    cohort = max(measured, key=lambda item: (len(lowest & set(item[1])), item[0]), default=(None, {}))[1]
+    scores = {candidate: cohort[candidate]["score"] for candidate in lowest if candidate in cohort}
+    spend = lambda c: len(EFFORT_SPEND) if rank(c) is None else rank(c)
+    return min(lowest, key=lambda c: (c not in scores, -scores.get(c, 0), spend(c), c)), len(lowest) > 1
+
 
 def _benchmark_preferences(comparisons):
     preferences = {}
@@ -85,6 +150,10 @@ def select_adequate(snapshot, packet, result):
     for values in categories.values():
         values.sort()
     adequate = set(categories["adequate"])
+    refs = {c["candidate_id"]: i for i, c in enumerate(snapshot["candidates"])}
+    measured_quality = _primary_measurements(snapshot, packet, refs, adequate) if adequate else []
+    below, floor_unknowns = _quality_floor(measured_quality, adequate)
+    eligible = adequate - set(below)
     local = next((item for item in snapshot["evidence"].get("task_similarity_evidence", {}).get("packets", [])
                   if item.get("packet_id") == packet["packet_id"]), {})
     paired = local.get("comparison", {})
@@ -94,7 +163,14 @@ def select_adequate(snapshot, packet, result):
                   "objective_unit": objective_unit, "selection_unit": None, "selection_basis": "adequacy_only"}
     if not adequate:
         return None, ["task_adequacy_unknown" if categories["unknown"] else "no_adequate_route"], assessment
-    refs = {c["candidate_id"]: i for i, c in enumerate(snapshot["candidates"])}
+    if below:
+        assessment["quality_floor"] = {"basis": "published_intervals", "excluded": [
+            {"candidate_id": candidate, "cohorts": cohorts} for candidate, cohorts in sorted(below.items())]}
+        if len(eligible) == 1:
+            # Price cannot choose between one remaining route and worse ones.
+            assessment.update(status="quality_floor_selected", selection_basis="quality_floor",
+                              unknowns=["alternative_adequacy_unknown"] if categories["unknown"] else [])
+            return next(iter(eligible)), ["task_adequate", "quality_floor_applied"], assessment
     groups = {"primary": [], "supporting": []}
     for role in groups:
         for cohort in snapshot["evidence"]["cohorts"]:
@@ -105,7 +181,7 @@ def select_adequate(snapshot, packet, result):
                 continue
             axis = axes.index("cost_usd")
             by_basis = {}
-            for candidate in sorted(adequate):
+            for candidate in sorted(eligible):
                 row = _compact_candidate(cohort, refs[candidate]) or {}
                 value = next((value for index, value in row.get("expenses", []) if index == axis), None)
                 basis = row.get("cost_basis")
@@ -120,10 +196,10 @@ def select_adequate(snapshot, packet, result):
     if not comparisons:
         comparisons = [g for g in groups["supporting"] if len(g["values"]) > 1]
     benchmark = _benchmark_preferences(comparisons)
-    local_preferences, local_comparisons, tradeoffs = _local_preferences(paired, adequate, objective)
-    unknowns = ["paired_quality_cost_tradeoff"] if tradeoffs else []
+    local_preferences, local_comparisons, tradeoffs = _local_preferences(paired, eligible, objective)
+    unknowns = [*floor_unknowns, *(["paired_quality_cost_tradeoff"] if tradeoffs else [])]
     local_measured = {candidate for pair in local_preferences for candidate in pair}
-    if objective_unit == "quota_units" and local_measured != adequate:
+    if objective_unit == "quota_units" and local_measured != eligible:
         unknowns.append("quota_cost_unknown")
     # A paired chain observation supersedes a benchmark preference for those
     # exact routes only. It cannot promote a winner over unpaired alternatives.
@@ -135,7 +211,11 @@ def select_adequate(snapshot, packet, result):
                           unknowns=[*unknowns, "comparable_cost_missing",
                                     *(["alternative_adequacy_unknown"] if categories["unknown"] else [])])
         # This is a qualified adequacy choice, not an asserted economic optimum.
-        return min(adequate), ["task_adequate", "comparable_cost_unknown"], assessment
+        selected, tied = _unpriced_choice(snapshot, measured_quality, eligible)
+        assessment["selection_basis"] = "measured_quality_without_cost"
+        return selected, ["task_adequate", "comparable_cost_unknown",
+                          *(["quality_floor_applied"] if below else []),
+                          *(["economic_tie"] if tied else [])], assessment
     more_expensive = set()
     measured = set()
     for pair, preferred in preferences.items():
@@ -146,14 +226,14 @@ def select_adequate(snapshot, packet, result):
     if local_comparisons:
         assessment["local_comparison"] = {"unit": paired["unit"], "pairwise_comparisons": local_comparisons}
         unknowns.append("observational_cost_transfer")
-        if any(tuple(sorted(pair)) not in local_preferences for pair in combinations(sorted(adequate), 2)):
+        if any(tuple(sorted(pair)) not in local_preferences for pair in combinations(sorted(eligible), 2)):
             unknowns.append("uncompared_alternatives")
     winners = measured - more_expensive
     if not winners:
         assessment.update(status="cost_cohort_conflict", unknowns=[*unknowns, "cost_cohort_conflict"])
         return None, ["cost_cohort_conflict"], assessment
     selected = min(winners)
-    if measured != adequate:
+    if measured != eligible:
         unknowns.append("adequate_cost_unmeasured")
     if categories["unknown"]:
         unknowns.append("alternative_adequacy_unknown")
@@ -169,6 +249,8 @@ def select_adequate(snapshot, packet, result):
                                       if benchmark_selection else "adequacy_only")
     codes = ["task_adequate", "paired_chain_cost_selected" if local_selection else "benchmark_cost_selected"
              if benchmark_selection else "cost_preference_unknown"]
+    if below:
+        codes.append("quality_floor_applied")
     if unknowns:
         codes.append("economic_uncertainty")
     assessment["undominated_candidates"] = sorted(winners)
