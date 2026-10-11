@@ -91,6 +91,7 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
             # execution and certainly not compliance with a skill.
             eid = hashlib.sha256(json.dumps([key, delivery, name, now]).encode()).hexdigest()
             _put(tx, "hook-event", eid, {"client": client, "event": name,
-                 "rule_ids": decision["rule_ids"], "decision": outcome or ("duplicate" if duplicate else "hint" if decision["context"] else "silent"),
+                 "rule_ids": decision["rule_ids"], "decision": outcome or ("duplicate" if duplicate else "hint" if decision["rule_ids"]
+                                                     else "check" if decision["context"] else "silent"),
                  "evidence": "command_input_unattested"}, now)
     return decision

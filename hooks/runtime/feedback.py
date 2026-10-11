@@ -154,7 +154,7 @@ def installed_version(root):
 
 
 def rules_fingerprint(root, settings):
-    """Fingerprint of hint rules and SKILL.md bytes; it does not cover references."""
+    """Fingerprint of the skill map and SKILL.md bytes; it does not cover references."""
     try:
         return load_rules(root, disabled_rules=settings.get("disabled_rules", ()),
                           disabled_skills=settings.get("disabled_skills", ()))[1]

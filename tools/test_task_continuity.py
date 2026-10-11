@@ -123,6 +123,23 @@ class TaskContinuityTests(unittest.TestCase):
         self.assertEqual("", self.apply(continued, outcome="deny")["context"])
         self.assertIn(self.RESTORED + "code-change", self.apply(continued)["context"])
 
+    def test_check_survives_a_missing_markdown_parser_with_and_without_state(self):
+        from unittest.mock import patch
+        settings = self.directory / "parserless.json"
+        settings.write_text(json.dumps({"state_dir": str(self.directory / "parserless")}), encoding="utf-8")
+        for environment in ({}, {"ASSAY_HOOK_CONFIG": str(settings)}):
+            for client in ("claude", "codex"):
+                event = {**self.event, "turn_id": f"{client}-{len(environment)}"}
+                with self.subTest(client=client, stateful=bool(environment)), \
+                        patch.dict(sys.modules, {"markdown_it": None}):
+                    output, error = process(event, client, environment, clock=lambda: self.now)
+                    self.assertIsNone(error)
+                    context = output["hookSpecificOutput"]["additionalContext"]
+                    # Without the parser an explicit choice is not recognized,
+                    # but the check does not read the prompt and still arrives.
+                    self.assertTrue(context.startswith("Assay skill check:"))
+                    self.assertNotIn("The request suggests", context)
+
     def test_event_processing_reuses_existing_state_without_storing_prompt(self):
         settings = self.directory / "settings.json"
         settings.write_text(json.dumps({"state_dir": str(self.directory / "events"),

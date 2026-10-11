@@ -1,2 +1,2 @@
-# Optional prompt classification only; strict routing remains standard-library-only.
+# Optional: recognizes explicit skill choices; the skill check and strict routing need only the standard library.
 markdown-it-py==4.2.0

@@ -175,10 +175,10 @@ class DelegationReminderTests(unittest.TestCase):
                     self.assertIn("workers must not spawn", output["additionalContext"])
                     self.assertLessEqual(len(output["additionalContext"]), 1200)
 
-    def test_planning_reaches_requests_the_hint_grammar_misses(self):
-        # The anchored delegation grammar recognizes narrow imperatives only.
-        # Whatever the wording, the planning step must arrive before the agent
-        # starts solo work: from the request hint or from the session reminder.
+    def test_planning_reaches_delegation_requests_in_any_wording(self):
+        # No hook recognizes delegation wording; the session reminder carries
+        # the planning step, so whatever the wording it arrives before the agent
+        # starts solo work.
         rules, _ = activation.load_rules(ROOT)
         session = reminders.reminder({"hook_event_name": "SessionStart", "source": "startup"}, {})
         session_text = session["hookSpecificOutput"]["additionalContext"]

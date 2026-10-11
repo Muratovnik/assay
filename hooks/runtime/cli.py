@@ -247,6 +247,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
     config = load_config(Path(environment["ASSAY_ROUTING_CONFIG"])) if environment.get("ASSAY_ROUTING_CONFIG") else {}
     result = {"capabilities": contract(client, config.get("pipeline", {}).get("host")),
               "rules": [r["id"] for r in rules], "rules_fingerprint": fingerprint,
+              "skill_check": rules.skill_check,
               "prompt_parser_available": importlib.util.find_spec("markdown_it") is not None,
               "state_configured": settings["state_dir"] is not None,
               "record_events": settings["record_events"], "hooks_trusted": "unknown",

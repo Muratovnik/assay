@@ -90,6 +90,15 @@ a hook that made the model evaluate each skill before acting activated skills fa
 more reliably than no hook or a plain reminder. That was one author's small,
 English-only sample, so treat it as a reason to measure, not as a guarantee.
 
+The check costs about 1.4 KB of English text (roughly 350 tokens) on every
+prompt, in Claude Code and Codex alike, and it stays in the conversation until
+compaction. It is not re-sent when a session resumes or compacts, so after a
+compaction the current request's check may survive only in the summary.
+Subagents do not receive it; their packets carry their own instructions. The
+agent omits the `Assay:` line when a request fixes an exact output format. For
+scripted runs whose output must stay clean, such as `claude -p` pipelines, turn
+the check off with `disabled_rules: ["skill-check"]` (see below).
+
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
 explicit skill choice is still recognized deterministically. It adds a short
@@ -155,7 +164,7 @@ uses transcript *identity* without opening that file; absent both agent and
 transcript identity, it abstains from stateful behavior rather than merging all
 workers under their parent's session. Codex turn/tool IDs deduplicate replayed
 delivery. Delivery is checked transactionally **before** changing active context,
-including silent prompts. An old duplicate cannot overwrite a newer task or
+including prompts without a suggestion. An old duplicate cannot overwrite a newer task or
 cancel pending restoration; changing rule versions does not create a new native
 delivery. This protection lasts only while its bounded record remains retained,
 not forever and not across unidentified deliveries. Claude prompt text is never hashed to invent a turn ID: identical words

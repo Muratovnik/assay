@@ -14,7 +14,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
-MAX_CHECK = 1_400
+MAX_CHECK = 1_600
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 SKILL_CHECK = "skill-check"
@@ -106,7 +106,12 @@ def continuation_request(prompt):
     """
     if not isinstance(prompt, str) or len(prompt) > MAX_PROMPT:
         return False
-    from markdown_it import MarkdownIt
+    try:
+        from markdown_it import MarkdownIt
+    except ImportError:
+        # Without the parser nothing counts as a continuation; the stateful
+        # path must not take the parser-free skill check down with it.
+        return False
     tokens = MarkdownIt("commonmark").parse(prompt)
     if [token.type for token in tokens] != ["paragraph_open", "inline", "paragraph_close"]:
         return False
@@ -173,7 +178,8 @@ def skill_check(rules):
         return ""
     entries = "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
     return ("Assay skill check: before acting on this request, decide which Assay skills apply and state them "
-            "in one short line, such as \"Assay: code-change, test-writing\" or \"Assay: none\". Load each chosen "
+            "in one short line, such as \"Assay: code-change, test-writing\" or \"Assay: none\", unless the request "
+            "fixes an exact output format. Load each chosen "
             "skill not yet loaded in this session (skill tool or its SKILL.md) before the stage it governs. Judge "
             "by the task, whatever its language, and skip skills that do not fit; this check grants no authority "
             "beyond the request. Skills: " + entries + ".")
