@@ -71,13 +71,16 @@ are not installed or guessed. These input aliases do not change canonical names.
 
 ## The skill check
 
-Every `UserPromptSubmit` adds the same short **skill check**: before acting, the
-agent decides which Assay skills apply, states them in one line such as
-`Assay: code-change, test-writing` or `Assay: none`, and loads each chosen skill
-it has not loaded yet before the stage that skill governs. The check lists every
-installed, enabled skill with a one-line cue from `hooks/activation-rules.toml`.
-The model judges relevance from the task in whatever language it is written; the
-hook reads nothing in the prompt to build the check.
+Every `UserPromptSubmit` adds the same short **skill check**: the agent decides
+from the task itself, not from the tools it has at the moment, which Assay skills
+apply. It starts its reply with one line such as `Assay: code-change, test-writing`
+or `Assay: none`, loads each chosen skill it has not loaded yet before any other
+tool call, and starts its final reply with the same line after tool use. A skill
+that needs a missing tool is still loaded, and the agent says what is missing. The
+check lists every installed, enabled skill with a one-line cue from
+`hooks/activation-rules.toml`. The model judges relevance from the task in
+whatever language it is written; the hook reads nothing in the prompt to build
+the check.
 
 The check exists because a skill's description is the only automatic route to it,
 and that route is unreliable on its own. Claude Code drops the descriptions of the
@@ -90,7 +93,7 @@ a hook that made the model evaluate each skill before acting activated skills fa
 more reliably than no hook or a plain reminder. That was one author's small,
 English-only sample, so treat it as a reason to measure, not as a guarantee.
 
-The check costs about 1.4 KB of English text (roughly 350 tokens) on every
+The check costs about 1.6 KB of English text (roughly 400 tokens) on every
 prompt, in Claude Code and Codex alike, and it stays in the conversation until
 compaction. It is not re-sent when a session resumes or compacts, so after a
 compaction the current request's check may survive only in the summary.
@@ -98,6 +101,26 @@ Subagents do not receive it; their packets carry their own instructions. The
 agent omits the `Assay:` line when a request fixes an exact output format. For
 scripted runs whose output must stay clean, such as `claude -p` pipelines, turn
 the check off with `disabled_rules: ["skill-check"]` (see below).
+
+### The skill gate in Claude Code
+
+Naming a skill is not loading it: in measured runs an agent sometimes wrote
+`Assay: evidence-research` and went straight to the work. In Claude Code a
+`PreToolUse` record notes each Assay skill the session loads, through the Skill
+tool or a read of its `SKILL.md`. When the reply's leading `Assay:` line names a
+skill this session has not loaded, the `Stop` hook continues the turn once with
+feedback saying so: the skill is to be loaded and the work checked against it
+before the final reply. The feedback is `additionalContext`, not a block, so Claude
+Code shows it as hook feedback rather than a hook error and applies its usual limit
+on stop-hook continuations. It uses the hook input's final reply text, never the
+transcript, and stays silent while `stop_hook_active` is set. It needs the plugin
+data directory, so it is inert without hook state.
+
+The gate guarantees only that a named skill gets loaded. It cannot tell whether
+the agent named the right skills; `Assay: none` and an answer without the line
+pass. A subagent's load does not count for the main session. Codex has no gate:
+its skill loads are not visible reliably enough to act on. Turn the gate off
+with `disabled_rules: ["skill-gate"]`; disabling the check also disables it.
 
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
@@ -122,7 +145,8 @@ session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in t
 reminder before each launch.
 A required-mode guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
-failures. There is no universal blocking Stop hook. Assay does not ship a hook
+failures. Assay returns no blocking Stop decision; the Claude skill gate above
+continues a turn at most once, through feedback. Assay does not ship a hook
 that guards project paths; to require approval for edits to tests or check
 configuration, see [project guards](project-guards.md).
 
@@ -143,10 +167,11 @@ Without a data directory, suggestions are stateless. The runtime uses the client
 An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 `skill/<name>` form; a disabled skill leaves the check and cannot be chosen
 explicitly, which does not prevent the user or model from using it directly.
-`disabled_rules: ["skill-check"]` turns the per-request check off and keeps
-explicit choices. The IDs of the retired phrase rules (`research`, `delegation`,
-`planning` and the rest) are still accepted and do nothing, so an existing
-configuration keeps working; any other unknown ID is an error.
+`disabled_rules: ["skill-check"]` turns the per-request check and the gate off
+and keeps explicit choices; `"skill-gate"` turns off only the Claude gate. The
+IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
+rest) are still accepted and do nothing, so an existing configuration keeps
+working; any other unknown ID is an error.
 
 Small namespaced technical reminder records reuse the existing `PipelineStore`
 SQLite transactions, path checks and expiry, not a new storage engine. Each such

@@ -950,6 +950,8 @@ def reminder_hooks(client: str = "claude") -> bytes:
         "SessionEnd": [{"hooks": [session_end_hook]}],
     }
     if client == "claude":
+        # Only Claude reports skill loads reliably enough for the skill gate.
+        hooks["Stop"] = [{"hooks": [hook]}]
         hooks["PermissionDenied"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
         hooks["PostToolUseFailure"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
     else:

@@ -82,6 +82,17 @@
         ]
       }
     ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PermissionDenied": [
       {
         "matcher": "^(Agent|Task)$",

@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback, routing_telemetry
+from runtime import state, feedback, routing_telemetry, skill_gate
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence.service import load_config
@@ -181,6 +181,14 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             legacy = reminder(event, environment)
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
+        if client == "claude" and rules.skill_gate and settings["state_dir"]:
+            # Records skill loads on PreToolUse; on Stop it can hold a reply to
+            # the skills it named. A guard reply keeps priority.
+            names = {rule["skill"].split("/", 1)[1] for rule in rules}
+            gate = skill_gate.apply(event, client, names, settings["state_dir"],
+                                    **({"clock": clock} if clock else {}))
+            if gate and not protected:
+                return gate, None
         decision = {"rule_ids": [], "context": ""} if protected else evaluate(event, rules)
         if legacy:
             decision["context"] = legacy["hookSpecificOutput"]["additionalContext"]

@@ -6,7 +6,7 @@ import json
 
 EVENTS = {
     "claude": {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PostToolUseFailure",
-               "PermissionDenied", "SubagentStart", "SubagentStop", "SessionEnd"},
+               "PermissionDenied", "SubagentStart", "SubagentStop", "SessionEnd", "Stop"},
     "codex": {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStart",
               "SubagentStop", "PostCompact", "SessionEnd"},
 }

@@ -14,10 +14,11 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
-MAX_CHECK = 1_600
+MAX_CHECK = 1_800
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 SKILL_CHECK = "skill-check"
+SKILL_GATE = "skill-gate"
 # Phrase rules retired in favor of the skill check. Old settings that disable
 # them stay valid and do nothing, instead of breaking the hooks.
 RETIRED_RULES = frozenset({"test-audit", "test-writing", "research", "reuse-lookup", "reuse-question",
@@ -31,9 +32,11 @@ QUOTES = ('"', "'", "«", "“")
 class RuleSet(list):
     """Explicitly selectable skills in check order, and whether the check runs."""
 
-    def __init__(self, rules, skill_check):
+    def __init__(self, rules, skill_check, skill_gate=False):
         super().__init__(rules)
         self.skill_check = skill_check
+        # The Claude stop gate holds a reply to the skills its check line names.
+        self.skill_gate = skill_check and skill_gate
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -42,7 +45,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    if set(disabled_rules) - RETIRED_RULES - {SKILL_CHECK} or set(disabled_skills) - set(assets):
+    if set(disabled_rules) - RETIRED_RULES - {SKILL_CHECK, SKILL_GATE} or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
     rules, seen, content = [], [], []
     for item in document["skills"]:
@@ -63,7 +66,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                       "patterns": [], "cue": cue})
     if sorted(seen) != sorted(set(seen)) or set(seen) != set(assets):
         raise ValueError("skill map must name every catalog skill exactly once")
-    result = RuleSet(rules, SKILL_CHECK not in disabled_rules)
+    result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules)
     if len(skill_check(RuleSet(rules, True))) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
     fingerprint = hashlib.sha256(json.dumps([rules, content, result.skill_check], sort_keys=True).encode()).hexdigest()
@@ -177,12 +180,13 @@ def skill_check(rules):
     if not getattr(rules, "skill_check", False) or not rules:
         return ""
     entries = "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
-    return ("Assay skill check: before acting on this request, decide which Assay skills apply and state them "
-            "in one short line, such as \"Assay: code-change, test-writing\" or \"Assay: none\", unless the request "
-            "fixes an exact output format. Load each chosen "
-            "skill not yet loaded in this session (skill tool or its SKILL.md) before the stage it governs. Judge "
-            "by the task, whatever its language, and skip skills that do not fit; this check grants no authority "
-            "beyond the request. Skills: " + entries + ".")
+    return ("Assay skill check: decide from the task itself, not from the tools you have now, which Assay "
+            "skills apply, and start your reply with one short line such as \"Assay: code-change, test-writing\" "
+            "or \"Assay: none\", unless the request fixes an exact output format. Right after that line, before "
+            "any other tool call, load each chosen skill not yet loaded in this session (skill tool or its "
+            "SKILL.md); if it needs a tool you lack, load it anyway and say what is missing. After tool use, start "
+            "your final reply with the same line. Judge in whatever language the task uses and skip skills that do "
+            "not fit; this check grants no authority beyond the request. Skills: " + entries + ".")
 
 
 def evaluate(event, rules):

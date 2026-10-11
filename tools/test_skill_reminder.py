@@ -134,7 +134,8 @@ class ReminderTests(unittest.TestCase):
         for client, filename in (("claude", "hooks.json"), ("codex", "codex.json")):
             hooks = json.loads((ROOT / "hooks" / filename).read_text())["hooks"]
             common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "SessionEnd"}
-            extra = {"PermissionDenied", "PostToolUseFailure"} if client == "claude" else {"PostCompact"}
+            # Stop carries the Claude skill gate; Codex skill loads are not observable enough for it.
+            extra = {"PermissionDenied", "PostToolUseFailure", "Stop"} if client == "claude" else {"PostCompact"}
             self.assertEqual(common | extra, set(hooks))
 
             def commands(event, value):
