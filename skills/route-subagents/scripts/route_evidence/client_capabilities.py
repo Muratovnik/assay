@@ -10,6 +10,8 @@ import re
 from .core import EvidenceError
 
 CHECKED_AT = "2026-09-29"
+# Claude's subagent precedence and per-call effort were rechecked separately.
+CLAUDE_CHECKED_AT = "2026-10-11"
 SOURCES = {
     "claude_agents": "https://code.claude.com/docs/en/sub-agents",
     "claude_effort": "https://code.claude.com/docs/en/model-config",
@@ -57,7 +59,9 @@ def contract(client, host=None):
               "sources": [url for key, url in SOURCES.items() if key.startswith(client + "_")]}
     if client == "claude":
         from .claude_agents import CLAUDE_MODEL_ALIASES
-        report.update(per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=False, effort_transport="agent_definition",
+        per_call_effort = bool(known_surface and version and version >= (2, 1, 292))
+        report.update(checked_at=CLAUDE_CHECKED_AT, per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=per_call_effort,
+                      effort_transport="call_or_agent_definition" if per_call_effort else "agent_definition",
                       model_transport="call_alias_or_pinned_definition",
                       model_precedence=("call_definition_environment_parent" if known_surface and version and version >= (2, 1, 251)
                                         else "environment_call_definition_parent" if known_surface and version else "unknown"),

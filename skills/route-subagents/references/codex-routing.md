@@ -6,6 +6,12 @@ then pass both explicitly where supported. Omitting fields can inherit the
 parent's route; omit them only when the effective settings match the deliberate
 selection. Do not import a benchmark ranking or fixed escalation ladder.
 
+After rejection or service failure, apply [routing failure](routing-failure.md)
+before a native launch. A fresh packet with `fork_turns="none"` and explicit
+supported model/effort fields avoids accidental parent inheritance. A full fork
+needs a deliberate matching selection and known effective parent settings;
+the failed routing call cannot establish them.
+
 For a semantic role, choose the requested capability boundary independently of
 model choice. Use only combinations exposed by the current tool and distinguish
 configured settings from an observed role/model/permission binding.

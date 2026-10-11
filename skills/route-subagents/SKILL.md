@@ -81,6 +81,14 @@ children. A profile remains a capability boundary, not a model selection.
 `routing_status` reports the configured `pipeline.mode`. Without a mode, and for
 older configurations, the evidence-only workflow applies.
 
+If routing is rejected, unavailable or fails before a valid decision, read
+[routing failure](references/routing-failure.md) before any advisor, worker,
+reviewer or replacement launch. A failed preparation produced no recommendation;
+it does not justify inheriting the primary's model or maximum effort. Respect the
+denied operation. Keep unaffected work local unless an authorized evidence-only
+exception has a task-specific or actual human selection and passes the local
+argument preflight. Required mode still needs its registered launch.
+
 ### Evidence-only workflow (default)
 
 Use the [routing advisor workflow](references/routing-advisor.md) when

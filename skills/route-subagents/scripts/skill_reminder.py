@@ -6,6 +6,13 @@ import os
 import sys
 
 
+FAILURE_REMINDER = (
+    " If routing is rejected or unavailable, read route-subagents/references/"
+    "routing-failure.md before any child launch. A refusal supplies no advice: "
+    "do not launch with unresolved model or effort, or inherit maximum settings "
+    "as a fallback. Respect the rejected operation; keep unaffected work local "
+    "unless a deliberate supported selection passes the local launch preflight."
+)
 SESSION_REMINDER = (
     "Assay is installed. Apply matching installed skills: read their SKILL.md "
     "and follow the applicable workflow, skip unrelated skills, and when the user "
@@ -15,8 +22,9 @@ SESSION_REMINDER = (
 )
 # The planning step stays in every session: the request hint recognizes only
 # narrow imperatives, and the launch reminder arrives after solo work started.
-# The routing checklist is added at session start only where routing is
-# configured; otherwise it arrives before every launch.
+# The routing checklist, including its failure branch, is added at session
+# start only where routing is configured; otherwise it arrives before every
+# launch, and the base reminder keeps pointing at the skill that owns it.
 ROUTING_SESSION_REMINDER = (
     " Revisit newly ready "
     "dependencies and material verification; do not create token delegations. "
@@ -26,7 +34,8 @@ ROUTING_SESSION_REMINDER = (
     "new packet. Select the child model and supported effort deliberately through "
     "its workflow, which weighs full-chain cost against quality using available "
     "evidence, and use the smallest sufficient context. Reuse valid plan evidence. "
-    "Preserve explicit user choices."
+    "Preserve explicit user choices. A failed routing request supplies no route; "
+    "read routing-failure.md first."
 )
 DELEGATION_REMINDER = (
     "Assay routing checkpoint: route-subagents is required for every authorized "
@@ -36,7 +45,7 @@ DELEGATION_REMINDER = (
     "parent model or full history is a choice requiring justification. Reuse "
     "valid plan evidence; do not rerun an advisor for each spawn. Preserve user "
     "choices and delegation limits. Reading the skill alone is not routing."
-)
+) + FAILURE_REMINDER
 MAX_INPUT_BYTES = 1024 * 1024
 MAX_CONFIG_BYTES = 1024 * 1024
 
