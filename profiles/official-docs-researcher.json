@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "official-docs-researcher",
-  "description": "Read-only researcher for one bounded, potentially changing technical question using official documentation and primary source repositories. Use before inventing a local mechanism or relying on stale product behavior.",
+  "description": "Read-only researcher for one bounded, potentially changing technical question using official documentation and primary source repositories. Use before inventing a local mechanism or relying on stale product behavior, only when the user or an invoked workflow has authorized delegation; otherwise research in the main session.",
   "capabilities": [
     "workspace-read",
     "workspace-search",

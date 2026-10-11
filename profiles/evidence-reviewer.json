@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "evidence-reviewer",
-  "description": "Read-only independent reviewer for a bounded immutable artifact, decision, diff, or acceptance package. Use after implementation or before a load-bearing commitment; never use it to make the change it reviews.",
+  "description": "Read-only independent reviewer for a bounded immutable artifact, decision, diff, or acceptance package. Use after implementation or before a load-bearing commitment, only when the user or an invoked workflow has authorized delegation; never use it to make the change it reviews.",
   "capabilities": [
     "workspace-read",
     "workspace-search",
