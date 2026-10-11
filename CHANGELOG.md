@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.7](https://github.com/Muratovnik/assay/compare/v0.17.6...v0.17.7) (2026-10-11)
+
+### Bug Fixes
+
+* **tests:** create scratch parents for routing telemetry and hook identity fixtures in fresh checkouts ([c311020](https://github.com/Muratovnik/assay/commit/c31102066d5a15ed07c9754b74cc17665ab56c9b))
+
 ## [0.17.6](https://github.com/Muratovnik/assay/compare/v0.17.5...v0.17.6) (2026-10-11)
 
 ### Features
