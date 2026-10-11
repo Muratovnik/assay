@@ -191,13 +191,47 @@ class RetrospectiveTests(unittest.TestCase):
         self.assertEqual(summary["with_provider_model"], 0)
         self.assertEqual(summary["provider_mismatch_evaluable"], 0)
 
-    def hook_binding(self):
+    def hook_binding(self, client="claude"):
         config = self.root / "config.json"
-        config.write_text(json.dumps({"schema_version": 4, "client": "claude", "telemetry": {"mode": "metadata", "dataset": "production"},
+        config.write_text(json.dumps({"schema_version": 4, "client": client, "telemetry": {"mode": "metadata", "dataset": "production"},
                                       "task_evidence": {"retain_descriptions": True}}), encoding="utf-8")
         binding = self.root / "binding.json"
         binding.write_text(json.dumps({"config": str(config), "cache_dir": str(self.root)}), encoding="utf-8")
         return {"ASSAY_ROUTING_TELEMETRY_CONFIG": str(binding)}
+
+    def test_codex_string_spawn_receipt_binds_exact_uuid_and_stop_usage(self):
+        self.decision(client="codex")
+        worker = "11111111-2222-7333-8444-555555555555"
+        env = self.hook_binding("codex")
+        launch = {"session_id": "session-one", "tool_use_id": "codex-call", "tool_name": "spawn_agent",
+                  "tool_input": {"message": "[assay-routing:d1/p1]"}}
+        routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "codex", env, clock=lambda: self.now)
+        routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse",
+            "tool_response": json.dumps({"agent_id": worker})}, "codex", env, clock=lambda: self.now)
+        path = self.root / "worker.jsonl"
+        path.write_text("\n".join(json.dumps(v) for v in [
+            {"type": "session_meta", "payload": {"session_id": "session-one", "id": worker}},
+            {"type": "token_usage_record", "payload": {"thread_id": worker, "response_id": "response-one",
+                "usage": {"input_tokens": 12, "output_tokens": 3}}}]) + "\n", encoding="utf-8")
+        stop = {"session_id": "session-one", "agent_id": worker, "hook_event_name": "SubagentStop",
+                "agent_transcript_path": str(path)}
+        routing_telemetry.capture(stop, "codex", env, clock=lambda: self.now)
+        routing_telemetry.capture(stop, "codex", env, clock=lambda: self.now)
+        row = report(self.store)["packets"][0]
+        self.assertTrue(all(o["runtime"]["agent_id"] == worker for o in row["attempts"][0]["observations"]))
+        self.assertEqual(row["attempts"][0]["usage"]["total_tokens"], 15)
+        self.assertEqual(row["attempts"][0]["assessments"], [])
+        self.assertEqual(row["attempts"][0]["provider_routes"], [])
+
+    def test_linked_launch_without_native_identity_is_a_visible_capture_gap(self):
+        self.decision(client="codex")
+        env = self.hook_binding("codex")
+        launch = {"session_id": "session-one", "tool_use_id": "call", "tool_name": "spawn_agent",
+                  "tool_input": {"message": "[assay-routing:d1/p1]"}}
+        routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "codex", env, clock=lambda: self.now)
+        with self.assertRaisesRegex(EvidenceError, "missing worker identity"):
+            routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse", "tool_response": {}},
+                                      "codex", env, clock=lambda: self.now)
 
     def test_native_stop_hook_captures_bound_worker_without_changing_payload(self):
         self.decision()

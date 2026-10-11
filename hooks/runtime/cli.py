@@ -91,11 +91,69 @@ def routing_result(event, client, environment):
         return failure(event, "plugin", True)
 
 
+def reading_role(role):
+    import re
+    if not isinstance(role, str):
+        return False
+    name = role.split(":")[-1]
+    return name in {"evidence-reviewer", "official-docs-researcher"} or bool(re.fullmatch(
+        r"assay-(?:evidence-reviewer|official-docs-researcher)-(?:low|medium|high|xhigh|max|ultra)-[0-9a-f]{16}", name))
+
+
+def reviewer_boundary(event, environment, *, clock=None):
+    role = event.get("agent_type")
+    reading = reading_role(role)
+    if isinstance(role, str) and not reading:
+        return {}
+    if event.get("hook_event_name") not in {"SubagentStart", "PreToolUse"}:
+        return {}
+    session, agent = event.get("session_id"), event.get("agent_id")
+    directory = environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA")
+    if directory and isinstance(session, str) and session and (not reading or event["hook_event_name"] == "SubagentStart"):
+        from route_evidence.core import digest
+        from route_evidence.pipeline_store import PipelineStore
+        import re
+        import time
+        now = clock() if clock else time.time()
+        observed_agent = agent
+        if not observed_agent and isinstance(event.get("transcript_path"), str):
+            match = re.search(r"([0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})\.jsonl$", event["transcript_path"])
+            observed_agent = match[1] if match else None
+        if isinstance(observed_agent, str) and observed_agent:
+            key = digest({"session": session, "agent": observed_agent})
+            boundary_root = Path(directory) / "profile-boundaries"
+            if event["hook_event_name"] == "PreToolUse" and not boundary_root.exists():
+                return {}
+            with PipelineStore(boundary_root, clock=clock or time.time).transaction() as tx:
+                if event.get("hook_event_name") == "SubagentStart" and isinstance(role, str):
+                    tx.put("profile", key, {"role": role}, now + 86400)
+                elif not role:
+                    record = tx.get("profile", key)
+                    role = record["role"] if record else None
+    if event.get("hook_event_name") != "PreToolUse" or not reading_role(role):
+        return {}
+    read_tools = {"Read", "Grep", "Glob", "read_file", "list_dir", "find_file", "view_image",
+                  "search_for_pattern", "get_symbols_overview", "find_symbol", "find_referencing_symbols",
+                  "read_mcp_resource", "list_mcp_resources", "list_mcp_resource_templates",
+                  "search_openai_docs", "fetch_openai_doc"}
+    tool = event.get("tool_name", "")
+    if tool in read_tools or (tool.startswith(("mcp__serena__", "mcp__openaiDeveloperDocs__"))
+                              and tool.rsplit("__", 1)[-1] in read_tools):
+        return {}
+    return deny("This profile is a reading role: return findings and receipts to the primary; "
+                "task/checklist, memory, file writes, shell execution and further delegation are unavailable")
+
+
 def _process(event, client, environment, *, root=ROOT, clock=None):
     normalized = normalize(event, client)
     if normalized is None:
         return {}, None
-    protected = routing_result(event, client, environment)
+    try:
+        protected = reviewer_boundary(event, environment, clock=clock) or routing_result(event, client, environment)
+    except Exception:
+        if event.get("hook_event_name") == "PreToolUse":
+            return deny("read-only profile identity could not be checked; repair the profile hook state before retrying"), None
+        return {}, "Assay: profile identity capture unavailable; reviewer enforcement is unverified."
     denied = protected.get("hookSpecificOutput", {}).get("permissionDecision") == "deny"
     outcome = "deny" if denied else "guard" if protected else None
     legacy = {}

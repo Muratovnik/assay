@@ -20,7 +20,7 @@ sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache
 from route_evidence.claude_agents import alias_efforts, generate, resolve_variant
 from route_evidence.core import EvidenceError, digest, timestamp
-from route_evidence.pipeline import RoutingPipeline
+from route_evidence.pipeline import RoutingPipeline, launch_requests
 from route_evidence.pipeline_config import configured_inventory, confirm_inventory, inventory_ttl_seconds, settings
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.routing import build_context
@@ -34,6 +34,65 @@ ROUTE = {"model": "worker-beta", "effort": "medium",
          "selection_basis": {"source": "client_role", "reason_code": "bounded_ranking"}}
 BASELINE = {"model": "worker-alpha", "effort": "low"}
 PACKETS = [{"packet_id": "work", "task_types": ["implementation"], "features": {}}]
+
+
+class ReviewReadinessTests(unittest.IsolatedAsyncioTestCase):
+    def request(self):
+        return {"work": {"profile": "assay:evidence-reviewer", "prompt": "Inspect the checkpoint durability invariant.",
+            "review_context": {"objective": "Check checkpoint durability", "mode": "acceptance_review",
+                "contracts": ["checkpoint-contract at revision abc123"], "snapshot": "git:abc123",
+                "owned_scope": ["checkpoint-module"], "oracle": {"status": "unavailable", "receipts": [
+                    {"ref": "checkpoint-interruption-check", "snapshot": "git:abc123"}]}}}}
+
+    def test_review_missing_each_load_bearing_input_is_rejected_before_launch(self):
+        for field in self.request()["work"]["review_context"]:
+            with self.subTest(field=field), self.assertRaises(EvidenceError):
+                value = self.request()
+                del value["work"]["review_context"][field]
+                launch_requests(value, ["work"])
+        with self.assertRaisesRegex(EvidenceError, "review_inputs_required"):
+            launch_requests({"work": {"profile": "evidence-reviewer", "prompt": "Review it"}}, ["work"])
+
+    def test_unavailable_oracle_with_bound_receipts_is_ready_and_input_is_detached(self):
+        value = self.request()
+        checked = launch_requests(value, ["work"])
+        self.assertIn("git:abc123", checked["work"]["prompt"])
+        self.assertIn("primary owns task/checklist", checked["work"]["prompt"])
+        self.assertNotIn("review_context", checked["work"])
+        self.assertIn("review_context", value["work"])
+        value["work"]["review_context"]["oracle"]["receipts"][0]["snapshot"] = "git:older"
+        with self.assertRaisesRegex(EvidenceError, "snapshot_mismatch"):
+            launch_requests(value, ["work"])
+
+    def test_one_mode_named_read_only_oracle_and_ordinary_worker_controls(self):
+        value = self.request()
+        value["work"]["review_context"]["mode"] = ["decision_review", "acceptance_review"]
+        with self.assertRaisesRegex(EvidenceError, "one_mode"):
+            launch_requests(value, ["work"])
+        value = self.request()
+        value["work"]["review_context"]["oracle"] = {"status": "read_only"}
+        with self.assertRaisesRegex(EvidenceError, "named_read_only"):
+            launch_requests(value, ["work"])
+        value["work"]["review_context"]["oracle"]["name"] = "readonly-durability-inspection"
+        launch_requests(value, ["work"])
+        worker = {"work": {"profile": "worker", "prompt": "Update the owned checklist and code."}}
+        self.assertEqual(launch_requests(worker, ["work"]), worker)
+
+    async def test_evidence_only_pipeline_checks_before_advice_and_returns_the_bound_prompt(self):
+        for client in ("codex", "claude"):
+            with self.subTest(client=client), tempfile.TemporaryDirectory() as directory:
+                service = RoutingService(Cache(Path(directory) / "cache"), client=client,
+                    advisor_config={"schema_version": 3, "pipeline": {"mode": "evidence-only"}})
+                service.prepare_routing = AsyncMock(return_value={"status": "chosen"})
+                pipeline = RoutingPipeline(service)
+                request = self.request()
+                del request["work"]["review_context"]["contracts"]
+                with self.assertRaises(EvidenceError):
+                    await pipeline.prepare({"packets": PACKETS, "launch_requests": request})
+                service.prepare_routing.assert_not_awaited()
+                reply = await pipeline.prepare({"packets": PACKETS, "launch_requests": self.request()})
+                self.assertIn("git:abc123", reply["execution_handoffs"]["work"]["prompt"])
+                self.assertNotIn("launch_requests", service.prepare_routing.call_args.kwargs)
 
 
 class PipelineTests(unittest.IsolatedAsyncioTestCase):

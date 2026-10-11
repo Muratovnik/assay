@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .claude_agents import (ADVISOR_PROFILE, ALIAS_KIND, launch_model, resolve_variant,
                             unconfirmed_changes)
-from .core import EvidenceError, digest, effort, epoch, timestamp
+from .core import EvidenceError, digest, encoded, effort, epoch, timestamp
 from .pipeline_config import (ADVISOR_TOOLS, PROTOCOL, ROOT_TOOLS, configured_inventory,
                               inventory_ttl_seconds, settings)
 from .pipeline_store import PipelineStore
@@ -75,12 +75,44 @@ def validate_continuation_availability(config, route):
         raise EvidenceError("continuation_route_unavailable")
 
 
+def review_context(value):
+    fields = {"objective", "mode", "contracts", "snapshot", "owned_scope", "oracle"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise EvidenceError("review_inputs_required: objective, one mode, frozen contracts, snapshot, owned_scope and oracle")
+    from .advice_contracts import _clean_prose, _safe_name
+    result = copy.deepcopy(value)
+    for key in ("objective", "snapshot"):
+        result[key] = _clean_prose(result[key], "review." + key)
+    if not isinstance(result["mode"], str) or result["mode"] not in {"decision_review", "acceptance_review", "adversarial_review"}:
+        raise EvidenceError("review_requires_one_mode")
+    for key in ("contracts", "owned_scope"):
+        if not isinstance(result[key], list) or not 1 <= len(result[key]) <= 16:
+            raise EvidenceError("review_" + key + "_required")
+        result[key] = [_clean_prose(item, "review." + key) for item in result[key]]
+    oracle = result["oracle"]
+    if (not isinstance(oracle, dict) or set(oracle) - {"status", "name", "receipts"}
+            or oracle.get("status") not in {"read_only", "unavailable"}):
+        raise EvidenceError("review_oracle_required")
+    if oracle["status"] == "read_only":
+        if not oracle.get("name"):
+            raise EvidenceError("review_named_read_only_oracle_required")
+        oracle["name"] = _clean_prose(oracle["name"], "review.oracle.name")
+    receipts = oracle.get("receipts", [])
+    if not isinstance(receipts, list) or len(receipts) > 16:
+        raise EvidenceError("review_receipts_invalid")
+    for receipt in receipts:
+        if not isinstance(receipt, dict) or set(receipt) != {"ref", "snapshot"} or receipt["snapshot"] != result["snapshot"]:
+            raise EvidenceError("review_receipt_snapshot_mismatch")
+        _safe_name(receipt["ref"], "review.oracle.receipt")
+    return result
+
+
 def launch_requests(value, packet_ids):
     if not isinstance(value, dict) or set(value) != set(packet_ids):
         raise EvidenceError("launch_requests_must_cover_every_packet")
     result = copy.deepcopy(value)
     for request in result.values():
-        if (not isinstance(request, dict) or set(request) - {"profile", "prompt", "description", "run_in_background", "isolation"}
+        if (not isinstance(request, dict) or set(request) - {"profile", "prompt", "description", "run_in_background", "isolation", "review_context"}
                 or not {"profile", "prompt"} <= set(request)):
             raise EvidenceError("invalid_launch_request")
         if (not isinstance(request["profile"], str) or request["profile"] == ADVISOR_PROFILE
@@ -93,6 +125,15 @@ def launch_requests(value, packet_ids):
             raise EvidenceError("invalid_launch_background")
         if "isolation" in request and request["isolation"] != "worktree":
             raise EvidenceError("invalid_launch_isolation")
+        if request["profile"].split(":")[-1] == "evidence-reviewer" or "review_context" in request:
+            reviewed = review_context(request.get("review_context"))
+            request.pop("review_context", None)
+            request["prompt"] = ("Review inputs (caller declarations; verify against the frozen evidence):\n" +
+                                 encoded(reviewed).decode("utf-8") + "\n" + request["prompt"] +
+                                 "\nReturn a receipt to the primary. The primary owns task/checklist and memory writes. "
+                                 "Do not mutate them or spawn additional agents.")
+            if len(request["prompt"].encode("utf-8")) > MAX_PROMPT_BYTES:
+                raise EvidenceError("invalid_launch_request")
     return result
 
 
@@ -343,8 +384,13 @@ class RoutingPipeline:
         params = arguments(supplied)
         requests = params.pop("launch_requests", None)
         if not self.required:
+            from .advice_contracts import validate_packets
+            packets = validate_packets(params["packets"])
+            checked = launch_requests(requests, [p["packet_id"] for p in packets]) if requests is not None else None
             response = await self.service.prepare_routing(**params)
             response["pipeline_mode"] = "evidence-only"
+            if checked is not None:
+                response["execution_handoffs"] = checked
             return response
         if self.service.offline:
             raise EvidenceError("offline_cannot_prepare_dispatch")

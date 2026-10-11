@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 
 from route_evidence.advisor_config import settings
-from route_evidence.core import EvidenceError, digest, read_document, number, epoch
+from route_evidence.core import EvidenceError, digest, read_document, number, epoch, loads
 from route_evidence.history import HistoryStore, _refuse_link_ancestors, _identifier, _usage, _route
 from route_evidence.pipeline_config import settings as pipeline_settings
 from route_evidence.pipeline_store import PipelineStore
@@ -15,6 +15,15 @@ from route_evidence.service import load_config
 from route_evidence.telemetry import append, bound_attempts, observe_transcript
 
 LINK = re.compile(r"(?m)^\[assay-routing:([A-Za-z0-9_.:-]{1,200})/([A-Za-z0-9_.:-]{1,200})\]$")
+
+
+def spawn_response(value):
+    if isinstance(value, str):
+        try:
+            value = loads(value)
+        except EvidenceError:
+            return {}
+    return value if isinstance(value, dict) else {}
 
 
 def configuration(environment):
@@ -88,7 +97,7 @@ def capture(event, client, environment, *, clock=time.time):
     if name != "SubagentStop":
         if event.get("tool_name") not in {"Agent", "Task", "spawn_agent"}:
             return
-        response = event.get("tool_response")
+        response = spawn_response(event.get("tool_response"))
         if isinstance(response, dict):
             agent = response.get("agentId", response.get("agent_id"))
     if not session:
@@ -112,9 +121,11 @@ def capture(event, client, environment, *, clock=time.time):
                        {"source": "native_hook", "status": "failed", "tool_use_id": tool_id})
             with pending_store.transaction() as tx:
                 tx.delete("launch-link", digest({"session": session, "tool": tool_id}))
+        if attempts and name == "PostToolUse":
+            raise EvidenceError("native launch receipt missing worker identity; record the native spawn UUID explicitly")
         return
     _identifier(agent, "native.agent_id")
-    returned = event.get("tool_response")
+    returned = spawn_response(event.get("tool_response"))
     raw_effort = event.get("effort")
     host_route = _route({"observed": {
         "model": returned.get("resolvedModel") if isinstance(returned, dict) else None,

@@ -206,6 +206,16 @@ and a written file is not proof of discovery.
 
 ### Record the outcome
 
+Forward the evidence-only advisor's exact inline `handoff.prompt`; do not replace
+it with a file path or an excerpt. The no-tools advisor cannot fetch that file.
+Required mode uses its separate private input exchange. Keep every candidate,
+question and evidence row; a compact format is not permission to trim inventory.
+
+Before dispatching an evidence-reviewer, use the structured `launch_requests`
+preflight in [review and continuity](references/review-and-continuity.md).
+Model adequacy does not establish assignment readiness. In evidence-only mode,
+use the validated `execution_handoffs` prompt; required mode registers it privately.
+
 Record the selected pair and task-based reason with the launch, then pass
 available execution evidence to `record_routing_outcome`, distinguishing
 requested, configured and host-observed settings. A requested setting is not an
@@ -215,6 +225,12 @@ use a supported route or keep the work local and disclose the limitation. Setup
 failure is not automatic model escalation. Include advisor, coordination,
 verification and retries in completed-task cost. Keep the primary's model and
 global client configuration unchanged.
+
+Preserve the packet's telemetry marker and the native spawn UUID/ID. A role path
+cannot bind usage. Record criterion assessments and use
+the explicit transcript import when automatic capture is unavailable; see
+[routing telemetry](references/routing-telemetry.md). Completion alone keeps
+acceptance unknown.
 
 ## Use the native client
 

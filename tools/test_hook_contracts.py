@@ -245,6 +245,44 @@ class StateTests(unittest.TestCase):
             self.assertEqual('command_input_unattested', records[0]['evidence'])
 
 
+class ReviewerBoundaryTests(unittest.TestCase):
+    def test_required_effort_variant_keeps_the_reading_boundary(self):
+        result = cli.reviewer_boundary({"hook_event_name": "PreToolUse",
+            "agent_type": "assay-evidence-reviewer-low-0123456789abcdef", "tool_name": "Write"}, {})
+        self.assertEqual(result["hookSpecificOutput"]["permissionDecision"], "deny")
+        self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse",
+            "agent_type": "assay-evidence-reviewer-not-a-variant", "tool_name": "Write"}, {}), {})
+
+    def test_review_claim_tick_memory_file_and_nested_tool_calls_are_denied(self):
+        for client in ("codex", "claude"):
+            for tool in ("mcp__planning__claim_work_item", "mcp__planning__tick_work_item_checklist_item",
+                         "mcp__memory__save", "apply_patch", "Write", "Bash", "spawn_agent", "Agent", "exec"):
+                with self.subTest(client=client, tool=tool):
+                    result, _ = cli.process({"hook_event_name": "PreToolUse", "agent_type": "assay:evidence-reviewer",
+                                             "tool_name": tool, "tool_input": {}}, client, {})
+                    self.assertEqual(result["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_read_tools_and_writable_worker_remain_available(self):
+        for client in ("codex", "claude"):
+            for role, tool in (("evidence-reviewer", "Read"), ("evidence-reviewer", "mcp__openaiDeveloperDocs__fetch_openai_doc"),
+                               ("evidence-reviewer", "mcp__serena__find_symbol"), ("worker", "mcp__planning__claim_work_item")):
+                result = cli.reviewer_boundary({"hook_event_name": "PreToolUse", "agent_type": role, "tool_name": tool}, {})
+                self.assertEqual(result, {})
+        self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "tool_name": "Write"}, {}), {})
+
+    def test_native_start_identity_is_used_without_parent_session_guess(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
+            env = {"PLUGIN_DATA": tmp}
+            worker = "11111111-2222-7333-8444-555555555555"
+            cli.reviewer_boundary({"hook_event_name": "SubagentStart", "session_id": "parent", "agent_id": worker,
+                                   "agent_type": "evidence-reviewer"}, env)
+            result = cli.reviewer_boundary({"hook_event_name": "PreToolUse", "session_id": "parent",
+                "transcript_path": "/logs/rollout-" + worker + ".jsonl", "tool_name": "mcp__planning__claim_work_item"}, env)
+            self.assertEqual(result["hookSpecificOutput"]["permissionDecision"], "deny")
+            self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "session_id": "parent",
+                "agent_id": "other-worker", "tool_name": "Write"}, env), {})
+
+
 class RuntimeTests(unittest.TestCase):
     def invoke(self, payload, client='claude', extra=(), environment=None):
         env={k:v for k,v in os.environ.items() if not k.startswith('ASSAY_') and k not in {'PLUGIN_DATA','CLAUDE_PLUGIN_DATA'}}

@@ -128,7 +128,9 @@ class VariantTests(unittest.TestCase):
         self.assertEqual((ROOT / profile.path).read_bytes(), source_before)
         record = json.loads(proc.stdout)["variants"][0]
         text = (self.root / "agents" / record["file"]).read_text()
-        self.assertIn("permissionMode: plan", text)
+        self.assertNotIn("permissionMode:", text)
+        self.assertIn("tools: Read, Grep, Glob", text)
+        self.assertIn("disallowedTools:\n- Agent\n- Task", text)
         self.assertIn("source-sha256:", text)
         self.assertIn("effort: low", text)
 

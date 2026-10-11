@@ -362,10 +362,11 @@ class AgentAssetsTests(unittest.TestCase):
         codex = aa.render_profile(source, asset, "codex").decode("utf-8")
         claude = aa.render_profile(source, asset, "claude").decode("utf-8")
         self.assertEqual("read-only", tomllib.loads(codex)["sandbox_mode"])
-        self.assertIn("You may run the caller's declared read-only oracle", codex)
-        self.assertIn("Report the oracle you independently reran", codex)
-        self.assertNotIn("Capabilities unavailable", codex)
-        self.assertNotIn("did not rerun the oracle", codex)
+        self.assertNotIn("You may run the caller's declared read-only oracle", codex)
+        self.assertIn("did not rerun the oracle", codex)
+        self.assertFalse(tomllib.loads(codex)["features"]["shell_tool"])
+        self.assertFalse(tomllib.loads(codex)["features"]["apps"])
+        self.assertFalse(tomllib.loads(codex)["agents"]["enabled"])
         # Claude ignores a plugin subagent's permissionMode, so its projection is
         # a bounded reader: no shell, no runtime tool or skill loading.
         tool_line = next(line for line in claude.splitlines() if line.startswith("tools: "))
@@ -379,6 +380,7 @@ class AgentAssetsTests(unittest.TestCase):
         self.assertIn("read the snapshot-bound receipts in the packet", claude)
         self.assertIn("that you did not rerun the oracle", claude)
         self.assertIn("read the independent-audit criteria the caller includes or names by path", claude)
+        self.assertNotIn("permissionMode:", claude)
 
     def test_conditional_profile_instructions_are_validated(self) -> None:
         catalog = aa.load_catalog(aa.ROOT)

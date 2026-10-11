@@ -77,6 +77,23 @@ its evidence locally. Existing terminal receipts stay immutable; imported
 observations and later assessments are separate records with the decision's
 expiry. Repeated imports are deduplicated by native event identity.
 
+For Codex, use the UUID returned by `spawn_agent` as `runtime.thread_id` and the
+observed parent session as `runtime.session_id`. For Claude, use the Agent
+receipt's `agentId` as `runtime.agent_id` and the native parent session ID.
+Do not use a task name, role path or guessed UUID. If no native ID
+is available, record the lifecycle receipt without runtime and keep the gap
+visible; that receipt cannot bind a transcript. A linked launch whose output
+has no worker identity reports a capture diagnostic instead of silently losing
+the link. Codex JSON-string and object spawn receipts are supported.
+
+The importer reads Codex `token_usage_record.payload.response_id` as a unique
+request identity. A legacy `token_count` after an observed response is a counter
+notification, not a second request; reset counters can have a different
+baseline. A legacy notification reporting unmatched nonzero usage leaves a
+partial import. Legacy-only cumulative/reset logs remain supported. Claude
+message IDs identify requests across repeated chunk UUIDs; result aggregates
+never add a second copy of directly observed assistant usage.
+
 ## Assess results and read the report
 
 Completion is a lifecycle fact. For acceptance, supply `assessment` to
@@ -123,9 +140,10 @@ exists. Unknown quality has a null rate, never zero or 100 percent. Evaluated
 attempts may be a selected sample; their rate is not a causal accuracy estimate.
 Worker tokens are not whole-chain cost, and unexecuted alternative routes supply
 no counterfactual quality or proof of optimality.
-Native completed Agent returns can also provide duration and aggregate worker
+Native completed Agent returns can also provide duration and final-request worker
 usage. `worker_return_usage` stays separate from deduplicated request usage;
-the report never adds these overlapping observations together.
+the report never adds these overlapping observations together or treats that
+return's usage as the whole run.
 
 History expires with its configured retention and is pruned on owned writes.
 Reports exclude expired records even before pruning. `task-purge-descriptions`

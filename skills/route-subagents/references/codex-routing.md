@@ -10,6 +10,15 @@ For a semantic role, choose the requested capability boundary independently of
 model choice. Use only combinations exposed by the current tool and distinguish
 configured settings from an observed role/model/permission binding.
 
+The published reading profiles disable shell, connectors, goals and further
+delegation and mark shell oracles and skill loading unavailable. Supply frozen
+artifacts, audit criteria and snapshot-bound receipts; use available reading
+tools rather than rerunning gates. A file sandbox alone does not prohibit MCP
+task or memory writes. The profile hook denies tools outside its reading list
+when the native role or exact worker identity is observed. Parent session alone
+never identifies a reviewer. Hooks must be trusted; absent role identity or a
+skipped hook leaves enforcement unverified. Confirm it in a fresh client.
+
 Choose the smallest sufficient context. A self-contained review packet normally
 uses no conversation inheritance. Use a bounded recent-turn count for a needed
 delta. In this client's current collaboration schema, omitted `fork_turns` or
@@ -23,7 +32,8 @@ selection just to copy history. Recheck the callable schema if that changes.
 For a [native economy advisor](routing-advisor.md), the primary passes the
 handoff's model and effort through `model` and `reasoning_effort`, with
 `fork_turns="none"` and the self-contained prompt. The advisor ranks only the
-provided snapshot and must not spawn. Submit the returned object to
+provided snapshot and must not spawn. Forward its exact inline prompt, rather
+than a file path the no-tools advisor cannot read. Submit the returned object to
 `complete_routing` before launching the actual worker. A no-tools instruction
 is not an enforced sandbox: use a real tool restriction only when the active
 schema exposes it. No fixed model or per-child token cap is implied. Snapshot
@@ -57,8 +67,10 @@ and `reasoning_effort`, so Codex needs no generated definitions for routing.
   tools arrive enabled.
 - **A hook-based guard needs proof first.** Subagents call their tools from
   code mode's `exec` tool. Whether `PreToolUse` sees the calls inside it is not
-  established, and a guard that sees only `exec` would block the routing tools
-  too. An untrusted hook is skipped without an error.
+  established by the historical probe. Current documentation describes hooks
+  for nested calls, but the installed client still needs a fresh capture. A
+  guard that sees only `exec` would block the routing tools too. An untrusted
+  hook is skipped without an error.
 - **Output sanitizing needs another route.** Codex `PostToolUse` cannot rewrite
   a tool's output, only block it with feedback, so the advisor's report cannot be
   reduced to a status the way the Claude adapter does it.

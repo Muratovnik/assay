@@ -146,20 +146,20 @@ class ReminderTests(unittest.TestCase):
             self.assertIn("hooks/runtime/cli.py", unified[0])
             self.assertIn("'" + client + "'", unified[0])
             self.assertEqual(unified, commands("UserPromptSubmit", ""))
-            # Neither client starts a process for ordinary tool invocations.
+            # Reading-role boundaries must see ordinary and nested tool calls.
             for tool in ("Bash", "Read", "Edit", "Write", "Skill", "AgentStatus", "send_message", "wait",
                          "mcp__example__search", "mcp__benchmark-routing__routing_status"):
                 with self.subTest(client=client, tool=tool):
-                    self.assertEqual([], commands("PreToolUse", tool))
+                    self.assertEqual(unified, commands("PreToolUse", tool))
             for tool in (("Agent", "Task") if client == "claude" else ("Agent", "spawn_agent")):
                 self.assertEqual(unified, commands("PreToolUse", tool))
-            self.assertEqual(unified if client == "claude" else [], commands("PreToolUse", "SubagentHandback"))
+            self.assertEqual(unified, commands("PreToolUse", "SubagentHandback"))
             for tool in ("mcp__benchmark-routing__prepare_routing", "mcp__plugin_assay_routing__authorize_routing_launch"):
                 self.assertEqual(unified, commands("PreToolUse", tool))
             for event in ("SubagentStart", "SubagentStop"):
                 self.assertEqual(unified, commands(event, "assay-general-purpose-0123456789abcdef"))
                 for agent_type in ("Explore", "general-purpose", ""):
-                    self.assertEqual(unified if event == "SubagentStop" else [], commands(event, agent_type))
+                    self.assertEqual(unified, commands(event, agent_type))
             for source in ("startup", "resume", "clear", "compact"):
                 self.assertEqual(unified, commands("SessionStart", source))
             self.assertEqual(unified if client == "claude" else [], commands("SessionStart", "fork"))

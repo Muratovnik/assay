@@ -7,6 +7,7 @@ from .advice_contracts import _metadata_value, _object, _reason_codes, _safe_nam
 from .core import EvidenceError, encoded, effort, text
 
 CHOICES = {"adequate", "inadequate", "unknown"}
+BASIS_KINDS = ("measurement", "task_inference", "unknown")
 
 
 def needs_assessment(packet):
@@ -81,7 +82,7 @@ def validate_decision_result(snapshot, result):
             basis_id = _safe_name(basis["id"], "basis.id")
             if len(basis_id) > 16 or (packet_id, basis_id) in bases:
                 raise EvidenceError("native_decision_basis_id_invalid")
-            if not isinstance(basis["kind"], str) or basis["kind"] not in {"measurement", "task_inference", "unknown"}:
+            if not isinstance(basis["kind"], str) or basis["kind"] not in BASIS_KINDS:
                 raise EvidenceError("native_decision_basis_kind_invalid")
             for key, allowed in (("criterion_ids", criteria), ("cohort_ids", cohorts)):
                 refs = basis[key]

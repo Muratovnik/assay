@@ -424,6 +424,71 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(report["requests"][1]["observed"]["model"], "claude-haiku")
         self.assertEqual(report["requests"][1]["observed"]["effort"], "low")
 
+    def test_response_usage_and_repeated_legacy_counters_count_once(self):
+        header = {"type": "session_meta", "payload": {"id": "child", "session_id": "root"}}
+        def response(ident, total):
+            return {"type": "token_usage_record", "payload": {"response_id": ident,
+                "thread_id": "child", "session_id": "root", "usage": {"input_tokens": 10, "output_tokens": 2},
+                "thread_token_usage": {"input_tokens": total, "output_tokens": total // 5}}}
+        def counter(total, timestamp):
+            return {"type": "event_msg", "timestamp": timestamp, "payload": {"type": "token_count", "info": {
+                "last_token_usage": {"input_tokens": 10, "output_tokens": 2},
+                "total_token_usage": {"input_tokens": total, "output_tokens": total // 5}}}}
+        events = [header, response("resp-1", 10), counter(10, "one"), counter(10, "two"),
+                  response("resp-2", 20), counter(20, "three"), response("resp-2", 20)]
+        path = self.write("modern.jsonl", events)
+        report = import_history([path, path])
+        self.assertEqual(report["status"], "complete")
+        self.assertEqual(report["summary"]["request_events"], 2)
+        self.assertEqual(report["summary"]["usage"]["input_tokens"], 20)
+        self.assertEqual([r["request_id"] for r in report["requests"]], ["resp-1", "resp-2"])
+        self.assertTrue(all(r["thread_id"] == "child" for r in report["requests"]))
+        self.assertEqual(import_history([path])["requests"], report["requests"])
+
+    def test_legacy_repeated_total_preserves_quota_without_extra_request(self):
+        first = self.cumulative("one", 10, 2, 5, 1)
+        repeated = self.cumulative("two", 10, 2, 5, 1, quota=True)
+        report = import_history([self.write("legacy.jsonl", [first, repeated])])
+        self.assertEqual(report["summary"]["request_events"], 1)
+        self.assertEqual(report["summary"]["quota_events"], 1)
+
+    def test_replayed_old_response_does_not_replace_the_latest_counter_baseline(self):
+        def response(ident, count):
+            return {"type": "token_usage_record", "payload": {"response_id": ident,
+                "thread_id": "child", "session_id": "root", "usage": {"input_tokens": count},
+                "thread_token_usage": {"input_tokens": count}}}
+        legacy = {"type": "event_msg", "payload": {"thread_id": "child", "session_id": "root",
+            "type": "token_count", "info": {"last_token_usage": {"input_tokens": 20},
+                "total_token_usage": {"input_tokens": 30}}}}
+        report = import_history([self.write("replayed.jsonl", [response("old", 10),
+            response("new", 20), response("old", 10), legacy])])
+        self.assertEqual(report["status"], "complete")
+        self.assertEqual(report["summary"]["request_events"], 2)
+        self.assertEqual(report["summary"]["usage"]["input_tokens"], 30)
+
+    def test_modern_response_wins_when_legacy_total_has_a_different_baseline(self):
+        response = {"type": "token_usage_record", "payload": {"session_id": "codex-session",
+            "response_id": "resp-1", "usage": {"input_tokens": 10, "output_tokens": 2},
+            "thread_token_usage": {"input_tokens": 100, "output_tokens": 20}}}
+        counter = self.cumulative("legacy", 90, 0, 18, 0)
+        counter["payload"]["info"]["last_token_usage"] = {"input_tokens": 10, "output_tokens": 2}
+        result = import_history([self.write("offset.jsonl", [response, counter])])
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["summary"]["request_events"], 1)
+        counter["payload"]["info"]["last_token_usage"]["input_tokens"] = 11
+        result = import_history([self.write("gap.jsonl", [response, counter])])
+        self.assertEqual(result["status"], "partial")
+        self.assertIsNone(result["summary"]["usage"]["input_tokens"])
+        self.assertIn("native_response_usage_missing", {e["code"] for e in result["errors"]})
+
+    def test_claude_chunk_uuid_does_not_duplicate_the_same_message(self):
+        event = {"type": "assistant", "uuid": "chunk-1", "sessionId": "s", "message": {
+            "id": "msg-1", "model": "claude-sonnet", "usage": {"input_tokens": 10, "output_tokens": 2}}}
+        another = json.loads(json.dumps(event))
+        another["uuid"] = "chunk-2"
+        report = import_history([self.write("chunks.jsonl", [event, another])])
+        self.assertEqual(report["summary"]["request_events"], 1)
+
     def test_malformed_and_missing_inputs_do_not_echo_raw_content_or_paths(self):
         bad = self.root / "secret-name.jsonl"
         bad.write_text('{"private":"DO-NOT-ECHO"\n', encoding="utf-8")

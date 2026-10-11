@@ -583,6 +583,8 @@ def runtime_identity(value: Any) -> dict:
     _supported_fields(value, {"client", "session_id", "thread_id", "agent_id", "tool_use_id"}, "runtime")
     if value.get("client") not in {"codex", "claude"}:
         raise EvidenceError("runtime.client must be codex or claude")
+    if any(isinstance(value.get(key), str) and "/" in value[key] for key in ("thread_id", "agent_id")):
+        raise EvidenceError("runtime worker identity must be the native spawn UUID/ID, not a role path")
     result = {key: _identifier(item, "runtime." + key) for key, item in value.items() if item is not None}
     if not result.get("session_id") or not (result.get("thread_id") or result.get("agent_id")):
         raise EvidenceError("runtime requires session_id and a worker thread_id or agent_id")
@@ -875,7 +877,7 @@ def _dig(value: Any, *paths: tuple[str, ...]) -> Any:
 
 
 def _event_identity(value: dict, normalized: dict, source_index: int, line_number: int) -> str:
-    observed = _dig(value, ("uuid",), ("id",), ("message", "id"),
+    observed = _dig(value, ("payload", "response_id"), ("message", "id"), ("uuid",), ("id",),
                     ("payload", "id"), ("payload", "turn_id"), ("request_id",))
     if isinstance(observed, str) and observed:
         identity = {"client": normalized.get("client"),
@@ -937,7 +939,7 @@ def _client(value: dict) -> str | None:
     if kind in {"assistant", "user", "result", "system"} and (
             "sessionId" in value or "session_id" in value or "message" in value):
         return "claude"
-    if kind in {"session_meta", "turn_context", "event_msg", "response_item"}:
+    if kind in {"session_meta", "turn_context", "event_msg", "response_item", "token_usage_record"}:
         return "codex"
     if value.get("client") in {"codex", "claude"}:
         return value["client"]
@@ -1008,13 +1010,37 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
     direct = _dig(value, ("message", "usage"), ("usage",),
                   ("payload", "usage"), ("payload", "info", "last_token_usage"))
     cumulative = _dig(value, ("payload", "info", "total_token_usage"),
-                      ("total_token_usage",), ("modelUsage",))
+                      ("payload", "thread_token_usage"), ("total_token_usage",), ("modelUsage",))
     suppress_result = value.get("type") == "result" and state.get("direct_seen")
+    replayed_response = False
+    if value.get("type") == "token_usage_record":
+        response_id = _dig(value, ("payload", "response_id"))
+        if not isinstance(response_id, str) or not response_id.strip():
+            raise EvidenceError("native_response_id_required")
+        responses = state.setdefault("response_ids", set())
+        replayed_response = response_id in responses
+        responses.add(response_id)
+    if client == "codex" and value.get("type") != "token_usage_record" and "response_usage" in state:
+        last = _usage(direct)
+        if last is not None and any(last.get(key, 0) for key in last if key.endswith("_tokens")) and any(
+                last.get(key) != state["response_usage"].get(key) for key in last if key.endswith("_tokens")):
+            source["issues"].add("native_response_usage_missing")
+            source["unknown_units"].update(key for key in last if key.endswith("_tokens"))
+            source["unknown_events"] += 1
+        return None, quota
+    if client == "codex" and value.get("type") != "token_usage_record" and isinstance(cumulative, dict):
+        current = _usage(cumulative, provenance="observed:cumulative_baseline")
+        previous = state.get("cumulative")
+        if current is not None and previous is not None and all(
+                current.get(key) == previous.get(key) for key in current if key.endswith("_tokens")):
+            return None, quota
     usage = None if suppress_result else _usage(direct, provenance="observed:direct_usage")
     provenance = "direct"
     if usage is not None:
         state["direct_seen"] = True
-        if isinstance(cumulative, dict) and "modelUsage" not in value:
+        if value.get("type") == "token_usage_record" and not replayed_response:
+            state["response_usage"] = usage
+        if isinstance(cumulative, dict) and "modelUsage" not in value and not replayed_response:
             observed_total = _usage(cumulative, provenance="observed:cumulative_baseline")
             if observed_total is not None:
                 state["cumulative"] = observed_total
@@ -1051,7 +1077,7 @@ def _normalized_event(value: dict, states: dict, source_index: int) -> tuple[dic
     source["usage_events"] += 1
     source["observed_units"].update(key for key in usage if key.endswith("_tokens"))
     merged = {**state, **{key: item for key, item in route.items() if item is not None}}
-    request_id = _dig(value, ("request_id",), ("message", "id"), ("payload", "turn_id"))
+    request_id = _dig(value, ("payload", "response_id"), ("request_id",), ("message", "id"), ("payload", "turn_id"))
     decision_id = _dig(value, ("decision_id",), ("payload", "decision_id"),
                        ("metadata", "decision_id"))
     normalized = {

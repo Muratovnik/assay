@@ -25,7 +25,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^(spawn_agent|Agent|mcp__.+__(authorize_routing_launch|complete_routing|get_advisor_input|get_routing_decision|prepare_routing|record_routing_outcome))$",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -37,7 +37,7 @@
     ],
     "SubagentStart": [
       {
-        "matcher": "^assay-",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",

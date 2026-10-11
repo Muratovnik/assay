@@ -93,7 +93,26 @@ class DecisionContractTests(unittest.TestCase):
         self.assertIn("benchmark_cost_selected", selected["reason_codes"])
         self.assertEqual(prepared["descriptor"]["privacy_profile"], "native-task-spec-v1")
         private = advisor_input(snap, ROUTE)
-        self.assertEqual(private["result_contract"]["metadata"]["contract_version"], "native-decisions-private-v2")
+        self.assertEqual(private["result_contract"]["metadata"]["contract_version"], "native-decisions-private-v3")
+
+    def test_large_handoff_frontloads_tasks_without_duplicating_measurements(self):
+        ctx = context(candidate_count=29)
+        ctx["guidance"] = {"excerpt": "evidence-sentinel-" + "x" * 30000}
+        snap = snapshot(count=29, packet_count=3, ctx=ctx)
+        available = [{"model": c["model"], "efforts": [c["effort"]]} for c in snap["candidates"]]
+        result = prepare_native(snap, ROUTE, available=available)
+        prompt = result["prompt"]
+        self.assertLess(prompt.index(SPEC["goal"]), 500)
+        self.assertNotIn("Replace with", prompt)
+        self.assertNotIn("measurement_view", prompt)
+        self.assertIn('basis.kind is one of ["measurement", "task_inference", "unknown"]', prompt)
+        self.assertIn('answer.choice is one of ["adequate", "inadequate", "unknown"]', prompt)
+        self.assertEqual(prompt.count("evidence-sentinel-"), 1)
+        request = json.loads(prompt.split("\nDecision request:\n")[1])
+        self.assertEqual(request["input"]["snapshot"], snap)
+        self.assertEqual(len(request["questions"]), 87)
+        self.assertEqual(set(question_bindings(snap)), {q["name"] for q in request["questions"]})
+        self.assertEqual(result["forwarding"], "inline_exact")
 
     def test_omitted_optional_unknowns_do_not_erase_or_supply_adequacy(self):
         snap = snapshot()
