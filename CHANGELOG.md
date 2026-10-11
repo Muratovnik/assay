@@ -6,6 +6,15 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.19.0](https://github.com/Muratovnik/assay/compare/v0.18.0...v0.19.0) (2026-10-12)
+
+### Features
+
+* **route-subagents:** refuse an evidence-only Claude subagent launch that names no model or no effort, so a routed child never silently inherits the session's settings, and record which model and effort each launch actually ran with as `host_observations`; `pipeline.explicit_routes: "off"` turns the check off ([9addee6](https://github.com/Muratovnik/assay/commit/9addee6a0d5b74f51a5f126db1ae44ce01f3be94))
+* **route-subagents:** bind benchmark labels to the available models by the host provider's brand instead of a stored table of names, so a new model binds as soon as it is in the inventory; ambiguous or duplicate labels are excluded rather than guessed ([249998e](https://github.com/Muratovnik/assay/commit/249998e817e8509e4eeca34cbbc7f46c210e842b))
+* **route-subagents:** take Claude's effort levels from the client, so an inventory entry may omit them, and reject placeholders such as `default` or `inherit` as levels ([46809a4](https://github.com/Muratovnik/assay/commit/46809a42b8764769f06bf912635a500255d5a3ed))
+* **route-subagents:** keep a route whose published score interval lies wholly below an adequate alternative's out of price selection, and choose between unpriced routes by effort and measured quality instead of candidate ID ([5967587](https://github.com/Muratovnik/assay/commit/59675873bfc3d8d7618e1f466c84e20939c53544))
+
 ## [0.18.0](https://github.com/Muratovnik/assay/compare/v0.17.7...v0.18.0) (2026-10-11)
 
 ### Features
