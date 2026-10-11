@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.18.0](https://github.com/Muratovnik/assay/compare/v0.17.7...v0.18.0) (2026-10-11)
+
+### Features
+
+* **hooks:** replace the English/Russian phrase hints with a short per-request skill check: the agent states which Assay skills apply and loads them, whatever the language of the request; explicit skill choices still work ([20282e0](https://github.com/Muratovnik/assay/commit/20282e01ba73a069a39d9d7df7dca2474e8d5e98))
+* **hooks:** in Claude Code, continue a turn whose reply names Assay skills the session has not loaded, so they are loaded and the work is checked against them; the skill check now asks for the loads before any other tool call and judges skills by the task rather than by the tools at hand ([39ade63](https://github.com/Muratovnik/assay/commit/39ade63482bd52345958df8f9b1242a7bb1ce5f9))
+
+### Bug Fixes
+
+* **evidence-research:** treat how a current product or tool behaves, and whether a ready-made solution exists, as research rather than a lookup from memory ([fa90c2e](https://github.com/Muratovnik/assay/commit/fa90c2e246c1a5a4e8a47caa21185e2e2af2ab62))
+* **hooks:** let the read-only reviewer and documentation researcher return their reports in Claude Code, and let the researcher use the web tools its profile grants ([cbc52d2](https://github.com/Muratovnik/assay/commit/cbc52d2654633f21adeaaa7cd807970a39a9b3e5))
+* **profiles:** launch the read-only reviewer and documentation researcher only when delegation has been authorized ([87d06f3](https://github.com/Muratovnik/assay/commit/87d06f35cab65b047e3cacd7e8326f24fd4728ff))
+* **routing:** keep rejected or unavailable routing from launching subagents with inherited maximum settings, and check fallback launch arguments locally ([3ca06ba](https://github.com/Muratovnik/assay/commit/3ca06ba79e3493c6871a3ec2edc9d7f627a12751))
+
 ## [0.17.7](https://github.com/Muratovnik/assay/compare/v0.17.6...v0.17.7) (2026-10-11)
 
 ### Bug Fixes
