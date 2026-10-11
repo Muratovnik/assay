@@ -91,13 +91,32 @@ def routing_result(event, client, environment):
         return failure(event, "plugin", True)
 
 
-def reading_role(role):
+READ_TOOLS = frozenset({"Read", "Grep", "Glob", "read_file", "list_dir", "find_file", "view_image",
+                        "search_for_pattern", "get_symbols_overview", "find_symbol", "find_referencing_symbols",
+                        "read_mcp_resource", "list_mcp_resources", "list_mcp_resource_templates",
+                        "search_openai_docs", "fetch_openai_doc"})
+# The host channel that delivers a subagent's final report to the primary. A
+# reading role exists to return findings; denying it silences the review.
+REPORT_TOOLS = frozenset({"SubagentHandback"})
+# Tools a profile's own projection grants beyond workspace reading.
+PROFILE_TOOLS = {"official-docs-researcher": frozenset({"WebFetch", "WebSearch", "ToolSearch"})}
+
+
+def reading_profile(role):
+    """The reading profile a native agent type names, or None."""
     import re
     if not isinstance(role, str):
-        return False
+        return None
     name = role.split(":")[-1]
-    return name in {"evidence-reviewer", "official-docs-researcher"} or bool(re.fullmatch(
-        r"assay-(?:evidence-reviewer|official-docs-researcher)-(?:low|medium|high|xhigh|max|ultra)-[0-9a-f]{16}", name))
+    if name in {"evidence-reviewer", "official-docs-researcher"}:
+        return name
+    match = re.fullmatch(
+        r"assay-(evidence-reviewer|official-docs-researcher)-(?:low|medium|high|xhigh|max|ultra)-[0-9a-f]{16}", name)
+    return match[1] if match else None
+
+
+def reading_role(role):
+    return reading_profile(role) is not None
 
 
 def reviewer_boundary(event, environment, *, clock=None):
@@ -130,15 +149,13 @@ def reviewer_boundary(event, environment, *, clock=None):
                 elif not role:
                     record = tx.get("profile", key)
                     role = record["role"] if record else None
-    if event.get("hook_event_name") != "PreToolUse" or not reading_role(role):
+    profile = reading_profile(role)
+    if event.get("hook_event_name") != "PreToolUse" or profile is None:
         return {}
-    read_tools = {"Read", "Grep", "Glob", "read_file", "list_dir", "find_file", "view_image",
-                  "search_for_pattern", "get_symbols_overview", "find_symbol", "find_referencing_symbols",
-                  "read_mcp_resource", "list_mcp_resources", "list_mcp_resource_templates",
-                  "search_openai_docs", "fetch_openai_doc"}
     tool = event.get("tool_name", "")
-    if tool in read_tools or (tool.startswith(("mcp__serena__", "mcp__openaiDeveloperDocs__"))
-                              and tool.rsplit("__", 1)[-1] in read_tools):
+    if (tool in READ_TOOLS | REPORT_TOOLS | PROFILE_TOOLS.get(profile, frozenset())
+            or (tool.startswith(("mcp__serena__", "mcp__openaiDeveloperDocs__"))
+                and tool.rsplit("__", 1)[-1] in READ_TOOLS)):
         return {}
     return deny("This profile is a reading role: return findings and receipts to the primary; "
                 "task/checklist, memory, file writes, shell execution and further delegation are unavailable")

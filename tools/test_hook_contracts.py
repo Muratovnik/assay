@@ -270,6 +270,33 @@ class ReviewerBoundaryTests(unittest.TestCase):
                 self.assertEqual(result, {})
         self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "tool_name": "Write"}, {}), {})
 
+    def test_reading_roles_can_hand_back_their_report(self):
+        for client in ("codex", "claude"):
+            for role in ("assay:evidence-reviewer", "official-docs-researcher",
+                         "assay-evidence-reviewer-medium-0123456789abcdef"):
+                with self.subTest(client=client, role=role):
+                    result, _ = cli.process({"hook_event_name": "PreToolUse", "agent_type": role,
+                                             "tool_name": "SubagentHandback", "tool_input": {"message": "findings"}},
+                                            client, {})
+                    self.assertNotEqual("deny", result.get("hookSpecificOutput", {}).get("permissionDecision"))
+
+    def test_boundary_allows_each_rendered_claude_tool_only_for_its_profile(self):
+        rendered = {}
+        for path in sorted((ROOT / "adapters/claude/agents").glob("*.md")):
+            line = next(line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("tools:"))
+            rendered[path.stem] = [tool.strip() for tool in line.split(":", 1)[1].split(",") if tool.strip()]
+        self.assertEqual({"evidence-reviewer", "official-docs-researcher"}, set(rendered))
+        for role, tools in rendered.items():
+            for tool in tools:
+                with self.subTest(role=role, tool=tool):
+                    self.assertEqual({}, cli.reviewer_boundary(
+                        {"hook_event_name": "PreToolUse", "agent_type": "assay:" + role, "tool_name": tool}, {}))
+        for tool in sorted(set(rendered["official-docs-researcher"]) - set(rendered["evidence-reviewer"])):
+            with self.subTest(denied=tool):
+                result = cli.reviewer_boundary({"hook_event_name": "PreToolUse",
+                                                "agent_type": "assay:evidence-reviewer", "tool_name": tool}, {})
+                self.assertEqual("deny", result["hookSpecificOutput"]["permissionDecision"])
+
     def test_native_start_identity_is_used_without_parent_session_guess(self):
         (ROOT / "tmp").mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
