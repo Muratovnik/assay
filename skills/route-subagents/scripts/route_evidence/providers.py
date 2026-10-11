@@ -11,7 +11,6 @@ import urllib.request
 from html.parser import HTMLParser
 
 from .cache import FetchError
-from .model_names import model_identity
 from .core import MAX_BYTES, EvidenceError, effort, identity, loads, number, validate_snapshot
 
 # Endpoints, not a model ranking. A new model needs no code change. New benchmark
@@ -226,10 +225,6 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
             harness = cells[header["harness"]] if "harness" in header else default_harness
             row = base_row(model, reasoning, harness, subset, metric={"frontiercode": "mergeability", "cursorbench": "task_score",
                                                                     "terminal-bench": "accuracy"}.get(source["id"], "resolve_rate"))
-            if source["id"] == "cursorbench":
-                # Keep the publisher label; the annotation is source-scoped and
-                # routing rechecks it against the current reviewed alias table.
-                row["model_identity"] = model_identity("cursorbench", model)
             row["score"], row["score_low"], row["score_high"] = score_measurement(cells[header["score"]])
             for key in ("cost_usd", "reported_tokens", "output_tokens", "steps"):
                 row[key] = quantity(cells[header[key]]) if key in header else None

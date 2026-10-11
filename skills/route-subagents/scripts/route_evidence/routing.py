@@ -5,7 +5,7 @@ import copy
 from collections import defaultdict
 from .core import METRICS, EvidenceError, effort, identity, number, text
 from .guides import matching_models
-from .model_names import matching_diagnostics, resolve_model
+from .model_names import bind_labels, matching_diagnostics
 
 TASK_TYPES = {
     "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "extended")], "support": ["cursorbench"]},
@@ -160,8 +160,6 @@ def describe_cohort(key, by_route, expected, request):
 
 def collect(request, evidence):
     """One pass over snapshots: cohorts stay tied to their measured conditions."""
-    inventory = {identity(name): c for c in request["available"]
-                 for name in [c["model"], *c.get("evidence_names", [])]}
     wanted = set(source_ids(request))
     cohorts, statuses, excluded, seen = defaultdict(dict), [], [], set()
     for source in evidence:
@@ -174,7 +172,8 @@ def collect(request, evidence):
                        "source_not_requested" if sid not in wanted else
                        "stale_disallowed" if source["stale"] and not request.get("allow_stale", True) else "loaded")
         diagnostics = matching_diagnostics(sid, data["rows"] if data else [], request["available"],
-                                           state=match_state, harness=request.get("harness"))
+                                           state=match_state, harness=request.get("harness"),
+                                           client=request["client"])
         statuses.append({**{k: v for k, v in source.items() if k != "snapshot"},
                          "model_matching": diagnostics,
                          **({"acquisition": data["acquisition"]} if data and "acquisition" in data else {}),
@@ -186,12 +185,13 @@ def collect(request, evidence):
             continue
         if sid != data["source_id"]:
             raise EvidenceError("source envelope and snapshot disagree")
+        bindings = bind_labels([row["model"] for row in data["rows"]], request["available"], request["client"])
         for row in data["rows"]:
-            candidate, annotation, match_error = resolve_model(sid, row["model"], inventory)
+            candidate, annotation, match_error = bindings[row["model"]]
             if not candidate:
                 # Unmatched examples/counts are in the source diagnostics. An
-                # ambiguous reviewed/explicit binding is never silently chosen.
-                if match_error == "ambiguous_model_identity":
+                # ambiguous or duplicate binding is never silently chosen.
+                if match_error in {"ambiguous_model_identity", "duplicate_source_label"}:
                     excluded.append({"model": row["model"], "effort": row["effort"],
                                      "source_id": sid, "reason": match_error})
                 continue

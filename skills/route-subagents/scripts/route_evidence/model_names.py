@@ -1,42 +1,71 @@
-"""Reviewed publisher spellings, not fuzzy model/version inference."""
+"""Bind publisher labels to host model IDs by rule, never by a model registry."""
 from __future__ import annotations
 
 from collections import Counter
 
 from .core import digest, effort, identity
 
-# Cursor's own model pages identify these exact releases. The benchmark omits
-# "Claude"; this does not license stripping arbitrary providers or date suffixes.
-# The table is frozen: a new model's spelling is the owner's confirmed
-# `evidence_names`, which the spelling report below helps to find.
-CURSOR_ALIASES = {
-    "opus-5-5": ("claude-opus-5-5", "https://cursor.com/docs/models/claude-opus-5-5"),
-    "opus-5": ("claude-opus-5", "https://cursor.com/docs/models/claude-opus-5"),
-    "fable-5-1": ("claude-fable-5-1", "https://cursor.com/docs/models/claude-fable-5-1"),
-    "fable-5": ("claude-fable-5", "https://cursor.com/docs/models/claude-fable-5"),
-    "sonnet-5": ("claude-sonnet-5", "https://cursor.com/docs/models/claude-sonnet-5"),
-}
+# Publishers add or drop the host provider's own brand: "Opus 5.5", "Claude
+# Opus 5.5" and "anthropic/Opus 5.5" all name claude-opus-5-5. That brand is the
+# only word a structural binding ignores. Family, variant, date and every version
+# number must still be equal, and the binding must be unique on both sides, so a
+# new release binds without a code or configuration entry.
+PROVIDER_BRANDS = {"claude": frozenset({"claude", "anthropic"}), "codex": frozenset({"openai"})}
 
 
-def model_identity(source_id, label):
-    """Return the original spelling plus a reversible, source-scoped annotation."""
-    pair = CURSOR_ALIASES.get(identity(label)) if source_id == "cursorbench" else None
-    return {"source_model": label, "canonical_model": pair[0] if pair else label,
-            "basis": "publisher_alias" if pair else "lexical",
-            "rule": "cursorbench:" + identity(label) if pair else None,
-            "reference": pair[1] if pair else None}
+def provider_brands(client):
+    """The brand words a client's own provider adds to labels; none when unknown."""
+    return PROVIDER_BRANDS.get(client, frozenset())
 
 
-def resolve_model(source_id, label, inventory):
-    """Match only exact/lexical or reviewed names; conflicting bindings abstain."""
-    annotation = model_identity(source_id, label)
-    keys = {identity(label), identity(annotation["canonical_model"])}
-    matches = {inventory[key]["model"]: inventory[key] for key in keys if key in inventory}
-    if len(matches) > 1:
-        return None, annotation, "ambiguous_model_identity"
-    if not matches:
-        return None, annotation, "unmatched_model_name"
-    return next(iter(matches.values())), annotation, None
+def structural_key(value, brands):
+    return tuple(token for token in identity(value).split("-") if token and token not in brands)
+
+
+def _annotation(label, model=None, brands=frozenset()):
+    if model is None:
+        return {"source_model": label, "canonical_model": label, "basis": "lexical", "rule": None}
+    return {"source_model": label, "canonical_model": model, "basis": "provider_brand",
+            "rule": "ignores " + "/".join(sorted(brands))}
+
+
+def bind_labels(labels, available, client=None):
+    """Bind one source's labels: {label: (inventory item | None, annotation, error)}.
+
+    An exact spelling (a model ID or a confirmed evidence name) binds first. For
+    a known provider, a label whose words equal one model's ID or confirmed name
+    apart from that provider's brand binds structurally. It abstains when two
+    inventory models share those words, and when another label of the same source
+    already names that model, so one configuration never gets two measurements.
+    """
+    brands = provider_brands(client)
+    names = [(name, item) for item in available for name in [item["model"], *item.get("evidence_names", [])]]
+    exact = {identity(name): item for name, item in names}
+    by_key = {}
+    for name, item in (names if brands else ()):
+        matches = by_key.setdefault(structural_key(name, brands), [])
+        if item not in matches:
+            matches.append(item)
+    result, structural = {}, {}
+    for label in sorted(set(labels)):
+        hit = exact.get(identity(label))
+        if hit:
+            result[label] = (hit, _annotation(label), None)
+            continue
+        matches = by_key.get(structural_key(label, brands), []) if brands else []
+        if len(matches) > 1:
+            result[label] = (None, _annotation(label), "ambiguous_model_identity")
+        elif matches:
+            structural[label] = matches[0]
+        else:
+            result[label] = (None, _annotation(label), "unmatched_model_name")
+    named = Counter(item["model"] for item, _, _ in result.values() if item)
+    named.update(item["model"] for item in structural.values())
+    for label, item in structural.items():
+        annotation = _annotation(label, item["model"], brands)
+        result[label] = ((None, annotation, "duplicate_source_label") if named[item["model"]] > 1
+                         else (item, annotation, None))
+    return result
 
 
 def inventory_keys(available):
@@ -47,19 +76,19 @@ def inventory_keys(available):
                    for item in available})
 
 
-def matching_diagnostics(source_id, rows, available, *, state="loaded", harness=None):
+def matching_diagnostics(source_id, rows, available, *, state="loaded", harness=None, client=None):
     """Explain name/effort gaps without treating unmatched names as unpublished models."""
-    inventory = {identity(name): item for item in available
-                 for name in [item["model"], *item.get("evidence_names", [])]}
     by_model = {item["model"]: {"model": item["model"], "status": state,
                                "matched_names": [], "observed_efforts": [],
                                "usable_rows": 0} for item in available}
-    unmatched, ambiguous = set(), set()
+    unmatched, ambiguous, duplicates = set(), set(), set()
     if state == "loaded":
+        bindings = bind_labels([row["model"] for row in rows], available, client)
         for row in rows:
-            candidate, annotation, error = resolve_model(source_id, row["model"], inventory)
+            candidate, annotation, error = bindings[row["model"]]
             if error:
-                (ambiguous if error == "ambiguous_model_identity" else unmatched).add(row["model"])
+                {"ambiguous_model_identity": ambiguous, "duplicate_source_label": duplicates}.get(
+                    error, unmatched).add(row["model"])
                 continue
             target = by_model[candidate["model"]]
             # Every relevant match is retained; only unrelated unmatched examples
@@ -87,7 +116,7 @@ def matching_diagnostics(source_id, rows, available, *, state="loaded", harness=
     return {"models": [by_model[key] for key in sorted(by_model)],
             "unmatched_name_count": len(names), "unmatched_name_examples": names[:12],
             "unmatched_names_truncated": len(names) > 12,
-            "ambiguous_names": sorted(ambiguous),
+            "ambiguous_names": sorted(ambiguous), "duplicate_labels": sorted(duplicates),
             "note": "Name gaps describe this snapshot and inventory, not absence of published measurements."}
 
 
@@ -116,20 +145,17 @@ def _candidate_rank(model, label):
             -shared, len(theirs) - shared, label)
 
 
-def spelling_report(snapshots, available, *, limit=MAX_SPELLING_CANDIDATES):
+def spelling_report(snapshots, available, *, limit=MAX_SPELLING_CANDIDATES, client=None):
     """Which cached sources name each inventory model, and spellings to review.
 
     `snapshots` lists (source_id, rows). Candidates are unbound labels of the
     sources that name none of a model's rows. The owner confirms one as
     `evidence_names` or ignores it; this report changes no matching.
     """
-    inventory = {identity(name): item for item in available
-                 for name in [item["model"], *item.get("evidence_names", [])]}
     models = {item["model"]: {"named_in": [], "unnamed_in": [], "candidates": {}} for item in available}
     for source_id, rows in snapshots:
         named, unbound = set(), set()
-        for label in {row["model"] for row in rows}:
-            candidate, _, error = resolve_model(source_id, label, inventory)
+        for label, (candidate, _, error) in bind_labels([row["model"] for row in rows], available, client).items():
             if candidate:
                 named.add(candidate["model"])
             elif error == "unmatched_model_name":

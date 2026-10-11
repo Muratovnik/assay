@@ -13,7 +13,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "
 sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, source_lock
 from route_evidence.core import EvidenceError, encoded, identity, timestamp
-from route_evidence.model_names import inventory_keys, matching_diagnostics, model_identity, resolve_model, spelling_report
+from route_evidence.model_names import bind_labels, inventory_keys, matching_diagnostics, spelling_report
 from route_evidence.providers import Fetcher, SOURCES, parse_tables, snapshot
 from route_evidence.routing import brief, build_context
 from route_evidence import terminal_hub as hub
@@ -32,8 +32,8 @@ def data(source="cursorbench", rows=None):
     return snapshot(SOURCES[source], [row()] if rows is None else rows)
 
 
-def context(rows, available, *, source="cursorbench", stale=False, **extra):
-    request = {"client": "codex", "task_types": ["terminal" if source == "terminal-bench" else "implementation"],
+def context(rows, available, *, source="cursorbench", stale=False, client="codex", **extra):
+    request = {"client": client, "task_types": ["terminal" if source == "terminal-bench" else "implementation"],
                "available": available, **extra}
     view = {"source_id": source, "source_url": SOURCES[source]["url"], "stale": stale,
             "snapshot": data(source, rows) if rows is not None else None}
@@ -41,26 +41,66 @@ def context(rows, available, *, source="cursorbench", stale=False, **extra):
 
 
 class NameMatchingTests(unittest.TestCase):
-    def test_cursor_alias_is_reversible_and_effort_is_separate(self):
+    def test_provider_brand_binds_and_effort_is_separate(self):
         rows = parse_tables(SOURCES["cursorbench"], [[
             ["Model", "Score", "Cost / Task", "Tokens / Task", "Steps / Task"],
             ["Opus 5.5 Medium", "80%", "$1.20", "1000", "20"]]])
         self.assertEqual(rows[0]["model"], "Opus 5.5")
         self.assertEqual(rows[0]["effort"], "medium")
-        self.assertEqual(rows[0]["model_identity"]["canonical_model"], "claude-opus-5-5")
-        result = context(rows, inventory("claude-opus-5-5"))
+        # The source keeps the publisher's label; routing binds it per request.
+        self.assertNotIn("model_identity", rows[0])
+        result = context(rows, inventory("claude-opus-5-5"), client="claude")
         candidates = result["tasks"][0]["supporting_comparisons"][0]["candidates"]
         self.assertEqual([(c["model"], c["effort"]) for c in candidates], [("claude-opus-5-5", "medium")])
         match = result["sources"][0]["model_matching"]["models"][0]
         self.assertEqual(match["matched_names"][0]["source_model"], "Opus 5.5")
+        self.assertEqual(match["matched_names"][0]["basis"], "provider_brand")
         self.assertEqual(match["status"], "matched")
 
-    def test_no_fuzzy_version_family_provider_or_tier_resolution(self):
-        for label in ("Opus 5.50", "Opus 5.5 fast", "Opus 5.5 20260922", "Opus latest", "anthropic/Opus 5.5", "GPT-5.6 Luna"):
+    def test_a_new_release_binds_without_a_registry_entry(self):
+        for client, label, model in (("claude", "Opus 6.1", "claude-opus-6-1"),
+                                     ("claude", "Claude Opus 6.1", "claude-opus-6-1"),
+                                     ("claude", "anthropic/opus-6.1", "claude-opus-6-1"),
+                                     ("codex", "OpenAI GPT-6 Luna", "gpt-6-luna")):
+            with self.subTest(client=client, label=label):
+                result = context([row(label)], inventory(model, "claude-sonnet-6-1"), client=client)
+                self.assertEqual(result["tasks"][0]["supporting_comparisons"][0]["candidates"][0]["model"], model)
+
+    def test_no_fuzzy_version_family_variant_date_or_foreign_brand(self):
+        labels = ("Opus 5.50", "Opus 5", "Opus 5.5 fast", "Opus 5.5 20260922", "Opus latest", "GPT-5.6 Luna",
+                  "Sonnet 5.5")
+        for client in ("claude", "codex"):
+            for label in labels:
+                with self.subTest(client=client, label=label):
+                    result = context([row(label)], inventory("claude-opus-5-5", "gpt-6-luna"), client=client)
+                    self.assertFalse(result["tasks"][0]["supporting_comparisons"])
+        # Another provider's brand is a word like any other.
+        for label in ("anthropic/Opus 5.5", "Opus 5.5"):
             with self.subTest(label=label):
-                result = context([row(label)], inventory("claude-opus-5-5", "gpt-6-luna"))
-                self.assertFalse(result["tasks"][0]["supporting_comparisons"])
-        self.assertEqual(model_identity("frontiercode", "Opus 5.5")["canonical_model"], "Opus 5.5")
+                self.assertFalse(context([row(label)], inventory("claude-opus-5-5"))["tasks"][0]
+                                 ["supporting_comparisons"])
+        self.assertFalse(context([row("GPT-6 Luna")], inventory("openai-gpt-6-luna"), client="claude")
+                         ["tasks"][0]["supporting_comparisons"])
+        # An unknown client binds exact spellings only.
+        self.assertIsNone(bind_labels(["Opus 5.5"], inventory("claude-opus-5-5"), "cursor")["Opus 5.5"][0])
+
+    def test_two_models_sharing_the_words_abstain(self):
+        result = context([row("Opus 5.5")], inventory("claude-opus-5-5", "anthropic-opus-5-5"), client="claude")
+        self.assertFalse(result["tasks"][0]["supporting_comparisons"])
+        self.assertEqual(result["excluded"][0]["reason"], "ambiguous_model_identity")
+        self.assertEqual(result["sources"][0]["model_matching"]["ambiguous_names"], ["Opus 5.5"])
+
+    def test_an_exact_label_wins_over_a_structural_duplicate(self):
+        result = context([row("Opus 5.5", score=.5), row("claude-opus-5-5")], inventory("claude-opus-5-5"),
+                         client="claude")
+        candidates = result["tasks"][0]["supporting_comparisons"][0]["candidates"]
+        self.assertEqual([(c["model"], c["score"]) for c in candidates], [("claude-opus-5-5", .8)])
+        self.assertEqual(result["excluded"][0]["reason"], "duplicate_source_label")
+        self.assertEqual(result["sources"][0]["model_matching"]["duplicate_labels"], ["Opus 5.5"])
+        # Two structural labels for one model both abstain; neither is chosen.
+        both = context([row("Opus 5.5"), row("anthropic/Opus 5.5")], inventory("claude-opus-5-5"), client="claude")
+        self.assertFalse(both["tasks"][0]["supporting_comparisons"])
+        self.assertEqual(sorted(e["model"] for e in both["excluded"]), ["Opus 5.5", "anthropic/Opus 5.5"])
 
     def test_new_exact_model_needs_no_registry_entry(self):
         result = context([row("Unseen Release 17.2")], inventory("unseen-release-17-2"))
@@ -68,16 +108,16 @@ class NameMatchingTests(unittest.TestCase):
 
     def test_confirmed_caller_alias_is_preserved(self):
         available = [{"model": "native-opus", "evidence_names": ["claude-opus-5-5"], "efforts": ["medium"]}]
-        result = context([row("Opus 5.5")], available)
+        result = context([row("Opus 5.5")], available, client="claude")
         self.assertEqual(result["tasks"][0]["supporting_comparisons"][0]["candidates"][0]["model"], "native-opus")
 
-    def test_reviewed_and_caller_bindings_cannot_choose_different_models(self):
+    def test_a_confirmed_spelling_precedes_the_structural_rule(self):
         available = [{"model": "other", "evidence_names": ["Opus 5.5"], "efforts": ["medium"]},
                      *inventory("claude-opus-5-5")]
-        result = context([row("Opus 5.5")], available)
-        self.assertFalse(result["tasks"][0]["supporting_comparisons"])
-        self.assertEqual(result["excluded"][0]["reason"], "ambiguous_model_identity")
-        self.assertEqual(result["sources"][0]["model_matching"]["ambiguous_names"], ["Opus 5.5"])
+        result = context([row("Opus 5.5")], available, client="claude")
+        candidates = result["tasks"][0]["supporting_comparisons"][0]["candidates"]
+        self.assertEqual([c["model"] for c in candidates], ["other"])
+        self.assertEqual(result["excluded"], [])
 
     def test_source_annotation_cannot_forge_a_mapping(self):
         result = context([row("wrong-model", model_identity={"canonical_model": "claude-opus-5-5"})], inventory("claude-opus-5-5"))
@@ -97,7 +137,7 @@ class NameMatchingTests(unittest.TestCase):
                 self.assertEqual(result["sources"][0]["model_matching"]["models"][0]["status"], expected)
 
     def test_compact_context_retains_diagnostics_not_raw_rows(self):
-        result = context([row("Opus 5.5")], inventory("claude-opus-5-5"))
+        result = context([row("Opus 5.5")], inventory("claude-opus-5-5"), client="claude")
         self.assertEqual(brief(result)["sources"], result["sources"])
         self.assertNotIn("observations", brief(result)["tasks"][0]["supporting_comparisons"][0])
 
@@ -108,8 +148,9 @@ class NameMatchingTests(unittest.TestCase):
         self.assertTrue(result["unmatched_names_truncated"])
 
     def test_normalization_cannot_duplicate_measurements(self):
+        available = [{"model": "claude-opus-5-5", "evidence_names": ["Opus 5.5"], "efforts": ["medium"]}]
         with self.assertRaisesRegex(EvidenceError, "multiple evidence labels"):
-            context([row("Opus 5.5"), row("claude-opus-5-5")], inventory("claude-opus-5-5"))
+            context([row("Opus 5.5"), row("claude-opus-5-5")], available, client="claude")
 
     def test_spelling_candidates_are_advice_and_only_confirmation_binds(self):
         rows = [row("Sonnet 5"), row("Sonnet 5.5"), row("Claude Opus 5.5"), row("Opus 5.5 fast"), row("unrelated-model")]
@@ -131,6 +172,13 @@ class NameMatchingTests(unittest.TestCase):
         status = context(rows, available, source="frontiercode")["sources"][0]["model_matching"]["models"]
         self.assertEqual({m["model"]: m["status"] for m in status}["claude-sonnet-5-5"], "matched")
         self.assertEqual(spelling_report([], available)["status"], "no_cached_rows")
+
+    def test_spelling_report_counts_structural_names_for_a_known_provider(self):
+        rows = [row("Sonnet 5.5"), row("Opus 5.5")]
+        report = spelling_report([("frontiercode", rows)], inventory("claude-sonnet-5-5", "claude-opus-5-5"),
+                                 client="claude")
+        self.assertEqual([(m["model"], m["named_in"], m["candidates"]) for m in report["models"]],
+                         [("claude-opus-5-5", ["frontiercode"], []), ("claude-sonnet-5-5", ["frontiercode"], [])])
 
 
 class InventoryRefreshTests(unittest.TestCase):
@@ -409,22 +457,22 @@ class EvolutionIntegrationTests(unittest.IsolatedAsyncioTestCase):
                     return guide_snapshot(source, body), {}
                 rows = [row("old-model")]
                 if source["id"] == "cursorbench" and calls.count("cursorbench") > 1:
-                    rows.append(row("Opus 5.5"))
+                    rows.append(row("OpenAI GPT-6 Luna"))
                 return snapshot(source, rows), {}
             with patch.object(ProcessScope, "fetch", side_effect=fetch):
                 await service.get_routing_context(["implementation"], available=inventory("old-model"))
-                result = await service.get_routing_context(["implementation"], available=inventory("old-model", "claude-opus-5-5"))
-                again = await service.get_routing_context(["implementation"], available=inventory("claude-opus-5-5", "old-model"))
+                result = await service.get_routing_context(["implementation"], available=inventory("old-model", "gpt-6-luna"))
+                again = await service.get_routing_context(["implementation"], available=inventory("gpt-6-luna", "old-model"))
             self.assertEqual(calls.count("cursorbench"), 2)
             self.assertEqual(calls.count("openai-reasoning"), 1)
             source = next(s for s in result["sources"] if s["source_id"] == "cursorbench")
             self.assertEqual(source["refresh_reason"], "inventory_changed")
             self.assertEqual(source["model_matching"]["models"][0]["status"], "matched")
-            candidates = [{"model": a["model"], "effort": e} for a in inventory("old-model", "claude-opus-5-5") for e in a["efforts"]]
+            candidates = [{"model": a["model"], "effort": e} for a in inventory("old-model", "gpt-6-luna") for e in a["efforts"]]
             projected = _project_evidence(again, candidates)
             restored = _expand_records(projected["sources"])
             self.assertEqual(next(s for s in restored if s["source_id"] == "cursorbench")["model_matching"], source["model_matching"])
-            self.assertTrue(any(c["model"] == "claude-opus-5-5" for t in again["tasks"] for cohort in t["supporting_comparisons"] for c in cohort["candidates"]))
+            self.assertTrue(any(c["model"] == "gpt-6-luna" for t in again["tasks"] for cohort in t["supporting_comparisons"] for c in cohort["candidates"]))
 
     async def test_new_inventory_skips_a_source_this_host_cannot_fetch(self):
         from route_evidence.service import RoutingService

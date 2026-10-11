@@ -125,14 +125,14 @@ def load_config(path: Path | None):
     return config
 
 
-def spelling(cache, available):
+def spelling(cache, available, client=None):
     """Name gaps of an inventory in cached benchmark rows; reads no network."""
     snapshots = []
     for sid in sorted(SOURCES):
         snapshot = cache.read(SOURCES[sid]).get("snapshot")
         if snapshot:
             snapshots.append((sid, snapshot["rows"]))
-    return spelling_report(snapshots, available)
+    return spelling_report(snapshots, available, client=client)
 
 
 def diagnostics():
@@ -253,7 +253,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                 "guides": brief({"sources": guides})["sources"],
                 "inventory": {"configured": inv is not None, "observed_at": inv["observed_at"] if inv else None,
                               "models": len(inv["available"]) if inv else 0},
-                "model_names": spelling(self.cache, inv["available"]) if inv else {"status": "no_inventory"},
+                "model_names": spelling(self.cache, inv["available"], self.client) if inv else {"status": "no_inventory"},
                 "installation": diagnostics(), **brief({"sources": sources})}
 
     def host_observations(self):

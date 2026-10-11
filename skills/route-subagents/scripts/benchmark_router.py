@@ -145,7 +145,7 @@ def main(argv=None):
             result = confirm_inventory(config, available, evidence_names=names)
             # Show what the confirmed spellings now name, and what is still unnamed.
             result["model_names"] = spelling(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
-                                             configured_inventory(config)["available"])
+                                             configured_inventory(config)["available"], config.get("client"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0
         service = make_service(args)

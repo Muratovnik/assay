@@ -5,37 +5,44 @@ publisher names differ from native IDs, or when maintaining a source adapter.
 The [benchmark service](benchmark-routing.md) remains the owner of acquisition,
 cache and comparable cohorts; this adds no service or model-discovery daemon.
 
-## Exact publisher correspondences
+## How publisher labels bind to the inventory
 
-The CursorBench adapter retains the publisher's `model` and adds a reversible
-`model_identity` annotation. `scripts/route_evidence/model_names.py` owns the
-reviewed correspondences: Opus 5.5, Opus 5, Fable 5.1, Fable 5 and Sonnet 5 to
-their exact `claude-*` identifiers. The rule records its source URL. Cursor's
-[Opus 5.5](https://cursor.com/docs/models/claude-opus-5-5),
-[Opus 5](https://cursor.com/docs/models/claude-opus-5),
-[Fable 5.1](https://cursor.com/docs/models/claude-fable-5-1),
-[Fable 5](https://cursor.com/docs/models/claude-fable-5), and
-[Sonnet 5](https://cursor.com/docs/models/claude-sonnet-5) pages document those IDs.
+Routing keeps no table of model names. The inventory the caller supplies is the
+only list of models, and a source row binds to one of its entries by rule, in
+this order:
 
-These rules apply only to CursorBench, not every source using similar text.
-Routing recomputes the correspondence instead of trusting an imported annotation.
-The table is frozen: a newer model does not get a code entry. Its spellings are
-the owner's confirmed `evidence_names` in the inventory, which also bind a native
-runtime alias. If literal/caller and reviewed matches point to different runtime
-models, the row is excluded as `ambiguous_model_identity`; neither binding wins
-silently.
+1. **Exact spelling.** The publisher's label, lexically normalized, equals the
+   entry's runtime ID or one of the owner's confirmed `evidence_names`.
+2. **Provider brand.** On a connection whose client is known, the label differs
+   from the entry's ID or confirmed name only by that client's own provider
+   brand: `claude` or `anthropic` for Claude, `openai` for Codex. "Opus 5.5",
+   "Claude Opus 5.5" and "anthropic/opus-5.5" all bind to `claude-opus-5-5`, so
+   a new release binds as soon as it is in the inventory, without a code or
+   configuration entry. The row's annotation records `basis: provider_brand` and
+   the ignored words. An unconfigured client gets no brand rule.
+
+The brand rule binds only when the result is unambiguous. If two inventory
+entries share the remaining words, the row is excluded as
+`ambiguous_model_identity`. If one source prints a second label that names the
+same entry, the brand-bound label is excluded as `duplicate_source_label`, so one
+configuration never gets two measurements; an exact spelling among them still
+binds. The context lists both kinds in each source's `model_matching` and among
+its excluded rows.
 
 Matching performs no fuzzy search, edit distance, rolling-alias resolution,
-date-suffix removal, provider-prefix stripping or version interpolation. An
-unlisted release keeps lexical matching. Fast variants remain separate; GPT-5.6
-results never become GPT-6 results. Effort is parsed separately and must match a
-setting the caller supplied. Missing effort stays unknown, not `medium` or `max`.
+date-suffix removal, version interpolation or removal of another provider's
+brand. Family, variant, date and every version number must still be equal: fast
+variants remain separate, and GPT-5.6 results never become GPT-6 results. Effort
+is parsed separately and must match a setting the caller supplied. Missing
+effort stays unknown, not `medium` or `max`.
 
-What a rolling alias currently means is not inferred here either. In required
-routing the host itself reports the model an alias resolved to, and a change of
-that resolution suspends the alias's confirmed spellings until the owner confirms
-the inventory again; see [required routing](required-routing.md#observations-failure-and-privacy-boundaries).
-That is a host observation feeding the inventory, not a matching rule.
+What a rolling alias currently means is not inferred here either; the host
+reports it. Evidence-only Claude routing returns recent resolutions as
+`host_observations` (see [Claude Code mechanics](claude-code-routing.md)). In
+required routing a change of that resolution suspends the alias's confirmed
+spellings until the owner confirms the inventory again; see
+[required routing](required-routing.md#observations-failure-and-privacy-boundaries).
+That is a host observation, not a matching rule.
 
 ## Finding a missing spelling
 
