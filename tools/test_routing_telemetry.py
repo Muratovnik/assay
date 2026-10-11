@@ -25,6 +25,7 @@ IDENTITY = {"client": "claude", "session_id": "session-one", "agent_id": "worker
 
 class RetrospectiveTests(unittest.TestCase):
     def setUp(self):
+        (ROOT / "tmp").mkdir(exist_ok=True)
         self.tmp = tempfile.TemporaryDirectory(dir=ROOT / "tmp")
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)

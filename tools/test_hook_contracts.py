@@ -271,6 +271,7 @@ class ReviewerBoundaryTests(unittest.TestCase):
         self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "tool_name": "Write"}, {}), {})
 
     def test_native_start_identity_is_used_without_parent_session_guess(self):
+        (ROOT / "tmp").mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
             env = {"PLUGIN_DATA": tmp}
             worker = "11111111-2222-7333-8444-555555555555"
