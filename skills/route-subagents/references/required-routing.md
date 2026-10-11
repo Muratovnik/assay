@@ -10,7 +10,9 @@ a separate economical advisor owns ranking when inference is needed.
 `pipeline.mode` defaults to `evidence-only`: without a configuration, for v1 and
 v2 files and for a v3 file without a mode, the workflow is the existing one.
 `get_routing_context`, the root-mediated advisor handoff and the CLI keep their
-behavior, and the plugin hooks return no decision and add no context.
+behavior, and the plugin hooks register no decision. For Claude they refuse only
+a launch that names no model or no effort, unless `pipeline.explicit_routes` is
+`"off"`; see the [launch check](claude-code-routing.md#evidence-only-launch-check).
 
 `required` is enabled only by an explicit `pipeline.mode: "required"`. It adds
 no automatic fallback to root-side benchmark comparison when an advisor is

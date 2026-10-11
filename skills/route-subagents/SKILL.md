@@ -245,11 +245,14 @@ acceptance unknown.
 Read only the matching mechanics when needed:
 
 - [Codex](references/codex-routing.md): context inheritance, role selection and waits.
-- [Claude Code](references/claude-code-routing.md): native agents and isolation.
+- [Claude Code](references/claude-code-routing.md): native agents, isolation,
+  the launch check and observed alias resolutions.
 
 Use only roles, model names, effort levels and isolation modes exposed by the
 active client. A profile defines permissions and purpose; its name does not
-prove which model, context or sandbox actually ran.
+prove which model, context or sandbox actually ran. A routed Claude launch names
+both its model and its effort; the Assay hook refuses an evidence-only launch
+that would inherit either.
 
 ## Match detail to the boundary
 

@@ -246,7 +246,8 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                   for gid in self._guides()[0]]
         with self._lock:
             inv = copy.deepcopy(self._inventory)
-        return {"client": self.client, "preferences": copy.deepcopy(self.preferences),
+        observed = {"host_observations": self.host_observations()} if self.client == "claude" else {}
+        return {"client": self.client, "preferences": copy.deepcopy(self.preferences), **observed,
                 "advisor": self.advisor_workflow.status(),
                 "refresh_mode": "offline" if self.offline else "automatic",
                 "guides": brief({"sources": guides})["sources"],
@@ -254,6 +255,15 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                               "models": len(inv["available"]) if inv else 0},
                 "model_names": spelling(self.cache, inv["available"]) if inv else {"status": "no_inventory"},
                 "installation": diagnostics(), **brief({"sources": sources})}
+
+    def host_observations(self):
+        """What recent launches' aliases and efforts ran as, from the host's own hooks."""
+        from . import host_observations
+        try:
+            return host_observations.summary(self.cache.root, clock=self.clock)
+        except EvidenceError:
+            # Optional context: a busy or unreadable store never fails routing.
+            return {"status": "unavailable", "aliases": [], "efforts": []}
 
     @staticmethod
     def _validate_sources(selected):
@@ -340,4 +350,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                 packets, candidates, {"context": task_query} if task_query is not None else None)
         # details keeps the raw measured rows; it never reveals a constraint that
         # the normal response withheld.
-        return result if details else brief(result)
+        result = result if details else brief(result)
+        if self.client == "claude":
+            result["host_observations"] = self.host_observations()
+        return result

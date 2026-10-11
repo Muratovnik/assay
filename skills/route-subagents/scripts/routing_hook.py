@@ -22,10 +22,11 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from route_evidence.claude_agents import ALIAS_KIND, CLAUDE_MODEL_ALIASES, check_record, observe_alias, resolve_variant, unrouted_model
 from route_evidence.claude_output import redact_agent_output
+from route_evidence.client_capabilities import version_tuple
 from route_evidence.core import EvidenceError, digest
 from route_evidence.pipeline import (RECEIPT_SECONDS, arguments, validate_continuation_availability,
                                      validate_launch_inventory)
-from route_evidence.pipeline_config import ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings, runtime_overrides
+from route_evidence.pipeline_config import AGENT_TYPE, ADVISOR_TOOLS, ROOT_TOOLS, ROUTING_TOOLS, settings, runtime_overrides
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.service import load_config
 
@@ -114,6 +115,78 @@ def _unrouted_launch(event, mode, spec, environment=None):
     if supplied.get("model") is not None:
         return deny("exempt agent types launch with their configured model; route another model through prepare_routing")
     return output("PreToolUse", updatedInput={**supplied, "model": model})
+
+
+# The Agent call has carried a per-call effort since this release.
+EFFORT_FIELD_SINCE = (2, 1, 292)
+MAX_DEFINITION_BYTES = 64 * 1024
+
+
+def _frontmatter_route(text):
+    """Top-level `model` and `effort` scalars a definition pins; `inherit` pins nothing."""
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    route = {}
+    for line in text[3:end if end >= 0 else 0].splitlines():
+        key, separator, value = line.partition(":")
+        value = value.strip().strip("'\"")
+        if separator and key in {"model", "effort"} and value and value != "inherit":
+            route[key] = value
+    return route
+
+
+def _definition_route(kind, cwd, home):
+    """What a project or user definition of this agent type pins, nearest first.
+
+    A plugin's agent (`plugin:agent`) is not read here: its call names both.
+    """
+    if not isinstance(kind, str) or not AGENT_TYPE.fullmatch(kind) or ":" in kind:
+        return {}
+    here = Path(cwd) if isinstance(cwd, str) and Path(cwd).is_absolute() else None
+    roots = [parent / ".claude" / "agents" for parent in ((here, *here.parents) if here else ())]
+    for directory in (*roots, Path(home) / ".claude" / "agents"):
+        try:
+            with (directory / (kind + ".md")).open("rb") as stream:
+                text = stream.read(MAX_DEFINITION_BYTES).decode("utf-8", "replace")
+        except OSError:
+            continue
+        return _frontmatter_route(text)
+    return {}
+
+
+def explicit_launch(event, config, *, home=None):
+    """An evidence-only Claude child names its model and effort; it never inherits them.
+
+    A fork shares its parent's context by design and a continuation keeps its
+    settings. An owner-exempt type and a definition pinning both are explicit
+    already. Any other launch missing either field is refused with the remedy,
+    because the Agent tool otherwise discourages a per-call effort.
+    """
+    mode = settings(config)
+    if (mode["mode"] != "evidence-only" or mode["explicit_routes"] != "require"
+            or config.get("client") != "claude" or event.get("hook_event_name") != "PreToolUse"
+            or event.get("tool_name") not in SPAWN_TOOLS):
+        return {}
+    supplied = event.get("tool_input")
+    if not isinstance(supplied, dict):
+        return {}
+    kind = supplied.get("subagent_type") or "general-purpose"
+    if kind == "fork" or supplied.get("resume") or kind in mode["unrouted_agents"]:
+        return {}
+    missing = [field for field in ("model", "effort") if not supplied.get(field)]
+    if missing:
+        pinned = _definition_route(kind, event.get("cwd"), Path.home() if home is None else home)
+        missing = [field for field in missing if field not in pinned]
+    if not missing:
+        return {}
+    version = version_tuple(mode["host"]["version"])
+    if "effort" in missing and version and version < EFFORT_FIELD_SINCE:
+        return deny("this client's Agent call has no effort field; launch a definition whose frontmatter "
+                    "sets effort (tools/assay.py claude-routes) or exempt the type in pipeline.unrouted_agents")
+    return deny("routing needs an explicit " + " and ".join(missing) + " in this Agent call; without it the "
+                "child inherits the session's settings. Choose both with route-subagents and retry: this "
+                "routing configuration is the explicit instruction the Agent effort field asks for")
 
 
 def _observe_unrouted(tx, event, clock):
@@ -439,7 +512,8 @@ def handle(event: dict, config: dict, *, scope="plugin", clock=time.time, enviro
     if name == "PreToolUse" and tool in SPAWN_TOOLS:
         supplied = event.get("tool_input")
         if isinstance(supplied, dict) and {"effort", "model_reasoning_effort", "reasoning_effort"} & set(supplied):
-            return deny("Claude Agent has no per-call effort field; use the registered generated definition")
+            return deny("required routing takes effort from the registered generated definition; "
+                        "send the authorized Agent input without a per-call effort")
         spec = _unrouted(event, mode)
         if spec is not None:
             return _unrouted_launch(event, mode, spec, environment)

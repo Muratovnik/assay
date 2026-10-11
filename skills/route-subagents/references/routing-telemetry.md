@@ -32,10 +32,14 @@ absolute binding file:
 ```
 
 Use the same client configuration and cache as its MCP registration. Paths are
-installation-specific local configuration. The binding is opt-in; it changes no
-permission decision, model settings or routing mode. Reconnect the client after
-changing an installed hook manifest or MCP implementation. Hooks doctor reports
-`routing_telemetry_bound`; this is configuration evidence, not a successful run.
+installation-specific local configuration. The binding is opt-in and changes no
+model settings or routing mode. For a Claude evidence-only configuration it also
+names the configuration whose launches the hook checks: a launch without both a
+model and an effort is refused, as [Claude Code mechanics](claude-code-routing.md#evidence-only-launch-check)
+describes. Unless telemetry is `off`, every Claude Agent launch, linked or not,
+also records what its alias and effort ran as. Reconnect the client after changing an installed hook
+manifest or MCP implementation. Hooks doctor reports `routing_telemetry_bound`;
+this is configuration evidence, not a successful run.
 
 ## Link the actual worker
 

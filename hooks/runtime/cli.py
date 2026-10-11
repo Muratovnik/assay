@@ -19,7 +19,7 @@ from runtime import state, feedback, routing_telemetry, skill_gate
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence.service import load_config
-from routing_hook import handle as route, failure, deny, routing_operation
+from routing_hook import handle as route, explicit_launch, failure, deny, routing_operation
 from skill_reminder import reminder
 
 MAX_INPUT = 1024 * 1024
@@ -63,14 +63,35 @@ def options(environment):
     return value
 
 
+def explicit_routes(event, client, environment, config=None):
+    """Evidence-only launch check; the configuration may come from the telemetry binding.
+
+    That binding names the routing configuration whose launches it records, so
+    an owner who set up evidence-only routing gets the check without another
+    setting. A missing or unreadable configuration keeps ordinary delegation.
+    """
+    if (client != "claude" or event.get("hook_event_name") != "PreToolUse"
+            or event.get("tool_name") not in {"Agent", "Task"}):
+        return {}
+    try:
+        if config is None:
+            binding = routing_telemetry.configuration(environment)
+            if binding is None:
+                return {}
+            config = load_config(Path(binding["config"]))
+        return explicit_launch(event, config)
+    except Exception:
+        return {}
+
+
 def routing_result(event, client, environment):
     path = environment.get("ASSAY_ROUTING_CONFIG")
     if not path:
-        return {}
+        return explicit_routes(event, client, environment)
     try:
         config = load_config(Path(path))
         if config.get("pipeline", {}).get("mode") != "required":
-            return {}
+            return explicit_routes(event, client, environment, config)
         if client != "claude" or config.get("client") != client:
             if event.get("hook_event_name") == "PreToolUse" and (
                     event.get("tool_name") in {"spawn_agent", "Agent", "Task"}

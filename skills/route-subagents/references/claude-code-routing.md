@@ -73,6 +73,44 @@ Parent permissions, tool restrictions, environment overrides and MCP exposure
 can affect the actual worker; observe the relevant boundary instead of relying
 on frontmatter alone.
 
+## Evidence-only launch check
+
+The Agent tool takes a per-call `effort` only when an instruction asks for a
+level, and a child launched without a model or an effort runs with the
+session's. When the Assay hook finds an evidence-only Claude routing
+configuration, through `ASSAY_ROUTING_CONFIG` or the
+[telemetry binding](routing-telemetry.md), that configuration is such an
+instruction: the hook refuses an Agent launch that does not name both `model`
+and `effort`, and its reason names what is missing. These launches pass:
+
+- a fork, which shares the parent's context and settings by design;
+- a `resume` of an existing worker, which keeps its settings;
+- a type listed in `pipeline.unrouted_agents`;
+- a type whose nearest project or user definition (`.claude/agents/<type>.md`)
+  pins both in its frontmatter, `inherit` excepted. A plugin agent's definition
+  is not read; its call names both.
+
+For a declared client older than 2.1.292, which has no per-call effort, the
+refusal points to a generated effort definition (`tools/assay.py claude-routes`)
+instead. `pipeline.explicit_routes: "off"` disables the check, and required mode
+keeps its own registered guard. A missing or invalid configuration leaves
+ordinary delegation unchanged. The check establishes that a launch named both
+settings, not which model ran.
+
+## Observed alias resolutions
+
+The call accepts only aliases, while routing evidence names full model IDs.
+With the binding and telemetry not `off`, every Claude Agent launch records the
+requested alias and effort, the `resolvedModel` its return reports and the
+`effort.level` its stop reports. `routing_status` and `get_routing_context`
+return the latest as
+`host_observations`: `aliases` maps an alias to the ID it ran as, and `efforts`
+pairs a requested level with the applied one, which is lower when the model
+lacks the requested level. Pass the alias whose observed resolution is the
+selected ID. Without an observation the client's own model listing is the
+source, and the first launch records the result. Observations expire after 30
+days and are not a registry: a new resolution replaces the old one.
+
 ## Model upgrades and completion
 
 For a changed model or provider binding, inspect the applicable

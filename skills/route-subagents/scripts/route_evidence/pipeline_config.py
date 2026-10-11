@@ -17,6 +17,7 @@ ROUTING_TOOLS = ROOT_TOOLS | ADVISOR_TOOLS
 EFFORT_ORDER = ("low", "medium", "high", "xhigh", "max")
 CLAUDE_EFFORTS = frozenset(EFFORT_ORDER)
 MODES = frozenset({"evidence-only", "required"})
+EXPLICIT_ROUTES = frozenset({"require", "off"})
 NAME = re.compile(r"[a-z][a-z0-9-]{0,63}\Z")
 AGENT_TYPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
 DEFAULT_INVENTORY_TTL_HOURS = 24
@@ -83,18 +84,23 @@ def settings(config: dict | None = None) -> dict:
     raw = config.get("pipeline", {})
     keys = {"mode", "state_dir", "agents_dir", "mcp_server", "advisor_route", "profiles", "variants", "baseline",
             "approved_choices", "profile_capabilities", "unrouted_agents", "agent_templates",
-            "inventory_file", "inventory_ttl_hours", "host"}
+            "inventory_file", "inventory_ttl_hours", "host", "explicit_routes"}
     if not isinstance(raw, dict) or set(raw) - keys:
         raise EvidenceError("unknown_pipeline_configuration")
     value = {"mode": "evidence-only", "state_dir": None, "agents_dir": None,
              "mcp_server": "assay-benchmark-routing", "advisor_route": None, "profiles": [],
              "variants": [], "baseline": None, "approved_choices": {}, "profile_capabilities": {},
              "unrouted_agents": {}, "agent_templates": {}, "inventory_file": None,
-             "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, "host": None, **copy.deepcopy(raw)}
+             "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, "host": None,
+             "explicit_routes": "require", **copy.deepcopy(raw)}
     from .client_capabilities import host_settings
     value["host"] = host_settings(value["host"])
     if not isinstance(value["mode"], str) or value["mode"] not in MODES:
         raise EvidenceError("invalid_pipeline_mode")
+    # Evidence-only Claude launches without a model and an effort are refused
+    # unless the owner turns that off; required mode registers every launch.
+    if not isinstance(value["explicit_routes"], str) or value["explicit_routes"] not in EXPLICIT_ROUTES:
+        raise EvidenceError("invalid_pipeline_explicit_routes")
     if not isinstance(value["mcp_server"], str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value["mcp_server"]):
         raise EvidenceError("invalid_pipeline_mcp_server")
     for key in ("state_dir", "agents_dir", "inventory_file"):

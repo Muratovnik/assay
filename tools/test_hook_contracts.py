@@ -352,6 +352,184 @@ class ReviewerBoundaryTests(unittest.TestCase):
                 "agent_id": "other-worker", "tool_name": "Write"}, env), {})
 
 
+class ExplicitRouteTests(unittest.TestCase):
+    """Evidence-only Claude launches name a model and an effort instead of inheriting both."""
+
+    def setUp(self):
+        tmp=tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        self.root=Path(tmp.name); self.project=self.root/'project'/'nested'; self.project.mkdir(parents=True)
+        self.home=self.root/'home'
+        home=patch.object(Path,'home',return_value=self.home); home.start(); self.addCleanup(home.stop)
+
+    def environment(self, pipeline=None, client='claude', variable='ASSAY_ROUTING_TELEMETRY_CONFIG'):
+        config=self.root/'config.json'
+        config.write_text(json.dumps({'schema_version':4,'client':client,'telemetry':{'mode':'off'},
+                                      **({'pipeline':pipeline} if pipeline is not None else {})}),encoding='utf-8')
+        if variable=='ASSAY_ROUTING_CONFIG':
+            return {variable:str(config)}
+        binding=self.root/'binding.json'
+        binding.write_text(json.dumps({'config':str(config),'cache_dir':str(self.root/'cache')}),encoding='utf-8')
+        return {variable:str(binding)}
+
+    def launch(self, **supplied):
+        return {'hook_event_name':'PreToolUse','tool_name':'Agent','session_id':'s','tool_use_id':'t',
+                'cwd':str(self.project),'tool_input':{'prompt':'Do the bounded task',**supplied}}
+
+    def reason(self, event, environment, client='claude'):
+        result,error=cli.process(event,client,environment)
+        self.assertIsNone(error)
+        output=result.get('hookSpecificOutput',{})
+        return output.get('permissionDecisionReason') if output.get('permissionDecision')=='deny' else None
+
+    def definition(self, directory, name, frontmatter):
+        directory.mkdir(parents=True,exist_ok=True)
+        (directory/(name+'.md')).write_text('---\nname: '+name+'\n'+frontmatter+'---\nWork.\n',encoding='utf-8')
+
+    def test_a_launch_missing_either_setting_is_refused_with_the_remedy(self):
+        env=self.environment()
+        for supplied,missing in (({},'model and effort'),({'model':'sonnet'},'effort'),({'effort':'low'},'model'),
+                                 ({'model':'sonnet','effort':''},'effort')):
+            with self.subTest(supplied=supplied):
+                reason=self.reason(self.launch(**supplied),env)
+                self.assertIn('explicit '+missing+' in this Agent call',reason)
+                self.assertIn('explicit instruction the Agent effort field asks for',reason)
+        self.assertIsNone(self.reason(self.launch(model='sonnet',effort='low'),env))
+        self.assertIsNone(self.reason(self.launch(model='haiku',effort='max',subagent_type='Explore'),env))
+
+    def test_a_routing_configuration_variable_applies_the_same_check(self):
+        env=self.environment(variable='ASSAY_ROUTING_CONFIG')
+        self.assertIn('explicit model and effort',self.reason(self.launch(),env))
+        self.assertIsNone(self.reason(self.launch(model='sonnet',effort='medium'),env))
+
+    def test_forks_continuations_exemptions_and_opt_out_pass(self):
+        exempt=self.environment({'mode':'evidence-only','unrouted_agents':{'Explore':'inherit'}})
+        self.assertIsNone(self.reason(self.launch(subagent_type='fork'),exempt))
+        self.assertIsNone(self.reason(self.launch(resume='agent-1'),exempt))
+        self.assertIsNone(self.reason(self.launch(subagent_type='Explore'),exempt))
+        self.assertIn('explicit model and effort',self.reason(self.launch(subagent_type='Plan'),exempt))
+        self.assertIsNone(self.reason(self.launch(),self.environment({'mode':'evidence-only','explicit_routes':'off'})))
+
+    def test_a_definition_pinning_both_settings_is_explicit(self):
+        project=self.project.parent/'.claude'/'agents'
+        self.definition(project,'pinned','model: haiku\neffort: low\n')
+        self.definition(project,'model-only','model: "sonnet"\n')
+        self.definition(project,'inheriting','model: inherit\neffort: high\n')
+        self.definition(self.home/'.claude'/'agents','personal','model: opus\neffort: medium\n')
+        self.definition(self.home/'.claude'/'agents','model-only','model: opus\neffort: medium\n')
+        env=self.environment()
+        self.assertIsNone(self.reason(self.launch(subagent_type='pinned'),env))
+        self.assertIsNone(self.reason(self.launch(subagent_type='personal'),env))
+        self.assertIsNone(self.reason(self.launch(subagent_type='model-only',effort='low'),env))
+        # The nearest definition decides; a user one never fills a project gap.
+        self.assertIn('explicit effort',self.reason(self.launch(subagent_type='model-only'),env))
+        self.assertIn('explicit model',self.reason(self.launch(subagent_type='inheriting'),env))
+        # Plugin agents and path-like names are not read from disk.
+        self.definition(project,'evidence-reviewer','model: haiku\neffort: low\n')
+        for kind in ('assay:evidence-reviewer','../pinned','.hidden'):
+            with self.subTest(kind=kind):
+                self.assertIn('explicit model and effort',self.reason(self.launch(subagent_type=kind),env))
+
+    def test_a_client_without_the_effort_field_is_sent_to_definitions(self):
+        env=self.environment({'mode':'evidence-only','host':{'version':'2.1.250','surface':'cli'}})
+        self.assertIn('tools/assay.py claude-routes',self.reason(self.launch(model='sonnet'),env))
+        self.assertIn('explicit model',self.reason(self.launch(effort='low'),env))
+
+    def test_other_clients_tools_modes_and_missing_bindings_are_untouched(self):
+        self.assertIsNone(self.reason(self.launch(),{}))
+        self.assertIsNone(self.reason({**self.launch(),'tool_name':'Bash'},self.environment()))
+        self.assertIsNone(self.reason({**self.launch(),'hook_event_name':'PostToolUse'},self.environment()))
+        self.assertEqual({},cli.routing_result(self.launch(),'claude',self.environment(client='codex')))
+        self.assertEqual({},cli.routing_result(self.launch(),'codex',self.environment()))
+        # Required mode keeps its own registered guard, configured by its own variable.
+        self.assertEqual({},cli.routing_result(self.launch(),'claude',self.environment({'mode':'required'})))
+
+    def test_an_invalid_setting_is_rejected_and_keeps_ordinary_delegation(self):
+        from route_evidence.pipeline_config import settings
+        with self.assertRaisesRegex(EvidenceError,'invalid_pipeline_explicit_routes'):
+            settings({'pipeline':{'explicit_routes':'sometimes'}})
+        self.assertEqual({},cli.routing_result(self.launch(),'claude',
+                                               self.environment({'mode':'evidence-only','explicit_routes':'sometimes'})))
+
+
+class HostObservationTests(unittest.TestCase):
+    def setUp(self):
+        tmp=tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        self.root=Path(tmp.name); self.now=1800000000.0
+
+    def observe(self, event):
+        from route_evidence import host_observations
+        host_observations.observe(event,self.root,clock=lambda: self.now)
+
+    def summary(self):
+        from route_evidence import host_observations
+        return host_observations.summary(self.root,clock=lambda: self.now)
+
+    def launch(self, tool, **supplied):
+        return {'hook_event_name':'PreToolUse','tool_name':'Agent','session_id':'s','tool_use_id':tool,
+                'tool_input':{'prompt':'x',**supplied}}
+
+    def test_alias_resolution_and_applied_effort_in_either_order(self):
+        background=self.launch('t1',model='sonnet',effort='xhigh')
+        self.observe(background)
+        self.observe({**background,'hook_event_name':'PostToolUse',
+                      'tool_response':{'agentId':'a1','resolvedModel':'claude-sonnet-5-5'}})
+        self.observe({'hook_event_name':'SubagentStop','session_id':'s','agent_id':'a1','effort':{'level':'high'}})
+        foreground=self.launch('t2',model='haiku',effort='low')
+        self.observe(foreground)
+        self.observe({'hook_event_name':'SubagentStop','session_id':'s','agent_id':'a2','effort':{'level':'low'}})
+        self.observe({**foreground,'hook_event_name':'PostToolUse',
+                      'tool_response':json.dumps({'agentId':'a2','resolvedModel':'claude-haiku-5-5'})})
+        result=self.summary()
+        self.assertEqual({'sonnet':'claude-sonnet-5-5','haiku':'claude-haiku-5-5'},
+                         {row['alias']:row['model'] for row in result['aliases']})
+        self.assertEqual({('claude-sonnet-5-5','xhigh','high'),('claude-haiku-5-5','low','low')},
+                         {(row['model'],row['requested'],row['applied']) for row in result['efforts']})
+
+    def test_failures_forks_and_unrequested_settings_record_nothing(self):
+        self.observe(self.launch('t0'))
+        self.observe({'hook_event_name':'SubagentStop','session_id':'s','agent_id':'a0','effort':{'level':'max'}})
+        self.assertFalse((self.root/'host-observations').exists())
+        self.observe(self.launch('t1',model='opus',subagent_type='fork'))
+        failed=self.launch('t2',model='opus',effort='low')
+        self.observe(failed)
+        self.observe({**failed,'hook_event_name':'PostToolUseFailure','tool_response':{'resolvedModel':'claude-opus-5-5'}})
+        self.assertEqual({'aliases':[],'efforts':[]},self.summary())
+
+    def test_observations_expire_instead_of_becoming_a_registry(self):
+        from route_evidence import host_observations
+        launch=self.launch('t1',model='opus')
+        self.observe(launch)
+        self.observe({**launch,'hook_event_name':'PostToolUse','tool_response':{'resolvedModel':'claude-opus-5-5'}})
+        self.assertEqual(1,len(self.summary()['aliases']))
+        self.now+=host_observations.KEEP_SECONDS+1
+        self.assertEqual([],self.summary()['aliases'])
+
+    def test_an_unavailable_store_is_reported_without_failing_routing(self):
+        from route_evidence import host_observations
+        from route_evidence.cache import Cache
+        from route_evidence.service import RoutingService
+        service=RoutingService(Cache(self.root),client='claude',clock=lambda: self.now)
+        with patch.object(host_observations,'summary',side_effect=EvidenceError('pipeline_store_unavailable')):
+            self.assertEqual('unavailable',service.host_observations()['status'])
+
+    def test_capture_observes_unlinked_launches_and_the_service_reports_them(self):
+        from route_evidence.cache import Cache
+        from route_evidence.service import RoutingService
+        config=self.root/'config.json'
+        config.write_text(json.dumps({'schema_version':4,'client':'claude','telemetry':{'mode':'metadata'}}),encoding='utf-8')
+        binding=self.root/'binding.json'
+        binding.write_text(json.dumps({'config':str(config),'cache_dir':str(self.root)}),encoding='utf-8')
+        env={'ASSAY_ROUTING_TELEMETRY_CONFIG':str(binding)}
+        launch=self.launch('t1',model='fable',effort='medium')
+        for event in (launch,{**launch,'hook_event_name':'PostToolUse',
+                              'tool_response':{'agentId':'a1','resolvedModel':'claude-fable-5-1'}}):
+            result,error=cli.process(event,'claude',env,clock=lambda: self.now)
+            self.assertIsNone(error)
+        service=RoutingService(Cache(self.root),client='claude',clock=lambda: self.now)
+        self.assertEqual([('fable','claude-fable-5-1')],
+                         [(row['alias'],row['model']) for row in service.host_observations()['aliases']])
+
+
 class RuntimeTests(unittest.TestCase):
     def invoke(self, payload, client='claude', extra=(), environment=None):
         env={k:v for k,v in os.environ.items() if not k.startswith('ASSAY_') and k not in {'PLUGIN_DATA','CLAUDE_PLUGIN_DATA'}}

@@ -85,7 +85,9 @@ and the catalog carry neither a permanent economy model nor runtime settings.
 
 Assay owns contracts, policy, local metadata and diagnostic replay. By default
 the client owns authorization, spawning, cancellation and actual quota
-accounting. Prepared state and an exact decision cache are bounded in memory;
+accounting. With a Claude evidence-only configuration the hook only refuses a
+launch that names no model or effort, and records what the host ran each
+requested alias and effort as. Prepared state and an exact decision cache are bounded in memory;
 optional JSON telemetry has its own cache namespace and retention. An explicitly
 configured required mode adds a Claude hook guard: it binds routing calls and
 registered launches to the host session through a bounded SQLite rendezvous in a

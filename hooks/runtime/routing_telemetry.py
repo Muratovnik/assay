@@ -8,6 +8,7 @@ import time
 
 from route_evidence.advisor_config import settings
 from route_evidence.core import EvidenceError, digest, read_document, number, epoch, loads
+from route_evidence import host_observations
 from route_evidence.history import HistoryStore, _refuse_link_ancestors, _identifier, _usage, _route
 from route_evidence.pipeline_config import settings as pipeline_settings
 from route_evidence.pipeline_store import PipelineStore
@@ -62,6 +63,16 @@ def capture(event, client, environment, *, clock=time.time):
     telemetry = settings(config)["telemetry"]
     if telemetry["mode"] == "off":
         return
+    try:
+        _linked(event, client, binding, config, telemetry, clock)
+    finally:
+        if client == "claude":
+            # Every launch, linked or not: what its alias and effort ran as.
+            host_observations.observe(event, binding["cache_dir"], clock=clock)
+
+
+def _linked(event, client, binding, config, telemetry, clock):
+    name = event.get("hook_event_name")
     store = HistoryStore(Path(binding["cache_dir"]), clock=clock, **telemetry,
                          retain_descriptions=config.get("task_evidence", {}).get("retain_descriptions", False))
     session, agent = event.get("session_id"), event.get("agent_id")
