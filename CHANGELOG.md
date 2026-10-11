@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.17.6](https://github.com/Muratovnik/assay/compare/v0.17.5...v0.17.6) (2026-10-11)
+
+### Features
+
+* **routing:** retain task and execution evidence for retrospectives with explicit privacy controls ([a47eedb](https://github.com/Muratovnik/assay/commit/a47eedb7df6184ae56739564dbd309e8f3cdbaea))
+
+### Bug Fixes
+
+* **routing:** preserve boundaries and distinguish requested launch settings from observed native execution in telemetry ([996ed8d](https://github.com/Muratovnik/assay/commit/996ed8d1e58a0290f4071b1283713aeb7c2ceb40))
+* **routing:** reject invalid advisor exchanges before execution and preserve their diagnostic evidence ([42891c0](https://github.com/Muratovnik/assay/commit/42891c0985a20d1b31cb76cc1c035729aea24d6b))
+* **routing:** provide bounded reviewer handoffs, correct Codex and Claude usage identity, and restrict reading profiles to the capabilities their clients can enforce ([9025bf4](https://github.com/Muratovnik/assay/commit/9025bf44bd31bbe828f1dc2ef9db0f64d8fb31bf))
+
+Reviewer launches now require the objective, review mode, frozen contracts,
+snapshot, owned scope and oracle status. Codex reading profiles disable shell,
+apps, goals and further delegation; Claude profiles use a reading-tool allowlist.
+Hook enforcement still depends on native hook trust and available worker identity.
+These changes do not establish general task-adequacy accuracy or subscription
+quota savings.
+
 ## [0.17.5](https://github.com/Muratovnik/assay/compare/v0.17.4...v0.17.5) (2026-10-10)
 
 ### Bug Fixes
