@@ -41,6 +41,9 @@ On the first call, supply `available` from the **current host's** model
 catalogue. The server remembers it for this connection and asks again after 24
 hours; also resend it whenever the host's provider, available models or alias
 resolution changes. Invalid input cannot replace a previously valid inventory.
+For a Claude connection an entry may omit `efforts` and receives every level
+the client documents; another client lists them. Words for whatever the host
+picks, such as `default`, `auto` or `inherit`, are rejected as levels.
 
 Example input (fictional model names, not recommendations):
 

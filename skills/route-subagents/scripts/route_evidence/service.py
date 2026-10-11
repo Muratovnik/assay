@@ -20,7 +20,7 @@ from .providers import SOURCES, needs_browser
 # Benchmarks and vendor guides share one registry, one cache mechanism and one
 # refresh deadline; only their payload contracts differ.
 REGISTRY = {**SOURCES, **GUIDES}
-from .routing import TASK_TYPES, brief, build_context, source_ids, validate_request
+from .routing import TASK_TYPES, brief, build_context, complete_efforts, source_ids, validate_request
 
 # Optional caller limits. None of them is required to obtain context, and none
 # of them removes a candidate; they annotate the context the caller receives.
@@ -221,7 +221,8 @@ an unqualified family alias nor the server's own guesses resolve model versions.
             inv = self._inventory
             if available is not None:
                 from .core import timestamp
-                inv = {"available": copy.deepcopy(available), "observed_at": timestamp(self.clock())}
+                inv = {"available": complete_efforts(self.client, copy.deepcopy(available)),
+                       "observed_at": timestamp(self.clock())}
             if inv is None:
                 return {"status": "needs_inventory", "required": ["available"],
                         "message": "Pass the current host's model IDs, exact resolved evidence names, and supported efforts once per MCP connection."}

@@ -149,10 +149,11 @@ or duplicate task execution is required.
 If the advisor is disabled, or the new tools are unavailable, use
 `get_routing_context` once per plan for all needed task types. CLI is a fallback
 only when MCP is unavailable; preserve the installed runtime, config, cache and
-browser settings. Supply confirmed runtime IDs and supported efforts. Never
-guess aliases or add `--offline` to a live decision. Read `data_status`,
-`data_message` and gaps before comparing configurations; an empty cache is not
-absence of published measurements.
+browser settings. Supply confirmed runtime IDs and supported efforts; a Claude
+entry may omit `efforts` to take every documented level, and a placeholder such
+as `default` is not a level. Never guess aliases or add `--offline` to a live
+decision. Read `data_status`, `data_message` and gaps before comparing
+configurations; an empty cache is not absence of published measurements.
 
 Compare model and effort together using ambiguity, error impact, verification
 strength, tools/context needs and benchmark fit. Treat quality and benchmark

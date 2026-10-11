@@ -19,6 +19,26 @@ TASK_TYPES = {
 CONSTRAINTS = (("max_cost_usd", "cost_usd"), ("max_duration_seconds", "duration_seconds"))
 
 
+# Words for "whatever the host picks" are not levels: a child launched without a
+# level inherits its parent's, which is exactly what routing replaces.
+EFFORT_PLACEHOLDERS = frozenset({"default", "auto", "inherit", "unspecified"})
+
+
+def complete_efforts(client, available):
+    """Fill an entry's omitted efforts from the client's documented levels.
+
+    Every level stays a candidate, measured or not; the host itself lowers a
+    level a model lacks. A client without documented levels keeps the caller's
+    obligation to list them, which `validate_request` enforces.
+    """
+    from .client_capabilities import host_effort_levels
+    levels = host_effort_levels(client)
+    if not levels or not isinstance(available, list):
+        return available
+    return [{**item, "efforts": list(levels)} if isinstance(item, dict) and "efforts" not in item else item
+            for item in available]
+
+
 def validate_request(request):
     if not isinstance(request, dict):
         raise EvidenceError("request must be an object")
@@ -64,7 +84,9 @@ def validate_request(request):
         for level in efforts:
             if level is None:
                 raise EvidenceError("client effort must be explicit; unknown is not a default")
-            effort(level)
+            if effort(level) in EFFORT_PLACEHOLDERS:
+                raise EvidenceError(f"'{level}' is not an effort level; list the levels the host accepts "
+                                    "or omit efforts for a client with documented levels")
         if len(set(map(effort, efforts))) != len(efforts):
             raise EvidenceError("duplicate inventory effort")
         for name in [model, *names]:

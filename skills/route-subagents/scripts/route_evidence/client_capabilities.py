@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 
 from .core import EvidenceError
+from .pipeline_config import EFFORT_ORDER
 
 CHECKED_AT = "2026-09-29"
 # Claude's subagent precedence and per-call effort were rechecked separately.
@@ -19,6 +20,16 @@ SOURCES = {
     "codex_agents": "https://developers.openai.com/codex/subagents",
     "codex_hooks": "https://developers.openai.com/codex/hooks",
 }
+
+
+# Levels a client accepts per launch (Claude: Agent `effort`, `--effort`). Claude
+# runs a level a model lacks at the highest supported level below it, and its
+# hooks report the level that ran; Codex levels come from the caller's list.
+HOST_EFFORT_LEVELS = {"claude": EFFORT_ORDER}
+
+
+def host_effort_levels(client):
+    return HOST_EFFORT_LEVELS.get(client, ())
 
 
 def version_tuple(value):
@@ -61,6 +72,7 @@ def contract(client, host=None):
         from .claude_agents import CLAUDE_MODEL_ALIASES
         per_call_effort = bool(known_surface and version and version >= (2, 1, 292))
         report.update(checked_at=CLAUDE_CHECKED_AT, per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=per_call_effort,
+                      effort_levels=list(EFFORT_ORDER),
                       effort_transport="call_or_agent_definition" if per_call_effort else "agent_definition",
                       model_transport="call_alias_or_pinned_definition",
                       model_precedence=("call_definition_environment_parent" if known_surface and version and version >= (2, 1, 251)

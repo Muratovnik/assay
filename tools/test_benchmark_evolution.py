@@ -181,6 +181,32 @@ class NameMatchingTests(unittest.TestCase):
                          [("claude-opus-5-5", ["frontiercode"], []), ("claude-sonnet-5-5", ["frontiercode"], [])])
 
 
+class HostEffortTests(unittest.TestCase):
+    def service(self, client):
+        from route_evidence.service import RoutingService
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        return RoutingService(Cache(Path(tmp.name)), client=client, clock=lambda: 1800000000.0)
+
+    def test_claude_inventory_gets_every_documented_level_when_efforts_are_omitted(self):
+        request = self.service("claude").prepare(["implementation"], available=[
+            {"model": "claude-opus-5-5"}, {"model": "claude-haiku-5-5", "efforts": ["low"]}])
+        self.assertEqual([item["efforts"] for item in request["available"]],
+                         [["low", "medium", "high", "xhigh", "max"], ["low"]])
+
+    def test_a_client_without_documented_levels_must_list_them(self):
+        with self.assertRaisesRegex(EvidenceError, "1..32 efforts"):
+            self.service("codex").prepare(["implementation"], available=[{"model": "gpt-6-luna"}])
+
+    def test_a_placeholder_is_not_a_level_and_keeps_the_previous_inventory(self):
+        service = self.service("claude")
+        service.prepare(["implementation"], available=[{"model": "claude-opus-5-5"}])
+        for placeholder in ("default", "Auto", "inherit"):
+            with self.subTest(placeholder=placeholder), self.assertRaisesRegex(EvidenceError, "not an effort level"):
+                service.prepare(["implementation"], available=[{"model": "claude-opus-5-5", "efforts": [placeholder]}])
+        self.assertEqual(service.inventory["available"][0]["efforts"], ["low", "medium", "high", "xhigh", "max"])
+
+
 class InventoryRefreshTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
