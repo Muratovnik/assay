@@ -83,13 +83,23 @@ Never auto-install into a user's global environment.
 
 ```text
 python -B tools/check.py --all
-python .github/relkit.pyz audit
+relkit audit
 ```
 
 `check --all` runs every gate and reports each one rather than stopping at the
 first failure. It creates its own scratch directory for the audit-packet suite.
 `make check` is the same command. To run a single gate, the list is in
 `tools/check.py`.
+
+Run the publication audit and releases through the installed `relkit` command;
+it delegates to the pinned `.github/relkit.pyz`, which CI runs directly. Install
+it with `uv tool install` from a [Release Kit release](https://github.com/Muratovnik/release-kit/releases);
+without it, `python .github/relkit.pyz` takes the same arguments. The
+release tool runs project checks with its own interpreter, which does not carry
+this repository's tooling, so `relkit.toml` calls `tools/release_check.py`. That
+script builds the pinned environment in the ignored `.cache/tools-env` from
+`requirements-tools.txt`, rebuilds it when that file changes and runs
+`check --all` there.
 
 Generated client manifests, profile adapters and the skills index are produced by
 `python -B tools/assay.py render` and verified byte-for-byte by the source check,

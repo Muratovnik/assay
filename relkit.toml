@@ -46,7 +46,9 @@ branch = "main"
 version_file = "VERSION"
 version_pattern = '^([0-9]+\.[0-9]+\.[0-9]+)$'
 assets = []
-checks = [["{python}", "-B", "tools/check.py", "--all"]]
+# The release tool runs checks with its own interpreter; release_check.py builds
+# the pinned tooling environment under .cache/tools-env and runs check --all there.
+checks = [["{python}", "-B", "tools/release_check.py"]]
 # With no artifact to download, the smoke is the one thing a consumer does with
 # this source: resolve every catalogued target into an install plan. It runs
 # against an isolated home and writes nothing.

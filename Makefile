@@ -11,4 +11,4 @@ render:
 	$(PYTHON) -B tools/assay.py render
 
 audit:
-	$(PYTHON) .github/relkit.pyz audit
+	relkit audit
