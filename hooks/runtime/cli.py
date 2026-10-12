@@ -20,10 +20,14 @@ from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence import route_table
 from route_evidence.service import load_config
-from routing_hook import handle as route, explicit_launch, failure, deny, routing_operation
+from routing_hook import handle as route, explicit_launch, failure, deny, routing_operation, settings as pipeline
 from skill_reminder import reminder
 
 MAX_INPUT = 1024 * 1024
+# The refusal carries the rule, because an open session may hold an older skill.
+NESTED_SPAWN = ("Assay routing: only the primary agent launches agents, so delegation stays one level deep. "
+                "Do this part of the work yourself; if a step needs a separate agent, finish your packet and "
+                "name that step in your report so the primary can route and launch it.")
 
 
 def read_json(path):
@@ -72,7 +76,10 @@ def explicit_routes(event, client, environment, config=None):
     setting. With a route table every spawn must follow its declared class,
     and a spawn the table does not check is pointed at it instead of the
     generic launch reminder; without one a Claude spawn must still name both
-    settings. A missing or unreadable configuration keeps ordinary delegation.
+    settings. A Claude spawn from inside a subagent is refused before either
+    check: only the primary routes. Codex hook input does not say which agent
+    calls, so its depth stays with `agents.max_depth`. A missing or unreadable
+    configuration keeps ordinary delegation.
     """
     spec = route_table.SPAWN.get(client)
     if (spec is None or event.get("hook_event_name") != "PreToolUse"
@@ -84,6 +91,9 @@ def explicit_routes(event, client, environment, config=None):
             if binding is None:
                 return {}
             config = load_config(Path(binding["config"]))
+        if (client == "claude" and event.get("agent_id") is not None and config.get("client") == client
+                and pipeline(config)["mode"] == "evidence-only"):
+            return deny(NESTED_SPAWN)
         table = config.get("routes")
         if table is None:
             return explicit_launch(event, config) if client == "claude" else {}

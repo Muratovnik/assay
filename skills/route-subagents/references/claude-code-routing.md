@@ -113,6 +113,18 @@ keeps its own registered guard. A missing or invalid configuration leaves
 ordinary delegation unchanged. The check establishes that a launch named both
 settings, not which model ran.
 
+## Launches from a subagent
+
+Since Claude Code 2.1.219 a subagent can launch subagents of its own, up to
+three layers below the main conversation. Such a child skips the primary's route
+choice, so with an evidence-only Claude configuration the hook refuses any Agent
+call whose input carries an `agent_id`, a fork's and a `resume` included, before
+the checks above, even with `pipeline.explicit_routes: "off"`. The refusal tells
+the worker to do the step itself or name it in its report. To stop nesting at the
+client as well, set `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` to `1`: a subagent
+then gets no Agent tool, and a fork's call fails. See the
+[nesting documentation](https://code.claude.com/docs/en/sub-agents#let-subagents-spawn-their-own-subagents).
+
 ## Observed alias resolutions
 
 The call accepts only aliases, while routing evidence names full model IDs.

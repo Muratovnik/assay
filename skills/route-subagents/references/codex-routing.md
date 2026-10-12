@@ -65,6 +65,16 @@ refuse. The check reads only `task_name`, `agent_type`, `model`,
 session files store encrypted. An untrusted hook is skipped without an error,
 so confirm the refusal once in a fresh session after installing or upgrading.
 
+## Launches from a subagent
+
+The hook cannot hold delegation to one level here: Codex documents no field in
+`PreToolUse` input that names the calling agent, and a subagent's hooks report
+the parent's session. The client limit is `agents.max_depth` in
+`config.toml`; its documented default, `1`, lets the root spawn children and
+stops children from spawning. Public reports say some Codex versions do not
+enforce it, so set it explicitly and confirm in a fresh session that a child's
+`spawn_agent` call fails before relying on it.
+
 [Required routing](required-routing.md#one-explicit-mode) has no Codex adapter.
 A Codex configuration that selects it reports the unsupported host and blocks
 protected delegation; keep Codex on the evidence-only workflow. The

@@ -27,6 +27,11 @@ not spawn.
 Only the primary/root agent may spawn subagents. Every worker packet must say
 that the worker must not spawn additional agents. The primary spawns any
 reviewer, replacement, or repair worker directly; delegation is one level deep.
+The primary holds the user's authorization, the route choice and acceptance; a
+child launched by a worker would skip all three and inherit its launcher's
+settings, and every extra layer adds cost and unchecked errors. A worker that
+needs another agent names that step in its report. Some clients allow nesting
+by default; the client references say how to stop it.
 
 ## Select a useful packet
 

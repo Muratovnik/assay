@@ -189,6 +189,28 @@ class RouteTableTests(unittest.TestCase):
         self.assertIsNone(self.reason(self.codex(task_name='x'), self.environment('codex'), 'codex'))
         self.assertIn('explicit model and effort', self.reason(self.claude(), self.environment(), 'claude'))
 
+    def test_a_claude_subagent_cannot_launch_agents_of_its_own(self):
+        # Nesting is on by default in current Claude Code; only the primary routes.
+        table = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
+        off = {'ASSAY_ROUTING_CONFIG': str(self.config(
+            routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'explicit_routes': 'off'}, name='off.json'))}
+        admitted = self.claude(description='code: fix the parser', model='sonnet', effort='high')
+        for environment in (table, off, self.environment()):
+            for supplied in (admitted['tool_input'], {'subagent_type': 'fork'}, {'resume': 'agent-1'}):
+                with self.subTest(environment=environment, supplied=supplied):
+                    event = {**self.claude(**supplied), 'agent_id': 'child-1', 'agent_type': 'general-purpose'}
+                    reason = self.reason(event, environment, 'claude')
+                    self.assertIn('only the primary agent launches agents', reason)
+                    self.assertIn('name that step in your report', reason)
+        self.assertIsNone(self.reason(admitted, table, 'claude'))
+        self.assertIsNone(self.reason({**self.claude(), 'agent_id': 'child-1', 'tool_name': 'Read'}, table, 'claude'))
+        # Without a routing configuration ordinary delegation is untouched.
+        self.assertIsNone(self.reason({**admitted, 'agent_id': 'child-1'}, {}, 'claude'))
+        # Codex hook input does not name the calling agent, so the hook claims nothing there.
+        codex = {'ASSAY_ROUTING_CONFIG': str(self.config('codex', CODEX_TABLE, name='codex.json'))}
+        good = self.codex(task_name='code_fix', model='gpt-6.1-sol', reasoning_effort='high', fork_turns='none')
+        self.assertIsNone(self.reason({**good, 'agent_id': 'child-1'}, codex, 'codex'))
+
     def test_other_tools_and_another_clients_configuration_are_untouched(self):
         env = self.environment(routes=CLAUDE_TABLE)
         self.assertIsNone(self.reason({**self.claude(), 'tool_name': 'Read'}, env, 'claude'))

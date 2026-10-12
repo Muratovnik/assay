@@ -242,6 +242,9 @@ In evidence-only mode the Agent call carries both the model and the effort
 (Claude Code 2.1.292 and later). Without a route table the hook refuses a launch
 that does not name both; with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
+Before either check it refuses an Agent call made inside a subagent, because only
+the primary routes; see
+[launches from a subagent](../../skills/route-subagents/references/claude-code-routing.md#launches-from-a-subagent).
 
 The frozen required mode predates the per-call effort field: its guard keeps
 effort in generated agent frontmatter and rejects a supplied per-call effort even
@@ -286,7 +289,10 @@ client/process. PostToolUse cannot undo work already performed.
 Hints, read-only preflight and, with a route table in evidence-only mode, a
 `spawn_agent` check are supported: the hook refuses a spawn that does not follow
 its declared class or would inherit the parent's settings, see
-[route-table launches](../../skills/route-subagents/references/codex-routing.md#route-table-launches). The Claude receipt-injection/private
+[route-table launches](../../skills/route-subagents/references/codex-routing.md#route-table-launches).
+Codex hook input does not name the calling agent, so a child's own spawn is held
+only by `agents.max_depth`; see
+[launches from a subagent](../../skills/route-subagents/references/codex-routing.md#launches-from-a-subagent). The Claude receipt-injection/private
 advisor protocol is **not** silently advertised as strict Codex routing. The
 current documented Codex rewrite requires `allow`, and its native output contract
 does not establish Claude's private return-rewriting guarantee. Explicit required
