@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.20.0](https://github.com/Muratovnik/assay/compare/v0.19.0...v0.20.0) (2026-10-12)
+
+### Features
+
+* **route-subagents:** enforce an owner route table of task classes, each with one model and effort, on Claude `Agent`/`Task` and Codex `spawn_agent` launches in evidence-only mode: a launch declares its class at the start of the Claude `description` or the Codex `task_name` and must carry that class's pair; a missing or unknown class, another pair, a Codex `fork_turns` that inherits the parent's settings, a Codex custom agent file that pins other settings and a `CLAUDE_CODE_EFFORT_LEVEL` that overrides the call are refused with the class list; `routing_status` returns the table, and `route-candidates` proposes the cheapest cached pair within a score band of the best ([fd1835c](https://github.com/Muratovnik/assay/commit/fd1835cb0728dc3ebb6c50d6f51b359f170fc4c0))
+
+### Documentation
+
+* **route-subagents:** make the route table the default routing path and mark the routing advisor, local task evidence and required routing as frozen; state that Claude Code 2.1.292 and later takes effort in the spawn call, that the Codex hook checks `spawn_agent` launches when a table is configured, and that `PreToolUse` runs for every tool ([e4a81ea](https://github.com/Muratovnik/assay/commit/e4a81ea19afac312bb8471d5a88bab94a51dbc47))
+
+Without a route table, launches are checked as in 0.19.0. The table check was
+exercised with synthetic hook events; a live Codex launch through it has not
+yet been observed.
+
 ## [0.19.0](https://github.com/Muratovnik/assay/compare/v0.18.0...v0.19.0) (2026-10-12)
 
 ### Features
