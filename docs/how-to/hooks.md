@@ -240,7 +240,7 @@ with unknown surface retain the existing guard with explicit unverified status.
 
 In evidence-only mode the Agent call carries both the model and the effort
 (Claude Code 2.1.292 and later). Without a route table the hook refuses a launch
-that names neither; with one it checks the pair against the declared class, see
+that does not name both; with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
 
 The frozen required mode predates the per-call effort field: its guard keeps
