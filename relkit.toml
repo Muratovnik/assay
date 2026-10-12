@@ -52,7 +52,10 @@ checks = [["{python}", "-B", "tools/release_check.py"]]
 # With no artifact to download, the smoke is the one thing a consumer does with
 # this source: resolve every catalogued target into an install plan. It runs
 # against an isolated home and writes nothing.
-smoke = [["{python}", "-B", "tools/assay.py", "plan", "--home", "{temp}"]]
+# The snapshot has no ignored files, so the smoke builds its tooling environment
+# in the scratch directory before resolving the plan.
+smoke = [["{python}", "-B", "tools/release_check.py", "--environment", "{temp}/tools-env", "--",
+          "tools/assay.py", "plan", "--home", "{temp}"]]
 smoke_platforms = ["linux", "win32"]
 require_guard = true
 owner_audit = true

@@ -95,11 +95,12 @@ Run the publication audit and releases through the installed `relkit` command;
 it delegates to the pinned `.github/relkit.pyz`, which CI runs directly. Install
 it with `uv tool install` from a [Release Kit release](https://github.com/Muratovnik/release-kit/releases);
 without it, `python .github/relkit.pyz` takes the same arguments. The
-release tool runs project checks with its own interpreter, which does not carry
-this repository's tooling, so `relkit.toml` calls `tools/release_check.py`. That
-script builds the pinned environment in the ignored `.cache/tools-env` from
-`requirements-tools.txt`, rebuilds it when that file changes and runs
-`check --all` there.
+release tool runs project checks and the smoke with its own interpreter, which
+does not carry this repository's tooling, so `relkit.toml` runs both through
+`tools/release_check.py`. That script builds the pinned environment from
+`requirements-tools.txt`, rebuilds it when that file changes and runs the
+command there: `check --all` in the ignored `.cache/tools-env`, the smoke in the
+release tool's scratch directory, since its Git-free snapshot has no ignored files.
 
 Generated client manifests, profile adapters and the skills index are produced by
 `python -B tools/assay.py render` and verified byte-for-byte by the source check,
