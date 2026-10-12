@@ -53,6 +53,10 @@ skill = "skill/skill-evaluation"
 cue = "a skill misfires or a skill change needs evidence"
 
 [[skills]]
+skill = "skill/retrospective"
+cue = "an explicit retrospective or review of past work or stored lessons"
+
+[[skills]]
 skill = "skill/research-driven-change"
 cue = "research that leads to a planned, delivered change"
 

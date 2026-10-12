@@ -31,6 +31,7 @@
 | [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | 需要依据来源还原现有产品的用户流程、界面和控件，用于重新设计、设计交接或测试清单 | 产品是全新的、改动仅涉及视觉，或场景已经明确 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
 | [skill-evaluation](skills/skill-evaluation/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
+| [retrospective](skills/retrospective/SKILL.md) | 你要求回顾一段时间的智能体工作或已存储的经验，以决定要改什么 | 只是排查单个事件、诊断单个技能，或只需要使用统计 |
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
 | [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
 
@@ -118,7 +119,7 @@ python tools/assay.py install-links
   `route-subagents` 可选用的基准测试服务，且需要你自行注册。
 - 脚本只接受显式路径，不会擅自向你的环境安装任何东西——这是一项值得你自行验证的
   声明，而不是应当直接采信的说法。
-- 这些方法会读取仓库、文档，其中的研究方法还会读取网页。这类内容对它们而言是
+- 这些方法会读取仓库、文档，其中的回顾方法还会读取你的会话日志，研究方法还会读取网页。这类内容对它们而言是
   数据而非指令，方法本身也如此声明，但任何声明都不构成保证。当智能体读取过你
   无法控制的内容后，请复核它提出的方案。
 - 持续集成中不运行任何模型，本仓库的技能也不带任何评分；确切范围见

@@ -45,6 +45,7 @@ Claude 启动仍须同时指明两项设置。`route-candidates` 根据缓存的
 | `skill/implementation-planning` | automatic | `~/.agents/skills/implementation-planning` | `~/.claude/skills/implementation-planning` |
 | `skill/technical-writing` | automatic | `~/.agents/skills/technical-writing` | `~/.claude/skills/technical-writing` |
 | `skill/text-writing` | automatic | `~/.agents/skills/text-writing` | `~/.claude/skills/text-writing` |
+| `skill/retrospective` | automatic | `~/.agents/skills/retrospective` | `~/.claude/skills/retrospective` |
 | `profile/evidence-reviewer` | explicit | `~/.codex/agents/evidence-reviewer.toml` | `~/.claude/agents/evidence-reviewer.md` |
 | `profile/official-docs-researcher` | explicit | `~/.codex/agents/official-docs-researcher.toml` | `~/.claude/agents/official-docs-researcher.md` |
 

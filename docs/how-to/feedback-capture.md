@@ -339,6 +339,11 @@ merge their source observations. `export` emits JSONL to stdout, with no network
 and no implicit file creation. Shell redirection has the shell's ordinary overwrite
 semantics. Never pipe an unsanitized export into an eval corpus or public commit.
 There is no automatic clustering, promotion, replay or Assay modification.
+To look for recurring corrections across records, ask an agent for a
+[retrospective](../../skills/retrospective/SKILL.md): it reads `list`, `show` or
+`export` output, counts a duplicate once, leaves dismissed records out of any
+pattern and proposes changes for you to decide. It does not annotate or review
+records, though each read still applies the store's expiry.
 
 Records use the existing transactional SQLite implementation in
 `<state_dir>/feedback/routing-v2.sqlite3`, isolated from routing receipts and hook

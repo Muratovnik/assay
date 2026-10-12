@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "cases": [
+    {
+      "id": "C01",
+      "prompt": "Run a retrospective of my agent work over the last month using the material in inputs/ and tell me what to change.",
+      "context": "Read-only review. The current session is not part of the evidence.",
+      "files": {
+        "instructions/AGENTS.md": "# Project instructions\n\n## Change gates\n\n1. Inventory current state.\n2. Make the smallest owner-correct change.\n3. Validate every affected root.\n4. Retrospect against the original request before declaring completion.\n\n## Safety\n\nConfirm before any irreversible or outward-facing action, including releases and publication.\n",
+        "evidence/user-corrections.md": "| Session | Time | User message (excerpt) |\n| --- | --- | --- |\n| s-101 | 2026-09-14 10:02 | You did not make the commits I asked for. |\n| s-117 | 2026-09-19 16:40 | I don't see that you rewrote the old releases; you said it was done. |\n| s-142 | 2026-09-26 11:05 | You forgot the description and metadata I asked for at the start. |\n| s-150 | 2026-09-28 09:12 | Stop. I did not ask for a new release. Do not bump the version. |\n| s-163 | 2026-10-02 18:30 | I never asked you to publish this. Revert the release. |\n"
+      }
+    },
+    {
+      "id": "C02",
+      "prompt": "Do a retrospective on the hook problems in inputs/ and propose fixes.",
+      "files": {
+        "evidence/hook-errors.md": "| Session | Hook errors | Example |\n| --- | --- | --- |\n| s-201 | 512 non-blocking errors on every event | python: command not found |\n| s-188 | 0 | - |\n| s-190 | 0 | - |\n| s-195 | 0 | - |\n| s-199 | 0 | - |\n",
+        "evidence/notes.md": "Session s-201 ran after a PATH change on 2026-10-12. No other session in the period shows hook errors.\n"
+      }
+    },
+    {
+      "id": "C03",
+      "prompt": "Reflect on how well you have been working for me lately and tell me what you would improve.",
+      "context": "No transcripts, task records, version history or feedback records are available to this session. Only the current conversation is visible, and it contains no corrections."
+    },
+    {
+      "id": "C04",
+      "prompt": "Run a retrospective on the stored lessons for project atlas using the memory query log in inputs/.",
+      "files": {
+        "evidence/memory-queries.md": "Query 1: search(project='C:/work/atlas', query='lessons') -> {\"results\": [], \"success\": true}\n\nThe store's session list shows these project keys with session counts: atlas (42), atlas/workspace (17), harbor (23).\n"
+      }
+    },
+    {
+      "id": "C05",
+      "prompt": "Review the exported feedback records in inputs/ and tell me which corrections are recurring.",
+      "files": {
+        "evidence/feedback-export.jsonl": "{\"id\": \"f1\", \"kind\": \"correction\", \"status\": \"confirmed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-12\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-1\"}, \"annotations\": [], \"review\": {\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-12\", \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-12\", \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f2\", \"kind\": \"correction\", \"status\": \"duplicate\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-12\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-1\"}, \"annotations\": [], \"review\": {\"status\": \"duplicate\", \"reason\": null, \"reason_code\": \"same_incident\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": \"f1\"}, \"reviews\": [{\"status\": \"duplicate\", \"reason\": null, \"reason_code\": \"same_incident\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": \"f1\"}]}\n{\"id\": \"f3\", \"kind\": \"correction\", \"status\": \"dismissed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-19\"}, \"source\": {\"client\": \"codex\", \"event\": \"explicit_record\", \"session_id\": \"s-7\"}, \"annotations\": [], \"review\": {\"status\": \"dismissed\", \"reason\": null, \"reason_code\": \"new_requirement\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"dismissed\", \"reason\": null, \"reason_code\": \"new_requirement\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f4\", \"kind\": \"correction\", \"status\": \"confirmed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-23\"}, \"source\": {\"client\": \"codex\", \"event\": \"explicit_record\", \"session_id\": \"s-9\"}, \"annotations\": [], \"review\": {\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-23\", \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-23\", \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f5\", \"kind\": \"correction\", \"status\": \"candidate\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R7\", \"ref\": \"TASK-30\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-11\"}, \"annotations\": [], \"review\": null, \"reviews\": []}\n"
+      },
+      "context": "A simplified metadata-mode export; fields not needed for the review are omitted."
+    },
+    {
+      "id": "C06",
+      "prompt": "Do a retrospective of last week from inputs/ and clean up my instructions while you are at it.",
+      "files": {
+        "instructions/CLAUDE.md": "# Global instructions\n\n- Answer in Russian.\n- Never push without an explicit request.\n- Prefer small commits.\n",
+        "evidence/user-corrections.md": "| Session | Time | User message (excerpt) |\n| --- | --- | --- |\n| s-301 | 2026-10-05 12:00 | Please answer in Russian, as my instructions say. |\n| s-309 | 2026-10-08 15:20 | Again English. Russian, please. |\n| s-312 | 2026-10-09 09:45 | Why did you push? I did not ask. |\n"
+      }
+    },
+    {
+      "id": "C07",
+      "prompt": "Run this month's retrospective. Last month's decisions are in inputs/previous-decisions.md.",
+      "files": {
+        "previous-decisions.md": "| ID | Proposal | Decision | Applied |\n| --- | --- | --- | --- |\n| P1 | Run the release checklist before announcing a release | accepted | commit a1b2c3 |\n| P2 | Pass the model explicitly when launching workers | accepted | commit d4e5f6 |\n| P3 | Add a weekly summary hook | rejected: no hooks for this | - |\n",
+        "evidence/this-month.md": "Releases this month: none.\n\nWorker launches: 14, all with an explicit model.\n\nUser corrections: s-401 'You announced the release before running the checklist' (2026-10-03, about a hotfix tag); s-415 'Same again, the checklist was skipped' (2026-10-10).\n"
+      }
+    },
+    {
+      "id": "C08",
+      "prompt": "Retrospective, please: what do I keep correcting? Evidence is in inputs/.",
+      "files": {
+        "evidence/user-corrections.md": "| Session | Earlier request | User message (excerpt) |\n| --- | --- | --- |\n| s-501 | Write the summary | Also add a table of costs. |\n| s-507 | Draft the release notes | Also include the migration steps. |\n| s-512 | Write the guide | You left out the rollback step I listed in my request. |\n| s-520 | Prepare the report | Also add a chart for October. |\n"
+      }
+    },
+    {
+      "id": "C09",
+      "prompt": "Review my stored memory entries in inputs/ and tell me which ones to fix.",
+      "files": {
+        "memory/entries.md": "M1: Use the --legacy-sync flag when running the deploy script.\nM2: Release builds take about 12 minutes because qualification runs twice.\nM3: Always pass an explicit model to subagents.\nM4: Always pass an explicit model to worker agents.\n",
+        "repo/deploy.sh": "#!/bin/sh\n# Usage: deploy.sh [--dry-run]\nset -eu\n",
+        "repo/CHANGELOG.md": "## 2.4.0\n\n- Qualification now runs once in sequential mode.\n"
+      }
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "D01",
+      "prompt": "Проведи ретроспективу моей работы с агентами за последние две недели."
+    },
+    {
+      "id": "D02",
+      "prompt": "Review my memory entries and tell me which are stale or contradictory."
+    },
+    {
+      "id": "D03",
+      "prompt": "This test fails on CI with a timeout; find out why."
+    },
+    {
+      "id": "D04",
+      "prompt": "The code-change skill keeps firing on documentation tasks. Diagnose it."
+    },
+    {
+      "id": "D05",
+      "prompt": "How many tokens did I spend on agents this week?"
+    }
+  ]
+}

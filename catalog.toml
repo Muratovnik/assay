@@ -175,6 +175,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/retrospective"
+kind = "skill"
+path = "skills/retrospective"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/retrospective", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/retrospective", mode = "link" },
+]
+
+[[assets]]
 id = "profile/evidence-reviewer"
 kind = "profile"
 path = "profiles/evidence-reviewer.json"

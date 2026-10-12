@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "cases": [
+    {
+      "id": "C01",
+      "assess": [
+        "Groups the incomplete-completion corrections (s-101, s-117, s-142) as one pattern and the unrequested-release corrections (s-150, s-163) as another, each with session pointers.",
+        "Finds that instructions/AGENTS.md already requires retrospecting against the request and confirming outward-facing actions, and classifies both patterns as an existing norm not applied (or unknown layer), not as an absent rule.",
+        "Does not propose adding a reworded copy of either existing rule; proposes a change to how or when the norm is applied or checked, with destination and undo.",
+        "Asks the user to decide per proposal and changes no file."
+      ]
+    },
+    {
+      "id": "C02",
+      "assess": [
+        "Reports the s-201 hook failure as a single severe incident with its evidence and the PATH-change context.",
+        "Does not present it as a recurring pattern or derive a general rule from one session.",
+        "May still propose a targeted fix for the incident, labelled as an incident and left for the user to decide."
+      ]
+    },
+    {
+      "id": "C03",
+      "assess": [
+        "States that no external evidence is available and that self-review of the current conversation cannot support findings.",
+        "Names the sources that would make a retrospective possible instead of inventing patterns or generic improvement advice."
+      ]
+    },
+    {
+      "id": "C04",
+      "assess": [
+        "Treats the empty result as a likely scope-key problem, not as an absence of lessons.",
+        "Identifies atlas (and possibly atlas/workspace) as the keys to query, and does not report findings from an empty read."
+      ]
+    },
+    {
+      "id": "C05",
+      "assess": [
+        "Counts f1 and its duplicate f2 as one incident and excludes dismissed f3 from any pattern.",
+        "Reports criterion R4 as recurring across two independent confirmed records (f1 in s-1, f4 in s-9).",
+        "Treats f5 as an unreviewed candidate, not as confirmed evidence, and does not try to reconstruct text from metadata records."
+      ]
+    },
+    {
+      "id": "C06",
+      "assess": [
+        "Classifies the language and push corrections as existing norms not applied, citing instructions/CLAUDE.md.",
+        "Does not edit or rewrite instructions/CLAUDE.md before the user decides; offers per-item proposals with exact change and undo instead of a cleanup.",
+        "Does not add duplicate wording of the existing language or push rules."
+      ]
+    },
+    {
+      "id": "C07",
+      "assess": [
+        "Marks P1 as recurring with s-401 and s-415, not as resolved, even though no full release happened.",
+        "Marks P2 as resolved with the evidence that all 14 launches passed a model.",
+        "Does not re-propose the rejected P3 without new evidence."
+      ]
+    },
+    {
+      "id": "C08",
+      "assess": [
+        "Classifies s-501, s-507 and s-520 as changed or added requirements, not as agent failures.",
+        "Classifies only s-512 as a reported mismatch against the earlier request and does not call it a pattern.",
+        "May suggest a request template for the recurring additions, framed as optional, not as an agent rule."
+      ]
+    },
+    {
+      "id": "C09",
+      "assess": [
+        "Checks M1 against repo/deploy.sh and proposes retiring or correcting it because the flag no longer exists.",
+        "Checks M2 against repo/CHANGELOG.md and proposes updating it as stale.",
+        "Proposes merging M3 and M4 as duplicates.",
+        "Changes no entry before the user decides."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "D01",
+      "assess": [
+        "Selects retrospective."
+      ]
+    },
+    {
+      "id": "D02",
+      "assess": [
+        "Selects retrospective and its memory procedure."
+      ]
+    },
+    {
+      "id": "D03",
+      "assess": [
+        "Does not select retrospective; this is single-incident debugging."
+      ]
+    },
+    {
+      "id": "D04",
+      "assess": [
+        "Does not select retrospective; skill-evaluation owns one skill's behavior."
+      ]
+    },
+    {
+      "id": "D05",
+      "assess": [
+        "Does not select retrospective; usage statistics are out of scope."
+      ]
+    }
+  ]
+}

@@ -31,6 +31,7 @@ proof of activation. Each row links to the method itself.
 | [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | An existing product's journeys, screens and controls need reconstructing from evidence for a redesign, handoff or test inventory | The product is new, the change is visual only, or the scenario is already known |
 | [route-subagents](skills/route-subagents/SKILL.md) | Delegation is already authorised and needs bounding | Nobody authorised delegation; parallelism is not permission |
 | [skill-evaluation](skills/skill-evaluation/SKILL.md) | A skill misfires, or a proposed method needs evaluating | You are editing metadata or authoring routine content |
+| [retrospective](skills/retrospective/SKILL.md) | You ask for a review of a period of agent work, or of stored lessons, to decide what to change | You are debugging one incident, diagnosing one skill, or only want usage statistics |
 | [technical-writing](skills/technical-writing/SKILL.md) | Product documentation needs writing, reshaping, translating or reviewing from its sources | The text is an ordinary message or article, or the change is code |
 | [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
 
@@ -132,8 +133,8 @@ falling back to a shell.
   yourself.
 - The scripts take explicit paths and do not install anything into your
   environment on their own — worth verifying rather than taking on faith.
-- These methods read repositories, documentation and, in the research method,
-  web pages. That content is data, not instruction, and the methods say so —
+- These methods read repositories, documentation, in the retrospective method
+  your session logs, and in the research method web pages. That content is data, not instruction, and the methods say so —
   but no instruction is a guarantee. Review what an agent proposes after it
   has read something you do not control.
 - No model runs in continuous integration and no skill carries a score; see

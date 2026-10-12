@@ -1,0 +1,4 @@
+interface:
+  display_name: "Retrospective"
+  short_description: "Review recurring friction and propose evidence-backed changes"
+  default_prompt: "Use $retrospective to review my recent agent work for recurring friction and propose changes I can accept or reject."

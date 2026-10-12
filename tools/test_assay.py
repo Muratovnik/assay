@@ -271,6 +271,7 @@ class AgentAssetsTests(unittest.TestCase):
                 "skill/research-driven-change",
                 "skill/technical-writing",
                 "skill/text-writing",
+                "skill/retrospective",
                 "profile/evidence-reviewer",
                 "profile/official-docs-researcher",
             },
