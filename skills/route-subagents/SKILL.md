@@ -89,9 +89,11 @@ delegating beats doing the work locally: one dependent chain that fits the
 primary's context is usually cheaper done there. Then:
 
 1. Read the classes from `routing_status`, or from a refusal that lists them.
-2. Choose the class whose description fits the packet's work. A stronger class
-   chosen "to be safe" is the inheritance the table exists to remove. When no
-   class fits, keep the work local or ask the owner for a class.
+2. Choose the class whose description fits the packet's work, not the class
+   whose pair you already chose. A stronger class chosen "to be safe" is the
+   inheritance the table exists to remove; when two classes fit, take the less
+   demanding one. When no class fits, keep the work local or ask the owner for
+   a class.
 3. Pass that class's model and effort in the spawn call itself and declare the
    class in the call's label field, as the client reference describes. Never
    rely on inherited or default settings.

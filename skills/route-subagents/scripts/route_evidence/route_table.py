@@ -26,6 +26,13 @@ PLACEHOLDER_EFFORTS = frozenset({"default", "auto", "inherit", "unspecified"})
 MAX_CLASSES = 16
 MAX_TEXT = 300
 MAX_BASIS = 2000
+# Said with every class refusal and admission, because a primary that reads only
+# the hook reply, such as a session still holding an older skill, still needs
+# the selection rule and the record the skill asks for.
+CHOOSING = ("Choose the class whose description fits the work, not the class whose pair you already chose; "
+            "when two classes fit, take the less demanding one, since a stronger class needs a reason in the "
+            "work itself, such as real ambiguity or design.")
+REASON = "State in one line, with the launch, why the work fits its class."
 
 # Native spawn calls this check reads. A client absent here has no launch check.
 SPAWN = {
@@ -113,28 +120,35 @@ def _codex_definition(kind: str, cwd: Any, home: Path) -> dict:
     return {}
 
 
-def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unrouted=(),
-                 environment: dict | None = None, cwd: Any = None, home: Path | None = None) -> str | None:
-    """The refusal for a spawn that does not follow the table, or None to let it run."""
+def _checked_kind(client: str, tool_name: Any, supplied: Any, unrouted) -> str | None:
+    """The agent type of a spawn the table governs; None for other tools and exempt launches."""
     spec = SPAWN.get(client)
     if spec is None or tool_name not in spec["tools"] or not isinstance(supplied, dict):
         return None
-    environment = environment or {}
-    home = Path.home() if home is None else home
     if client == "claude":
         kind = supplied.get("subagent_type") or "general-purpose"
-        if kind == "fork" or supplied.get("resume") or kind in unrouted:
+        if kind == "fork" or supplied.get("resume"):
             return None
     else:
         kind = supplied.get("agent_type") or "default"
-        if kind in unrouted:
-            return None
+    return None if kind in unrouted else kind
+
+
+def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unrouted=(),
+                 environment: dict | None = None, cwd: Any = None, home: Path | None = None) -> str | None:
+    """The refusal for a spawn that does not follow the table, or None to let it run."""
+    kind = _checked_kind(client, tool_name, supplied, unrouted)
+    if kind is None:
+        return None
+    spec = SPAWN[client]
+    environment = environment or {}
+    home = Path.home() if home is None else home
     field = spec["label"]
     name = declared_class(supplied.get(field))
     if name is None or name not in table["classes"]:
         example = next(iter(table["classes"])) + ("_..." if client == "codex" else ": ...")
         return (f"routing needs a task class at the start of this call's `{field}` (for example "
-                f"`{example}`), then that class's model and effort. Classes: "
+                f"`{example}`), then that class's model and effort. {CHOOSING} Classes: "
                 + listing(table))
     entry = table["classes"][name]
     expected = {spec["model"]: entry["model"], spec["effort"]: entry["effort"]}
@@ -142,7 +156,8 @@ def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unr
              for key, value in expected.items() if supplied.get(key) != value]
     if wrong:
         return ("this launch does not match its declared class: " + "; ".join(wrong)
-                + ". Use the class's pair, or declare the class that fits the task. Classes: " + listing(table))
+                + f". Use the class's pair, or declare the class that fits the task. {CHOOSING} Classes: "
+                + listing(table))
     if client == "codex":
         fork = supplied.get("fork_turns")
         if fork is None or fork == "all":
@@ -163,6 +178,21 @@ def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unr
             return (f"CLAUDE_CODE_EFFORT_LEVEL={override!r} overrides this call's effort; class {name} "
                     f"needs {entry['effort']!r}. Unset the variable for routed launches")
     return None
+
+
+def admission(client: str, tool_name: Any, supplied: Any, table: dict, *, unrouted=()) -> str | None:
+    """Context for a launch the table admitted: the record to keep and the rule to apply next time.
+
+    A reminder, not a check: nothing verifies that the reason is written.
+    """
+    if _checked_kind(client, tool_name, supplied, unrouted) is None:
+        return None
+    name = declared_class(supplied.get(SPAWN[client]["label"]))
+    entry = table["classes"].get(name) if name else None
+    if entry is None:
+        return None
+    return (f"Assay: launch admitted as class `{name}` ({entry['model']}/{entry['effort']}). {REASON} "
+            f"{CHOOSING}")
 
 
 def candidates(rows: list, *, band: float, subset: str | None = None, harness: str | None = None,

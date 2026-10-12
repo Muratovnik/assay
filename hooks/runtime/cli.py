@@ -93,7 +93,11 @@ def explicit_routes(event, client, environment, config=None):
         reason = route_table.check_launch(client, event.get("tool_name"), event.get("tool_input"), table,
                                           unrouted=mode["unrouted_agents"], environment=environment,
                                           cwd=event.get("cwd"))
-        return deny(reason) if reason else {}
+        if reason:
+            return deny(reason)
+        note = route_table.admission(client, event.get("tool_name"), event.get("tool_input"), table,
+                                     unrouted=mode["unrouted_agents"])
+        return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else {}
     except Exception:
         return {}
 

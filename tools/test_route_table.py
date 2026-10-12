@@ -130,6 +130,38 @@ class RouteTableTests(unittest.TestCase):
         (project / 'same.toml').write_text('model_reasoning_effort = "low"\n', encoding='utf-8')
         self.assertIn('pins model_reasoning_effort', self.reason(self.codex(agent_type='same', **launch), env, 'codex'))
 
+    def context(self, event, environment, client):
+        result, error = cli.process(event, client, environment)
+        self.assertIsNone(error)
+        output = result.get('hookSpecificOutput', {})
+        self.assertNotEqual(output.get('permissionDecision'), 'deny')
+        return output.get('additionalContext', '')
+
+    def test_a_refusal_says_how_to_choose_a_class_not_only_which_exist(self):
+        # A primary holding an older skill learns the selection rule from the refusal alone.
+        claude = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
+        codex = {'ASSAY_ROUTING_CONFIG': str(self.config('codex', CODEX_TABLE, name='codex.json'))}
+        for reason in (self.reason(self.claude(description='fix the parser', model='sonnet', effort='high'), claude, 'claude'),
+                       self.reason(self.claude(description='code: fix', model='opus', effort='medium'), claude, 'claude'),
+                       self.reason(self.codex(task_name='parser_fix', fork_turns='none'), codex, 'codex')):
+            self.assertIn('not the class whose pair you already chose', reason)
+            self.assertIn('take the less demanding one', reason)
+
+    def test_an_admitted_launch_is_reminded_to_record_its_reason_without_being_held(self):
+        claude = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
+        codex = {'ASSAY_ROUTING_CONFIG': str(self.config('codex', CODEX_TABLE, name='codex.json'))}
+        note = self.context(self.claude(description='code: fix the parser', model='sonnet', effort='high'),
+                            claude, 'claude')
+        self.assertIn('admitted as class `code` (sonnet/high)', note)
+        self.assertIn('why the work fits its class', note)
+        note = self.context(self.codex(task_name='gather_logs', model='gpt-6-luna', reasoning_effort='medium',
+                                       fork_turns='none'), codex, 'codex')
+        self.assertIn('admitted as class `gather` (gpt-6-luna/medium)', note)
+        # Exempt launches and launches without a table get no class note.
+        self.assertNotIn('admitted as class', self.context(self.claude(subagent_type='fork'), claude, 'claude'))
+        self.assertNotIn('admitted as class', self.context(
+            self.claude(description='code: fix', model='sonnet', effort='high'), self.environment(), 'claude'))
+
     def test_without_a_table_codex_is_untouched_and_claude_keeps_the_explicit_check(self):
         self.assertIsNone(self.reason(self.codex(task_name='x'), self.environment('codex'), 'codex'))
         self.assertIn('explicit model and effort', self.reason(self.claude(), self.environment(), 'claude'))

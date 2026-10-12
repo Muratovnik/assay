@@ -50,8 +50,12 @@ under `routes`, or `{"status": "not_configured"}`.
    the same work done locally is often cheaper.
 2. Read the classes from `routing_status`, or from the refusal that lists them.
 3. Choose the class whose `when` fits the packet. Choose by the work, not by
-   caution: a stronger class "to be safe" is the inheritance this table removes.
-   If no class fits, keep the work local or ask the owner to add one.
+   caution and not by a pair chosen beforehand: a stronger class "to be safe" is
+   the inheritance this table removes. When two classes fit, take the less
+   demanding one; a stronger class needs a reason in the work itself, such as
+   real ambiguity or design. If no class fits, keep the work local or ask the
+   owner to add one. State in one line, with the launch, why the work fits the
+   class.
 4. Launch with that class's model and effort in the spawn call itself, and
    declare the class at the start of the call's short label field. The field
    and the inheritance rules are client mechanics:
@@ -70,7 +74,9 @@ With a table configured in evidence-only mode, the Assay `PreToolUse` hook check
 every native spawn of a supported client. It refuses a spawn that declares no
 class, declares an unknown class, or names a model or effort different from the
 class's pair, and a spawn whose settings the client would replace by inheritance
-or by an override. The refusal lists the classes with their pairs.
+or by an override. The refusal lists the classes with their pairs and the rule
+for choosing one. An admitted launch gets a short note naming its class and
+asking for the one-line reason; nothing checks that the reason is written.
 
 Exemptions are the client's continuation mechanisms and the owner's
 `pipeline.unrouted_agents` types. `pipeline.explicit_routes: "off"` turns the
