@@ -132,8 +132,9 @@ def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unr
     field = spec["label"]
     name = declared_class(supplied.get(field))
     if name is None or name not in table["classes"]:
+        example = next(iter(table["classes"])) + ("_..." if client == "codex" else ": ...")
         return (f"routing needs a task class at the start of this call's `{field}` (for example "
-                f"`{next(iter(table['classes']))}: ...`), then that class's model and effort. Classes: "
+                f"`{example}`), then that class's model and effort. Classes: "
                 + listing(table))
     entry = table["classes"][name]
     expected = {spec["model"]: entry["model"], spec["effort"]: entry["effort"]}

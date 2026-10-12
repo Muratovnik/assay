@@ -91,6 +91,7 @@ class RouteTableTests(unittest.TestCase):
         self.assertIsNone(self.reason(self.claude(resume='agent-1'), env, 'claude'))
         self.assertIsNone(self.reason(self.claude(subagent_type='Explore'), env, 'claude'))
         self.assertIn('task class', self.reason(self.claude(subagent_type='Plan'), env, 'claude'))
+        self.assertIn('`gather: ...`', self.reason(self.claude(subagent_type='Plan'), env, 'claude'))
         off = self.environment(routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'explicit_routes': 'off'})
         self.assertIsNone(self.reason(self.claude(), off, 'claude'))
 
@@ -110,7 +111,9 @@ class RouteTableTests(unittest.TestCase):
         for change, expected in (({'fork_turns': None}, 'fork_turns'), ({'fork_turns': 'all'}, 'fork_turns'),
                                  ({'reasoning_effort': 'low'}, "reasoning_effort='low'"),
                                  ({'model': 'gpt-6-luna'}, "model='gpt-6-luna'"),
-                                 ({'task_name': 'parser_fix'}, 'task class')):
+                                 ({'task_name': 'parser_fix'}, 'task class'),
+                                 # A task name is an identifier, so the example continues with an underscore.
+                                 ({'task_name': 'parser_fix'}, '`gather_...`')):
             supplied = {key: value for key, value in {**good, **change}.items() if value is not None}
             with self.subTest(change=change):
                 self.assertIn(expected, self.reason(self.codex(**supplied), env, 'codex'))
