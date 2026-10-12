@@ -101,6 +101,8 @@ def load_config(path: Path | None):
         allowed.update({"advisor", "policy", "telemetry", "task_evidence"})
     if config["schema_version"] >= 3:
         allowed.add("pipeline")
+    if config["schema_version"] >= 4:
+        allowed.add("routes")
     if set(config) - allowed:
         raise EvidenceError("unknown configuration field")
     preferences = config.get("preferences", {})
@@ -122,6 +124,9 @@ def load_config(path: Path | None):
     if config["schema_version"] >= 3:
         from .pipeline_config import settings as pipeline_settings
         config["pipeline"] = pipeline_settings(config)
+    if "routes" in config:
+        from .route_table import settings as route_settings
+        config["routes"] = route_settings(config)
     return config
 
 
@@ -248,7 +253,9 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         with self._lock:
             inv = copy.deepcopy(self._inventory)
         observed = {"host_observations": self.host_observations()} if self.client == "claude" else {}
+        routes = self._advisor_config.get("routes")
         return {"client": self.client, "preferences": copy.deepcopy(self.preferences), **observed,
+                "routes": copy.deepcopy(routes) if routes else {"status": "not_configured"},
                 "advisor": self.advisor_workflow.status(),
                 "refresh_mode": "offline" if self.offline else "automatic",
                 "guides": brief({"sources": guides})["sources"],

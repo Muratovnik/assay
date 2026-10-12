@@ -12,7 +12,7 @@ from pathlib import Path
 from route_evidence.cache import Cache
 from route_evidence.core import MAX_BYTES, EvidenceError, loads, read_document
 from route_evidence.routing import TASK_TYPES, brief
-from route_evidence.service import REGISTRY, RoutingService, default_cache, ingest, load_config
+from route_evidence.service import REGISTRY, SOURCES, RoutingService, default_cache, ingest, load_config
 
 
 def add_options(parser):
@@ -105,6 +105,12 @@ def main(argv=None):
                     help="JSON list of {model, efforts} currently offered by the host; replaces the recorded list")
     ic.add_argument("--evidence-name", action="append", default=[], metavar="MODEL=LABEL",
                     help="confirm a benchmark spelling of a listed model; repeatable; see doctor's model_names")
+    rc = subs.add_parser("route-candidates", help="measured pairs of one cached benchmark for the route table; no network")
+    rc.add_argument("--source", required=True, choices=sorted(SOURCES))
+    rc.add_argument("--subset")
+    rc.add_argument("--harness")
+    rc.add_argument("--match", help="keep rows whose model label contains this text")
+    rc.add_argument("--band", type=float, default=0.07, help="score difference treated as indistinguishable")
     tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
     tp.add_argument("--file", type=Path, required=True)
     tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
@@ -148,6 +154,14 @@ def main(argv=None):
                                              configured_inventory(config)["available"], config.get("client"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0
+        if args.command == "route-candidates":
+            from route_evidence.route_table import candidates
+            snapshot = Cache(args.cache_dir, ttl=args.ttl_hours * 3600).read(SOURCES[args.source]).get("snapshot") or {}
+            result = candidates(snapshot.get("rows", []), band=args.band, subset=args.subset,
+                                harness=args.harness, match=args.match)
+            result.update(source=args.source, source_updated_at=snapshot.get("source_updated_at"))
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["status"] == "ok" else 2
         service = make_service(args)
         from route_evidence.pipeline import RoutingPipeline
         pipeline = RoutingPipeline(service)

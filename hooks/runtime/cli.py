@@ -18,6 +18,7 @@ from runtime.events import normalize
 from runtime import state, feedback, routing_telemetry, skill_gate
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
+from route_evidence import route_table
 from route_evidence.service import load_config
 from routing_hook import handle as route, explicit_launch, failure, deny, routing_operation
 from skill_reminder import reminder
@@ -68,10 +69,13 @@ def explicit_routes(event, client, environment, config=None):
 
     That binding names the routing configuration whose launches it records, so
     an owner who set up evidence-only routing gets the check without another
-    setting. A missing or unreadable configuration keeps ordinary delegation.
+    setting. With a route table every spawn must follow its declared class;
+    without one a Claude spawn must still name both settings. A missing or
+    unreadable configuration keeps ordinary delegation.
     """
-    if (client != "claude" or event.get("hook_event_name") != "PreToolUse"
-            or event.get("tool_name") not in {"Agent", "Task"}):
+    spec = route_table.SPAWN.get(client)
+    if (spec is None or event.get("hook_event_name") != "PreToolUse"
+            or event.get("tool_name") not in spec["tools"]):
         return {}
     try:
         if config is None:
@@ -79,7 +83,17 @@ def explicit_routes(event, client, environment, config=None):
             if binding is None:
                 return {}
             config = load_config(Path(binding["config"]))
-        return explicit_launch(event, config)
+        table = config.get("routes")
+        if table is None:
+            return explicit_launch(event, config) if client == "claude" else {}
+        mode = config["pipeline"]
+        if (config.get("client") != client or mode["mode"] != "evidence-only"
+                or mode["explicit_routes"] != "require"):
+            return {}
+        reason = route_table.check_launch(client, event.get("tool_name"), event.get("tool_input"), table,
+                                          unrouted=mode["unrouted_agents"], environment=environment,
+                                          cwd=event.get("cwd"))
+        return deny(reason) if reason else {}
     except Exception:
         return {}
 
