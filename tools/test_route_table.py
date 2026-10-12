@@ -162,6 +162,29 @@ class RouteTableTests(unittest.TestCase):
         self.assertNotIn('admitted as class', self.context(
             self.claude(description='code: fix', model='sonnet', effort='high'), self.environment(), 'claude'))
 
+    def test_a_launch_the_table_does_not_check_is_pointed_at_the_table(self):
+        # With a table, the generic launch reminder's advisor-era wording would contradict it.
+        table = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
+        exempt = {'ASSAY_ROUTING_CONFIG': str(self.config(
+            routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': {'Explore': 'inherit'}},
+            name='exempt.json'))}
+        off = {'ASSAY_ROUTING_CONFIG': str(self.config(
+            routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'explicit_routes': 'off'}, name='off.json'))}
+        codex = {'ASSAY_ROUTING_CONFIG': str(self.config(
+            'codex', CODEX_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': {'explorer': 'inherit'}},
+            name='codex.json'))}
+        for event, environment, client in ((self.claude(subagent_type='fork'), table, 'claude'),
+                                           (self.claude(resume='agent-1'), table, 'claude'),
+                                           (self.claude(subagent_type='Explore'), exempt, 'claude'),
+                                           (self.claude(description='fix it'), off, 'claude'),
+                                           (self.codex(agent_type='explorer', task_name='scan'), codex, 'codex')):
+            with self.subTest(client=client, supplied=event['tool_input']):
+                note = self.context(event, environment, client)
+                self.assertIn("outside the owner's route table check", note)
+                self.assertNotIn('routing checkpoint', note)
+        # Without a table the generic reminder stays.
+        self.assertIn('routing checkpoint', self.context(self.claude(subagent_type='fork'), self.environment(), 'claude'))
+
     def test_without_a_table_codex_is_untouched_and_claude_keeps_the_explicit_check(self):
         self.assertIsNone(self.reason(self.codex(task_name='x'), self.environment('codex'), 'codex'))
         self.assertIn('explicit model and effort', self.reason(self.claude(), self.environment(), 'claude'))

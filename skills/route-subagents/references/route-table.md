@@ -80,7 +80,8 @@ asking for the one-line reason; nothing checks that the reason is written.
 
 Exemptions are the client's continuation mechanisms and the owner's
 `pipeline.unrouted_agents` types. `pipeline.explicit_routes: "off"` turns the
-check off. Without a table, a Claude spawn must still name both settings and a
+check off. A spawn the check skips for either reason gets a short pointer to the
+table instead of the generic launch reminder. Without a table, a Claude spawn must still name both settings and a
 Codex spawn is not checked.
 
 Clients differ in what they allow:

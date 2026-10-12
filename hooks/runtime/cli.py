@@ -69,9 +69,10 @@ def explicit_routes(event, client, environment, config=None):
 
     That binding names the routing configuration whose launches it records, so
     an owner who set up evidence-only routing gets the check without another
-    setting. With a route table every spawn must follow its declared class;
-    without one a Claude spawn must still name both settings. A missing or
-    unreadable configuration keeps ordinary delegation.
+    setting. With a route table every spawn must follow its declared class,
+    and a spawn the table does not check is pointed at it instead of the
+    generic launch reminder; without one a Claude spawn must still name both
+    settings. A missing or unreadable configuration keeps ordinary delegation.
     """
     spec = route_table.SPAWN.get(client)
     if (spec is None or event.get("hook_event_name") != "PreToolUse"
@@ -87,9 +88,12 @@ def explicit_routes(event, client, environment, config=None):
         if table is None:
             return explicit_launch(event, config) if client == "claude" else {}
         mode = config["pipeline"]
-        if (config.get("client") != client or mode["mode"] != "evidence-only"
-                or mode["explicit_routes"] != "require"):
+        if config.get("client") != client or mode["mode"] != "evidence-only":
             return {}
+        # The table, not the generic launch reminder, describes routing here.
+        outside = {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": route_table.OUTSIDE}}
+        if mode["explicit_routes"] != "require":
+            return outside
         reason = route_table.check_launch(client, event.get("tool_name"), event.get("tool_input"), table,
                                           unrouted=mode["unrouted_agents"], environment=environment,
                                           cwd=event.get("cwd"))
@@ -97,7 +101,7 @@ def explicit_routes(event, client, environment, config=None):
             return deny(reason)
         note = route_table.admission(client, event.get("tool_name"), event.get("tool_input"), table,
                                      unrouted=mode["unrouted_agents"])
-        return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else {}
+        return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else outside
     except Exception:
         return {}
 

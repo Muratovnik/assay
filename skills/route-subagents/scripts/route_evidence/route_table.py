@@ -33,6 +33,11 @@ CHOOSING = ("Choose the class whose description fits the work, not the class who
             "when two classes fit, take the less demanding one, since a stronger class needs a reason in the "
             "work itself, such as real ambiguity or design.")
 REASON = "State in one line, with the launch, why the work fits its class."
+# For a spawn the table does not check while a table is configured: a
+# continuation, an owner-exempt agent type or a switched-off check.
+OUTSIDE = ("Assay routing: this launch is outside the owner's route table check and keeps the settings it "
+           "names or inherits. For a new child, take a class from routing_status and pass its model and effort "
+           "in the call. " + CHOOSING)
 
 # Native spawn calls this check reads. A client absent here has no launch check.
 SPAWN = {
