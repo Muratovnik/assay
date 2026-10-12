@@ -25,7 +25,7 @@ from skill_reminder import reminder
 
 MAX_INPUT = 1024 * 1024
 # The refusal carries the rule, because an open session may hold an older skill.
-NESTED_SPAWN = ("Assay routing: only the primary agent launches agents, so delegation stays one level deep. "
+NESTED_SPAWN = ("only the primary agent launches agents, so delegation stays one level deep. "
                 "Do this part of the work yourself; if a step needs a separate agent, finish your packet and "
                 "name that step in your report so the primary can route and launch it.")
 

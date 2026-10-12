@@ -200,7 +200,7 @@ class RouteTableTests(unittest.TestCase):
                 with self.subTest(environment=environment, supplied=supplied):
                     event = {**self.claude(**supplied), 'agent_id': 'child-1', 'agent_type': 'general-purpose'}
                     reason = self.reason(event, environment, 'claude')
-                    self.assertIn('only the primary agent launches agents', reason)
+                    self.assertTrue(reason.startswith('Assay: only the primary agent launches agents'), reason)
                     self.assertIn('name that step in your report', reason)
         self.assertIsNone(self.reason(admitted, table, 'claude'))
         self.assertIsNone(self.reason({**self.claude(), 'agent_id': 'child-1', 'tool_name': 'Read'}, table, 'claude'))
