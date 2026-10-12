@@ -1,7 +1,9 @@
 """Claude adapter: immutable effort definitions and model-pinned variants of profiles.
 
-The Agent call carries the model when it is one of the host's aliases; only the
-effort needs a generated definition, because the call has no effort field.
+Required routing (frozen) launches through these definitions: the Agent call
+carries the model when it is one of the host's aliases, and the definition
+carries the effort, because the mode predates the call's per-invocation effort
+field (Claude Code 2.1.292). Evidence-only launches put both in the call.
 """
 from __future__ import annotations
 

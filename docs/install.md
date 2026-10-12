@@ -197,8 +197,19 @@ links in place, and removing Codex alone is refused while Claude links remain. T
 drop the Claude entries from an existing install, run
 `python tools/assay.py uninstall-links --client claude`.
 
-## Optional routing advisor
+## Route table
 
+To route subagents, add a `routes` table to the client's routing configuration
+(schema 4): a few task classes with the model and effort each launches with.
+With the plugin hooks enabled, evidence-only mode then refuses Claude and Codex
+spawns that do not follow it. `route-candidates` proposes pairs from the cached
+benchmarks; see the [route table reference](../skills/route-subagents/references/route-table.md).
+Confirm one refusal in a fresh session of each client after installing, because
+an untrusted hook is skipped without an error.
+
+## Optional routing advisor (frozen)
+
+The advisor is frozen: unchanged and available, but not the default path.
 `route-subagents` can use `native-economy` through the active client's available
 models, or the separately enabled hosted Jev adapter. Both extend the existing
 benchmark MCP server; installing skill links does not register or enable them.

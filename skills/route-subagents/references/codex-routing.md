@@ -46,14 +46,32 @@ schema exposes it. No fixed model or per-child token cap is implied. Snapshot
 expiry rejects a late answer; interrupting the running advisor still belongs
 to the native client.
 
-[Required routing](required-routing.md#one-explicit-mode) has no Codex adapter.
-A Codex configuration that selects it reports the unsupported host, and the
-routing hook leaves Codex launches alone; keep Codex on the evidence-only
-workflow. Do not claim that the reminder enforces a launch gate. A Codex hook and
-identity adapter needs separately verified client contracts; matching tool names
-are insufficient.
+## Route-table launches
 
-### Required-mode adapter requirements
+With a [route table](route-table.md) configured, start `task_name` with the class
+name, then an underscore or the end of the name (`code_parser_fix`), and pass
+that class's `model` and `reasoning_effort` with `fork_turns="none"` or a
+bounded positive recent-turn count. Omitted or `"all"` fork turns inherit the
+parent's settings and ignore the requested ones, so the hook refuses them. A
+custom agent file that sets `model` or `model_reasoning_effort` outranks the
+call; the hook reads the project's and the user's `.codex/agents/<agent_type>.toml`
+and refuses a pinned value that differs from the class's pair. A type in
+`pipeline.unrouted_agents` is not checked.
+
+The Assay plugin registers `PreToolUse` for Codex, and current Codex
+documentation lists `spawn_agent` among the local function tools that hook can
+refuse. The check reads only `task_name`, `agent_type`, `model`,
+`reasoning_effort` and `fork_turns`; it never needs the message, which Codex
+session files store encrypted. An untrusted hook is skipped without an error,
+so confirm the refusal once in a fresh session after installing or upgrading.
+
+[Required routing](required-routing.md#one-explicit-mode) has no Codex adapter.
+A Codex configuration that selects it reports the unsupported host and blocks
+protected delegation; keep Codex on the evidence-only workflow. The
+reminder alone enforces nothing; the launch check above is the hook's
+evidence-only guard.
+
+## Required-mode adapter requirements
 
 These are the conditions a future Codex adapter must meet, from observations on
 Codex 0.147.0; none of it is implemented. The spawn call already carries `model`
@@ -82,6 +100,8 @@ and `reasoning_effort`, so Codex needs no generated definitions for routing.
   reduced to a status the way the Claude adapter does it.
 - **The inventory comes from the host.** The client's local model cache can be
   stale; the owner confirms what the host actually offers.
+
+## Workers and waits
 
 A spawned worker shares the filesystem unless an isolated checkout has been
 prepared. Set its actual root and owned scope; a prompt saying "isolated" does

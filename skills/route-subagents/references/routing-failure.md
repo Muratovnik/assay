@@ -2,6 +2,8 @@
 
 Read this before launching after a failed recommendation request. Delegation
 authorization and permission for the failed data operation remain separate.
+A hook refusal of a route-table launch is not this case: correct the declared
+class or the pair as the refusal states and launch again.
 
 ## Establish what failed
 

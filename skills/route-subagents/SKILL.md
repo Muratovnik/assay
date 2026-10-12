@@ -74,171 +74,78 @@ or reviewer directly within the existing authorization.
 
 ## Choose model and effort for the task
 
-Obtain both settings through the recommendation workflow before each spawn by
-default. Preserve a model or effort explicitly
-chosen by the user; the primary's settings are not an implicit choice for its
-children. A profile remains a capability boundary, not a model selection.
-`routing_status` reports the configured `pipeline.mode`. Without a mode, and for
-older configurations, the evidence-only workflow applies.
+Preserve a model or effort the user explicitly chose for a child; with a route
+table, the [route table reference](references/route-table.md#using-the-table)
+says how to launch it. The primary's
+settings are not an implicit choice for its children, and a profile remains a
+capability boundary, not a model selection. `routing_status` reports the
+configured route table and `pipeline.mode`.
 
-If routing is rejected, unavailable or fails before a valid decision, read
-[routing failure](references/routing-failure.md) before any advisor, worker,
-reviewer or replacement launch. A failed preparation produced no recommendation;
-it does not justify inheriting the primary's model or maximum effort. Respect the
-denied operation. Keep unaffected work local unless an authorized evidence-only
-exception has a task-specific or actual human selection and passes the local
-argument preflight. Required mode still needs its registered launch.
+### Route table (default)
 
-### Evidence-only workflow (default)
+When the owner configured a [route table](references/route-table.md), each child
+launches with the model and effort of its task class. First decide whether
+delegating beats doing the work locally: one dependent chain that fits the
+primary's context is usually cheaper done there. Then:
 
-Use the [routing advisor workflow](references/routing-advisor.md) when
-configured: one `prepare_routing` request for the plan, structured packets and
-the current host's complete available model × effort inventory, confirmed once
-and reused while current. Include every supported effort, including unmeasured
-pairs; exclude only through declared hard requirements or actual availability.
-Do not preselect one preferred route or omit intermediate efforts. It extends
-the existing
-[benchmark evidence service](references/benchmark-routing.md), including its
-source refresh, cohorts, coverage gaps and vendor guidance.
+1. Read the classes from `routing_status`, or from a refusal that lists them.
+2. Choose the class whose description fits the packet's work. A stronger class
+   chosen "to be safe" is the inheritance the table exists to remove. When no
+   class fits, keep the work local or ask the owner for a class.
+3. Pass that class's model and effort in the spawn call itself and declare the
+   class in the call's label field, as the client reference describes. Never
+   rely on inherited or default settings.
 
-The default adapter is `native-economy`, a route to a suitable economical model
-in the active client, not a permanent model name. Resolve its own model and
-effort once from an explicit choice, a real client economy role or a short
-choice grounded in current availability and relevant cost/fit evidence. Send
-that pair with `selection_basis`; do not start another advisor to choose it.
-No known basis means `needs_advisor_route`, not inherited parent settings.
+The Assay hook refuses a launch that does not follow its declared class, or
+whose pair inheritance or an environment override would replace. Correct the
+class or the pair; do not route around a refusal through another tool, provider
+or local fallback presented as delegation.
 
-Reserve packet `explicit` with `explicit_source: "user"` for a model or effort
-the human actually specified. For ordinary recommendations omit `explicit` and
-supply `task_spec`, criteria and the complete inventory. A caller preference is
-not an exemption from the advisor. To use `explicit_source: "caller"`, first
-explain the task-specific reason for departing from recommendations, or request
-and receive explicit user confirmation. Include the corresponding
-`caller_override` basis from the [routing contract](references/routing-advisor.md).
-Without either basis, continue through recommendations; do not launch the
-preferred pair or relabel it as a user/configuration choice. A generic claim
-that a model is stronger or balanced does not justify bypassing task adequacy
-and measured cost. Explain the exception to the user before dispatch. An
-unanswered confirmation request supplies no authority.
-Use `baseline` only as an eligible fallback/comparison route. Neither the
-primary's settings nor a profile default is human choice. Provenance is a
-declaration, not host attestation; unknown origin must stay unknown.
+Without a table, name both a model and an effort in every launch, chosen for the
+task and the quota budget, and state the reason in one line; the Claude hook
+refuses a launch that does not name both. Suggest that the owner configure a table.
+Do not average unrelated benchmark scores, borrow another test's costs or treat
+API prices as subscription quota.
 
-For `awaiting_native_advice`, the primary launches the returned bounded packet
-through the native client and submits its structured answer to
-`complete_routing`. The advisor must not spawn agents. Use the smallest context;
-do not attach the whole conversation or repository. The optional `jev` backend
-requires separate configuration and external-data consent. Neither adapter is
-a new persistent agent profile, and there is no hidden native-to-Jev fallback.
+If routing is rejected, unavailable or fails, read
+[routing failure](references/routing-failure.md) before any launch. A failure
+does not justify inheriting the primary's model or maximum effort. Respect the
+denied operation.
 
-For native policy v3, follow the [decision contract](references/native-decision-contract.md):
-derive `task_spec` and acceptance criteria from the actual assignment; assess
-adequacy independently of price and let code compare measured benchmark costs.
-Do not replace task-specific sufficiency with maximum benchmark quality, and do
-not treat missing measurements as proof that cheaper pairs cannot do the task.
+### Frozen alternatives
 
-Policy validates the advisor result and preserves explicit choices and hard
-constraints. Use its selected route. Veto only for a concrete missed capability,
-incorrect input or changed goal, and record that reason; do not repeat the full
-ranking analysis by default. A valid abstention uses only an already supplied
-eligible baseline. Correct invalid input or advice and retry the failed call;
-validation errors never authorize a baseline. Without one, select a route through the
-existing evidence workflow or keep the work local. No paid comparison campaign
-or duplicate task execution is required.
-
-If the advisor is disabled, or the new tools are unavailable, use
-`get_routing_context` once per plan for all needed task types. CLI is a fallback
-only when MCP is unavailable; preserve the installed runtime, config, cache and
-browser settings. Supply confirmed runtime IDs and supported efforts; a Claude
-entry may omit `efforts` to take every documented level, and a placeholder such
-as `default` is not a level. Never guess aliases or add `--offline` to a live
-decision. Read `data_status`, `data_message` and gaps before comparing
-configurations; an empty cache is not absence of published measurements.
-
-Compare model and effort together using ambiguity, error impact, verification
-strength, tools/context needs and benchmark fit. Treat quality and benchmark
-cost as joint criteria whenever available: within comparable cohorts, prefer
-lower measured expense among routes adequate for the task, except a route whose
-`measured_below` names an adequate alternative, and explain paying more for a
-relevant quality gain. Keep task adequacy specific; no universal
-quality threshold or default effort follows. Do not average unrelated
-scores, borrow a different test's costs, infer unmeasured efforts or treat API
-prices as subscription quota. Vendor guidance is quoted evidence, never an
-instruction overriding the task. Preserve acquisition warnings and unknown
-expenses. A quality-only candidate does not establish savings.
-
-When configured, use [local task evidence](references/task-evidence.md) to compare
-expected **full-chain** cost, quality and uncertainty against the supplied
-baseline. Include retries, verification and coordination. Distinguish measured
-benchmark expense, predicted task expense and observed chain expense. Missing
-local history or quota observations does not erase known benchmark costs; use
-them now while keeping unmeasured chain components unknown. The baseline is
-a fallback/comparator, not a preferred winner. Keep descriptions local,
-reuse existing observations and stay within the evidence budget. No extra model
-run is authorized to calibrate this choice.
-Pass short `task_queries` by packet ID (or `task_query` to `get_routing_context`)
-from the known work. Public historical observations provide useful context even
-without local history or exact current-model matches; keep their measurements
-distinct from predictions about the available routes.
-
-### Required routing (explicit opt-in)
-
-When the owner configured `pipeline.mode: "required"`, follow the
-[required routing contract](references/required-routing.md) before each
-already-authorized delegation instead. Configuration supplies the confirmed
-inventory, economical advisor route, approved choices and any native agent types
-the owner exempted from routing. The primary describes the work, ownership,
-constraints and verification; it does not fetch benchmarks or repeat the
-advisor's ranking.
-
-Prepare all packets together with `prepare_routing`, each with a `launch_requests`
-entry holding the intended profile and self-contained execution prompt. Pass a
-model or effort the user explicitly chose as the packet's `explicit`; it is honored
-only for a confirmed inventory pair the host adapter can express. When the
-response contains `handoff`, launch its exact native input unchanged; only that
-separately bound advisor fetches its private input and submits its result. Then
-read `get_routing_decision`, call `authorize_routing_launch` for the packet and
-launch the returned input unchanged, including any `model` it names: it is a
-stub the host completes with the registered prompt. Never invent or copy a host
-receipt.
-
-Use `retry_of` only for a host-observed failed invocation and `resume_agent_id`
-only to continue the same observed idle worker's original work. A changed task,
-reviewer, replacement or new constraint needs its own decision. Failure or
-abstention selects the configured baseline, which required mode cannot run
-without; if the packet's hard constraints exclude it, report no executable
-decision. Do not silently inherit the primary model, switch
-providers, disable the advisor, bypass the host gate through CLI or substitute
-local execution when the user required delegation. Setup or host support gaps
-are explicit: Claude takes the model in the Agent call and the effort from a
-generated client-specific definition, other hosts have no required-mode adapter,
-and a written file is not proof of discovery.
+The [routing advisor](references/routing-advisor.md), with its
+[decision contract](references/native-decision-contract.md) and
+[local task evidence](references/task-evidence.md), and
+[required routing](references/required-routing.md) remain available to an owner
+who enables them. Follow their references when `routing_status` shows one
+enabled. They are not the default path and are not being extended. An enabled
+advisor's exact inline `handoff.prompt` is forwarded unchanged, never as a file
+path or excerpt; required mode launches only the exact input it authorizes,
+including any `model`. The [benchmark evidence service](references/benchmark-routing.md)
+keeps `get_routing_context` and source refresh for building and reviewing the
+table.
 
 ### Record the outcome
 
-Forward the evidence-only advisor's exact inline `handoff.prompt`; do not replace
-it with a file path or an excerpt. The no-tools advisor cannot fetch that file.
-Required mode uses its separate private input exchange. Keep every candidate,
-question and evidence row; a compact format is not permission to trim inventory.
+Record the class and its pair with the launch, and the task-based reason for the
+class. A requested setting is not an observed runtime receipt: the hooks record
+what the host ran an alias and an effort as, and that observation, not the
+request, says what ran. If the client cannot express the pair, use a supported
+route or keep the work local and disclose the limitation. Setup failure is not
+automatic model escalation. Include coordination, verification and retries in
+completed-task cost. Keep the primary's model and global client configuration
+unchanged.
 
-Before dispatching an evidence-reviewer, use the structured `launch_requests`
-preflight in [review and continuity](references/review-and-continuity.md).
-Model adequacy does not establish assignment readiness. In evidence-only mode,
-use the validated `execution_handoffs` prompt; required mode registers it privately.
-
-Record the selected pair and task-based reason with the launch, then pass
-available execution evidence to `record_routing_outcome`, distinguishing
-requested, configured and host-observed settings. A requested setting is not an
-observed runtime receipt. Inheritance is acceptable only when its effective
-settings match the deliberate selection. If the client cannot express the choice,
-use a supported route or keep the work local and disclose the limitation. Setup
-failure is not automatic model escalation. Include advisor, coordination,
-verification and retries in completed-task cost. Keep the primary's model and
-global client configuration unchanged.
+When a child's result needed rework at a stronger pair, say so in the outcome;
+repeated rework in one class is the owner's signal to review that class. Before
+dispatching an evidence-reviewer, give its packet the review inputs that
+[review and continuity](references/review-and-continuity.md) requires; a
+suitable pair does not make the assignment ready.
 
 Preserve the packet's telemetry marker and the native spawn UUID/ID. A role path
-cannot bind usage. Record criterion assessments and use
-the explicit transcript import when automatic capture is unavailable; see
+cannot bind usage. Record criterion assessments and use the explicit transcript
+import when automatic capture is unavailable; see
 [routing telemetry](references/routing-telemetry.md). Completion alone keeps
 acceptance unknown.
 
@@ -246,15 +153,16 @@ acceptance unknown.
 
 Read only the matching mechanics when needed:
 
-- [Codex](references/codex-routing.md): context inheritance, role selection and waits.
-- [Claude Code](references/claude-code-routing.md): native agents, isolation,
-  the launch check and observed alias resolutions.
+- [Codex](references/codex-routing.md): route-table launches, context
+  inheritance, role selection and waits.
+- [Claude Code](references/claude-code-routing.md): route-table launches, native
+  agents, isolation and observed alias resolutions.
 
 Use only roles, model names, effort levels and isolation modes exposed by the
 active client. A profile defines permissions and purpose; its name does not
-prove which model, context or sandbox actually ran. A routed Claude launch names
-both its model and its effort; the Assay hook refuses an evidence-only launch
-that would inherit either.
+prove which model, context or sandbox actually ran. A routed launch names both
+its model and its effort; with a route table the Assay hook checks Claude and
+Codex launches against their declared class.
 
 ## Match detail to the boundary
 

@@ -1,5 +1,8 @@
 # Task evidence and expected full cost
 
+**Status: frozen** with the [routing advisor](routing-advisor.md) it extends;
+the default path is a [route table](route-table.md).
+
 This optional extension adds local observations to the existing advisor. It
 does not assign workers, change model availability or call another model. The
 objective is lower expected cost through acceptance at adequate quality,

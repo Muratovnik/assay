@@ -1,12 +1,15 @@
 # 安装 assay
 
-`route-subagents` 支持可选的路由建议：默认 `native-economy` 使用当前客户端中
-合适的低成本模型；Jev 需要单独启用并同意向外部服务传输结构化数据。
-v1 配置保留原有基准证据流程，v2 文件保留建议器设置；迁移创建新的 schema 3 文件，
-默认为 evidence-only 模式。强制路由是 Claude Code 的独立模式，须由所有者显式启用，
-见[契约](../../skills/route-subagents/references/required-routing.md)。原生模式不需要 Jev SDK 或密钥，
-技能链接安装也不会更改 MCP 注册。配置、重新连接、历史记录和回滚见
-[RoutingAdvisor 指南](../../skills/route-subagents/references/routing-advisor.md)。
+`route-subagents` 的子代理路由由客户端路由配置（schema 4）中的 `routes` 表决定：
+若干任务类别，每个类别指定模型和 effort。启用插件钩子后，evidence-only 模式会拒绝
+不遵循该表的 Claude 和 Codex 启动；`route-candidates` 根据缓存的基准数据提出候选组合。
+详见 [路由表](../../skills/route-subagents/references/route-table.md)。安装后请在每个
+客户端的新会话中确认一次拒绝：不受信任的钩子会被静默跳过。
+
+路由建议器（`native-economy`，或经同意向外部传输数据的 Jev）和 Claude Code 的强制路由
+已冻结：所有者启用后仍可使用，但不是默认路径。技能链接安装不会更改 MCP 注册。建议器配置见
+[RoutingAdvisor 指南](../../skills/route-subagents/references/routing-advisor.md)，
+`required` 模式见[契约](../../skills/route-subagents/references/required-routing.md)。
 本地契约测试不能证明模型质量或配额节省。
 
 选择哪条安装路径，取决于你使用的客户端，以及你是否需要在技能之外再获得智能体

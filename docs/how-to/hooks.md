@@ -16,7 +16,9 @@ failures automatically.
 
 The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
 `hooks/codex.json` through its plugin manifest. Both invoke one runtime command
-per matching event; ordinary Read/Edit/Bash calls do not start this plugin hook.
+per matching event. `PreToolUse` matches every tool, because the reading-role
+boundary and the spawn checks need to see each call; result and failure events
+match only the native spawn tools.
 Generated definitions used by required routing retain their existing lifecycle.
 
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
@@ -236,9 +238,15 @@ with unknown surface retain the existing guard with explicit unverified status.
 
 ### Claude
 
-Effort belongs in generated agent frontmatter, not an Agent-call field. The guard
-rejects supplied per-call effort even for exempt agent types. It preserves the
-existing alias/pinned-model mechanism and checks immutable definition bytes.
+In evidence-only mode the Agent call carries both the model and the effort
+(Claude Code 2.1.292 and later). Without a route table the hook refuses a launch
+that names neither; with one it checks the pair against the declared class, see
+[route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
+
+The frozen required mode predates the per-call effort field: its guard keeps
+effort in generated agent frontmatter and rejects a supplied per-call effort even
+for exempt agent types. It preserves the existing alias/pinned-model mechanism
+and checks immutable definition bytes.
 Plugin-scope definitions cannot preserve required permission fields, so the
 routing generator rejects that declared scope. Definition presence remains
 configured, not proof of discovery or effective permissions.
@@ -275,7 +283,10 @@ client/process. PostToolUse cannot undo work already performed.
 
 ### Codex
 
-Hints and read-only preflight are supported. The Claude receipt-injection/private
+Hints, read-only preflight and, with a route table in evidence-only mode, a
+`spawn_agent` check are supported: the hook refuses a spawn that does not follow
+its declared class or would inherit the parent's settings, see
+[route-table launches](../../skills/route-subagents/references/codex-routing.md#route-table-launches). The Claude receipt-injection/private
 advisor protocol is **not** silently advertised as strict Codex routing. The
 current documented Codex rewrite requires `allow`, and its native output contract
 does not establish Claude's private return-rewriting guarantee. Explicit required

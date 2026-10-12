@@ -1,7 +1,9 @@
 # Benchmark evidence context for model and effort selection
 
 This reference describes the **evidence-only** comparison and its acquisition
-diagnostics. When an advisor is enabled, ordinary delegation uses the
+diagnostics. With a [route table](route-table.md) configured, launches follow
+the table and this surface serves building and reviewing it. When an advisor is
+enabled, ordinary delegation uses the
 [recommendation workflow](routing-advisor.md) by default; do not turn a
 benchmark preference into an unexplained binding caller choice. Use this raw
 comparison surface when the advisor is disabled or unavailable. When the owner explicitly selected

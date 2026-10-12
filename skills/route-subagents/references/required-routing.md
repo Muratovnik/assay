@@ -1,5 +1,12 @@
 # Required routing: configuration, execution and migration
 
+**Status: frozen.** This mode keeps its contract and tests but is no longer the
+recommended path and is not being extended. The default is a
+[route table](route-table.md) enforced by the evidence-only hook. Its Claude
+adapter predates the per-call `effort` field: it still carries effort through
+generated definitions, which remains correct but is no longer the only way the
+client can express effort.
+
 This is the opt-in routing contract, protocol 3 in configuration schema 3. It
 extends the existing evidence service and policy, not the native agent launcher.
 Delegation must already be authorized. The primary owns task scope and acceptance;
@@ -149,9 +156,10 @@ shipped, no advisor chooses itself and no parent route is inherited silently.
 
 ### Routes: the model in the call, the effort in a definition
 
-The Claude Agent call accepts a `model` but no effort, and only the four aliases
-`sonnet`, `opus`, `haiku` and `fable`: a full ID supplied by a hook fails the
-call's schema validation before anything launches. So a route travels in two
+The Claude Agent call accepts only the four model aliases `sonnet`, `opus`,
+`haiku` and `fable`: a full ID supplied by a hook fails the call's schema
+validation before anything launches. This mode was built before the call gained
+a per-invocation `effort` (Claude Code 2.1.292), so a route still travels in two
 parts. For a profile listed in `profiles` and an alias model, the call carries
 the alias and a generated definition for that profile and effort carries the
 effort; one definition serves every alias with that effort. A model the call
@@ -319,8 +327,8 @@ the packet prompt, profile, definition, model, current configuration, session,
 expiry and individual attempt. Altered stubs, another packet's record, model
 overrides, expired records and reused attempts are rejected. It returns no
 automatic permission grant: normal client approval and permission checks evaluate
-the substituted input. Effort stays in the generated definition until the Agent
-tool accepts it per call ([open feature request](https://github.com/anthropics/claude-code/issues/77298));
+the substituted input. Effort stays in the generated definition: the frozen mode
+was not moved to the per-call `effort` field that Claude Code 2.1.292 added, and
 foreground defaults avoid relying on anything else.
 
 Several packets may use the same definition and start in one message. The start

@@ -74,30 +74,38 @@ keeps only reading tools and reads the caller's receipts instead. An adapter's
 requested sandbox is configuration: verify the effective session policy rather
 than assuming a parent process left it intact.
 
-## Routing advice
+## Routing
 
-The routing advisor is a bundled part of `route-subagents`, served by its
-existing benchmark MCP/CLI application. It reuses acquisition and cohort evidence,
-builds a bounded immutable snapshot, asks the selected adapter for a ranking,
-then applies deterministic policy. Native economy resolves a current economical
-client model; Jev is an optional, explicitly consented hosted backend. Profiles
-and the catalog carry neither a permanent economy model nor runtime settings.
+The default route is the owner's route table in the client's routing
+configuration: a few task classes, each with the model and effort its children
+launch with. The primary chooses the class; in evidence-only mode the hook refuses
+a Claude or Codex spawn that does not carry its declared class's pair, or whose
+pair inheritance or an environment override would replace. Without a table a
+Claude spawn must still name both settings. Every Claude launch records what the
+host ran its requested alias and effort as. `route-candidates` proposes pairs
+from cached benchmark measurements; the owner approves the table and reviews it
+when models change. See the
+[route table reference](../skills/route-subagents/references/route-table.md).
 
-Assay owns contracts, policy, local metadata and diagnostic replay. By default
-the client owns authorization, spawning, cancellation and actual quota
-accounting. With a Claude evidence-only configuration the hook only refuses a
-launch that names no model or effort, and records what the host ran each
-requested alias and effort as. Prepared state and an exact decision cache are bounded in memory;
-optional JSON telemetry has its own cache namespace and retention. An explicitly
-configured required mode adds a Claude hook guard: it binds routing calls and
-registered launches to the host session through a bounded SQLite rendezvous in a
-private state directory, launches workers with the model in the Agent call and
-the effort in a generated definition, gives owner-exempt native agents their
-configured model and denies unregistered launches without granting any permission.
-No daemon, learned router or mandatory model evaluation campaign is introduced.
-The [advisor reference](../skills/route-subagents/references/routing-advisor.md)
-and the [required routing contract](../skills/route-subagents/references/required-routing.md)
-define failure, configuration migration and rollback behavior.
+The routing advisor and required mode are frozen: available to an owner who
+enables them, unchanged, and not the default. The advisor is served by the
+benchmark MCP/CLI application: it builds a bounded immutable snapshot, asks the
+selected adapter (`native-economy`, or Jev with explicit consent) for an answer
+and applies deterministic policy. Required mode adds a Claude hook guard that
+binds routing calls and registered launches to the host session through a
+bounded SQLite rendezvous, launches workers with the model in the Agent call and
+the effort in a generated definition (it predates the per-call effort field),
+and denies unregistered launches without granting any permission.
+
+Assay owns contracts, policy, local metadata and diagnostic replay. The client
+owns authorization, spawning, cancellation and actual quota accounting. Prepared
+state and an exact decision cache are bounded in memory; optional JSON telemetry
+has its own cache namespace and retention. Profiles and the catalog carry no
+model or runtime settings. No daemon, learned router or mandatory model
+evaluation campaign is introduced. The
+[advisor reference](../skills/route-subagents/references/routing-advisor.md) and
+the [required routing contract](../skills/route-subagents/references/required-routing.md)
+define their failure, migration and rollback behavior.
 
 ## Guarded lifecycle
 

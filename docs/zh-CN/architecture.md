@@ -1,13 +1,16 @@
 # assay 的组成方式
 
-路由建议器是现有 `route-subagents` MCP/CLI 的组成部分。它复用原有基准数据，
-构建有大小限制的快照，经 `native-economy` 或单独启用的 Jev 获取排序后应用策略。
-目录和智能体配置不绑定固定的低成本模型。客户端负责权限、启动及实际配额；
-Assay 负责契约、本地元数据和诊断重放，不引入新守护进程或强制付费评测。
-显式启用的 `required` 模式增加 Claude 钩子检查：路由调用和已登记的启动经有界
-SQLite 存储绑定到主机会话。工作代理的模型在 Agent 调用中传递，effort 由生成的定义
-提供；所有者豁免的内置代理获得配置的模型；未登记的启动被拒绝，钩子本身不授予任何权限。
-详见 [RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)
+默认路由是所有者在客户端路由配置中维护的路由表：若干任务类别，每个类别指定其子代理
+使用的模型和 effort。主代理选择类别；在 evidence-only 模式下，钩子会拒绝未携带所声明
+类别对应组合的 Claude 或 Codex 启动，以及会被继承或环境变量覆盖的组合。没有路由表时，
+Claude 启动仍须同时指明两项设置。`route-candidates` 根据缓存的基准数据提出候选组合，
+由所有者批准路由表。详见 [路由表](../../skills/route-subagents/references/route-table.md)。
+
+路由建议器（`native-economy`，或经明确同意的 Jev）和 `required` 模式已冻结：所有者
+启用后仍可使用，但不再更改，也不是默认路径。`required` 模式早于 Agent 调用中的 effort
+字段，因此仍通过生成的定义传递 effort。客户端负责权限、启动及实际配额；Assay 负责契约、
+本地元数据和诊断重放，不引入新守护进程或强制付费评测。详见
+[RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md)
 与 [强制路由](../../skills/route-subagents/references/required-routing.md)。
 
 [English](../architecture.md) · [Русский](../ru/architecture.md) · **简体中文**

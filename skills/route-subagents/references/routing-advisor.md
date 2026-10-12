@@ -1,5 +1,10 @@
 # Routing advice over the existing evidence service
 
+**Status: frozen.** The advisor stays available to an owner who enables it, with
+this contract unchanged, but it is no longer the default path and is not being
+extended. Its adequacy answers did not separate candidate pairs in practice; the
+default is a [route table](route-table.md) the owner reviews when models change.
+
 The native [decision contract](native-decision-contract.md) assesses current
 client model × effort pairs against a concrete task, then code selects using
 comparable benchmark cost. Legacy policies and optional Jev still use rankings.

@@ -74,8 +74,9 @@ purpose, expected use, reason for this timing and any readiness trigger only
 where they clarify the boundary. The primary's retained work may be a short
 note; do not forward the complete task graph or conversation unnecessarily.
 
-Finalize the execution prompt and ownership before `prepare_routing`, batching
-ready packets in the existing plan. Then follow the skill's selected routing
+Finalize the execution prompt and ownership before choosing the packet's route
+class, or before `prepare_routing` when an advisor is enabled, batching ready
+packets in the existing plan. Then follow the skill's selected routing
 mode. Do not add these notes as invented API parameters, mutate an authorized
 launch input, choose a new model here, or bypass an unavailable host adapter.
 Later newly ready work can need another routing decision; reuse valid evidence
