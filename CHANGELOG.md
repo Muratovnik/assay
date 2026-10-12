@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.23.0](https://github.com/Muratovnik/assay/compare/v0.22.0...v0.23.0) (2026-10-12)
+
+### Features
+
+* **route-subagents:** with an evidence-only Claude configuration the hook refuses an agent launch made inside a subagent, since Claude Code lets subagents nest by default and such a child skips the primary's route choice; the refusal names the one-level rule and tells the worker to do the step itself or name it in its report. Codex hook input does not name the calling agent, so the references point to `agents.max_depth` there and say why the rule exists ([6cde3c5](https://github.com/Muratovnik/assay/commit/6cde3c559b0bccfe344a2fad02f5dbc7e9c8cbf3))
+
 ## [0.22.0](https://github.com/Muratovnik/assay/compare/v0.21.0...v0.22.0) (2026-10-12)
 
 ### Features
