@@ -111,6 +111,24 @@ class SkillCheckActivationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             activation.load_rules(self.root, disabled_rules=["no-such-rule"])
 
+    def test_a_subagent_gets_its_own_check_at_start(self):
+        # A subagent never receives the per-request check; its start carries one.
+        def start(agent_type, rules=None):
+            return activation.evaluate({"hook_event_name": "SubagentStart", "agent_id": "a1",
+                                        "agent_type": agent_type}, self.rules if rules is None else rules)
+        text = start("general-purpose")["context"]
+        self.assertIn("Assay skill check for this subagent", text)
+        self.assertIn("skills your packet names apply", text)
+        self.assertIn("Start your report", text)
+        self.assertIn(str((self.root / "skills").resolve()), text)
+        self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(self.listed(text)))
+        self.assertEqual(text, start("assay:evidence-reviewer")["context"])
+        self.assertEqual("", start("assay-routing-advisor-high-0123456789abcdef")["context"])
+        disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check"])
+        self.assertEqual("", start("general-purpose", disabled)["context"])
+        self.assertEqual("", activation.evaluate({"hook_event_name": "SubagentStop", "agent_id": "a1"},
+                                                 self.rules)["context"])
+
     def test_skill_map_must_cover_the_catalog_with_short_ascii_cues(self):
         for label, transform in (
             ("missing", lambda text: text.replace('skill = "skill/code-change"', 'skill = "skill/test-writing"')),

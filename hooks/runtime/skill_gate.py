@@ -1,4 +1,4 @@
-"""Hold a Claude reply to the Assay skills it names; never route, authorize or launch work.
+"""Hold a Claude reply or subagent report to the Assay skills it names; never route, authorize or launch work.
 
 The skill check asks the agent to start its final reply with "Assay: ...".
 This gate records which skills the session actually loaded (Skill tool calls
@@ -66,11 +66,17 @@ def declared(text, names):
 
 
 def apply(event, client, names, directory, *, clock=time.time):
-    """Record a load on PreToolUse; on Stop return continuation feedback or {}."""
+    """Record a load on PreToolUse; on Stop or SubagentStop return continuation feedback or {}.
+
+    A subagent's tool calls carry its agent_id, and so does its SubagentStop, so
+    a worker's report is held to the skills that worker loaded.
+    """
     if client != "claude" or not directory:
         return {}
     name, key = event.get("hook_event_name"), _key(event)
-    if key is None or name not in {"PreToolUse", "Stop"}:
+    if key is None or name not in {"PreToolUse", "Stop", "SubagentStop"}:
+        return {}
+    if name == "SubagentStop" and not event.get("agent_id"):
         return {}
     from route_evidence.pipeline_store import PipelineStore
     with PipelineStore(Path(directory) / "skill-gate", clock=clock).transaction() as tx:
@@ -91,11 +97,12 @@ def apply(event, client, names, directory, *, clock=time.time):
     if not missing:
         return {}
     listed = ", ".join(missing)
+    who = "this subagent" if name == "SubagentStop" else "this session"
     # Stated as facts, not commands: the client continues the turn under the
     # same loop limits as a block, and an imperative out-of-band message is
     # what prompt-injection defenses are wary of.
-    return {"hookSpecificOutput": {"hookEventName": "Stop", "additionalContext": (
-        f"Assay skill gate: the reply's Assay line names {listed}, and this session has not loaded "
+    return {"hookSpecificOutput": {"hookEventName": name, "additionalContext": (
+        f"Assay skill gate: the reply's Assay line names {listed}, and {who} has not loaded "
         f"{'that skill' if len(missing) == 1 else 'those skills'}. The skill check expects each named skill "
         "to be loaded (skill tool or its SKILL.md) and the work checked against it before the final reply, "
         "which starts with the Assay line again.")}}

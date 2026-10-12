@@ -99,7 +99,8 @@ The check costs about 1.6 KB of English text (roughly 400 tokens) on every
 prompt, in Claude Code and Codex alike, and it stays in the conversation until
 compaction. It is not re-sent when a session resumes or compacts, so after a
 compaction the current request's check may survive only in the summary.
-Subagents do not receive it; their packets carry their own instructions. The
+A subagent's packet is not a user prompt, so subagents get a variant at their
+start instead, see [subagents](#subagents). The
 agent omits the `Assay:` line when a request fixes an exact output format. For
 scripted runs whose output must stay clean, such as `claude -p` pipelines, turn
 the check off with `disabled_rules: ["skill-check"]` (see below).
@@ -123,6 +124,22 @@ the agent named the right skills; `Assay: none` and an answer without the line
 pass. A subagent's load does not count for the main session. Codex has no gate:
 its skill loads are not visible reliably enough to act on. Turn the gate off
 with `disabled_rules: ["skill-gate"]`; disabling the check also disables it.
+
+### Subagents
+
+A subagent starts without the main session's loaded skills and never receives
+the per-request check. At `SubagentStart`, in Claude Code and Codex, the hook adds
+a check for the subagent instead: the skills its packet names apply, it may add
+others its work needs, it loads each before the work, through the skill tool or
+by reading `<name>/SKILL.md` under the installed `skills` directory, which the
+check names for profiles without the skill tool, and it starts its report with
+the `Assay:` line. The required-mode routing advisor, whose answer is a fixed
+structure, gets no check. In Claude Code the gate above also runs at
+`SubagentStop`: a report naming a skill that subagent did not load continues it
+once. Codex `SubagentStop` accepts no feedback context, so Codex subagents get
+the check only. A report without the line passes, because the hook cannot see
+whether its packet fixed an exact output format. `disabled_rules:
+["skill-check"]` turns off the subagent check as well.
 
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an

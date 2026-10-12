@@ -14,6 +14,7 @@ Primary-owned work while this runs (or why sequential isolation is useful):
 Expected effect: change_required | no_change_acceptable | read_only_finding
 Relevant root, base or snapshot, owned dirty inputs:
 Selected model and reasoning effort, brief task/quota rationale:
+Assay skills the work needs (or none), loaded before the work:
 Read scope, owned paths/hunks and runtime write set:
 Shared decisions, dependencies and reserved generated outputs:
 Acceptance evidence and permitted checks:
@@ -25,6 +26,14 @@ These are assignment/plan notes, not additional routing API parameters. Follow
 [delegation planning](delegation-planning.md) when the split or timing is unclear.
 Finalize relevant notes in the execution prompt before preparing the route;
 never append them to an already authorized immutable launch input.
+
+Name the Assay skills by the packet's own work, not the primary's: a code
+worker gets `code-change`, a reviewer `independent-audit`, a test writer
+`test-writing`. A worker starts with none of the primary's loaded skills or its
+per-request skill check, so a packet without them leaves the method to chance.
+The worker loads each named skill before the work, may add another its work
+needs, and starts its report with the `Assay:` line unless the packet fixes an
+exact output format, such as a structured advisor answer.
 
 Record model and effort with the launch even when inheritance implements the
 selection; no model matrix is needed. Explain ordered implementation steps only

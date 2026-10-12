@@ -34,13 +34,17 @@ class SkillGateTests(unittest.TestCase):
     def load(self, tool, data, **extra):
         return self.apply({"hook_event_name": "PreToolUse", "tool_name": tool, "tool_input": data, **extra})
 
-    def feedback(self, result):
-        """The continuation text, once it is checked to be Stop feedback rather than a block."""
+    def feedback(self, result, event="Stop"):
+        """The continuation text, once it is checked to be stop feedback rather than a block."""
         self.assertNotIn("decision", result)
         output = result["hookSpecificOutput"]
         self.assertEqual({"hookEventName", "additionalContext"}, set(output))
-        self.assertEqual("Stop", output["hookEventName"])
+        self.assertEqual(event, output["hookEventName"])
         return output["additionalContext"]
+
+    def report(self, text, agent="worker", **extra):
+        return self.apply({"hook_event_name": "SubagentStop", "agent_id": agent, "agent_type": "general-purpose",
+                           "last_assistant_message": text, **extra})
 
     def test_named_but_unloaded_skill_continues_the_turn_once(self):
         text = self.feedback(self.stop("Assay: evidence-research\n\nFrom memory: use /usage."))
@@ -78,6 +82,23 @@ class SkillGateTests(unittest.TestCase):
         self.load("Skill", {"skill": "evidence-research"}, session_id="other")
         self.assertIn("evidence-research", self.feedback(self.stop("Assay: evidence-research")))
 
+    def test_a_subagent_report_is_held_to_the_skills_that_subagent_loaded(self):
+        text = self.feedback(self.report("Assay: code-change\n\nPatched."), "SubagentStop")
+        self.assertIn("names code-change", text)
+        self.assertIn("this subagent has not loaded", text)
+        self.assertEqual({}, self.report("Assay: code-change", stop_hook_active=True))
+        # The root's load or another worker's does not count for this worker.
+        self.load("Skill", {"skill": "code-change"})
+        self.load("Skill", {"skill": "code-change"}, agent_id="other")
+        self.assertIn("code-change", self.feedback(self.report("Assay: code-change"), "SubagentStop"))
+        self.load("Read", {"file_path": "C:\\plugins\\assay\\skills\\code-change\\SKILL.md"}, agent_id="worker")
+        self.assertEqual({}, self.report("Assay: code-change"))
+        self.assertEqual({}, self.report("Assay: none"))
+        # Without an agent identity, or in Codex, nothing is held.
+        unloaded = {"hook_event_name": "SubagentStop", "last_assistant_message": "Assay: test-writing"}
+        self.assertEqual({}, self.apply(unloaded))
+        self.assertEqual({}, self.apply({**unloaded, "agent_id": "worker"}, client="codex"))
+
     def test_loads_expire_with_their_record(self):
         self.load("Skill", {"skill": "code-change"})
         self.now += skill_gate.TTL + 1
@@ -106,6 +127,25 @@ class SkillGateTests(unittest.TestCase):
         result, _ = process(unloaded, "claude", {**environment, "ASSAY_HOOK_CONFIG": str(settings)},
                             clock=lambda: self.now)
         self.assertEqual({}, result)
+
+    def test_runtime_gives_a_subagent_the_check_and_holds_its_report(self):
+        environment = {"CLAUDE_PLUGIN_DATA": str(self.directory / "data")}
+        worker = {"session_id": "session", "cwd": "work", "agent_id": "worker", "agent_type": "general-purpose"}
+        for client in ("claude", "codex"):
+            with self.subTest(client=client):
+                result, error = process({**worker, "hook_event_name": "SubagentStart"}, client, environment,
+                                        clock=lambda: self.now)
+                self.assertIsNone(error)
+                output = result["hookSpecificOutput"]
+                self.assertEqual("SubagentStart", output["hookEventName"])
+                self.assertIn("Assay skill check for this subagent", output["additionalContext"])
+        report = {**worker, "hook_event_name": "SubagentStop", "last_assistant_message": "Assay: code-change"}
+        result, error = process(report, "claude", environment, clock=lambda: self.now)
+        self.assertIsNone(error)
+        self.assertIn("this subagent", self.feedback(result, "SubagentStop"))
+        process({**worker, "hook_event_name": "PreToolUse", "tool_name": "Skill",
+                 "tool_input": {"skill": "assay:code-change"}}, "claude", environment, clock=lambda: self.now)
+        self.assertEqual({}, process(report, "claude", environment, clock=lambda: self.now)[0])
 
     def test_only_the_claude_manifest_registers_stop(self):
         claude = json.loads((ROOT / "hooks/hooks.json").read_text(encoding="utf-8"))["hooks"]

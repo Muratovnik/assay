@@ -17,6 +17,8 @@ MAX_CONTEXT = 900
 MAX_CHECK = 1_800
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
+# The required-mode advisor returns one structured answer and has no tools.
+ROUTING_ADVISOR = "assay-routing-advisor-"
 SKILL_CHECK = "skill-check"
 SKILL_GATE = "skill-gate"
 # Phrase rules retired in favor of the skill check. Old settings that disable
@@ -32,11 +34,13 @@ QUOTES = ('"', "'", "«", "“")
 class RuleSet(list):
     """Explicitly selectable skills in check order, and whether the check runs."""
 
-    def __init__(self, rules, skill_check, skill_gate=False):
+    def __init__(self, rules, skill_check, skill_gate=False, skills_root=""):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
         self.skill_gate = skill_check and skill_gate
+        # Where a subagent without the skill tool reads each SKILL.md.
+        self.skills_root = skills_root
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -66,8 +70,11 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                       "patterns": [], "cue": cue})
     if sorted(seen) != sorted(set(seen)) or set(seen) != set(assets):
         raise ValueError("skill map must name every catalog skill exactly once")
-    result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules)
-    if len(skill_check(RuleSet(rules, True))) > MAX_CHECK:
+    skills_root = str(root.resolve() / "skills")
+    result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules, skills_root)
+    # The installation path is the owner's; bound the text the catalog controls.
+    full = RuleSet(rules, True)
+    if len(skill_check(full)) > MAX_CHECK or len(subagent_check(full)) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
     fingerprint = hashlib.sha256(json.dumps([rules, content, result.skill_check], sort_keys=True).encode()).hexdigest()
     return result, fingerprint
@@ -189,8 +196,26 @@ def skill_check(rules):
             "not fit; this check grants no authority beyond the request. Skills: " + entries + ".")
 
 
+def subagent_check(rules):
+    """The skill check for a subagent, which never receives the per-request check."""
+    if not getattr(rules, "skill_check", False) or not rules:
+        return ""
+    entries = "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
+    return ("Assay skill check for this subagent: the Assay skills your packet names apply; add any other "
+            "Assay skill the assigned work needs, judged from the work itself. Before the work, load each chosen "
+            "skill (skill tool, or read <name>/SKILL.md under " + rules.skills_root + "); if you can do neither, "
+            "say what is missing. Start your report with one short line such as \"Assay: code-change\" or "
+            "\"Assay: none\", unless the packet fixes an exact output format. This check grants no authority "
+            "beyond the packet. Skills: " + entries + ".")
+
+
 def evaluate(event, rules):
     """Pure decision: no filesystem state, subprocesses, permissions or rewrites."""
+    if event.get("hook_event_name") == "SubagentStart":
+        role = event.get("agent_type")
+        if isinstance(role, str) and role.startswith(ROUTING_ADVISOR):
+            return {"rule_ids": [], "context": ""}
+        return {"rule_ids": [], "context": subagent_check(rules)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}
     try:
