@@ -6,6 +6,13 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.24.0](https://github.com/Muratovnik/assay/compare/v0.23.1...v0.24.0) (2026-10-12)
+
+### Features
+
+* **hooks:** subagents get the Assay skill check at their start in Claude Code and Codex, since they never receive the per-request check; it says the skills their packet names apply and where to read each SKILL.md without the skill tool. In Claude Code the skill gate also holds a subagent's report to the skills that subagent loaded. route-subagents packets now name the Assay skills their work needs ([ec035d3](https://github.com/Muratovnik/assay/commit/ec035d39e254b9ef1bb4831b2b200e1a9510e05a))
+* **retrospective:** add a tool-neutral retrospective skill that reviews a period of agent work for recurring friction, reconciles it with the rules already in force and proposes evidence-backed, owner-routed changes for the user to decide ([b59b7a1](https://github.com/Muratovnik/assay/commit/b59b7a1a90dbf2f3781bf7eafb9056a57309f276))
+
 ## [0.23.1](https://github.com/Muratovnik/assay/compare/v0.23.0...v0.23.1) (2026-10-12)
 
 ### Bug Fixes
