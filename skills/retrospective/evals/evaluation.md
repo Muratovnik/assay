@@ -39,6 +39,18 @@ All inputs are synthetic and anonymised. The C05 export follows the documented
 metadata-mode record shape in simplified form; it is not a captured store. No
 fixture contains real transcripts, client data or personal data.
 
+## Recorded comparison
+
+A first paired run used C01 and C07, one executor configuration and explicit
+loading, graded by the maintainer after all runs. Both conditions reached the
+substantive answers: without the method the executor still found the norms
+supplied in C01's inputs and tracked C07's earlier decisions correctly. The
+method added a reading ledger, an explicit cause layer, exact changes with undo
+and a per-item decision request, at roughly ten percent more tokens. Neither
+case reproduced the failure to look for norms that are not handed over; a new
+case should place the norm in the repository rather than the inputs. C01 and
+C07 are now exposed regression cases.
+
 ## Limits
 
 These files establish input and rubric structure only. They do not run a model,
