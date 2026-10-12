@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.23.1](https://github.com/Muratovnik/assay/compare/v0.23.0...v0.23.1) (2026-10-12)
+
+### Bug Fixes
+
+* **route-subagents:** the refusal of an agent launch made inside a Claude subagent no longer starts with a doubled `Assay:` prefix ([603f28e](https://github.com/Muratovnik/assay/commit/603f28e7f2eff653921720dd14fdc7be007eba6c))
+
 ## [0.23.0](https://github.com/Muratovnik/assay/compare/v0.22.0...v0.23.0) (2026-10-12)
 
 ### Features
