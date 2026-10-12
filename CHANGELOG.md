@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.21.0](https://github.com/Muratovnik/assay/compare/v0.20.0...v0.21.0) (2026-10-12)
+
+### Features
+
+* **route-subagents:** a route-table refusal now also says how to choose a class: by the work, not by a pair chosen beforehand, and the less demanding class when two fit; an admitted launch gets a note naming its class and asking for a one-line reason, which nothing enforces. A session still holding an older skill learns the rule from the hook reply alone ([9e04d7d](https://github.com/Muratovnik/assay/commit/9e04d7ddf5ba1b14603ee9c4b245505539ebcca0))
+
+### Bug Fixes
+
+* **route-subagents:** show a Codex task-name example the client accepts (`gather_...`) in a class refusal ([7489836](https://github.com/Muratovnik/assay/commit/748983659575c6f448e7d21670241cc64f5d8cd7))
+
+### Documentation
+
+* **hooks:** say that a Claude launch without a route table must name both model and effort ([a142ee4](https://github.com/Muratovnik/assay/commit/a142ee4e329db9e7fb27690d9562e6af9484c2bb))
+
 ## [0.20.0](https://github.com/Muratovnik/assay/compare/v0.19.0...v0.20.0) (2026-10-12)
 
 ### Features
