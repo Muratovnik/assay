@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.22.0](https://github.com/Muratovnik/assay/compare/v0.21.0...v0.22.0) (2026-10-12)
+
+### Features
+
+* **route-subagents:** with a route table configured, a spawn the table does not check (a continuation, an owner-exempt agent type or a switched-off check) gets a short pointer to the table and the rule for choosing a class instead of the advisor-era launch reminder; without a table the reminder is unchanged ([6aa22d6](https://github.com/Muratovnik/assay/commit/6aa22d6fcdafd640eccb5102edd1de1fa755ba45))
+
 ## [0.21.0](https://github.com/Muratovnik/assay/compare/v0.20.0...v0.21.0) (2026-10-12)
 
 ### Features
