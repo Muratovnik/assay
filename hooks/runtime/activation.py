@@ -21,6 +21,9 @@ DELEGATION_SKILL = "skill/route-subagents"
 ROUTING_ADVISOR = "assay-routing-advisor-"
 SKILL_CHECK = "skill-check"
 SKILL_GATE = "skill-gate"
+# Claude source checks: the note after a fetch and the stop check of full-read claims.
+FETCH_NOTE = "fetch-note"
+READ_CLAIMS = "read-claims"
 # Phrase rules retired in favor of the skill check. Old settings that disable
 # them stay valid and do nothing, instead of breaking the hooks.
 RETIRED_RULES = frozenset({"test-audit", "test-writing", "research", "reuse-lookup", "reuse-question",
@@ -34,13 +37,16 @@ QUOTES = ('"', "'", "«", "“")
 class RuleSet(list):
     """Explicitly selectable skills in check order, and whether the check runs."""
 
-    def __init__(self, rules, skill_check, skill_gate=False, skills_root=""):
+    def __init__(self, rules, skill_check, skill_gate=False, skills_root="", fetch_note=False, read_claims=False):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
         self.skill_gate = skill_check and skill_gate
         # Where a subagent without the skill tool reads each SKILL.md.
         self.skills_root = skills_root
+        # Independent of the skill check: it reads sources, not skills.
+        self.fetch_note = fetch_note
+        self.read_claims = read_claims
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -49,7 +55,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    if set(disabled_rules) - RETIRED_RULES - {SKILL_CHECK, SKILL_GATE} or set(disabled_skills) - set(assets):
+    if set(disabled_rules) - RETIRED_RULES - {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, READ_CLAIMS} or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
     rules, seen, content = [], [], []
     for item in document["skills"]:
@@ -71,7 +77,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if sorted(seen) != sorted(set(seen)) or set(seen) != set(assets):
         raise ValueError("skill map must name every catalog skill exactly once")
     skills_root = str(root.resolve() / "skills")
-    result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules, skills_root)
+    result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules, skills_root,
+                     FETCH_NOTE not in disabled_rules, READ_CLAIMS not in disabled_rules)
     # The installation path is the owner's; bound the text the catalog controls.
     full = RuleSet(rules, True)
     every = [rule["skill"].split("/", 1)[1] for rule in rules]

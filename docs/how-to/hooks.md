@@ -1,8 +1,9 @@
 # Configure and diagnose command hooks
 
 Assay's plugin hooks are local commands, not prompt/agent hooks. They do not call
-models, install dependencies, launch advisors, read transcripts or modify client
-settings. Their text and any subsequent agent work still consume context/quota.
+models, install dependencies, launch advisors or modify client settings. In Claude
+Code the skill gate and the source check read the tail of the session transcript
+at `Stop` and `SubagentStop`. Their text and any subsequent agent work still consume context/quota.
 Skills-only installations do not install hooks.
 
 User corrections and acceptable examples can be kept as local feedback cases by
@@ -18,7 +19,8 @@ The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
 `hooks/codex.json` through its plugin manifest. Both invoke one runtime command
 per matching event. `PreToolUse` matches every tool, because the reading-role
 boundary and the spawn checks need to see each call; result and failure events
-match only the native spawn tools.
+match only the native spawn tools, and in Claude Code also `WebFetch` results for
+the [source check](#source-checks-in-claude-code).
 Generated definitions used by required routing retain their existing lifecycle.
 
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
@@ -191,6 +193,38 @@ and negative requests do not count as a choice. The CommonMark parser excludes
 blockquotes, fenced/indented code, lists and headings, and only the first request
 paragraph can make a choice.
 
+### Source checks in Claude Code
+
+A `WebFetch` result is not the page. Claude Code hands the page to a model with the
+fetch prompt and returns that model's answer, with short paraphrased quotes, and a
+blocked or challenge page can come back as a summary of the block. In a measured
+run an agent made seven such fetches of one study, got a challenge page, a 403 and
+a 404, and answered from a news article and the abstract; with a shell download
+of the same page it found the table the answer depended on.
+
+After the first `WebFetch` result of a request, the `PostToolUse` hook adds a note
+saying so: a conclusion that rests on the page needs its text, downloaded with a
+shell command such as `curl` or `gh` and read where the conclusion depends on it,
+or the answer says it rests on the fetch summary. The note appears once per
+request and agent, keyed by the prompt ID Claude Code sends; without one, once per
+agent. It needs the plugin data directory, where it keeps one hashed key per
+request and agent.
+
+At `Stop` and `SubagentStop` the hook reads the same transcript tail as the skill
+gate. When a line of the turn says a file or URL was read in full (`in full`,
+`entire`, `end to end`, `целиком`, `полностью` and similar) and names a file
+whose `Read` calls returned only part of it, or a URL opened only through
+`WebFetch`, the turn continues once with feedback naming what was read. As with
+the gate, the answer stands and one line is enough when nothing changes. The
+check fires only on positive evidence. A file printed with a shell command leaves
+no `Read` in the transcript, and a URL that a shell command also names counts as
+downloaded, so neither triggers it. Reads before the latest compaction are not
+counted. A subagent's transcript records no line counts, so there a ranged read
+counts as reaching the end only when it returned fewer lines than its limit, and
+a plain `Read` counts as complete. The skill gate's feedback takes priority at the
+same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch and
+`"read-claims"` the stop check; each works without the other.
+
 ## Hints do not grant authority
 
 Neither the check nor an explicit-choice suggestion authorizes edits, delegation,
@@ -229,7 +263,8 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 `skill/<name>` form; a disabled skill leaves the check and cannot be chosen
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
-and keeps explicit choices; `"skill-gate"` turns off only the Claude gate. The
+and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
+`"fetch-note"` and `"read-claims"` the two Claude source checks. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
 rest) are still accepted and do nothing, so an existing configuration keeps
 working; any other unknown ID is an error.

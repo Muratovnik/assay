@@ -61,7 +61,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "^(Agent|Task)$",
+        "matcher": "^(Agent|Task|WebFetch)$",
         "hooks": [
           {
             "type": "command",

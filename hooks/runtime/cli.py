@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback, routing_telemetry, skill_gate
+from runtime import state, feedback, routing_telemetry, skill_gate, sources
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence import route_table
@@ -247,6 +247,14 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 # The check names skills already loaded, so the model can stay quiet about them.
                 loaded = skill_gate.loaded(event, client, names, settings["state_dir"],
                                            **({"clock": clock} if clock else {}))
+        name = event["hook_event_name"]
+        if client == "claude" and not protected:
+            # How a source was read, not which skill applies; the skill gate's reply keeps priority.
+            note = (sources.fetched(event, settings["state_dir"], **({"clock": clock} if clock else {}))
+                    if name == "PostToolUse" and rules.fetch_note
+                    else sources.stopped(event) if name in {"Stop", "SubagentStop"} and rules.read_claims else {})
+            if note:
+                return note, None
         decision = ({"rule_ids": [], "context": ""} if protected
                     else evaluate(event, rules, client=client, loaded=loaded))
         if legacy:
