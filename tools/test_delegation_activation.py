@@ -81,6 +81,8 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertTrue(text.isascii())
         self.assertNotIn("SECRET_SENTINEL", text)
         # Announce on change in one sentence; nothing when no skill applies.
+        self.assertIn("a missing tool does not make a skill inapplicable", text)
+        self.assertIn("even if it needs a tool you lack, and say what is missing", text)
         self.assertIn("When you start applying a skill not yet in use here, or the set changes", text)
         self.assertIn("`assay:code-change`", text)
         self.assertIn("Say nothing about skills when none applies", text)

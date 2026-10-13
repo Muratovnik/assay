@@ -84,8 +84,8 @@ Using `assay:code-change` and `assay:test-writing` to fix the parser and cover i
 ```
 
 It then loads each named skill it has not loaded yet before any other tool call.
-A skill that needs a missing tool is still loaded, and the agent says what is
-missing. When no skill applies, or the skills already in use still fit, as in a
+A missing tool does not make a skill inapplicable: a skill that needs one is still
+announced and loaded, and the agent says what is missing. When no skill applies, or the skills already in use still fit, as in a
 follow-up question, a turn after a subagent's notification or a continuation, it
 says nothing about skills, and it does not restate the sentence later in the
 turn. If it skips a skill the task obviously calls for, it says why in a few

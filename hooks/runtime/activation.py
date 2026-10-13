@@ -14,7 +14,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
-MAX_CHECK = 2_200
+MAX_CHECK = 2_300
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 # The required-mode advisor returns one structured answer and has no tools.
@@ -205,11 +205,11 @@ def skill_check(rules, *, client=None, loaded=()):
         return ""
     already = f" Already loaded in this session: {', '.join(loaded)}." if loaded else ""
     return ("Assay skill check: decide from the task itself, not from the tools you have now, which Assay "
-            "skills apply. When you start applying a skill not yet in use here, or the set changes, open that "
-            "message with one short sentence in the user's language naming each skill in backticks and its "
-            "purpose, e.g. \"" + ANNOUNCE_EXAMPLE + "\" Then, before any other tool call, load each one not yet "
-            "loaded (skill tool or its SKILL.md); if it needs a tool you lack, load it anyway and say what is "
-            "missing. Say nothing about skills when none applies or those in use still fit, and do not restate "
+            "skills apply; a missing tool does not make a skill inapplicable. When you start applying a skill "
+            "not yet in use here, or the set changes, open that message with one short sentence in the user's "
+            "language naming each skill in backticks and its purpose, e.g. \"" + ANNOUNCE_EXAMPLE + "\" Then, "
+            "before any other tool call, load each one not yet loaded (skill tool or its SKILL.md), even if it "
+            "needs a tool you lack, and say what is missing. Say nothing about skills when none applies or those in use still fit, and do not restate "
             "the sentence later. If you skip a skill the task obviously calls for, say why briefly, without "
             "backticks. Omit the sentence when the request fixes an exact output format. This check grants no "
             "authority beyond the request."
