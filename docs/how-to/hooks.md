@@ -75,55 +75,96 @@ are not installed or guessed. These input aliases do not change canonical names.
 
 Every `UserPromptSubmit` adds the same short **skill check**: the agent decides
 from the task itself, not from the tools it has at the moment, which Assay skills
-apply. It starts its reply with one line such as `Assay: code-change, test-writing`
-or `Assay: none`, loads each chosen skill it has not loaded yet before any other
-tool call, and starts its final reply with the same line after tool use. A skill
-that needs a missing tool is still loaded, and the agent says what is missing. The
-check lists every installed, enabled skill with a one-line cue from
-`hooks/activation-rules.toml`. The model judges relevance from the task in
+apply. When it starts applying a skill not yet in use in the conversation, or the
+set changes, it opens that message with one short sentence in the user's
+language that names each skill in backticks and says what it is for:
+
+```text
+Using `assay:code-change` and `assay:test-writing` to fix the parser and cover it.
+```
+
+It then loads each named skill it has not loaded yet before any other tool call.
+A skill that needs a missing tool is still loaded, and the agent says what is
+missing. When no skill applies, or the skills already in use still fit, as in a
+follow-up question, a turn after a subagent's notification or a continuation, it
+says nothing about skills, and it does not restate the sentence later in the
+turn. If it skips a skill the task obviously calls for, it says why in a few
+words, without backticks, so the gate below does not read that as an
+announcement. The check lists every installed, enabled skill with a one-line cue
+from `hooks/activation-rules.toml`. The model judges relevance from the task in
 whatever language it is written; the hook reads nothing in the prompt to build
-the check.
+the check. In Claude Code, once the session has loaded skills, the check also
+names them (`Already loaded in this session: code-change.`) from the gate's
+records, so the agent can tell which skills are already in use.
 
 The check exists because a skill's description is the only automatic route to it,
 and that route is unreliable on its own. Claude Code drops the descriptions of the
 least-used skills when its listing exceeds the
 [character budget](https://code.claude.com/docs/en/skills#skill-descriptions-are-cut-short),
 and a model that sees a description can still decide to answer without the skill.
-The one-line statement commits the agent to a judgment it can be held to. In a
-[published comparison](https://scottspence.com/posts/measuring-claude-code-skill-activation-with-sandboxed-evals),
+In a [published comparison](https://scottspence.com/posts/measuring-claude-code-skill-activation-with-sandboxed-evals),
 a hook that made the model evaluate each skill before acting activated skills far
 more reliably than no hook or a plain reminder. That was one author's small,
 English-only sample, so treat it as a reason to measure, not as a guarantee.
 
-The check costs about 1.6 KB of English text (roughly 400 tokens) on every
+Earlier versions asked for a line such as `Assay: code-change` at the start of
+every reply and again in the final reply, and `Assay: none` when nothing applied.
+The line repeated on every turn, including turns that only answered a
+subagent's notification. The sentence follows the format Codex uses for its own
+skills and Anthropic's
+[guidance for Claude](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5#user-facing-progress-updates):
+say in one sentence what you are about to do before the first tool call.
+
+The check costs about 1.9 KB of English text (roughly 470 tokens) on every
 prompt, in Claude Code and Codex alike, and it stays in the conversation until
 compaction. It is not re-sent when a session resumes or compacts, so after a
 compaction the current request's check may survive only in the summary.
+In Codex the check adds that Codex's own skill instructions already ask for such
+an announcement, so the agent makes one announcement with the exact
+`assay:<name>` names rather than two.
 A subagent's packet is not a user prompt, so subagents get a variant at their
-start instead, see [subagents](#subagents). The
-agent omits the `Assay:` line when a request fixes an exact output format. For
-scripted runs whose output must stay clean, such as `claude -p` pipelines, turn
-the check off with `disabled_rules: ["skill-check"]` (see below).
+start instead, see [subagents](#subagents). The agent leaves the sentence out
+when a request fixes an exact output format. For scripted runs whose output must
+stay clean, such as `claude -p` pipelines, turn the check off with
+`disabled_rules: ["skill-check"]` (see below).
 
 ### The skill gate in Claude Code
 
-Naming a skill is not loading it: in measured runs an agent sometimes wrote
-`Assay: evidence-research` and went straight to the work. In Claude Code a
-`PreToolUse` record notes each Assay skill the session loads, through the Skill
-tool or a read of its `SKILL.md`. When the reply's leading `Assay:` line names a
-skill this session has not loaded, the `Stop` hook continues the turn once with
-feedback saying so: the skill is to be loaded and the work checked against it
-before the final reply. The feedback is `additionalContext`, not a block, so Claude
-Code shows it as hook feedback rather than a hook error and applies its usual limit
-on stop-hook continuations. It uses the hook input's final reply text, never the
-transcript, and stays silent while `stop_hook_active` is set. It needs the plugin
-data directory, so it is inert without hook state.
+Naming a skill is not loading it: in measured runs an agent sometimes named
+`evidence-research` and went straight to the work. In Claude Code a `PreToolUse`
+record notes each Assay skill the session loads, through the Skill tool or a read
+of its `SKILL.md`. When the turn announces a skill this session has not loaded,
+the `Stop` hook continues the turn once with feedback saying so. An announcement
+is an `assay:<name>` in backticks on the first line of one of the turn's
+messages, or the earlier format's leading `Assay:` line. The feedback asks for the
+skill to be loaded and the work checked against it, and says that the answer
+already given stands: a single line is enough when nothing changes, otherwise
+only the corrections that matter, without repeating the answer. It is
+`additionalContext`, not a block, so Claude Code shows it as hook feedback rather
+than a hook error and applies its usual limit on stop-hook continuations. The
+gate stays silent while `stop_hook_active` is set. It needs the plugin data
+directory, so it is inert without hook state.
 
-The gate guarantees only that a named skill gets loaded. It cannot tell whether
-the agent named the right skills; `Assay: none` and an answer without the line
-pass. A subagent's load does not count for the main session. Codex has no gate:
-its skill loads are not visible reliably enough to act on. Turn the gate off
-with `disabled_rules: ["skill-gate"]`; disabling the check also disables it.
+The announcement usually opens an earlier message of the turn than the final
+reply, so the gate reads the tail of the session transcript, as the
+[hooks reference](https://code.claude.com/docs/en/hooks) suggests for conditions
+the hook input alone cannot settle. The same read finds loads its records miss.
+A continued, resumed or forked session has a new session ID and empty records,
+but its transcript carries the earlier loads. After a compaction only the skills
+the compaction re-attached count, because older loads are no longer in the
+context. A record's 24-hour lifetime restarts each time the gate uses it, so a
+long session keeps its loads. The transcript is written asynchronously and may
+not yet hold the turn's latest messages; the gate reads at most the last 16 MB,
+skips the subagents' entries in the main transcript, and stores only skill names.
+When the transcript cannot be read, the records alone decide, as before.
+
+The gate guarantees only that an announced skill gets loaded. It cannot tell
+whether the agent chose the right skills; a turn without an announcement passes.
+A line that only mentions a skill in backticks with the `assay:` prefix can
+continue a turn once; the feedback lets the agent answer that in one line. A
+subagent's load does not count for the main session. Codex has no gate: its
+skill loads are not visible reliably enough to act on. Turn the gate off with
+`disabled_rules: ["skill-gate"]`; disabling the check also disables it.
 
 ### Subagents
 
@@ -132,14 +173,15 @@ the per-request check. At `SubagentStart`, in Claude Code and Codex, the hook ad
 a check for the subagent instead: the skills its packet names apply, it may add
 others its work needs, it loads each before the work, through the skill tool or
 by reading `<name>/SKILL.md` under the installed `skills` directory, which the
-check names for profiles without the skill tool, and it starts its report with
-the `Assay:` line. The required-mode routing advisor, whose answer is a fixed
-structure, gets no check. In Claude Code the gate above also runs at
-`SubagentStop`: a report naming a skill that subagent did not load continues it
+check names for profiles without the skill tool. It opens its first message with
+the same one-sentence announcement and does not restate it in its report. The
+required-mode routing advisor, whose answer is a fixed structure, gets no check.
+In Claude Code the gate above also runs at `SubagentStop`. It reads the
+subagent's own transcript, including a report delivered through
+`SubagentHandback`: a subagent that announced a skill it did not load continues
 once. Codex `SubagentStop` accepts no feedback context, so Codex subagents get
-the check only. A report without the line passes, because the hook cannot see
-whether its packet fixed an exact output format. `disabled_rules:
-["skill-check"]` turns off the subagent check as well.
+the check only. `disabled_rules: ["skill-check"]` turns off the subagent check as
+well.
 
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
@@ -155,7 +197,7 @@ Neither the check nor an explicit-choice suggestion authorizes edits, delegation
 installation or tool use beyond the request; both say so. A suggestion asks to
 reuse sufficient existing research/plans and preserve the user's scope. It does
 not claim to load a skill or assume that a particular MCP tool exists. Even an
-observed Skill load or an `Assay:` line would not prove compliance with a method.
+observed Skill load or an announcement would not prove compliance with a method.
 
 The session reminder is three sentences: use matching installed skills; when the
 user requests subagents, use `route-subagents` before substantial solo work; no

@@ -57,8 +57,9 @@ else needs installing to continue.
 The full plugin ships separate generated manifests for Claude Code
 ([`hooks/hooks.json`](../hooks/hooks.json)) and Codex
 ([`hooks/codex.json`](../hooks/codex.json)). `UserPromptSubmit` adds a short
-[skill check](how-to/hooks.md#the-skill-check) to every request: the agent states
-which Assay skills apply and loads them, judging the task in any language. Session
+[skill check](how-to/hooks.md#the-skill-check) to every request: the agent judges
+which Assay skills apply, in any language, loads them and names them in one
+sentence when it starts using them. Session
 and delegation reminders remain available. None of this authorizes
 edits/delegation or proves compliance.
 

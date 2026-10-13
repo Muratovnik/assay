@@ -234,21 +234,27 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             legacy = reminder(event, environment)
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
+        loaded = []
         if client == "claude" and rules.skill_gate and settings["state_dir"]:
-            # Records skill loads on PreToolUse; on Stop it can hold a reply to
-            # the skills it named. A guard reply keeps priority.
+            # Records skill loads on PreToolUse; on Stop it can hold a turn to
+            # the skills it announced. A guard reply keeps priority.
             names = {rule["skill"].split("/", 1)[1] for rule in rules}
             gate = skill_gate.apply(event, client, names, settings["state_dir"],
                                     **({"clock": clock} if clock else {}))
             if gate and not protected:
                 return gate, None
-        decision = {"rule_ids": [], "context": ""} if protected else evaluate(event, rules)
+            if event["hook_event_name"] == "UserPromptSubmit":
+                # The check names skills already loaded, so the model can stay quiet about them.
+                loaded = skill_gate.loaded(event, client, names, settings["state_dir"],
+                                           **({"clock": clock} if clock else {}))
+        decision = ({"rule_ids": [], "context": ""} if protected
+                    else evaluate(event, rules, client=client, loaded=loaded))
         if legacy:
             decision["context"] = legacy["hookSpecificOutput"]["additionalContext"]
         if settings["state_dir"]:
             kwargs = {"clock": clock} if clock else {}
             decision = state.apply(event, client, decision, rules, fingerprint, settings["state_dir"],
-                                   record=settings["record_events"], outcome=outcome, **kwargs)
+                                   record=settings["record_events"], outcome=outcome, loaded=loaded, **kwargs)
         if protected:
             return protected, None  # One voice; no competing permission/argument writers.
         if decision["context"]:

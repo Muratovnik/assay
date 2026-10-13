@@ -14,7 +14,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
-MAX_CHECK = 1_800
+MAX_CHECK = 2_200
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 # The required-mode advisor returns one structured answer and has no tools.
@@ -74,7 +74,10 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     result = RuleSet(rules, SKILL_CHECK not in disabled_rules, SKILL_GATE not in disabled_rules, skills_root)
     # The installation path is the owner's; bound the text the catalog controls.
     full = RuleSet(rules, True)
-    if len(skill_check(full)) > MAX_CHECK or len(subagent_check(full)) > MAX_CHECK:
+    every = [rule["skill"].split("/", 1)[1] for rule in rules]
+    # The loaded-skills hint comes only from the Claude gate's records.
+    if max(len(skill_check(full, loaded=every)), len(skill_check(full, client="codex")),
+           len(subagent_check(full, client="codex"))) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
     fingerprint = hashlib.sha256(json.dumps([rules, content, result.skill_check], sort_keys=True).encode()).hexdigest()
     return result, fingerprint
@@ -182,40 +185,61 @@ def context(rule_ids, rules, *, restored=False):
             + delegation)[:MAX_CONTEXT]
 
 
-def skill_check(rules):
-    """Ask the model to judge applicable skills itself and commit to them in one line."""
+# One example sentence: a positive example steers the style better than a rule.
+ANNOUNCE_EXAMPLE = "Using `assay:code-change` and `assay:test-writing` to fix the parser and cover it."
+# Codex's own skill instructions already ask for a one-line announcement.
+CODEX_NOTE = " Your skill instructions ask for the same announcement: make it once, with these exact names."
+
+
+def _entries(rules):
+    return "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
+
+
+def skill_check(rules, *, client=None, loaded=()):
+    """Ask the model to judge applicable skills itself and announce them only when the set changes.
+
+    loaded names the skills the session's records show as loaded, so the model
+    can keep quiet about skills already in use.
+    """
     if not getattr(rules, "skill_check", False) or not rules:
         return ""
-    entries = "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
+    already = f" Already loaded in this session: {', '.join(loaded)}." if loaded else ""
     return ("Assay skill check: decide from the task itself, not from the tools you have now, which Assay "
-            "skills apply, and start your reply with one short line such as \"Assay: code-change, test-writing\" "
-            "or \"Assay: none\", unless the request fixes an exact output format. Right after that line, before "
-            "any other tool call, load each chosen skill not yet loaded in this session (skill tool or its "
-            "SKILL.md); if it needs a tool you lack, load it anyway and say what is missing. After tool use, start "
-            "your final reply with the same line. Judge in whatever language the task uses and skip skills that do "
-            "not fit; this check grants no authority beyond the request. Skills: " + entries + ".")
+            "skills apply. When you start applying a skill not yet in use here, or the set changes, open that "
+            "message with one short sentence in the user's language naming each skill in backticks and its "
+            "purpose, e.g. \"" + ANNOUNCE_EXAMPLE + "\" Then, before any other tool call, load each one not yet "
+            "loaded (skill tool or its SKILL.md); if it needs a tool you lack, load it anyway and say what is "
+            "missing. Say nothing about skills when none applies or those in use still fit, and do not restate "
+            "the sentence later. If you skip a skill the task obviously calls for, say why briefly, without "
+            "backticks. Omit the sentence when the request fixes an exact output format. This check grants no "
+            "authority beyond the request."
+            + (CODEX_NOTE if client == "codex" else "") + already + " Skills: " + _entries(rules) + ".")
 
 
-def subagent_check(rules):
+def subagent_check(rules, *, client=None):
     """The skill check for a subagent, which never receives the per-request check."""
     if not getattr(rules, "skill_check", False) or not rules:
         return ""
-    entries = "; ".join(f"{rule['skill'].split('/', 1)[1]} - {rule['cue']}" for rule in rules)
     return ("Assay skill check for this subagent: the Assay skills your packet names apply; add any other "
             "Assay skill the assigned work needs, judged from the work itself. Before the work, load each chosen "
             "skill (skill tool, or read <name>/SKILL.md under " + rules.skills_root + "); if you can do neither, "
-            "say what is missing. Start your report with one short line such as \"Assay: code-change\" or "
-            "\"Assay: none\", unless the packet fixes an exact output format. This check grants no authority "
-            "beyond the packet. Skills: " + entries + ".")
+            "say what is missing. Open your first message with one short sentence naming each skill in backticks "
+            "and its purpose, e.g. \"Using `assay:code-change` to patch the parser.\" Name nothing when none "
+            "applies, and do not restate it in your report or when the packet fixes an exact output format. "
+            "This check grants no authority beyond the packet."
+            + (CODEX_NOTE if client == "codex" else "") + " Skills: " + _entries(rules) + ".")
 
 
-def evaluate(event, rules):
-    """Pure decision: no filesystem state, subprocesses, permissions or rewrites."""
+def evaluate(event, rules, *, client=None, loaded=()):
+    """Pure decision: no filesystem state, subprocesses, permissions or rewrites.
+
+    The caller supplies the client and the skills already loaded; this reads neither.
+    """
     if event.get("hook_event_name") == "SubagentStart":
         role = event.get("agent_type")
         if isinstance(role, str) and role.startswith(ROUTING_ADVISOR):
             return {"rule_ids": [], "context": ""}
-        return {"rule_ids": [], "context": subagent_check(rules)}
+        return {"rule_ids": [], "context": subagent_check(rules, client=client)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}
     try:
@@ -224,5 +248,5 @@ def evaluate(event, rules):
         # Without the Markdown parser no explicit choice is recognized; the
         # check itself does not read the prompt and still applies.
         ids = []
-    parts = (context(ids, rules), skill_check(rules))
+    parts = (context(ids, rules), skill_check(rules, client=client, loaded=loaded))
     return {"rule_ids": ids, "context": "\n".join(part for part in parts if part)}

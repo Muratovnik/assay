@@ -25,7 +25,8 @@ def _put(tx, kind, key, payload, now):
     tx.put(kind, key, {**payload, "id": key, "at": now}, now + TTL)
 
 
-def apply(event, client, decision, rules, fingerprint, directory, *, record=False, outcome=None, clock=time.time):
+def apply(event, client, decision, rules, fingerprint, directory, *, record=False, outcome=None, loaded=(),
+          clock=time.time):
     from route_evidence.pipeline_store import PipelineStore
     key = identity(event, client)
     if key is None:
@@ -53,7 +54,7 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
                 # Explicit tasks/modifiers still replace it, including no-match.
                 retained = [identifier for identifier in previous["rules"]
                             if any(rule["id"] == identifier for rule in rules)][:2]
-                restored = (context(retained, rules, restored=True), skill_check(rules))
+                restored = (context(retained, rules, restored=True), skill_check(rules, client=client, loaded=loaded))
                 decision = {"rule_ids": retained, "context": "\n".join(part for part in restored if part)}
             _put(tx, "hook-context", key, {"rules": decision["rule_ids"], "fingerprint": fingerprint}, now)
         elif name == "PostCompact":

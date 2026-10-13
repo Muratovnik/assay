@@ -80,9 +80,29 @@ class SkillCheckActivationTests(unittest.TestCase):
         text = results[0]["context"]
         self.assertTrue(text.isascii())
         self.assertNotIn("SECRET_SENTINEL", text)
-        self.assertIn('"Assay: none"', text)
+        # Announce on change in one sentence; nothing when no skill applies.
+        self.assertIn("When you start applying a skill not yet in use here, or the set changes", text)
+        self.assertIn("`assay:code-change`", text)
+        self.assertIn("Say nothing about skills when none applies", text)
+        self.assertIn("do not restate the sentence later", text)
+        self.assertIn("obviously calls for, say why briefly, without backticks", text)
+        self.assertNotIn("Assay: none", text)
+        self.assertNotIn("final reply", text)
         self.assertIn("grants no authority", text)
         self.assertLessEqual(len(text), activation.MAX_CHECK)
+
+    def test_the_check_names_loaded_skills_and_defers_to_codex_announcements(self):
+        plain = self.decide("anything")["context"]
+        loaded = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": "anything"}, self.rules,
+                                     loaded=["code-change", "test-writing"])["context"]
+        self.assertIn("Already loaded in this session: code-change, test-writing. Skills: ", loaded)
+        self.assertNotIn("Already loaded", plain)
+        self.assertEqual(self.listed(plain), self.listed(loaded))
+        codex = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": "anything"}, self.rules,
+                                    client="codex")["context"]
+        self.assertIn("Your skill instructions ask for the same announcement: make it once", codex)
+        self.assertNotIn("same announcement", plain)
+        self.assertEqual(self.listed(plain), self.listed(codex))
 
     def test_check_names_every_installed_skill_once(self):
         listed = self.listed(self.decide("anything")["context"])
@@ -119,7 +139,14 @@ class SkillCheckActivationTests(unittest.TestCase):
         text = start("general-purpose")["context"]
         self.assertIn("Assay skill check for this subagent", text)
         self.assertIn("skills your packet names apply", text)
-        self.assertIn("Start your report", text)
+        self.assertIn("Open your first message with one short sentence naming each skill in backticks", text)
+        self.assertIn("do not restate it in your report", text)
+        self.assertNotIn("Assay: none", text)
+        self.assertNotIn("instructions ask for the same announcement", text)
+        codex = activation.evaluate({"hook_event_name": "SubagentStart", "agent_id": "a1",
+                                     "agent_type": "general-purpose"}, self.rules, client="codex")["context"]
+        self.assertIn("instructions ask for the same announcement: make it once", codex)
+        self.assertEqual(sorted(self.listed(text)), sorted(self.listed(codex)))
         self.assertIn(str((self.root / "skills").resolve()), text)
         self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(self.listed(text)))
         self.assertEqual(text, start("assay:evidence-reviewer")["context"])
