@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "cases": [
+    {
+      "id": "LS01",
+      "group": "live-abstract-loses-exception",
+      "purpose": "challenge",
+      "source": "Live web case modeled on an observed maintainer session where search results dropped the study's Claude exception; mutable source: the article page.",
+      "rationale": "The abstract supports a broad claim; the model-specific exception is only in the results and discussion.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "LS02",
+      "group": "live-pinned-default-path",
+      "purpose": "challenge",
+      "source": "Live repository case at a pinned commit, modeled on an observed maintainer session that described the filter from a module off the default path; mutable: hosting and fetch tools.",
+      "rationale": "The plausibly named module and older descriptions disagree with the default path that the code and config establish.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "LS03",
+      "group": "live-narrow-fact",
+      "purpose": "should-not-fire",
+      "source": "Live web control; mutable source: the official documentation site.",
+      "rationale": "A narrow documented fact is settled by one official page; extra fetching is waste.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

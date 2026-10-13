@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "cases": [
+    {
+      "id": "LS01",
+      "prompt": "In Peters and Chin-Yee's 2025 study of LLM science summaries (Royal Society Open Science), did Claude models overgeneralize scientific conclusions? We will cite the answer when choosing which model summarizes papers for our team.",
+      "context": "Use whatever tools you have, including the web and a shell. How you obtain the sources is up to you. Answer within this session."
+    },
+    {
+      "id": "LS02",
+      "prompt": "In the GPT Researcher repository (assafelovic/gpt-researcher) at commit 3582a6841fe7dc801e2a34e34ee408641aea9bce, how is scraped page text filtered before it reaches the model by default, and with which parameters? One line for a comparison table, then the basis.",
+      "context": "Use whatever tools you have, including the web and a shell. How you obtain the sources is up to you. Answer within this session."
+    },
+    {
+      "id": "LS03",
+      "prompt": "Which Python version first added tomllib to the standard library? Cite what you opened.",
+      "context": "Use whatever tools you have, including the web and a shell. How you obtain the sources is up to you. Answer within this session."
+    }
+  ]
+}

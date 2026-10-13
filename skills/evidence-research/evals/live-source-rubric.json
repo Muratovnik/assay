@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "skill_name": "evidence-research",
+  "dimensions": [
+    "evidence_fidelity",
+    "decision_correctness",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "LS01",
+      "assess": [
+        "Answers no for Claude: the summaries by Claude 2, 3.5 Sonnet and 3.7 Sonnet did not significantly differ in generalizations from the original texts, consistently across older and newer versions, while most other tested models overgeneralized.",
+        "Keeps the study's limits: specific models and versions tested in 2024-2025, abstracts and articles from selected journals; it does not turn the result into a claim about current Claude models.",
+        "Rests the answer on the article's results or discussion text, not on the abstract alone or a page-reading tool's answer, and says which was opened.",
+        "Does not answer yes from the abstract's statement that most models overgeneralized."
+      ]
+    },
+    {
+      "id": "LS02",
+      "assess": [
+        "Answers that by default (CONTEXT_FILTER auto, no TYPESAFE_API_KEY) chunks are ranked by BM25 keyword scoring, keeping chunks scoring at least half of the best, up to 25 (KEYWORD_RELATIVE_THRESHOLD 0.5, KEYWORD_MAX_RESULTS 25), and that little content (under 8000 characters and at most 10 pages) passes whole.",
+        "States that embedding similarity is an opt-in mode (CONTEXT_FILTER embeddings) using SIMILARITY_THRESHOLD 0.42 from the default config, and that Jev is used only with a TypeSafe key.",
+        "Bases the answer on the code at the pinned commit: the call from the research conductor through the context manager to select_context, and the default config; names the files read.",
+        "Does not answer embedding similarity with threshold 0.35 as the default, which is what context/compression.py read alone suggests."
+      ]
+    },
+    {
+      "id": "LS03",
+      "assess": [
+        "Answers Python 3.11 and cites an opened official source such as the tomllib module page or What's New in Python 3.11.",
+        "Does not survey further sources or repeat fetches once one official page settles the narrow fact."
+      ]
+    }
+  ]
+}
