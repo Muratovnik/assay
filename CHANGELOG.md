@@ -6,6 +6,18 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.25.0](https://github.com/Muratovnik/assay/compare/v0.24.0...v0.25.0) (2026-10-13)
+
+### Features
+
+* **hooks:** the skill check no longer asks for an `Assay:` line at the start of every reply and again at the end. The agent names each skill it starts applying once, as `assay:<name>` with its purpose, and stays quiet while the skills in use still fit; in Claude Code the check lists the skills the session already loaded. The Claude skill gate reads announcements and loads from the transcript, so a resumed, forked or compacted session keeps its loads, and its continuation keeps the answer already given instead of asking for a new one ([ca560cf](https://github.com/Muratovnik/assay/commit/ca560cf5f3c23defc4be56700e61efb68f7b403c))
+* **hooks:** in Claude Code the first WebFetch result of a request gets a note that the result is a model's answer about the page, not its text, and that a conclusion resting on the page needs the downloaded text. A turn that says a file or URL was read in full continues once when the transcript shows the file read only in part or the URL opened only through WebFetch. `disabled_rules` turns them off separately as `fetch-note` and `read-claims` ([2ed9334](https://github.com/Muratovnik/assay/commit/2ed93340d86f147a7b77b13f34c05d66db581b24))
+
+### Bug Fixes
+
+* **hooks:** the skill check says that a missing tool does not make a skill inapplicable, so an agent without web tools no longer skips evidence-research and answers from memory ([18d26b6](https://github.com/Muratovnik/assay/commit/18d26b6f0ed1cb6a222fc433419e6d59df002716))
+* **hooks:** a turn with no full-read claim stops the transcript scan at its start, so a stop in a long session stays within the hook's timeout ([f3d8c45](https://github.com/Muratovnik/assay/commit/f3d8c450e5e7d02a218d7422408a2834afb25155))
+
 ## [0.24.0](https://github.com/Muratovnik/assay/compare/v0.23.1...v0.24.0) (2026-10-12)
 
 ### Features
