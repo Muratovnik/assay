@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
@@ -169,6 +170,25 @@ class SourceCheckTests(unittest.TestCase):
         text = self.feedback(self.stop(prompt(), read("r1", 1, 200, 900, limit=200),
                                        last="I read researcher.py in full."))
         self.assertIn("researcher.py", text)
+
+    def test_a_turn_without_a_claim_stops_reading_at_its_start(self):
+        consumed = []
+        original = sources._lines
+
+        def counted(path):
+            for line in original(path):
+                consumed.append(line)
+                yield line
+
+        earlier = [prompt("first"), *read("r0", 1, 200, 900, limit=200), said("ok")]
+        with unittest.mock.patch.object(sources, "_lines", counted):
+            self.assertEqual({}, self.stop(*earlier, prompt(), said("Done.")))
+            self.assertEqual(2, len([line for line in consumed if line.strip()]))  # the reply and its prompt
+            consumed.clear()
+            # A claim in the final message alone still reaches the earlier read.
+            text = self.feedback(self.stop(*earlier, prompt(), said("Done."), last="I read researcher.py in full."))
+        self.assertIn("only lines 1-200 of 900", text)
+        self.assertGreater(len([line for line in consumed if line.strip()]), 2)
 
     def test_an_unreadable_transcript_stays_silent(self):
         event = {**self.base, "hook_event_name": "Stop", "transcript_path": str(self.directory / "missing.jsonl"),

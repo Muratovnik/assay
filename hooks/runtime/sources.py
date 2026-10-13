@@ -114,13 +114,14 @@ def _text(content):
     return "\n".join(part.get("text", "") for part in content or [] if isinstance(part, dict))
 
 
-def ledger(path, *, subagent=False):
+def ledger(path, *, subagent=False, needed=False):
     """(claims, reads, fetched, shell) from a transcript's tail, or None when it cannot be read.
 
     Claims: lines of this turn's messages that say something was read in full.
     Reads map a file path to the line ranges its Reads returned, and fetched
     holds WebFetch URLs, both since the latest compaction; shell holds the
-    shell commands of the same span.
+    shell commands of the same span. Without a claim in the turn, and unless
+    needed says the final message holds one, the scan stops at the turn's start.
     """
     if not isinstance(path, str) or not path or len(path) > 4_096:
         return None
@@ -141,6 +142,8 @@ def ledger(path, *, subagent=False):
             if kind == "user":
                 if in_turn and _prompt(entry, content):
                     in_turn = False
+                    if not claims and not needed:
+                        break  # Nothing to check: earlier reads would go unused.
                 for block in content if isinstance(content, list) else []:
                     if isinstance(block, dict) and block.get("type") == "tool_result":
                         results[block.get("tool_use_id")] = (entry.get("toolUseResult"), _text(block.get("content")))
@@ -205,14 +208,15 @@ def stopped(event):
         return {}
     if name == "SubagentStop" and not event.get("agent_id"):
         return {}
+    last = event.get("last_assistant_message")
+    final = ([line for line in last[:65_536].splitlines() if CLAIM.search(line[:MAX_LINE])]
+             if isinstance(last, str) else [])
     path = event.get("agent_transcript_path") if name == "SubagentStop" else event.get("transcript_path")
-    scan = ledger(path, subagent=name == "SubagentStop")
+    scan = ledger(path, subagent=name == "SubagentStop", needed=bool(final))
     if not scan:
         return {}
     claims, reads, fetched_urls, shell = scan
-    last = event.get("last_assistant_message")
-    if isinstance(last, str):
-        claims += [line for line in last[:65_536].splitlines() if CLAIM.search(line[:MAX_LINE])]
+    claims += final
     reasons = contradicted(claims, reads, fetched_urls, shell)
     if not reasons:
         return {}
