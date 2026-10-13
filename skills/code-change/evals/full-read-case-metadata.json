@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "FR01",
+      "group": "full-read-tail-rebinding",
+      "purpose": "challenge",
+      "source": "Modeled on observed maintainer sessions that read affected code by line ranges; synthetic code.",
+      "rationale": "The affected module rebinds the function at its end; only reading the file through its end finds the cause.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "FR02",
+      "group": "full-read-local-bug",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the full-read case.",
+      "rationale": "A small, local bug in a short module needs a direct fix, not a wider survey.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

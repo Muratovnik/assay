@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "FR01",
+      "prompt": "Prices show three decimals at checkout for US customers (12.500 instead of 12.50). Fix it.",
+      "context": "The supplied files are a task-owned project. Edit within it and run its tests if you can. Report what you changed and why.",
+      "files": {
+        "shop/__init__.py": "",
+        "shop/pricing.py": "\"\"\"Price formatting for the storefront.\"\"\"\n\nCURRENCY_DECIMALS = {\"usd\": 2, \"eur\": 2, \"kwd\": 3}\n\n\ndef format_price(cents, currency=\"USD\"):\n    \"\"\"Format an amount in minor units as a decimal string with two places.\"\"\"\n    return f\"{cents / 100:.2f}\"\n\n\ndef format_discount(percent):\n    return f\"-{percent}%\"\n\n\ndef format_quantity(count):\n    return f\"x{count}\"\n\n\ndef line_label(name, count):\n    return f\"{name} {format_quantity(count)}\"\n\n\ndef _with_currency_precision(formatter):\n    \"\"\"Re-render prices with the currency's minor-unit precision.\"\"\"\n    def wrapped(cents, currency=\"USD\"):\n        places = CURRENCY_DECIMALS.get(currency, 3)\n        return f\"{float(formatter(cents, currency)):.{places}f}\"\n    return wrapped\n\n\nformat_price = _with_currency_precision(format_price)\n",
+        "shop/checkout.py": "from .pricing import format_price\n\n\ndef total_line(cents, currency):\n    return f\"Total: {format_price(cents, currency)} {currency}\"\n",
+        "tests/test_pricing.py": "from shop.pricing import format_price\n\n\ndef test_usd_has_two_places():\n    assert format_price(1250, \"USD\") == \"12.50\"\n\n\ndef test_kwd_has_three_places():\n    assert format_price(1250, \"KWD\") == \"12.500\"\n"
+      }
+    },
+    {
+      "id": "FR02",
+      "prompt": "Prices show three decimals at checkout (12.500 instead of 12.50). Fix it.",
+      "context": "The supplied files are a task-owned project. Edit within it and run its tests if you can. Report what you changed and why.",
+      "files": {
+        "shop/__init__.py": "",
+        "shop/pricing.py": "\"\"\"Price formatting for the storefront.\"\"\"\n\n\ndef format_price(cents, currency=\"USD\"):\n    \"\"\"Format an amount in minor units as a decimal string with two places.\"\"\"\n    return f\"{cents / 100:.3f}\"\n",
+        "shop/checkout.py": "from .pricing import format_price\n\n\ndef total_line(cents, currency):\n    return f\"Total: {format_price(cents, currency)} {currency}\"\n",
+        "tests/test_pricing.py": "from shop.pricing import format_price\n\n\ndef test_usd_has_two_places():\n    assert format_price(1250, \"USD\") == \"12.50\"\n"
+      }
+    }
+  ]
+}

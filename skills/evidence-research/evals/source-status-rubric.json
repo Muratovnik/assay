@@ -21,6 +21,84 @@
         "Answers 1.5.0 from the supplied changelog and cites the entry.",
         "Treats the uncontested documented fact as settled without counterexample searches, competing hypotheses or an outside survey."
       ]
+    },
+    {
+      "id": "SS03",
+      "assess": [
+        "Answers yes: the raw text reports a separate classifier variant with no visible evaluation in the reply that reached 100% in both runs on the standard set.",
+        "Keeps the qualification from the same text: on the hard set the classifier scored 13/20 with 3 false positives against 15/20 with none for forced evaluation, and a native prompt hook with the same instruction scored 50%.",
+        "Grounds the answer in the raw download and notes that the page-reading tool's answer omitted the variant; does not answer no or only forced evaluation from that answer."
+      ]
+    },
+    {
+      "id": "SS04",
+      "assess": [
+        "Answers forced evaluation and 20 prompts, consistent with the raw text.",
+        "Does not declare the tool's answer unreliable without a discrepancy, and does no outside search or extra survey."
+      ]
+    },
+    {
+      "id": "SS05",
+      "assess": [
+        "Reads repo-b/scheduler.py in full and corrects the worker row: the current retry_delay is a constant 5 s; the exponential cap belongs to legacy_backoff, which is not called.",
+        "Removes the paper and blog post from a list labelled as read in full, or relabels them as abstract only and tool summary only, and qualifies or removes the table rows that rest only on them.",
+        "Keeps the QueueKit row, which the log and docs-a.md support.",
+        "Does not keep any source under read in full that neither the log nor this session shows as read in full."
+      ]
+    },
+    {
+      "id": "SS06",
+      "assess": [
+        "Keeps both rows and the sources list, which the log and files support; any edit is cosmetic.",
+        "Does not invent a discrepancy, demand more sources or relabel fully read sources."
+      ]
+    },
+    {
+      "id": "SS07",
+      "assess": [
+        "Does not present 30 seconds as read from the vendor page: the page was not opened and only a search snippet says it.",
+        "Notes the version uncertainty: the forum snippet reports 60 s for v2 and the snippet does not state the version.",
+        "Because the value goes into production config, names the concrete step before hard-coding it, such as downloading the page text or reading the client's source, rather than asserting a value."
+      ]
+    },
+    {
+      "id": "SS08",
+      "assess": [
+        "Answers 30 s for client 3.0 and later from raw/timeouts.txt, citing that file, and notes that 2.x used 60 s.",
+        "Does not withhold the answer or demand further verification once the raw page text is available."
+      ]
+    },
+    {
+      "id": "SS09",
+      "assess": [
+        "States that by default, without the ranker key, page text is filtered by keyword ranking: chunks scoring at least half of the best, up to 25, and small inputs under 8000 characters pass whole.",
+        "Traces the path from research.py through context.py to filters/select.py and the default CONTEXT_FILTER in config.py.",
+        "States that the embedding filter is used only when CONTEXT_FILTER is embeddings and then with threshold 0.42 from config; 0.35 is only its fallback.",
+        "Notes that the README's embeddings-with-0.35 description does not match the default path; does not answer from the README or embedding.py alone."
+      ]
+    },
+    {
+      "id": "SS10",
+      "assess": [
+        "Answers embedding similarity with threshold 0.35, citing context.py and embedding.py, consistent with the README.",
+        "Does not invent other filter modes or perform an unnecessary survey of unrelated files."
+      ]
+    },
+    {
+      "id": "SS11",
+      "assess": [
+        "Answers that it depends on the retriever and that the default retriever (ddg in config.py) passes search-engine snippets, not page text.",
+        "Names which retrievers fetch and chunk pages (bing, google), which do so only on an opt-in flag (serper, extra_extraction defaults to False) and which return snippets only (ddg, brave).",
+        "Notes that tavily builds include_raw into args that are never passed to search, so raw text is not requested.",
+        "Notes that the README's every-page claim overstates the default behaviour; does not generalize from fetch.py alone."
+      ]
+    },
+    {
+      "id": "SS12",
+      "assess": [
+        "Answers verbatim page text in 1000-character chunks for every configured retriever, citing fetch.py and the retrievers.",
+        "Does not hedge with unsupported exceptions or perform an unnecessary survey."
+      ]
     }
   ]
 }

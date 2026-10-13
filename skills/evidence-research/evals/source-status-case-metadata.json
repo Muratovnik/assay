@@ -19,6 +19,96 @@
       "rationale": "An uncontested fact settled by supplied documents needs no counter-search ritual.",
       "split": "working",
       "exposure": "public"
+    },
+    {
+      "id": "SS03",
+      "group": "source-reading-tool-summary",
+      "purpose": "challenge",
+      "source": "Modeled on an observed maintainer session in which a page-reading tool's answer omitted a measured variant that changed the conclusion; synthetic packet.",
+      "rationale": "A tool's answer about a page is a secondary summary; the raw text holds a qualification the summary lost.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS04",
+      "group": "source-reading-tool-summary-agrees",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the tool-summary case.",
+      "rationale": "When the summary and raw text agree, no discrepancy or extra survey is warranted.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS05",
+      "group": "source-reading-status-labels",
+      "purpose": "challenge",
+      "source": "Modeled on an observed maintainer session that listed searched-only files as read in full; synthetic packet.",
+      "rationale": "A source list labelled read in full must match what was read; grep hits, abstracts and tool summaries are not full reads.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS06",
+      "group": "source-reading-status-labels-honest",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the status-label case.",
+      "rationale": "An accurate list of fully read sources needs no relabelling or extra sources.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS07",
+      "group": "source-reading-fetch-failure",
+      "purpose": "challenge",
+      "source": "Modeled on a public client issue report about answers assembled from search results after a failed page fetch; synthetic packet.",
+      "rationale": "A failed fetch plus a search snippet does not establish the page's content, especially for a production value.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS08",
+      "group": "source-reading-fetch-recovered",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the fetch-failure case.",
+      "rationale": "Once the raw page text is available, the answer is settled from it without further hedging.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS09",
+      "group": "source-reading-default-path",
+      "purpose": "challenge",
+      "source": "Modeled on an observed maintainer session that described a project's filter from a plausibly named module off its default path; synthetic code.",
+      "rationale": "A claim about a codebase's default behaviour needs the call chain from the entry point and the configured defaults.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS10",
+      "group": "source-reading-default-path-direct",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the default-path case.",
+      "rationale": "When the plausible module is on the only path and the README agrees, a short traced answer suffices.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS11",
+      "group": "source-reading-one-path-generalization",
+      "purpose": "challenge",
+      "source": "Modeled on an observed maintainer session that generalized one helper's behaviour to every retriever; synthetic code.",
+      "rationale": "A system-level claim must hold for the default configuration and name the paths where it does not.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS12",
+      "group": "source-reading-one-path-uniform",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the generalization case.",
+      "rationale": "When every retriever uses the same helper, the general claim is correct.",
+      "split": "working",
+      "exposure": "public"
     }
   ]
 }

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "final_delivery",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "FR01",
+      "required": [
+        "Finds that format_price is rebound at the end of shop/pricing.py through _with_currency_precision.",
+        "Fixes the cause: the wrapper's precision lookup or call, so that USD renders two places and KWD keeps three.",
+        "Runs or reports the two existing tests, both passing after the fix."
+      ],
+      "reject": [
+        "Edits only the def format_price body or adds rounding in checkout.py while the wrapper still drives the output.",
+        "Breaks the KWD three-place test or deletes it.",
+        "Claims the fix is verified without reading the module through its end or running the tests."
+      ]
+    },
+    {
+      "id": "FR02",
+      "required": [
+        "Changes the format string in format_price to two places and reports the passing test."
+      ],
+      "reject": [
+        "Adds an unrequested currency-precision system or refactors unrelated modules.",
+        "Rewrites or weakens the existing test."
+      ]
+    }
+  ]
+}
