@@ -62,10 +62,13 @@ python -B tools/check.py --all
 5. Добавьте `evals/` с кейсами и отдельными критериями. Входы и критерии лежат
    порознь, и ни то ни другое не читается, пока навык делает задачу пользователя.
 6. Зарегистрируйте актив в `catalog.toml`, дайте ему одну подсказку в
-   `hooks/activation-rules.toml`, добавьте строку в таблицы навыков `README.md`,
-   `README.ru.md` и `README.zh-CN.md`, внесите его в ручные описи
-   `tools/compatibility_fixture.py` и `tools/test_assay.py`, а для парных
-   оценочных данных — в `PAIRED_SKILLS` из `tools/eval_assets.py`. Затем выполните
+   `hooks/activation-rules.toml`, добавьте его запись в `CUE_TERMS` из
+   `tools/assay.py` (основы слов, которые обязаны встречаться и в подсказке, и в
+   условии `Use when` описания, а без него — в первом предложении), добавьте
+   строку в таблицы навыков `README.md`, `README.ru.md` и `README.zh-CN.md`,
+   внесите его в ручные описи `tools/compatibility_fixture.py` и
+   `tools/test_assay.py`, а для парных оценочных данных — в `PAIRED_SKILLS` из
+   `tools/eval_assets.py`. Затем выполните
    `python -B tools/catalog_docs.py --write` и `python -B tools/assay.py render`,
    чтобы обновить сгенерированную опись, клиентские манифесты и индекс навыков.
    Гейт сверяет эти байты, поэтому забытый `render` уронит сборку.

@@ -695,6 +695,114 @@ def readme_registration_problems(root: Path, catalog: Catalog) -> list[str]:
     return problems
 
 
+# Hand-kept routing correspondence. The ``description`` in a skill's frontmatter
+# (native listing) and its ``cue`` in hooks/activation-rules.toml (hook skill
+# check) are written separately and drift: a cue narrower than its description
+# once hid a skill. For each catalogued skill this lists the stems that must
+# appear, case-insensitively at the start of a word, in BOTH the cue and the
+# trigger part of the description. It lives here, not beside the rules, because
+# the rules loader enforces a strict {skill, cue} schema and ships to users, while
+# this table only matters when the texts are edited. Keep it minimal: the terms
+# that carry what the skill is for, not every word two texts share.
+CUE_TERMS: dict[str, tuple[str, ...]] = {
+    "code-change": ("code",),
+    "critical-discussion": ("idea", "cover"),
+    "evidence-research": ("current", "solution"),
+    "implementation-planning": ("plan",),
+    "independent-audit": ("audit",),
+    "instruction-maintenance": ("instruction", "agents.md"),
+    "product-flow-mapping": ("trac",),
+    "research-driven-change": ("research", "deliver"),
+    "retrospective": ("review",),
+    "route-subagents": ("subagent", "authori"),
+    "skill-evaluation": ("skill",),
+    "software-architecture": ("boundar", "contract"),
+    "technical-writing": ("documentation", "readme", "release note"),
+    "test-audit": ("review", "regression"),
+    "test-writing": ("test", "repair"),
+    "text-writing": ("prose", "message"),
+    "ui-delivery": ("screen", "artifact"),
+}
+CUE_TERMS_HOME = "tools/assay.py CUE_TERMS"
+ACTIVATION_RULES = "hooks/activation-rules.toml"
+# The "Use when ..." clause ends at the first semicolon or sentence end. Other
+# openers ("Use for", "Use on") are not this clause: such a description is
+# checked against its first sentence, as is one with no "Use" clause at all.
+USE_WHEN = re.compile(r"\buse when\b.*?(?=;|\.(?:\s|$)|$)", re.IGNORECASE | re.DOTALL)
+FIRST_SENTENCE = re.compile(r".*?(?:\.(?=\s|$)|$)", re.DOTALL)
+
+
+def trigger_part(description: str) -> tuple[str, str]:
+    """The text a cue is held to, and its label: the Use-when clause, else the first sentence."""
+    text = " ".join(description.split())
+    clause = USE_WHEN.search(text)
+    if clause:
+        return "Use-when clause", clause.group(0)
+    return "first sentence", FIRST_SENTENCE.match(text).group(0)
+
+
+def mentions(text: str, term: str) -> bool:
+    return re.search(r"(?<![a-z0-9])" + re.escape(term.lower()), text.lower()) is not None
+
+
+def cue_term_problems(
+    root: Path, catalog: Catalog, terms: dict[str, tuple[str, ...]] | None = None
+) -> list[str]:
+    """Name each skill whose cue or description lacks a term the table requires of both.
+
+    The table must be complete: a catalogued skill without an entry fails, and so
+    does an entry for a skill that is not catalogued.
+    """
+    terms = CUE_TERMS if terms is None else terms
+    skills = [asset for asset in catalog.assets if asset.kind == "skill"]
+    cues: dict[str, object] = {}
+    try:
+        document = tomllib.loads((root / ACTIVATION_RULES).read_text(encoding="utf-8"))
+        for item in document.get("skills", []):
+            if isinstance(item, dict) and isinstance(item.get("skill"), str):
+                cues[item["skill"]] = item.get("cue")
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+        return [f"{ACTIVATION_RULES}: cannot read cues for the term check: {error}"]
+    problems: list[str] = []
+    names = {asset.name for asset in skills}
+    for name in sorted(set(terms) - names):
+        problems.append(f"{CUE_TERMS_HOME}: entry for {name}, which is not a catalogued skill")
+    for asset in skills:
+        required = terms.get(asset.name)
+        if not required or not all(isinstance(term, str) and term.strip() for term in required):
+            problems.append(
+                f"{CUE_TERMS_HOME}: {asset.name} has no terms; list the stems its cue and "
+                "description must share"
+            )
+            continue
+        cue = cues.get(asset.id)
+        if not isinstance(cue, str):
+            problems.append(f"{ACTIVATION_RULES}: no cue for {asset.id} to hold to the term table")
+            continue
+        relative = f"{asset.path}/SKILL.md"
+        try:
+            description = frontmatter(root / relative).get("description")
+        except (ContractError, OSError, UnicodeDecodeError) as error:
+            problems.append(f"{relative}: cannot read the description for the term check: {error}")
+            continue
+        if not isinstance(description, str) or not description.strip():
+            problems.append(f"{relative}: no description to hold to the cue-term table")
+            continue
+        label, trigger = trigger_part(description)
+        for term in required:
+            if not mentions(cue, term):
+                problems.append(
+                    f"{ACTIVATION_RULES}: cue of {asset.name} lacks {term!r}, which the "
+                    f"{label} of its description names"
+                )
+            if not mentions(trigger, term):
+                problems.append(
+                    f"{relative}: {label} of the description lacks {term!r}, which the "
+                    f"cue of {asset.name} names"
+                )
+    return problems
+
+
 def check(root: Path = ROOT) -> list[str]:
     problems: list[str] = []
     try:
@@ -811,6 +919,8 @@ def check(root: Path = ROOT) -> list[str]:
             module.load_rules(root)
         except (OSError, ValueError, KeyError, TypeError) as error:
             problems.append(f"hooks/activation-rules.toml: {error}")
+        else:
+            problems.extend(cue_term_problems(root, catalog))
     problems.extend(render_drift(root))
     return sorted(set(problems))
 

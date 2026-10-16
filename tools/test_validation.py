@@ -212,6 +212,158 @@ class RegistrationGateTests(unittest.TestCase):
         self.assertIn("explicit-example", problems[0])
 
 
+class CueTermGateTests(unittest.TestCase):
+    """A cue and the trigger part of its description must share the table's terms."""
+
+    SKILL = "skills/route-subagents/SKILL.md"
+    RULES = "hooks/activation-rules.toml"
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        write_fixture(self.root)
+        self.write_cue("subagents (grants no authority)")
+        self.write_description("Route bounded subagent packets after authorized delegation.")
+        self.catalog = aa.load_catalog(self.root)
+
+    def write_cue(self, cue: str) -> None:
+        path = self.root / self.RULES
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            f'schema = 2\n\n[[skills]]\nskill = "skill/route-subagents"\ncue = "{cue}"\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    def write_description(self, description: str) -> None:
+        (self.root / self.SKILL).write_text(
+            f"---\nname: route-subagents\ndescription: {description}\nlicense: MIT\n---\n\n"
+            "# Route subagents\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    def problems(self, *terms: str) -> list[str]:
+        return aa.cue_term_problems(self.root, self.catalog, {"route-subagents": terms})
+
+    def test_shared_terms_pass(self) -> None:
+        self.assertEqual([], self.problems("subagent", "authori"))
+
+    def test_cue_without_its_term_fails_naming_cue_and_term(self) -> None:
+        self.write_cue("handing work to helpers")
+        self.assertEqual(
+            [
+                f"{self.RULES}: cue of route-subagents lacks 'subagent', which the "
+                "first sentence of its description names"
+            ],
+            self.problems("subagent"),
+        )
+
+    def test_description_without_the_term_fails_even_when_the_cue_has_it(self) -> None:
+        self.write_description("Route bounded packets after authorized delegation.")
+        self.assertEqual(
+            [
+                f"{self.SKILL}: first sentence of the description lacks 'subagent', which "
+                "the cue of route-subagents names"
+            ],
+            self.problems("subagent"),
+        )
+
+    def test_matching_ignores_case_and_accepts_a_stem(self) -> None:
+        self.write_cue("SUBAGENTS, plans and Release Notes")
+        self.write_description("Subagent plans and release notes.")
+        self.assertEqual([], self.problems("subagent", "plan", "release note"))
+
+    def test_a_term_is_matched_at_the_start_of_a_word(self) -> None:
+        self.write_cue("subagents")
+        self.write_description("Route bounded subagent packets.")
+        self.assertEqual(2, len(self.problems("agent")))
+
+    def test_use_when_clause_is_the_trigger_part(self) -> None:
+        self.write_description(
+            "Route subagent packets. Use when the user authorizes delegation; "
+            "skip other tickets."
+        )
+        self.write_cue("subagents with authority")
+        self.assertEqual([], self.problems("authori"))
+        # The first sentence and the skip half are outside the clause.
+        for term, outside in (("subagent", "first sentence"), ("ticket", "skip half")):
+            with self.subTest(outside=outside):
+                self.write_cue(f"{term}s with authority")
+                problems = self.problems(term)
+                self.assertEqual(1, len(problems), problems)
+                self.assertIn(f"Use-when clause of the description lacks '{term}'", problems[0])
+
+    def test_description_without_use_when_is_held_to_its_first_sentence(self) -> None:
+        self.write_description(
+            "Route bounded subagent packets. Skip tiny work that needs no authority."
+        )
+        self.write_cue("subagents with authority")
+        self.assertEqual([], self.problems("subagent"))
+        self.assertEqual(
+            [
+                f"{self.SKILL}: first sentence of the description lacks 'authori', which "
+                "the cue of route-subagents names"
+            ],
+            self.problems("authori"),
+        )
+
+    def test_use_for_is_not_the_use_when_clause(self) -> None:
+        self.write_description("Route bounded packets. Use for subagent work; skip the rest.")
+        self.assertEqual(1, len(self.problems("subagent")))
+
+    def test_catalogued_skill_without_a_table_entry_fails(self) -> None:
+        self.assertEqual(
+            [
+                "tools/assay.py CUE_TERMS: route-subagents has no terms; list the stems "
+                "its cue and description must share"
+            ],
+            aa.cue_term_problems(self.root, self.catalog, {}),
+        )
+        self.assertEqual(1, len(self.problems()), "an empty term list is no entry")
+
+    def test_entry_for_an_uncatalogued_skill_fails(self) -> None:
+        problems = aa.cue_term_problems(
+            self.root, self.catalog, {"route-subagents": ("subagent",), "gone": ("x",)}
+        )
+        self.assertEqual(
+            ["tools/assay.py CUE_TERMS: entry for gone, which is not a catalogued skill"],
+            problems,
+        )
+
+    def test_source_check_runs_the_term_gate(self) -> None:
+        aa.write_rendered(self.root)
+        with mock.patch.dict(aa.CUE_TERMS, {"route-subagents": ("subagent",)}, clear=True):
+            self.assertEqual([], aa.check(self.root))
+            self.write_cue("handing work to helpers")
+            problems = aa.check(self.root)
+        self.assertEqual(1, len(problems), problems)
+        self.assertIn("cue of route-subagents lacks 'subagent'", problems[0])
+
+    def test_real_table_catches_a_narrowed_real_cue(self) -> None:
+        """The shipped table, against the shipped texts, with one cue cut down."""
+        for relative in ("catalog.toml", self.RULES):
+            target = self.root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((aa.ROOT / relative).read_bytes())
+        catalog = aa.load_catalog(self.root)
+        for asset in catalog.assets:
+            if asset.kind == "skill":
+                target = self.root / asset.path / "SKILL.md"
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((aa.ROOT / asset.path / "SKILL.md").read_bytes())
+        self.assertEqual([], aa.cue_term_problems(self.root, catalog))
+        rules = self.root / self.RULES
+        text = rules.read_text(encoding="utf-8")
+        narrowed = text.replace("boundaries, contracts or file placement", "file placement")
+        self.assertNotEqual(text, narrowed)
+        rules.write_text(narrowed, encoding="utf-8", newline="\n")
+        problems = aa.cue_term_problems(self.root, catalog)
+        self.assertEqual(2, len(problems), problems)
+        self.assertTrue(all("cue of software-architecture lacks" in p for p in problems), problems)
+
+
 class SkillMetadataTests(unittest.TestCase):
     def test_every_published_skill_states_the_catalog_licence(self) -> None:
         catalog = aa.load_catalog(aa.ROOT)
