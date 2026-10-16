@@ -6,6 +6,21 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.27.0](https://github.com/Muratovnik/assay/compare/v0.26.0...v0.27.0) (2026-10-17)
+
+### Features
+
+* **activation:** the critical-discussion hint names the judgment ("whether an idea, plan or tool is worth it or covers a need") instead of the topic, and the evidence-research description no longer claims gap assessment. In paired first-turn runs with the owner's full plugin set, a request to review which skills a library lacks loaded critical-discussion in 3 of 3 runs on Sonnet and on Opus, against 0 of 3 and 1 of 3 before; near-negative requests gained no false loads ([d5324a9](https://github.com/Muratovnik/assay/commit/d5324a9db40f3c7b78bfb1b57f7e0533418610a4))
+* **check:** the source check fails a skill reference or example that no relative link reaches from its SKILL.md, a skill without `agents/openai.yaml` or without a row in any of the three README tables, and a skill hint that shares no key term with the trigger part of its description ([dae5d9e](https://github.com/Muratovnik/assay/commit/dae5d9e1c536941e69e6fc7e55761ec1f89c8233), [e52ad4d](https://github.com/Muratovnik/assay/commit/e52ad4d0e50d60a4544f5e83a6bc7b772e803800), [6b81a3d](https://github.com/Muratovnik/assay/commit/6b81a3db399062ae4c3e7e2db349df070be10f04))
+* **code-change:** a confirmed defect gets a variant analysis branch that sweeps for its other occurrences, and a question about why something fails, with no repair requested, takes a read-only diagnostic entry that changes nothing ([0515b92](https://github.com/Muratovnik/assay/commit/0515b928eec250f9fb482f9be884a5e8e8b90894), [84bb4f7](https://github.com/Muratovnik/assay/commit/84bb4f7ce23bed29977472c2b3b1ec4bfe0569c5))
+* **feedback:** the correction grammar of the feedback journal reads the first six sentences of a request and recognises many more Russian and English correction phrasings, still without a model call ([25fe138](https://github.com/Muratovnik/assay/commit/25fe1387d4ab905c6b42755f21ea17cf8d772faa))
+* **hooks:** in Claude Code a tool call that shows the work of a skill the session has not loaded (an external fetch, a source, test, interface or documentation edit, a skill file edit) gets one note per skill and request naming the skill and the decision it governs. `skill_note_form = "deny"` refuses the first such call instead; each row turns off by its own ID in `disabled_rules`. Codex is not covered: its skill loads cannot yet be recognised reliably ([5bd66be](https://github.com/Muratovnik/assay/commit/5bd66bec4d804210beba4c58d1f894ba6daf675b))
+* **instruction-maintenance:** add a method for editing, compressing, reviewing and extending agent instruction files without losing a rule's trigger, force, quantifiers, negations or identifiers; it reports a size target it cannot meet instead of dropping rules and routes a lesson to its layer. In paired runs on a dense instruction file it kept every probed qualifier where ordinary editing lost four or five, and it loaded on its own for three of four instruction-editing requests ([a81827f](https://github.com/Muratovnik/assay/commit/a81827fc6abf15af78b15df411c88183dd47dd07))
+
+### Bug Fixes
+
+* **hooks:** the skill check bound is raised so the check no longer exceeds it with the current skills, and a test keeps room for one more skill entry ([f95ac85](https://github.com/Muratovnik/assay/commit/f95ac851a4394aaeb5a2827f97226bfcf070765f))
+
 ## [0.26.0](https://github.com/Muratovnik/assay/compare/v0.25.0...v0.26.0) (2026-10-16)
 
 ### Features
