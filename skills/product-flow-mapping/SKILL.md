@@ -95,6 +95,9 @@ boundaries and justified expectations; an observed bug must not become the
 expected result. [Implementation planning](../implementation-planning/SKILL.md)
 can consume the map when sequencing is requested, without starting a new plan
 for every mapping task. These are conditional consumers, not automatic workflows.
+Read the synthetic [consumer handoffs](examples/consumer-handoffs.md) example when
+you first prepare a redesign or test handoff from a scenario table; a single
+question needs no example.
 
 Before finishing, trace one consequential path in both directions and challenge
 one material omission or conflicting source. A same-screen download is not a

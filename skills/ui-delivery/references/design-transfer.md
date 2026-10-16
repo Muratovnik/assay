@@ -73,8 +73,9 @@ Reproduce the state from an existing story, fixture or scenario when one exists.
 data, time/access and readiness for it, fonts and assets included, and do not wait
 for idle in a way that erases the loading, transition or failure state under test. A
 missing Storybook or browser on a native platform does not require installing one:
-take the available path and name the gap. Capture mechanics stay with
-[browser checks](browser-checks.md).
+take the available path and name the gap. For Playwright actions, readiness
+waits or screenshot baselines, read [browser checks](browser-checks.md); it owns
+capture mechanics.
 
 What comes back is material, not a result. Confirm transfer coverage, source
 accuracy and the required structure/editability separately; none follows from the
