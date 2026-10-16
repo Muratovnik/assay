@@ -139,6 +139,61 @@ def markdown_problems(path: Path, root: Path) -> list[str]:
     return problems
 
 
+REACHABLE_DIRECTORIES = ("references", "examples")
+UNREAD_DIRECTORIES = ("evals",)
+
+
+def unreachable_problems(skill: Path, root: Path) -> list[str]:
+    """Name each file under references/ or examples/ that SKILL.md never reaches.
+
+    Reachability follows relative Markdown links from SKILL.md through the
+    skill's own Markdown files, so a file linked only from another reference
+    counts. Evaluation data is never read while performing a task and is not
+    followed. Links that leave the skill, break or point at a directory reach
+    nothing here; markdown_problems reports the broken ones.
+    """
+    definition = skill / "SKILL.md"
+    if not definition.is_file():
+        return []
+    base = skill.resolve(strict=True)
+    reached: set[Path] = {definition.resolve(strict=True)}
+    pending = [definition.resolve(strict=True)]
+    while pending:
+        current = pending.pop()
+        if current.suffix != ".md":
+            continue
+        try:
+            targets = markdown_targets(current.read_text(encoding="utf-8", errors="strict"))
+        except (OSError, UnicodeError, ContractError):
+            continue
+        for target in targets:
+            try:
+                raw = local_target(target)
+                if raw is None:
+                    continue
+                resolved = (current.parent / raw).resolve(strict=True)
+                relative = resolved.relative_to(base)
+            except (OSError, ValueError):
+                continue
+            if (
+                resolved in reached
+                or not resolved.is_file()
+                or relative.parts[0] in UNREAD_DIRECTORIES
+            ):
+                continue
+            reached.add(resolved)
+            pending.append(resolved)
+    label = skill.relative_to(root).as_posix()
+    return [
+        f"{label}/{path.relative_to(skill).as_posix()}: not reachable by relative "
+        f"Markdown links from {label}/SKILL.md; link it with the condition for "
+        "reading it, or move or delete it"
+        for directory in REACHABLE_DIRECTORIES
+        for path in sorted((skill / directory).rglob("*"))
+        if path.is_file() and path.resolve(strict=True) not in reached
+    ]
+
+
 def validate_plain_tree(path: Path) -> None:
     """Refuse links, reparse points and special files before reading/copying."""
     def inspect(item: Path) -> None:

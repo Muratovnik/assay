@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.skill_resources import (
     distribution_problems, markdown_problems, markdown_targets, selection_problems,
+    unreachable_problems,
 )
 
 
@@ -127,6 +128,64 @@ class SkillResourceTests(unittest.TestCase):
                 self.skipTest(f"symlink unavailable: {error}")
             self.assertTrue(distribution_problems([first]))
             self.assertTrue(selection_problems(root, {"first"}))
+
+
+
+class ReachabilityTests(unittest.TestCase):
+    """Every file under references/ and examples/ must be linked from SKILL.md, directly or transitively."""
+
+    def fixture(self, directory: str) -> tuple[Path, Path]:
+        root = Path(directory)
+        first = skill(root, "first", "[core](references/core.md)")
+        (first / "references").mkdir()
+        (first / "examples").mkdir()
+        (first / "references/core.md").write_text(
+            "Core. Read [the deep case](deep.md) when X.\n", encoding="utf-8")
+        (first / "references/deep.md").write_text(
+            "Deep. See [a sample](../examples/sample.md).\n", encoding="utf-8")
+        (first / "examples/sample.md").write_text("Sample.\n", encoding="utf-8")
+        return root, first
+
+    def test_complete_skill_passes_including_files_reached_only_through_another_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root, first = self.fixture(directory)
+            self.assertEqual([], unreachable_problems(first, root))
+
+    def test_an_unlinked_reference_fails_naming_the_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root, first = self.fixture(directory)
+            (first / "references/orphan.md").write_text("Nobody links this.\n", encoding="utf-8")
+            (first / "examples/loose.json").write_text("{}\n", encoding="utf-8")
+            problems = unreachable_problems(first, root)
+            self.assertEqual(2, len(problems), problems)
+            self.assertEqual(
+                ["first/examples/loose.json", "first/references/orphan.md"],
+                sorted(problem.split(": ")[0] for problem in problems),
+            )
+            self.assertTrue(all(": not reachable" in problem for problem in problems), problems)
+
+    def test_a_link_from_evals_or_a_code_example_or_another_skill_does_not_reach(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root, first = self.fixture(directory)
+            (first / "references/orphan.md").write_text("Nobody links this.\n", encoding="utf-8")
+            (first / "evals").mkdir()
+            (first / "evals/case.md").write_text("[graded](../references/orphan.md)\n", encoding="utf-8")
+            skill(root, "second", "[elsewhere](../first/references/orphan.md)\n\n"
+                  "`[code](references/orphan.md)`\n\n```md\n[fenced](references/orphan.md)\n```\n")
+            self.assertEqual(
+                ["first/references/orphan.md"],
+                [problem.split(": ")[0] for problem in unreachable_problems(first, root)],
+            )
+
+    def test_a_link_chain_that_never_starts_at_skill_md_does_not_reach(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root, first = self.fixture(directory)
+            (first / "references/a.md").write_text("[b](b.md)\n", encoding="utf-8")
+            (first / "references/b.md").write_text("[a](a.md)\n", encoding="utf-8")
+            self.assertEqual(
+                ["first/references/a.md", "first/references/b.md"],
+                [problem.split(": ")[0] for problem in unreachable_problems(first, root)],
+            )
 
 
 if __name__ == "__main__":

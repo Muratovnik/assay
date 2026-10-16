@@ -19,10 +19,10 @@ import tomllib
 
 if __package__:
     from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from .skill_resources import distribution_problems, markdown_problems, validate_plain_tree
+    from .skill_resources import distribution_problems, markdown_problems, unreachable_problems, validate_plain_tree
 else:
     from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from skill_resources import distribution_problems, markdown_problems, validate_plain_tree
+    from skill_resources import distribution_problems, markdown_problems, unreachable_problems, validate_plain_tree
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
@@ -758,6 +758,7 @@ def check(root: Path = ROOT) -> list[str]:
                 problems.extend(skill_problems(definition, asset, root))
             for markdown in sorted(source.rglob("*.md")):
                 problems.extend(markdown_problems(markdown, root))
+            problems.extend(unreachable_problems(source, root))
             adapter = source / "agents" / "openai.yaml"
             if adapter.is_file():
                 problems.extend(openai_adapter_problems(adapter, asset, root))

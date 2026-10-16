@@ -110,6 +110,29 @@ class SourceGateTests(unittest.TestCase):
             (root / "notes.md").write_bytes(bytes([0xFF, 0x00, 0x0A]))
             self.assertTrue(any("notes.md" in problem for problem in aa.check(root)))
 
+    def test_a_reference_no_link_reaches_fails_the_source_check(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            skill = root / "skills/route-subagents"
+            (skill / "SKILL.md").write_text(
+                (skill / "SKILL.md").read_text(encoding="utf-8")
+                + "\nRead [the deep case](references/core.md) when X.\n",
+                encoding="utf-8", newline="\n")
+            (skill / "references").mkdir()
+            (skill / "references/core.md").write_text(
+                "See [the sample](deep.md).\n", encoding="utf-8", newline="\n")
+            (skill / "references/deep.md").write_text("Deep.\n", encoding="utf-8", newline="\n")
+            aa.write_rendered(root)
+            self.assertEqual([], aa.check(root))
+            (skill / "references/orphan.md").write_text("Unlinked.\n", encoding="utf-8", newline="\n")
+            problems = aa.check(root)
+            self.assertEqual(1, len(problems), problems)
+            self.assertTrue(
+                problems[0].startswith("skills/route-subagents/references/orphan.md: not reachable"),
+                problems,
+            )
+
 
 class RegistrationGateTests(unittest.TestCase):
     """A catalogued skill must carry its Codex interface and a row in every README."""
