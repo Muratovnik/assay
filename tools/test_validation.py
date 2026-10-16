@@ -11,7 +11,10 @@ import unittest
 from tools import assay as aa
 from tools import catalog_docs as docs
 from tools import eval_assets as ev
-from tools.test_assay import CATALOG, EXPLICIT_SKILL, write_fixture, add_explicit_skill
+from tools.test_assay import (
+    CATALOG, EXPLICIT_SKILL, README_TABLES, add_explicit_skill, readme_with_rows,
+    write_fixture,
+)
 
 
 class AdapterStructureTests(unittest.TestCase):
@@ -106,6 +109,80 @@ class SourceGateTests(unittest.TestCase):
             write_fixture(root)
             (root / "notes.md").write_bytes(bytes([0xFF, 0x00, 0x0A]))
             self.assertTrue(any("notes.md" in problem for problem in aa.check(root)))
+
+
+class RegistrationGateTests(unittest.TestCase):
+    """A catalogued skill must carry its Codex interface and a row in every README."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        write_fixture(self.root)
+        aa.write_rendered(self.root)
+
+    def test_complete_registration_passes(self) -> None:
+        self.assertEqual([], aa.check(self.root))
+
+    def test_skill_without_openai_yaml_fails_naming_the_skill(self) -> None:
+        (self.root / "skills/route-subagents/agents/openai.yaml").unlink()
+        aa.write_rendered(self.root)
+        self.assertEqual(
+            [
+                "skills/route-subagents: missing agents/openai.yaml; "
+                "every skill needs its Codex interface"
+            ],
+            aa.check(self.root),
+        )
+
+    def test_readme_without_the_skill_row_fails_naming_readme_and_skill(self) -> None:
+        for readme in README_TABLES:
+            with self.subTest(readme=readme):
+                path = self.root / readme
+                complete = path.read_text(encoding="utf-8")
+                # The skill stays mentioned in prose: only a table row counts.
+                path.write_text(
+                    readme_with_rows() + "\nSee route-subagents for delegation.\n",
+                    encoding="utf-8",
+                    newline="\n",
+                )
+                problems = aa.check(self.root)
+                self.assertEqual(
+                    [
+                        f"{readme}: skill table has no row for route-subagents "
+                        "([route-subagents](skills/route-subagents/SKILL.md))"
+                    ],
+                    problems,
+                )
+                path.write_text(complete, encoding="utf-8", newline="\n")
+                self.assertEqual([], aa.check(self.root))
+
+    def test_missing_translated_readme_fails(self) -> None:
+        (self.root / "README.ru.md").unlink()
+        self.assertEqual(
+            ["README.ru.md: missing; it must list every catalogued skill"],
+            aa.check(self.root),
+        )
+
+    def test_added_skill_needs_its_row_in_every_readme(self) -> None:
+        write_fixture(self.root, CATALOG + EXPLICIT_SKILL)
+        add_explicit_skill(self.root)
+        adapter = self.root / "skills/explicit-example/agents/openai.yaml"
+        adapter.parent.mkdir()
+        adapter.write_text(
+            'interface: {default_prompt: "Use $explicit-example"}\n'
+            "policy: {allow_implicit_invocation: false}\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        aa.write_rendered(self.root)
+        self.assertEqual([], aa.check(self.root))
+        path = self.root / "README.zh-CN.md"
+        path.write_text(readme_with_rows("route-subagents"), encoding="utf-8", newline="\n")
+        problems = aa.check(self.root)
+        self.assertEqual(1, len(problems), problems)
+        self.assertTrue(problems[0].startswith("README.zh-CN.md: "), problems)
+        self.assertIn("explicit-example", problems[0])
 
 
 class SkillMetadataTests(unittest.TestCase):

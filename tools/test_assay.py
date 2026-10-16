@@ -85,13 +85,29 @@ def profile(name: str, capabilities: list[str]) -> str:
     )
 
 
+README_TABLES = ("README.md", "README.ru.md", "README.zh-CN.md")
+
+
+def readme_row(name: str) -> str:
+    return f"| [{name}](skills/{name}/SKILL.md) | Use it. | Skip it. |\n"
+
+
+def readme_with_rows(*names: str) -> str:
+    return (
+        "# Fixture\n\n"
+        "| Skill | Use it when | Skip it when |\n"
+        "| --- | --- | --- |\n"
+        + "".join(readme_row(name) for name in names)
+    )
+
+
 def write_fixture(root: Path, catalog: str = CATALOG) -> None:
     files = {
         "AGENTS.md": "# Fixture instructions\n",
         "CHANGELOG.md": "# Changelog\n",
         "CLAUDE.md": "@AGENTS.md\n",
         "LICENSE": "MIT\n",
-        "README.md": "# Fixture\n",
+        **{name: readme_with_rows("route-subagents") for name in README_TABLES},
         "VERSION": "1.0.0\n",
         "catalog.toml": catalog,
         "profiles/evidence-reviewer.json": profile(
@@ -137,6 +153,9 @@ def add_explicit_skill(root: Path) -> None:
         encoding="utf-8",
         newline="\n",
     )
+    for name in README_TABLES:
+        with (root / name).open("a", encoding="utf-8", newline="\n") as readme:
+            readme.write(readme_row("explicit-example"))
 
 
 def write_claude_explicit_override(

@@ -654,6 +654,36 @@ def still_text(directory: Path) -> set[str] | None:
     return kept if exempt else None
 
 
+README_SKILL_TABLES = ("README.md", "README.ru.md", "README.zh-CN.md")
+
+
+def readme_registration_problems(root: Path, catalog: Catalog) -> list[str]:
+    """Name each catalogued skill that a README skill table does not list.
+
+    The tables are hand-written and translated, so this checks presence of the
+    row ``| [name](skills/name/SKILL.md) | ...`` and never generates it.
+    """
+    skills = [asset for asset in catalog.assets if asset.kind == "skill"]
+    problems: list[str] = []
+    for readme in README_SKILL_TABLES:
+        path = root / readme
+        if not path.is_file():
+            problems.append(f"{readme}: missing; it must list every catalogued skill")
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for asset in skills:
+            row = re.compile(
+                rf"^\| \[{re.escape(asset.name)}\]\({re.escape(asset.path)}/SKILL\.md\) \|",
+                re.MULTILINE,
+            )
+            if not row.search(text):
+                problems.append(
+                    f"{readme}: skill table has no row for {asset.name} "
+                    f"([{asset.name}]({asset.path}/SKILL.md))"
+                )
+    return problems
+
+
 def check(root: Path = ROOT) -> list[str]:
     problems: list[str] = []
     try:
@@ -735,12 +765,19 @@ def check(root: Path = ROOT) -> list[str]:
                 problems.append(
                     f"{asset.path}: explicit activation requires agents/openai.yaml"
                 )
+            else:
+                problems.append(
+                    f"{asset.path}: missing agents/openai.yaml; every skill needs "
+                    "its Codex interface"
+                )
         else:
             if source.is_file():
                 try:
                     profile_document(source.read_bytes(), asset)
                 except ContractError as error:
                     problems.append(str(error))
+
+    problems.extend(readme_registration_problems(root, catalog))
 
     # Validate a full copied collection and every singleton, not only checkout
     # links. Unsafe source trees never enter the copying boundary.
