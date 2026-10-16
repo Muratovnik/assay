@@ -21,7 +21,7 @@ the session's maximum effort; express both settings through the actual supported
 controls or establish deliberate matching inheritance. An unavailable router
 does not make either setting a valid default.
 
-For a [native economy advisor](routing-advisor.md), use the active Claude model
+For a native economy advisor (`docs/how-to/routing-advisor.md` in the Assay repository), use the active Claude model
 inventory and a supported native Agent route for the returned handoff. Do not
 launch another provider's CLI to obtain its economical model. Send only the
 bounded snapshot, request the explicit supported effort and return the object
@@ -38,7 +38,8 @@ Verify the actual binding when it matters. Custom
 profiles should describe stable capabilities and omit model/effort defaults
 unless the owner deliberately pins them.
 
-When the owner selected [required routing](required-routing.md), the separately
+When the owner selected required routing (`docs/how-to/required-routing.md` in the Assay
+repository), the separately
 bound native advisor fetches its private snapshot and submits the structured
 answer itself. The primary uses only the compact handoff, decision and the
 authorized worker stub, which the host completes. It does not copy benchmarks,

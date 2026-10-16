@@ -77,8 +77,8 @@ the existing documented caller override can express a concrete, explained
 reason to use a simple route; approved choices and explicitly unrouted native
 types serve the corresponding owner-controlled required-mode cases. These are
 existing authority paths, not declarations of measured optimality. See the
-[advisor contract](../../skills/route-subagents/references/routing-advisor.md)
-and [required-mode contract](../../skills/route-subagents/references/required-routing.md).
+[advisor contract](../how-to/routing-advisor.md)
+and [required-mode contract](../how-to/required-routing.md).
 
 ## Research that changes the decision
 

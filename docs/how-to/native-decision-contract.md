@@ -1,5 +1,11 @@
 # Native task adequacy and cost selection
 
+**Status: frozen** with the [routing advisor](routing-advisor.md) whose policy v3
+it defines; the default path is a [route table](../../skills/route-subagents/references/route-table.md).
+
+Operator documentation: the `route-subagents` skill points to this page in
+plain text and does not load it.
+
 Routing policy v3 replaces native full rankings with independently named
 categorical questions. Config v4 enables this policy for new configurations;
 existing v1–v3 configurations retain their declared policies. Migrate explicitly:

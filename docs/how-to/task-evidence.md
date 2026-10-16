@@ -1,7 +1,10 @@
 # Task evidence and expected full cost
 
 **Status: frozen** with the [routing advisor](routing-advisor.md) it extends;
-the default path is a [route table](route-table.md).
+the default path is a [route table](../../skills/route-subagents/references/route-table.md).
+
+Operator documentation: the `route-subagents` skill points to this page in
+plain text and does not load it.
 
 This optional extension adds local observations to the existing advisor. It
 does not assign workers, change model availability or call another model. The

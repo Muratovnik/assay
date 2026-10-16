@@ -12,8 +12,8 @@ Claude и Codex, которые ей не следуют; `route-candidates` п�
 обязательная маршрутизация для Claude Code заморожены: доступны, если владелец их
 включит, но не используются по умолчанию. Установка ссылок навыков не меняет
 регистрацию MCP. Настройка советчика описана в
-[руководстве RoutingAdvisor](../../skills/route-subagents/references/routing-advisor.md),
-режим `required` — в [контракте](../../skills/route-subagents/references/required-routing.md).
+[руководстве RoutingAdvisor](../how-to/routing-advisor.md),
+режим `required` — в [контракте](../how-to/required-routing.md).
 Локальные проверки контрактов не доказывают качество модели или экономию квоты.
 
 Какой путь выбрать, зависит от клиента и от того, нужны ли вам профили агентов

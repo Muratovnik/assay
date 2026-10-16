@@ -2,10 +2,13 @@
 
 **Status: frozen.** This mode keeps its contract and tests but is no longer the
 recommended path and is not being extended. The default is a
-[route table](route-table.md) enforced by the evidence-only hook. Its Claude
+[route table](../../skills/route-subagents/references/route-table.md) enforced by the evidence-only hook. Its Claude
 adapter predates the per-call `effort` field: it still carries effort through
 generated definitions, which remains correct but is no longer the only way the
 client can express effort.
+
+Operator documentation: the `route-subagents` skill points to this page in
+plain text and does not load it.
 
 This is the opt-in routing contract, protocol 3 in configuration schema 3. It
 extends the existing evidence service and policy, not the native agent launcher.
@@ -19,7 +22,7 @@ v2 files and for a v3 file without a mode, the workflow is the existing one.
 `get_routing_context`, the root-mediated advisor handoff and the CLI keep their
 behavior, and the plugin hooks register no decision. For Claude they refuse only
 a launch that names no model or no effort, unless `pipeline.explicit_routes` is
-`"off"`; see the [launch check](claude-code-routing.md#evidence-only-launch-check).
+`"off"`; see the [launch check](../../skills/route-subagents/references/claude-code-routing.md#evidence-only-launch-check).
 
 `required` is enabled only by an explicit `pipeline.mode: "required"`. It adds
 no automatic fallback to root-side benchmark comparison when an advisor is
@@ -35,7 +38,7 @@ The implemented host adapter is Claude Code. Codex and other hosts report
 runtime denies protected Codex spawns and routing operations when required mode
 is selected. Familiar tool names do not make Claude's hook
 payloads portable. What a Codex adapter must establish first is recorded in the
-[Codex mechanics](codex-routing.md#required-mode-adapter-requirements). The optional hosted Jev backend remains available for the
+[Codex mechanics](../../skills/route-subagents/references/codex-routing.md#required-mode-adapter-requirements). The optional hosted Jev backend remains available for the
 evidence-only diagnostic workflow and its consent, not as a hidden required-mode
 or native-advisor fallback.
 

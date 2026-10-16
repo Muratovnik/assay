@@ -4,10 +4,10 @@ This reference describes the **evidence-only** comparison and its acquisition
 diagnostics. With a [route table](route-table.md) configured, launches follow
 the table and this surface serves building and reviewing it. When an advisor is
 enabled, ordinary delegation uses the
-[recommendation workflow](routing-advisor.md) by default; do not turn a
+recommendation workflow (`docs/how-to/routing-advisor.md` in the Assay repository) by default; do not turn a
 benchmark preference into an unexplained binding caller choice. Use this raw
 comparison surface when the advisor is disabled or unavailable. When the owner explicitly selected
-[required routing](required-routing.md), the root does not call
+required routing (`docs/how-to/required-routing.md`), the root does not call
 `get_routing_context`; that tool is absent from the required-mode MCP surface.
 No acquisition or advisor failure changes modes. Source refresh is shared by
 both workflows.
@@ -118,10 +118,10 @@ actual confirmation time. Otherwise the agent supplies it on the first call.
 Neither config nor inventory belongs in tracked source.
 
 Version 1 keeps evidence-only behavior. The opt-in
-[routing advisor](routing-advisor.md) adds native economy and Jev adapters through
+routing advisor (`docs/how-to/routing-advisor.md`) adds native economy and Jev adapters through
 the same service and source cache. Its separate snapshot/policy does not change
 the comparisons returned by `get_routing_context`. Schema 3 keeps this workflow
-unless it sets the separate [required mode](required-routing.md#one-explicit-mode).
+unless it sets the separate required mode (`docs/how-to/required-routing.md`, section "One explicit mode").
 
 Codex registration template (replace capitalized arguments with real paths):
 

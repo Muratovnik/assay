@@ -114,8 +114,9 @@ add new models within days is visible in their `source_updated_at`.
 
 ## Frozen alternatives
 
-The [routing advisor](routing-advisor.md), [required routing](required-routing.md)
-and [local task evidence](task-evidence.md) remain available to an owner who
-enables them, and their contracts are unchanged. They are frozen: not the
-default path, not extended, and not used when a table is configured unless the
-owner turns them on.
+The routing advisor, required routing and local task evidence remain available
+to an owner who enables them, and their contracts are unchanged. They are
+frozen: not the default path, not extended, and not used when a table is
+configured unless the owner turns them on. Their procedures are operator
+documentation in `docs/how-to/` of the Assay repository, named in the skill's
+"Frozen alternatives" section.

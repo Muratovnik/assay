@@ -416,7 +416,7 @@ replacement. Internal return-processing failures use the same schema.
 Private advisor launches require `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` in the
 environment that starts Claude. Otherwise the guard denies the launch: background
 completion notifications bypass this replacement. See the
-[required-routing setup](../../skills/route-subagents/references/required-routing.md#configure-once-outside-task-execution)
+[required-routing setup](required-routing.md#configure-once-outside-task-execution)
 for the session-wide effect and alternatives.
 Failure notifications, missing hooks and input too large to parse are not a proven
 redaction boundary. Hooks are workflow checks, not isolation against a hostile

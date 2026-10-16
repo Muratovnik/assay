@@ -124,15 +124,17 @@ denied operation.
 
 ### Frozen alternatives
 
-The [routing advisor](references/routing-advisor.md), with its
-[decision contract](references/native-decision-contract.md) and
-[local task evidence](references/task-evidence.md), and
-[required routing](references/required-routing.md) remain available to an owner
-who enables them. Follow their references when `routing_status` shows one
-enabled. They are not the default path and are not being extended. An enabled
-advisor's exact inline `handoff.prompt` is forwarded unchanged, never as a file
-path or excerpt; required mode launches only the exact input it authorizes,
-including any `model`. The [benchmark evidence service](references/benchmark-routing.md)
+The routing advisor, with its decision contract and local task evidence, and
+required routing remain available to an owner who enables them. They are not the
+default path and are not being extended. If `routing_status` shows the advisor
+or required mode enabled, its procedure is in `docs/how-to/routing-advisor.md`
+(also `native-decision-contract.md` and `task-evidence.md`) or
+`docs/how-to/required-routing.md` of the Assay repository. The installed Claude
+plugin carries `docs/`; a Codex link install or a singleton copy does not, so
+read the file from the repository. An enabled advisor's exact inline
+`handoff.prompt` is forwarded unchanged, never as a file path or excerpt;
+required mode launches only the exact input it authorizes, including any
+`model`. The [benchmark evidence service](references/benchmark-routing.md)
 keeps `get_routing_context` and source refresh for building and reviewing the
 table.
 

@@ -3,7 +3,10 @@
 **Status: frozen.** The advisor stays available to an owner who enables it, with
 this contract unchanged, but it is no longer the default path and is not being
 extended. Its adequacy answers did not separate candidate pairs in practice; the
-default is a [route table](route-table.md) the owner reviews when models change.
+default is a [route table](../../skills/route-subagents/references/route-table.md) the owner reviews when models change.
+
+Operator documentation: the `route-subagents` skill points to this page in
+plain text and does not load it.
 
 The native [decision contract](native-decision-contract.md) assesses current
 client model × effort pairs against a concrete task, then code selects using
@@ -393,7 +396,7 @@ touches only owned records, refuses linked paths and runs on writes without a
 scheduler. User exports have a separate lifetime.
 
 For linked native execution capture, criterion assessments and coverage-aware
-local reports, use [retrospective telemetry](routing-telemetry.md).
+local reports, use [retrospective telemetry](../../skills/route-subagents/references/routing-telemetry.md).
 
 History import reads only explicitly named Codex/Claude JSONL files. It returns
 usage events and an account quota timeline separately, handles cumulative
@@ -432,7 +435,7 @@ not a mandatory paid comparison campaign.
 ## Cost of a completed task
 
 Compare routing policies on representative completed tasks, not API price alone,
-counting their cost as the [paired pilot](../../skill-evaluation/references/paired-pilot.md#inspect-four-distinct-results)
+counting their cost as the [paired pilot](../../skills/skill-evaluation/references/paired-pilot.md#inspect-four-distinct-results)
 does. Public benchmarks can inform a prior, not establish this cost.
 
 Use the existing explicit choice when the candidate is already justified; do not

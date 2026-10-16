@@ -35,7 +35,7 @@ Use full inheritance only when full continuity is material and the inherited
 settings also fit the task and budget. Do not discard a cheaper sufficient
 selection just to copy history. Recheck the callable schema if that changes.
 
-For a [native economy advisor](routing-advisor.md), the primary passes the
+For a native economy advisor (`docs/how-to/routing-advisor.md` in the Assay repository), the primary passes the
 handoff's model and effort through `model` and `reasoning_effort`, with
 `fork_turns="none"` and the self-contained prompt. The advisor ranks only the
 provided snapshot and must not spawn. Forward its exact inline prompt, rather
@@ -75,7 +75,7 @@ stops children from spawning. Public reports say some Codex versions do not
 enforce it, so set it explicitly and confirm in a fresh session that a child's
 `spawn_agent` call fails before relying on it.
 
-[Required routing](required-routing.md#one-explicit-mode) has no Codex adapter.
+Required routing (`docs/how-to/required-routing.md`, section "One explicit mode") has no Codex adapter.
 A Codex configuration that selects it reports the unsupported host and blocks
 protected delegation; keep Codex on the evidence-only workflow. The
 reminder alone enforces nothing; the launch check above is the hook's

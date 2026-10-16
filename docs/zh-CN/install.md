@@ -8,8 +8,8 @@
 
 路由建议器（`native-economy`，或经同意向外部传输数据的 Jev）和 Claude Code 的强制路由
 已冻结：所有者启用后仍可使用，但不是默认路径。技能链接安装不会更改 MCP 注册。建议器配置见
-[RoutingAdvisor 指南](../../skills/route-subagents/references/routing-advisor.md)，
-`required` 模式见[契约](../../skills/route-subagents/references/required-routing.md)。
+[RoutingAdvisor 指南](../how-to/routing-advisor.md)，
+`required` 模式见[契约](../how-to/required-routing.md)。
 本地契约测试不能证明模型质量或配额节省。
 
 选择哪条安装路径，取决于你使用的客户端，以及你是否需要在技能之外再获得智能体

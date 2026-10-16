@@ -218,9 +218,9 @@ Config v1 remains evidence-only and a v2 file keeps its advisor settings. The
 explicit migration writes a new schema-3 file, evidence-only by default, and keeps
 the original for rollback. Native-only operation needs no Jev SDK or key.
 Required routing is a separate opt-in for Claude Code, described in the
-[required routing contract](../skills/route-subagents/references/required-routing.md).
+[required routing contract](how-to/required-routing.md).
 
-See the [routing advisor setup and workflow](../skills/route-subagents/references/routing-advisor.md)
+See the [routing advisor setup and workflow](how-to/routing-advisor.md)
 for configuration, optional pinned SDK installation, external-data consent,
 bounded handoff, metadata retention and offline replay. Reconnect the client
 after changing its server configuration. Static tests do not establish native

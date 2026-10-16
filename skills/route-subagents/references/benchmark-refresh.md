@@ -41,7 +41,7 @@ reports it. Evidence-only Claude routing returns recent resolutions as
 `host_observations` (see [Claude Code mechanics](claude-code-routing.md)). In
 required routing a change of that resolution suspends the alias's confirmed
 spellings until the owner confirms the inventory again; see
-[required routing](required-routing.md#observations-failure-and-privacy-boundaries).
+`docs/how-to/required-routing.md`, section "Observations, failure and privacy boundaries".
 That is a host observation, not a matching rule.
 
 ## Finding a missing spelling
