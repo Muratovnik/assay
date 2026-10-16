@@ -73,6 +73,62 @@ class FeedbackCaptureTests(unittest.TestCase):
             with self.subTest(prompt=prompt):
                 self.assertIsNone(feedback.signal(prompt))
 
+    def test_phrasings_beyond_the_sentence_start_map_to_their_kind(self):
+        # Invented sentences: each family is a complaint wherever the sentence
+        # stands, and a conversational lead-in must not hide it.
+        cases = {
+            "omission": ("Ок, но ты не прочитал конфигурацию целиком.", "Спасибо. Ты упустил третий пункт.",
+                         "Модуль разобран по верхам.", "You didn't read the changelog.",
+                         "Okay, but you forgot the migration."),
+            "repeated_constraint": ("Не в первый раз замечаю, что тесты не запускаются.", "Ты снова поменял имена.",
+                                    "This is not the first time it happens."),
+            "correction": ("Вижу, что в отчёте нет таблицы.", "Я вижу, что ты переписал конфиг.",
+                           "Я заметил, что кнопка стала шире.", "Я хотел короткий список, а не таблицу.",
+                           "Хотя я его не просил, добавлен кэш.", "I never asked for a cache.",
+                           "Ты сделал это не так.", "Ты ошибся с версией.", "Это неприемлемо.",
+                           "Почему ты выбрал этот порт?", "Почему именно три повтора?",
+                           "Почему сделано скриптом, а не плагином?", "Разве это не должно быть в тесте?",
+                           "Why did you rename the folder?", "Why use a script instead of a plugin?", "Ты понял неправильно.",
+                           "Лучше, но отступы всё ещё велики.", "Есть замечания: подпись обрезана.",
+                           "Используй готовое, не пиши свою функцию.", "Не пиши свой парсер, возьми библиотеку.",
+                           "Вместо своей логики подключи библиотеку.", "Убери за собой временные файлы.",
+                           "Clean up the mess you left.", "Не ограничивайся одним файлом.",
+                           "Don't limit yourself to one file.", "Не только заголовок, но и подвал нужно поправить.",
+                           "Not only the header but also the footer needs a fix.", "You changed the layout.",
+                           "Your mistake is the wrong path."),
+        }
+        for kind, prompts in cases.items():
+            for prompt in prompts:
+                with self.subTest(prompt=prompt):
+                    self.assertEqual(feedback.signal(prompt), kind)
+
+    def test_phrasing_controls_stay_quiet(self):
+        for prompt in (
+                # neutral questions and plain tasks
+                "Почему так долго?", "Почему по умолчанию выбран порт 8080?", "Why is the build slow?",
+                "Давай посмотрим, что я вижу в логе.", "Не вижу проблем, идём дальше.", "Я хочу добавить тест.",
+                "Добавь кэш и напиши тест.", "Why would anyone cache this?", "Давай использовать готовую библиотеку.",
+                "Please use the existing helper for dates.", "Нужно не только добавить кэш.",
+                "Я хотел бы добавить тест.", "Почему?", "Вижу, спасибо.", "Я заметил, что тесты проходят, спасибо.",
+                # status questions, nouns and probes that merely end like a past-tense verb
+                "Ты закончил?", "Ты понял задачу?", "Ты можешь файл прислать?", "Ты видел эту статью?",
+                "Ты уже смотрел логи?",
+                # conditions and approval
+                "Если ты не уверен, спроси.", "Если ты не прочитал файл, прочитай его.", "Ты всё сделал правильно.",
+                "You did great, thanks.", "Отлично, ты нашёл причину.", "You missed nothing. Go on.",
+                "Спасибо, не в этот раз.",
+                # quoted or structured material is data, not a request
+                "> Ты не прочитал файл.\n\nСделай сводку.", "- Вижу, что нет таблицы.",
+                "```text\nWhy did you rename the folder?\n```", '"Почему ты выбрал порт?" - пример вопроса.',
+                "Разбери пример:\n\nТы упустил пункт.", "    Ты ошибся с версией."):
+            with self.subTest(prompt=prompt):
+                self.assertIsNone(feedback.signal(prompt))
+        # A complaint later in the same paragraph still counts; one in a later paragraph does not.
+        self.assertEqual(feedback.signal("Добавь кэш. Потом напиши тест. Вижу, что ты забыл про TTL."), "correction")
+        self.assertIsNone(feedback.signal("Добавь кэш.\n\nВижу, что ты забыл про TTL."))
+        # Only the opening sentences of a long paragraph are examined.
+        self.assertIsNone(feedback.signal(" ".join(["Добавь кэш."] * 12 + ["Ты ошибся с версией."])))
+
     def test_native_context_envelopes(self):
         for client in ("claude", "codex", "gemini"):
             with self.subTest(client=client):

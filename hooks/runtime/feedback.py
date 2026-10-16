@@ -53,6 +53,26 @@ METHOD_PATH = re.compile(r"skills/[a-z][a-z0-9-]{0,63}/(?:SKILL\.md|references/[
 REVISION = re.compile(r"[0-9a-f]{7,64}")
 # These are candidate signals, not a sentiment classifier or a verdict. The
 # existing CommonMark selector keeps quoted documents/code out of this grammar.
+# Each pattern is tried against the first sentences of that first request
+# paragraph, after conversational lead-ins ("no,", "but", "ok") are removed, so
+# a correction need not open the message. A pattern without `^` or a leading
+# word boundary is deliberately a phrase that is a complaint wherever it stands.
+CLAUSE_LIMIT = 6
+LEAD_IN = re.compile(
+    r"^(?:(?:no|нет|но|а|и|ну|так|однако|окей|ок|хорошо|ладно|понял|ясно|слушай|but|and|so|well|ok|okay)\b[,.!:]?\s+)+",
+    re.I)
+# A clause that states the absence of a miss or approves the work is skipped,
+# not the whole message: "you missed nothing", "I can see that, thanks".
+NEUTRAL = re.compile(
+    r"^you missed nothing\b"
+    r"|(?<!не)(?<!не )(?<!not )\b(?:правильно|отлично|спасибо|молодец|супер|здорово|great|perfect|thanks|thank you|well done|good job|nicely)\b",
+    re.I)
+# What the agent visibly did, as a bounded verb list: an open past-tense ending
+# also matches nouns ("файл", "канал") and probing questions ("ты видел ...?").
+# An adverb or two may sit between the subject and the verb.
+DID_BY_YOU = (r"(?:сделал|поменял|изменил|удалил|переписал|добавил|убрал|собрал|установил|разместил|поставил|написал|"
+              r"выбрал|перенёс|перенес|создал|запустил|заменил|сломал|оставил|отключил|включил|положил|вынес)")
+PAST_BY_YOU = r"ты(?: \w+){0,2} " + DID_BY_YOU + r"\b"
 SIGNALS = (
     ("omission", r"^(?:you (?:missed|omitted|forgot|ignored)\b|ты (?:упустил\w*|пропустил\w*|забыл\w*|проигнорировал\w*)\b)"),
     ("correction", r"^(?:i (?:asked|said|meant)\b|я (?:просил\w*|говорил\w*|имел\w* в виду)\b)"),
@@ -60,6 +80,35 @@ SIGNALS = (
     ("omission", r"^(?:why (?:didn't|did not|haven't|have not) you\b|почему ты не\b)"),
     ("repeated_constraint", r"^(?:i already (?:told|asked)|я (?:уже|же) (?:говорил\w*|просил\w*)\b|ты опять\b|you (?:did it|are doing it) again\b)"),
     ("correction", r"^(?:not what i (?:asked|meant)|не (?:это|то) (?:я )?имел\w* в виду)\b"),
+    # Repetition of a known constraint.
+    ("repeated_constraint", r"\b(?:не в первый раз|в который раз|not the first time|ты (?:снова|вновь))\b"),
+    # The agent skipped work it was expected to do.
+    ("omission", r"(?<!если )(?<!когда )(?<!чтобы )(?<!пока )\bты (?:(?:так и|всё равно|опять|снова|почему-то|же|ещё|еще|вообще|полностью) )*не "
+                 r"(?:прочитал\w*|читал\w*|читаешь|изучил\w*|проверил\w*|проверял\w*|использовал\w*|учёл|учел|упомянул\w*|"
+                 r"сделал\w*|выполнил\w*|открыл\w*|применил\w*|применял\w*|посмотрел\w*|смотрел\w*|заметил\w*)"),
+    ("omission", r"^you (?:(?:still|again|just) )?(?:didn't|did not|never|haven't|have not) (?:read|mention|use|check|include|cover|consider|look|follow|test)\w*"),
+    ("omission", r"\bпо верхам\b"),
+    # The owner reports what they saw the agent do, or what they wanted instead.
+    ("correction", r"^(?:(?:я|уже|не в первый раз|опять|снова|всё ещё|все еще) )*вижу\b"),
+    ("correction", r"\bя (?:заметил\w*|увидел\w*)\b|\bi (?:noticed|saw) (?:that )?you\b"),
+    ("correction", r"\bя хотел[аи]?\b(?! бы\b)|\bi wanted (?:a|an|the|it|you|this|that)\b"),
+    ("correction", r"\b(?:я (?:же |вообще )?не (?:просил\w*|говорил\w*)|хотя я (?:его |её |ее |это |этого |тебя )?не (?:просил|говорил|велел))\b"
+                   r"|\b(?:i (?:never|didn't|did not) (?:ask\w*|tell|told)|(?:although|even though) i (?:didn't|did not) (?:ask\w*|tell|told))\b"),
+    ("correction", r"^" + PAST_BY_YOU),
+    ("correction", r"^ты(?: \w+){0,2} (?:неправильно|неверно|не так)\b|^you (?:misunderstood|got (?:it|that) wrong)\b"),
+    ("correction", r"^you (?:(?:just|also|then|already) )?(?:changed|removed|deleted|rewrote|replaced|broke|installed|moved|placed|put)\b"),
+    ("correction", r"\bты (?:ошибся|ошиблась|неправ\w*|не прав\w*)\b|\bтвоя ошибка\b|\byour mistake\b|\byou(?:'re| are) wrong\b|\bзнаешь свою ошибку\b"),
+    ("correction", r"\bнеприемлем\w*|\bunacceptable\b"),
+    # A challenge to a choice the agent made.
+    ("correction", r"^(?:почему (?:ты|вы|именно)\b|why did you\b|why exactly\b|разве\b)"),
+    ("correction", r"\b(?:почему|why)\b[^?.!]{1,80}\b(?:а не|instead of|rather than)\b"),
+    # Partial acceptance followed by a defect, and out-of-scope or home-made work.
+    ("correction", r"^(?:(?:уже )?(?:лучше|получше|better)\W+(?:но|однако|but)|(?:у меня )?есть (?:замечания|претензии)|i have (?:some )?(?:comments|remarks|complaints))\b"),
+    ("correction", r"^используй готов(?:ое|ую|ый|ые|ых)\b|\b(?:вместо|instead of)\b[^.?!]{0,20}\b(?:своей|своего|своё|свое|своих|собственн\w+|your own|writing your own)"
+                   r"|\bне (?:пиши|делай|изобретай)\w* (?:свой|своё|свое|велосипед)\b|\breinvent"),
+    ("correction", r"\bубер\w* за собой|\bclean up (?:after yourself|the (?:leftovers|mess) you)\b"),
+    ("correction", r"\bне ограничива\w+|\bdon't limit yourself\b"),
+    ("correction", r"^(?:не только\b[^.?!]{1,120}\bно и|not only\b[^.?!]{1,120}\bbut (?:also|as well))\b"),
 )
 
 
@@ -120,12 +169,13 @@ def source(event, client):
 
 def signal(prompt):
     text = request_text(prompt, set())
-    text = re.sub(r"^(?:no|нет)[,.!:]?\s+", "", text, flags=re.I)
-    if re.match(r"^you missed nothing\b", text, re.I):
-        return None
-    for kind, pattern in SIGNALS:
-        if re.search(pattern, text, re.I):
-            return kind
+    for clause in re.split(r"(?<=[.!?…])\s+", text)[:CLAUSE_LIMIT]:
+        clause = LEAD_IN.sub("", clause)
+        if NEUTRAL.search(clause):
+            continue
+        for kind, pattern in SIGNALS:
+            if re.search(pattern, clause, re.I):
+                return kind
     return None
 
 

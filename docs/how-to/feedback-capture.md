@@ -141,10 +141,15 @@ python -I -B hooks/runtime/cli.py doctor --client codex
 
 On a later actual correction such as `You missed the required static analysis.`,
 the collector records a candidate and returns a short notice to the working model.
-The parser considers the first top-level request paragraph, excludes Markdown
-quotes/code/lists/headings, and recognizes bounded English/Russian repair phrases.
-It does not analyze sentiment generally, and can miss implicit corrections or
-messages over 16,384 characters. False positives remain candidates for review.
+The parser considers the first six sentences of the first top-level request
+paragraph, excludes Markdown quotes/code/lists/headings, and recognizes bounded
+English/Russian repair phrases. A phrase need not open the message: "Ok, but you
+forgot the migration" and "I noticed you rewrote the config" both count, as
+do a challenge to a choice ("why did you ...", "why this instead of ...") and a
+report of what the owner saw or wanted. Status questions ("did you finish?") and
+approval of the agent's work are skipped. It does not analyze sentiment
+generally, uses no model, and can miss implicit corrections or messages over
+16,384 characters. False positives remain candidates for review.
 
 Inspect the store from the checkout or installed plugin root:
 
