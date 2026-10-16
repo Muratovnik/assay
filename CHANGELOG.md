@@ -6,6 +6,13 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.26.0](https://github.com/Muratovnik/assay/compare/v0.25.0...v0.26.0) (2026-10-16)
+
+### Features
+
+* **critical-discussion:** add a discussion method that challenges an idea or tool instead of agreeing by default. It recovers the underlying need, treats an example as a sample of the system rather than its scope, compares the idea with doing nothing and with existing solutions, requires coverage and migration evidence before calling a part unnecessary, and changes its position only on new evidence. implementation-planning, research-driven-change and product-flow-mapping route idea-only discussion to it. Its evaluation corpus is not yet executed, so no model run supports the method yet ([39bdc9b](https://github.com/Muratovnik/assay/commit/39bdc9b2485a138cbdb9fb7cb77ff076273c2c4c))
+* **hooks:** in Claude Code a turn that visibly meets the reading condition of a loaded skill's reference without reading it continues once, with one note naming each such reference. The signs are an edited `.vue` file (code-change's Vue structure), changed check configuration or `git mv` (effective quality checks), a reviewer launch (independent-audit's bounded review), a new plan file (implementation-planning's units), an edited interface file (ui-delivery's acceptance and visual judgment), documentation prose in Russian or Chinese (technical-writing's languages) and a claim that no solution exists or none qualifies (evidence-research's search and coverage). Each row turns off by its own ID in `disabled_rules`, and a disabled skill drops its rows ([660a9a0](https://github.com/Muratovnik/assay/commit/660a9a0d79370f14e5f70d6e917740877ebcaac7), [ee2ec0b](https://github.com/Muratovnik/assay/commit/ee2ec0b5f98b60bf5cb82c13b1a9594d42b19ed8))
+
 ## [0.25.0](https://github.com/Muratovnik/assay/compare/v0.24.0...v0.25.0) (2026-10-13)
 
 ### Features
