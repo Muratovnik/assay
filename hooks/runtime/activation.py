@@ -14,7 +14,7 @@ import tomllib
 
 MAX_PROMPT = 16_384
 MAX_CONTEXT = 900
-MAX_CHECK = 2_300
+MAX_CHECK = 2_700
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 # The required-mode advisor returns one structured answer and has no tools.
@@ -89,14 +89,19 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                      FETCH_NOTE not in disabled_rules, READ_CLAIMS not in disabled_rules,
                      [rule for rule in BRANCH_RULES if rule not in disabled_rules])
     # The installation path is the owner's; bound the text the catalog controls.
-    full = RuleSet(rules, True)
-    every = [rule["skill"].split("/", 1)[1] for rule in rules]
-    # The loaded-skills hint comes only from the Claude gate's records.
-    if max(len(skill_check(full, loaded=every)), len(skill_check(full, client="codex")),
-           len(subagent_check(full, client="codex"))) > MAX_CHECK:
+    if longest_check(rules) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
     fingerprint = hashlib.sha256(json.dumps([rules, content, result.skill_check], sort_keys=True).encode()).hexdigest()
     return result, fingerprint
+
+
+def longest_check(rules):
+    """Length of the longest skill check variant these rules produce."""
+    full = RuleSet(rules, True)
+    every = [rule["skill"].split("/", 1)[1] for rule in rules]
+    # The loaded-skills hint comes only from the Claude gate's records.
+    return max(len(skill_check(full, loaded=every)), len(skill_check(full, client="codex")),
+               len(subagent_check(full, client="codex")))
 
 
 def request_text(prompt, known_names):

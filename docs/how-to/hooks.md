@@ -117,8 +117,10 @@ skills and Anthropic's
 [guidance for Claude](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5#user-facing-progress-updates):
 say in one sentence what you are about to do before the first tool call.
 
-The check costs about 1.9 KB of English text (roughly 470 tokens) on every
-prompt, in Claude Code and Codex alike, and it stays in the conversation until
+The check costs about 2 KB of English text (roughly 500 tokens) on every
+prompt, in Claude Code and Codex alike; in Claude Code the list of skills
+already loaded adds up to 0.3 KB more. A test keeps it under 2,700 characters
+with room for one more skill. It stays in the conversation until
 compaction. It is not re-sent when a session resumes or compacts, so after a
 compaction the current request's check may survive only in the summary.
 In Codex the check adds that Codex's own skill instructions already ask for such

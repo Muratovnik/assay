@@ -59,6 +59,17 @@ class ActivationTests(unittest.TestCase):
                 self.assertEqual(1, context.count(CHECK))
                 self.assertTrue(context.endswith(check))
 
+    def test_skill_check_leaves_room_for_one_more_skill(self):
+        # A new skill adds its entry and its name in the loaded list. Without
+        # this room the next skill fails load_rules and every skill hint drops.
+        name = max((r['skill'].split('/', 1)[1] for r in self.rules), key=len)
+        extra = {'id': 'explicit:skill/x' + name[1:], 'skill': 'skill/x' + name[1:], 'priority': 0,
+                 'patterns': [], 'cue': 'x' * activation.MAX_CUE}
+        length = activation.longest_check([*self.rules, extra])
+        self.assertLessEqual(length, activation.MAX_CHECK,
+                             f'one more skill with a {len(name)}-character name and a full cue would make the '
+                             f'skill check {length} characters; raise MAX_CHECK or shorten cues')
+
     def test_bounds_and_non_prompt_events_abstain(self):
         for prompt in (None, {}, 'Use code-change '+ 'x' * activation.MAX_PROMPT):
             self.assertEqual([], activation.select(prompt, self.rules))
