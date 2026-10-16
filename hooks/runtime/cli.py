@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback, routing_telemetry, skill_gate, sources, coverage
+from runtime import state, feedback, routing_telemetry, skill_gate, sources, branches
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence import route_table
@@ -248,14 +248,15 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 loaded = skill_gate.loaded(event, client, names, settings["state_dir"],
                                            **({"clock": clock} if clock else {}))
         name = event["hook_event_name"]
+        enabled = {rule["skill"].split("/", 1)[1] for rule in rules}
         if client == "claude" and not protected:
             # How a source was read, not which skill applies; the skill gate's reply keeps priority.
             note = (sources.fetched(event, settings["state_dir"], **({"clock": clock} if clock else {}))
                     if name == "PostToolUse" and rules.fetch_note
                     else sources.stopped(event) if name in {"Stop", "SubagentStop"} and rules.read_claims else {})
             # A stop continues at most once: a contradicted read claim goes first.
-            if not note and name in {"Stop", "SubagentStop"} and rules.coverage_claims:
-                note = coverage.stopped(event)
+            if not note and name in {"Stop", "SubagentStop"} and rules.branch_rules:
+                note = branches.stopped(event, rules.branch_rules, enabled)
             if note:
                 return note, None
         decision = ({"rule_ids": [], "context": ""} if protected

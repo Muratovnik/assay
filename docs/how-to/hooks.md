@@ -225,29 +225,46 @@ a plain `Read` counts as complete. The skill gate's feedback takes priority at t
 same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch and
 `"read-claims"` the stop check; each works without the other.
 
-### Coverage check in Claude Code
+### Branch check in Claude Code
 
-`evidence-research` sends a landscape question or a claim of completeness through
-its `search-and-coverage` reference, and says that evidence absent from the
-examined scope is not proof that something does not exist. In an observed session
-an agent loaded the skill, skipped that reference, searched once with a list of
-candidates fixed in advance and answered that none of the existing skills did what
-the user wanted; the user then found several that did.
+A skill routes conditional depth into `references/`, and its `SKILL.md` names when
+each reference applies. Loading the skill does not load those references. In two
+weeks of observed sessions agents loaded a skill and skipped a reference whose
+condition the turn plainly met in about two of three sampled turns. In one of them
+an agent loaded `evidence-research`, skipped its `search-and-coverage` reference,
+searched once with a candidate list fixed in advance and answered that none of the
+existing skills did what the user wanted; the user then found several that did.
 
-At `Stop` and `SubagentStop` the hook reads the same transcript tail. When a line
-of the turn says something is absent or that none qualifies (`none of them`,
-`there are no existing tools`, `doesn't exist`, `ни один`, `нигде`,
-`не существует` and similar), the session or subagent loaded `evidence-research`
-since the latest compaction, and `references/search-and-coverage.md` was not read
-in that span by `Read` or a shell command, the turn continues once with feedback
-quoting up to two such lines. A skill that compaction re-attached counts as loaded,
-but a read of the reference before compaction does not count. A session or
-subagent that has not loaded the skill is not held to its reference. The wording
-match is deliberately broad, so a documented absence can draw the note too; one
-line saying the claim rests on the cited source answers it. The skill gate's
-feedback and a contradicted full-read claim take priority at the same stop, since
-a turn continues at most once.
-`disabled_rules: ["coverage-claims"]` turns this check off.
+At `Stop` and `SubagentStop` the hook reads the same transcript tail and checks a
+fixed table. Each row pairs a reference with a sign of its condition that the turn's
+own actions or words show:
+
+| Rule | Skill and reference | Sign in this turn |
+| --- | --- | --- |
+| `coverage-claims` | `evidence-research` → `search-and-coverage` | a line saying that no tool, skill, library or other solution exists, or that none of the candidates qualifies (`none of these skills`, `there is no maintained library`, `ни один из навыков`, `готового решения нет` and similar) |
+| `branch-vue-structure` | `code-change` → `vue-structure` | an edited `.vue` file |
+| `branch-quality-checks` | `code-change` → `effective-quality-checks` | an edited linter, formatter, type-checker, test-runner, hook or CI configuration file, a tool section written into `pyproject.toml` or `setup.cfg`, or `git mv` |
+| `branch-bounded-review` | `independent-audit` → `bounded-review` | an agent launched as a reviewer or auditor, by its type or its description; a worker that fixes or implements findings does not count |
+| `branch-implementation-units` | `implementation-planning` → `implementation-units` | a new plan file written with `Write`: one under a `plans` directory or named for a plan |
+| `branch-ui-acceptance` | `ui-delivery` → `scenario-testing` and `visual-judgment` | an edited component, markup or style file other than a test |
+| `branch-languages` | `technical-writing` → `languages` | a documentation file written with at least forty Cyrillic or Chinese characters, except agent memory notes |
+
+When a row's sign appears in this turn, the session or subagent loaded the skill
+since the latest compaction, and the reference was not read in that span by `Read`
+or a shell command naming it, the turn continues once. One note names every such
+reference with the condition the skill states and the turn's own evidence, quoting
+up to two lines or naming up to two files. A skill that compaction re-attached
+counts as loaded, but a read before compaction does not count. A session or
+subagent that has not loaded the skill is not held to its references, and a sign
+from an earlier turn does not count.
+
+The signs are deliberately narrow and still approximate. A write made through a
+shell command is not seen. The absence wording can match a documented fact about
+the work; one line saying the claim is limited to what was examined answers it.
+A condition the transcript cannot show, such as whether a comparison is
+consequential, has no row. The skill gate's feedback and a contradicted full-read
+claim take priority at the same stop, since a turn continues at most once. Each
+rule ID in `disabled_rules` turns its row off; a disabled skill drops its rows too.
 
 ## Hints do not grant authority
 
@@ -288,8 +305,8 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
-`"fetch-note"` and `"read-claims"` the two Claude source checks, and
-`"coverage-claims"` the Claude coverage check. The
+`"fetch-note"` and `"read-claims"` the two Claude source checks, and each
+rule ID of the branch check table one of its rows. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
 rest) are still accepted and do nothing, so an existing configuration keeps
 working; any other unknown ID is an error.
