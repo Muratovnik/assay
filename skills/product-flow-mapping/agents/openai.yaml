@@ -1,5 +1,5 @@
 interface:
-  display_name: "Product flow mapping"
+  display_name: "Product Flow Mapping"
   short_description: "Map existing journeys to screens, controls and evidence"
   default_prompt: "Use $product-flow-mapping to reconstruct the scoped product journeys and prepare an evidence-linked handoff."
 policy:

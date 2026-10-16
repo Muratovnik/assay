@@ -1,5 +1,5 @@
 interface:
-  display_name: "Critical discussion"
+  display_name: "Critical Discussion"
   short_description: "Challenge ideas and tools instead of agreeing by default"
   default_prompt: "Use $critical-discussion to examine this idea: recover the real need, compare it with doing nothing and existing solutions, and give a verdict with what would change it."
 policy:
