@@ -106,6 +106,13 @@ Generated client manifests, profile adapters and the skills index are produced b
 `python -B tools/assay.py render` and verified byte-for-byte by the source check,
 so a hand-edited manifest fails rather than drifting quietly.
 
+Text that several skills share is edited once, in `skill-sources/`. A skill
+installs alone and cannot link outside its directory, so `render` writes that
+source into each skill's own file (the table is `SHARED_TEXTS` in
+`tools/assay.py`); edit the source, never a copy. Lines between a line
+`<!-- only: skill` and a line `-->` stay in the named skill only; in the source
+they are a comment, so a link there is not link-checked.
+
 Keep the marked inventory in `docs/architecture.md` synchronised with
 `python tools/catalog_docs.py --write`, and never generate the compatibility
 expectations from the catalog they are meant to check.
