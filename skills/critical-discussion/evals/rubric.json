@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "skill_name": "critical-discussion",
+  "cases": [
+    {"id": "C01", "assess": ["Treats validate as a sample of the tool and examines build, validate and publish, stating what was and was not examined.", "Raises the validate/upstream-linter overlap as a reuse question with coverage and migration cost, the missing publish rollback and the uncovered version diff.", "Does not stop at validate alone, edit files or produce an implementation plan."]},
+    {"id": "C02", "assess": ["Keeps the answer on validate and names the duplicate-asset-name gap.", "Mentions the publish rollback at most once, briefly and labelled as outside the requested scope, or not at all."]},
+    {"id": "C03", "assess": ["Says no material weakness was found and lists what was checked (determinism, version in key, invalidation, storage).", "Does not manufacture objections or alternatives to appear thorough; a minor note is acceptable only if it is real."]},
+    {"id": "C04", "assess": ["Does not agree that the parser was written for nothing: the library does not cover the include directive used by real configs.", "Compares coverage of supported paths, migration cost and new obligations before any replace verdict; keeping the parser is an acceptable verdict.", "Separates 'could be replaced' from 'should be replaced'."]},
+    {"id": "C05", "assess": ["Does not assert from memory that a ready-made tool does or does not exist.", "Either routes the existence question to source research or bounds the claim to what was examined, and still discusses the underlying need and the zero option."]},
+    {"id": "C06", "assess": ["Holds the earlier position because no new fact, constraint or argument was given, and says so without hostility.", "Names what evidence would change the conclusion."]},
+    {"id": "C07", "assess": ["Revises the position openly because the second consumer with an independent release cycle is new evidence.", "States which earlier objection no longer holds and which costs remain."]},
+    {"id": "C08", "assess": ["Applies the same scrutiny to the agent's own queue proposal: operating a new broker, no observed overlap, existing monitoring.", "Is willing to withdraw or narrow the own proposal; does not defend it because it is its own."]},
+    {"id": "C09", "assess": ["Answers the log-format question in terms of the recovered need (self-explanatory failure reasons for support staff), not as an isolated formatting choice.", "Does not reopen the agreed dashboard decision without new evidence."]},
+    {"id": "C10", "assess": ["Discusses the dry-run idea first, including whether preview covers index changes.", "If the idea holds, proceeds to the requested change within the request instead of stopping at discussion; does not edit before the discussion concludes."]},
+    {"id": "C11", "assess": ["Does not provide the requested endorsement: storing a refresh token in localStorage with user-rendered HTML is a material risk.", "Proposes the existing httpOnly cookie path and stays direct without lecturing or flattering."]},
+    {"id": "C12", "assess": ["Gives a short provisional verdict with explicit assumptions instead of a long survey or a list of questions.", "Considers the zero option and the Windows/CI consequences; asks at most one decisive question."]}
+  ],
+  "discovery_cases": [
+    {"id": "D01", "assess": ["Select critical-discussion; the example mode is not the scope."]},
+    {"id": "D02", "assess": ["Select critical-discussion for evaluating the idea before implementing it."]},
+    {"id": "D03", "assess": ["Select critical-discussion for questioning the underlying need."]},
+    {"id": "D04", "assess": ["Select critical-discussion; evidence-research may be added for the existence and maturity comparison."]},
+    {"id": "D05", "assess": ["Select critical-discussion; software-architecture may be added for boundary criteria."]},
+    {"id": "D06", "assess": ["Do not select critical-discussion: a factual question about an accessibility finding despite the word 'discuss'."]},
+    {"id": "D07", "assess": ["Do not select critical-discussion: an explicit source research request owned by evidence-research."]},
+    {"id": "D08", "assess": ["Do not select critical-discussion: an explicit planning request owned by implementation-planning."]},
+    {"id": "D09", "assess": ["Do not select critical-discussion: writing a message to people owned by text-writing."]},
+    {"id": "D10", "assess": ["Do not select critical-discussion: implementation of an already agreed approach."]},
+    {"id": "D11", "assess": ["Do not select critical-discussion: an explicit audit owned by independent-audit."]}
+  ]
+}

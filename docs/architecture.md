@@ -29,6 +29,7 @@ location a client reads.
 | `skill/technical-writing` | automatic | `~/.agents/skills/technical-writing` | `~/.claude/skills/technical-writing` |
 | `skill/text-writing` | automatic | `~/.agents/skills/text-writing` | `~/.claude/skills/text-writing` |
 | `skill/retrospective` | automatic | `~/.agents/skills/retrospective` | `~/.claude/skills/retrospective` |
+| `skill/critical-discussion` | automatic | `~/.agents/skills/critical-discussion` | `~/.claude/skills/critical-discussion` |
 | `profile/evidence-reviewer` | explicit | `~/.codex/agents/evidence-reviewer.toml` | `~/.claude/agents/evidence-reviewer.md` |
 | `profile/official-docs-researcher` | explicit | `~/.codex/agents/official-docs-researcher.toml` | `~/.claude/agents/official-docs-researcher.md` |
 

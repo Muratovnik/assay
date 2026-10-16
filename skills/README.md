@@ -23,6 +23,7 @@ Declared automatic activation is eligibility, not a successful-run receipt.
 | [technical-writing](technical-writing/SKILL.md) | automatic | Write, edit, translate or review product documentation and repository or package descriptions, including README, guides, references and release notes. |
 | [text-writing](text-writing/SKILL.md) | automatic | Write, edit or review ordinary prose for a particular reader — messages, letters, articles, topic explanations, portfolio and product copy — including prose within a larger task. |
 | [retrospective](retrospective/SKILL.md) | automatic | Review a period of agent work for recurring friction, reconcile it with the rules already in force and propose evidence-backed, owner-routed changes for the user to decide. |
+| [critical-discussion](critical-discussion/SKILL.md) | automatic | Challenge an idea, decision, design or existing tool in discussion instead of agreeing by default. |
 
 The full description, including when the method should **not** run, is in
 each skill's frontmatter. Conditional depth lives in its `references/`, and

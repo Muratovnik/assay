@@ -1,9 +1,9 @@
 ---
 name: research-driven-change
-description: Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. Use for multi-stage research-to-change work or resuming that cycle; skip idea-only discussion, isolated research, routine edits and standalone skill assessments or read-only audits.
+description: Coordinate research-backed changes across requested stages, from comparing existing solutions and choosing an approach to planning, implementation, review and delivery. Use for multi-stage research-to-change work or resuming that cycle; skip idea-only discussion (critical-discussion), isolated research, routine edits and standalone skill assessments or read-only audits.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research implementation-planning independent-audit route-subagents skill-evaluation software-architecture technical-writing test-audit test-writing text-writing ui-delivery"
+  assay-optional-skills: "code-change critical-discussion evidence-research implementation-planning independent-audit route-subagents skill-evaluation software-architecture technical-writing test-audit test-writing text-writing ui-delivery"
 ---
 
 # Research-driven change
@@ -19,7 +19,9 @@ Recover the selected subject, outcome, constraints, available prior decisions an
 requested endpoint: decision, plan, local change, published proposal or checked
 revision. Enter at the first unresolved dependency, not always at research. A
 plan-only request stops at its plan; a request for implementation and a pull
-request does not end with research or an intention to publish.
+request does not end with research or an intention to publish. Discussing an
+idea before any change is requested belongs to
+[critical discussion](../critical-discussion/SKILL.md).
 
 Use the existing owning plan, issue or authorized notes. A short task can keep its
 account in chat. For interrupted work, changed subjects or authority, the

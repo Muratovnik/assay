@@ -1,9 +1,9 @@
 ---
 name: product-flow-mapping
-description: Reconstruct, document, review or update existing product journeys and their screens, states and controls for redesign, handoff or coverage analysis. Use when behavior must be discovered and traced to evidence; skip visual styling, new-product ideation, backend-only work and local edits with an already sufficient scenario contract.
+description: Reconstruct, document, review or update existing product journeys and their screens, states and controls for redesign, handoff or coverage analysis. Use when behavior must be discovered and traced to evidence; skip visual styling, new-product ideation (critical-discussion), backend-only work and local edits with an already sufficient scenario contract.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change implementation-planning independent-audit test-writing ui-delivery"
+  assay-optional-skills: "code-change critical-discussion implementation-planning independent-audit test-writing ui-delivery"
 ---
 
 # Product flow mapping
@@ -11,6 +11,8 @@ metadata:
 Explain what a person can accomplish, which interface actions support it and
 what actually happens. Deliver a navigable, evidence-linked map, not a gallery
 of pages, a new design or an assertion that existing behavior is correct.
+Evaluating a new product idea belongs to
+[critical discussion](../critical-discussion/SKILL.md).
 
 ## Establish the task and authority
 

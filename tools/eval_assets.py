@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PAIRED_SKILLS = ("route-subagents", "code-change", "evidence-research", "test-writing", "test-audit",
                  "technical-writing", "text-writing", "implementation-planning",
                  "software-architecture", "product-flow-mapping",
-                 "research-driven-change", "skill-evaluation", "ui-delivery", "retrospective")
+                 "research-driven-change", "skill-evaluation", "ui-delivery", "retrospective",
+                 "critical-discussion")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
 COLLECTIONS = ("cases", "discovery_cases", "triggers")
 METADATA_KEYS = {"id", "group", "purpose", "source", "rationale", "split", "exposure"}

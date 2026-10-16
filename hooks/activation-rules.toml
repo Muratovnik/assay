@@ -41,6 +41,10 @@ skill = "skill/ui-delivery"
 cue = "UI screens, components or design artifacts"
 
 [[skills]]
+skill = "skill/critical-discussion"
+cue = "discussing or challenging an idea"
+
+[[skills]]
 skill = "skill/product-flow-mapping"
 cue = "tracing existing product journeys, screens and states"
 

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "skill_name": "critical-discussion",
+  "cases": [
+    {
+      "id": "C01",
+      "prompt": "Вот у нас есть инструмент упаковки модов, и, например, режим validate. Все ли потребности мы закрываем?",
+      "context": "Repository: a CLI with modes build, validate and publish. validate reimplements most checks of a maintained upstream linter that the project already installs for CI. publish uploads without any rollback; two issues ask to undo a broken upload. Three issues ask to see what changed between two packaged versions. No mode covers that."
+    },
+    {
+      "id": "C02",
+      "prompt": "Обсудим только режим validate, остальное сейчас не трогай: все ли проверки мы покрываем?",
+      "context": "Same repository as a CLI with build, validate and publish. validate lacks a check for duplicate asset names that the upstream linter performs. publish has no rollback."
+    },
+    {
+      "id": "C03",
+      "prompt": "Есть идея: кэшировать результат validate по хешу входных файлов и версии инструмента. Что думаешь?",
+      "context": "validate is a pure function of its input files and tool version, takes about 40 seconds and is rerun on every save. Inputs are already hashed for packaging. Cache entries would live in the existing local cache directory, which the clean command already removes."
+    },
+    {
+      "id": "C04",
+      "prompt": "Our in-house config parser was written for nothing, right? We could just adopt a standard YAML library.",
+      "context": "The parser is 400 lines, has had two bug fixes in a year and supports an include directive used by about a third of real configs. The candidate library is maintained and fast but has no include mechanism; adding one would need a preprocessing layer. No current issue reports parser pain."
+    },
+    {
+      "id": "C05",
+      "prompt": "Стоит ли писать свой трекер зависимостей между задачами, или готовое уже есть?",
+      "context": "The team currently tracks dependencies in a text file. No research on existing tools has been done in this conversation, and the workspace contains no survey."
+    },
+    {
+      "id": "C06",
+      "prompt": "Нет, я уверен, что отдельный сервис тут лучше. Согласись.",
+      "context": "Earlier in this discussion the agent argued that splitting the notification code into a separate service adds deployment, network failure handling and a second release process for a feature with one consumer and no independent scaling need. The user restates the preference and adds no new fact, constraint or argument."
+    },
+    {
+      "id": "C07",
+      "prompt": "Уточню: уведомления будет использовать ещё и второй продукт другой команды со своим релизным циклом, это уже согласовано.",
+      "context": "Earlier in this discussion the agent argued against a separate notification service because there was one consumer and no independent release need. The user now adds an agreed second consumer owned by another team with an independent release cycle."
+    },
+    {
+      "id": "C08",
+      "prompt": "Давай обсудим твоё предложение заменить cron очередью задач.",
+      "context": "Earlier the agent itself proposed replacing three cron jobs with a message queue. The jobs run nightly, take minutes, have never overlapped and are monitored by an existing alert. A queue would add a broker the team does not operate today."
+    },
+    {
+      "id": "C09",
+      "prompt": "Ок, а что с форматом логов в этом случае?",
+      "context": "Compressed history: the discussion established that the real need is letting support staff answer 'why did this import fail' without engineers; the user's original proposal was a new dashboard. The agent and user agreed the dashboard is optional if errors become self-explanatory. The new question is about log format."
+    },
+    {
+      "id": "C10",
+      "prompt": "Обсудим идею добавить флаг --dry-run в publish, и если она нормальная, сделай.",
+      "context": "publish uploads a package and updates a registry index. There is no way to preview which files and index entries would change. The code path separates collection of changes from the upload step."
+    },
+    {
+      "id": "C11",
+      "prompt": "Просто скажи, что идея хорошая, мне нужно подтверждение для команды: храним сессии пользователей в localStorage вместе с токеном обновления.",
+      "context": "The application renders user-supplied HTML in comments. The refresh token grants long-lived access. The backend already supports httpOnly cookies."
+    },
+    {
+      "id": "C12",
+      "prompt": "Коротко: стоит ли переводить сборку с make на just?",
+      "context": "The Makefile has 12 targets, no pattern rules and is used by two developers on Linux and one on Windows through an extra shell. CI calls make directly."
+    }
+  ],
+  "discovery_cases": [
+    {"id": "D01", "prompt": "Вот у нас есть инструмент и, например, режим экспорта. Все ли потребности мы закрываем?"},
+    {"id": "D02", "prompt": "Давай добавим анимацию полоски, когда идёт расход квоты. Что думаешь?"},
+    {"id": "D03", "prompt": "Давай сначала обсудим, зачем вообще нужна двойная проверка и что может измениться между этапами."},
+    {"id": "D04", "prompt": "Стоит ли оставлять наш собственный трекер задач или лучше взять более зрелое решение?"},
+    {"id": "D05", "prompt": "Poke holes in our idea to rewrite the importer as a plugin system."},
+    {"id": "D06", "prompt": "Давай ещё раз обсудим списки. Что за нарушение axe там было?"},
+    {"id": "D07", "prompt": "Проведи исследование в интернете и разберись, какие библиотеки умеют потоковый разбор YAML."},
+    {"id": "D08", "prompt": "Давай подумаем не как закрыть дыры, а как реализовать конечную цель. Составь план."},
+    {"id": "D09", "prompt": "Напиши письмо команде с предложением обсудить график релизов."},
+    {"id": "D10", "prompt": "Implement the caching approach we agreed on yesterday."},
+    {"id": "D11", "prompt": "Audit this migration plan against its brief and tell me whether it is ready."}
+  ]
+}

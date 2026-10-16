@@ -29,6 +29,7 @@
 | [research-driven-change](skills/research-driven-change/SKILL.md) | 需要把研究衔接到计划、改动、评审或交付，或继续这个过程 | 只需讨论想法、独立研究、常规修改、单独的技能评估或只读审计 |
 | [ui-delivery](skills/ui-delivery/SKILL.md) | 需要设计、修复、迁移或评审产品界面 | 工作仅涉及后端 |
 | [product-flow-mapping](skills/product-flow-mapping/SKILL.md) | 需要依据来源还原现有产品的用户流程、界面和控件，用于重新设计、设计交接或测试清单 | 产品是全新的、改动仅涉及视觉，或场景已经明确 |
+| [critical-discussion](skills/critical-discussion/SKILL.md) | 希望对想法、决策或现有工具进行质疑而非附和：真实需求、示例背后的整个系统、不做改变的选项和现成替代方案 | 需要实现、制定计划、基于来源调研或审计 |
 | [route-subagents](skills/route-subagents/SKILL.md) | 已获授权的委派需要设定边界 | 无人授权委派；并行本身不构成许可 |
 | [skill-evaluation](skills/skill-evaluation/SKILL.md) | 某个技能触发错位，或需要评估一个方法 | 只是修改元数据或撰写常规内容 |
 | [retrospective](skills/retrospective/SKILL.md) | 你要求回顾一段时间的智能体工作或已存储的经验，以决定要改什么 | 只是排查单个事件、诊断单个技能，或只需要使用统计 |

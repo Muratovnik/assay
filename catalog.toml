@@ -187,6 +187,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/critical-discussion"
+kind = "skill"
+path = "skills/critical-discussion"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/critical-discussion", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/critical-discussion", mode = "link" },
+]
+
+[[assets]]
 id = "profile/evidence-reviewer"
 kind = "profile"
 path = "profiles/evidence-reviewer.json"
