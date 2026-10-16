@@ -1,6 +1,6 @@
 ---
 name: evidence-research
-description: Investigate questions, compare options or assess gaps using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence, including how a current product, tool or service behaves and whether a ready-made solution exists; skip facts already in the conversation or workspace, text summaries and routine implementation.
+description: Investigate questions or compare options using source-grounded research and synthesis. Use when consequential claims require locating and reconciling evidence, including how a current product, tool or service behaves and whether a ready-made solution exists; skip facts already in the conversation or workspace, text summaries and routine implementation.
 license: MIT
 metadata:
   assay-optional-skills: "code-change implementation-planning research-driven-change"
