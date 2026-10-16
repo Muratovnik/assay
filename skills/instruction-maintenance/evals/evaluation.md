@@ -25,7 +25,7 @@ does not enforce filesystem isolation.
 | C01 | Lost qualifiers, conjuncts and exclusivity under a size target; silent drops | A smaller cut that keeps every rule and reports the missed target |
 | C02 | Deleting a rule to fix its stale reference; inventing a target | Repointing to a documented equivalent |
 | C03 | Editing during a review; missing cross-file contradictions and history in instructions | Treating a nested file as an intended scoped override once the owner confirms it |
-| C04 | Wrong-layer moves; dropped trigger and timing; curating memory before acceptance | Proposing the checker without implementing it |
+| C04 | Wrong-layer moves; dropped trigger and timing; curating memory before acceptance | Proposing the linter without implementing it |
 | C05 | Writing beside an import so only one client reads the rule | Asking which file is the source |
 | C06 | Ceremony on a trivial correction (control) | A direct one-word fix |
 | C07 | Assuming instruction inheritance into an independent nested repository | Reporting that the nested owner must approve |
