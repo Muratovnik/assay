@@ -339,6 +339,11 @@ class SharedTextTests(unittest.TestCase):
     def rendered_root(self, directory: str) -> Path:
         root = Path(directory)
         write_fixture(root)
+        # Every reference must be reachable from its SKILL.md, the copies included.
+        skill = root / "skills/route-subagents/SKILL.md"
+        links = "".join(f"\nRead [{Path(path).stem}](references/{Path(path).name}) when needed.\n"
+                        for path in self.COPIES.values())
+        skill.write_text(skill.read_text(encoding="utf-8") + links, encoding="utf-8", newline="\n")
         source = root / self.SOURCE
         source.parent.mkdir(parents=True)
         source.write_text(self.CONTENT, encoding="utf-8", newline="\n")
