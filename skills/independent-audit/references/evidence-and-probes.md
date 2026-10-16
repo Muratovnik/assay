@@ -41,7 +41,13 @@ Quantifiers such as all, none, single source and fully migrated require an
 enumerated population. Record sampling, exclusions and inaccessible surfaces.
 Search silence, one example or digests for a subset cannot prove completeness.
 For every material coverage claim compare the actual decoded inputs, tool call,
-exit/output and hashed file set with the submitted statement. Literal backslash-n
+exit/output and hashed file set with the submitted statement. A claim that no
+other occurrence of a confirmed defect exists is such a claim: it needs the rule
+the cause was stated as, evidence that the queries found the original case, the
+dimensions searched and each candidate's classification with its excluding
+evidence, as set out in [variant analysis](../../code-change/references/variant-analysis.md).
+A search that missed the seed, or covered one spelling of a semantic mistake,
+supports no conclusion. Literal backslash-n
 is not a newline; an available correct observation does not repair a citation to
 the wrong one. Never promote parse success to native operation.
 

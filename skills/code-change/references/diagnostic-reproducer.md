@@ -42,7 +42,8 @@ See [Git's bisect contract](https://git-scm.com/docs/git-bisect) for skip semant
 
 Before calling the repair complete, recheck the original unminimized scenario
 and preserve relevant regression protection using
-[test-writing](../../test-writing/SKILL.md). An immediately passing characterization
+[test-writing](../../test-writing/SKILL.md). When the confirmed cause could recur
+elsewhere, continue with [variant analysis](variant-analysis.md). An immediately passing characterization
 or a new failure outside write scope is not permission to change the contract.
 Remove only task-owned temporary instrumentation, retain decisive private
 receipts in the existing evidence location, and report unresolved causes or
