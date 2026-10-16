@@ -3,7 +3,9 @@
 Assay's plugin hooks are local commands, not prompt/agent hooks. They do not call
 models, install dependencies, launch advisors or modify client settings. In Claude
 Code the skill gate and the source check read the tail of the session transcript
-at `Stop` and `SubagentStop`. Their text and any subsequent agent work still consume context/quota.
+at `Stop` and `SubagentStop`, and the [mid-turn skill note](#mid-turn-skill-note-in-claude-code)
+reads it at `PreToolUse` when the gate's records do not show a skill loaded. Their text and any
+subsequent agent work still consume context/quota.
 Skills-only installations do not install hooks.
 
 User corrections and acceptable examples can be kept as local feedback cases by
@@ -268,6 +270,72 @@ consequential, has no row. The skill gate's feedback and a contradicted full-rea
 claim take priority at the same stop, since a turn continues at most once. Each
 rule ID in `disabled_rules` turns its row off; a disabled skill drops its rows too.
 
+### Mid-turn skill note in Claude Code
+
+The skill check arrives once per request, and some work shows its skill only
+later: an agent downloaded documentation with `curl` without loading
+`evidence-research`, and nothing in the request had named research. The announcement rule above is
+a request to the agent; this note is a fact it can act on at the call itself.
+
+At `PreToolUse`, when one tool call shows a sign from the table below and neither
+the gate's records nor the transcript tail show that skill loaded by this agent,
+the hook adds a note of about 300 characters. It names what the call does (a file
+name or a host, never a path or a URL), the skill and the decision that skill
+governs there, and says the session has not loaded it. An example, for an edit of
+a test file: `Assay skill note: this call edits a test file (test_app.py). The
+assay:test-writing skill governs what behavior the test pins and whether it fails
+without the fix; this session has not loaded it. The skill check expects it
+loaded (skill tool or its SKILL.md) and named in one short sentence.` It is
+stated as fact and runs no model.
+
+| Rule | Skill | Sign in one tool call |
+| --- | --- | --- |
+| `midturn-evidence-research` | `evidence-research` | `WebFetch`, `WebSearch`, or a shell command whose `curl`, `wget`, `Invoke-WebRequest` or `Invoke-RestMethod` targets a non-local URL; a reachability probe (`-I`, output discarded), `gh api` and a local address do not count |
+| `midturn-code-change` | `code-change` | an edit or write of a source file (Python, Go, JavaScript and TypeScript, C#, Java, shell and PowerShell scripts and similar) that is not a test, an interface file or generated output |
+| `midturn-test-writing` | `test-writing` | an edit of a test file: under `test`, `tests`, `__tests__` or `spec`, named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`, or `conftest.py` |
+| `midturn-ui-delivery` | `ui-delivery` | an edit of an interface file: `.vue`, `.svelte`, `.jsx`, `.tsx`, `.css`, `.scss`, `.sass`, `.less`, `.html` |
+| `midturn-technical-writing` | `technical-writing` | an edit of a `README` or of a Markdown, MDX or reStructuredText file under `docs`, except `docs/plans` and `docs/research`; agent instructions, memory notes and change logs do not count |
+| `midturn-skill-evaluation` | `skill-evaluation` | an edit of a `SKILL.md`, a skill's `references` or `evals` file, or `activation-rules.toml` |
+
+A path under `node_modules`, `dist`, `build`, `vendor`, `.venv`, a minified, declaration
+or generated file, and a scratch directory (`tmp`, `temp`, `scratchpad`, `.private`)
+gives no sign. A task worktree under `tmp/worktrees/<name>` is a checkout, so its files do. A
+file belongs to one row: a test file gives `test-writing` and not also `code-change`,
+an interface file `ui-delivery` and not `code-change`.
+
+The note appears at most once per skill, request and agent. The key is one hashed
+entry kept like the fetch note's, from the prompt ID Claude Code sends and the
+agent ID, and without a prompt ID it appears once per agent. A skill counts as
+loaded when the gate's records show it, otherwise when the transcript tail does:
+the Skill tool, a `Read` of its `SKILL.md`, or a skill that a compaction
+re-attached. The loads found there are added to the records, so a resumed session
+reads the transcript once. A subagent is judged by its own records and its own
+transcript, the file under `<session>/subagents/`. A skill read with a shell command is not
+seen as loaded, and neither is a write made with one. A routing guard's reply, a read-only profile's
+refusal and the launch reminder on the same call take priority and the note is
+not given. The note needs the plugin data directory and goes with the skill check:
+`disabled_rules: ["skill-check"]` turns it off with the check, and a disabled skill
+drops its row.
+
+The option `skill_note_form` in the hook configuration chooses the form. `note`, the
+default, gives the text as context beside the call. `deny` refuses the first
+matching call with the same text as the reason and passes the repeated call, so
+it costs one extra turn and shows the reason in Claude Code as a refusal. Both
+forms keep the key, so a skill is named once either way.
+
+Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
+`Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load
+records for it. In a sample of Codex sessions from two weeks, 134 of 463 command items that name a
+`SKILL.md` carried Codex's own `read` classification; the other 329 were compound
+commands, searches and listings that name the file without loading it. Until the load can be
+recognised from the hook input and survives a compaction, a note would either
+sound every time or never, so no row is enabled there.
+
+The signs are narrow and approximate. Over two weeks of one owner's sessions, a
+sample of up to 20 notes per row had at least 80 % of its notes appropriate
+(the skill really applied to what that call was doing). A row on a different
+kind of work can behave differently; each rule ID turns its row off.
+
 ## Hints do not grant authority
 
 Neither the check nor an explicit-choice suggestion authorizes edits, delegation,
@@ -298,7 +366,8 @@ Without a data directory, suggestions are stateless. The runtime uses the client
 {
   "disabled_rules": [],
   "disabled_skills": ["skill/ui-delivery"],
-  "record_events": false
+  "record_events": false,
+  "skill_note_form": "note"
 }
 ```
 
@@ -308,7 +377,8 @@ explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
 `"fetch-note"` and `"read-claims"` the two Claude source checks, and each
-rule ID of the branch check table one of its rows. The
+rule ID of the branch check table or of the mid-turn note table one of its rows.
+`skill_note_form` is `"note"` (the default) or `"deny"`, see the mid-turn note above. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
 rest) are still accepted and do nothing, so an existing configuration keeps
 working; any other unknown ID is an error.

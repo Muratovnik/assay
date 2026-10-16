@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback, routing_telemetry, skill_gate, sources, branches
+from runtime import state, feedback, routing_telemetry, skill_gate, sources, branches, midturn
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence import route_table
@@ -47,12 +47,12 @@ def options(environment):
         raise ValueError("hook configuration path must be absolute")
     raw = read_json(location) if location else {}
     if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events",
-                   "feedback_capture", "feedback_trigger"}:
+                   "feedback_capture", "feedback_trigger", "skill_note_form"}:
         raise ValueError("unknown hook option")
     # Storage defaults to metadata for explicit records; the correction
     # grammar stays off until the owner selects the hook trigger.
     value = {"disabled_rules": [], "disabled_skills": [], "record_events": False,
-             "feedback_capture": "metadata", "feedback_trigger": "explicit",
+             "feedback_capture": "metadata", "feedback_trigger": "explicit", "skill_note_form": "note",
              "state_dir": environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA"), **raw}
     for key in ("disabled_rules", "disabled_skills"):
         if not isinstance(value[key], list) or any(not isinstance(v, str) for v in value[key]):
@@ -63,6 +63,8 @@ def options(environment):
         raise ValueError("invalid feedback capture mode")
     if not isinstance(value["feedback_trigger"], str) or value["feedback_trigger"] not in feedback.TRIGGERS:
         raise ValueError("invalid feedback trigger")
+    if not isinstance(value["skill_note_form"], str) or value["skill_note_form"] not in midturn.FORMS:
+        raise ValueError("invalid skill note form")
     if value["state_dir"] is not None and (not isinstance(value["state_dir"], str) or not Path(value["state_dir"]).is_absolute()):
         raise ValueError("hook state directory must be absolute")
     return value
@@ -253,7 +255,12 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             # How a source was read, not which skill applies; the skill gate's reply keeps priority.
             note = (sources.fetched(event, settings["state_dir"], **({"clock": clock} if clock else {}))
                     if name == "PostToolUse" and rules.fetch_note
-                    else sources.stopped(event) if name in {"Stop", "SubagentStop"} and rules.read_claims else {})
+                    else sources.stopped(event) if name in {"Stop", "SubagentStop"} and rules.read_claims
+                    # A tool call that shows a skill this session has not loaded; a routing reply and the
+                    # launch reminder own their PreToolUse, so this check stays silent there.
+                    else midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
+                                         form=settings["skill_note_form"], **({"clock": clock} if clock else {}))
+                    if name == "PreToolUse" and rules.midturn_rules and not legacy else {})
             # A stop continues at most once: a contradicted read claim goes first.
             if not note and name in {"Stop", "SubagentStop"} and rules.branch_rules:
                 note = branches.stopped(event, rules.branch_rules, enabled)
@@ -327,6 +334,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
     result = {"capabilities": contract(client, config.get("pipeline", {}).get("host")),
               "rules": [r["id"] for r in rules], "rules_fingerprint": fingerprint,
               "skill_check": rules.skill_check,
+              "skill_note_form": settings["skill_note_form"],
               "prompt_parser_available": importlib.util.find_spec("markdown_it") is not None,
               "state_configured": settings["state_dir"] is not None,
               "record_events": settings["record_events"], "hooks_trusted": "unknown",
