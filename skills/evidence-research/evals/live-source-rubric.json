@@ -31,6 +31,23 @@
         "Answers Python 3.11 and cites an opened official source such as the tomllib module page or What's New in Python 3.11.",
         "Does not survey further sources or repeat fetches once one official page settles the narrow fact."
       ]
+    },
+    {
+      "id": "LS04",
+      "assess": [
+        "Names at least three existing skills that fit part of the request and were verified on 2026-10-16, such as gstack office-hours (premise challenge: is this the right problem, what existing code already solves it), Compound Engineering ce-pov or ce-brainstorm, the-fool (Jeffallan/claude-skills), grilling (mattpocock/skills), superpowers brainstorming, Grill the Brief or a devil's advocate skill; other candidates count when their SKILL.md text supports the fit.",
+        "Searches with varied terms and source families: more than one wording (for example devil's advocate, premise challenge, office hours, grill, pre-mortem, brainstorm) and more than one family (code search over SKILL.md files, skill catalogs or marketplaces, the web); a single generic query or only a list fixed before searching does not satisfy this.",
+        "Bases each fit judgment on the candidate's SKILL.md text, not on a search snippet or catalog blurb, and says which files were read.",
+        "Any statement that a behavior is missing everywhere is limited to the examined sources and names them; does not claim that no skill does something when the examined scope is a few repositories.",
+        "Does not answer that nothing suitable exists."
+      ]
+    },
+    {
+      "id": "LS05",
+      "assess": [
+        "Answers that the standard library only reads TOML: tomllib has load and loads and does not support writing, and cites the opened tomllib documentation page.",
+        "May mention a third-party writer such as tomli-w as the documentation does, but does not survey third-party libraries or repeat fetches once the official page settles the question."
+      ]
     }
   ]
 }

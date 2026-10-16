@@ -225,6 +225,30 @@ a plain `Read` counts as complete. The skill gate's feedback takes priority at t
 same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch and
 `"read-claims"` the stop check; each works without the other.
 
+### Coverage check in Claude Code
+
+`evidence-research` sends a landscape question or a claim of completeness through
+its `search-and-coverage` reference, and says that evidence absent from the
+examined scope is not proof that something does not exist. In an observed session
+an agent loaded the skill, skipped that reference, searched once with a list of
+candidates fixed in advance and answered that none of the existing skills did what
+the user wanted; the user then found several that did.
+
+At `Stop` and `SubagentStop` the hook reads the same transcript tail. When a line
+of the turn says something is absent or that none qualifies (`none of them`,
+`there are no existing tools`, `doesn't exist`, `ни один`, `нигде`,
+`не существует` and similar), the session or subagent loaded `evidence-research`
+since the latest compaction, and `references/search-and-coverage.md` was not read
+in that span by `Read` or a shell command, the turn continues once with feedback
+quoting up to two such lines. A skill that compaction re-attached counts as loaded,
+but a read of the reference before compaction does not count. A session or
+subagent that has not loaded the skill is not held to its reference. The wording
+match is deliberately broad, so a documented absence can draw the note too; one
+line saying the claim rests on the cited source answers it. The skill gate's
+feedback and a contradicted full-read claim take priority at the same stop, since
+a turn continues at most once.
+`disabled_rules: ["coverage-claims"]` turns this check off.
+
 ## Hints do not grant authority
 
 Neither the check nor an explicit-choice suggestion authorizes edits, delegation,
@@ -264,7 +288,8 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
-`"fetch-note"` and `"read-claims"` the two Claude source checks. The
+`"fetch-note"` and `"read-claims"` the two Claude source checks, and
+`"coverage-claims"` the Claude coverage check. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
 rest) are still accepted and do nothing, so an existing configuration keeps
 working; any other unknown ID is an error.
