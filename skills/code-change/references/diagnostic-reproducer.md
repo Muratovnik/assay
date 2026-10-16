@@ -1,9 +1,46 @@
 # Diagnostic reproducers
 
-Use for an authorized repair when the cause is unclear, attempts keep changing
-the symptom, or the evidence needs to survive a handoff. This is conditional
+Use when the cause is unclear, attempts keep changing the symptom, or the
+evidence needs to survive a handoff. Without repair authority, start with the
+read-only entry; the steps after it apply to both. This is conditional
 detail, not another automatic skill or permission to edit production during an
 audit. Keep an already justified narrow repair proportional.
+
+## Read-only entry: why does this not work
+
+Use for "why does X not connect, not show up or stay red" and similar, when no
+repair is requested, or before a repair of such a symptom. It grants no repair
+authority. It follows the steps below with these differences:
+
+- **Find what is in effect before explaining.** Identify the installation,
+  configuration layer and process that actually produce the symptom: which
+  version and path resolve, which setting won, which running process or session
+  serves the request and whether it started before the last change. Read these
+  from the live system, not from the files that should apply, earlier notes or
+  recall; those are hypotheses until observed.
+- **Check availability before saying unavailable.** Run the cheapest observation
+  that would show the thing present (list, resolve, status, read-only call) before
+  claiming a tool, service, file, permission or route is missing. Report
+  separately: absent, present but unreachable from here, present but not loaded
+  in this session, and not checked.
+- **Stay read-only.** Observe without changing state: no edit, setting change,
+  reinstall, restart or stopped process unless the user authorizes it. An action
+  that would only test a guess, such as restarting to see whether it recovers, is a
+  repair. Name it as the next step and ask.
+- **Prefer a distinguishing observation to a trial edit.** Pick the one reading
+  that separates the live explanations, as in the boundary probe below, rather
+  than changing something and watching the symptom.
+- **End with a cause or a bounded hypothesis.** A cause cites what was observed
+  and where. Otherwise give the hypotheses still standing, the observation that
+  would separate them and what that observation needs authorized. Do not present
+  a plausible mechanism as the finding.
+
+A question about how a third-party product is documented to behave is
+[evidence-research](../../evidence-research/SKILL.md), not this entry; take its
+current-source findings back here only as hypotheses about the local setup.
+A request to fix a known defect is an ordinary repair, not this entry.
+
+## Reproducer steps
 
 Start from the reported consumer outcome and the owner contract. Find the
 smallest existing test, command, captured request or event replay that exposes
@@ -40,7 +77,7 @@ commands. Classify unfamiliar output, setup failures and timeouts as untestable
 Keep expected bytes and the checker stable across revisions.
 See [Git's bisect contract](https://git-scm.com/docs/git-bisect) for skip semantics.
 
-Before calling the repair complete, recheck the original unminimized scenario
+For a repair, before calling it complete, recheck the original unminimized scenario
 and preserve relevant regression protection using
 [test-writing](../../test-writing/SKILL.md). When the confirmed cause could recur
 elsewhere, continue with [variant analysis](variant-analysis.md). An immediately passing characterization

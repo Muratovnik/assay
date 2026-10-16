@@ -19,7 +19,10 @@ architecture review. When the change also needs product documentation or a
 repository/package description, use [technical-writing](../technical-writing/SKILL.md)
 for that artifact before drafting it. Implementation stays here; a code-only
 change needs no writing phase. A read-only audit uses these criteria without
-repair authority.
+repair authority. A question about why something fails, does not connect or does
+not show up, with no repair requested, takes the
+[read-only entry](references/diagnostic-reproducer.md#read-only-entry-why-does-this-not-work)
+of the diagnostic reproducers and changes nothing.
 
 ## Establish the working contract
 
