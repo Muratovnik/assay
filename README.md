@@ -35,6 +35,7 @@ proof of activation. Each row links to the method itself.
 | [retrospective](skills/retrospective/SKILL.md) | You ask for a review of a period of agent work, or of stored lessons, to decide what to change | You are debugging one incident, diagnosing one skill, or only want usage statistics |
 | [technical-writing](skills/technical-writing/SKILL.md) | Product documentation needs writing, reshaping, translating or reviewing from its sources | The text is an ordinary message or article, or the change is code |
 | [text-writing](skills/text-writing/SKILL.md) | Ordinary prose needs writing or reshaping for one particular reader | The text is product documentation, agent instructions or a commit record |
+| [instruction-maintenance](skills/instruction-maintenance/SKILL.md) | Agent instructions such as AGENTS.md, CLAUDE.md or a SKILL.md body need shortening, reorganizing, correcting or reviewing, or an accepted lesson needs moving into the right layer, without losing a condition | The text is product documentation or prose for people, or you need to judge whether a skill change improves behavior |
 
 Two agent profiles ship as capability boundaries rather than personas.
 `evidence-reviewer` reviews a frozen packet and returns a verdict, rerunning a

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "skill_name": "instruction-maintenance",
+  "cases": [
+    {
+      "id": "C01",
+      "prompt": "AGENTS.md has grown too long. Cut it by about 30% but keep every rule.",
+      "files": {
+        "AGENTS.md": "# Instructions\n\n## Scope\n\nThis repository deploys the data pipeline. It does not own the upstream schemas, the warehouse or its backups.\n\nBefore changing a pipeline contract, inspect the current DAG files, the scheduler state and the running jobs.\n\n## Tooling\n\n`tools/ops.py` exposes only `plan`, `apply`, `status` and `prune`. It never writes to the warehouse directly.\n\n`prune` is the only command that deletes, and only expired snapshots under `.snapshots/`. `apply` runs the same expiry automatically after the 14-day window. A snapshot that an open incident references is never pruned at any age.\n\n## Safety\n\nNever drop a table, truncate a partition or rotate a key without a ticket, a verified backup and a second reviewer.\n\nAfter the change is reviewed and the required checks pass, deploy by default. Never run a backfill without an explicit request.\n\nDecommission a host only after the health checks, a canary run, a restore drill and a zero-traffic check. A rollback restores the complete recorded release, never a mix of old and new DAGs.\n\n## Reporting\n\nLead with the result or the exact blocker. Separate confirmed facts, conclusions and hypotheses. Use absolute paths.\n"
+      }
+    },
+    {
+      "id": "C02",
+      "prompt": "Fix the stale references in AGENTS.md.",
+      "files": {
+        "AGENTS.md": "# Instructions\n\nRun `tools/lint.sh` before every commit.\n\nFollow `docs/deploy.md` for any release.\n\nNever edit files under `generated/` by hand; regenerate them with `make gen`.\n",
+        "Makefile": "check:\n\tpython tools/check.py\n\ngen:\n\tpython tools/render.py\n",
+        "tools/check.py": "# Runs the linters that tools/lint.sh used to run, plus the type check.\n",
+        "tools/render.py": "# Regenerates generated/.\n",
+        "CHANGELOG.md": "## 2.0\n\n- Replaced tools/lint.sh with tools/check.py.\n- Removed docs/deploy.md; releases are being redesigned and no procedure is published yet.\n"
+      }
+    },
+    {
+      "id": "C03",
+      "prompt": "Review our agent instructions. Don't change anything, just tell me what is wrong.",
+      "files": {
+        "AGENTS.md": "# Instructions\n\nAlways run the full test suite before committing.\n\nUse `pnpm` for every package operation.\n\nIn March a release shipped with a broken migration because the staging database was skipped; the incident took two days to repair.\n\nNever commit generated files.\n",
+        "web/AGENTS.md": "# Web\n\nUse `npm` for package operations in this directory.\n\nCommit the generated `web/dist/` bundle with every change.\n",
+        "CLAUDE.md": "@AGENTS.md\n\nRun only the affected tests before committing; the full suite takes forty minutes.\n"
+      }
+    },
+    {
+      "id": "C04",
+      "prompt": "Move this stored lesson into wherever it belongs and clean it up.",
+      "context": "The repository's AGENTS.md routes lessons: always-on invariants to the nearest AGENTS.md, conditional workflows to a skill, mechanical facts to a validator or hook, history to the planning record. The project has a skill for database migrations at skills/migrations/SKILL.md. The lesson is stored in the agent's memory store, which the owner curates.",
+      "files": {
+        "memory/not-null-columns.md": "When a migration adds a NOT NULL column to a large table, adding the column with the constraint in one statement is not safe. Add it as nullable, backfill in batches, then add the constraint, and do this before the release window opens, while the deploy can still be split. In one release a single ALTER held a table lock for twenty minutes and stopped checkout. A migration linter could flag a NOT NULL column added without a default.\n",
+        "skills/migrations/SKILL.md": "---\nname: migrations\ndescription: Write and review database migrations.\n---\n\n# Migrations\n\nEvery migration has a down step. Name migrations by date.\n"
+      }
+    },
+    {
+      "id": "C05",
+      "prompt": "Add to CLAUDE.md: never run database migrations against production from an agent session.",
+      "files": {
+        "CLAUDE.md": "@AGENTS.md\n",
+        "AGENTS.md": "# Instructions\n\nRun `make check` before committing.\n",
+        "GEMINI.md": "@AGENTS.md\n"
+      }
+    },
+    {
+      "id": "C06",
+      "prompt": "Fix the typo in AGENTS.md: 'comit' should be 'commit'.",
+      "files": {
+        "AGENTS.md": "# Instructions\n\nNever comit secrets. Run `make check` before every commit.\n"
+      }
+    },
+    {
+      "id": "C07",
+      "prompt": "The root AGENTS.md says never to push without an explicit request. Make sure that also applies when agents work in services/billing.",
+      "context": "services/billing is an independent Git repository physically nested in the root checkout and ignored by the root repository. It has its own AGENTS.md, which says nothing about pushing.",
+      "files": {
+        "AGENTS.md": "# Root\n\nNever push without an explicit request.\n",
+        "services/billing/AGENTS.md": "# Billing\n\nRun `make test` before committing.\n"
+      }
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "D01",
+      "prompt": "Сожми, пожалуйста, наш AGENTS.md, он уже слишком длинный, но правила должны остаться."
+    },
+    {
+      "id": "D02",
+      "prompt": "Half the paths in CLAUDE.md point to files we renamed last month. Can you clean that up?"
+    },
+    {
+      "id": "D03",
+      "prompt": "Перенеси этот урок из памяти агента туда, где ему место: в инструкции, навык или проверку."
+    },
+    {
+      "id": "D04",
+      "prompt": "Review the instructions in this repo's AGENTS.md and nested AGENTS.md files for contradictions."
+    },
+    {
+      "id": "D05",
+      "prompt": "Rewrite the README so a new user can install the tool and run it the first time."
+    },
+    {
+      "id": "D06",
+      "prompt": "Напиши письмо команде о том, что мы меняем правила код-ревью."
+    },
+    {
+      "id": "D07",
+      "prompt": "My deploy skill keeps firing on unrelated tasks. Figure out why and whether a new description fixes it."
+    },
+    {
+      "id": "D08",
+      "prompt": "Let's do a retrospective of the last two weeks of agent sessions and see what we should change."
+    }
+  ]
+}

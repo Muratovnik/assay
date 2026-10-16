@@ -21,7 +21,7 @@ PAIRED_SKILLS = ("route-subagents", "code-change", "evidence-research", "test-wr
                  "technical-writing", "text-writing", "implementation-planning",
                  "software-architecture", "product-flow-mapping",
                  "research-driven-change", "skill-evaluation", "ui-delivery", "retrospective",
-                 "critical-discussion")
+                 "critical-discussion", "instruction-maintenance")
 INPUT_KEYS = {"id", "prompt", "context", "files"}
 COLLECTIONS = ("cases", "discovery_cases", "triggers")
 METADATA_KEYS = {"id", "group", "purpose", "source", "rationale", "split", "exposure"}

@@ -71,7 +71,11 @@ that before trusting a green run.
 4. Add `agents/openai.yaml` with the Codex interface strings, in English.
 5. Add `evals/` with cases and a separate rubric. Inputs and grading criteria stay
    apart, and neither is read while the skill is doing a user's task.
-6. Register the asset in `catalog.toml`, then run
+6. Register the asset in `catalog.toml`, give it one cue in
+   `hooks/activation-rules.toml`, add a row to the skill tables of `README.md`,
+   `README.ru.md` and `README.zh-CN.md`, list it in the hand-kept inventories of
+   `tools/compatibility_fixture.py` and `tools/test_assay.py` and, for paired
+   evaluation data, in `PAIRED_SKILLS` of `tools/eval_assets.py`. Then run
    `python -B tools/catalog_docs.py --write` and `python -B tools/assay.py render`
    to refresh the generated inventory, the client manifests and the skills index.
    The gate compares those bytes, so a forgotten render fails the build.

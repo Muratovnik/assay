@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "skill_name": "instruction-maintenance",
+  "cases": [
+    {
+      "id": "C01",
+      "assess": [
+        "Keeps every rule with its qualifiers: 'only' for the ops commands and for prune, the 14-day window, 'at any age', all three conjuncts of 'a ticket, a verified backup and a second reviewer', all four decommission conditions, 'never a mix', 'explicit request', 'reviewed' and 'required checks'.",
+        "Keeps every path and command byte-exact.",
+        "If 30% cannot be reached without dropping a rule, says so with the measured size and the rules that would have to go, instead of dropping them silently; a shorter result that keeps every rule is also acceptable.",
+        "Reports each rule's disposition or states how retention was checked; a word count alone is not verification."
+      ]
+    },
+    {
+      "id": "C02",
+      "assess": [
+        "Repoints `tools/lint.sh` to the current equivalent (`tools/check.py` or `make check`) because the changelog shows the same purpose.",
+        "Does not invent a replacement for `docs/deploy.md` and does not delete the release rule silently; reports it as an open reference that needs the owner's decision.",
+        "Leaves the `generated/` rule and `make gen` unchanged after confirming the target exists."
+      ]
+    },
+    {
+      "id": "C03",
+      "assess": [
+        "Makes no edits.",
+        "Reports the pnpm/npm and generated-files conflicts between the root and web files, distinguishing a possibly intended scoped override from a contradiction and asking which the owner intends.",
+        "Reports that the CLAUDE.md addition contradicts the full-suite rule and is read only by one client, while AGENTS.md is the shared source.",
+        "Reports the March incident as history that belongs in a planning or audit record rather than instructions."
+      ]
+    },
+    {
+      "id": "C04",
+      "assess": [
+        "Splits the lesson: the nullable-backfill-constraint procedure goes to the migrations skill with its trigger ('when a migration adds a NOT NULL column to a large table') and timing ('before the release window opens, while the deploy can still be split') intact; the incident stays as evidence in the planning record; the linter becomes a proposal for the owner.",
+        "Does not put the procedure or the incident into always-on AGENTS.md.",
+        "Does not delete or rewrite the memory entry before the owner accepts the move; proposes its retirement or a pointer."
+      ]
+    },
+    {
+      "id": "C05",
+      "assess": [
+        "Adds the rule to AGENTS.md, the single source that CLAUDE.md and GEMINI.md import, or asks before writing it into CLAUDE.md alone, explaining that other clients would not read it there.",
+        "Keeps the rule's wording and scope: never, migrations, production, from an agent session."
+      ]
+    },
+    {
+      "id": "C06",
+      "assess": [
+        "Fixes the typo only, without an inventory report, restructuring or other edits.",
+        "Leaves the rest of the file byte-identical."
+      ]
+    },
+    {
+      "id": "C07",
+      "assess": [
+        "Does not rely on the root file being inherited by the nested independent repository.",
+        "States the rule in services/billing/AGENTS.md or adds an explicit pointer there, or reports that this needs that repository owner's approval if editing it is outside the request's authority.",
+        "Keeps 'explicit request' in the stated rule."
+      ]
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "D01",
+      "assess": [
+        "Select instruction-maintenance for compressing an instruction file while keeping its rules."
+      ]
+    },
+    {
+      "id": "D02",
+      "assess": [
+        "Select instruction-maintenance for stale references in an instruction file."
+      ]
+    },
+    {
+      "id": "D03",
+      "assess": [
+        "Select instruction-maintenance for moving an accepted lesson to its layer; retrospective is not required for a single named lesson."
+      ]
+    },
+    {
+      "id": "D04",
+      "assess": [
+        "Select instruction-maintenance for reviewing instruction files; independent-audit may also apply if the request is framed as an audit."
+      ]
+    },
+    {
+      "id": "D05",
+      "assess": [
+        "Do not select instruction-maintenance; technical-writing owns README work."
+      ]
+    },
+    {
+      "id": "D06",
+      "assess": [
+        "Do not select instruction-maintenance; text-writing owns a message to people, even about rules."
+      ]
+    },
+    {
+      "id": "D07",
+      "assess": [
+        "Do not select instruction-maintenance as the owner; skill-evaluation owns diagnosing a skill's triggering."
+      ]
+    },
+    {
+      "id": "D08",
+      "assess": [
+        "Do not select instruction-maintenance as the owner; retrospective owns reviewing a period of work."
+      ]
+    }
+  ]
+}

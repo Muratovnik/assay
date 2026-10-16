@@ -30,6 +30,7 @@ EXPECTED_ASSETS = {
     "skill/text-writing",
     "skill/retrospective",
     "skill/critical-discussion",
+    "skill/instruction-maintenance",
 }
 
 
@@ -81,6 +82,8 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             home / ".claude/skills/retrospective",
             home / ".agents/skills/critical-discussion",
             home / ".claude/skills/critical-discussion",
+            home / ".agents/skills/instruction-maintenance",
+            home / ".claude/skills/instruction-maintenance",
             home / ".codex/agents/evidence-reviewer.toml",
             home / ".claude/agents/evidence-reviewer.md",
             home / ".codex/agents/official-docs-researcher.toml",

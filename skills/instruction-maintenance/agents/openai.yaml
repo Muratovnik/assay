@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instruction Maintenance"
+  short_description: "Edit and review agent instruction files without losing their conditions"
+  default_prompt: "Use $instruction-maintenance to edit these agent instructions: inventory the rules first, keep every condition and identifier, choose the right layer for any moved lesson, and report each rule's disposition."
+policy:
+  allow_implicit_invocation: true

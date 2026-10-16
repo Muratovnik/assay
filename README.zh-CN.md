@@ -35,6 +35,7 @@
 | [retrospective](skills/retrospective/SKILL.md) | 你要求回顾一段时间的智能体工作或已存储的经验，以决定要改什么 | 只是排查单个事件、诊断单个技能，或只需要使用统计 |
 | [technical-writing](skills/technical-writing/SKILL.md) | 需要依据来源撰写、重构、翻译或评审产品文档 | 要写的是普通消息或文章，或改动的是代码 |
 | [text-writing](skills/text-writing/SKILL.md) | 需要为某一位特定读者撰写或重构普通文本 | 要写的是产品文档、智能体指令或提交记录 |
+| [instruction-maintenance](skills/instruction-maintenance/SKILL.md) | 需要精简、重组、修正或评审 AGENTS.md、CLAUDE.md、SKILL.md 正文等智能体指令，或把已接受的经验移到合适的层级，且不丢失任何条件 | 要写的是产品文档或给人看的文字，或需要判断技能改动是否改善了行为 |
 
 两个智能体配置提供的是能力边界，而非人设。`evidence-reviewer` 审查冻结的材料包
 并给出结论：在客户端能保持只读的地方重新运行只读取证手段，否则读取材料包中的回执；

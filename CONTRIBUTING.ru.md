@@ -61,7 +61,11 @@ python -B tools/check.py --all
 4. Добавьте `agents/openai.yaml` со строками интерфейса Codex, на английском.
 5. Добавьте `evals/` с кейсами и отдельными критериями. Входы и критерии лежат
    порознь, и ни то ни другое не читается, пока навык делает задачу пользователя.
-6. Зарегистрируйте актив в `catalog.toml`, затем выполните
+6. Зарегистрируйте актив в `catalog.toml`, дайте ему одну подсказку в
+   `hooks/activation-rules.toml`, добавьте строку в таблицы навыков `README.md`,
+   `README.ru.md` и `README.zh-CN.md`, внесите его в ручные описи
+   `tools/compatibility_fixture.py` и `tools/test_assay.py`, а для парных
+   оценочных данных — в `PAIRED_SKILLS` из `tools/eval_assets.py`. Затем выполните
    `python -B tools/catalog_docs.py --write` и `python -B tools/assay.py render`,
    чтобы обновить сгенерированную опись, клиентские манифесты и индекс навыков.
    Гейт сверяет эти байты, поэтому забытый `render` уронит сборку.

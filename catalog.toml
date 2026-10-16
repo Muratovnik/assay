@@ -199,6 +199,18 @@ projections = [
 ]
 
 [[assets]]
+id = "skill/instruction-maintenance"
+kind = "skill"
+path = "skills/instruction-maintenance"
+activation = "automatic"
+license = "MIT"
+attribution = "Nikolai Muratov and contributors"
+projections = [
+  { client = "codex", root = "agents", path = "skills/instruction-maintenance", mode = "link" },
+  { client = "claude", root = "claude", path = "skills/instruction-maintenance", mode = "link" },
+]
+
+[[assets]]
 id = "profile/evidence-reviewer"
 kind = "profile"
 path = "profiles/evidence-reviewer.json"

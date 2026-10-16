@@ -37,6 +37,10 @@ skill = "skill/text-writing"
 cue = "messages, articles or other prose for a reader"
 
 [[skills]]
+skill = "skill/instruction-maintenance"
+cue = "editing agent instructions such as AGENTS.md or CLAUDE.md"
+
+[[skills]]
 skill = "skill/ui-delivery"
 cue = "UI screens, components or design artifacts"
 

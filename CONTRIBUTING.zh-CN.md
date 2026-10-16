@@ -55,7 +55,10 @@ python -B tools/check.py --all
 4. 添加 `agents/openai.yaml`，其中的 Codex 界面字符串使用英文。
 5. 添加 `evals/`，包含用例与单独的评分标准。输入与评分标准分开存放，并且在技能
    执行用户任务期间都不会被读取。
-6. 在 `catalog.toml` 中登记该资产，然后运行
+6. 在 `catalog.toml` 中登记该资产，在 `hooks/activation-rules.toml` 中为它写一条提示，
+   在 `README.md`、`README.ru.md` 与 `README.zh-CN.md` 的技能表中各加一行，把它列入
+   `tools/compatibility_fixture.py` 与 `tools/test_assay.py` 的手工清单；若有成对的
+   评估数据，再列入 `tools/eval_assets.py` 的 `PAIRED_SKILLS`。然后运行
    `python -B tools/catalog_docs.py --write` 与 `python -B tools/assay.py render`，
    刷新生成的清单、客户端清单与技能索引。校验会比对这些字节，漏掉 render 会让
    构建失败。
