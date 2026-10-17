@@ -6,6 +6,13 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.27.1](https://github.com/Muratovnik/assay/compare/v0.27.0...v0.27.1) (2026-10-17)
+
+### Bug Fixes
+
+* **check:** the hint check reads a description's "Use for" and "Use on" clause as its trigger part, as it already read "Use when", and the software-architecture hint names architecture. In paired first-turn runs on Sonnet from an empty directory, a question about a project's architecture loaded software-architecture in 3 of 3 runs in Russian and in English, against 2 of 3 before; a variable rename loaded it in none ([11a1459](https://github.com/Muratovnik/assay/commit/11a1459508b7b95608a1891a8c26842723af297c))
+* **feedback:** the correction journal skips a leading block a client inserts before the request, such as an editor selection, and «вижу» counts as a correction only with a finding («вижу, что …») or a mention of the agent, so an observation that opens a new task no longer becomes a candidate ([1381118](https://github.com/Muratovnik/assay/commit/1381118b6884542e85a9ac9b0fec3bae727df0bc))
+
 ## [0.27.0](https://github.com/Muratovnik/assay/compare/v0.26.0...v0.27.0) (2026-10-17)
 
 ### Features
