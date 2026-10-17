@@ -6,6 +6,13 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.28.0](https://github.com/Muratovnik/assay/compare/v0.27.1...v0.28.0) (2026-10-17)
+
+### Features
+
+* **check:** the source check requires every file under `references/` and `examples/` to be linked from its skill's own SKILL.md, instead of accepting a file reached only through another reference, and a reference over 100 lines to open with a `## Contents` list that links its other second-level headings. Eight references in route-subagents, technical-writing and ui-delivery are now linked from their SKILL.md and 44 long references open with a contents list. Skill frontmatter rejects the reserved words claude and anthropic in a name and XML tags in a name or description ([e178c9c](https://github.com/Muratovnik/assay/commit/e178c9c91fb4e10882e77f339e3f271b9e6980c7))
+* **install:** `plan`, `install-links` and `uninstall-links` take a repeatable `--kind skill|profile`, so the two profiles can be linked beside a client plugin that already supplies the skills; with `--kind profile` the skill link chain and the explicit-skill prerequisite do not apply. In Codex, which cannot take agent definitions from a plugin, this removes the second listed copy of every skill ([4f9fbdc](https://github.com/Muratovnik/assay/commit/4f9fbdc82fee8514a5898aaa0c295ddfee5bde68))
+
 ## [0.27.1](https://github.com/Muratovnik/assay/compare/v0.27.0...v0.27.1) (2026-10-17)
 
 ### Bug Fixes
