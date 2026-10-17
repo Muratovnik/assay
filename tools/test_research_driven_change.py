@@ -147,20 +147,15 @@ class ResearchChangeIntegrationTests(unittest.TestCase):
                                for h in headings}
                     self.assertIn(fragment, anchors, f"{path.name}: {target}")
 
-    def test_consumers_return_to_transition_owner(self) -> None:
-        for name, destination in (
-            ("evidence-research", "stage-handoffs.md"),
-            ("implementation-planning", "stage-handoffs.md"),
-            ("code-change", "stage-handoffs.md"),
-            ("skill-evaluation", "stage-handoffs.md"),
-            ("independent-audit", "review-and-delivery.md"),
-        ):
-            with self.subTest(consumer=name):
-                path = ROOT / "skills" / name / "SKILL.md"
-                targets = {(path.parent / target.split("#", 1)[0]).resolve()
-                           for target in markdown_targets(path.read_text(encoding="utf-8"))
-                           if NAME in target}
-                self.assertIn(SKILL / "references" / destination, targets)
+    def test_transition_owner_states_what_each_stage_returns(self) -> None:
+        # The receiving workflow owns the return contract once; the methods it
+        # selects do not restate it, so every stage result must be named here.
+        text = (SKILL / "references" / "stage-handoffs.md").read_text(encoding="utf-8")
+        self.assertIn("Result to carry forward", text)
+        for transition in ("Research to choice", "Choice to plan", "Plan to implementation",
+                           "Implementation to review", "Checked work to publication"):
+            with self.subTest(transition=transition):
+                self.assertIn(f"| {transition} |", text)
 
 
 class ResearchChangePacketTests(unittest.TestCase):

@@ -3,7 +3,7 @@ name: independent-audit
 description: Audit a requested plan, change, architecture, repository, release or migration against its brief and evidence. Not an automatic implementation gate or specialist security assessment.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change evidence-research implementation-planning research-driven-change skill-evaluation software-architecture technical-writing test-audit test-writing text-writing ui-delivery"
+  assay-optional-skills: "code-change evidence-research implementation-planning skill-evaluation software-architecture technical-writing test-audit test-writing text-writing ui-delivery"
 ---
 
 # Independent audit
@@ -155,13 +155,6 @@ the primary's responsibility. A decisive FAIL
 settles acceptance, not the completeness of a broad audit: continue the remaining
 authorized checks, or explicitly name why they remain unchecked. Respect user
 stops, access limits and the agreed budget; never infer coverage from silence.
-
-When contributing to an already active
-[research-driven change](../research-driven-change/references/review-and-delivery.md),
-return the verdict, findings, checked revision and coverage limits. The caller
-owns any authorized repair and delivery; this audit remains read-only. The link
-explains the receiving workflow, not permission to start it during a standalone
-audit or to repair findings within a bounded reviewer role.
 
 ## Report the decision
 

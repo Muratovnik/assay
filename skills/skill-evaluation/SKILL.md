@@ -51,12 +51,6 @@ only for a concrete consumer/tooling need; preserve a working justified exceptio
 Check links and selective reading separately from package validity. File moves
 alone do not demonstrate better behavior or lower context cost.
 
-When this assessment belongs to an already active
-[research-driven change](../research-driven-change/references/stage-handoffs.md),
-return the supported transfer, behavior evidence and remaining limits to its
-owner. This method retains behavioral diagnosis and evaluation; it does not
-restart the lifecycle or imply that a local candidate was published.
-
 For a small paired comparison, use [paired pilot](references/paired-pilot.md).
 It reuses existing execution and inspection tools; it is not another platform.
 Before trusting a new or materially changed evaluator, use
