@@ -712,11 +712,11 @@ CUE_TERMS: dict[str, tuple[str, ...]] = {
     "independent-audit": ("audit",),
     "instruction-maintenance": ("instruction", "agents.md"),
     "product-flow-mapping": ("trac",),
-    "research-driven-change": ("research", "deliver"),
+    "research-driven-change": ("research", "change"),
     "retrospective": ("review",),
     "route-subagents": ("subagent", "authori"),
     "skill-evaluation": ("skill",),
-    "software-architecture": ("boundar", "contract"),
+    "software-architecture": ("architect",),
     "technical-writing": ("documentation", "readme", "release note"),
     "test-audit": ("review", "regression"),
     "test-writing": ("test", "repair"),
@@ -725,19 +725,19 @@ CUE_TERMS: dict[str, tuple[str, ...]] = {
 }
 CUE_TERMS_HOME = "tools/assay.py CUE_TERMS"
 ACTIVATION_RULES = "hooks/activation-rules.toml"
-# The "Use when ..." clause ends at the first semicolon or sentence end. Other
-# openers ("Use for", "Use on") are not this clause: such a description is
-# checked against its first sentence, as is one with no "Use" clause at all.
-USE_WHEN = re.compile(r"\buse when\b.*?(?=;|\.(?:\s|$)|$)", re.IGNORECASE | re.DOTALL)
+# The trigger clause ("Use when ...", "Use for ..." or "Use on ...") ends at the
+# first semicolon or sentence end. A description with no such clause is checked
+# against its first sentence.
+USE_WHEN = re.compile(r"\buse (?:when|for|on)\b.*?(?=;|\.(?:\s|$)|$)", re.IGNORECASE | re.DOTALL)
 FIRST_SENTENCE = re.compile(r".*?(?:\.(?=\s|$)|$)", re.DOTALL)
 
 
 def trigger_part(description: str) -> tuple[str, str]:
-    """The text a cue is held to, and its label: the Use-when clause, else the first sentence."""
+    """The text a cue is held to, and its label: the trigger clause, else the first sentence."""
     text = " ".join(description.split())
     clause = USE_WHEN.search(text)
     if clause:
-        return "Use-when clause", clause.group(0)
+        return "trigger clause", clause.group(0)
     return "first sentence", FIRST_SENTENCE.match(text).group(0)
 
 

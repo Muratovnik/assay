@@ -293,7 +293,7 @@ class CueTermGateTests(unittest.TestCase):
                 self.write_cue(f"{term}s with authority")
                 problems = self.problems(term)
                 self.assertEqual(1, len(problems), problems)
-                self.assertIn(f"Use-when clause of the description lacks '{term}'", problems[0])
+                self.assertIn(f"trigger clause of the description lacks '{term}'", problems[0])
 
     def test_description_without_use_when_is_held_to_its_first_sentence(self) -> None:
         self.write_description(
@@ -309,9 +309,15 @@ class CueTermGateTests(unittest.TestCase):
             self.problems("authori"),
         )
 
-    def test_use_for_is_not_the_use_when_clause(self) -> None:
-        self.write_description("Route bounded packets. Use for subagent work; skip the rest.")
-        self.assertEqual(1, len(self.problems("subagent")))
+    def test_use_for_and_use_on_open_the_trigger_clause(self) -> None:
+        # A description may open its trigger with "Use for" or "Use on"; the
+        # first sentence is then outside the clause, as with "Use when".
+        self.write_cue("subagent packets")
+        for opener in ("Use for", "Use on"):
+            with self.subTest(opener=opener):
+                self.write_description(f"Route bounded packets. {opener} subagent work; skip the rest.")
+                self.assertEqual([], self.problems("subagent"))
+                self.assertEqual(1, len(self.problems("packet")))
 
     def test_catalogued_skill_without_a_table_entry_fails(self) -> None:
         self.assertEqual(
@@ -356,11 +362,11 @@ class CueTermGateTests(unittest.TestCase):
         self.assertEqual([], aa.cue_term_problems(self.root, catalog))
         rules = self.root / self.RULES
         text = rules.read_text(encoding="utf-8")
-        narrowed = text.replace("boundaries, contracts or file placement", "file placement")
+        narrowed = text.replace("architecture, boundaries, contracts or file placement", "file placement")
         self.assertNotEqual(text, narrowed)
         rules.write_text(narrowed, encoding="utf-8", newline="\n")
         problems = aa.cue_term_problems(self.root, catalog)
-        self.assertEqual(2, len(problems), problems)
+        self.assertEqual(1, len(problems), problems)
         self.assertTrue(all("cue of software-architecture lacks" in p for p in problems), problems)
 
 

@@ -26,7 +26,7 @@ cue = "plans, sequencing or resuming planned work"
 
 [[skills]]
 skill = "skill/software-architecture"
-cue = "boundaries, contracts or file placement"
+cue = "architecture, boundaries, contracts or file placement"
 
 [[skills]]
 skill = "skill/technical-writing"
