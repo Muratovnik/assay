@@ -58,6 +58,9 @@ REVISION = re.compile(r"[0-9a-f]{7,64}")
 # a correction need not open the message. A pattern without `^` or a leading
 # word boundary is deliberately a phrase that is a complaint wherever it stands.
 CLAUSE_LIMIT = 6
+# A whole element at the very start: an opening tag, its content and the same
+# closing tag. Bounded by the prompt limit request_text already enforces.
+WRAPPER = re.compile(r"\A\s*<([A-Za-z][\w-]*)(?:\s[^<>]*)?>.*?</\1>[ \t]*(?:\r?\n)?", re.S)
 LEAD_IN = re.compile(
     r"^(?:(?:no|нет|но|а|и|ну|так|однако|окей|ок|хорошо|ладно|понял|ясно|слушай|but|and|so|well|ok|okay)\b[,.!:]?\s+)+",
     re.I)
@@ -89,7 +92,9 @@ SIGNALS = (
     ("omission", r"^you (?:(?:still|again|just) )?(?:didn't|did not|never|haven't|have not) (?:read|mention|use|check|include|cover|consider|look|follow|test)\w*"),
     ("omission", r"\bпо верхам\b"),
     # The owner reports what they saw the agent do, or what they wanted instead.
-    ("correction", r"^(?:(?:я|уже|не в первый раз|опять|снова|всё ещё|все еще) )*вижу\b"),
+    # "Вижу" reports a fault only with a stated finding or the agent named;
+    # a bare "вижу много изменений" is an observation before a new task.
+    ("correction", r"^(?:(?:я|уже|не в первый раз|опять|снова|всё ещё|все еще) )*вижу(?:,? что\b|\b[^.?!]{0,80}\bты\b)"),
     ("correction", r"\bя (?:заметил\w*|увидел\w*)\b|\bi (?:noticed|saw) (?:that )?you\b"),
     ("correction", r"\bя хотел[аи]?\b(?! бы\b)|\bi wanted (?:a|an|the|it|you|this|that)\b"),
     ("correction", r"\b(?:я (?:же |вообще )?не (?:просил\w*|говорил\w*)|хотя я (?:его |её |ее |это |этого |тебя )?не (?:просил|говорил|велел))\b"
@@ -167,8 +172,20 @@ def source(event, client):
             "evidence_level": "command_input_unattested"}
 
 
+def strip_wrappers(prompt):
+    """Drop leading client-inserted elements such as an IDE selection.
+
+    They are data, and a blank line inside one splits it into paragraphs, so the
+    first request paragraph would be the wrapper rather than the owner's text.
+    Only this grammar skips them; skill activation keeps the shared selector.
+    """
+    while isinstance(prompt, str) and (match := WRAPPER.match(prompt)):
+        prompt = prompt[match.end():]
+    return prompt
+
+
 def signal(prompt):
-    text = request_text(prompt, set())
+    text = request_text(strip_wrappers(prompt), set())
     for clause in re.split(r"(?<=[.!?…])\s+", text)[:CLAUSE_LIMIT]:
         clause = LEAD_IN.sub("", clause)
         if NEUTRAL.search(clause):

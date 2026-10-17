@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime import feedback, cli
+from runtime.activation import request_text
 
 
 class FeedbackCaptureTests(unittest.TestCase):
@@ -128,6 +129,31 @@ class FeedbackCaptureTests(unittest.TestCase):
         self.assertIsNone(feedback.signal("Добавь кэш.\n\nВижу, что ты забыл про TTL."))
         # Only the opening sentences of a long paragraph are examined.
         self.assertIsNone(feedback.signal(" ".join(["Добавь кэш."] * 12 + ["Ты ошибся с версией."])))
+
+    def test_seeing_reports_a_fault_only_with_a_finding_or_the_agent(self):
+        for prompt in ("Вижу, что тесты не запускались.", "Я вижу, что не все файлы закоммичены.",
+                       "Вижу задачи, которые ты пропустил."):
+            with self.subTest(prompt=prompt):
+                self.assertEqual(feedback.signal(prompt), "correction")
+        # An observation that precedes a new task is not a correction.
+        for prompt in ("Вижу много изменений в репозитории. Разбери их.",
+                       "Вижу у себя несколько старых веток, удали лишние."):
+            with self.subTest(prompt=prompt):
+                self.assertIsNone(feedback.signal(prompt))
+
+    def test_leading_client_wrapper_is_skipped_by_the_grammar_only(self):
+        # A blank line inside the selection splits it into paragraphs, so without
+        # skipping it the first request paragraph would be the wrapper itself.
+        wrapped = ("<ide_selection>The user selected line 7 from app.vue:\ncopyText\n\n"
+                   "This may or may not be related.</ide_selection>\nТы ошибся с версией.")
+        self.assertEqual(feedback.signal(wrapped), "correction")
+        self.assertEqual(feedback.signal('<note kind="a">x</note>\n<ide_selection>y</ide_selection>\nТы ошибся.'),
+                         "correction")
+        # The wrapper's own text is data, and the shared selector is unchanged.
+        self.assertIsNone(feedback.signal("<ide_selection>Ты ошибся с версией.</ide_selection>\nДобавь тест."))
+        self.assertNotIn("ошибся", request_text(wrapped, set()))
+        # Only a whole leading element is skipped; an unclosed tag stays data.
+        self.assertIsNone(feedback.signal("<ide_selection>code\n\nТы ошибся с версией."))
 
     def test_native_context_envelopes(self):
         for client in ("claude", "codex", "gemini"):
