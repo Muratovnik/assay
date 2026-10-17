@@ -8,6 +8,20 @@ master with instances or a unique composition; content may arrive as a
 property, slot or child. Code and editor catalogs need not match, and "variant"
 means a supported difference of state or structure, not an editor construct.
 
+## Contents
+
+- [Split families by role, not by surface difference](#split-families-by-role-not-by-surface-difference)
+- [Map the system before adding to it](#map-the-system-before-adding-to-it)
+- [Make the ownership and system basis explicit](#make-the-ownership-and-system-basis-explicit)
+- [Resolve reusable dependencies before their dependents](#resolve-reusable-dependencies-before-their-dependents)
+- [Follow reuse transitively to real consumers](#follow-reuse-transitively-to-real-consumers)
+- [Keep shell, content and demo example distinct](#keep-shell-content-and-demo-example-distinct)
+- [State the contract a reusable composition offers](#state-the-contract-a-reusable-composition-offers)
+- [Editability means an observable effect](#editability-means-an-observable-effect)
+- [Choose the edit boundary of a nested element](#choose-the-edit-boundary-of-a-nested-element)
+- [Map design roles onto the real code API](#map-design-roles-onto-the-real-code-api)
+- [Primary references](#primary-references)
+
 ## Split families by role, not by surface difference
 
 Separate a family when role, stable structure, behavior, states or required

@@ -4,6 +4,18 @@ Read for a substantial new document or rewrite. For a local correction, keep the
 existing structure unless the task opens it. These are composition choices, not
 a demand to write planning documents before writing documentation.
 
+## Contents
+
+- [Establish the starting point and destination](#establish-the-starting-point-and-destination)
+- [Select content before arranging it](#select-content-before-arranging-it)
+- [Match precision to the surface](#match-precision-to-the-surface)
+- [Arrange by dependency, not discovery order](#arrange-by-dependency-not-discovery-order)
+- [Establish procedure conditions](#establish-procedure-conditions)
+- [Show one complete path before enumerating options](#show-one-complete-path-before-enumerating-options)
+- [Explain mechanisms at the needed depth](#explain-mechanisms-at-the-needed-depth)
+- [Update the semantic unit](#update-the-semantic-unit)
+- [Review the finished content](#review-the-finished-content)
+
 ## Establish the starting point and destination
 
 A user installing a package, a contributor running a checkout and an operator

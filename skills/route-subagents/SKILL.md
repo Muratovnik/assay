@@ -184,6 +184,9 @@ Codex launches against their declared class.
 | Acceptance/decision review or finding repair | [Review and continuity](references/review-and-continuity.md) |
 | Complex packet, multiple dependencies or a durable handoff | [Packet examples](references/packet-contracts.md) |
 | Completion, no-op, failure or repair classification | [Outcomes](references/outcome-and-repair-contracts.md) |
+| An unfamiliar split of the work | The relevant pattern in [delegation patterns](references/delegation-patterns.md) |
+| A model or client upgrade changes a routing assumption, or vendor advice conflicts across routes | [Model guidance](references/model-guidance.md) |
+| A model missing from routing evidence, publisher names unlike native IDs, or a source adapter to maintain | [Benchmark refresh](references/benchmark-refresh.md) |
 
 A simple advisory question needs its question, evidence boundary, authority and
 useful return; no repository-wide inventory, interface-version ceremony or

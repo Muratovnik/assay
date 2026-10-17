@@ -6,6 +6,12 @@ handoff applies to ordinary audit workers too; profile-specific verdicts and
 packet rules apply only when that profile is selected. An ordinary repository
 audit does not require a subagent. The skill grants no delegation.
 
+## Contents
+
+- [Carry coverage through delegation](#carry-coverage-through-delegation)
+- [Preserve the packet boundary](#preserve-the-packet-boundary)
+- [Preserve meaning across verdict vocabularies](#preserve-meaning-across-verdict-vocabularies)
+
 ## Carry coverage through delegation
 
 The primary assigns questions and applicable criteria owners from its coverage

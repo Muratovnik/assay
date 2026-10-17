@@ -6,6 +6,16 @@ decisions about visual states, or to carry out a requested migration. Inspect
 the affected boundary and callers; a small unrelated repair needs no
 whole-repository inventory.
 
+## Contents
+
+- [Preserve the applicable outcome](#preserve-the-applicable-outcome)
+- [Establish who performs the behavior](#establish-who-performs-the-behavior)
+- [Report the reuse decision](#report-the-reuse-decision)
+- [Apply this to UI primitives](#apply-this-to-ui-primitives)
+- [Keep staged adoption tied to the request](#keep-staged-adoption-tied-to-the-request)
+- [Keep exceptions finite and test the final state](#keep-exceptions-finite-and-test-the-final-state)
+- [Preserve structural and public contracts](#preserve-structural-and-public-contracts)
+
 ## Preserve the applicable outcome
 
 Before relying on a material exception or a reduced migration, check its source

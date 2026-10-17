@@ -8,6 +8,16 @@ The contracts inside one reusable component belong to
 [visual judgment](visual-judgment.md); editor-specific moves and naming mechanics
 belong to the adapter in use.
 
+## Contents
+
+- [Organize for retrieval, not creation history](#organize-for-retrieval-not-creation-history)
+- [Separate the consumer surface from support material](#separate-the-consumer-surface-from-support-material)
+- [Keep related families and states comparable](#keep-related-families-and-states-comparable)
+- [Make composition levels legible without imposing a taxonomy](#make-composition-levels-legible-without-imposing-a-taxonomy)
+- [Preserve identity while reorganizing](#preserve-identity-while-reorganizing)
+- [Judge architecture separately from canvas polish](#judge-architecture-separately-from-canvas-polish)
+- [Method references](#method-references)
+
 ## Organize for retrieval, not creation history
 
 Treat the library consumer as a user with a concrete retrieval task. Group and

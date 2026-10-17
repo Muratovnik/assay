@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from tools.skill_resources import (
-    distribution_problems, markdown_problems, markdown_targets, selection_problems,
-    unreachable_problems,
+    contents_problems, distribution_problems, markdown_problems, markdown_targets,
+    selection_problems, unreachable_problems,
 )
 
 
@@ -132,24 +132,35 @@ class SkillResourceTests(unittest.TestCase):
 
 
 class ReachabilityTests(unittest.TestCase):
-    """Every file under references/ and examples/ must be linked from SKILL.md, directly or transitively."""
+    """Every file under references/ and examples/ must be linked from SKILL.md itself."""
 
-    def fixture(self, directory: str) -> tuple[Path, Path]:
+    def fixture(self, directory: str, body: str = (
+        "[core](references/core.md) [deep](references/deep.md#part) "
+        "[sample](examples/sample.md)"
+    )) -> tuple[Path, Path]:
         root = Path(directory)
-        first = skill(root, "first", "[core](references/core.md)")
+        first = skill(root, "first", body)
         (first / "references").mkdir()
         (first / "examples").mkdir()
         (first / "references/core.md").write_text(
             "Core. Read [the deep case](deep.md) when X.\n", encoding="utf-8")
         (first / "references/deep.md").write_text(
-            "Deep. See [a sample](../examples/sample.md).\n", encoding="utf-8")
+            "# Deep\n\n## Part\n\nSee [a sample](../examples/sample.md).\n", encoding="utf-8")
         (first / "examples/sample.md").write_text("Sample.\n", encoding="utf-8")
         return root, first
 
-    def test_complete_skill_passes_including_files_reached_only_through_another_reference(self) -> None:
+    def test_complete_skill_passes_when_skill_md_links_every_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root, first = self.fixture(directory)
             self.assertEqual([], unreachable_problems(first, root))
+
+    def test_a_file_reached_only_through_another_reference_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root, first = self.fixture(directory, "[core](references/core.md)")
+            self.assertEqual(
+                ["first/examples/sample.md", "first/references/deep.md"],
+                sorted(problem.split(": ")[0] for problem in unreachable_problems(first, root)),
+            )
 
     def test_an_unlinked_reference_fails_naming_the_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -162,7 +173,7 @@ class ReachabilityTests(unittest.TestCase):
                 ["first/examples/loose.json", "first/references/orphan.md"],
                 sorted(problem.split(": ")[0] for problem in problems),
             )
-            self.assertTrue(all(": not reachable" in problem for problem in problems), problems)
+            self.assertTrue(all(": not linked from first/SKILL.md" in problem for problem in problems), problems)
 
     def test_a_link_from_evals_or_a_code_example_or_another_skill_does_not_reach(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -185,6 +196,69 @@ class ReachabilityTests(unittest.TestCase):
             self.assertEqual(
                 ["first/references/a.md", "first/references/b.md"],
                 [problem.split(": ")[0] for problem in unreachable_problems(first, root)],
+            )
+
+
+def long_reference(contents: str | None, sections: tuple[str, ...] = ("Alpha", "Beta"),
+                   lines: int = 120, intro: int = 2) -> str:
+    """A reference file over the threshold, optionally opened with a contents list."""
+    body = ["# Topic", ""] + ["Intro."] * intro + [""]
+    if contents is not None:
+        body += ["## Contents", "", contents, ""]
+    for title in sections:
+        body += [f"## {title}", "", "Detail.", ""]
+    body += ["Filler."] * max(0, lines - len(body))
+    return "\n".join(body) + "\n"
+
+
+class ContentsTests(unittest.TestCase):
+    """A reference over 100 lines opens with a Contents list linking every other section."""
+
+    def problems(self, text: str, directory: str, place: str = "references") -> list[str]:
+        root = Path(directory)
+        first = skill(root, "first", f"[topic]({place}/topic.md)")
+        (first / place).mkdir()
+        (first / place / "topic.md").write_text(text, encoding="utf-8")
+        return contents_problems(first, root)
+
+    def test_complete_contents_list_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            text = long_reference("- [Alpha](#alpha)\n- [Beta](#beta)")
+            self.assertEqual([], self.problems(text, directory))
+
+    def test_short_file_needs_no_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual([], self.problems(long_reference(None, lines=100), directory))
+
+    def test_long_file_without_contents_fails_in_references_and_examples(self) -> None:
+        for place in ("references", "examples"):
+            with self.subTest(place=place), tempfile.TemporaryDirectory() as directory:
+                problems = self.problems(long_reference(None, lines=101), directory, place)
+                self.assertEqual(1, len(problems), problems)
+                self.assertIn(f"first/{place}/topic.md: over 100 lines", problems[0])
+
+    def test_contents_missing_a_section_names_the_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            problems = self.problems(long_reference("- [Alpha](#alpha)"), directory)
+            self.assertEqual(["first/references/topic.md: '## Contents' does not link #beta"], problems)
+
+    def test_contents_must_be_the_first_section_and_near_the_top(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            late_heading = long_reference(None, sections=("Alpha", "Contents", "Beta"))
+            self.assertIn("as the first second-level heading", self.problems(late_heading, directory)[0])
+        with tempfile.TemporaryDirectory() as directory:
+            late_list = long_reference("- [Alpha](#alpha)\n- [Beta](#beta)", intro=100, lines=140)
+            self.assertIn("must start within the first 100 lines", self.problems(late_list, directory)[0])
+
+    def test_a_repeated_heading_needs_its_numbered_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            sections = ("Notes", "Notes")
+            self.assertEqual([], self.problems(
+                long_reference("- [Notes](#notes)\n- [Notes](#notes-1)", sections), directory))
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual(
+                ["first/references/topic.md: '## Contents' does not link #notes-1"],
+                self.problems(long_reference("- [Notes](#notes)", sections), directory),
             )
 
 

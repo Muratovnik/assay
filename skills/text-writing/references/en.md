@@ -1,5 +1,11 @@
 # English prose
 
+## Contents
+
+- [Compose for the actual reader](#compose-for-the-actual-reader)
+- [Defects](#defects)
+- [What is not a rule here](#what-is-not-a-rule-here)
+
 ## Compose for the actual reader
 
 Make the purpose visible, then develop the point with the evidence or example

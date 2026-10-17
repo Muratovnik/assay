@@ -4,6 +4,15 @@ An author cannot un-know the product. A fresh reader can help find
 the step that exists only in the author's head — the unset variable, the
 directory nobody changed into, the account that had to be created first.
 
+## Contents
+
+- [When it applies](#when-it-applies)
+- [Authorization](#authorization)
+- [The protocol](#the-protocol)
+- [Reading the result](#reading-the-result)
+- [Complete writing review](#complete-writing-review)
+- [What it does not establish](#what-it-does-not-establish)
+
 ## When it applies
 
 One bounded pass, for a substantial document whose readers cannot ask the author

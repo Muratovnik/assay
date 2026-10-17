@@ -6,6 +6,12 @@ here without its own example.
 The valid examples show possible uses, not phrases exempt from content selection.
 Keep an example's information only when it serves the particular reader and task.
 
+## Contents
+
+- [Measures that do not apply to Chinese](#measures-that-do-not-apply-to-chinese)
+- [Defects](#defects)
+- [Legitimate Chinese that must not be flagged](#legitimate-chinese-that-must-not-be-flagged)
+
 ## Measures that do not apply to Chinese
 
 - **Per-word density.** Chinese prose has no spaces between words, so "how many

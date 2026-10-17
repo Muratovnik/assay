@@ -5,6 +5,14 @@ selected procedure's checks and the entrypoint's finish procedure; they do not
 automatically require this file. For Playwright actions or screenshot baselines,
 also read the applicable section of [browser checks](browser-checks.md).
 
+## Contents
+
+- [Derive the scenario](#derive-the-scenario)
+- [Choose distinguishing checks](#choose-distinguishing-checks)
+- [Check interaction under representative load](#check-interaction-under-representative-load)
+- [Evaluate the evidence](#evaluate-the-evidence)
+- [Method references](#method-references)
+
 ## Derive the scenario
 
 Connect the user's goal and starting state to the actual entry/actions, observable

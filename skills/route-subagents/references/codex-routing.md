@@ -46,6 +46,14 @@ schema exposes it. No fixed model or per-child token cap is implied. Snapshot
 expiry rejects a late answer; interrupting the running advisor still belongs
 to the native client.
 
+## Contents
+
+- [Route-table launches](#route-table-launches)
+- [Launches from a subagent](#launches-from-a-subagent)
+- [Required-mode adapter requirements](#required-mode-adapter-requirements)
+- [Workers and waits](#workers-and-waits)
+- [Model upgrades and API boundaries](#model-upgrades-and-api-boundaries)
+
 ## Route-table launches
 
 With a [route table](route-table.md) configured, start `task_name` with the class

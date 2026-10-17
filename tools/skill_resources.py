@@ -50,11 +50,14 @@ def _parse(text: str) -> list:
     return MarkdownIt("commonmark").parse(text)
 
 
-def heading_anchors(text: str) -> set[str]:
-    """Return GitHub-style heading anchors, with -1, -2 for repeated headings."""
+def headings(text: str) -> list[tuple[int, str, str, int]]:
+    """Return (level, title, GitHub-style anchor, token index) for each heading.
+
+    Repeated anchors get -1, -2 across all levels, as GitHub numbers them.
+    """
     tokens = _parse(text)
     counts: dict[str, int] = {}
-    anchors: set[str] = set()
+    result: list[tuple[int, str, str, int]] = []
     for index, token in enumerate(tokens):
         if token.type != "heading_open":
             continue
@@ -64,9 +67,14 @@ def heading_anchors(text: str) -> set[str]:
                        if character in " -_" or unicodedata.category(character)[0] in "LN")
         base = base.replace(" ", "-")
         count = counts.get(base, 0)
-        anchors.add(base if not count else f"{base}-{count}")
+        result.append((int(token.tag[1:]), title.strip(), base if not count else f"{base}-{count}", index))
         counts[base] = count + 1
-    return anchors
+    return result
+
+
+def heading_anchors(text: str) -> set[str]:
+    """Return GitHub-style heading anchors, with -1, -2 for repeated headings."""
+    return {anchor for _, _, anchor, _ in headings(text)}
 
 
 def markdown_targets(text: str) -> list[str]:
@@ -144,54 +152,109 @@ UNREAD_DIRECTORIES = ("evals",)
 
 
 def unreachable_problems(skill: Path, root: Path) -> list[str]:
-    """Name each file under references/ or examples/ that SKILL.md never reaches.
+    """Name each file under references/ or examples/ that SKILL.md does not link.
 
-    Reachability follows relative Markdown links from SKILL.md through the
-    skill's own Markdown files, so a file linked only from another reference
-    counts. Evaluation data is never read while performing a task and is not
-    followed. Links that leave the skill, break or point at a directory reach
-    nothing here; markdown_problems reports the broken ones.
+    The link must be in SKILL.md itself. A file reached only through another
+    reference counts as unlinked: an agent may preview a nested file partially
+    instead of reading it, so Anthropic's skill guidance keeps references one
+    level deep. References may still link each other. Links that leave the
+    skill, break or point into evals/ reach nothing here; markdown_problems
+    reports the broken ones.
     """
     definition = skill / "SKILL.md"
     if not definition.is_file():
         return []
     base = skill.resolve(strict=True)
-    reached: set[Path] = {definition.resolve(strict=True)}
-    pending = [definition.resolve(strict=True)]
-    while pending:
-        current = pending.pop()
-        if current.suffix != ".md":
-            continue
+    reached: set[Path] = set()
+    try:
+        targets = markdown_targets(definition.read_text(encoding="utf-8", errors="strict"))
+    except (OSError, UnicodeError, ContractError):
+        targets = []
+    for target in targets:
         try:
-            targets = markdown_targets(current.read_text(encoding="utf-8", errors="strict"))
-        except (OSError, UnicodeError, ContractError):
+            raw = local_target(target)
+            if raw is None:
+                continue
+            resolved = (definition.parent / raw).resolve(strict=True)
+            relative = resolved.relative_to(base)
+        except (OSError, ValueError):
             continue
-        for target in targets:
-            try:
-                raw = local_target(target)
-                if raw is None:
-                    continue
-                resolved = (current.parent / raw).resolve(strict=True)
-                relative = resolved.relative_to(base)
-            except (OSError, ValueError):
-                continue
-            if (
-                resolved in reached
-                or not resolved.is_file()
-                or relative.parts[0] in UNREAD_DIRECTORIES
-            ):
-                continue
+        if resolved.is_file() and relative.parts[0] not in UNREAD_DIRECTORIES:
             reached.add(resolved)
-            pending.append(resolved)
     label = skill.relative_to(root).as_posix()
     return [
-        f"{label}/{path.relative_to(skill).as_posix()}: not reachable by relative "
-        f"Markdown links from {label}/SKILL.md; link it with the condition for "
-        "reading it, or move or delete it"
+        f"{label}/{path.relative_to(skill).as_posix()}: not linked from "
+        f"{label}/SKILL.md; link it there with the condition for reading it, "
+        "or move or delete it"
         for directory in REACHABLE_DIRECTORIES
         for path in sorted((skill / directory).rglob("*"))
         if path.is_file() and path.resolve(strict=True) not in reached
     ]
+
+
+CONTENTS_THRESHOLD = 100
+CONTENTS_TITLE = "Contents"
+
+
+def contents_problems(skill: Path, root: Path) -> list[str]:
+    """Name each long Markdown file under references/ or examples/ without a contents list.
+
+    A file over CONTENTS_THRESHOLD lines opens its section list with a
+    `## Contents` heading as its first second-level heading, starting within
+    the first CONTENTS_THRESHOLD lines, whose links cover every other
+    second-level heading. A partial preview then still shows the whole scope,
+    and markdown_problems turns a renamed heading into a broken link instead of
+    a stale entry.
+    """
+    problems: list[str] = []
+    for directory in REACHABLE_DIRECTORIES:
+        for path in sorted((skill / directory).rglob("*.md")):
+            label = path.relative_to(root).as_posix()
+            try:
+                text = path.read_text(encoding="utf-8", errors="strict")
+                if len(text.splitlines()) <= CONTENTS_THRESHOLD:
+                    continue
+                tokens = _parse(text)
+                sections = [entry for entry in headings(text) if entry[0] == 2]
+            except (OSError, UnicodeError, ContractError) as error:
+                problems.append(f"{label}: {error}")
+                continue
+            # _parse drops frontmatter, so token line numbers start after it.
+            match = FRONTMATTER.match(text)
+            offset = text.count("\n", 0, match.end()) if match else 0
+            if not sections or sections[0][1] != CONTENTS_TITLE:
+                problems.append(
+                    f"{label}: over {CONTENTS_THRESHOLD} lines; open its sections with "
+                    f"a '## {CONTENTS_TITLE}' list as the first second-level heading"
+                )
+                continue
+            _, _, _, start = sections[0]
+            if offset + tokens[start].map[0] >= CONTENTS_THRESHOLD:
+                problems.append(
+                    f"{label}: '## {CONTENTS_TITLE}' must start within the first "
+                    f"{CONTENTS_THRESHOLD} lines"
+                )
+            end = next(
+                (index for index in range(start + 1, len(tokens))
+                 if tokens[index].type == "heading_open"),
+                len(tokens),
+            )
+            linked: set[str] = set()
+            pending = list(tokens[start + 1:end])
+            while pending:
+                token = pending.pop()
+                if token.type == "link_open":
+                    fragment = urlsplit(token.attrGet("href") or "").fragment
+                    if fragment:
+                        linked.add(unquote(fragment))
+                pending.extend(token.children or [])
+            missing = [anchor for _, _, anchor, _ in sections[1:] if anchor not in linked]
+            if missing:
+                problems.append(
+                    f"{label}: '## {CONTENTS_TITLE}' does not link "
+                    + ", ".join(f"#{anchor}" for anchor in missing)
+                )
+    return problems
 
 
 def validate_plain_tree(path: Path) -> None:

@@ -31,7 +31,10 @@ an improvement supported by comparable task execution.
   description says when to use the method **and when to skip it**, because that
   second half is what stops it firing on the wrong task.
 - Keep `SKILL.md` short and route conditional depth into `references/`. An
-  unused method should cost little context.
+  unused method should cost little context. Link every file under `references/`
+  and `examples/` from `SKILL.md` itself with the condition for reading it, and
+  open a reference over 100 lines with a `## Contents` list; the source check
+  enforces both.
 - Link to a rule another skill owns instead of restating it. The linking skill
   says when to use that method and what stays with itself; the owner keeps the
   rule, so it changes in one place.

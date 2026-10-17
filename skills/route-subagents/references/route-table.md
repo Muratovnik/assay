@@ -12,6 +12,14 @@ per-packet adequacy judgment over them did not discriminate in practice. A few
 classes with deliberate pairs carry the resolution the data has. The table is
 reviewed when a model is released, not recomputed for every launch.
 
+## Contents
+
+- [Configuration](#configuration)
+- [Using the table](#using-the-table)
+- [Enforcement](#enforcement)
+- [Building and reviewing the table](#building-and-reviewing-the-table)
+- [Frozen alternatives](#frozen-alternatives)
+
 ## Configuration
 
 The table lives in the client's routing configuration (schema 4), next to

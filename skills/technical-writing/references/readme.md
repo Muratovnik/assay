@@ -5,6 +5,13 @@ For a local correction, consult only the affected part and keep the existing
 layout. This module is an entry within `technical-writing`; it creates no new
 agent, slash command, catalog entry or mandatory delegation.
 
+## Contents
+
+- [Establish what the reader is getting](#establish-what-the-reader-is-getting)
+- [Select a presentation contract](#select-a-presentation-contract)
+- [Compose the page](#compose-the-page)
+- [Presentation and completion](#presentation-and-completion)
+
 ## Establish what the reader is getting
 
 Identify audience, product, version scope and render target from the task and

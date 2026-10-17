@@ -4,6 +4,15 @@ Use for material build, adapt, adopt, or retain decisions within the named audit
 The objective is justified complexity and useful outcomes, not a dependency quota
 or a presumption that custom work is wrong.
 
+## Contents
+
+- [Establish the actual problem and alternatives](#establish-the-actual-problem-and-alternatives)
+- [Test the decision basis separately from conformance](#test-the-decision-basis-separately-from-conformance)
+- [Resolve retained mechanics](#resolve-retained-mechanics)
+- [Learn from products without importing their scope](#learn-from-products-without-importing-their-scope)
+- [Compare the whole cost of ownership](#compare-the-whole-cost-of-ownership)
+- [Calibrate the conclusion](#calibrate-the-conclusion)
+
 ## Establish the actual problem and alternatives
 
 Existing material owned mechanics can trigger this review in a broad repository

@@ -5,6 +5,14 @@ publisher names differ from native IDs, or when maintaining a source adapter.
 The [benchmark service](benchmark-routing.md) remains the owner of acquisition,
 cache and comparable cohorts; this adds no service or model-discovery daemon.
 
+## Contents
+
+- [How publisher labels bind to the inventory](#how-publisher-labels-bind-to-the-inventory)
+- [Finding a missing spelling](#finding-a-missing-spelling)
+- [Inventory-aware lazy refresh](#inventory-aware-lazy-refresh)
+- [Interpret the diagnostics](#interpret-the-diagnostics)
+- [Prefer publisher data to a rendered page](#prefer-publisher-data-to-a-rendered-page)
+
 ## How publisher labels bind to the inventory
 
 Routing keeps no table of model names. The inventory the caller supplies is the

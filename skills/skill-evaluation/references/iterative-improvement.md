@@ -6,6 +6,14 @@ Start with one consequential decision in one skill, not optimization of the whol
 collection. Reuse existing execution, inspection, analysis tools and Git. This is
 not authority to create a runner, a service, a task store or self-modifying loop.
 
+## Contents
+
+- [Establish a comparable starting point](#establish-a-comparable-starting-point)
+- [Change one explainable cause at a time](#change-one-explainable-cause-at-a-time)
+- [Inspect and decide after each candidate](#inspect-and-decide-after-each-candidate)
+- [When progress stalls](#when-progress-stalls)
+- [Freeze, validate transfer and hand back](#freeze-validate-transfer-and-hand-back)
+
 ## Establish a comparable starting point
 
 Use [evaluation design](eval-design.md) when the task distribution, grader or

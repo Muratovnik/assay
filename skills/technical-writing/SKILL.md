@@ -71,8 +71,12 @@ before choosing headings or polishing sentences:
 For a new README, a full README rewrite or an explicit presentation-standard
 request, read the [README module](references/readme.md) before drafting. It selects
 an applicable structure and house style; it is part of this skill, not another
-agent or installed skill. For a local README correction, preserve the opened scope
-and consult only the affected module guidance; do not restyle the whole page.
+agent or installed skill. Within it, the [README profile](references/readme-profile.md)
+governs a new README or a full layout change, and
+[presentation details](references/readme-presentation.md) cover badges, images,
+HTML, diagrams, a table of contents or community modules. For a local README
+correction, preserve the opened scope and consult only the affected module
+guidance; do not restyle the whole page.
 
 Apply the decisions directly on small tasks. A chosen house style can require
 formatting; it does not make every content slot applicable and is not a measure of

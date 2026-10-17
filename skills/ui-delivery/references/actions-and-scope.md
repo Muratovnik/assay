@@ -3,6 +3,16 @@
 Use when placing actions, reorganizing create/edit flows, or changing an object's
 scope. A compact answer in the task is enough; a new specification is not required.
 
+## Contents
+
+- [Make the action match the user's object](#make-the-action-match-the-users-object)
+- [Put frequent work where it is needed](#put-frequent-work-where-it-is-needed)
+- [Make transitions apparent](#make-transitions-apparent)
+- [Return to what the action replaced](#return-to-what-the-action-replaced)
+- [Preserve drafts across departure](#preserve-drafts-across-departure)
+- [Preserve the journey during redesign](#preserve-the-journey-during-redesign)
+- [Primary references](#primary-references)
+
 ## Make the action match the user's object
 
 Establish which object is viewed, which will change, who else consumes it, and

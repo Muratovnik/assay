@@ -4,6 +4,15 @@ Use for async counts, forecasts, derived summaries, refresh, writes/retries and
 shared-data invalidation. A correct query or state store does not establish a truthful UI:
 follow the result to every affected visible consumer.
 
+## Contents
+
+- [Identify what the result describes](#identify-what-the-result-describes)
+- [Establish that a valid result is reachable](#establish-that-a-valid-result-is-reachable)
+- [Separate initial loading from refreshing](#separate-initial-loading-from-refreshing)
+- [Reconcile writes and retries](#reconcile-writes-and-retries)
+- [Trace invalidation through consumers](#trace-invalidation-through-consumers)
+- [Method references](#method-references)
+
 ## Identify what the result describes
 
 Establish the relevant object/composition, target or format, source revision,

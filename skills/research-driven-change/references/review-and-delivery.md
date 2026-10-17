@@ -7,6 +7,14 @@ audit criteria, verdicts and its read-only authority;
 [planning](../../implementation-planning/SKILL.md) owns replanning and
 continuation.
 
+## Contents
+
+- [Give review the actual contract](#give-review-the-actual-contract)
+- [Route feedback to its cause](#route-feedback-to-its-cause)
+- [Keep checks attached to the checked result](#keep-checks-attached-to-the-checked-result)
+- [Publish only the requested proposal](#publish-only-the-requested-proposal)
+- [Report the endpoint actually reached](#report-the-endpoint-actually-reached)
+
 ## Give review the actual contract
 
 Supply the original requested outcome, current constraints and approved decisions,

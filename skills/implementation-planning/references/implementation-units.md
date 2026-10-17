@@ -4,6 +4,14 @@ Use for multi-unit decomposition, shared interfaces and substantive acceptance.
 The unit is an outcome that can be meaningfully accepted or rejected, not a file,
 a tool invocation, a fixed time slice or an obligatory commit.
 
+## Contents
+
+- [Describe enough to execute](#describe-enough-to-execute)
+- [Establish a risky boundary early](#establish-a-risky-boundary-early)
+- [Contracts versus implementation](#contracts-versus-implementation)
+- [Bidirectional coverage and acceptance](#bidirectional-coverage-and-acceptance)
+- [Example: prevent repeated profile submission](#example-prevent-repeated-profile-submission)
+
 ## Describe enough to execute
 
 For each unit give its result, requirement or necessary prerequisite, dependencies,

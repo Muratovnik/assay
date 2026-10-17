@@ -16,6 +16,16 @@ each, [Diataxis](https://diataxis.fr/) is the primary source. Take the
 distinction, not a mandate to create four documents: a project with one useful
 how-to does not need three empty siblings.
 
+## Contents
+
+- [How-to](#how-to)
+- [Tutorial](#tutorial)
+- [Reference](#reference)
+- [Explanation](#explanation)
+- [Runbook](#runbook)
+- [ADR and RFC](#adr-and-rfc)
+- [Release notes and changelog](#release-notes-and-changelog)
+
 ## How-to
 
 The reader has a goal and some experience. They need to finish, not to learn.

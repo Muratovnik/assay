@@ -87,6 +87,9 @@ chain; do not load the whole directory or evaluation corpus.
 | Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets | [Visual judgment](references/visual-judgment.md) |
 | Transferring an interface, selecting its target-system basis, structural replacement or migration | [Design transfer](references/design-transfer.md) |
 | Any read or write through the Figwright adapter | [Figwright](references/figwright.md), before the first operation |
+| Figma-specific design-system structure through Figwright: published components, cross-file libraries, properties and slots | [Figwright design-system mechanics](references/figwright-design-system.md), with Figwright |
+| Playwright actions, readiness waits or screenshot baselines | [Browser checks](references/browser-checks.md) |
+| A confirmed source-discovery or stale-byte problem that needs an extra source check | [UI source identity](references/ui-source-context.md) |
 
 When implementation changes component responsibilities, shared code or reactive
 ownership, use [code-change](../code-change/SKILL.md) for those decisions,

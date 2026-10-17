@@ -3,6 +3,14 @@
 Use only for the applicable browser-testing mechanism; the Acceptance procedure
 owns scenario design and evidence levels.
 
+## Contents
+
+- [Playwright actions](#playwright-actions)
+- [Establish capture readiness](#establish-capture-readiness)
+- [State-specific evidence](#state-specific-evidence)
+- [Screenshot baselines](#screenshot-baselines)
+- [Sources](#sources)
+
 ## Playwright actions
 
 Reuse its existing fixtures, configuration and reporting. Prefer user-facing

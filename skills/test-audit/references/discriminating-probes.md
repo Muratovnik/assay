@@ -4,6 +4,15 @@ Use only probes needed by the scoped claim. Preserve source identity and report
 the exact command, input, result and environment that support the conclusion.
 An unexecuted suggestion is not a reproduction.
 
+## Contents
+
+- [Is the expected result justified?](#is-the-expected-result-justified)
+- [Does the assertion detect the protected fault?](#does-the-assertion-detect-the-protected-fault)
+- [Would valid alternatives be rejected?](#would-valid-alternatives-be-rejected)
+- [Does the transition gate protect new work and permit completion?](#does-the-transition-gate-protect-new-work-and-permit-completion)
+- [Are observations real and stable?](#are-observations-real-and-stable)
+- [Bound the conclusion](#bound-the-conclusion)
+
 ## Is the expected result justified?
 
 Compare the assertion with the actual owner requirement and supported consumer.

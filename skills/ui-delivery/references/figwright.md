@@ -8,6 +8,18 @@ and `figma-codegen` skills instead of repeating them: they own how a value is
 grounded and which binding path a token takes. With a different adapter, that
 adapter's documentation applies and none of the command names here carry over.
 
+## Contents
+
+- [Confirm the connection and the target file](#confirm-the-connection-and-the-target-file)
+- [Read the vendor documentation for the operation you chose](#read-the-vendor-documentation-for-the-operation-you-chose)
+- [Resolve a gap from the schema and the primary source](#resolve-a-gap-from-the-schema-and-the-primary-source)
+- [Check every result before the next dependent call](#check-every-result-before-the-next-dependent-call)
+- [Verify the effect, not the acknowledgement](#verify-the-effect-not-the-acknowledgement)
+- [Match the intent to a method](#match-the-intent-to-a-method)
+- [Classify a failure before retrying](#classify-a-failure-before-retrying)
+- [Recovery when a binding owner cannot be resolved](#recovery-when-a-binding-owner-cannot-be-resolved)
+- [Primary references](#primary-references)
+
 ## Confirm the connection and the target file
 
 Confirm the plugin is connected (`ping`) and look at the command set this

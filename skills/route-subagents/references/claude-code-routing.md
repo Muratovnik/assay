@@ -74,6 +74,14 @@ Parent permissions, tool restrictions, environment overrides and MCP exposure
 can affect the actual worker; observe the relevant boundary instead of relying
 on frontmatter alone.
 
+## Contents
+
+- [Route-table launches](#route-table-launches)
+- [Evidence-only launch check](#evidence-only-launch-check)
+- [Launches from a subagent](#launches-from-a-subagent)
+- [Observed alias resolutions](#observed-alias-resolutions)
+- [Model upgrades and completion](#model-upgrades-and-completion)
+
 ## Route-table launches
 
 With a [route table](route-table.md) configured, start the Agent call's

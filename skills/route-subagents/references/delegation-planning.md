@@ -5,6 +5,13 @@ useful work is being left in the primary, or the split and launch timing are
 unclear. This procedure chooses work, not models. The primary keeps the existing
 plan, acceptance and integration; no separate planner agent or task store.
 
+## Contents
+
+- [Find useful outcomes before roles](#find-useful-outcomes-before-roles)
+- [Choose the decision and the moment](#choose-the-decision-and-the-moment)
+- [Prepare once, route through the existing owner](#prepare-once-route-through-the-existing-owner)
+- [Revisit at meaningful boundaries](#revisit-at-meaningful-boundaries)
+
 ## Find useful outcomes before roles
 
 Recover the goal, constraints, current evidence, dependency state and actual

@@ -128,12 +128,26 @@ class SourceGateTests(unittest.TestCase):
                 "See [the sample](deep.md).\n", encoding="utf-8", newline="\n")
             (skill / "references/deep.md").write_text("Deep.\n", encoding="utf-8", newline="\n")
             aa.write_rendered(root)
+            problems = aa.check(root)
+            self.assertEqual(1, len(problems), problems)
+            self.assertTrue(
+                problems[0].startswith(
+                    "skills/route-subagents/references/deep.md: not linked from "
+                    "skills/route-subagents/SKILL.md"
+                ),
+                problems,
+            )
+            (skill / "SKILL.md").write_text(
+                (skill / "SKILL.md").read_text(encoding="utf-8")
+                + "Read [the sample](references/deep.md) when Y.\n",
+                encoding="utf-8", newline="\n")
+            aa.write_rendered(root)
             self.assertEqual([], aa.check(root))
             (skill / "references/orphan.md").write_text("Unlinked.\n", encoding="utf-8", newline="\n")
             problems = aa.check(root)
             self.assertEqual(1, len(problems), problems)
             self.assertTrue(
-                problems[0].startswith("skills/route-subagents/references/orphan.md: not reachable"),
+                problems[0].startswith("skills/route-subagents/references/orphan.md: not linked from"),
                 problems,
             )
 

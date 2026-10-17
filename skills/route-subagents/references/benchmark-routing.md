@@ -18,6 +18,17 @@ subscription quota or change native client settings. The same application
 service powers a stdio MCP server and a maintenance CLI. No paid router,
 personal benchmark campaign or always-running updater is needed.
 
+## Contents
+
+- [Use from an agent](#use-from-an-agent)
+- [Install and connect once](#install-and-connect-once)
+- [CLI and diagnostics](#cli-and-diagnostics)
+- [Task types and context contract](#task-types-and-context-contract)
+- [Vendor guidance](#vendor-guidance)
+- [Sources and safe acquisition](#sources-and-safe-acquisition)
+- [Refresh, deadlines and recovery](#refresh-deadlines-and-recovery)
+- [Import and verification](#import-and-verification)
+
 ## Use from an agent
 
 Prefer the MCP tools when configured:
@@ -91,13 +102,14 @@ cost. Do not turn incomplete evidence into a claim of savings.
 
 Python 3.11+ is required. Core CLI operations use the standard library. MCP uses
 the pinned official Python SDK; browser acquisition is a separate optional
-installation. Work in a user-approved isolated environment:
+installation. Work in a user-approved isolated environment; `<skill-directory>`
+in the commands here is the resolved directory of this installed skill:
 
 ```sh
 python -m venv .cache/routing-env
 # Activate using the normal command for your shell, then:
-python -m pip install -r skills/route-subagents/scripts/requirements-mcp.txt
-python skills/route-subagents/scripts/benchmark_router.py doctor
+python -m pip install -r <skill-directory>/scripts/requirements-mcp.txt
+python <skill-directory>/scripts/benchmark_router.py doctor
 ```
 
 Use the environment's Python executable explicitly in native client settings.
@@ -153,8 +165,7 @@ See [Codex MCP](https://developers.openai.com/codex/mcp),
 
 ## CLI and diagnostics
 
-Paths below are relative to the repository; use the resolved installed skill
-path elsewhere. Global flags go **before** the subcommand.
+Global flags go **before** the subcommand.
 
 Use CLI for routing only when the configured MCP tool is unavailable in the
 current session. Use the same Python environment, local config, cache directory,
@@ -163,12 +174,12 @@ reason. Missing tools in an existing session do not establish a broken server.
 Do not drop browser/config flags or add `--offline` for convenience or speed.
 
 ```sh
-python skills/route-subagents/scripts/benchmark_router.py status
-python skills/route-subagents/scripts/benchmark_router.py doctor --check-browser
-python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --browser context --request REQUEST.json
-python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --browser context --task-type implementation --task-type tests
-python skills/route-subagents/scripts/benchmark_router.py refresh --source deepswe
-python skills/route-subagents/scripts/benchmark_router.py --force smoke --source deepswe
+python <skill-directory>/scripts/benchmark_router.py status
+python <skill-directory>/scripts/benchmark_router.py doctor --check-browser
+python <skill-directory>/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --browser context --request REQUEST.json
+python <skill-directory>/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --browser context --task-type implementation --task-type tests
+python <skill-directory>/scripts/benchmark_router.py refresh --source deepswe
+python <skill-directory>/scripts/benchmark_router.py --force smoke --source deepswe
 ```
 
 Here `python` stands for the installed environment's executable; preserve the
@@ -207,7 +218,7 @@ every tested task type and check its acquisition state. Retain and
 report any missing/stale sources; a replay cannot turn them into measurements.
 
 ```sh
-python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --offline context --request REQUEST.json
+python <skill-directory>/scripts/benchmark_router.py --config LOCAL_CONFIG --cache-dir LOCAL_CACHE --offline context --request REQUEST.json
 ```
 
 Offline replay preserves computed candidates for analysis, but always returns
@@ -363,10 +374,10 @@ Browser acquisition is **off by default**. Enable only after installing and
 checking it in the target environment:
 
 ```sh
-python -m pip install -r skills/route-subagents/scripts/requirements-browser.txt
+python -m pip install -r <skill-directory>/scripts/requirements-browser.txt
 python -m playwright install chromium
-python skills/route-subagents/scripts/benchmark_router.py doctor --check-browser
-python skills/route-subagents/scripts/benchmark_router.py --browser --force smoke --source frontiercode
+python <skill-directory>/scripts/benchmark_router.py doctor --check-browser
+python <skill-directory>/scripts/benchmark_router.py --browser --force smoke --source frontiercode
 ```
 
 After a successful live smoke, add `--browser` to the MCP server arguments

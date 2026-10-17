@@ -3,6 +3,16 @@
 Use for grouped, nested, filtered, paginated or bulk selection. Resolve membership
 and action scope before choosing the visual checkbox state.
 
+## Contents
+
+- [Separate membership, selection and effect](#separate-membership-selection-and-effect)
+- [Keep selection, display order and execution priority separate](#keep-selection-display-order-and-execution-priority-separate)
+- [Avoid indistinguishable selection controls](#avoid-indistinguishable-selection-controls)
+- [Represent partial knowledge truthfully](#represent-partial-knowledge-truthfully)
+- [Keep the selected contents inspectable](#keep-the-selected-contents-inspectable)
+- [Classify the control by its consumer's behavior](#classify-the-control-by-its-consumers-behavior)
+- [Primary references](#primary-references)
+
 ## Separate membership, selection and effect
 
 State what the control selects: visible rows, a page, all filtered matches,

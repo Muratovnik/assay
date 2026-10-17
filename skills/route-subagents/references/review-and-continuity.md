@@ -28,6 +28,13 @@ failure yields inconclusive. Ship requires the scoped mandatory claims to be
 established; retain nonblocking findings. No verdict grants publication authority.
 These are subject verdicts, separate from whether the review assignment completed.
 
+## Contents
+
+- [Preflight the review assignment](#preflight-the-review-assignment)
+- [Review the stable result](#review-the-stable-result)
+- [Repair proportionately](#repair-proportionately)
+- [Resume the exact work](#resume-the-exact-work)
+
 ## Preflight the review assignment
 
 For `evidence-reviewer`, supply `launch_requests[packet_id]` to `prepare_routing`

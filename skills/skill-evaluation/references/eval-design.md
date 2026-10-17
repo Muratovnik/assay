@@ -5,6 +5,14 @@ skill changes, or when a verdict is disputed. Reuse a still-applicable evaluatio
 and its calibration evidence; a small justified edit does not need a new campaign.
 This method specifies decisions and evidence, not a runner or a grading service.
 
+## Contents
+
+- [Define the decision and the population](#define-the-decision-and-the-population)
+- [Separate development, selection and final evidence](#separate-development-selection-and-final-evidence)
+- [Calibrate the evaluator before trusting its verdict](#calibrate-the-evaluator-before-trusting-its-verdict)
+- [Freeze a usable measurement](#freeze-a-usable-measurement)
+- [Sources and transfer limits](#sources-and-transfer-limits)
+
 ## Define the decision and the population
 
 Name the user outcome, the method surface under test and the decision the result

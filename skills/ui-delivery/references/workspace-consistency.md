@@ -3,6 +3,19 @@
 Use for repeated flows, shared shells, headers, panels or space/scroll allocation.
 Scope the affected family; a distinct task need not adopt identical layout.
 
+## Contents
+
+- [Follow consumers and entry paths](#follow-consumers-and-entry-paths)
+- [Derive states and size owners from the source](#derive-states-and-size-owners-from-the-source)
+- [Compare semantic columns across tables](#compare-semantic-columns-across-tables)
+- [Preserve collection context deliberately](#preserve-collection-context-deliberately)
+- [Check the supported environment](#check-the-supported-environment)
+- [Adapt to the space that actually changes](#adapt-to-the-space-that-actually-changes)
+- [Give regions useful space and scroll](#give-regions-useful-space-and-scroll)
+- [Separate wayfinding, identity and actions](#separate-wayfinding-identity-and-actions)
+- [Support the task with panels](#support-the-task-with-panels)
+- [Method references](#method-references)
+
 ## Follow consumers and entry paths
 
 Map changed components, styles and state owners to actual screens and compare

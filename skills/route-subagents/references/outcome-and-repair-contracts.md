@@ -3,6 +3,14 @@
 Use these contracts for every delegated packet. They classify what happened;
 they do not replace the primary's inspection or oracle.
 
+## Contents
+
+- [Expected effect](#expected-effect)
+- [Worker outcome](#worker-outcome)
+- [Capability evidence ladder](#capability-evidence-ladder)
+- [Required result packet](#required-result-packet)
+- [Repair delta](#repair-delta)
+
 ## Expected effect
 
 Choose exactly one before spawn:

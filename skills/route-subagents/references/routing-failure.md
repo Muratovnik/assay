@@ -5,6 +5,12 @@ authorization and permission for the failed data operation remain separate.
 A hook refusal of a route-table launch is not this case: correct the declared
 class or the pair as the refusal states and launch again.
 
+## Contents
+
+- [Establish what failed](#establish-what-failed)
+- [Choose the next authorized action](#choose-the-next-authorized-action)
+- [Check the native arguments locally](#check-the-native-arguments-locally)
+
 ## Establish what failed
 
 A request rejected before execution produced no advisor recommendation. Report

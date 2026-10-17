@@ -4,6 +4,17 @@ Use for hit areas, actual gestures, popup geometry or composed overlays.
 Inspect the control in its real container. Read only the relevant sections;
 animation mechanics belong to [Motion](motion-and-transitions.md).
 
+## Contents
+
+- [Align feedback and the hit area](#align-feedback-and-the-hit-area)
+- [Enforce availability through the gesture](#enforce-availability-through-the-gesture)
+- [Provide an alternative to dragging](#provide-an-alternative-to-dragging)
+- [Make disclosed help usable](#make-disclosed-help-usable)
+- [Design geometry across transitions](#design-geometry-across-transitions)
+- [Resolve coexisting states](#resolve-coexisting-states)
+- [Treat overlays as one composed interaction](#treat-overlays-as-one-composed-interaction)
+- [Primary references](#primary-references)
+
 ## Align feedback and the hit area
 
 Hover, cursor, focus and active feedback must describe the action at that location.

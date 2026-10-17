@@ -8,6 +8,17 @@ or movement of published resources. The tool-neutral decisions still belong to
 and [visual judgment](visual-judgment.md). This file owns how those decisions map
 onto Figma and the current Figwright adapter.
 
+## Contents
+
+- [Separate the Figma platform capability from the adapter capability](#separate-the-figma-platform-capability-from-the-adapter-capability)
+- [Choose local components or a published library by actual reuse scope](#choose-local-components-or-a-published-library-by-actual-reuse-scope)
+- [Use the right Figma component property](#use-the-right-figma-component-property)
+- [Preserve slots when Figwright cannot author them](#preserve-slots-when-figwright-cannot-author-them)
+- [Organize the Figma library through its real retrieval surfaces](#organize-the-figma-library-through-its-real-retrieval-surfaces)
+- [Move published components without breaking subscribed instances](#move-published-components-without-breaking-subscribed-instances)
+- [Build reusable Figma dependencies before dependents](#build-reusable-figma-dependencies-before-dependents)
+- [References](#references)
+
 ## Separate the Figma platform capability from the adapter capability
 
 Check the current Figwright tool list and schema before planning a write. Figma can

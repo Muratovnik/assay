@@ -3,6 +3,16 @@
 Use when choosing names, explanatory copy, status vocabulary or error handling,
 or when a visual cue, number, comparison or activity display implies a fact.
 
+## Contents
+
+- [Let the control carry its meaning](#let-the-control-carry-its-meaning)
+- [Connect a count to the action it describes](#connect-a-count-to-the-action-it-describes)
+- [Do not collapse distinct states into one decoration](#do-not-collapse-distinct-states-into-one-decoration)
+- [Verify what the presentation implies](#verify-what-the-presentation-implies)
+- [Announce meaningful updates](#announce-meaningful-updates)
+- [Keep recovery in the user's working context](#keep-recovery-in-the-users-working-context)
+- [Primary references](#primary-references)
+
 ## Let the control carry its meaning
 
 Name objects and actions in terms the user recognizes. Keep an action's wording

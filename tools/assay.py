@@ -19,10 +19,16 @@ import tomllib
 
 if __package__:
     from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from .skill_resources import distribution_problems, markdown_problems, unreachable_problems, validate_plain_tree
+    from .skill_resources import (
+        contents_problems, distribution_problems, markdown_problems, unreachable_problems,
+        validate_plain_tree,
+    )
 else:
     from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
-    from skill_resources import distribution_problems, markdown_problems, unreachable_problems, validate_plain_tree
+    from skill_resources import (
+        contents_problems, distribution_problems, markdown_problems, unreachable_problems,
+        validate_plain_tree,
+    )
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = 2
@@ -537,6 +543,13 @@ def render_profile(data: bytes, asset: Asset, client: str) -> bytes:
     raise ContractError(f"{asset.id}: unsupported profile client {client!r}")
 
 
+# Claude's frontmatter rules forbid these words in a name and an XML tag in the
+# name or description:
+# https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+RESERVED_NAME_WORD = re.compile(r"anthropic|claude", re.IGNORECASE)
+XML_TAG = re.compile(r"</?[A-Za-z][\w:.-]*(?:\s[^<>]*)?/?>")
+
+
 def skill_problems(path: Path, asset: Asset, root: Path) -> list[str]:
     relative = path.relative_to(root).as_posix()
     try:
@@ -567,9 +580,14 @@ def skill_problems(path: Path, asset: Asset, root: Path) -> list[str]:
         r"[a-z0-9]+(?:-[a-z0-9]+)*", name
     ):
         problems.append(f"{relative}: name must be 1-64 lowercase letters, digits or single hyphens")
+    if isinstance(name, str) and RESERVED_NAME_WORD.search(name):
+        problems.append(f"{relative}: name must not contain the reserved words claude or anthropic")
     description = metadata.get("description")
     if isinstance(description, str) and len(description) > 1024:
         problems.append(f"{relative}: description must not exceed 1024 characters")
+    for field in ("name", "description"):
+        if isinstance(metadata.get(field), str) and XML_TAG.search(metadata[field]):
+            problems.append(f"{relative}: {field} must not contain XML tags")
     if "compatibility" in metadata:
         compatibility = metadata["compatibility"]
         if not isinstance(compatibility, str) or not compatibility.strip() or len(compatibility) > 500:
@@ -879,6 +897,7 @@ def check(root: Path = ROOT) -> list[str]:
             for markdown in sorted(source.rglob("*.md")):
                 problems.extend(markdown_problems(markdown, root))
             problems.extend(unreachable_problems(source, root))
+            problems.extend(contents_problems(source, root))
             adapter = source / "agents" / "openai.yaml"
             if adapter.is_file():
                 problems.extend(openai_adapter_problems(adapter, asset, root))

@@ -55,6 +55,16 @@ brief. Show a useful preview without turning it into an automatic stop. Separate
 what was observed, checked automatically and actually approved by the user.
 If the design already serves the task well, a clean assessment is valid.
 
+## Contents
+
+- [Judge information displays by their question](#judge-information-displays-by-their-question)
+- [Establish which source governs each decision](#establish-which-source-governs-each-decision)
+- [Check tokens, fonts and theme through the composition](#check-tokens-fonts-and-theme-through-the-composition)
+- [Inspect geometry at the affected depth](#inspect-geometry-at-the-affected-depth)
+- [Keep asset provenance](#keep-asset-provenance)
+- [Optional composition pilot for new surfaces](#optional-composition-pilot-for-new-surfaces)
+- [Preserve meaning across display modes](#preserve-meaning-across-display-modes)
+
 ## Judge information displays by their question
 
 For a dashboard, chart, metric group or operational table, identify the user's

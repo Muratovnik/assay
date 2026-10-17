@@ -271,6 +271,51 @@ class AgentAssetsTests(unittest.TestCase):
                             for problem in problems), problems
                     )
 
+    def test_skill_frontmatter_rejects_reserved_name_words_and_xml_tags(self) -> None:
+        definition = "skills/route-subagents/SKILL.md"
+        cases = {
+            "reserved word in name": (
+                "claude-route", "Route bounded subagent packets.",
+                "name must not contain the reserved words",
+            ),
+            "XML tag in description": (
+                "route-subagents", "Route <b>bounded</b> subagent packets.",
+                "description must not contain XML tags",
+            ),
+            "self-closing XML tag": (
+                "route-subagents", "Route packets.<br/>Then stop.",
+                "description must not contain XML tags",
+            ),
+        }
+        for label, (name, description, expected) in cases.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                write_fixture(root)
+                aa.write_rendered(root)
+                (root / definition).write_text(
+                    f"---\nname: {name}\ndescription: {description}\nlicense: MIT\n---\n\n# Route\n",
+                    encoding="utf-8", newline="\n",
+                )
+                problems = aa.check(root)
+                self.assertTrue(
+                    any(problem.startswith(f"{definition}: {expected}") for problem in problems),
+                    problems,
+                )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            (root / definition).write_text(
+                "---\nname: route-subagents\ndescription: Route when cost < budget "
+                "and quality > floor, not a claudette.\nlicense: MIT\n---\n\n# Route\n",
+                encoding="utf-8", newline="\n",
+            )
+            problems = [problem for problem in aa.check(root) if problem.startswith(definition)]
+            self.assertFalse(
+                any("XML" in problem or "reserved" in problem for problem in problems),
+                problems,
+            )
+
     def test_repository_check_and_inventory_are_exact(self) -> None:
         self.assertEqual([], aa.check(aa.ROOT))
         catalog = aa.load_catalog(aa.ROOT)

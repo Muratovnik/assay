@@ -4,6 +4,15 @@ Three profiles, not one profile translated three times. Choose the profile by
 the language of the prose. In a mixed document the prose language decides the
 editorial rules, and the technical strings keep their original form.
 
+## Contents
+
+- [What is the same in all three](#what-is-the-same-in-all-three)
+- [Russian](#russian)
+- [English](#english)
+- [Simplified Chinese (zh-CN)](#simplified-chinese-zh-cn)
+- [Keeping a translation in step with its original](#keeping-a-translation-in-step-with-its-original)
+- [Editing the delivered form](#editing-the-delivered-form)
+
 ## What is the same in all three
 
 Identifiers, CLI flags, environment variables, API names, file names, error

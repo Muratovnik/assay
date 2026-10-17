@@ -3,6 +3,15 @@
 Use when the goal, constraints, repository facts or an unknown could change the
 plan. Scale reconnaissance to that decision; no whole-project inventory by default.
 
+## Contents
+
+- [Recover the actual contract](#recover-the-actual-contract)
+- [Establish a necessary capability](#establish-a-necessary-capability)
+- [Conditions the project should supply](#conditions-the-project-should-supply)
+- [Check material changes to the contract](#check-material-changes-to-the-contract)
+- [Classify unknowns by the next decision](#classify-unknowns-by-the-next-decision)
+- [Example: missing retry contract](#example-missing-retry-contract)
+
 ## Recover the actual contract
 
 Identify the consumer outcome, required behavior, non-goals, adopted decisions,

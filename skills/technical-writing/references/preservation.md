@@ -5,6 +5,16 @@ is whether the edit stayed inside the area it was allowed to touch. This is a
 structural check, not a judgement about meaning, and it is optional: read the
 document and the edit first.
 
+## Contents
+
+- [The command](#the-command)
+- [What each mode protects](#what-each-mode-protects)
+- [Intentional removal and retained meaning](#intentional-removal-and-retained-meaning)
+- [Statuses and exit codes](#statuses-and-exit-codes)
+- [What this cannot establish](#what-this-cannot-establish)
+- [Existing linters](#existing-linters)
+- [Interpret the result in the right context](#interpret-the-result-in-the-right-context)
+
 ## The command
 
 The [preservation check](../scripts/text_check.py) compares two files and

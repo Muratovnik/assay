@@ -1,5 +1,12 @@
 # Russian prose
 
+## Contents
+
+- [Compose for a Russian reader](#compose-for-a-russian-reader)
+- [Defects](#defects)
+- [What is not a rule here](#what-is-not-a-rule-here)
+- [Valid word order does not need repair](#valid-word-order-does-not-need-repair)
+
 ## Compose for a Russian reader
 
 Start with the subject or action relevant to this reader; Russian word order can

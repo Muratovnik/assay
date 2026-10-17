@@ -3,6 +3,15 @@
 Read this when the chosen testing technique risks confusing a contract with an
 implementation detail. These are conditional decisions, not smell-based bans.
 
+## Contents
+
+- [Structural checks and interaction assertions](#structural-checks-and-interaction-assertions)
+- [Doubles and real effects](#doubles-and-real-effects)
+- [Identity and lifetime](#identity-and-lifetime)
+- [UI and snapshots](#ui-and-snapshots)
+- [Properties, examples and operation sequences](#properties-examples-and-operation-sequences)
+- [Legacy behavior and changing contracts](#legacy-behavior-and-changing-contracts)
+
 ## Structural checks and interaction assertions
 
 An internal class, helper call, private state field or DOM shape usually is not

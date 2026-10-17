@@ -5,6 +5,18 @@ DOM capture, or an older design file — becomes an editable design artifact or 
 system, or when structure inside an existing design file is replaced or migrated. It
 adds only the transfer duties; the general rules keep their own owners.
 
+## Contents
+
+- [Fix the source and the allowed delta](#fix-the-source-and-the-allowed-delta)
+- [Distinguish the observed UI from the target system](#distinguish-the-observed-ui-from-the-target-system)
+- [Establish coverage before a broad transfer](#establish-coverage-before-a-broad-transfer)
+- [Capture the chosen state, then treat it as raw material](#capture-the-chosen-state-then-treat-it-as-raw-material)
+- [Classify a region before replacing it](#classify-a-region-before-replacing-it)
+- [Migrate without breaking the relations](#migrate-without-breaking-the-relations)
+- [Separate organizing from replacing](#separate-organizing-from-replacing)
+- [Compare a real reference with a real candidate](#compare-a-real-reference-with-a-real-candidate)
+- [Method references](#method-references)
+
 ## Fix the source and the allowed delta
 
 Before the first capture or write, record what is reproduced and the allowed delta:

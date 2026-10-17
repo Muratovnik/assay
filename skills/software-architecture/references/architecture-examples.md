@@ -5,6 +5,17 @@ teaching scenarios, not observed deployments or evaluation answers. Paths are
 illustrative: an accepted project contract can require different placement.
 The core method owns the rules; examples introduce no additional requirements.
 
+## Contents
+
+- [A. A small site grows a real responsibility](#a-a-small-site-grows-a-real-responsibility)
+- [B. Similar presentation versus one business invariant](#b-similar-presentation-versus-one-business-invariant)
+- [C. One consumer can justify extraction](#c-one-consumer-can-justify-extraction)
+- [D. The same state declaration has different lifetimes](#d-the-same-state-declaration-has-different-lifetimes)
+- [E. A file move changes a package contract](#e-a-file-move-changes-a-package-contract)
+- [F. Green after relocation can mean missing coverage](#f-green-after-relocation-can-mean-missing-coverage)
+- [G. Framework discovery is a real consumer](#g-framework-discovery-is-a-real-consumer)
+- [H. Domain modules are not automatically services](#h-domain-modules-are-not-automatically-services)
+
 ## A. A small site grows a real responsibility
 
 **Starting point:** three pages and one contact form, one deployment, no shared

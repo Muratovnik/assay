@@ -4,6 +4,12 @@ A useful retrospective follows the task, selected route, native execution attemp
 and acceptance criteria. Local history keeps these facts separately so missing
 execution evidence does not become a successful model selection.
 
+## Contents
+
+- [Enable useful local history](#enable-useful-local-history)
+- [Link the actual worker](#link-the-actual-worker)
+- [Assess results and read the report](#assess-results-and-read-the-report)
+
 ## Enable useful local history
 
 In the existing routing configuration, choose the history lifetime and dataset:
