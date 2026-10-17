@@ -57,8 +57,12 @@ to separate the conditions.
 `code-change` never fired on C02. In a calibration run on the same task, Haiku
 loaded `software-architecture`. The C02 prompt asks for read-only
 recommendations, and the `code-change` description skips read-only audits, so
-the routing agrees with the descriptions. The corpus case and the description
-disagree about whether this task belongs to `code-change`.
+the routing agrees with the descriptions and with the corpus's own discovery
+case D03, which sends a read-only audit to `independent-audit`. C01–C14 are
+criteria cases graded from the answer; running C02 under natural discovery was
+a choice of this pilot, so it says nothing about how `code-change` performs.
+Its corpora with write tasks (verification-choice, capability-reuse, full-read)
+were not run here.
 
 ## What changed besides the score
 
