@@ -19,7 +19,7 @@
     },
     {
       "id": "LS04",
-      "prompt": "Are there existing agent skills (SKILL.md for Claude Code, Codex or similar) that make the agent push back when I bring an idea to discuss: challenge my premises, dig for the real need behind the question, treat my example as an example rather than the whole scope, and ask questions instead of agreeing? Before I write my own, tell me what exists and what is missing.",
+      "prompt": "Are there existing agent skills (SKILL.md for Claude Code, Codex or similar) that make the agent instrument the code it changes for production: structured logs tied together by a request ID, metrics and traces, and a check that the new telemetry actually arrives before it reports the work as done? Before I write my own, tell me what exists and what is missing.",
       "context": "Use whatever tools you have, including the web and a shell. How you obtain the sources is up to you. Answer within this session."
     },
     {

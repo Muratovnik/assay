@@ -26,7 +26,10 @@ Separate retrieval from evidence use. E23/E24 supply raw traces for diagnostic
 decisions. To evaluate retrieval itself, use a fixed searchable corpus with known
 support and plausible distractors; then compare a condition with the support
 provided directly. A reasoning response to E23/E24 is not that retrieval test.
-Assess live web behavior separately and record mutable-source confounders.
+Assess live web behavior separately and record mutable-source confounders. Run
+live cases from an empty directory outside any project, and keep a landscape
+case on a topic the executor's own installed skills do not already answer: a
+local file or plugin that settles the question replaces the search it measures.
 
 Grade material claims and table cells against raw evidence, including units,
 qualifications, version and citation alignment. Derive additional requirements

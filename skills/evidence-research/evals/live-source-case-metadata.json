@@ -33,8 +33,8 @@
       "id": "LS04",
       "group": "live-landscape-absence",
       "purpose": "challenge",
-      "source": "Live landscape case from an observed maintainer session (2026-10-16) that answered 'none of the skills does this' after one generic search and a closed candidate list; the owner then found gstack office-hours and Compound Engineering ce-pov. Mutable: repositories, catalogs and search indexes.",
-      "rationale": "Several fitting skills exist under different names (office hours, premise challenge, devil's advocate, grill, pre-mortem); the first obvious query misses some, so an absence claim needs varied terms, source families and a scope-bounded wording.",
+      "source": "Live landscape case modeled on an observed maintainer session (2026-10-16) that answered 'none of the skills does this' after one generic search and a closed candidate list. The first version asked about idea-challenging skills; once this collection shipped critical-discussion, executors found it locally and the case stopped measuring the search, so the topic moved to instrumentation (2026-10-17). Mutable: repositories, catalogs and search indexes.",
+      "rationale": "Fitting skills exist under different names (observability, instrumentation, telemetry, OpenTelemetry or OTel, logging, tracing) and most cover only part of the request; the verification step sits inside one general skill, so a quick survey of the OpenTelemetry-specific ones invites a false 'nobody checks the telemetry arrives'. An absence claim needs varied terms, source families and a scope-bounded wording.",
       "split": "working",
       "exposure": "public"
     },
