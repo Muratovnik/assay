@@ -618,6 +618,83 @@ class AgentAssetsTests(unittest.TestCase):
             )
             self.assertEqual(["claude", "codex"], options.clients)
 
+    def test_profile_only_selection_leaves_skills_to_a_plugin(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root, home = base / "source", base / "home"
+            root.mkdir()
+            home.mkdir()
+            write_fixture(root, CATALOG + EXPLICIT_SKILL)
+            add_explicit_skill(root)
+            codex_skill = home / ".agents/skills/route-subagents"
+            codex_profile = home / ".codex/agents/evidence-reviewer.toml"
+
+            def profile_targets(client: str) -> list[Path]:
+                targets = [
+                    entry.target
+                    for entry in aa.native_plan(root, home, [client], ["profile"])
+                ]
+                self.assertEqual(2, len(targets))
+                return targets
+
+            self.assertEqual(
+                {("render", "profile")},
+                {
+                    (entry.mode, entry.asset_id.split("/")[0])
+                    for entry in aa.native_plan(root, home, kinds=["profile"])
+                },
+            )
+            with self.assertRaisesRegex(aa.ContractError, "unknown kind selection"):
+                aa.native_plan(root, home, kinds=["hook"])
+
+            # A plugin owns the Claude skills, so neither the skill link chain
+            # nor the explicit-skill setting may block installing profiles.
+            document = aa.plan_document(root, home, ["claude"], ["profile"])
+            self.assertEqual([], document["prerequisites"])
+            actions = aa.install_links(root, home, ["claude"], ["profile"])
+            self.assertEqual(
+                [f"INSTALLED {target}" for target in profile_targets("claude")],
+                actions,
+            )
+            self.assertFalse(aa.lexists(home / ".claude/skills"))
+
+            # Moving Codex from links to a plugin removes the skill links and
+            # keeps the profiles it still needs.
+            aa.install_links(root, home, ["codex"])
+            self.assertTrue(aa.lexists(codex_skill))
+            removed = aa.uninstall_links(root, home, ["codex"], ["skill"])
+            self.assertTrue(all(action.startswith("REMOVED ") for action in removed))
+            self.assertFalse(aa.lexists(codex_skill))
+            self.assertFalse(aa.lexists(home / ".agents/skills/explicit-example"))
+            self.assertTrue(codex_profile.is_file())
+            self.assertEqual(
+                [f"NOOP {target}" for target in profile_targets("codex")],
+                aa.install_links(root, home, ["codex"], ["profile"]),
+            )
+            self.assertFalse(aa.lexists(codex_skill))
+
+            options = aa.parser().parse_args(
+                ["install-links", "--client", "codex", "--kind", "profile"]
+            )
+            self.assertEqual(["profile"], options.kinds)
+            self.assertIsNone(aa.parser().parse_args(["plan"]).kinds)
+
+    def test_skill_selection_still_keeps_the_link_chain_whole(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root, home = base / "source", base / "home"
+            root.mkdir()
+            home.mkdir()
+            write_fixture(root)
+            aa.install_links(root, home)
+            with self.assertRaisesRegex(aa.ContractError, "broken link chain"):
+                aa.uninstall_links(root, home, ["codex"], ["skill"])
+            self.assertTrue(aa.lexists(home / ".agents/skills/route-subagents"))
+            # Profiles never take part in the chain, so they can still go alone.
+            removed = aa.uninstall_links(root, home, ["codex"], ["profile"])
+            self.assertTrue(all(action.startswith("REMOVED ") for action in removed))
+            self.assertTrue(aa.lexists(home / ".claude/skills/route-subagents"))
+
     def test_install_preflight_refuses_a_real_directory_without_partial_writes(
         self,
     ) -> None:

@@ -48,6 +48,10 @@ Still on the current revision (do not pull yet), run:
 python tools/assay.py uninstall-links
 ```
 
+If you installed with `--client` or `--kind`, for example
+`--client codex --kind profile` beside the Codex plugin, pass the same options
+here and in step 4.
+
 This removes only entries whose link target or rendered bytes still exactly
 match what this revision would install. Anything you changed by hand is left
 alone and reported, not overwritten. Run this step *before* switching

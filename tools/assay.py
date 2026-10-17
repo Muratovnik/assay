@@ -99,6 +99,7 @@ ROOT_LAYOUT = {
     "claude": Path(".claude"),
 }
 CLIENTS = ("codex", "claude")
+KINDS = ("skill", "profile")
 BASE_FILES = (
     "AGENTS.md",
     "CHANGELOG.md",
@@ -1285,14 +1286,30 @@ def selected_clients(clients: Iterable[str] | None = None) -> frozenset[str]:
     return chosen
 
 
+def selected_kinds(kinds: Iterable[str] | None = None) -> frozenset[str]:
+    """A plugin can supply the skills while the installer supplies profiles."""
+    if kinds is None:
+        return frozenset(KINDS)
+    chosen = frozenset(kinds)
+    unknown = sorted(chosen - set(KINDS))
+    if not chosen or unknown:
+        raise ContractError(
+            f"unknown kind selection: {', '.join(unknown) or 'none'}; "
+            f"expected {', '.join(KINDS)}"
+        )
+    return chosen
+
+
 def native_plan(
     root: Path = ROOT,
     home: Path | None = None,
     clients: Iterable[str] | None = None,
+    kinds: Iterable[str] | None = None,
 ) -> list[PlannedEntry]:
     root = root.resolve(strict=True)
     home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
+    chosen_kinds = selected_kinds(kinds)
     # Lifecycle commands cannot rely on the publication gate to reject a
     # redirected source. This does not validate unrelated documentation.
     validate_plain_tree(root / "catalog.toml")
@@ -1309,6 +1326,8 @@ def native_plan(
     entries: list[PlannedEntry] = []
     client_order = {"codex": 0, "claude": 1}
     for asset in sorted(catalog.assets, key=lambda item: item.id):
+        if asset.kind not in chosen_kinds:
+            continue
         source = root / asset.path
         preflight_safe_parent(root, source.parent)
         validate_plain_tree(source)
@@ -1358,9 +1377,15 @@ def native_plan(
 
 
 def link_chain_problems(
-    root: Path, home: Path, clients: frozenset[str], installing: bool
+    root: Path,
+    home: Path,
+    clients: frozenset[str],
+    installing: bool,
+    kinds: frozenset[str] = frozenset(KINDS),
 ) -> list[str]:
     """A Claude skill link resolves through the Codex one; keep the chain whole."""
+    if "skill" not in kinds:
+        return []
     if installing:
         dependent = "claude" in clients and "codex" not in clients
     else:
@@ -1442,8 +1467,9 @@ def activation_prerequisites(
     root: Path = ROOT,
     home: Path | None = None,
     clients: Iterable[str] | None = None,
+    kinds: Iterable[str] | None = None,
 ) -> list[dict[str, str]]:
-    if "claude" not in selected_clients(clients):
+    if "claude" not in selected_clients(clients) or "skill" not in selected_kinds(kinds):
         return []
     selected_home = lexical_absolute((home or Path.home()).expanduser())
     settings = selected_home / ".claude" / "settings.json"
@@ -1513,10 +1539,12 @@ def plan_document(
     root: Path = ROOT,
     home: Path | None = None,
     clients: Iterable[str] | None = None,
+    kinds: Iterable[str] | None = None,
 ) -> dict[str, Any]:
     selected_home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
-    entries = native_plan(root, selected_home, chosen)
+    chosen_kinds = selected_kinds(kinds)
+    entries = native_plan(root, selected_home, chosen, chosen_kinds)
     planned: list[dict[str, Any]] = []
     for entry in entries:
         state, detail = entry_state(entry)
@@ -1547,7 +1575,9 @@ def plan_document(
         "schema": 2,
         "source_root": str(root.resolve(strict=True)),
         "version": parse_version(root),
-        "prerequisites": activation_prerequisites(root, selected_home, chosen),
+        "prerequisites": activation_prerequisites(
+            root, selected_home, chosen, chosen_kinds
+        ),
         "entries": planned,
     }
 
@@ -1690,10 +1720,12 @@ def install_links(
     root: Path = ROOT,
     home: Path | None = None,
     clients: Iterable[str] | None = None,
+    kinds: Iterable[str] | None = None,
 ) -> list[str]:
     home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
-    prerequisites = activation_prerequisites(root, home, chosen)
+    chosen_kinds = selected_kinds(kinds)
+    prerequisites = activation_prerequisites(root, home, chosen, chosen_kinds)
     unmet = [item for item in prerequisites if item["state"] != "exact"]
     if unmet:
         raise ContractError(
@@ -1703,13 +1735,13 @@ def install_links(
                 for item in unmet
             )
         )
-    chain = link_chain_problems(root, home, chosen, installing=True)
+    chain = link_chain_problems(root, home, chosen, installing=True, kinds=chosen_kinds)
     if chain:
         raise ContractError(
             "native install preflight refused a broken link chain:\n"
             + "\n".join(chain)
         )
-    entries = native_plan(root, home, chosen)
+    entries = native_plan(root, home, chosen, chosen_kinds)
     states = [(entry, *entry_state(entry)) for entry in entries]
     foreign = [(entry, detail) for entry, state, detail in states if state == "foreign"]
     parent_problems: list[str] = []
@@ -1764,16 +1796,20 @@ def uninstall_links(
     root: Path = ROOT,
     home: Path | None = None,
     clients: Iterable[str] | None = None,
+    kinds: Iterable[str] | None = None,
 ) -> list[str]:
     selected_home = lexical_absolute((home or Path.home()).expanduser())
     chosen = selected_clients(clients)
-    chain = link_chain_problems(root, selected_home, chosen, installing=False)
+    chosen_kinds = selected_kinds(kinds)
+    chain = link_chain_problems(
+        root, selected_home, chosen, installing=False, kinds=chosen_kinds
+    )
     if chain:
         raise ContractError(
             "native uninstall preflight refused a broken link chain:\n"
             + "\n".join(chain)
         )
-    entries = native_plan(root, selected_home, chosen)
+    entries = native_plan(root, selected_home, chosen, chosen_kinds)
     states = [(entry, *entry_state(entry)) for entry in entries]
     foreign = [(entry, detail) for entry, state, detail in states if state == "foreign"]
     parent_problems: list[str] = []
@@ -1913,6 +1949,14 @@ def parser() -> argparse.ArgumentParser:
             choices=CLIENTS,
             help="limit to this client's entries; repeat for more (default: all)",
         )
+        command.add_argument(
+            "--kind",
+            dest="kinds",
+            action="append",
+            choices=KINDS,
+            help="limit to this asset kind, for example profiles beside a plugin "
+            "that supplies the skills; repeat for more (default: all)",
+        )
     render = commands.add_parser("render")
     render.add_argument("--check", action="store_true")
     return result
@@ -1942,7 +1986,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         # An unrelated source-format or generated-file error must not trap an
         # installation. The lifecycle's preflight and rollback remain mandatory.
         if options.command == "uninstall-links":
-            print("\n".join(uninstall_links(root, options.home, options.clients)))
+            print(
+                "\n".join(
+                    uninstall_links(root, options.home, options.clients, options.kinds)
+                )
+            )
             print("uninstall-links: APPLIED")
             return 0
 
@@ -1952,14 +2000,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
         if options.command == "check":
             print("check: PASS")
         elif options.command == "plan":
-            document = plan_document(root, options.home, options.clients)
+            document = plan_document(root, options.home, options.clients, options.kinds)
             if options.json:
                 print(canonical_json(document).decode("utf-8"), end="")
             else:
                 print("\n".join(format_plan(document)))
                 print("plan: PREVIEW")
         elif options.command == "install-links":
-            print("\n".join(install_links(root, options.home, options.clients)))
+            print(
+                "\n".join(
+                    install_links(root, options.home, options.clients, options.kinds)
+                )
+            )
             print("install-links: APPLIED")
     except (ContractError, OSError) as error:
         print(error, file=sys.stderr)

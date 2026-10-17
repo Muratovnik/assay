@@ -114,7 +114,13 @@ Codex afterwards.
 Codex reads skills from `.agents/skills` in the project, walking up to the
 repository root, and from `$HOME/.agents/skills` for your user account. Its agent
 definitions live in `~/.codex/agents/*.toml`, which the plugin route does not
-write: for the profiles, use the symlink installer below.
+write, because a Codex plugin cannot carry agent definitions. Add the two
+profiles with the symlink installer below, limited to them so that Codex does
+not list every skill twice:
+
+```text
+python tools/assay.py install-links --client codex --kind profile
+```
 
 Codex shows the model an initial list of skill names and descriptions within a
 budget of about 2% of the context window, or 8,000 characters when the window is
@@ -198,6 +204,12 @@ links in place, and removing Codex alone is refused while Claude links remain. T
 drop the Claude entries from an existing install, run
 `python tools/assay.py uninstall-links --client claude`.
 
+`--kind profile` or `--kind skill` narrows the same three commands to one asset
+kind. With the Codex plugin installed, use `--client codex --kind profile`: the
+plugin supplies the skills, and only the profiles need the installer. To move an
+existing Codex link install onto the plugin, remove the skill links and keep the
+profiles with `python tools/assay.py uninstall-links --client codex --kind skill`.
+
 ## Route table
 
 To route subagents, add a `routes` table to the client's routing configuration
@@ -244,7 +256,7 @@ assay@assay`, or the client's plugin manager.
 ## Upgrading
 
 Pull the new revision and re-run the installer, keeping the same `--client`
-selection on every step. If the profile adapters changed
+and `--kind` selection on every step. If the profile adapters changed
 between revisions, the upgrade is two steps in order:
 
 ```text

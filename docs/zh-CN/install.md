@@ -74,7 +74,12 @@ codex plugin marketplace add Muratovnik/assay
 
 Codex 从项目中的 `.agents/skills` 读取技能，并逐级向上直到仓库根目录，账号级则
 读取 `$HOME/.agents/skills`。它的智能体定义位于 `~/.codex/agents/*.toml`，插件
-路径不会写入该位置：若需要配置，请使用下方的符号链接安装器。
+路径不会写入该位置，因为 Codex 插件无法携带智能体定义。请用下方的符号链接安装器
+只安装这两个配置，以免 Codex 把每个技能列出两次：
+
+```text
+python tools/assay.py install-links --client codex --kind profile
+```
 
 Codex 向模型展示的初始技能列表（名称与描述）上限约为上下文窗口的 2%，窗口未知时
 为 8,000 个字符；超出时先缩短描述，再省略部分技能并给出警告（已于 2026-10-06 对照
@@ -150,6 +155,12 @@ Claude 的技能链接经由 Codex 链接解析，因此单独安装 Claude 需�
 只要 Claude 链接仍在，单独移除 Codex 就会被拒绝。要从现有安装中去掉 Claude 条目，
 运行 `python tools/assay.py uninstall-links --client claude`。
 
+`--kind profile` 或 `--kind skill` 会把这三个命令限定为一种资源。已安装 Codex
+插件时，请使用 `--client codex --kind profile`：技能由插件提供，只有配置需要
+安装器。要把现有的 Codex 链接安装迁移到插件，请用
+`python tools/assay.py uninstall-links --client codex --kind skill` 移除技能链接并
+保留配置。
+
 ## 卸载
 
 ```text
@@ -164,7 +175,7 @@ assay@assay`，或你所用客户端的插件管理器。
 
 ## 升级
 
-拉取新版本后重新运行安装器，每一步都保持相同的 `--client` 选择。如果两个版本之间
+拉取新版本后重新运行安装器，每一步都保持相同的 `--client` 和 `--kind` 选择。如果两个版本之间
 配置适配器发生了变化，升级需要按
 以下顺序分两步进行：
 

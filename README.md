@@ -110,6 +110,10 @@ to this checkout and renders the profile adapters, preflighting the whole plan
 first: a real directory, a foreign link or a modified adapter stops the run
 before anything is written.
 
+With the Codex plugin installed, add `--client codex --kind profile` to `plan`
+and `install-links`: the plugin already supplies the skills, and Codex lists a
+linked copy beside the plugin's own.
+
 On Windows, creating a directory symlink needs that permission, normally
 Developer Mode or an elevated terminal. The installer fails closed rather than
 falling back to a shell.

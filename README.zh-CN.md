@@ -98,6 +98,10 @@ python tools/assay.py install-links
 配置适配器，且会先对整个计划做预检：真实目录、外来链接或被修改过的适配器都会在
 第一次写入之前中止本次运行。
 
+如果已安装 Codex 插件，请给 `plan` 和 `install-links` 加上
+`--client codex --kind profile`：技能已由插件提供，而 Codex 会把链接副本与插件
+自带的副本一同列出。
+
 在 Windows 上创建目录符号链接需要相应权限，通常是开发者模式或提升权限的终端。
 缺少该权限时安装器直接失败，而不会退回到调用 shell。
 
