@@ -61,7 +61,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "^(spawn_agent|Agent)$",
+        "matcher": "^(spawn_agent|collaborationspawn_agent|Agent)$",
         "hooks": [
           {
             "type": "command",

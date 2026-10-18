@@ -130,6 +130,37 @@ class RouteTableTests(unittest.TestCase):
         (project / 'same.toml').write_text('model_reasoning_effort = "low"\n', encoding='utf-8')
         self.assertIn('pins model_reasoning_effort', self.reason(self.codex(agent_type='same', **launch), env, 'codex'))
 
+    def test_namespaced_codex_hook_name_checks_the_class_and_preserves_native_evidence(self):
+        from runtime.events import normalize
+        env = self.environment('codex', CODEX_TABLE)
+        event = {**self.codex(task_name='gather_probe', model='gpt-6-astra',
+                              reasoning_effort='ultra', fork_turns='none'),
+                 'tool_name': 'collaborationspawn_agent'}
+        original = json.dumps(event, sort_keys=True)
+        self.assertIn("model='gpt-6-astra'", self.reason(event, env, 'codex'))
+        self.assertIn("reasoning_effort='ultra'", self.reason(event, env, 'codex'))
+        good = {**event, 'tool_input': {**event['tool_input'], 'model': 'gpt-6-luna',
+                                      'reasoning_effort': 'medium'}}
+        self.assertIn('admitted as class `gather`', self.context(good, env, 'codex'))
+        self.assertIn('task class', self.reason({**event, 'tool_input': {}}, env, 'codex'))
+        self.assertIn('input must be an object', self.reason({**event, 'tool_input': None}, env, 'codex'))
+        self.assertIsNone(self.reason(event, {}, 'codex'))
+        self.assertIsNone(self.reason({**event, 'tool_name': 'foreignspawn_agent'}, env, 'codex'))
+        normalized = normalize(event, 'codex')
+        self.assertEqual(normalized['operation'], 'spawn')
+        self.assertEqual(normalized['native_tool'], 'collaborationspawn_agent')
+        self.assertEqual(json.dumps(event, sort_keys=True), original)
+
+    def test_configured_launch_refuses_an_unreadable_binding_or_configuration(self):
+        event = {**self.codex(), 'tool_name': 'collaborationspawn_agent'}
+        missing = str(self.root / 'missing.json')
+        for environment in ({'ASSAY_ROUTING_CONFIG': missing},
+                            {'ASSAY_ROUTING_TELEMETRY_CONFIG': missing}):
+            with self.subTest(environment=environment):
+                output = cli.routing_result(event, 'codex', environment)['hookSpecificOutput']
+                self.assertEqual(output['permissionDecision'], 'deny')
+                self.assertEqual(cli.routing_result({**event, 'tool_name': 'Read'}, 'codex', environment), {})
+
     def context(self, event, environment, client):
         result, error = cli.process(event, client, environment)
         self.assertIsNone(error)
@@ -269,8 +300,7 @@ class RouteTableTests(unittest.TestCase):
             candidates(rows, band=1.5)
 
     def test_an_invalid_table_follows_the_configuration_source_contract(self):
-        # An explicitly selected configuration that fails validation blocks the
-        # spawn; a telemetry binding that cannot be read keeps ordinary delegation.
+        # Either configured source must remain closed when validation fails.
         launch = self.claude(model='sonnet', effort='high')
         explicit = self.environment(routes={'classes': {}})
         self.assertIn('routing doctor', self.reason(launch, explicit, 'claude'))
@@ -278,8 +308,9 @@ class RouteTableTests(unittest.TestCase):
         binding.write_text(json.dumps({'config': str(self.config(routes={'classes': {}})),
                                        'cache_dir': str(self.root / 'cache')}), encoding='utf-8')
         result, error = cli.process(launch, 'claude', {'ASSAY_ROUTING_TELEMETRY_CONFIG': str(binding)})
-        self.assertNotEqual('deny', result.get('hookSpecificOutput', {}).get('permissionDecision'))
-        self.assertIn('telemetry unavailable', error)
+        self.assertEqual('deny', result['hookSpecificOutput']['permissionDecision'])
+        self.assertIn('routing configuration could not be validated', result['hookSpecificOutput']['permissionDecisionReason'])
+        self.assertIsNone(error)
 
 
 if __name__ == '__main__':

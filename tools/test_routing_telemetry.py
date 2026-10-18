@@ -204,7 +204,7 @@ class RetrospectiveTests(unittest.TestCase):
         self.decision(client="codex")
         worker = "11111111-2222-7333-8444-555555555555"
         env = self.hook_binding("codex")
-        launch = {"session_id": "session-one", "tool_use_id": "codex-call", "tool_name": "spawn_agent",
+        launch = {"session_id": "session-one", "tool_use_id": "codex-call", "tool_name": "collaborationspawn_agent",
                   "tool_input": {"message": "[assay-routing:d1/p1]"}}
         routing_telemetry.capture({**launch, "hook_event_name": "PreToolUse"}, "codex", env, clock=lambda: self.now)
         routing_telemetry.capture({**launch, "hook_event_name": "PostToolUse",

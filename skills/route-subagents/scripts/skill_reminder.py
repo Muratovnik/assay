@@ -79,12 +79,12 @@ def reminder(event: dict, environ=None) -> dict:
         routing = (os.environ if environ is None else environ).get("ASSAY_ROUTING_CONFIG")
         context = SESSION_REMINDER + (ROUTING_SESSION_REMINDER if routing else "")
     elif name == "PreToolUse" and event.get("tool_name") in (
-        "spawn_agent", "Agent", "Task"
+        "spawn_agent", "collaborationspawn_agent", "Agent", "Task"
     ):
         # A registered launch already follows the routing protocol, and the
         # guard's own reply explains any refused one; a second voice here only
         # contradicts it.
-        if event["tool_name"] != "spawn_agent" and required_claude_routing(environ):
+        if event["tool_name"] in {"Agent", "Task"} and required_claude_routing(environ):
             return {}
         context = DELEGATION_REMINDER
     else:

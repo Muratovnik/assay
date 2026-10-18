@@ -92,7 +92,7 @@ class ReminderTests(unittest.TestCase):
         self.assertLess(len(text), 1000)
 
     def test_delegation_aliases_remind_without_permission_or_argument_changes(self):
-        for tool in ("spawn_agent", "Agent", "Task"):
+        for tool in ("spawn_agent", "collaborationspawn_agent", "Agent", "Task"):
             with self.subTest(tool=tool):
                 output = self.output({
                     "hook_event_name": "PreToolUse", "tool_name": tool,
@@ -152,8 +152,9 @@ class ReminderTests(unittest.TestCase):
                          "mcp__example__search", "mcp__benchmark-routing__routing_status"):
                 with self.subTest(client=client, tool=tool):
                     self.assertEqual(unified, commands("PreToolUse", tool))
-            for tool in (("Agent", "Task") if client == "claude" else ("Agent", "spawn_agent")):
+            for tool in (("Agent", "Task") if client == "claude" else ("Agent", "spawn_agent", "collaborationspawn_agent")):
                 self.assertEqual(unified, commands("PreToolUse", tool))
+                self.assertEqual(unified, commands("PostToolUse", tool))
             self.assertEqual(unified, commands("PreToolUse", "SubagentHandback"))
             for tool in ("mcp__benchmark-routing__prepare_routing", "mcp__plugin_assay_routing__authorize_routing_launch"):
                 self.assertEqual(unified, commands("PreToolUse", tool))

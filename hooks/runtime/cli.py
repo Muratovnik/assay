@@ -81,7 +81,7 @@ def explicit_routes(event, client, environment, config=None):
     settings. A Claude spawn from inside a subagent is refused before either
     check: only the primary routes. Codex hook input does not say which agent
     calls, so its depth stays with `agents.max_depth`. A missing or unreadable
-    configuration keeps ordinary delegation.
+    configuration refuses a recognized launch; an absent binding keeps ordinary delegation.
     """
     spec = route_table.SPAWN.get(client)
     if (spec is None or event.get("hook_event_name") != "PreToolUse"
@@ -115,7 +115,7 @@ def explicit_routes(event, client, environment, config=None):
                                      unrouted=mode["unrouted_agents"])
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else outside
     except Exception:
-        return {}
+        return deny("routing configuration could not be validated; restore the configured route table before delegation")
 
 
 def routing_result(event, client, environment):
@@ -128,7 +128,7 @@ def routing_result(event, client, environment):
             return explicit_routes(event, client, environment, config)
         if client != "claude" or config.get("client") != client:
             if event.get("hook_event_name") == "PreToolUse" and (
-                    event.get("tool_name") in {"spawn_agent", "Agent", "Task"}
+                    event.get("tool_name") in route_table.SPAWN.get(client, {}).get("tools", ())
                     or routing_operation(event.get("tool_name")) is not None):
                 return deny("required routing is unavailable for this client contract; use evidence-only mode explicitly, not an implicit bypass")
             if event.get("hook_event_name") == "SessionStart":
@@ -141,7 +141,8 @@ def routing_result(event, client, environment):
     except Exception:
         # Do not let an advisory dependency or malformed config downgrade an
         # explicitly selected contract. Echo neither paths nor payloads.
-        if client == "codex" and event.get("hook_event_name") == "PreToolUse" and event.get("tool_name") == "spawn_agent":
+        if (client == "codex" and event.get("hook_event_name") == "PreToolUse"
+                and event.get("tool_name") in route_table.SPAWN[client]["tools"]):
             return deny("required routing configuration could not be validated")
         return failure(event, "plugin", True)
 

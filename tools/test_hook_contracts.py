@@ -454,12 +454,15 @@ class ExplicitRouteTests(unittest.TestCase):
         # Required mode keeps its own registered guard, configured by its own variable.
         self.assertEqual({},cli.routing_result(self.launch(),'claude',self.environment({'mode':'required'})))
 
-    def test_an_invalid_setting_is_rejected_and_keeps_ordinary_delegation(self):
+    def test_an_invalid_setting_is_rejected_and_refuses_configured_delegation(self):
         from route_evidence.pipeline_config import settings
         with self.assertRaisesRegex(EvidenceError,'invalid_pipeline_explicit_routes'):
             settings({'pipeline':{'explicit_routes':'sometimes'}})
-        self.assertEqual({},cli.routing_result(self.launch(),'claude',
-                                               self.environment({'mode':'evidence-only','explicit_routes':'sometimes'})))
+        output=cli.routing_result(self.launch(),'claude',
+                                  self.environment({'mode':'evidence-only','explicit_routes':'sometimes'}))
+        self.assertEqual('deny',output['hookSpecificOutput']['permissionDecision'])
+        self.assertIn('routing configuration could not be validated',
+                      output['hookSpecificOutput']['permissionDecisionReason'])
 
 
 class HostObservationTests(unittest.TestCase):

@@ -86,6 +86,11 @@ or by an override. The refusal lists the classes with their pairs and the rule
 for choosing one. An admitted launch gets a short note naming its class and
 asking for the one-line reason; nothing checks that the reason is written.
 
+If a configured routing file or telemetry binding cannot be read or validated,
+the hook refuses recognized launches. With no binding or routing configuration,
+ordinary delegation remains available. This refusal requires the host to invoke
+the trusted hook: a disabled, skipped or broken handler is not a verified guard.
+
 Exemptions are the client's continuation mechanisms and the owner's
 `pipeline.unrouted_agents` types. `pipeline.explicit_routes: "off"` turns the
 check off. A spawn the check skips for either reason gets a short pointer to the

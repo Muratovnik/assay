@@ -13,6 +13,7 @@ from route_evidence.history import HistoryStore, _refuse_link_ancestors, _identi
 from route_evidence.pipeline_config import settings as pipeline_settings
 from route_evidence.pipeline_store import PipelineStore
 from route_evidence.service import load_config
+from route_evidence.route_table import SPAWN
 from route_evidence.telemetry import append, bound_attempts, observe_transcript
 
 LINK = re.compile(r"(?m)^\[assay-routing:([A-Za-z0-9_.:-]{1,200})/([A-Za-z0-9_.:-]{1,200})\]$")
@@ -79,7 +80,7 @@ def _linked(event, client, binding, config, telemetry, clock):
     tool_id = event.get("tool_use_id")
     pending_store = PipelineStore(Path(binding["cache_dir"]) / "routing-telemetry-hooks", clock=clock)
     if name == "PreToolUse":
-        if event.get("tool_name") not in {"Agent", "Task", "spawn_agent"} or not session or not tool_id:
+        if event.get("tool_name") not in SPAWN.get(client, {}).get("tools", ()) or not session or not tool_id:
             return
         supplied = event.get("tool_input", {})
         prompt = supplied.get("prompt", supplied.get("message")) if isinstance(supplied, dict) else None
@@ -106,7 +107,7 @@ def _linked(event, client, binding, config, telemetry, clock):
                     "resume": resume}, min(epoch(decision["expires_at"]), clock() + 86400))
         return
     if name != "SubagentStop":
-        if event.get("tool_name") not in {"Agent", "Task", "spawn_agent"}:
+        if event.get("tool_name") not in SPAWN.get(client, {}).get("tools", ()):
             return
         response = spawn_response(event.get("tool_response"))
         if isinstance(response, dict):

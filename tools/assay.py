@@ -1115,7 +1115,7 @@ def reminder_hooks(client: str = "claude") -> bytes:
     hook = {"type": "command", "command": command, "timeout": 5}
     session_end_hook = {**hook, "timeout": 3} if client == "codex" else hook
     operations = "|".join(sorted(ROUTING_OPERATIONS))
-    spawn = "Agent|Task" if client == "claude" else "spawn_agent|Agent"
+    spawn = "Agent|Task" if client == "claude" else "spawn_agent|collaborationspawn_agent|Agent"
     pre = f"{spawn}|mcp__.+__({operations})"
     if client == "claude":
         pre += "|SubagentHandback"

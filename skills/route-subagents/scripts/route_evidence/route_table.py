@@ -43,7 +43,7 @@ OUTSIDE = ("Assay routing: this launch is outside the owner's route table check 
 SPAWN = {
     "claude": {"tools": frozenset({"Agent", "Task"}), "model": "model", "effort": "effort",
                "label": "description"},
-    "codex": {"tools": frozenset({"spawn_agent"}), "model": "model", "effort": "reasoning_effort",
+    "codex": {"tools": frozenset({"spawn_agent", "collaborationspawn_agent"}), "model": "model", "effort": "reasoning_effort",
               "label": "task_name"},
 }
 
@@ -142,6 +142,8 @@ def _checked_kind(client: str, tool_name: Any, supplied: Any, unrouted) -> str |
 def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unrouted=(),
                  environment: dict | None = None, cwd: Any = None, home: Path | None = None) -> str | None:
     """The refusal for a spawn that does not follow the table, or None to let it run."""
+    if tool_name in SPAWN.get(client, {}).get("tools", ()) and not isinstance(supplied, dict):
+        return "routing launch input must be an object before its class and settings can be checked"
     kind = _checked_kind(client, tool_name, supplied, unrouted)
     if kind is None:
         return None

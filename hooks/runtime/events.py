@@ -11,7 +11,7 @@ EVENTS = {
               "SubagentStop", "PostCompact", "SessionEnd"},
 }
 ALIASES = {"claude": {"Agent": "spawn", "Task": "spawn"},
-           "codex": {"spawn_agent": "spawn", "apply_patch": "edit"}}
+           "codex": {"spawn_agent": "spawn", "collaborationspawn_agent": "spawn", "apply_patch": "edit"}}
 
 
 def normalize(event, client):

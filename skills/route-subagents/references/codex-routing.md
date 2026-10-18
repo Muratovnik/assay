@@ -72,6 +72,12 @@ refuse. The check reads only `task_name`, `agent_type`, `model`,
 `reasoning_effort` and `fork_turns`; it never needs the message, which Codex
 session files store encrypted. An untrusted hook is skipped without an error,
 so confirm the refusal once in a fresh session after installing or upgrading.
+Codex can report a namespaced collaboration call to the hook as
+`collaborationspawn_agent`. Assay recognizes that exact name as well as
+`spawn_agent`, retaining the native name in event evidence. It does not infer a
+spawn from an arbitrary tool-name suffix. Verify that a forbidden call creates
+no worker and a neighboring allowed class still launches; a loaded hook alone
+does not establish either result.
 
 ## Launches from a subagent
 
