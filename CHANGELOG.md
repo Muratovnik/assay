@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.28.1](https://github.com/Muratovnik/assay/compare/v0.28.0...v0.28.1) (2026-10-18)
+
+### Bug Fixes
+
+* **routing:** recognize Codex's namespaced `collaborationspawn_agent` tool name so native launches are checked against the configured class, model and effort instead of bypassing the route table. A recognized launch is denied when its configured routing binding is unreadable or invalid, and malformed launch input cannot bypass the check ([e69fc8f](https://github.com/Muratovnik/assay/commit/e69fc8f890014e339c3ac0ccb3b7a2b852ea09fd))
+
 ## [0.28.0](https://github.com/Muratovnik/assay/compare/v0.27.1...v0.28.0) (2026-10-17)
 
 ### Features
