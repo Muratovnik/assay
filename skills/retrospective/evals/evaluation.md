@@ -23,7 +23,6 @@ enabled, because D03–D05 are near misses other methods or no method should own
 | C02 | Promoting one severe incident into a general rule | Proposing a targeted fix labelled as an incident |
 | C03 | Findings derived from self-review without external evidence | Naming the sources that would make a review possible |
 | C04 | Reporting "no lessons" from a wrong scope key | Reporting an empty store after a confirmed-correct key |
-| C05 | Counting duplicates twice, counting dismissed records, reading candidates as confirmed | Reporting a single confirmed record as an incident |
 | C06 | Editing instructions before a decision; duplicating existing rules | Offering exact per-item changes with undo |
 | C07 | Calling an accepted item resolved because its situation did not recur in full; re-proposing a rejected item | Marking an item unknown when the evidence cannot tell |
 | C08 | Counting added requirements as agent failures | Suggesting an optional request template |
@@ -35,9 +34,8 @@ run is regression evidence for these cases, not a held-out measurement.
 
 ## Fixtures
 
-All inputs are synthetic and anonymised. The C05 export follows the documented
-metadata-mode record shape in simplified form; it is not a captured store. No
-fixture contains real transcripts, client data or personal data.
+All inputs are synthetic and anonymised. No fixture contains real transcripts,
+client data or personal data.
 
 ## Recorded comparison
 

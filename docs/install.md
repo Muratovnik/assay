@@ -30,12 +30,11 @@ dependencies from this field. The source gate copies the collection and each
 singleton into temporary layouts to check Markdown resource boundaries; it does
 not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
-Hook-backed features — the per-request skill check, the session reminder, the routing guard and
-the [feedback recorder](how-to/feedback-capture.md) — exist only where
+Hook-backed features — the per-request skill check, the session reminder and the
+routing guard — exist only where
 `hooks/runtime` and `skills/route-subagents/scripts` are present: the two plugin
 routes and a full checkout. On a skills-only route, invoke a method explicitly in
-the client's usual way and keep feedback cases in the task's own notes; nothing
-else needs installing to continue.
+the client's usual way; nothing else needs installing to continue.
 
 ## Check what a session can use
 

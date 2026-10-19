@@ -27,9 +27,9 @@ skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配
 是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的
 加载或行为。参见[交付矩阵](../install.md#installation-surfaces)。
 
-提示词建议、会话提醒、路由守卫和反馈案例记录只在存在 `hooks/runtime` 与
+提示词建议、会话提醒和路由守卫只在存在 `hooks/runtime` 与
 `skills/route-subagents/scripts` 的位置可用：两种插件路径和完整检出。仅安装技能时，
-请用客户端的常规方式显式调用方法，并把反馈案例记在任务自己的笔记中。如何确认
+请用客户端的常规方式显式调用方法。如何确认
 当前生效的技能副本、`doctor` 报告什么，以及缺少协作技能时如何继续，参见
 [英文版](../install.md#check-what-a-session-can-use)。
 

@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, feedback, routing_telemetry, skill_gate, sources, branches, midturn
+from runtime import state, routing_telemetry, skill_gate, sources, branches, midturn
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import loads
 from route_evidence import route_table
@@ -28,6 +28,15 @@ MAX_INPUT = 1024 * 1024
 NESTED_SPAWN = ("only the primary agent launches agents, so delegation stays one level deep. "
                 "Do this part of the work yourself; if a step needs a separate agent, finish your packet and "
                 "name that step in your report so the primary can route and launch it.")
+
+
+# Options of the removed feedback recorder. A configuration that still names one is
+# refused with the list, not with the generic unknown-option error.
+REMOVED_OPTIONS = frozenset({"record_events", "feedback_capture", "feedback_trigger"})
+
+
+class RemovedOptions(ValueError):
+    """The hook configuration names an option that no longer exists; the message says which."""
 
 
 def read_json(path):
@@ -46,23 +55,17 @@ def options(environment):
     if location and (not isinstance(location, str) or not Path(location).is_absolute()):
         raise ValueError("hook configuration path must be absolute")
     raw = read_json(location) if location else {}
-    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "record_events",
-                   "feedback_capture", "feedback_trigger", "skill_note_form"}:
+    removed = sorted(set(raw) & REMOVED_OPTIONS)
+    if removed:
+        raise RemovedOptions("Assay: hook options " + ", ".join(removed) + " were removed together with "
+                             "feedback capture and event recording; delete them from the hook configuration.")
+    if set(raw) - {"disabled_rules", "disabled_skills", "state_dir", "skill_note_form"}:
         raise ValueError("unknown hook option")
-    # Storage defaults to metadata for explicit records; the correction
-    # grammar stays off until the owner selects the hook trigger.
-    value = {"disabled_rules": [], "disabled_skills": [], "record_events": False,
-             "feedback_capture": "metadata", "feedback_trigger": "explicit", "skill_note_form": "note",
+    value = {"disabled_rules": [], "disabled_skills": [], "skill_note_form": "note",
              "state_dir": environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA"), **raw}
     for key in ("disabled_rules", "disabled_skills"):
         if not isinstance(value[key], list) or any(not isinstance(v, str) for v in value[key]):
             raise ValueError("invalid disabled rules or skills")
-    if type(value["record_events"]) is not bool:
-        raise ValueError("invalid recording option")
-    if not isinstance(value["feedback_capture"], str) or value["feedback_capture"] not in feedback.MODES:
-        raise ValueError("invalid feedback capture mode")
-    if not isinstance(value["feedback_trigger"], str) or value["feedback_trigger"] not in feedback.TRIGGERS:
-        raise ValueError("invalid feedback trigger")
     if not isinstance(value["skill_note_form"], str) or value["skill_note_form"] not in midturn.FORMS:
         raise ValueError("invalid skill note form")
     if value["state_dir"] is not None and (not isinstance(value["state_dir"], str) or not Path(value["state_dir"]).is_absolute()):
@@ -274,13 +277,15 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         if settings["state_dir"]:
             kwargs = {"clock": clock} if clock else {}
             decision = state.apply(event, client, decision, rules, fingerprint, settings["state_dir"],
-                                   record=settings["record_events"], outcome=outcome, loaded=loaded, **kwargs)
+                                   outcome=outcome, loaded=loaded, **kwargs)
         if protected:
             return protected, None  # One voice; no competing permission/argument writers.
         if decision["context"]:
             return {"hookSpecificOutput": {"hookEventName": event["hook_event_name"],
                                           "additionalContext": decision["context"]}}, None
         return {}, None
+    except RemovedOptions as exc:
+        return protected or legacy, str(exc)
     except Exception:
         return protected or legacy, "Assay: optional hints unavailable; routing decision and basic reminders retained. Run hooks doctor."
 
@@ -293,39 +298,7 @@ def process(event, client, environment, *, root=ROOT, clock=None):
     except Exception:
         diagnostic = "Assay: routing execution telemetry unavailable; hook decision retained. Check telemetry binding and native identity."
         error = "\n".join(part for part in (error, diagnostic) if part)
-    if event.get("hook_event_name") != "UserPromptSubmit":
-        return result, error
-    # Feedback may append context, never merge into a permission decision or
-    # replacement payload. Failure in this optional feature preserves the first
-    # owner's complete result. No second native handler is registered.
-    if result and (set(result) != {"hookSpecificOutput"} or
-                   set(result["hookSpecificOutput"]) - {"hookEventName", "additionalContext"}):
-        return result, error
-    try:
-        kwargs = {"clock": clock} if clock else {}
-        extra = feedback.handle(event, client, options(environment), root=root, **kwargs)
-        if extra:
-            original = result.get("hookSpecificOutput", {}).get("additionalContext", "")
-            message = extra["hookSpecificOutput"]["additionalContext"]
-            result = {"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
-                      "additionalContext": "\n".join(part for part in (original, message) if part)}}
-    except Exception:
-        diagnostic = "Assay: optional feedback capture unavailable; existing hook result retained. Check feedback configuration, capacity and permissions."
-        error = "\n".join(part for part in (error, diagnostic) if part)
     return result, error
-
-
-def record_command(environment, settings, root):
-    """Name the explicit record command, since a model shell may not see plugin variables."""
-    if settings["feedback_capture"] == "off":
-        return {"available": False, "reason": "feedback_capture is off"}
-    if not settings["state_dir"]:
-        return {"available": False, "reason": "no state directory configured"}
-    location = environment.get("ASSAY_HOOK_CONFIG")
-    return {"available": True,
-            "argv": ["python", "-I", "-B", str(root / "hooks/runtime/feedback_cli.py"), "record",
-                     *(["--config", location] if location else []),
-                     "--state-dir", settings["state_dir"], "--input", "CASE.json"]}
 
 
 def doctor(client, environment, *, root=ROOT, settings_path=None):
@@ -338,10 +311,7 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "skill_note_form": settings["skill_note_form"],
               "prompt_parser_available": importlib.util.find_spec("markdown_it") is not None,
               "state_configured": settings["state_dir"] is not None,
-              "record_events": settings["record_events"], "hooks_trusted": "unknown",
-              "feedback_capture": settings["feedback_capture"],
-              "feedback_trigger": settings["feedback_trigger"],
-              "feedback_record": record_command(environment, settings, root),
+              "hooks_trusted": "unknown",
               "native_execution": "unverified", "model_compliance": "unverified",
               "routing_telemetry_bound": routing_telemetry.configuration(environment) is not None,
               "settings_modified": False, "conflicts": []}
@@ -409,6 +379,9 @@ def main(argv=None):
         if error:
             print(error, file=sys.stderr)
         return 0
+    except RemovedOptions as exc:
+        print(str(exc), file=sys.stderr)
+        return 1 if args.command == "event" else 2
     except Exception:
         print("Assay: invalid or unavailable hook input/configuration; no payload was recorded.", file=sys.stderr)
         # Event type is unknown. A missing/disabled/broken hook is not an

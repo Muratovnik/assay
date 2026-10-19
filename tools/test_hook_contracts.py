@@ -274,27 +274,23 @@ class StateTests(unittest.TestCase):
         self.now += state.TTL+1
         self.assertEqual('', self.apply(compact)['context'])
 
-    def test_session_end_and_default_no_event_recording(self):
+    def test_session_end_and_postcompact_leave_no_restorable_context(self):
         self.apply()
-        with PipelineStore(self.directory, clock=lambda:self.now).transaction() as tx:
-            self.assertEqual([], tx.values('hook-event'))
         self.apply({**self.event,'hook_event_name':'SessionEnd'})
         self.assertEqual('', self.apply({**self.event,'hook_event_name':'PostCompact'})['context'])
 
-    def test_recording_is_bounded_and_contains_no_prompt_path_or_args(self):
+    def test_records_are_bounded_and_contain_no_prompt_path_or_args(self):
         with patch.object(state,'MAX_OWN_RECORDS',3):
             for index in range(8):
                 self.now+=1
-                self.apply({**self.event,'turn_id':str(index)},record=True)
+                self.apply({**self.event,'turn_id':str(index)})
         with PipelineStore(self.directory, clock=lambda:self.now).transaction() as tx:
             for kind in state.KINDS:
                 self.assertLessEqual(len(tx.values(kind)),3)
-            records=tx.values('hook-event')
-            self.assertEqual(3,len(records))
-            serialized=json.dumps(records)
+            self.assertEqual(3,len(tx.values('hook-seen')))
+            serialized=json.dumps([tx.values(kind) for kind in state.KINDS])
             for private in ('SECRET_SENTINEL',self.event['cwd'], 'transcript-parent','session'):
                 self.assertNotIn(private,serialized)
-            self.assertEqual('command_input_unattested', records[0]['evidence'])
 
 
 class ReviewerBoundaryTests(unittest.TestCase):

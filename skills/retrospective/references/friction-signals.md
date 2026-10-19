@@ -21,7 +21,7 @@ user objected or work was lost.
 
 ## Distinguish before counting
 
-Use the same categories a reviewed feedback record uses:
+Sort each candidate into one of these categories:
 
 - **reported mismatch** — the result did not meet a requirement stated earlier;
 - **changed requirement** — the user added or changed a requirement; not an

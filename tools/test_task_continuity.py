@@ -142,8 +142,7 @@ class TaskContinuityTests(unittest.TestCase):
 
     def test_event_processing_reuses_existing_state_without_storing_prompt(self):
         settings = self.directory / "settings.json"
-        settings.write_text(json.dumps({"state_dir": str(self.directory / "events"),
-                                        "record_events": True}), encoding="utf-8")
+        settings.write_text(json.dumps({"state_dir": str(self.directory / "events")}), encoding="utf-8")
         environment = {"ASSAY_HOOK_CONFIG": str(settings)}
         for client in ("claude", "codex"):
             with self.subTest(client=client):

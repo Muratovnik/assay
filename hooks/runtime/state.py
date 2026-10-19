@@ -14,7 +14,7 @@ from .events import event_key, identity
 
 TTL = 24 * 3600
 MAX_OWN_RECORDS = 128
-KINDS = ("hook-context", "hook-seen", "hook-event")
+KINDS = ("hook-context", "hook-seen")
 
 
 def _put(tx, kind, key, payload, now):
@@ -25,7 +25,7 @@ def _put(tx, kind, key, payload, now):
     tx.put(kind, key, {**payload, "id": key, "at": now}, now + TTL)
 
 
-def apply(event, client, decision, rules, fingerprint, directory, *, record=False, outcome=None, loaded=(),
+def apply(event, client, decision, rules, fingerprint, directory, *, outcome=None, loaded=(),
           clock=time.time):
     from route_evidence.pipeline_store import PipelineStore
     key = identity(event, client)
@@ -87,12 +87,4 @@ def apply(event, client, decision, rules, fingerprint, directory, *, record=Fals
         # undelivered hint (or its deduplication key) when a guard owns the reply.
         if seen and not duplicate and outcome is None and (name == "UserPromptSubmit" or decision["context"]):
             _put(tx, "hook-seen", seen, {}, now)
-        if record:
-            # This records receipt of command input, not authenticated client
-            # execution and certainly not compliance with a skill.
-            eid = hashlib.sha256(json.dumps([key, delivery, name, now]).encode()).hexdigest()
-            _put(tx, "hook-event", eid, {"client": client, "event": name,
-                 "rule_ids": decision["rule_ids"], "decision": outcome or ("duplicate" if duplicate else "hint" if decision["rule_ids"]
-                                                     else "check" if decision["context"] else "silent"),
-                 "evidence": "command_input_unattested"}, now)
     return decision

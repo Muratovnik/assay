@@ -22,7 +22,7 @@
     {
       "id": "C03",
       "prompt": "Reflect on how well you have been working for me lately and tell me what you would improve.",
-      "context": "No transcripts, task records, version history or feedback records are available to this session. Only the current conversation is visible, and it contains no corrections."
+      "context": "No transcripts, task records or version history are available to this session. Only the current conversation is visible, and it contains no corrections."
     },
     {
       "id": "C04",
@@ -30,14 +30,6 @@
       "files": {
         "evidence/memory-queries.md": "Query 1: search(project='C:/work/atlas', query='lessons') -> {\"results\": [], \"success\": true}\n\nThe store's session list shows these project keys with session counts: atlas (42), atlas/workspace (17), harbor (23).\n"
       }
-    },
-    {
-      "id": "C05",
-      "prompt": "Review the exported feedback records in inputs/ and tell me which corrections are recurring.",
-      "files": {
-        "evidence/feedback-export.jsonl": "{\"id\": \"f1\", \"kind\": \"correction\", \"status\": \"confirmed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-12\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-1\"}, \"annotations\": [], \"review\": {\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-12\", \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-12\", \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f2\", \"kind\": \"correction\", \"status\": \"duplicate\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-12\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-1\"}, \"annotations\": [], \"review\": {\"status\": \"duplicate\", \"reason\": null, \"reason_code\": \"same_incident\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": \"f1\"}, \"reviews\": [{\"status\": \"duplicate\", \"reason\": null, \"reason_code\": \"same_incident\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": \"f1\"}]}\n{\"id\": \"f3\", \"kind\": \"correction\", \"status\": \"dismissed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-19\"}, \"source\": {\"client\": \"codex\", \"event\": \"explicit_record\", \"session_id\": \"s-7\"}, \"annotations\": [], \"review\": {\"status\": \"dismissed\", \"reason\": null, \"reason_code\": \"new_requirement\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"dismissed\", \"reason\": null, \"reason_code\": \"new_requirement\", \"basis_ref\": null, \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f4\", \"kind\": \"correction\", \"status\": \"confirmed\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R4\", \"ref\": \"TASK-23\"}, \"source\": {\"client\": \"codex\", \"event\": \"explicit_record\", \"session_id\": \"s-9\"}, \"annotations\": [], \"review\": {\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-23\", \"layer\": null, \"duplicate_of\": null}, \"reviews\": [{\"status\": \"confirmed\", \"reason\": null, \"reason_code\": null, \"basis_ref\": \"TASK-23\", \"layer\": null, \"duplicate_of\": null}]}\n{\"id\": \"f5\", \"kind\": \"correction\", \"status\": \"candidate\", \"signal\": \"explicit\", \"capture_mode\": \"metadata\", \"criterion\": {\"code\": \"R7\", \"ref\": \"TASK-30\"}, \"source\": {\"client\": \"claude\", \"event\": \"explicit_record\", \"session_id\": \"s-11\"}, \"annotations\": [], \"review\": null, \"reviews\": []}\n"
-      },
-      "context": "A simplified metadata-mode export; fields not needed for the review are omitted."
     },
     {
       "id": "C06",

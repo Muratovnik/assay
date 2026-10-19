@@ -34,14 +34,6 @@
       ]
     },
     {
-      "id": "C05",
-      "assess": [
-        "Counts f1 and its duplicate f2 as one incident and excludes dismissed f3 from any pattern.",
-        "Reports criterion R4 as recurring across two independent confirmed records (f1 in s-1, f4 in s-9).",
-        "Treats f5 as an unreviewed candidate, not as confirmed evidence, and does not try to reconstruct text from metadata records."
-      ]
-    },
-    {
       "id": "C06",
       "assess": [
         "Classifies the language and push corrections as existing norms not applied, citing instructions/CLAUDE.md.",

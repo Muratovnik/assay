@@ -45,20 +45,6 @@ log does not include its children's.
 Reopened items, guard overrides, blocked reasons and closing summaries that admit
 an omission are signals. An item that took long is not a signal by itself.
 
-## Local feedback records
-
-Some installations keep reviewed correction records. With Assay's feedback
-capture, read them with its `list`, `show` and `export` commands, which need the
-absolute parent data directory; its hooks `doctor` prints the configured command.
-These commands do not annotate or review, but a store transaction — including
-reading — removes records past their retention period, so a review can see
-fewer records than an earlier one. In `metadata` mode records hold codes and
-identifiers only; do not try to reconstruct text. Count `confirmed` records as
-evidence, treat `candidate` records as unreviewed signals, never count
-`dismissed` records toward a pattern, and count a `duplicate` with the record it
-duplicates. The commands exist only in a full plugin or checkout; a skills-only
-installation lacks them. Never enable capture as part of a review.
-
 ## Memory stores
 
 Stored lessons and notes are evidence of what was learned, not of what

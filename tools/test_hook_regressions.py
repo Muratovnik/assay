@@ -340,7 +340,7 @@ class HookCommandTests(unittest.TestCase):
         self.assertEqual("synthetic_replay", report["evidence"])
 
     def test_hook_json_reuses_strict_decoder(self):
-        for raw in ('{"record_events":false,"record_events":true}', '{"value":NaN}'):
+        for raw in ('{"state_dir":"/a","state_dir":"/b"}', '{"value":NaN}'):
             with self.subTest(raw=raw), tempfile.TemporaryDirectory() as temporary:
                 path = Path(temporary) / "input.json"
                 path.write_text(raw, encoding="utf-8")

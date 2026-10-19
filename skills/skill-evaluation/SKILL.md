@@ -86,9 +86,7 @@ treat a harness failure as a subject defect.
 Keep a reviewed episode — original correction, the criterion then in force,
 observation, assessment and a separate cause hypothesis — in the owning record
 described by [continuation](../implementation-planning/references/continuation.md#preserve-sufficient-context);
-no new store is required. Where the installation offers an explicit local feedback
-record, it keeps the same distinctions, and its command comes from the user or
-the hooks doctor output; record an allowed example only against
+no new store is required. Record an allowed example only against
 the criterion it meets, never from an absence of complaints.
 For recurring failures, map each confirmed incident to the responsible procedure
 and a distinguishing case/control; leave uncertain causes labeled as such.
