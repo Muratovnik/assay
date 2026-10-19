@@ -409,7 +409,7 @@ class ExplicitRouteTests(unittest.TestCase):
         self.assertIsNone(self.reason(self.launch(model='sonnet',effort='medium'),env))
 
     def test_forks_continuations_exemptions_and_opt_out_pass(self):
-        exempt=self.environment({'mode':'evidence-only','unrouted_agents':{'Explore':'inherit'}})
+        exempt=self.environment({'mode':'evidence-only','unrouted_agents': ['Explore']})
         self.assertIsNone(self.reason(self.launch(subagent_type='fork'),exempt))
         self.assertIsNone(self.reason(self.launch(resume='agent-1'),exempt))
         self.assertIsNone(self.reason(self.launch(subagent_type='Explore'),exempt))

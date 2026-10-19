@@ -86,7 +86,7 @@ class RouteTableTests(unittest.TestCase):
 
     def test_claude_exemptions_and_opt_out_pass(self):
         env = self.environment(routes=CLAUDE_TABLE,
-                               pipeline={'mode': 'evidence-only', 'unrouted_agents': {'Explore': 'inherit'}})
+                               pipeline={'mode': 'evidence-only', 'unrouted_agents': ['Explore']})
         self.assertIsNone(self.reason(self.claude(subagent_type='fork'), env, 'claude'))
         self.assertIsNone(self.reason(self.claude(resume='agent-1'), env, 'claude'))
         self.assertIsNone(self.reason(self.claude(subagent_type='Explore'), env, 'claude'))
@@ -199,12 +199,12 @@ class RouteTableTests(unittest.TestCase):
         # With a table, the generic launch reminder's wording would contradict it.
         table = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
         exempt = {'ASSAY_ROUTING_CONFIG': str(self.config(
-            routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': {'Explore': 'inherit'}},
+            routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': ['Explore']},
             name='exempt.json'))}
         off = {'ASSAY_ROUTING_CONFIG': str(self.config(
             routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'explicit_routes': 'off'}, name='off.json'))}
         codex = {'ASSAY_ROUTING_CONFIG': str(self.config(
-            'codex', CODEX_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': {'explorer': 'inherit'}},
+            'codex', CODEX_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': ['explorer']},
             name='codex.json'))}
         for event, environment, client in ((self.claude(subagent_type='fork'), table, 'claude'),
                                            (self.claude(resume='agent-1'), table, 'claude'),

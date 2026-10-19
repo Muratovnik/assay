@@ -17,6 +17,7 @@ reviewed when a model is released, not recomputed for every launch.
 - [Configuration](#configuration)
 - [Bind the configuration to the hooks](#bind-the-configuration-to-the-hooks)
 - [Upgrade from 0.28](#upgrade-from-028)
+- [Upgrade from 0.29](#upgrade-from-029)
 - [Using the table](#using-the-table)
 - [Enforcement](#enforcement)
 - [Building and reviewing the table](#building-and-reviewing-the-table)
@@ -56,7 +57,9 @@ A schema 5 configuration accepts only these top-level keys: `schema_version`,
 `client`, `preferences`, `inventory`, `pipeline` and `routes`. `pipeline` accepts
 `mode` (only `evidence-only`), `explicit_routes` (`require`, the default, or
 `off`), `unrouted_agents`, `host`, `inventory_file` and `inventory_ttl_hours`.
-Any other key is an error. A configuration that carries a section or key of the
+`unrouted_agents` is a list of agent-type names (default `[]`): letters, digits and
+`_.:-`, no `assay-` prefix, no duplicates, at most 64. The object form that
+mapped a type to a model is refused. Any other key is an error. A configuration that carries a section or key of the
 removed routing advisor, required mode or execution telemetry, or an older
 `schema_version`, is refused with one message that lists the keys to remove and
 the version to set; there is no migration command.
@@ -117,6 +120,14 @@ it is changed:
    `pipeline.agents_dir` named. Nothing removes them now. Their frontmatter calls
    `routing_hook.py`, which no longer does anything for them, so a leftover file is
    harmless but no longer routes.
+
+## Upgrade from 0.29
+
+`pipeline.unrouted_agents` takes only a list of agent types. The launch check
+never used the model an object form attached to a type, so that form was
+removed in schema 5 and a configuration that still has it, `{}` included, refuses
+launches with a message naming the change. Replace the object with the list of
+its keys: `{}` becomes `[]` and `{"Explore": "inherit"}` becomes `["Explore"]`.
 
 ## Using the table
 

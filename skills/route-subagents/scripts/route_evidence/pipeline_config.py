@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .core import EvidenceError, epoch, is_reparse, read_document
+from .core import EvidenceError, RetiredConfiguration, epoch, is_reparse, read_document
 
 EFFORT_ORDER = ("low", "medium", "high", "xhigh", "max")
 # The launch check is the only mode left; the key stays so a configuration says
@@ -19,6 +19,10 @@ KEYS = frozenset({"mode", "explicit_routes", "unrouted_agents", "host", "invento
 # refused with the list instead of the generic unknown-key error.
 REMOVED_KEYS = ("state_dir", "agents_dir", "mcp_server", "advisor_route", "profiles", "variants", "baseline",
                 "approved_choices", "profile_capabilities", "agent_templates")
+UNROUTED_OBJECT_REMOVED = (
+    "pipeline.unrouted_agents takes only a list of agent types since schema 5; the object form that mapped a type "
+    "to a model was removed because the launch check never used the model. Replace it with the list of its agent "
+    "types, for example {} with [] and {\"Explore\": \"inherit\"} with [\"Explore\"]")
 AGENT_TYPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
 DEFAULT_INVENTORY_TTL_HOURS = 24
 MAX_INVENTORY_TTL_HOURS = 720
@@ -30,35 +34,21 @@ def _absolute(value: Any, code: str) -> str | None:
     return value
 
 
-def _unrouted(value: Any) -> dict:
-    """Owner-exempt native agent types and the model each one launches with.
+def _unrouted(value: Any) -> list[str]:
+    """Owner-exempt native agent types: a list of type names, nothing else.
 
-    A list names types that use the baseline model. An object maps a type to
-    "baseline", "inherit" (the parent's model, as an explicit choice) or
-    {"model": ID}.
+    The launch check only asks whether a type is listed. The object form that
+    mapped a type to a model served the removed advisor and was never read
+    afterwards, so it is refused as a retired configuration, `{}` included.
     """
-    if isinstance(value, list):
-        if any(not isinstance(name, str) for name in value) or len(set(value)) != len(value):
-            raise EvidenceError("invalid_pipeline_unrouted_agents")
-        value = {name: "baseline" for name in value}
-    if not isinstance(value, dict) or len(value) > 64:
+    if isinstance(value, dict):
+        raise RetiredConfiguration(UNROUTED_OBJECT_REMOVED)
+    if not isinstance(value, list) or len(value) > 64 or len(set(map(str, value))) != len(value):
         raise EvidenceError("invalid_pipeline_unrouted_agents")
-    result = {}
-    for name, spec in value.items():
+    for name in value:
         if not isinstance(name, str) or not AGENT_TYPE.fullmatch(name) or name.startswith("assay-"):
             raise EvidenceError("invalid_pipeline_unrouted_agents")
-        if isinstance(spec, dict):
-            if set(spec) != {"model"}:
-                raise EvidenceError("invalid_pipeline_unrouted_agent_model")
-            model = spec["model"]
-            if (not isinstance(model, str) or not model or model != model.strip() or len(model) > 200
-                    or any(ord(c) < 32 for c in model) or model == "inherit"):
-                raise EvidenceError("invalid_pipeline_unrouted_agent_model")
-            spec = {"model": model}
-        elif spec not in ("baseline", "inherit"):
-            raise EvidenceError("invalid_pipeline_unrouted_agent_model")
-        result[name] = spec
-    return result
+    return list(value)
 
 
 def removed_keys(raw: Any) -> list[str]:
@@ -77,7 +67,7 @@ def settings(config: dict | None = None) -> dict:
     raw = config.get("pipeline", {})
     if not isinstance(raw, dict) or set(raw) - KEYS:
         raise EvidenceError("unknown_pipeline_configuration")
-    value = {"mode": "evidence-only", "unrouted_agents": {}, "inventory_file": None,
+    value = {"mode": "evidence-only", "unrouted_agents": [], "inventory_file": None,
              "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, "host": None,
              "explicit_routes": "require", **copy.deepcopy(raw)}
     from .client_capabilities import host_settings

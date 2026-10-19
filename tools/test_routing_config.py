@@ -98,23 +98,60 @@ class SchemaTests(Fixture):
             'pipeline': {'mode': 'evidence-only', 'explicit_routes': 'require', 'unrouted_agents': ['Explore'],
                          'host': {'version': '2.1.300', 'surface': 'cli'}, 'inventory_ttl_hours': 24,
                          'inventory_file': None}}))
-        self.assertEqual(loaded['pipeline']['unrouted_agents'], {'Explore': 'baseline'})
+        self.assertEqual(loaded['pipeline']['unrouted_agents'], ['Explore'])
         self.assertEqual(set(loaded['routes']['classes']), {'gather', 'code'})
         with self.assertRaisesRegex(EvidenceError, 'unknown_pipeline_configuration'):
             load_config(self.config({'schema_version': 5, 'client': 'claude', 'pipeline': {'novel': 1}}))
 
-    def test_exempt_agent_configuration_is_validated_and_normalized(self):
-        for value, code in ((['Explore', 'Explore'], 'unrouted_agents'), ([{'name': 'Explore'}], 'unrouted_agents'),
-                            (['assay-general-purpose-low-x'], 'unrouted_agents'),
-                            ({'Explore': 'sometimes'}, 'unrouted_agent_model'),
-                            ({'Explore': {'model': ''}}, 'unrouted_agent_model'),
-                            ({'Explore': {'model': 'haiku', 'effort': 'low'}}, 'unrouted_agent_model')):
-            with self.subTest(value=value), self.assertRaisesRegex(EvidenceError, code):
+    def test_exempt_agents_are_a_list_of_valid_unique_type_names(self):
+        for value in (['Explore', 'Explore'], [{'name': 'Explore'}], ['assay-general-purpose-low-x'], ['bad name'],
+                      [''], 'Explore', None, ['t%d' % n for n in range(65)]):
+            with self.subTest(value=value), self.assertRaisesRegex(EvidenceError, 'invalid_pipeline_unrouted_agents'):
                 settings({'pipeline': {'unrouted_agents': value}})
-        listed = settings({'pipeline': {'unrouted_agents': ['Explore']}})
-        self.assertEqual(listed['unrouted_agents'], {'Explore': 'baseline'})
+        listed = settings({'pipeline': {'unrouted_agents': ['Explore', 'plugin:reviewer']}})
+        self.assertEqual(listed['unrouted_agents'], ['Explore', 'plugin:reviewer'])
+        self.assertEqual(settings({'pipeline': {'unrouted_agents': ['t%d' % n for n in range(64)]}})
+                         ['unrouted_agents'][-1], 't63')
+        self.assertEqual(settings({})['unrouted_agents'], [])
         # Normalization is stable, so the hook and the server read the same policy.
         self.assertEqual(settings({'pipeline': listed}), listed)
+
+    def test_the_object_form_of_exempt_agents_is_refused_as_removed_in_schema_5(self):
+        for value in ({}, {'Explore': 'inherit'}, {'Explore': 'baseline'}, {'Explore': {'model': 'haiku'}}):
+            with self.subTest(value=value), self.assertRaises(RetiredConfiguration) as caught:
+                settings({'pipeline': {'unrouted_agents': value}})
+            message = str(caught.exception)
+            self.assertIn('object form', message)
+            self.assertIn('removed', message)
+            self.assertIn('schema 5', message)
+            self.assertIn('Replace it with the list of its agent types', message)
+            self.assertIn('{} with []', message)
+        # Loading a schema 5 file reaches the same refusal, and nothing is partly accepted.
+        for value in ({}, {'Explore': 'inherit'}):
+            with self.subTest(file=value), self.assertRaises(RetiredConfiguration):
+                load_config(self.config({'schema_version': 5, 'client': 'claude', 'routes': TABLE,
+                                         'pipeline': {'unrouted_agents': value}}))
+
+    def test_an_object_form_refuses_launches_with_the_message_and_a_list_exempts_its_type(self):
+        for value in ({}, {'Explore': 'inherit'}):
+            config = self.config({'schema_version': 5, 'client': 'claude', 'routes': TABLE,
+                                  'pipeline': {'unrouted_agents': value}})
+            for label, environment in (('binding', self.bind(config)),
+                                       ('variable', {'ASSAY_ROUTING_CONFIG': str(config)})):
+                with self.subTest(value=value, via=label):
+                    decision, reason, error = self.decide(
+                        self.launch(description='code: x', model='sonnet', effort='high'), environment)
+                    self.assertEqual(decision, 'deny')
+                    self.assertIn('Replace it with the list of its agent types', reason)
+                    self.assertIn('object form', reason)
+                    self.assertNotIn('could not be validated', reason)
+                    self.assertNotIn(str(self.root), reason)
+        listed = self.config({'schema_version': 5, 'client': 'claude', 'routes': TABLE,
+                              'pipeline': {'unrouted_agents': ['Explore']}}, name='listed.json')
+        environment = self.bind(listed)
+        # A listed type keeps its own settings; any other type must still follow the table.
+        self.assertEqual(self.decide(self.launch(subagent_type='Explore'), environment)[0], 'allow')
+        self.assertEqual(self.decide(self.launch(subagent_type='Plan', description='fix it'), environment)[0], 'deny')
 
     def test_the_launch_check_and_the_cli_pass_the_refusal_on(self):
         retired = self.config({'schema_version': 4, 'client': 'claude', 'routes': TABLE, 'telemetry': {'mode': 'off'}})
