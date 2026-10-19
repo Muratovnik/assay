@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, routing_binding, skill_gate, sources, branches, midturn
+from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
 from route_evidence import host_observations
@@ -278,6 +278,10 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                     else midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
                                          form=settings["skill_note_form"], **({"clock": clock} if clock else {}))
                     if name == "PreToolUse" and rules.midturn_rules and not legacy else {})
+            # A rerun of one scenario while its reference is unread; a skill note on the same call goes first.
+            if not note and name == "PreToolUse" and rules.rerun_rules and not legacy:
+                note = reruns.checked(event, rules.rerun_rules, enabled, settings["state_dir"],
+                                      **({"clock": clock} if clock else {}))
             # A stop continues at most once: a contradicted read claim goes first.
             if not note and name in {"Stop", "SubagentStop"} and rules.branch_rules:
                 note = branches.stopped(event, rules.branch_rules, enabled)

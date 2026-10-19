@@ -337,6 +337,45 @@ came with the skill not loaded, in 32 sessions. An agent that loads the skill af
 the refusal is not refused again, so the refusal falls on the first question of a
 session, and again after a compaction that did not keep the skill.
 
+## Rerun note in Claude Code
+
+A run that fails on a different setup error each time looks like progress: the
+results differ, and the exit code is often 0 because the verdict is only in the
+output. A detector that waits for identical errors or a failed exit stays silent
+there. In the observed loops `code-change` was loaded, but the reference that says
+when repeated runs should give way to tracing the consumer's prerequisites,
+`references/diagnostic-reproducer.md`, was never opened.
+
+At `PreToolUse`, when a `Bash` or `PowerShell` call runs the same scenario for the
+fifth time since the owner's last message and that reference was not read since
+the latest compaction, the hook adds one note: `Assay rerun note: this call is run
+5 of the same scenario (n1t-run/run.ps1) since the owner's last message. The
+assay:code-change reference references/diagnostic-reproducer.md governs when
+repeated runs should give way to tracing the consumer's prerequisites; it has not
+been read in this context.` The rule is `rerun-diagnostic-reproducer`.
+
+A scenario is the first run a command line names: a script, by its last two path
+parts and its arguments, whether an interpreter starts it or it is called directly,
+or a test command with its filter (`python -m pytest tests/test_app.py -k parse`, `dotnet test …
+--filter X`, `npm run test:unit`, `go test ./...`). Redirections, pipes and later
+commands are ignored, so a new log name does not make a new scenario. Inline code
+(`python -c`, `python -`, a heredoc) is not a run. Results and exit codes are not read.
+
+Only a message from the owner starts the count again. A task notification that
+starts a turn after a background run does not, and neither does a compaction: the
+runs it summarized still happened. A `Read` of the reference, or a shell command
+naming `code-change` and `diagnostic-reproducer.md`, keeps the note away until the
+next compaction. The note comes at most once per scenario, owner message and agent,
+kept as one hashed key in the plugin data directory, and a subagent is judged by its
+own transcript. It does not depend on the skill check; a disabled `code-change`
+skill or the rule ID turns it off. A skill note on the same call takes priority.
+
+The threshold is five because fixing and rechecking a gate three or four times is often
+ordinary work. Replayed over two weeks of one owner's Claude sessions, the note came
+106 times in 32 sessions at three runs, 45 times in 20 sessions at four and 15 times
+in 11 sessions at five; the loop that prompted the rule was caught at every threshold
+before the owner intervened.
+
 ## Hints do not grant authority
 
 Neither the check nor an explicit-choice suggestion authorizes edits, delegation,
