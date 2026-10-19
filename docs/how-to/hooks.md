@@ -335,8 +335,7 @@ kind of work can behave differently; each rule ID turns its row off. For
 `midturn-critical-discussion`, 185 of 223 owner questions from 5 to 19 October 2026
 came with the skill not loaded, in 32 sessions. An agent that loads the skill after
 the refusal is not refused again, so the refusal falls on the first question of a
-session; 29 of those 32
-asked the owner to choose between approaches, and the rest were confirmations.
+session, and again after a compaction that did not keep the skill.
 
 ## Hints do not grant authority
 
