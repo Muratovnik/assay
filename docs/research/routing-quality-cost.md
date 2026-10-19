@@ -77,8 +77,8 @@ the existing documented caller override can express a concrete, explained
 reason to use a simple route; approved choices and explicitly unrouted native
 types serve the corresponding owner-controlled required-mode cases. These are
 existing authority paths, not declarations of measured optimality. See the
-[advisor contract](../how-to/routing-advisor.md)
-and [required-mode contract](../how-to/required-routing.md).
+[advisor contract](https://github.com/Muratovnik/assay/blob/v0.28.1/docs/how-to/routing-advisor.md)
+and [required-mode contract](https://github.com/Muratovnik/assay/blob/v0.28.1/docs/how-to/required-routing.md).
 
 ## Research that changes the decision
 
@@ -151,16 +151,16 @@ only checking its own output shape.
 | R19: shared test-fixture cleanup | A pre-existing decision test manually initialized an asynchronous test helper, then called its cleanup dispatcher without a unittest runner. That dispatcher swallowed its own assertion, so the test passed while leaving its temporary directory for garbage collection. | Forward the helper's cleanup registrations to the active test before setup, including resources allocated before setup failure. A real-test ownership probe retained both directory objects: before the fix one directory survived test cleanup; afterward neither did. No production cleanup defect is inferred from this test-only finding. |
 
 Regression owners are
-[policy and dispatch cases](../../tools/test_routing_policy_guards.py),
+[policy and dispatch cases](https://github.com/Muratovnik/assay/blob/v0.28.1/tools/test_routing_policy_guards.py),
 [evidence boundaries](../../tools/test_routing_evidence_boundaries.py),
-[fixed-route paths](../../tools/test_routing_fast_paths.py), and
+[fixed-route paths](https://github.com/Muratovnik/assay/blob/v0.28.1/tools/test_routing_fast_paths.py), and
 [process lifecycle cases](../../tools/test_benchmark_service.py), together with
 the affected existing integration and compatibility suites. PR-review repairs
 add [whole-caveat cases](../../tools/test_routing_guide_caveats.py),
-[summary budget controls](../../tools/test_routing_summary_budget.py), and
-[shared-store/invocation tests](../../tools/test_routing_pipeline.py).
+[summary budget controls](https://github.com/Muratovnik/assay/blob/v0.28.1/tools/test_routing_summary_budget.py), and
+[shared-store/invocation tests](https://github.com/Muratovnik/assay/blob/v0.28.1/tools/test_routing_pipeline.py).
 The final CI warning investigation also corrects the shared helper cleanup in
-[decision lifecycle tests](../../tools/test_routing_decisions.py).
+[decision lifecycle tests](https://github.com/Muratovnik/assay/blob/v0.28.1/tools/test_routing_decisions.py).
 
 The baseline's initial 768-test run reported two Linux process-test failures.
 Those two assertions inspected host-mounted `/proc` using namespace-local PIDs,
