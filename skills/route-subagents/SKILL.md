@@ -69,7 +69,7 @@ Read the actual owner instructions and target state before assigning work.
 Define the outcome, source identity, smallest sufficient read scope, write
 ownership, dependencies, exclusions and evidence required for completion.
 Name the Assay skills the packet's work needs; the worker loads them before the
-work and starts its report with the `Assay:` line, see
+work and names them on the first line of its report, see
 [packet examples](references/packet-contracts.md).
 Include failure and escalation conditions when relevant. A verified no-op may
 be useful; distinguish it from an unperformed required change.

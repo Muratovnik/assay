@@ -32,8 +32,10 @@ worker gets `code-change`, a reviewer `independent-audit`, a test writer
 `test-writing`. A worker starts with none of the primary's loaded skills or its
 per-request skill check, so a packet without them leaves the method to chance.
 The worker loads each named skill before the work, may add another its work
-needs, and starts its report with the `Assay:` line unless the packet fixes an
-exact output format, such as a structured result.
+needs, and names each Assay skill it loaded on the first line of its report, for
+example: Used `assay:code-change`. The worker does not read this skill, so the
+packet states the instruction with that example. An exact output format the
+packet fixes, such as a structured result, takes precedence over the line.
 
 Record model and effort with the launch even when inheritance implements the
 selection; no model matrix is needed. Explain ordered implementation steps only
