@@ -6,6 +6,27 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.29.0](https://github.com/Muratovnik/assay/compare/v0.28.1...v0.29.0) (2026-10-19)
+
+Assay drops the parts that stopped producing evidence: the frozen routing
+advisor, the required routing mode, routing execution history and telemetry,
+and the feedback recorder with the hook event log. The
+route table and its launch check stay as they were, and so do the benchmark
+evidence service, host observations and every other hook. Configurations and
+bindings left in the old form are refused with a message naming the fix, never
+skipped; the upgrade steps are in the route table reference.
+
+### ⚠ BREAKING CHANGES
+
+* **routing:** routing configuration schema 5 is required. A configuration that names an older schema or still carries the sections `advisor`, `policy`, `telemetry` or `task_evidence`, or the required-mode `pipeline` keys, is refused with one message listing every key to remove; `pipeline.mode` accepts only `evidence-only`, and there is no migration command ([8d93796](https://github.com/Muratovnik/assay/commit/8d93796cba96b46a098b98c42ab1861083700a4c))
+* **routing:** the plugin's routing binding `routing-telemetry.json` is renamed to `routing.json` with the same `config` and `cache_dir`; a binding left under the old name refuses route-table launches until it is renamed, and `ASSAY_ROUTING_TELEMETRY_CONFIG` is refused while `ASSAY_ROUTING_CONFIG` is kept. Hooks doctor reports `routing_binding_found` and `routing_config_found` instead of `routing_telemetry_bound` ([8d93796](https://github.com/Muratovnik/assay/commit/8d93796cba96b46a098b98c42ab1861083700a4c))
+* **routing:** the MCP tools `prepare_routing`, `get_advisor_input`, `complete_routing`, `get_routing_decision`, `authorize_routing_launch` and `record_routing_outcome` are removed, and `get_routing_context` no longer takes a task query; the router commands for advice, history, replay, telemetry and task evidence and `tools/assay.py claude-routes` are removed. Agent definitions that `claude-routes` generated are not deleted for you: remove them and their `.assay-routing-v2` manifest and lock as the upgrade steps describe ([8d93796](https://github.com/Muratovnik/assay/commit/8d93796cba96b46a098b98c42ab1861083700a4c), [b0da5a2](https://github.com/Muratovnik/assay/commit/b0da5a2b73f52e9be04deee94abba50a7a6c6922))
+* **hooks:** the hook options `record_events`, `feedback_capture` and `feedback_trigger` are removed, and a hook configuration that still names one is refused with a message listing it; feedback records and hook events are no longer written, and the feedback commands and their doctor keys no longer exist. Route-table enforcement does not depend on these options ([6f2652f](https://github.com/Muratovnik/assay/commit/6f2652fec95d14f80305e1352d88e67607f1f135))
+
+### Documentation
+
+* **routing:** describe configuration schema 5, the `routing.json` binding, the doctor keys and the upgrade from 0.28 in the route table reference and the hooks guide, and remove the advisor, required-mode and telemetry prose from the references, the architecture overview and the installation guide in all three languages ([b0da5a2](https://github.com/Muratovnik/assay/commit/b0da5a2b73f52e9be04deee94abba50a7a6c6922))
+
 ## [0.28.1](https://github.com/Muratovnik/assay/compare/v0.28.0...v0.28.1) (2026-10-18)
 
 ### Bug Fixes
