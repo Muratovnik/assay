@@ -93,18 +93,23 @@ def routing_config(environment):
 ROUTING_UNUSABLE = "it could not be validated; run the hooks doctor for the cause."
 
 
-def session_routing(event, environment):
+def session_routing(event, client, environment):
     """What the session reminder needs to know about routing, resolved like the launch check.
 
-    A configuration named by the variable or bound in the plugin data counts as
-    routing even when it cannot be loaded: its launches are refused, so the
-    checklist is the right guidance and the reason is added to it. Nothing here
-    raises; session start never fails over routing.
+    The checklist describes the route table, so a loaded configuration counts
+    only with a table for this client; without one the launch check is the
+    evidence-only check, or none, and speaks at the launch. A configuration named
+    by the variable or bound in the plugin data that cannot be loaded counts
+    anyway: its launches are refused, so the checklist is the right guidance and
+    the reason is added to it. Nothing here raises; session start never fails
+    over routing.
     """
     if event.get("hook_event_name") != "SessionStart":
         return {}
     try:
-        return {"routing": routing_config(environment) is not None}
+        config = routing_config(environment)
+        return {"routing": config is not None and config.get("routes") is not None
+                and config.get("client") == client}
     except RetiredConfiguration as exc:
         return {"routing": True, "problem": str(exc)}
     except Exception:
@@ -245,7 +250,7 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         # Basic reminders do not depend on prompt rules, the parser or state.
         # Keep them as a fallback; a routing reply always remains authoritative.
         if not protected and event["hook_event_name"] in {"SessionStart", "PreToolUse"}:
-            legacy = reminder(event, environment, **session_routing(event, environment))
+            legacy = reminder(event, environment, **session_routing(event, client, environment))
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
         loaded = []

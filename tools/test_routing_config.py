@@ -117,6 +117,19 @@ class SessionChecklistTests(Fixture):
             with self.subTest(source=source):
                 self.assertIn(self.CHECKLIST, self.start(environment, source))
 
+    def test_only_a_route_table_for_this_client_shows_the_checklist(self):
+        tableless = self.config({'schema_version': 5, 'client': 'claude'}, name='tableless.json')
+        other = self.config({'schema_version': 5, 'client': 'codex', 'routes': TABLE}, name='other.json')
+        matching = self.config(name='matching.json')
+        for config, shown in ((tableless, False), (other, False), (matching, True)):
+            for label, environment in (('binding', self.bind(config)),
+                                       ('variable', {'ASSAY_ROUTING_CONFIG': str(config)})):
+                with self.subTest(config=config.name, via=label):
+                    text = self.start(environment)
+                    self.assertEqual(shown, self.CHECKLIST in text)
+                    self.assertIn('Assay is installed.', text)
+                    self.assertNotIn('routing configuration is refused', text)
+
     def test_the_variable_wins_over_the_binding_as_in_the_launch_check(self):
         retired = self.config({'schema_version': 4, 'client': 'claude'}, name='retired.json')
         environment = {**self.bind(retired), 'ASSAY_ROUTING_CONFIG': str(self.config())}

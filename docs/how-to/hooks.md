@@ -342,7 +342,9 @@ user requests subagents, use `route-subagents` before substantial solo work; no
 delegation is authorized by it. The rest of the routing checklist is added at
 session start whenever the hook resolves a routing configuration the way the
 launch check does, through `ASSAY_ROUTING_CONFIG` or the plugin data directory's
-`routing.json` binding; otherwise it arrives in the reminder before each launch.
+`routing.json` binding, and that configuration has a route table for the hook's
+client; otherwise it arrives in the reminder before each launch. A configuration
+without a table, or written for the other client, gets no checklist.
 The checklist says to apply `route-subagents` before every launch, to start the
 launch's description with a task class from the route table and pass exactly that
 class's model and effort, and where a refusal's remedy is. A configuration that
