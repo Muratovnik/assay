@@ -1093,12 +1093,6 @@ def gemini_extension(version: str) -> bytes:
     )
 
 
-ROUTING_OPERATIONS = frozenset({
-    "prepare_routing", "get_advisor_input", "complete_routing", "get_routing_decision",
-    "authorize_routing_launch", "record_routing_outcome",
-})
-
-
 def reminder_hooks(client: str = "claude") -> bytes:
     # Resolve roots in Python, never interpolate installation paths in a shell.
     # Native manifests contain only supported fields. One command owns the
@@ -1114,11 +1108,7 @@ def reminder_hooks(client: str = "claude") -> bytes:
     )
     hook = {"type": "command", "command": command, "timeout": 5}
     session_end_hook = {**hook, "timeout": 3} if client == "codex" else hook
-    operations = "|".join(sorted(ROUTING_OPERATIONS))
     spawn = "Agent|Task" if client == "claude" else "spawn_agent|collaborationspawn_agent|Agent"
-    pre = f"{spawn}|mcp__.+__({operations})"
-    if client == "claude":
-        pre += "|SubagentHandback"
     hooks = {
         "SessionStart": [{"matcher": "^(startup|resume|clear|compact" + ("|fork" if client == "claude" else "") + ")$", "hooks": [hook]}],
         "UserPromptSubmit": [{"hooks": [hook]}],
@@ -1876,85 +1866,11 @@ def uninstall_links(
     ]
 
 
-MAX_AGENT_TEMPLATE_BYTES = 256 * 1024
-
-
-def generate_claude_routes(root: Path, config_path: Path, *, prune=False, remove=False) -> dict:
-    """Explicit client-artifact generation; never mutate root agent settings."""
-    scripts = root / "skills" / "route-subagents" / "scripts"
-    sys.path.insert(0, str(scripts))
-    from route_evidence.claude_agents import alias_efforts, generate, internal_templates
-    from route_evidence.claude_agents import remove as remove_variants
-    from route_evidence.core import EvidenceError
-    from route_evidence.pipeline_config import configured_inventory, plain_path
-    from route_evidence.pipeline_config import settings as pipeline_settings
-    from route_evidence.pipeline_store import PipelineStore
-    from route_evidence.service import load_config
-
-    def active_names(pipeline):
-        if not pipeline["state_dir"]:
-            raise EvidenceError("pruning_requires_shared_runtime_state")
-        return PipelineStore(Path(pipeline["state_dir"])).transaction()
-
-    try:
-        config = load_config(config_path)
-        if config.get("client") != "claude":
-            raise EvidenceError("variant_generation_requires_claude_configuration")
-        pipeline = pipeline_settings(config)
-        if remove:
-            if not pipeline["state_dir"]:
-                return remove_variants(pipeline)  # no runtime state, so no active launch
-            # Hold the state transaction so a concurrently authorized launch
-            # cannot lose its immutable definition.
-            with active_names(pipeline) as tx:
-                active = [a["variant"]["name"] for a in tx.values("attempt")
-                          if a["state"] not in {"failed", "finished"}]
-                return remove_variants(pipeline, active_names=active)
-        inventory = (configured_inventory(config) or {}).get("available", [])
-        pairs = {(m["model"], e) for m in inventory for e in m["efforts"]}
-        routes = list(pipeline["variants"]) + ([pipeline["advisor_route"]] if pipeline["advisor_route"] else [])
-        if not pairs or any((r["model"], r["effort"]) not in pairs for r in routes):
-            raise EvidenceError("generated_routes_require_confirmed_inventory_pairs")
-        # Routed profiles get one definition per effort the inventory offers for
-        # a model the Agent call accepts; the call itself carries that model.
-        efforts = alias_efforts(inventory)
-        if pipeline["profiles"] and not efforts:
-            raise EvidenceError("routed_profiles_require_an_alias_model_in_inventory")
-        catalog = load_catalog(root)
-        templates = {asset.name: render_profile((root / asset.path).read_bytes(), asset, "claude")
-                     for asset in profile_assets(catalog)}
-        for name, location in pipeline["agent_templates"].items():
-            # An existing user or project definition becomes a template; its own
-            # file is read, never changed, and cannot shadow a catalogued name.
-            if name in templates or name in internal_templates():
-                raise EvidenceError("agent_template_name_conflict")
-            path = plain_path(Path(location))
-            if not path.is_file() or path.stat().st_size > MAX_AGENT_TEMPLATE_BYTES:
-                raise EvidenceError("agent_template_unreadable")
-            templates[name] = path.read_bytes()
-        if prune:
-            with active_names(pipeline) as tx:
-                active = [a["variant"]["name"] for a in tx.values("attempt")
-                          if a["state"] not in {"failed", "finished"}]
-                return generate(pipeline, templates, efforts=efforts, prune=True, active_names=active)
-        return generate(pipeline, templates, efforts=efforts)
-    except EvidenceError as error:
-        raise ContractError(str(error)) from error
-    finally:
-        sys.path.remove(str(scripts))
-
-
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     commands = result.add_subparsers(dest="command", required=True)
     commands.add_parser("check")
-    variants = commands.add_parser("claude-routes", help="generate configured model/effort variants without changing root settings")
-    variants.add_argument("--config", type=Path, required=True)
-    lifecycle = variants.add_mutually_exclusive_group()
-    lifecycle.add_argument("--prune", action="store_true", help="remove only unmodified inactive owned variants")
-    lifecycle.add_argument("--remove", action="store_true",
-                           help="uninstall every unmodified inactive owned variant, for example before a rollback")
     plan = commands.add_parser("plan")
     plan.add_argument("--json", action="store_true")
     install = commands.add_parser("install-links")
@@ -1985,10 +1901,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
     options = parser().parse_args(arguments)
     root = options.root.resolve()
     try:
-        if options.command == "claude-routes":
-            print(json.dumps(generate_claude_routes(root, options.config, prune=options.prune,
-                                                    remove=options.remove), indent=2))
-            return 0
         if options.command == "render":
             if options.check:
                 drift = render_drift(root)

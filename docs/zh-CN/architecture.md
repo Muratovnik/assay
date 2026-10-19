@@ -9,9 +9,7 @@ Claude 启动仍须同时指明两项设置。`route-candidates` 根据缓存的
 路由建议器（`native-economy`，或经明确同意的 Jev）和 `required` 模式已冻结：所有者
 启用后仍可使用，但不再更改，也不是默认路径。`required` 模式早于 Agent 调用中的 effort
 字段，因此仍通过生成的定义传递 effort。客户端负责权限、启动及实际配额；Assay 负责契约、
-本地元数据和诊断重放，不引入新守护进程或强制付费评测。详见
-[RoutingAdvisor](../how-to/routing-advisor.md)
-与 [强制路由](../how-to/required-routing.md)。
+本地元数据和诊断重放，不引入新守护进程或强制付费评测。
 
 [English](../architecture.md) · [Русский](../ru/architecture.md) · **简体中文**
 

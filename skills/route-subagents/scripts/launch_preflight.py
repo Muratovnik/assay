@@ -1,4 +1,4 @@
-"""Local fallback argument check; no advisor, network, telemetry or launch permit."""
+"""Local fallback argument check; no network or launch permit."""
 from __future__ import annotations
 
 import argparse
@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 
-from route_evidence.client_capabilities import claude_overrides, contract, codex_route_check
+from route_evidence.client_capabilities import CLAUDE_MODEL_ALIASES, claude_overrides, contract, codex_route_check
 from route_evidence.core import MAX_BYTES, EvidenceError, loads, read_document, text
 from route_evidence.routing import validate_request
 
@@ -50,10 +50,8 @@ def check(document, *, environment=None):
     if not isinstance(document, dict) or set(document) - allowed:
         raise EvidenceError("invalid_fallback_preflight_fields")
     client = document.get("client")
-    if client not in {"codex", "claude"} or document.get("mode") not in {"required", "evidence-only"}:
+    if client not in {"codex", "claude"} or document.get("mode") != "evidence-only":
         raise EvidenceError("fallback_requires_client_and_mode")
-    if document["mode"] == "required":
-        raise EvidenceError("required_routing_needs_registered_launch_not_local_fallback")
     if document.get("failure") not in {"approval_rejected", "service_unavailable"}:
         raise EvidenceError("invalid_failure_for_local_fallback")
     packet = text(document.get("packet_id"), "packet_id")
@@ -112,7 +110,6 @@ def check(document, *, environment=None):
             raise EvidenceError("claude_per_call_effort_not_supported")
         if "effort" in launch and fields["effort"] is None:
             raise EvidenceError("claude_effort_field_not_bound")
-        from route_evidence.claude_agents import CLAUDE_MODEL_ALIASES
         if "model" in launch and launch["model"] not in CLAUDE_MODEL_ALIASES:
             raise EvidenceError("claude_call_model_requires_native_alias")
         for field in (value for value in fields.values() if value is not None):

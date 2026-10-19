@@ -134,17 +134,21 @@ class ServiceTests(unittest.IsolatedAsyncioTestCase):
 
     def test_configuration_is_strict_and_dated(self):
         config = self.root / "config.json"
-        for value in ({"schema_version": 1, "unexpected": True},
-                      {"schema_version": 1, "preferences": {"price_guess": 2}},
-                      {"schema_version": 1, "preferences": {"objective": "cost_usd"}},
-                      {"schema_version": 1, "inventory": {"available": request()["available"]}}):
+        for value in ({"schema_version": 5, "unexpected": True},
+                      {"schema_version": 5, "preferences": {"price_guess": 2}},
+                      {"schema_version": 5, "preferences": {"objective": "cost_usd"}},
+                      {"schema_version": 5, "inventory": {"available": request()["available"]}},
+                      {"schema_version": 6}, {"schema_version": "5"}):
             config.write_text(json.dumps(value), encoding="utf-8")
             with self.assertRaises(EvidenceError):
                 load_config(config)
-        valid = {"schema_version": 1, "client": "codex", "preferences": {"quality_loss_pp": 3},
+        valid = {"schema_version": 5, "client": "codex", "preferences": {"quality_loss_pp": 3},
                  "inventory": {"available": request()["available"], "observed_at": timestamp(self.now)}}
         config.write_text(json.dumps(valid), encoding="utf-8")
-        self.assertEqual(load_config(config), valid)
+        loaded = load_config(config)
+        # The launch-check block is normalized even when absent; everything else is returned as written.
+        self.assertEqual(loaded.pop("pipeline")["mode"], "evidence-only")
+        self.assertEqual(loaded, valid)
 
     def test_identical_import_preserves_data_change_date(self):
         before = ingest(self.cache, data(), timestamp(self.now))
@@ -191,7 +195,7 @@ class CLITests(unittest.TestCase):
 
     def test_config_and_client_cannot_disagree(self):
         config = Path(self.tmp.name) / "config.json"
-        config.write_text(json.dumps({"schema_version": 1, "client": "codex"}))
+        config.write_text(json.dumps({"schema_version": 5, "client": "codex"}))
         p = self.cli("--config", str(config), "--client", "claude", "status")
         self.assertEqual(p.returncode, 2)
         self.assertIn("conflicts", json.loads(p.stdout)["error"])

@@ -219,24 +219,6 @@ benchmarks; see the [route table reference](../skills/route-subagents/references
 Confirm one refusal in a fresh session of each client after installing, because
 an untrusted hook is skipped without an error.
 
-## Optional routing advisor (frozen)
-
-The advisor is frozen: unchanged and available, but not the default path.
-`route-subagents` can use `native-economy` through the active client's available
-models, or the separately enabled hosted Jev adapter. Both extend the existing
-benchmark MCP server; installing skill links does not register or enable them.
-Config v1 remains evidence-only and a v2 file keeps its advisor settings. The
-explicit migration writes a new schema-3 file, evidence-only by default, and keeps
-the original for rollback. Native-only operation needs no Jev SDK or key.
-Required routing is a separate opt-in for Claude Code, described in the
-[required routing contract](how-to/required-routing.md).
-
-See the [routing advisor setup and workflow](how-to/routing-advisor.md)
-for configuration, optional pinned SDK installation, external-data consent,
-bounded handoff, metadata retention and offline replay. Reconnect the client
-after changing its server configuration. Static tests do not establish native
-model behavior, actual provider access or quota savings.
-
 ## Uninstalling
 
 ```text

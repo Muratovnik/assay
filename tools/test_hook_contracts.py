@@ -199,7 +199,6 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertIn('effort_unresolved', result['unverified'])
         self.assertFalse(result['launch_verified'])
         self.assertIn('spawn_field_not_exposed:model', codex_route_check(expected, spawn, spawn_fields={'model':'model','effort':'model_reasoning_effort'})['conflicts'])
-        self.assertIsNone(contract('codex')['strict_adapter'])
         self.assertTrue(contract('codex')['input_rewrite_requires_allow'])
 
     def test_native_argument_names_are_not_inferred_from_config_names(self):
@@ -360,7 +359,7 @@ class ReviewerBoundaryTests(unittest.TestCase):
 
 
 class ExplicitRouteTests(unittest.TestCase):
-    """Evidence-only Claude launches name a model and an effort instead of inheriting both."""
+    """Claude launches name a model and an effort instead of inheriting both."""
 
     def setUp(self):
         tmp=tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
@@ -368,15 +367,16 @@ class ExplicitRouteTests(unittest.TestCase):
         self.home=self.root/'home'
         home=patch.object(Path,'home',return_value=self.home); home.start(); self.addCleanup(home.stop)
 
-    def environment(self, pipeline=None, client='claude', variable='ASSAY_ROUTING_TELEMETRY_CONFIG'):
+    def environment(self, pipeline=None, client='claude', variable='PLUGIN_DATA'):
         config=self.root/'config.json'
-        config.write_text(json.dumps({'schema_version':4,'client':client,'telemetry':{'mode':'off'},
+        config.write_text(json.dumps({'schema_version':5,'client':client,
                                       **({'pipeline':pipeline} if pipeline is not None else {})}),encoding='utf-8')
         if variable=='ASSAY_ROUTING_CONFIG':
             return {variable:str(config)}
-        binding=self.root/'binding.json'
-        binding.write_text(json.dumps({'config':str(config),'cache_dir':str(self.root/'cache')}),encoding='utf-8')
-        return {variable:str(binding)}
+        data=self.root/'plugin-data'; data.mkdir(exist_ok=True)
+        (data/'routing.json').write_text(json.dumps({'config':str(config),'cache_dir':str(self.root/'cache')}),
+                                         encoding='utf-8')
+        return {variable:str(data)}
 
     def launch(self, **supplied):
         return {'hook_event_name':'PreToolUse','tool_name':'Agent','session_id':'s','tool_use_id':'t',
@@ -438,23 +438,21 @@ class ExplicitRouteTests(unittest.TestCase):
 
     def test_a_client_without_the_effort_field_is_sent_to_definitions(self):
         env=self.environment({'mode':'evidence-only','host':{'version':'2.1.250','surface':'cli'}})
-        self.assertIn('tools/assay.py claude-routes',self.reason(self.launch(model='sonnet'),env))
+        self.assertIn('definition whose frontmatter sets effort',self.reason(self.launch(model='sonnet'),env))
         self.assertIn('explicit model',self.reason(self.launch(effort='low'),env))
 
     def test_other_clients_tools_modes_and_missing_bindings_are_untouched(self):
         self.assertIsNone(self.reason(self.launch(),{}))
         self.assertIsNone(self.reason({**self.launch(),'tool_name':'Bash'},self.environment()))
         self.assertIsNone(self.reason({**self.launch(),'hook_event_name':'PostToolUse'},self.environment()))
-        self.assertEqual({},cli.routing_result(self.launch(),'claude',self.environment(client='codex')))
-        self.assertEqual({},cli.routing_result(self.launch(),'codex',self.environment()))
-        # Required mode keeps its own registered guard, configured by its own variable.
-        self.assertEqual({},cli.routing_result(self.launch(),'claude',self.environment({'mode':'required'})))
+        self.assertEqual({},cli.explicit_routes(self.launch(),'claude',self.environment(client='codex')))
+        self.assertEqual({},cli.explicit_routes(self.launch(),'codex',self.environment()))
 
     def test_an_invalid_setting_is_rejected_and_refuses_configured_delegation(self):
         from route_evidence.pipeline_config import settings
         with self.assertRaisesRegex(EvidenceError,'invalid_pipeline_explicit_routes'):
             settings({'pipeline':{'explicit_routes':'sometimes'}})
-        output=cli.routing_result(self.launch(),'claude',
+        output=cli.explicit_routes(self.launch(),'claude',
                                   self.environment({'mode':'evidence-only','explicit_routes':'sometimes'}))
         self.assertEqual('deny',output['hookSpecificOutput']['permissionDecision'])
         self.assertIn('routing configuration could not be validated',
@@ -522,14 +520,14 @@ class HostObservationTests(unittest.TestCase):
         with patch.object(host_observations,'summary',side_effect=EvidenceError('pipeline_store_unavailable')):
             self.assertEqual('unavailable',service.host_observations()['status'])
 
-    def test_capture_observes_unlinked_launches_and_the_service_reports_them(self):
+    def test_hook_events_observe_launches_through_the_binding_and_the_service_reports_them(self):
         from route_evidence.cache import Cache
         from route_evidence.service import RoutingService
         config=self.root/'config.json'
-        config.write_text(json.dumps({'schema_version':4,'client':'claude','telemetry':{'mode':'metadata'}}),encoding='utf-8')
-        binding=self.root/'binding.json'
-        binding.write_text(json.dumps({'config':str(config),'cache_dir':str(self.root)}),encoding='utf-8')
-        env={'ASSAY_ROUTING_TELEMETRY_CONFIG':str(binding)}
+        config.write_text(json.dumps({'schema_version':5,'client':'claude'}),encoding='utf-8')
+        data=self.root/'plugin-data'; data.mkdir()
+        (data/'routing.json').write_text(json.dumps({'config':str(config),'cache_dir':str(self.root)}),encoding='utf-8')
+        env={'PLUGIN_DATA':str(data)}
         launch=self.launch('t1',model='fable',effort='medium')
         for event in (launch,{**launch,'hook_event_name':'PostToolUse',
                               'tool_response':{'agentId':'a1','resolvedModel':'claude-fable-5-1'}}):
@@ -570,24 +568,12 @@ class RuntimeTests(unittest.TestCase):
     def test_no_hint_failure_can_erase_a_guard_decision(self):
         event={'hook_event_name':'PreToolUse','tool_name':'Agent','tool_input':{}}
         denied={'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'test'}}
-        with patch.object(cli, 'routing_result',return_value=denied), patch.object(cli,'load_rules',side_effect=RuntimeError('SECRET')):
+        with patch.object(cli, 'explicit_routes',return_value=denied), patch.object(cli,'load_rules',side_effect=RuntimeError('SECRET')):
             result,error=cli.process(event,'claude',{})
         self.assertEqual(denied,result); self.assertNotIn('SECRET',error)
-        with patch.object(cli,'routing_result',return_value={}), patch.object(cli,'load_rules',side_effect=ImportError()):
+        with patch.object(cli,'explicit_routes',return_value={}), patch.object(cli,'load_rules',side_effect=ImportError()):
             result,error=cli.process(event,'claude',{})
         self.assertEqual(cli.reminder(event, {}),result); self.assertTrue(error)
-
-    def test_codex_required_guard_denies_without_allow_or_rewrite(self):
-        config={'client':'codex','pipeline':{'mode':'required'}}
-        event={'hook_event_name':'PreToolUse','tool_name':'spawn_agent','tool_input':{'model':'x'}}
-        with patch.object(cli,'load_config',return_value=config):
-            result,error=cli.process(event,'codex',{'ASSAY_ROUTING_CONFIG':'configured'})
-        self.assertIsNone(error)
-        self.assertEqual('deny',result['hookSpecificOutput']['permissionDecision'])
-        self.assertNotIn('updatedInput',json.dumps(result))
-        self.assertEqual('x',event['tool_input']['model'])
-        with patch.object(cli,'load_config',return_value=config):
-            self.assertEqual({},cli.routing_result({**event,'tool_name':'apply_patch'},'codex',{'ASSAY_ROUTING_CONFIG':'configured'}))
 
     def test_bad_advisory_settings_are_nonblocking_and_readonly(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -623,26 +609,6 @@ class RuntimeTests(unittest.TestCase):
             self.assertIn('route-subagents',context)
             self.assertIn('Previous request suggested code-change',context)
             self.assertLess(len(context),1000)
-
-    def test_rebinding_cannot_erase_an_earlier_effort_mismatch(self):
-        from routing_hook import observe_effort, _recheck_observed
-        run={'route':{'model':'sonnet','effort':'low'},'binding':'start_order'}
-        observe_effort(run,{'effort':{'level':'high'}})
-        observe_effort(run,{'effort':{'level':'low'}})
-        self.assertNotIn('route_mismatch',run)
-        run['binding']='host_result'; _recheck_observed(run)
-        self.assertTrue(run['route_mismatch'])
-        _recheck_observed(run)
-        self.assertTrue(run['route_mismatch'])
-
-    def test_failed_guard_redacts_returns_and_blocks_unknown_handbacks(self):
-        from routing_hook import failure
-        returned={'hook_event_name':'PostToolUse','tool_name':'Agent','tool_response':{'secret':'SENTINEL'}}
-        result=failure(returned,'plugin',True)
-        self.assertIn('updatedToolOutput',result['hookSpecificOutput'])
-        self.assertNotIn('SENTINEL',json.dumps(result))
-        result=failure({'hook_event_name':'PreToolUse','tool_name':'SubagentHandback'},'plugin',True)
-        self.assertEqual('deny',result['hookSpecificOutput']['permissionDecision'])
 
     def test_offline_replay_ignores_installed_environment(self):
         with tempfile.TemporaryDirectory() as tmp:

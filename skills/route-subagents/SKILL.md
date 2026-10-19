@@ -122,21 +122,8 @@ If routing is rejected, unavailable or fails, read
 does not justify inheriting the primary's model or maximum effort. Respect the
 denied operation.
 
-### Frozen alternatives
-
-The routing advisor, with its decision contract and local task evidence, and
-required routing remain available to an owner who enables them. They are not the
-default path and are not being extended. If `routing_status` shows the advisor
-or required mode enabled, its procedure is in `docs/how-to/routing-advisor.md`
-(also `native-decision-contract.md` and `task-evidence.md`) or
-`docs/how-to/required-routing.md` of the Assay repository. The installed Claude
-plugin carries `docs/`; a Codex link install or a singleton copy does not, so
-read the file from the repository. An enabled advisor's exact inline
-`handoff.prompt` is forwarded unchanged, never as a file path or excerpt;
-required mode launches only the exact input it authorizes, including any
-`model`. The [benchmark evidence service](references/benchmark-routing.md)
-keeps `get_routing_context` and source refresh for building and reviewing the
-table.
+The [benchmark evidence service](references/benchmark-routing.md) keeps
+`get_routing_context` and source refresh for building and reviewing the table.
 
 ### Record the outcome
 
@@ -154,12 +141,6 @@ repeated rework in one class is the owner's signal to review that class. Before
 dispatching an evidence-reviewer, give its packet the review inputs that
 [review and continuity](references/review-and-continuity.md) requires; a
 suitable pair does not make the assignment ready.
-
-Preserve the packet's telemetry marker and the native spawn UUID/ID. A role path
-cannot bind usage. Record criterion assessments and use the explicit transcript
-import when automatic capture is unavailable; see
-[routing telemetry](references/routing-telemetry.md). Completion alone keeps
-acceptance unknown.
 
 ## Use the native client
 

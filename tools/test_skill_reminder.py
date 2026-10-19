@@ -36,29 +36,18 @@ class ReminderTests(unittest.TestCase):
         self.assertEqual(b"", result.stderr)
         return json.loads(result.stdout)
 
-    def test_required_claude_routing_leaves_claude_launches_to_the_guard(self):
+    def test_every_launch_gets_the_reminder_whatever_the_configuration_says(self):
+        # No configuration hands launches to another voice; the launch check speaks through the hook handler.
         spawn = {"hook_event_name": "PreToolUse", "tool_input": {"prompt": "work"}}
-        start = {"hook_event_name": "SessionStart", "source": "startup"}
         with tempfile.TemporaryDirectory() as tmp:
-            def config(name, value):
+            for name, value in (("retired.json", {"schema_version": 3, "client": "claude", "pipeline": {"mode": "required"}}),
+                                ("current.json", {"schema_version": 5, "client": "claude"}),
+                                ("broken.json", "{not json")):
                 path = Path(tmp) / name
                 path.write_text(value if isinstance(value, str) else json.dumps(value), encoding="utf-8")
-                return path
-            required = {"schema_version": 3, "client": "claude", "pipeline": {"mode": "required"}}
-            silent = config("required.json", required)
-            for tool in ("Agent", "Task"):
-                with self.subTest(tool=tool):
-                    self.assertEqual({}, self.output({**spawn, "tool_name": tool}, silent))
-            # Codex launches and the session reminder are not the guard's to answer.
-            self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "spawn_agent"}, silent))
-            self.assertIn("hookSpecificOutput", self.output(start, silent))
-            for name, value in (("evidence.json", {**required, "pipeline": {"mode": "evidence-only"}}),
-                                ("codex.json", {**required, "client": "codex"}),
-                                ("v2.json", {**required, "schema_version": 2}),
-                                ("broken.json", "{not json")):
-                with self.subTest(config=name):
-                    self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "Agent"}, config(name, value)))
-            self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": "Agent"}, Path(tmp) / "missing.json"))
+                for tool in ("Agent", "Task", "spawn_agent"):
+                    with self.subTest(config=name, tool=tool):
+                        self.assertIn("hookSpecificOutput", self.output({**spawn, "tool_name": tool}, path))
 
     def test_session_reminder_survives_every_supported_restart(self):
         for source in ("startup", "resume", "clear", "compact", "fork"):
@@ -130,7 +119,7 @@ class ReminderTests(unittest.TestCase):
                 self.assertIn(b"invalid or oversized", result.stderr)
                 self.assertNotIn(b"PRIVATE_SENTINEL", result.stderr)
 
-    def test_packaged_matchers_cover_reminders_guards_and_worker_stop_telemetry(self):
+    def test_packaged_matchers_cover_reminders_guards_and_worker_stops(self):
         for client, filename in (("claude", "hooks.json"), ("codex", "codex.json")):
             hooks = json.loads((ROOT / "hooks" / filename).read_text())["hooks"]
             common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "SessionEnd"}
@@ -156,8 +145,6 @@ class ReminderTests(unittest.TestCase):
                 self.assertEqual(unified, commands("PreToolUse", tool))
                 self.assertEqual(unified, commands("PostToolUse", tool))
             self.assertEqual(unified, commands("PreToolUse", "SubagentHandback"))
-            for tool in ("mcp__benchmark-routing__prepare_routing", "mcp__plugin_assay_routing__authorize_routing_launch"):
-                self.assertEqual(unified, commands("PreToolUse", tool))
             for event in ("SubagentStart", "SubagentStop"):
                 self.assertEqual(unified, commands(event, "assay-general-purpose-0123456789abcdef"))
                 for agent_type in ("Explore", "general-purpose", ""):
@@ -173,15 +160,6 @@ class ReminderTests(unittest.TestCase):
                         self.assertEqual("command", hook["type"])
                         timeout_limit = 3 if client == "codex" and event == "SessionEnd" else 5
                         self.assertLessEqual(hook["timeout"], timeout_limit)
-
-    def test_guard_matcher_names_exactly_the_routing_operations(self):
-        sys.path.insert(0, str(SCRIPT.parent))
-        try:
-            from route_evidence.pipeline_config import ROUTING_TOOLS
-            from tools import assay
-        finally:
-            sys.path.remove(str(SCRIPT.parent))
-        self.assertEqual(ROUTING_TOOLS, assay.ROUTING_OPERATIONS)
 
     def test_packaged_command_from_other_cwd_with_space_and_shell_characters(self):
         # A local fixture checks shell/path wiring without trusting a plugin or

@@ -467,10 +467,9 @@ class HubSourceTests(unittest.TestCase):
 
 class EvolutionIntegrationTests(unittest.IsolatedAsyncioTestCase):
     """Run with the complete repository through ordinary tools/test_*.py discovery."""
-    async def test_service_refresh_and_aliases_reach_compact_advisor_evidence(self):
+    async def test_service_refresh_and_aliases_reach_the_routing_context(self):
         from route_evidence.service import RoutingService
         from route_evidence.processes import ProcessScope
-        from route_evidence.advice import _project_evidence, _expand_records
         from route_evidence.guides import guide_snapshot
         with tempfile.TemporaryDirectory() as tmp:
             now = 1800000000.0
@@ -494,10 +493,8 @@ class EvolutionIntegrationTests(unittest.IsolatedAsyncioTestCase):
             source = next(s for s in result["sources"] if s["source_id"] == "cursorbench")
             self.assertEqual(source["refresh_reason"], "inventory_changed")
             self.assertEqual(source["model_matching"]["models"][0]["status"], "matched")
-            candidates = [{"model": a["model"], "effort": e} for a in inventory("old-model", "gpt-6-luna") for e in a["efforts"]]
-            projected = _project_evidence(again, candidates)
-            restored = _expand_records(projected["sources"])
-            self.assertEqual(next(s for s in restored if s["source_id"] == "cursorbench")["model_matching"], source["model_matching"])
+            repeated = next(s for s in again["sources"] if s["source_id"] == "cursorbench")
+            self.assertEqual(repeated["model_matching"], source["model_matching"])
             self.assertTrue(any(c["model"] == "gpt-6-luna" for t in again["tasks"] for cohort in t["supporting_comparisons"] for c in cohort["candidates"]))
 
     async def test_new_inventory_skips_a_source_this_host_cannot_fetch(self):

@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .cache import Cache, atomic_write, source_lock
-from .core import EvidenceError, digest, epoch, number, read_document, validate_snapshot
+from .core import EvidenceError, RetiredConfiguration, digest, epoch, number, read_document, validate_snapshot
 from .processes import ProcessScope
 from .guides import GUIDES, guide_ids
 from .model_names import inventory_keys, spelling_report
@@ -90,20 +90,34 @@ def ingest(cache, document, observed_at):
         return cache.view(source, state, refresh="imported")
 
 
+SCHEMA_VERSION = 5
+CONFIG_KEYS = frozenset({"schema_version", "client", "preferences", "inventory", "pipeline", "routes"})
+# Sections of the removed routing advisor and execution telemetry. A configuration
+# that still carries one is refused with the full list, never partly accepted.
+REMOVED_SECTIONS = ("advisor", "policy", "telemetry", "task_evidence")
+
+
+def retired_message(removed):
+    """One refusal naming every removed key and the schema version to set."""
+    remove = ("remove " + ", ".join(removed) + " and ") if removed else ""
+    return (f"routing configuration schema {SCHEMA_VERSION} no longer has the routing advisor, required mode "
+            f"or execution telemetry; {remove}set schema_version to {SCHEMA_VERSION}")
+
+
 def load_config(path: Path | None):
     if path is None:
         return {}
     config = read_document(path)
-    if not isinstance(config, dict) or type(config.get("schema_version")) is not int or config["schema_version"] not in (1, 2, 3, 4):
-        raise EvidenceError("configuration requires schema_version=1, 2, 3 or 4")
-    allowed = {"schema_version", "client", "preferences", "inventory"}
-    if config["schema_version"] >= 2:
-        allowed.update({"advisor", "policy", "telemetry", "task_evidence"})
-    if config["schema_version"] >= 3:
-        allowed.add("pipeline")
-    if config["schema_version"] >= 4:
-        allowed.add("routes")
-    if set(config) - allowed:
+    if not isinstance(config, dict):
+        raise EvidenceError("configuration must be an object")
+    from .pipeline_config import removed_keys
+    removed = [key for key in REMOVED_SECTIONS if key in config] + removed_keys(config.get("pipeline"))
+    version = config.get("schema_version")
+    if removed or (type(version) is int and version < SCHEMA_VERSION):
+        raise RetiredConfiguration(retired_message(removed))
+    if type(version) is not int or version != SCHEMA_VERSION:
+        raise EvidenceError(f"configuration requires schema_version={SCHEMA_VERSION}")
+    if set(config) - CONFIG_KEYS:
         raise EvidenceError("unknown configuration field")
     preferences = config.get("preferences", {})
     if not isinstance(preferences, dict) or set(preferences) - PREFERENCES:
@@ -118,12 +132,8 @@ def load_config(path: Path | None):
                       **preferences})
     if inventory:
         epoch(inventory["observed_at"])
-    if config["schema_version"] >= 2:
-        from .advisor_config import settings
-        config.update(settings(config))
-    if config["schema_version"] >= 3:
-        from .pipeline_config import settings as pipeline_settings
-        config["pipeline"] = pipeline_settings(config)
+    from .pipeline_config import settings as pipeline_settings
+    config["pipeline"] = pipeline_settings(config)
     if "routes" in config:
         from .route_table import settings as route_settings
         config["routes"] = route_settings(config)
@@ -164,7 +174,7 @@ inventory once per connection, or a dated local inventory is configured. Neither
 an unqualified family alias nor the server's own guesses resolve model versions.
 """
     def __init__(self, cache: Cache, *, client="unconfigured", preferences=None, inventory=None,
-                 timeout=30, browser=False, offline=False, force=False, clock=time.time, advisor_config=None,
+                 timeout=30, browser=False, offline=False, force=False, clock=time.time, config=None,
                  inventory_ttl=86400):
         number(timeout, "timeout_seconds", upper=300)
         number(inventory_ttl, "inventory_ttl_seconds", upper=720 * 3600)
@@ -178,12 +188,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         self._inventory = copy.deepcopy(inventory)
         self.inventory_ttl = float(inventory_ttl)
         self._lock = threading.Lock()
-        self._advisor_config = copy.deepcopy(advisor_config or {})
-        self._advisor_workflow = None
-
-    @property
-    def advisor_config(self):
-        return copy.deepcopy(self._advisor_config)
+        self._config = copy.deepcopy(config or {})
 
     @property
     def inventory(self):
@@ -194,25 +199,6 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         """Adopt an owner-confirmed inventory; its observation time is preserved."""
         with self._lock:
             self._inventory = copy.deepcopy(inventory)
-
-    @property
-    def advisor_workflow(self):
-        from .advisor_service import AdvisorWorkflow
-        if self._advisor_workflow is None:
-            self._advisor_workflow = AdvisorWorkflow(self, self._advisor_config)
-        return self._advisor_workflow
-
-    async def prepare_routing(self, packets, *, available=None, constraints=None, advisor_route=None, portable=False,
-                              task_queries=None, cost_objectives=None, native_delivery="handoff"):
-        return await self.advisor_workflow.prepare_routing(
-            packets, available=available, constraints=constraints, advisor_route=advisor_route, portable=portable,
-            task_queries=task_queries, cost_objectives=cost_objectives, native_delivery=native_delivery)
-
-    def complete_routing(self, decision_id, advisor_result, *, envelope=None, cache=True):
-        return self.advisor_workflow.complete_routing(decision_id, advisor_result, envelope=envelope, cache=cache)
-
-    def record_routing_outcome(self, decision_id, execution):
-        return self.advisor_workflow.record_routing_outcome(decision_id, execution)
 
     def prepare(self, task_types, *, available=None, constraints=None):
         if not isinstance(task_types, list) or not task_types:
@@ -253,16 +239,25 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         with self._lock:
             inv = copy.deepcopy(self._inventory)
         observed = {"host_observations": self.host_observations()} if self.client == "claude" else {}
-        routes = self._advisor_config.get("routes")
+        routes = self._config.get("routes")
         return {"client": self.client, "preferences": copy.deepcopy(self.preferences), **observed,
                 "routes": copy.deepcopy(routes) if routes else {"status": "not_configured"},
-                "advisor": self.advisor_workflow.status(),
+                "pipeline": self.launch_check(),
                 "refresh_mode": "offline" if self.offline else "automatic",
                 "guides": brief({"sources": guides})["sources"],
                 "inventory": {"configured": inv is not None, "observed_at": inv["observed_at"] if inv else None,
                               "models": len(inv["available"]) if inv else 0},
                 "model_names": spelling(self.cache, inv["available"], self.client) if inv else {"status": "no_inventory"},
                 "installation": diagnostics(), **brief({"sources": sources})}
+
+    def launch_check(self):
+        """The configured launch check and what the declared host supports; configuration is not observation."""
+        from .client_capabilities import contract
+        from .pipeline_config import settings
+        mode = settings(self._config)
+        return {"mode": mode["mode"], "explicit_routes": mode["explicit_routes"],
+                "unrouted_agents": list(mode["unrouted_agents"]),
+                "adapter_capabilities": contract(self.client, mode["host"])}
 
     def host_observations(self):
         """What recent launches' aliases and efforts ran as, from the host's own hooks."""
@@ -341,21 +336,12 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         # load is reported inside the guidance block, not as missing evidence.
         return {**acquisition_summary(sources, offline=self.offline, matched=matched), **result}
 
-    async def get_routing_context(self, task_types, *, available=None, constraints=None, details=False,
-                                  task_query=None, features=None):
+    async def get_routing_context(self, task_types, *, available=None, constraints=None, details=False):
         request = self.prepare(task_types, available=available, constraints=constraints)
         if "status" in request:
             return {**request, "data_status": "not_checked", "usage": "setup_required",
                     "data_message": "Source refresh has not run: supply the required connection inputs first."}
         result = await self.context(request)
-        if task_query is not None or features is not None:
-            from .advice_contracts import candidate_id, validate_packets
-            from .core import effort
-            packets = validate_packets([{"packet_id": "context", "task_types": task_types, "features": features or {}}])
-            candidates = [{"candidate_id": candidate_id(a["model"], effort(e)), "model": a["model"], "effort": effort(e)}
-                          for a in request["available"] for e in a["efforts"]]
-            result["task_similarity_evidence"] = await self.advisor_workflow.task_evidence.async_summarize(
-                packets, candidates, {"context": task_query} if task_query is not None else None)
         # details keeps the raw measured rows; it never reveals a constraint that
         # the normal response withheld.
         result = result if details else brief(result)

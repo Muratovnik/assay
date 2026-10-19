@@ -15,12 +15,13 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, routing_telemetry, skill_gate, sources, branches, midturn
+from runtime import state, routing_binding, skill_gate, sources, branches, midturn
 from route_evidence.client_capabilities import contract, codex_route_check
-from route_evidence.core import loads
+from route_evidence.core import RetiredConfiguration, loads
+from route_evidence import host_observations
 from route_evidence import route_table
 from route_evidence.service import load_config
-from routing_hook import handle as route, explicit_launch, failure, deny, routing_operation, settings as pipeline
+from routing_hook import explicit_launch, deny
 from skill_reminder import reminder
 
 MAX_INPUT = 1024 * 1024
@@ -73,37 +74,47 @@ def options(environment):
     return value
 
 
-def explicit_routes(event, client, environment, config=None):
-    """Evidence-only launch check; the configuration may come from the telemetry binding.
+def routing_config(environment):
+    """The routing configuration the launch check applies, or None without one.
 
-    That binding names the routing configuration whose launches it records, so
-    an owner who set up evidence-only routing gets the check without another
-    setting. With a route table every spawn must follow its declared class,
-    and a spawn the table does not check is pointed at it instead of the
-    generic launch reminder; without one a Claude spawn must still name both
-    settings. A Claude spawn from inside a subagent is refused before either
-    check: only the primary routes. Codex hook input does not say which agent
-    calls, so its depth stays with `agents.max_depth`. A missing or unreadable
-    configuration refuses a recognized launch; an absent binding keeps ordinary delegation.
+    `ASSAY_ROUTING_CONFIG` names it directly; otherwise the plugin's routing
+    binding does, so an owner who set up the binding gets the check without
+    another setting.
+    """
+    location = environment.get("ASSAY_ROUTING_CONFIG")
+    if location:
+        return load_config(Path(location))
+    binding = routing_binding.configuration(environment)
+    return load_config(Path(binding["config"])) if binding else None
+
+
+def explicit_routes(event, client, environment):
+    """The launch check of a configured routing configuration.
+
+    With a route table every spawn must follow its declared class, and a spawn
+    the table does not check is pointed at it instead of the generic launch
+    reminder; without one a Claude spawn must still name both settings. A
+    Claude spawn from inside a subagent is refused before either check: only
+    the primary routes. Codex hook input does not say which agent calls, so its
+    depth stays with `agents.max_depth`. A missing, unreadable or retired
+    configuration refuses a recognized launch; no configuration keeps ordinary
+    delegation.
     """
     spec = route_table.SPAWN.get(client)
     if (spec is None or event.get("hook_event_name") != "PreToolUse"
             or event.get("tool_name") not in spec["tools"]):
         return {}
     try:
+        config = routing_config(environment)
         if config is None:
-            binding = routing_telemetry.configuration(environment)
-            if binding is None:
-                return {}
-            config = load_config(Path(binding["config"]))
-        if (client == "claude" and event.get("agent_id") is not None and config.get("client") == client
-                and pipeline(config)["mode"] == "evidence-only"):
+            return {}
+        if client == "claude" and event.get("agent_id") is not None and config.get("client") == client:
             return deny(NESTED_SPAWN)
         table = config.get("routes")
         if table is None:
             return explicit_launch(event, config) if client == "claude" else {}
         mode = config["pipeline"]
-        if config.get("client") != client or mode["mode"] != "evidence-only":
+        if config.get("client") != client:
             return {}
         # The table, not the generic launch reminder, describes routing here.
         outside = {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": route_table.OUTSIDE}}
@@ -117,37 +128,11 @@ def explicit_routes(event, client, environment, config=None):
         note = route_table.admission(client, event.get("tool_name"), event.get("tool_input"), table,
                                      unrouted=mode["unrouted_agents"])
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else outside
+    except RetiredConfiguration as exc:
+        # The message names keys and file names only, never paths or payloads.
+        return deny(str(exc))
     except Exception:
         return deny("routing configuration could not be validated; restore the configured route table before delegation")
-
-
-def routing_result(event, client, environment):
-    path = environment.get("ASSAY_ROUTING_CONFIG")
-    if not path:
-        return explicit_routes(event, client, environment)
-    try:
-        config = load_config(Path(path))
-        if config.get("pipeline", {}).get("mode") != "required":
-            return explicit_routes(event, client, environment, config)
-        if client != "claude" or config.get("client") != client:
-            if event.get("hook_event_name") == "PreToolUse" and (
-                    event.get("tool_name") in route_table.SPAWN.get(client, {}).get("tools", ())
-                    or routing_operation(event.get("tool_name")) is not None):
-                return deny("required routing is unavailable for this client contract; use evidence-only mode explicitly, not an implicit bypass")
-            if event.get("hook_event_name") == "SessionStart":
-                return {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext":
-                    "Assay: required routing is not supported by this configured client adapter. Protected delegation is blocked; ordinary root work remains available. Run the routing doctor."}}
-            return {}
-        if event.get("hook_event_name") == "UserPromptSubmit":
-            return {}
-        return route(event, config, environment=environment)
-    except Exception:
-        # Do not let an advisory dependency or malformed config downgrade an
-        # explicitly selected contract. Echo neither paths nor payloads.
-        if (client == "codex" and event.get("hook_event_name") == "PreToolUse"
-                and event.get("tool_name") in route_table.SPAWN[client]["tools"]):
-            return deny("required routing configuration could not be validated")
-        return failure(event, "plugin", True)
 
 
 READ_TOOLS = frozenset({"Read", "Grep", "Glob", "read_file", "list_dir", "find_file", "view_image",
@@ -225,7 +210,7 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
     if normalized is None:
         return {}, None
     try:
-        protected = reviewer_boundary(event, environment, clock=clock) or routing_result(event, client, environment)
+        protected = reviewer_boundary(event, environment, clock=clock) or explicit_routes(event, client, environment)
     except Exception:
         if event.get("hook_event_name") == "PreToolUse":
             return deny("read-only profile identity could not be checked; repair the profile hook state before retrying"), None
@@ -290,13 +275,30 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         return protected or legacy, "Assay: optional hints unavailable; routing decision and basic reminders retained. Run hooks doctor."
 
 
+OBSERVED_EVENTS = frozenset({"PreToolUse", "PostToolUse", "PostToolUseFailure", "SubagentStop"})
+
+
+def observe(event, client, environment, *, clock=None):
+    """Record what a Claude launch's alias and effort ran as, in the binding's cache directory."""
+    name = event.get("hook_event_name")
+    if (client != "claude" or name not in OBSERVED_EVENTS
+            or (name != "SubagentStop" and event.get("tool_name") not in route_table.SPAWN["claude"]["tools"])):
+        return
+    binding = routing_binding.configuration(environment)
+    if binding is not None:
+        host_observations.observe(event, binding["cache_dir"], **({"clock": clock} if clock else {}))
+
+
 def process(event, client, environment, *, root=ROOT, clock=None):
     result, error = _process(event, client, environment, root=root, clock=clock)
     try:
+        # A refused launch never ran, so it leaves no observation.
         if result.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
-            routing_telemetry.capture(event, client, environment, **({"clock": clock} if clock else {}))
+            observe(event, client, environment, clock=clock)
+    except RetiredConfiguration as exc:
+        error = "\n".join(part for part in (error, "Assay: " + str(exc)) if part)
     except Exception:
-        diagnostic = "Assay: routing execution telemetry unavailable; hook decision retained. Check telemetry binding and native identity."
+        diagnostic = "Assay: host observations unavailable; hook decision retained. Check the routing binding."
         error = "\n".join(part for part in (error, diagnostic) if part)
     return result, error
 
@@ -304,7 +306,8 @@ def process(event, client, environment, *, root=ROOT, clock=None):
 def doctor(client, environment, *, root=ROOT, settings_path=None):
     settings = options(environment)
     rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
-    config = load_config(Path(environment["ASSAY_ROUTING_CONFIG"])) if environment.get("ASSAY_ROUTING_CONFIG") else {}
+    binding = routing_binding.configuration(environment)
+    config = routing_config(environment) or {}
     result = {"capabilities": contract(client, config.get("pipeline", {}).get("host")),
               "rules": [r["id"] for r in rules], "rules_fingerprint": fingerprint,
               "skill_check": rules.skill_check,
@@ -313,7 +316,8 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
               "state_configured": settings["state_dir"] is not None,
               "hooks_trusted": "unknown",
               "native_execution": "unverified", "model_compliance": "unverified",
-              "routing_telemetry_bound": routing_telemetry.configuration(environment) is not None,
+              "routing_binding_found": binding is not None,
+              "routing_config_found": bool(config),
               "settings_modified": False, "conflicts": []}
     if settings_path:
         supplied = read_json(settings_path).get("hooks", {})
@@ -381,6 +385,9 @@ def main(argv=None):
         return 0
     except RemovedOptions as exc:
         print(str(exc), file=sys.stderr)
+        return 1 if args.command == "event" else 2
+    except RetiredConfiguration as exc:
+        print("Assay: " + str(exc), file=sys.stderr)
         return 1 if args.command == "event" else 2
     except Exception:
         print("Assay: invalid or unavailable hook input/configuration; no payload was recorded.", file=sys.stderr)

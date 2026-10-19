@@ -152,7 +152,6 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertIn(str((self.root / "skills").resolve()), text)
         self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(self.listed(text)))
         self.assertEqual(text, start("assay:evidence-reviewer")["context"])
-        self.assertEqual("", start("assay-routing-advisor-high-0123456789abcdef")["context"])
         disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check"])
         self.assertEqual("", start("general-purpose", disabled)["context"])
         self.assertEqual("", activation.evaluate({"hook_event_name": "SubagentStop", "agent_id": "a1"},
@@ -238,16 +237,6 @@ class DelegationReminderTests(unittest.TestCase):
                 decision = activation.evaluate({"hook_event_name": "UserPromptSubmit", "prompt": prompt}, rules)
                 channels = (session_text, decision.get("context") or "")
                 self.assertTrue(any("before substantial solo work" in text for text in channels))
-
-    def test_required_claude_guard_still_owns_launches(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "routing.json"
-            path.write_text(json.dumps({"schema_version": 3, "client": "claude", "pipeline": {"mode": "required"}}))
-            environment = {"ASSAY_ROUTING_CONFIG": str(path)}
-            for tool in ("Agent", "Task"):
-                self.assertEqual({}, reminders.reminder({"hook_event_name": "PreToolUse", "tool_name": tool}, environment))
-            result = reminders.reminder({"hook_event_name": "PreToolUse", "tool_name": "spawn_agent"}, environment)
-            self.assertEqual({"hookEventName", "additionalContext"}, set(result["hookSpecificOutput"]))
 
     def test_no_launch_or_settings_mutation(self):
         event = {"hook_event_name": "PreToolUse", "tool_name": "Agent", "tool_input": {"prompt": "SECRET"}}

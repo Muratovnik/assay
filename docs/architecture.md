@@ -105,10 +105,7 @@ owns authorization, spawning, cancellation and actual quota accounting. Prepared
 state and an exact decision cache are bounded in memory; optional JSON telemetry
 has its own cache namespace and retention. Profiles and the catalog carry no
 model or runtime settings. No daemon, learned router or mandatory model
-evaluation campaign is introduced. The
-[advisor reference](how-to/routing-advisor.md) and
-the [required routing contract](how-to/required-routing.md)
-define their failure, migration and rollback behavior.
+evaluation campaign is introduced.
 
 ## Guarded lifecycle
 

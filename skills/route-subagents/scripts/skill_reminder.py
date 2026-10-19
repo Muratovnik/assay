@@ -43,32 +43,10 @@ DELEGATION_REMINDER = (
     "this packet: deliberate model and supported effort, bounded ownership and "
     "return contract, minimal context, cost and quality evidence. Inheriting the "
     "parent model or full history is a choice requiring justification. Reuse "
-    "valid plan evidence; do not rerun an advisor for each spawn. Preserve user "
-    "choices and delegation limits. Reading the skill alone is not routing."
+    "valid plan evidence. Preserve user choices and delegation limits. "
+    "Reading the skill alone is not routing."
 ) + FAILURE_REMINDER
 MAX_INPUT_BYTES = 1024 * 1024
-MAX_CONFIG_BYTES = 1024 * 1024
-
-
-def required_claude_routing(environ=None) -> bool:
-    """Whether the routing guard, not this reminder, answers Claude launches.
-
-    Only an explicit required-mode Claude configuration counts. Any unreadable
-    or different configuration keeps the reminder: the guard then denies the
-    launch itself and names the problem.
-    """
-    path = (os.environ if environ is None else environ).get("ASSAY_ROUTING_CONFIG")
-    if not path:
-        return False
-    try:
-        with open(path, "rb") as stream:
-            data = stream.read(MAX_CONFIG_BYTES + 1)
-        config = json.loads(data) if len(data) <= MAX_CONFIG_BYTES else None
-    except (OSError, ValueError, UnicodeError, RecursionError):
-        return False
-    pipeline = config.get("pipeline") if isinstance(config, dict) else None
-    return (isinstance(pipeline, dict) and config.get("schema_version") == 3
-            and config.get("client") == "claude" and pipeline.get("mode") == "required")
 
 
 def reminder(event: dict, environ=None) -> dict:
@@ -81,11 +59,6 @@ def reminder(event: dict, environ=None) -> dict:
     elif name == "PreToolUse" and event.get("tool_name") in (
         "spawn_agent", "collaborationspawn_agent", "Agent", "Task"
     ):
-        # A registered launch already follows the routing protocol, and the
-        # guard's own reply explains any refused one; a second voice here only
-        # contradicts it.
-        if event["tool_name"] in {"Agent", "Task"} and required_claude_routing(environ):
-            return {}
         context = DELEGATION_REMINDER
     else:
         return {}

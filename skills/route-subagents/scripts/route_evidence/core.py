@@ -18,6 +18,10 @@ class EvidenceError(ValueError):
     """Invalid or unavailable evidence, not an invitation to guess a model."""
 
 
+class RetiredConfiguration(EvidenceError):
+    """A routing configuration or binding written for a removed contract; the message says what to change."""
+
+
 def loads(text: str) -> Any:
     def pairs(items):
         out = {}

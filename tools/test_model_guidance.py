@@ -171,14 +171,6 @@ class ModelGuidanceIntegrationTests(unittest.TestCase):
             altered["applicability"]["models"] = ["different-model"]
             self.assertIsNone(cache.read(altered).get("snapshot"))
 
-    def test_advisor_projection_preserves_scope_and_confirmed_runtime_alias(self):
-        from route_evidence.advice import _project_evidence
-        available = inventory("runtime-sol", "gpt-6-sol")
-        original = context("openai-gpt-6", available)
-        projected = _project_evidence(original, [{"model": "runtime-sol", "effort": "medium"}])
-        self.assertEqual(projected["guidance"], original["guidance"])
-        self.assertEqual(projected["guidance"]["documents"][0]["matched_models"], ["runtime-sol"])
-
 
 if __name__ == "__main__":
     unittest.main()

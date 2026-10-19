@@ -13,6 +13,10 @@ from .pipeline_config import EFFORT_ORDER
 CHECKED_AT = "2026-09-29"
 # Claude's subagent precedence and per-call effort were rechecked separately.
 CLAUDE_CHECKED_AT = "2026-10-11"
+# The only model values an Agent call accepts: the host rejects any other value,
+# including a full ID supplied by a hook, before launch. Each is a rolling alias
+# that the host resolves at launch and reports as the resolved full ID.
+CLAUDE_MODEL_ALIASES = frozenset({"sonnet", "opus", "haiku", "fable"})
 SOURCES = {
     "claude_agents": "https://code.claude.com/docs/en/sub-agents",
     "claude_effort": "https://code.claude.com/docs/en/model-config",
@@ -69,7 +73,6 @@ def contract(client, host=None):
               "observed_model": None, "observed_effort": None,
               "sources": [url for key, url in SOURCES.items() if key.startswith(client + "_")]}
     if client == "claude":
-        from .claude_agents import CLAUDE_MODEL_ALIASES
         per_call_effort = bool(known_surface and version and version >= (2, 1, 292))
         report.update(checked_at=CLAUDE_CHECKED_AT, per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=per_call_effort,
                       effort_levels=list(EFFORT_ORDER),
@@ -79,17 +82,15 @@ def contract(client, host=None):
                                         else "environment_call_definition_parent" if known_surface and version else "unknown"),
                       input_rewrite_requires_allow=False,
                       plugin_ignored_fields=["hooks", "mcpServers", "permissionMode"],
-                      strict_adapter="claude" if host["surface"] in {"cli", "unknown"} else None,
                       definition_registry_loaded="unverified", effective_permissions="unverified",
                       observation="event_specific")
     elif client == "codex":
         report.update(per_call_effort=None, effort_transport="inspect_exposed_tool_schema",
                       model_precedence="custom_agent_over_spawn_over_defaults_over_parent",
-                      input_rewrite_requires_allow=True, strict_adapter=None,
-                      unsupported=["permission_neutral_receipt_injection", "private_native_advisor_return"],
+                      input_rewrite_requires_allow=True,
                       uncovered_tools=["hosted WebSearch", "write_stdin continuations", "specialized opt-out paths"])
     else:
-        report.update(per_call_effort=None, strict_adapter=None, effort_transport="unknown")
+        report.update(per_call_effort=None, effort_transport="unknown")
     return report
 
 

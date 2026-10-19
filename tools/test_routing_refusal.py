@@ -153,10 +153,10 @@ class RefusalPreflightTests(unittest.TestCase):
         with self.assertRaisesRegex(RouteRefuted, "spawn_field_not_exposed"):
             check(data)
 
-    def test_required_routing_and_input_errors_cannot_be_replaced_by_this_check(self):
+    def test_a_removed_mode_and_input_errors_are_refused(self):
         for client in ("codex", "claude"):
             data = request(client); data["mode"] = "required"
-            with self.subTest(client=client), self.assertRaisesRegex(EvidenceError, "registered_launch_not_local_fallback"):
+            with self.subTest(client=client), self.assertRaisesRegex(EvidenceError, "fallback_requires_client_and_mode"):
                 check(data, environment={})
         data = request(); data["failure"] = "invalid_advice"
         with self.assertRaisesRegex(EvidenceError, "invalid_failure"):

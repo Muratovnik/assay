@@ -282,7 +282,7 @@ class HookCommandTests(unittest.TestCase):
             self.cli.process({**event, "hook_event_name": "PostCompact"}, "codex", environment)
             pre = {**event, "hook_event_name": "PreToolUse", "tool_name": "spawn_agent", "tool_use_id": "spawn"}
             protected = {"hookSpecificOutput": {"hookEventName": "PreToolUse", "updatedInput": {"message": "kept"}}}
-            with patch.object(self.cli, "routing_result", return_value=protected):
+            with patch.object(self.cli, "explicit_routes", return_value=protected):
                 result, error = self.cli.process(pre, "codex", environment)
             self.assertIsNone(error)
             self.assertEqual(protected, result)

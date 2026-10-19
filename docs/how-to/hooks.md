@@ -475,9 +475,7 @@ and usage fields remain present with sanitized values, so the client accepts the
 replacement. Internal return-processing failures use the same schema.
 Private advisor launches require `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` in the
 environment that starts Claude. Otherwise the guard denies the launch: background
-completion notifications bypass this replacement. See the
-[required-routing setup](required-routing.md#configure-once-outside-task-execution)
-for the session-wide effect and alternatives.
+completion notifications bypass this replacement.
 Failure notifications, missing hooks and input too large to parse are not a proven
 redaction boundary. Hooks are workflow checks, not isolation against a hostile
 client/process. PostToolUse cannot undo work already performed.
@@ -528,7 +526,7 @@ payloads: `spawn_agent` remains `spawn_agent`, not Claude's `Agent` envelope.
 ## Offline checks and evidence levels
 
 ```text
-python -B -m unittest tools.test_hook_contracts tools.test_hook_regressions tools.test_skill_reminder tools.test_routing_pipeline tools.test_claude_variants
+python -B -m unittest tools.test_hook_contracts tools.test_hook_regressions tools.test_skill_reminder
 python -B tools/check.py --all
 python -I -B hooks/runtime/cli.py replay --client codex --input sanitized-events.jsonl
 ```

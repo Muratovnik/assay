@@ -17,8 +17,6 @@ MAX_CONTEXT = 900
 MAX_CHECK = 2_700
 MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
-# The required-mode advisor returns one structured answer and has no tools.
-ROUTING_ADVISOR = "assay-routing-advisor-"
 SKILL_CHECK = "skill-check"
 SKILL_GATE = "skill-gate"
 # Claude source checks: the note after a fetch and the stop check of full-read claims.
@@ -265,9 +263,6 @@ def evaluate(event, rules, *, client=None, loaded=()):
     The caller supplies the client and the skills already loaded; this reads neither.
     """
     if event.get("hook_event_name") == "SubagentStart":
-        role = event.get("agent_type")
-        if isinstance(role, str) and role.startswith(ROUTING_ADVISOR):
-            return {"rule_ids": [], "context": ""}
         return {"rule_ids": [], "context": subagent_check(rules, client=client)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}

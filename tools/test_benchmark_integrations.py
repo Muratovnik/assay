@@ -10,7 +10,6 @@ import sys
 import tempfile
 import time
 import unittest
-from claude_output_fixture import assert_agent_output, completed_output
 from pathlib import Path
 
 from test_benchmark_router import SCRIPTS, request
@@ -158,7 +157,7 @@ class OptionalSDKTests(unittest.TestCase):
     def test_cli_help_and_missing_sdk_diagnostic_without_site_packages(self):
         with tempfile.TemporaryDirectory() as tmp:
             config = Path(tmp) / "routing.json"
-            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
+            config.write_text(json.dumps({"schema_version": 5, "client": "codex", "preferences": {}}), encoding="utf-8")
             for arguments, code in ((["--help"], 0),
                                     (["--offline", "--cache-dir", str(Path(tmp) / "cache"),
                                       "--config", str(config)], 2)):
@@ -247,16 +246,16 @@ build_server(service).run(transport="stdio")
         from mcp import Client, StdioServerParameters
         with tempfile.TemporaryDirectory() as tmp:
             config = Path(tmp) / "routing.json"
-            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
+            config.write_text(json.dumps({"schema_version": 5, "client": "codex", "preferences": {}}), encoding="utf-8")
             params = StdioServerParameters(command=sys.executable, args=["-B", str(SCRIPTS / "benchmark_mcp.py"),
                 "--cache-dir", str(Path(tmp) / "cache"), "--offline", "--config", str(config)])
             async with asyncio.timeout(30):
                 async with Client(params) as client:
                     tools = await client.list_tools()
-                    self.assertEqual({t.name for t in tools.tools}, {"get_routing_context", "routing_status",
-                        "prepare_routing", "complete_routing", "record_routing_outcome", "get_advisor_input", "get_routing_decision", "authorize_routing_launch"})
+                    self.assertEqual({t.name for t in tools.tools}, {"get_routing_context", "routing_status"})
                     status = await client.call_tool("routing_status", {})
                     self.assertFalse(status.is_error)
+                    self.assertEqual(status.structured_content["pipeline"]["mode"], "evidence-only")
                     self.assertFalse(status.structured_content["inventory"]["configured"])
                     self.assertEqual(status.structured_content["refresh_mode"], "offline")
                     initial = await client.call_tool("get_routing_context", {"task_types": ["implementation"]})
@@ -277,297 +276,6 @@ build_server(service).run(transport="stdio")
                     self.assertTrue(invalid.is_error)
                     after = await client.call_tool("routing_status", {})
                     self.assertEqual(after.structured_content["inventory"]["models"], 2)
-                    diagnostic = await client.call_tool("prepare_routing", {"packets": [
-                        {"packet_id": "local-check", "task_types": ["implementation"], "features": {}}]})
-                    self.assertFalse(diagnostic.is_error)
-                    self.assertEqual(diagnostic.structured_content["usage"], "diagnostic_only")
-                    self.assertNotIn("handoff", diagnostic.structured_content)
-                    unknown = await client.call_tool("complete_routing", {"decision_id": "absent", "advisor_result": {}})
-                    self.assertEqual(unknown.structured_content["status"], "expired")
-                    receipt = await client.call_tool("record_routing_outcome", {"decision_id": "absent", "execution": {}})
-                    self.assertFalse(receipt.structured_content["recorded"])
-
-    async def test_stdio_receipt_contract_is_visible_and_rejects_lossy_input(self):
-        from mcp import Client, StdioServerParameters
-        from jsonschema import Draft202012Validator
-        with tempfile.TemporaryDirectory() as tmp:
-            config = Path(tmp) / "routing.json"
-            config.write_text(json.dumps({"schema_version": 1, "client": "codex", "preferences": {}}), encoding="utf-8")
-            params = StdioServerParameters(command=sys.executable, args=["-B", str(SCRIPTS / "benchmark_mcp.py"),
-                "--cache-dir", str(Path(tmp) / "cache"), "--offline", "--config", str(config)])
-            async with asyncio.timeout(30):
-                async with Client(params) as client:
-                    listed = (await client.list_tools()).tools
-                    advertised = next(tool for tool in listed if tool.name == "record_routing_outcome")
-                    for name in ("prepare_routing", "get_advisor_input"):
-                        delivery = next(tool for tool in listed if tool.name == name)
-                        self.assertEqual(delivery.meta["anthropic/maxResultSizeChars"], 500000)
-                    self.assertTrue(advertised.output_schema)
-                    schema = Draft202012Validator(advertised.input_schema)
-                    valid = {"decision_id": "absent", "execution": {
-                        "status": "completed", "actual_model": "economy", "actual_effort": "low",
-                        "observed": {"model": None, "effort": None},
-                        "usage": {"inputTokens": 8, "outputTokens": 3},
-                        "outcome": {"status": "accepted", "evidence_refs": [{"id": "receipt-1"}]},
-                    }}
-                    schema.validate(valid)
-                    receipt = await client.call_tool("record_routing_outcome", valid)
-                    self.assertFalse(receipt.is_error)
-                    Draft202012Validator(advertised.output_schema).validate(receipt.structured_content)
-                    self.assertEqual(receipt.structured_content["status"], "diagnostic_only")
-                    self.assertFalse(receipt.structured_content["recorded"])
-                    for execution in (
-                        {"elapsed_ms": 5},
-                        {"outcome": {"evidence_refs": ["https://example.org/check"]}},
-                        {"usage": {"input_tokens": True}},
-                        {"usage": {"input_tokens": -1}},
-                        {"observed": {"model": "economy", "unobserved": "discarded"}},
-                    ):
-                        with self.subTest(execution=execution):
-                            invalid = {"decision_id": "absent", "execution": execution}
-                            self.assertTrue(list(schema.iter_errors(invalid)))
-                            error = await client.call_tool("record_routing_outcome", invalid)
-                            self.assertTrue(error.is_error)
-                    self.assertFalse((await client.call_tool("routing_status", {})).is_error)
-
-    async def test_stdio_bootstrap_errors_and_corrected_submission_never_authorize_a_fallback(self):
-        import copy
-        from mcp import Client, StdioServerParameters
-        from jsonschema import Draft202012Validator
-        from route_evidence.history import HistoryStore
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / "config.json").write_text(json.dumps({"schema_version": 3,
-                "task_evidence": {"enabled": False, "retain_descriptions": True},
-                "telemetry": {"mode": "full", "dataset": "smoke"}}), encoding="utf-8")
-            bootstrap = root / "server.py"
-            bootstrap.write_text('''
-import sys
-from pathlib import Path
-sys.path.insert(0, sys.argv[1])
-from route_evidence.routing import build_context
-from route_evidence.service import RoutingService, load_config
-from route_evidence.cache import Cache
-from benchmark_mcp import build_server
-root = Path(sys.argv[2])
-async def context(request):
-    (root / "acquired").write_text("yes")
-    return {**build_context(request, []), "sources": [], "data_status": "unavailable",
-            "guidance": {"documents": [{"sections": [{"excerpt": "First line\\nSecond line\\tEvidence"}]}]},
-            "data_message": "synthetic acquisition fixture", "usage": "routing"}
-service = RoutingService(Cache(root / "cache"), client="codex", advisor_config=load_config(root / "config.json"))
-service.context = context
-build_server(service).run(transport="stdio")
-''', encoding="utf-8")
-            route = {"model": "worker-beta", "effort": "medium",
-                     "selection_basis": {"source": "evidence", "reason_code": "bounded_ranking"}}
-            args = {"available": [{"model": "worker-alpha", "efforts": ["low"]},
-                                  {"model": "worker-beta", "efforts": ["medium"]}],
-                    "advisor_route": route, "packets": [{"packet_id": "wire-error", "task_types": ["investigation"],
-                        "features": {}, "baseline": {"model": "worker-alpha", "effort": "low"}}]}
-            params = StdioServerParameters(command=sys.executable, args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
-            async with asyncio.timeout(30):
-                async with Client(params) as client:
-                    tool = next(t for t in (await client.list_tools()).tools if t.name == "prepare_routing")
-                    validator = Draft202012Validator(tool.input_schema)
-                    validator.validate(args)
-                    bad = copy.deepcopy(args)
-                    bad["advisor_route"]["selection_basis"]["reason"] = "Bounded assessment"
-                    self.assertTrue(list(validator.iter_errors(bad)))
-                    rejected = await client.call_tool("prepare_routing", bad)
-                    self.assertTrue(rejected.is_error)
-                    self.assertFalse((root / "acquired").exists())
-                    self.assertEqual((await client.call_tool("routing_status", {})).structured_content["advisor"]["pending"], 0)
-                    prepared = await client.call_tool("prepare_routing", args)
-                    self.assertFalse(prepared.is_error, prepared)
-                    value = prepared.structured_content
-                    self.assertEqual(value["status"], "awaiting_native_advice")
-                    answer = copy.deepcopy(value["handoff"]["result_contract"])
-                    for assessment in answer["metadata"].get("assessments", []):
-                        assessment["basis"] = "Bounded fixture assessment with no measurement claim."
-                    malformed = copy.deepcopy(answer)
-                    malformed["rankings"][0]["ranking"].pop()
-                    rejected = await client.call_tool("complete_routing", {
-                        "decision_id": value["decision_id"], "advisor_result": malformed})
-                    self.assertTrue(rejected.is_error)
-                    self.assertIn("correct advisor_result", str(rejected.content))
-                    history = HistoryStore(root / "cache", mode="full")
-                    self.assertIsNone(history.read(value["decision_id"]))
-                    result = await client.call_tool("complete_routing", {
-                        "decision_id": value["decision_id"], "advisor_result": answer})
-                    self.assertFalse(result.is_error, result)
-                    self.assertEqual(result.structured_content["status"], "decided")
-                    self.assertNotIn("telemetry_status", result.structured_content)
-                    stored = history.read(value["decision_id"])
-                    self.assertEqual(stored["full"]["snapshot"]["evidence"]["guidance"]["documents"][0]["sections"][0]["excerpt"],
-                                     "First line\nSecond line\tEvidence")
-
-    async def test_stdio_retrospective_context_native_observation_and_acceptance(self):
-        from mcp import Client, StdioServerParameters
-        from route_evidence.history import HistoryStore
-        from route_evidence.telemetry import report
-        from jsonschema import Draft202012Validator
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            config = root / "config.json"
-            config.write_text(json.dumps({"schema_version": 4, "client": "claude",
-                "advisor": {"enabled": False}, "task_evidence": {"enabled": False, "retain_descriptions": True},
-                "telemetry": {"mode": "full", "dataset": "smoke"}}), encoding="utf-8")
-            bootstrap = root / "server.py"
-            bootstrap.write_text("""
-import sys
-from pathlib import Path
-sys.path.insert(0, sys.argv[1])
-from route_evidence.routing import build_context
-from route_evidence.service import RoutingService, load_config
-from route_evidence.cache import Cache
-from benchmark_mcp import build_server
-root = Path(sys.argv[2])
-async def context(request):
-    return {**build_context(request, []), "sources": [], "data_status": "unavailable",
-            "data_message": "synthetic acquisition fixture", "usage": "routing"}
-service = RoutingService(Cache(root / "cache"), client="claude", advisor_config=load_config(root / "config.json"))
-service.context = context
-build_server(service).run(transport="stdio")
-""", encoding="utf-8")
-            native = root / "worker.jsonl"
-            native.write_text(json.dumps({"type": "assistant", "uuid": "native-request",
-                "sessionId": "wire-session", "agentId": "wire-worker", "message": {
-                    "model": "worker-alpha", "content": "PRIVATE_OUTPUT_SENTINEL",
-                    "usage": {"input_tokens": 12, "output_tokens": 4}}}) + "\n", encoding="utf-8")
-            params = StdioServerParameters(command=sys.executable,
-                args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
-            async with asyncio.timeout(30):
-                async with Client(params) as client:
-                    prepared = await client.call_tool("prepare_routing", {"available": [
-                        {"model": "worker-alpha", "efforts": ["low"]}], "packets": [{
-                        "packet_id": "parser", "task_types": ["implementation"], "features": {}, "task_spec": {
-                            "goal": "Repair parser", "criteria": [{"id": "reject", "description": "Reject malformed input"}],
-                            "verification": "Run parser check", "error_impact": "medium", "ambiguity": "low", "provenance": "caller"}}]})
-                    self.assertFalse(prepared.is_error, prepared)
-                    value = prepared.structured_content
-                    self.assertEqual(value["status"], "decided")
-                    self.assertEqual(value["telemetry_links"]["parser"], f'[assay-routing:{value["decision_id"]}/parser]')
-                    receipt = {"decision_id": value["decision_id"], "execution": {
-                        "packet_id": "parser", "execution_ref": "wire-attempt", "status": "completed",
-                        "runtime": {"client": "claude", "session_id": "wire-session", "agent_id": "wire-worker"},
-                        "transcript_path": str(native), "assessment": {"assessment_id": "wire-review", "source": "verification",
-                            "criteria": [{"id": "reject", "status": "pass", "evidence_refs": ["parser-check"]}]}}}
-                    advertised = next(t for t in (await client.list_tools()).tools if t.name == "record_routing_outcome")
-                    Draft202012Validator(advertised.input_schema).validate(receipt)
-                    result = await client.call_tool("record_routing_outcome", receipt)
-                    self.assertFalse(result.is_error, result)
-                    Draft202012Validator(advertised.output_schema).validate(result.structured_content)
-                    self.assertEqual(result.structured_content["telemetry_gaps"], [])
-                    self.assertFalse((await client.call_tool("record_routing_outcome", receipt)).is_error)
-                    invalid = json.loads(json.dumps(receipt))
-                    invalid["execution"]["runtime"] = "invalid-runtime"
-                    self.assertTrue((await client.call_tool("record_routing_outcome", invalid)).is_error)
-            retrospective = report(HistoryStore(root / "cache", mode="full"), dataset="smoke")
-            summary = retrospective["summary"]
-            self.assertEqual(summary["context_retained"], 1)
-            self.assertEqual(summary["with_provider_model"], 1)
-            self.assertEqual(summary["first_attempt_acceptance_rate"], 1)
-            attempt = retrospective["packets"][0]["attempts"][0]
-            self.assertEqual(attempt["usage"]["input_tokens"], 12)
-            self.assertNotIn("PRIVATE_OUTPUT_SENTINEL", json.dumps(retrospective))
-
-    async def test_native_advisor_protocol_roundtrip_without_inference(self):
-        from mcp import Client, StdioServerParameters
-        from route_evidence.claude_agents import generate
-        from route_evidence.core import timestamp
-        from route_evidence.pipeline_config import settings
-        from route_evidence.service import load_config
-        from routing_hook import handle
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            config_path = root / "config.json"
-            available = request()["available"]
-            config_path.write_text(json.dumps({"schema_version": 3, "client": "claude",
-                "telemetry": {"mode": "metadata"},
-                "inventory": {"available": available, "observed_at": timestamp(time.time())},
-                "pipeline": {"mode": "required", "state_dir": str(root / "state"), "agents_dir": str(root / "agents"),
-                    "advisor_route": {"model": "economy-b", "effort": "max", "selection_basis": {
-                        "source": "client_role", "reason_code": "bounded_ranking"}},
-                    "baseline": {"model": available[0]["model"], "effort": available[0]["efforts"][0]},
-                    "variants": [{"profile": "general-purpose", "model": m["model"], "effort": e}
-                                 for m in available for e in m["efforts"]]}}), encoding="utf-8")
-            config = load_config(config_path)
-            generate(settings(config), {})
-            def event(name, **fields):
-                return handle({"hook_event_name": name, "session_id": "wire-session", **fields}, config,
-                              environment={"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"})
-            def attested(tool, arguments, **fields):
-                return event("PreToolUse", tool_name="mcp__assay-benchmark-routing__" + tool,
-                    tool_input=arguments, **fields)["hookSpecificOutput"]["updatedInput"]
-            event("SessionStart")
-            bootstrap = root / "advisor_server.py"
-            bootstrap.write_text("""import sys
-from pathlib import Path
-sys.path.insert(0, sys.argv[1])
-from route_evidence.cache import Cache
-from route_evidence.routing import build_context
-from route_evidence.service import RoutingService, load_config
-from benchmark_mcp import build_server
-root = Path(sys.argv[2])
-config = load_config(root / "config.json")
-service = RoutingService(Cache(root / "cache"), client="claude",
-    advisor_config=config, inventory=config["inventory"])
-async def context(request):
-    return {**build_context(request, []), "sources": [], "data_status": "unavailable", "usage": "routing"}
-service.context = context
-build_server(service).run(transport="stdio")
-""", encoding="utf-8")
-            params = StdioServerParameters(command=sys.executable,
-                args=["-B", str(bootstrap), str(SCRIPTS), str(root)])
-            async with asyncio.timeout(30), Client(params) as client:
-                tools = await client.list_tools()
-                self.assertNotIn("get_routing_context", {t.name for t in tools.tools})
-                args = {"packets": [{"packet_id": "local-check", "task_types": ["implementation"], "features": {}}],
-                    "launch_requests": {"local-check": {"profile": "general-purpose", "prompt": "PRIVATE_WORK_SCOPE"}}}
-                refused = await client.call_tool("prepare_routing", args)
-                self.assertTrue(refused.is_error)
-                prepared = await client.call_tool("prepare_routing", attested("prepare_routing", args))
-                self.assertFalse(prepared.is_error)
-                value = prepared.structured_content
-                self.assertEqual(value["status"], "awaiting_native_advice")
-                self.assertNotIn("result_contract", json.dumps(value))
-                launch = value["handoff"]["input"]
-                substituted = event("PreToolUse", tool_name="Agent", tool_use_id="advisor-call", tool_input=launch)
-                self.assertIn("get_advisor_input", substituted["hookSpecificOutput"]["updatedInput"]["prompt"])
-                event("SubagentStart", agent_id="wire-advisor", agent_type=launch["subagent_type"])
-                private = await client.call_tool("get_advisor_input", attested("get_advisor_input",
-                    {"decision_id": value["decision_id"]}, agent_id="wire-advisor", effort={"level": "max"}))
-                self.assertFalse(private.is_error)
-                self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(private.structured_content))
-                answer = private.structured_content["result_contract"]
-                for assessment in answer["metadata"].get("assessments", []):
-                    assessment["basis"] = "Synthetic protocol fixture ranking; no benchmark cost or production quality claim."
-                arguments = {"decision_id": value["decision_id"], "advisor_result": answer}
-                forged = await client.call_tool("complete_routing", arguments)
-                self.assertTrue(forged.is_error)
-                completed = await client.call_tool("complete_routing", attested("complete_routing", arguments, agent_id="wire-advisor"))
-                self.assertFalse(completed.is_error)
-                self.assertEqual(completed.structured_content["status"], "submitted")
-                sanitized = event("PostToolUse", tool_name="Agent", tool_use_id="advisor-call",
-                    tool_response=completed_output(agentId="wire-advisor", resolvedModel="economy-b"))
-                assert_agent_output(self, sanitized["hookSpecificOutput"]["updatedToolOutput"])
-                self.assertNotIn("PRIVATE_", json.dumps(sanitized))
-                result = await client.call_tool("get_routing_decision", attested("get_routing_decision", {"decision_id": value["decision_id"]}))
-                self.assertEqual(result.structured_content["status"], "decided")
-                self.assertEqual(result.structured_content["advisor_provenance"]["observed_model"], "economy-b")
-                self.assertNotIn('"ranking"', json.dumps(result.structured_content))
-                authorized = await client.call_tool("authorize_routing_launch", attested("authorize_routing_launch", {
-                    "decision_id": value["decision_id"], "packet_id": "local-check"}))
-                self.assertFalse(authorized.is_error)
-                worker = event("PreToolUse", tool_name="Agent", tool_use_id="worker-call",
-                    tool_input=authorized.structured_content["input"])
-                self.assertIn("PRIVATE_WORK_SCOPE", worker["hookSpecificOutput"]["updatedInput"]["prompt"])
-                self.assertNotIn("PRIVATE_WORK_SCOPE", json.dumps(authorized.structured_content))
-                recorded = await client.call_tool("record_routing_outcome", attested("record_routing_outcome", {
-                    "decision_id": value["decision_id"], "execution": {"status": "unknown"}}))
-                self.assertFalse(recorded.is_error)
-                self.assertEqual(recorded.structured_content["execution"]["observed"], {})
 
 
 if __name__ == "__main__":

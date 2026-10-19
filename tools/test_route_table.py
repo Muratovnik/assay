@@ -38,7 +38,7 @@ class RouteTableTests(unittest.TestCase):
         home = patch.object(Path, 'home', return_value=self.home); home.start(); self.addCleanup(home.stop)
 
     def config(self, client='claude', routes=None, pipeline=None, name='config.json'):
-        document = {'schema_version': 4, 'client': client, 'telemetry': {'mode': 'off'}}
+        document = {'schema_version': 5, 'client': client}
         if routes is not None:
             document['routes'] = routes
         if pipeline is not None:
@@ -154,12 +154,14 @@ class RouteTableTests(unittest.TestCase):
     def test_configured_launch_refuses_an_unreadable_binding_or_configuration(self):
         event = {**self.codex(), 'tool_name': 'collaborationspawn_agent'}
         missing = str(self.root / 'missing.json')
-        for environment in ({'ASSAY_ROUTING_CONFIG': missing},
-                            {'ASSAY_ROUTING_TELEMETRY_CONFIG': missing}):
+        data = self.root / 'plugin-data'; data.mkdir()
+        (data / 'routing.json').write_text(json.dumps({'config': missing, 'cache_dir': str(self.root / 'cache')}),
+                                           encoding='utf-8')
+        for environment in ({'ASSAY_ROUTING_CONFIG': missing}, {'PLUGIN_DATA': str(data)}):
             with self.subTest(environment=environment):
-                output = cli.routing_result(event, 'codex', environment)['hookSpecificOutput']
+                output = cli.explicit_routes(event, 'codex', environment)['hookSpecificOutput']
                 self.assertEqual(output['permissionDecision'], 'deny')
-                self.assertEqual(cli.routing_result({**event, 'tool_name': 'Read'}, 'codex', environment), {})
+                self.assertEqual(cli.explicit_routes({**event, 'tool_name': 'Read'}, 'codex', environment), {})
 
     def context(self, event, environment, client):
         result, error = cli.process(event, client, environment)
@@ -194,7 +196,7 @@ class RouteTableTests(unittest.TestCase):
             self.claude(description='code: fix', model='sonnet', effort='high'), self.environment(), 'claude'))
 
     def test_a_launch_the_table_does_not_check_is_pointed_at_the_table(self):
-        # With a table, the generic launch reminder's advisor-era wording would contradict it.
+        # With a table, the generic launch reminder's wording would contradict it.
         table = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
         exempt = {'ASSAY_ROUTING_CONFIG': str(self.config(
             routes=CLAUDE_TABLE, pipeline={'mode': 'evidence-only', 'unrouted_agents': {'Explore': 'inherit'}},
@@ -272,11 +274,11 @@ class RouteTableTests(unittest.TestCase):
         from route_evidence.cache import Cache
         from route_evidence.service import RoutingService
         cache = Cache(self.root / 'cache')
-        configured = RoutingService(cache, client='claude', advisor_config=load_config(self.config(routes=CLAUDE_TABLE)),
+        configured = RoutingService(cache, client='claude', config=load_config(self.config(routes=CLAUDE_TABLE)),
                                     offline=True).status()
         self.assertEqual(configured['routes']['classes']['code'],
                          {'model': 'sonnet', 'effort': 'high', 'when': 'ordinary implementation'})
-        bare = RoutingService(cache, client='claude', advisor_config=load_config(self.config()), offline=True).status()
+        bare = RoutingService(cache, client='claude', config=load_config(self.config()), offline=True).status()
         self.assertEqual(bare['routes'], {'status': 'not_configured'})
 
     def test_candidates_propose_the_cheapest_pair_indistinguishable_from_the_best(self):
@@ -303,11 +305,11 @@ class RouteTableTests(unittest.TestCase):
         # Either configured source must remain closed when validation fails.
         launch = self.claude(model='sonnet', effort='high')
         explicit = self.environment(routes={'classes': {}})
-        self.assertIn('routing doctor', self.reason(launch, explicit, 'claude'))
-        binding = self.root / 'binding.json'
-        binding.write_text(json.dumps({'config': str(self.config(routes={'classes': {}})),
-                                       'cache_dir': str(self.root / 'cache')}), encoding='utf-8')
-        result, error = cli.process(launch, 'claude', {'ASSAY_ROUTING_TELEMETRY_CONFIG': str(binding)})
+        self.assertIn('could not be validated', self.reason(launch, explicit, 'claude'))
+        data = self.root / 'plugin-data'; data.mkdir()
+        (data / 'routing.json').write_text(json.dumps({'config': str(self.config(routes={'classes': {}})),
+                                                       'cache_dir': str(self.root / 'cache')}), encoding='utf-8')
+        result, error = cli.process(launch, 'claude', {'PLUGIN_DATA': str(data)})
         self.assertEqual('deny', result['hookSpecificOutput']['permissionDecision'])
         self.assertIn('routing configuration could not be validated', result['hookSpecificOutput']['permissionDecisionReason'])
         self.assertIsNone(error)

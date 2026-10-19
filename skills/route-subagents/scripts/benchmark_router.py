@@ -40,14 +40,14 @@ def make_service(args):
     try:
         inventory = configured_inventory(config)
     except EvidenceError:
-        # routing_status and doctor report an unreadable inventory file; required
-        # preparation rereads it and refuses explicitly instead of guessing.
+        # routing_status and doctor report an unreadable inventory file; inventory-confirm
+        # rereads it and refuses explicitly instead of guessing.
         inventory = None
     return RoutingService(Cache(args.cache_dir, ttl=args.ttl_hours * 3600),
                           client=args.client or config.get("client", "unconfigured"),
                           preferences=config.get("preferences"), inventory=inventory,
                           timeout=args.timeout_seconds, browser=args.browser, offline=args.offline, force=args.force,
-                          advisor_config=config, inventory_ttl=inventory_ttl_seconds(config))
+                          config=config, inventory_ttl=inventory_ttl_seconds(config))
 
 
 def request_document(path):
@@ -73,32 +73,6 @@ def main(argv=None):
     ip.add_argument("--observed-at", required=True)
     dp = subs.add_parser("doctor")
     dp.add_argument("--check-browser", action="store_true", help="actually launch Chromium on about:blank")
-    for name in ("prepare", "complete", "record"):
-        ap = subs.add_parser(name)
-        ap.add_argument("--request", required=True, help="JSON object file, or - for stdin")
-    hp = subs.add_parser("history-import")
-    hp.add_argument("--file", type=Path, action="append", required=True,
-                    help="explicit Codex/Claude JSONL path; repeat for multiple logs (read-only)")
-    rp = subs.add_parser("replay")
-    rp.add_argument("--record", type=Path, required=True, help="retained advisor record; never invokes a model")
-    rp.add_argument("--policy", type=Path, help="optional pure-policy overrides")
-    tr = subs.add_parser("telemetry-report", help="local retrospective with execution and acceptance coverage; no network")
-    tr.add_argument("--dataset", choices=("production", "test", "smoke", "unspecified"))
-    tr.add_argument("--since", help="decision timestamp inclusive, ISO 8601 UTC")
-    tr.add_argument("--until", help="decision timestamp exclusive, ISO 8601 UTC")
-    for name in ("telemetry-observe", "telemetry-assess"):
-        tr = subs.add_parser(name, help="append local runtime evidence or acceptance criteria assessment")
-        tr.add_argument("--request", required=True, help="JSON object file, or - for stdin")
-    mp = subs.add_parser("migrate-config")
-    mp.add_argument("--source", type=Path, required=True)
-    mp.add_argument("--output", type=Path, required=True, help="new file only; never replaces the source")
-    mp.add_argument("--enable-advisor", action="store_true")
-    mp.add_argument("--native-input-unlimited", action="store_true",
-                    help="explicitly replace the legacy shared input cap with routing-policy-v2")
-    mp.add_argument("--native-decisions", action="store_true",
-                    help="explicitly migrate native advice to task adequacy and deterministic cost selection")
-    mp.add_argument("--mode", choices=["required", "evidence-only"], default="evidence-only",
-                    help="evidence-only keeps the existing workflow; required is an explicit opt-in")
     ic = subs.add_parser("inventory-confirm",
                          help="record that the configured inventory file matches the host now; no model call")
     ic.add_argument("--available", type=Path,
@@ -111,30 +85,10 @@ def main(argv=None):
     rc.add_argument("--harness")
     rc.add_argument("--match", help="keep rows whose model label contains this text")
     rc.add_argument("--band", type=float, default=0.07, help="score difference treated as indistinguishable")
-    tp = subs.add_parser("task-import", help="import an explicit local corpus; no network")
-    tp.add_argument("--file", type=Path, required=True)
-    tp.add_argument("--manifest", type=Path, help="LLMRouterBench slice manifest; otherwise normalized corpus JSON")
-    subs.add_parser("task-setup", help="download and index pinned public evidence; no model calls")
-    tp = subs.add_parser("task-context", help="local task evidence only; never calls a model")
-    tp.add_argument("--request", required=True)
-    subs.add_parser("task-purge-descriptions", help="remove only opted-in descriptions from local receipts")
-    tp = subs.add_parser("task-evaluate", help="held-out lookup on existing answers; no model calls")
-    tp.add_argument("--file", type=Path, required=True)
-    tp.add_argument("--unit", choices=["api_usd", "quota_units", "input_tokens", "output_tokens", "duration_seconds"], default="api_usd")
-    tp.add_argument("--overhead", type=float)
-    tp = subs.add_parser("task-forecast", help="chronological cost diagnostics from retained receipts; no model calls")
-    tp.add_argument("--request", required=True, help="JSON with packets")
-    tp.add_argument("--unit", choices=["api_usd", "quota_units", "input_tokens", "output_tokens", "duration_seconds"], default="api_usd")
     args = parser.parse_args(argv)
     try:
         if args.command == "smoke" and (args.offline or not args.force):
             raise EvidenceError("smoke requires --force and online mode")
-        if args.command == "migrate-config":
-            from route_evidence.advisor_config import migrate_config
-            result = migrate_config(args.source, args.output, enable_advisor=args.enable_advisor, mode=args.mode,
-                                    native_input_unlimited=args.native_input_unlimited, native_decisions=args.native_decisions)
-            print(json.dumps(result, indent=2))
-            return 0
         if args.command == "inventory-confirm":
             from route_evidence.pipeline_config import configured_inventory, confirm_inventory
             from route_evidence.service import spelling
@@ -163,106 +117,21 @@ def main(argv=None):
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0 if result["status"] == "ok" else 2
         service = make_service(args)
-        from route_evidence.pipeline import RoutingPipeline
-        pipeline = RoutingPipeline(service)
-        if pipeline.required and not args.offline and args.command in {"prepare", "complete", "record", "context", "task-context"}:
-            raise EvidenceError("required routing uses host-attested MCP operations; legacy CLI needs explicit evidence-only configuration")
-        if args.command in {"prepare", "context", "task-context"}:
-            service.advisor_workflow.task_evidence.provisioner.wait = True
         code = 0
-        if args.command.startswith("telemetry-"):
-            from route_evidence.telemetry import report, observe_transcript, assess
-            history = service.advisor_workflow.history
-            result = (report(history, dataset=args.dataset, since=args.since, until=args.until) if args.command == "telemetry-report" else
-                      observe_transcript(history, request_document(args.request)) if args.command == "telemetry-observe" else
-                      assess(history, request_document(args.request)))
-        elif args.command == "task-setup":
-            from route_evidence.task_bootstrap import setup
-            result = setup(service.advisor_workflow.task_evidence, offline=args.offline)
-            code = 0 if result["status"] == "ready" else 2
-        elif args.command == "task-forecast":
-            import time
-            from route_evidence.advice_contracts import validate_packets
-            from route_evidence.task_evaluation import forecast
-            document = request_document(args.request)
-            if not isinstance(document, dict) or set(document) != {"packets"}:
-                raise EvidenceError("forecast requires packets")
-            packets = validate_packets(document["packets"])
-            evidence = service.advisor_workflow.task_evidence
-            deadline = time.monotonic() + evidence.config["deadline_seconds"]
-            result = {"status": "diagnostic_only", "packets": [
-                {"packet_id": p["packet_id"], **forecast(evidence.local_rows(p, deadline), args.unit)} for p in packets]}
-        elif args.command == "task-evaluate":
-            from route_evidence.task_evaluation import evaluate
-            result = evaluate(read_document(args.file), args.unit, args.overhead)
-        elif args.command == "task-purge-descriptions":
-            result = service.advisor_workflow.task_evidence.purge_descriptions()
-        elif args.command == "task-import":
-            from route_evidence.task_import import llmrouterbench
-            document = (llmrouterbench(args.file, read_document(args.manifest)) if args.manifest else
-                        read_document(args.file))
-            result = service.advisor_workflow.task_evidence.install(document)
-        elif args.command == "task-context":
-            from route_evidence.advice_contracts import validate_packets, candidate_id
-            document = request_document(args.request)
-            if not isinstance(document, dict) or "packets" not in document or set(document) - {"packets", "available", "task_queries", "cost_objectives"}:
-                raise EvidenceError("invalid task context request")
-            packets = validate_packets(document["packets"])
-            prepared = service.prepare(list(dict.fromkeys(t for p in packets for t in p["task_types"])), available=document.get("available"))
-            if "status" in prepared:
-                result = prepared
-            else:
-                from route_evidence.core import effort
-                candidates = [{"candidate_id": candidate_id(a["model"], effort(e)), "model": a["model"], "effort": effort(e)}
-                              for a in prepared["available"] for e in a["efforts"]]
-                result = asyncio.run(service.advisor_workflow.task_evidence.async_summarize(packets, candidates, document.get("task_queries"), document.get("cost_objectives")))
-        elif args.command == "ingest":
+        if args.command == "ingest":
             value = ingest(service.cache, read_document(args.file), args.observed_at)
             result = {"sources": [value]}
-        elif args.command in ("prepare", "complete", "record"):
-            document = request_document(args.request)
-            allowed = {
-                "prepare": {"packets", "available", "constraints", "advisor_route", "task_queries", "cost_objectives"},
-                "complete": {"decision_id", "advisor_result", "envelope"},
-                "record": {"decision_id", "execution"},
-            }[args.command]
-            if not isinstance(document, dict) or set(document) - allowed:
-                raise EvidenceError("invalid advisor operation fields")
-            required = {"prepare": {"packets"}, "complete": {"decision_id", "advisor_result"},
-                        "record": {"decision_id", "execution"}}[args.command]
-            if required - set(document):
-                raise EvidenceError("missing advisor operation fields")
-            if args.command == "prepare":
-                result = asyncio.run(service.prepare_routing(**document, portable=True))
-            elif args.command == "complete":
-                result = service.complete_routing(**document)
-            else:
-                result = service.record_routing_outcome(**document)
-        elif args.command in ("history-import", "replay"):
-            from route_evidence.history import import_history, replay
-            result = (import_history(args.file) if args.command == "history-import" else
-                      replay(read_document(args.record), policy=read_document(args.policy) if args.policy else None))
         elif args.command == "context":
             if args.offline:
                 print("DIAGNOSTIC ONLY: --offline disables source refresh. "
                       "Do not use this replay for live routing; inspect data_status/data_message.", file=sys.stderr)
             if args.request:
                 # External JSON is always a request, never an internal result.
-                document = request_document(args.request)
-                if isinstance(document, dict) and ("task_query" in document or "features" in document):
-                    query, features = document.pop("task_query", None), document.pop("features", None)
-                    if "task_types" not in document or set(document) - {"task_types", "client", "available", "constraints"}:
-                        raise EvidenceError("invalid task context fields")
-                    if document.get("client", service.client) != service.client:
-                        raise EvidenceError("task context client conflicts with configured client")
-                    result = asyncio.run(service.get_routing_context(document["task_types"], available=document.get("available"),
-                        constraints=document.get("constraints"), details=True, task_query=query, features=features))
-                else:
-                    result = asyncio.run(service.context(document))
+                result = asyncio.run(service.context(request_document(args.request)))
             else:
                 result = asyncio.run(service.get_routing_context(args.task_type, details=True))
         elif args.command in ("status", "doctor"):
-            result = {**service.status(getattr(args, "source", None)), "pipeline": pipeline.status()}
+            result = service.status(getattr(args, "source", None))
             if args.command == "doctor" and args.check_browser:
                 from route_evidence.processes import ProcessScope
                 from route_evidence.core import encoded
@@ -282,7 +151,7 @@ def main(argv=None):
                 # Caller uses --force; refuse misleading offline smoke success.
                 code = 0 if all(s.get("snapshot") and s.get("refresh") in ("updated", "validated_not_modified")
                                 for s in result["sources"]) else 2
-        if not args.details and not args.command.startswith(("task-", "telemetry-")):
+        if not args.details:
             # Raw rows are dropped; candidates, gaps and limits stay complete.
             result = brief(result)
         print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
@@ -292,9 +161,6 @@ def main(argv=None):
         return 2
     except KeyboardInterrupt:
         return 130
-    finally:
-        if "service" in locals() and service._advisor_workflow is not None:
-            service.advisor_workflow.task_evidence.provisioner.close()
 
 
 if __name__ == "__main__":
