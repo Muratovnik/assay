@@ -88,6 +88,29 @@ def routing_config(environment):
     return load_config(Path(binding["config"])) if binding else None
 
 
+# Shown at session start when the routing configuration cannot be loaded for a reason
+# other than a retired contract, which carries its own message.
+ROUTING_UNUSABLE = "it could not be validated; run the hooks doctor for the cause."
+
+
+def session_routing(event, environment):
+    """What the session reminder needs to know about routing, resolved like the launch check.
+
+    A configuration named by the variable or bound in the plugin data counts as
+    routing even when it cannot be loaded: its launches are refused, so the
+    checklist is the right guidance and the reason is added to it. Nothing here
+    raises; session start never fails over routing.
+    """
+    if event.get("hook_event_name") != "SessionStart":
+        return {}
+    try:
+        return {"routing": routing_config(environment) is not None}
+    except RetiredConfiguration as exc:
+        return {"routing": True, "problem": str(exc)}
+    except Exception:
+        return {"routing": True, "problem": ROUTING_UNUSABLE}
+
+
 def explicit_routes(event, client, environment):
     """The launch check of a configured routing configuration.
 
@@ -222,7 +245,7 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         # Basic reminders do not depend on prompt rules, the parser or state.
         # Keep them as a fallback; a routing reply always remains authoritative.
         if not protected and event["hook_event_name"] in {"SessionStart", "PreToolUse"}:
-            legacy = reminder(event, environment)
+            legacy = reminder(event, environment, **session_routing(event, environment))
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
         loaded = []

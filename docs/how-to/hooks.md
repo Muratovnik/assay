@@ -340,8 +340,14 @@ observed Skill load or an announcement would not prove compliance with a method.
 The session reminder is three sentences: use matching installed skills; when the
 user requests subagents, use `route-subagents` before substantial solo work; no
 delegation is authorized by it. The rest of the routing checklist is added at
-session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the
-reminder before each launch.
+session start whenever the hook resolves a routing configuration the way the
+launch check does, through `ASSAY_ROUTING_CONFIG` or the plugin data directory's
+`routing.json` binding; otherwise it arrives in the reminder before each launch.
+The checklist says to apply `route-subagents` before every launch, to start the
+launch's description with a task class from the route table and pass exactly that
+class's model and effort, and where a refusal's remedy is. A configuration that
+is retired or cannot be validated keeps the checklist and adds one sentence with
+the reason, because it refuses every launch; session start itself never fails.
 A routing guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
 failures. Assay returns no blocking Stop decision; the Claude skill gate above

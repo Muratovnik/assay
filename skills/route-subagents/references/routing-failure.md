@@ -118,6 +118,7 @@ routing evidence and runtime observations absent. Resume the normal routing
 workflow when the failure is resolved.
 
 The hooks deliver this procedure as a reminder before each native
-launch, and at session start only where `ASSAY_ROUTING_CONFIG` is set. They do not
+launch, and at session start where a routing configuration is set through
+`ASSAY_ROUTING_CONFIG` or the plugin's routing binding. They do not
 force a native caller to run the preflight. Do not claim that a passed
 argument check prevents a caller from launching outside this procedure.

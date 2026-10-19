@@ -22,20 +22,25 @@ SESSION_REMINDER = (
 )
 # The planning step stays in every session: the request hint recognizes only
 # narrow imperatives, and the launch reminder arrives after solo work started.
-# The routing checklist, including its failure branch, is added at session
-# start only where routing is configured; otherwise it arrives before every
-# launch, and the base reminder keeps pointing at the skill that owns it.
+# The routing checklist is added at session start only where routing is
+# configured, through ASSAY_ROUTING_CONFIG or the plugin's routing binding;
+# otherwise it arrives before every launch, and the base reminder keeps
+# pointing at the skill that owns it.
 ROUTING_SESSION_REMINDER = (
-    " Revisit newly ready "
-    "dependencies and material verification; do not create token delegations. "
-    "Before every authorized subagent launch, including replacements and "
-    "reviewers, the root agent must apply route-subagents (possibly named "
-    "assay:route-subagents). Reading it earlier is not a routing decision for a "
-    "new packet. Select the child model and supported effort deliberately through "
-    "its workflow, which weighs full-chain cost against quality using available "
-    "evidence, and use the smallest sufficient context. Reuse valid plan evidence. "
-    "Preserve explicit user choices. A failed routing request supplies no route; "
-    "read routing-failure.md first."
+    " Before every authorized subagent launch, including replacements and "
+    "reviewers, apply route-subagents (possibly named assay:route-subagents). "
+    "Start the launch's description with a task class from the route table, "
+    "such as `gather: ...`, and pass exactly that class's model and effort; "
+    "choose the class that fits the work, the less demanding one when two fit. "
+    "The table is shown by routing_status and listed in a refusal, which says "
+    "what to correct; if routing itself is rejected or unavailable, read "
+    "route-subagents/references/routing-failure.md before any launch. "
+    "Revisit newly ready dependencies and material verification before launching."
+)
+# Added after the checklist when the configuration routing resolved to cannot be
+# used: its launches are refused, so the session should know before the first one.
+ROUTING_PROBLEM = (
+    " The routing configuration is refused and every launch it covers is blocked until it is fixed: "
 )
 DELEGATION_REMINDER = (
     "Assay routing checkpoint: route-subagents is required for every authorized "
@@ -49,13 +54,22 @@ DELEGATION_REMINDER = (
 MAX_INPUT_BYTES = 1024 * 1024
 
 
-def reminder(event: dict, environ=None) -> dict:
+def reminder(event: dict, environ=None, *, routing: bool | None = None, problem: str | None = None) -> dict:
+    """The reminder for one event.
+
+    `routing` is the hook handler's own resolution of the routing configuration
+    (variable or plugin binding) and `problem` says why it cannot be used. Left
+    out, as in this script's standalone run, only ASSAY_ROUTING_CONFIG counts.
+    """
     name = event.get("hook_event_name")
     if name == "SessionStart" and event.get("source") in (
         "startup", "resume", "clear", "compact", "fork"
     ):
-        routing = (os.environ if environ is None else environ).get("ASSAY_ROUTING_CONFIG")
+        if routing is None:
+            routing = bool((os.environ if environ is None else environ).get("ASSAY_ROUTING_CONFIG"))
         context = SESSION_REMINDER + (ROUTING_SESSION_REMINDER if routing else "")
+        if routing and problem:
+            context += ROUTING_PROBLEM + problem.rstrip(".") + "."
     elif name == "PreToolUse" and event.get("tool_name") in (
         "spawn_agent", "collaborationspawn_agent", "Agent", "Task"
     ):

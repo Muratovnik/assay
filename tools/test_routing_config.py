@@ -24,6 +24,7 @@ from runtime import cli
 from route_evidence.core import EvidenceError, RetiredConfiguration
 from route_evidence.pipeline_config import settings
 from route_evidence.service import load_config
+import skill_reminder
 
 TABLE = {'classes': {
     'gather': {'model': 'haiku', 'effort': 'medium', 'when': 'search and read'},
@@ -64,6 +65,98 @@ class Fixture(unittest.TestCase):
         output = result.get('hookSpecificOutput', {})
         denied = output.get('permissionDecision') == 'deny'
         return ('deny' if denied else 'allow'), output.get('permissionDecisionReason' if denied else 'additionalContext'), error
+
+
+class SessionChecklistTests(Fixture):
+    """The routing checklist appears at session start whenever the launch check would find a configuration."""
+    CHECKLIST = 'Before every authorized subagent launch'
+
+    def start(self, environment, source='startup'):
+        result, error = cli.process({'hook_event_name': 'SessionStart', 'source': source, 'session_id': 's'},
+                                    'claude', environment)
+        self.assertIsNone(error)
+        return result['hookSpecificOutput']['additionalContext']
+
+    def test_the_resolved_fact_overrides_the_variable_in_the_reminder(self):
+        event = {'hook_event_name': 'SessionStart', 'source': 'startup'}
+
+        def context(**resolved):
+            return skill_reminder.reminder(event, {'ASSAY_ROUTING_CONFIG': 'x.json'}, **resolved)[
+                'hookSpecificOutput']['additionalContext']
+        self.assertIn(self.CHECKLIST, context())
+        self.assertIn(self.CHECKLIST, context(routing=True))
+        self.assertNotIn(self.CHECKLIST, context(routing=False))
+        self.assertIn('blocked until it is fixed: why not.', context(routing=True, problem='why not'))
+        # A problem without routing is not shown: there is no checklist for it to follow.
+        self.assertNotIn('blocked', context(routing=False, problem='why not'))
+
+    def test_a_binding_alone_shows_the_checklist(self):
+        text = self.start(self.bind(self.config()))
+        self.assertTrue(text.startswith('Assay is installed.'))
+        self.assertIn(self.CHECKLIST, text)
+        self.assertIn('`gather: ...`', text)
+        self.assertIn('routing_status', text)
+        self.assertIn('references/routing-failure.md', text)
+        self.assertNotIn('routing configuration is refused', text)
+
+    def test_the_variable_alone_shows_the_checklist(self):
+        text = self.start({'ASSAY_ROUTING_CONFIG': str(self.config())})
+        self.assertIn(self.CHECKLIST, text)
+        self.assertNotIn('routing configuration is refused', text)
+
+    def test_without_a_variable_or_binding_there_is_no_checklist(self):
+        for environment in ({}, {'PLUGIN_DATA': str(self.data)}):
+            with self.subTest(environment=sorted(environment)):
+                text = self.start(environment)
+                self.assertIn('Assay is installed.', text)
+                self.assertNotIn(self.CHECKLIST, text)
+
+    def test_every_session_start_source_shows_it(self):
+        environment = self.bind(self.config())
+        for source in ('startup', 'resume', 'clear', 'compact', 'fork'):
+            with self.subTest(source=source):
+                self.assertIn(self.CHECKLIST, self.start(environment, source))
+
+    def test_the_variable_wins_over_the_binding_as_in_the_launch_check(self):
+        retired = self.config({'schema_version': 4, 'client': 'claude'}, name='retired.json')
+        environment = {**self.bind(retired), 'ASSAY_ROUTING_CONFIG': str(self.config())}
+        self.assertNotIn('routing configuration is refused', self.start(environment))
+
+    def test_a_retired_configuration_keeps_the_checklist_and_says_why_launches_are_blocked(self):
+        retired = self.config({'schema_version': 4, 'client': 'claude', 'routes': TABLE,
+                               'telemetry': {'mode': 'off'}})
+        for label, environment in (('binding', self.bind(retired)), ('variable', {'ASSAY_ROUTING_CONFIG': str(retired)})):
+            with self.subTest(via=label):
+                text = self.start(environment)
+                self.assertIn(self.CHECKLIST, text)
+                self.assertIn('routing configuration is refused', text)
+                self.assertIn('remove telemetry and set schema_version to 5.', text)
+                self.assertNotIn(str(self.root), text)
+
+    def test_a_retired_binding_name_keeps_the_checklist_and_names_the_rename(self):
+        (self.data / 'routing-telemetry.json').write_text('{}', encoding='utf-8')
+        text = self.start({'PLUGIN_DATA': str(self.data)})
+        self.assertIn(self.CHECKLIST, text)
+        self.assertIn(RENAMED, text)
+
+    def test_an_unreadable_configuration_keeps_the_checklist_without_leaking_its_error(self):
+        broken = self.root / 'broken.json'
+        broken.write_text('{not json', encoding='utf-8')
+        missing = self.root / 'missing.json'
+        for config in (broken, missing):
+            for label, environment in (('binding', self.bind(config)), ('variable', {'ASSAY_ROUTING_CONFIG': str(config)})):
+                with self.subTest(config=config.name, via=label):
+                    text = self.start(environment)
+                    self.assertIn(self.CHECKLIST, text)
+                    self.assertIn('every launch it covers is blocked until it is fixed: it could not be validated', text)
+                    self.assertNotIn(str(self.root), text)
+
+    def test_an_object_form_of_exempt_agents_is_named_at_session_start(self):
+        config = self.config({'schema_version': 5, 'client': 'claude', 'routes': TABLE,
+                              'pipeline': {'unrouted_agents': {}}})
+        text = self.start(self.bind(config))
+        self.assertIn(self.CHECKLIST, text)
+        self.assertIn('Replace it with the list of its agent types', text)
 
 
 class SchemaTests(Fixture):
