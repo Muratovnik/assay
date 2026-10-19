@@ -273,8 +273,8 @@ a request to the agent; this note is a fact it can act on at the call itself.
 At `PreToolUse`, when one tool call shows a sign from the table below and neither
 the gate's records nor the transcript tail show that skill loaded by this agent,
 the hook adds a note of about 300 characters. It names what the call does (a file
-name or a host, never a path or a URL), the skill and the decision that skill
-governs there, and says the session has not loaded it. An example, for an edit of
+name, a host or the first question's header, never a path or a URL), the skill and
+the decision that skill governs there, and says the session has not loaded it. An example, for an edit of
 a test file: `Assay skill note: this call edits a test file (test_app.py). The
 assay:test-writing skill governs what behavior the test pins and whether it fails
 without the fix; this session has not loaded it. The skill check expects it
@@ -289,6 +289,7 @@ stated as fact and runs no model.
 | `midturn-ui-delivery` | `ui-delivery` | an edit of an interface file: `.vue`, `.svelte`, `.jsx`, `.tsx`, `.css`, `.scss`, `.sass`, `.less`, `.html` |
 | `midturn-technical-writing` | `technical-writing` | an edit of a `README` or of a Markdown, MDX or reStructuredText file under `docs`, except `docs/plans` and `docs/research`; agent instructions, memory notes and change logs do not count |
 | `midturn-skill-evaluation` | `skill-evaluation` | an edit of a `SKILL.md`, a skill's `references` or `evals` file, or `activation-rules.toml` |
+| `midturn-critical-discussion` | `critical-discussion` | an `AskUserQuestion` call, the point where the owner chooses between options |
 
 A path under `node_modules`, `dist`, `build`, `vendor`, `.venv`, a minified, declaration
 or generated file, and a scratch directory (`tmp`, `temp`, `scratchpad`, `.private`)
@@ -314,7 +315,10 @@ The option `skill_note_form` in the hook configuration chooses the form. `note`,
 default, gives the text as context beside the call. `deny` refuses the first
 matching call with the same text as the reason and passes the repeated call, so
 it costs one extra turn and shows the reason in Claude Code as a refusal. Both
-forms keep the key, so a skill is named once either way.
+forms keep the key, so a skill is named once either way. The `midturn-critical-discussion`
+row always takes the `deny` form: a note reaches the model on its next request, which
+for `AskUserQuestion` comes after the owner has answered, so only a refusal arrives
+while the options can still change.
 
 Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
 `Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load
@@ -327,7 +331,12 @@ sound every time or never, so no row is enabled there.
 The signs are narrow and approximate. Over two weeks of one owner's sessions, a
 sample of up to 20 notes per row had at least 80 % of its notes appropriate
 (the skill really applied to what that call was doing). A row on a different
-kind of work can behave differently; each rule ID turns its row off.
+kind of work can behave differently; each rule ID turns its row off. For
+`midturn-critical-discussion`, 185 of 223 owner questions from 5 to 19 October 2026
+came with the skill not loaded, in 32 sessions. An agent that loads the skill after
+the refusal is not refused again, so the refusal falls on the first question of a
+session; 29 of those 32
+asked the owner to choose between approaches, and the rest were confirmations.
 
 ## Hints do not grant authority
 

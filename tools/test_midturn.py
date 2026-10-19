@@ -119,6 +119,17 @@ class SignTableTests(unittest.TestCase):
         self.assertEqual([("midturn-evidence-research", "docs.example.dev")], midturn.signs("WebFetch", {"url": DOCS}))
         self.assertEqual([("midturn-evidence-research", "web search")], midturn.signs("WebSearch", {"query": "q"}))
 
+    def test_an_owner_question_calls_for_critical_discussion_and_names_its_header(self):
+        options = [{"label": "A", "description": "a"}, {"label": "B", "description": "b"}]
+        asked = {"questions": [{"question": "Which approach?", "header": "Approach", "options": options,
+                                "multiSelect": False}]}
+        self.assertEqual([("midturn-critical-discussion", "Approach")], midturn.signs("AskUserQuestion", asked))
+        for data in ({"questions": []}, {"questions": ["text"]}, {"questions": [{"header": "  "}]}, {}):
+            with self.subTest(data=data):
+                self.assertEqual([("midturn-critical-discussion", "question")], midturn.signs("AskUserQuestion", data))
+        self.assertEqual([], midturn.signs("AskUserQuestion", "not an object"))
+        self.assertEqual([], midturn.signs("ExitPlanMode", {"plan": "x"}))
+
     def test_the_activation_list_matches_the_table(self):
         self.assertEqual(midturn.RULES, activation.MIDTURN_RULES)
         self.assertEqual(len(midturn.RULES), len(set(midturn.RULES)))
@@ -279,6 +290,31 @@ class NoteTests(unittest.TestCase):
         # Loading the skill before the first call needs no refusal at all.
         self.run_event(self.pre("Skill", {"skill": "assay:code-change"}), environment)
         self.assertEqual({}, self.run_event(self.pre("Edit", {"file_path": APP}), environment))
+
+    def test_an_owner_question_without_the_skill_is_refused_once_under_either_form(self):
+        asked = {"questions": [{"question": "Which approach?", "header": "Approach", "multiSelect": False,
+                                "options": [{"label": "A", "description": "a"}, {"label": "B", "description": "b"}]}]}
+        for options in ({}, {"skill_note_form": "deny"}):
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as scratch:
+                self.data = Path(scratch)
+                environment = self.environment(**options)
+                output = self.run_event(self.pre("AskUserQuestion", asked), environment)["hookSpecificOutput"]
+                # A note would reach the model only after the owner answered, so the first call is refused.
+                self.assertEqual("deny", output["permissionDecision"])
+                self.assertIn("asks the owner to choose (Approach)", output["permissionDecisionReason"])
+                self.assertIn("assay:critical-discussion", output["permissionDecisionReason"])
+                self.assertNotIn("Which approach?", output["permissionDecisionReason"])
+                self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), environment))
+                # A later request with the skill loaded asks without a refusal.
+                self.run_event(self.pre("Skill", {"skill": "assay:critical-discussion"}, prompt_id="p2"), environment)
+                self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked, prompt_id="p2"), environment))
+                # The other rows keep the note form unless the option says deny.
+                result = self.run_event(self.pre(prompt_id="p3"), environment)["hookSpecificOutput"]
+                self.assertEqual("deny" if options else None, result.get("permissionDecision"))
+        with tempfile.TemporaryDirectory() as scratch:
+            self.data = Path(scratch)
+            environment = self.environment(disabled_rules=["midturn-critical-discussion"])
+            self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), environment))
 
     def test_the_default_form_is_the_note_and_both_forms_say_the_same(self):
         self.assertEqual("note", cli.options({})["skill_note_form"])

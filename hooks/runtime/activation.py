@@ -29,7 +29,7 @@ BRANCH_RULES = ("coverage-claims", "branch-vue-structure", "branch-quality-check
 # The Claude note on a tool call that shows a skill the session has not loaded, one rule per row.
 # Repeated from midturn.RULES for the same reason; a test keeps the two equal.
 MIDTURN_RULES = ("midturn-evidence-research", "midturn-code-change", "midturn-test-writing", "midturn-ui-delivery",
-                 "midturn-technical-writing", "midturn-skill-evaluation")
+                 "midturn-technical-writing", "midturn-skill-evaluation", "midturn-critical-discussion")
 # Phrase rules retired in favor of the skill check. Old settings that disable
 # them stay valid and do nothing, instead of breaking the hooks.
 RETIRED_RULES = frozenset({"test-audit", "test-writing", "research", "reuse-lookup", "reuse-question",

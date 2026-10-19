@@ -32,6 +32,7 @@ FORMS = ("note", "deny")
 WRITES = frozenset({"Edit", "Write", "MultiEdit", "NotebookEdit"})
 SHELLS = frozenset({"Bash", "PowerShell"})
 WEB = frozenset({"WebFetch", "WebSearch"})
+QUESTION = "AskUserQuestion"
 MAX_PATH = 4_096
 MAX_COMMAND = 65_536
 
@@ -42,6 +43,9 @@ class Row:
     skill: str
     action: str  # What the call does, completed by its evidence.
     decision: str  # What the skill governs in a call that shows the sign.
+    # A note reaches the model on its next request. When that comes only after the call has done
+    # its work, as with a question the owner answers, the row refuses the first call instead.
+    refuses: bool = False
 
 
 ROWS = (
@@ -57,6 +61,9 @@ ROWS = (
         "who reads the document and what that reader needs to do with it"),
     Row("midturn-skill-evaluation", "skill-evaluation", "edits a skill file",
         "what evidence shows the change helps and not only that it reads well"),
+    Row("midturn-critical-discussion", "critical-discussion", "asks the owner to choose",
+        "the need behind it, doing nothing, existing solutions and each option's basis",
+        refuses=True),
 )
 RULES = tuple(row.rule for row in ROWS)
 
@@ -146,6 +153,12 @@ def signs(tool, data):
     if tool in SHELLS:
         host = external(data.get("command"))
         return [("midturn-evidence-research", host)] if host else []
+    if tool == QUESTION:
+        # The header is the short label the agent wrote for the first question.
+        questions = data.get("questions")
+        first = questions[0] if isinstance(questions, list) and questions and isinstance(questions[0], dict) else {}
+        header = first.get("header")
+        return [("midturn-critical-discussion", header if isinstance(header, str) and header.strip() else "question")]
     return []
 
 
@@ -209,7 +222,7 @@ def _shown_loaded(event, skill, names, directory, clock):
 
 
 def checked(event, rules, names, directory, *, form="note", clock=time.time):
-    """The note, or under the deny form the refusal, for the first sign this call shows; else {}.
+    """The note, or under the deny form or a refusing row the refusal, for the first sign this call shows; else {}.
 
     Rules are the enabled row IDs and names the enabled skills. A skill is named at most once
     per request and agent: the key is stored whichever form answers, so a refused call passes
@@ -242,7 +255,7 @@ def checked(event, rules, names, directory, *, form="note", clock=time.time):
             now = clock()
             tx.put("note", key, {"id": key, "at": now}, now + TTL)
         message = text(row, evidence)
-        if form == "deny":
+        if form == "deny" or row.refuses:
             return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
                     "permissionDecisionReason": "Assay: " + message + " This call was not run; the same call passes "
                     "when repeated."}}
