@@ -1,9 +1,11 @@
 # 安装 assay
 
-`route-subagents` 的子代理路由由客户端路由配置（schema 4）中的 `routes` 表决定：
-若干任务类别，每个类别指定模型和 effort。启用插件钩子后，evidence-only 模式会拒绝
+`route-subagents` 的子代理路由由客户端路由配置（schema 5）中的 `routes` 表决定：
+若干任务类别，每个类别指定模型和 effort。启用插件钩子后，它们会拒绝
 不遵循该表的 Claude 和 Codex 启动；`route-candidates` 根据缓存的基准数据提出候选组合。
-详见 [路由表](../../skills/route-subagents/references/route-table.md)。安装后请在每个
+详见 [路由表](../../skills/route-subagents/references/route-table.md)。钩子通过
+`ASSAY_ROUTING_CONFIG` 或插件的 `routing.json` 绑定找到该配置；旧版安装需要
+[从 0.28 升级](../../skills/route-subagents/references/route-table.md#upgrade-from-028)。安装后请在每个
 客户端的新会话中确认一次拒绝：不受信任的钩子会被静默跳过。
 
 本地契约测试不能证明模型质量或配额节省。
@@ -40,8 +42,7 @@ skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配
 Claude 强制路由守卫不依赖 Markdown 解析器，优先于建议。
 
 更新后通过客户端界面检查插件启用和 hooks 信任。技能 CLI 与 `install-links`
-不安装 hooks，也不修改个人 AGENTS.md。强制路由协议仍仅适用于 Claude；在 Codex
-中明确选择 required 会阻止受保护操作，不会静默退化为建议。
+不安装 hooks，也不修改个人 AGENTS.md。
 
 详见[配置、doctor、客户端限制及离线 replay](../how-to/hooks.md)。该指南区分文件存在、
 配置和运行观察，说明可选状态、回滚、重复 hooks 与 custom effort 限制。

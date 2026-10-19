@@ -1,6 +1,7 @@
 # Routing rejected or unavailable
 
-Read this before launching after a failed recommendation request. Delegation
+Read this before launching after a rejected or failed routing request, such as
+a `get_routing_context` call or a table lookup. Delegation
 authorization and permission for the failed data operation remain separate.
 A hook refusal of a route-table launch is not this case: correct the declared
 class or the pair as the refusal states and launch again.
@@ -13,26 +14,20 @@ class or the pair as the refusal states and launch again.
 
 ## Establish what failed
 
-A request rejected before execution produced no advisor recommendation. Report
-the actual failure and distinguish approval rejection, unavailable service,
-invalid input/advice and valid advisor abstention. Invalid input or advice needs
-correction through the existing workflow; it does not authorize fallback. A valid
-abstention keeps that workflow's eligible baseline rules.
+A request rejected before execution produced no routing evidence. Report
+the actual failure and distinguish approval rejection, unavailable service and
+invalid input. Invalid input needs correction through the existing workflow; it
+does not authorize fallback.
 
 Respect an approval rejection. Do not repeat the rejected operation through CLI,
-another endpoint, provider or changed telemetry settings. Where useful, verify
+another endpoint or provider. Where useful, verify
 the actual registration and local/remote data boundary without resubmitting the
 private payload. Explain the rejected action and stated reason; ask for the
-missing permission only if that action remains necessary. An enabled telemetry
-setting is not evidence of consent or a reason to select a more expensive model.
+missing permission only if that action remains necessary.
 
 ## Choose the next authorized action
 
-In required mode, only the registered decision/launch contract can recover the
-failure. Do not replace it with this procedure, a direct native call or local work
-when the user required delegation.
-
-In evidence-only mode, continue unaffected local work. Launch an exception only
+Continue unaffected local work. Launch an exception only
 after deliberately selecting both settings for each packet from the complete
 current inventory, preserving hard constraints and actual human choices. State
 the task-specific sufficiency, verification and relevant cost/uncertainty basis
@@ -48,9 +43,9 @@ change the primary's settings or client-wide defaults to route one child.
 ## Check the native arguments locally
 
 Use `scripts/launch_preflight.py --request <routing-only.json>` (relative to this
-skill) with the declared client and actual mode. The command reads JSON and
+skill) with the declared client. The command reads JSON and
 prints a result; it does not contact the routing service, acquire benchmarks,
-retain descriptions, create telemetry, grant permission or launch a model. It is
+retain descriptions, grant permission or launch a model. It is
 an argument check, not a replacement recommendation or a host receipt. Use it
 only if the local read itself is permitted. Keep the input task-owned and ignored,
 or pass JSON through stdin with `--request -`; omit prompts, repository contents,
@@ -119,12 +114,10 @@ input, or a setting that stays unresolved. Both blocked outcomes mean no launch,
 and neither success nor failure grants authorization. Launch with the checked routing arguments unchanged
 and the bounded packet only after the selection and permissions are established.
 Record the failure and manual selection in the existing task record, marking
-advisor recommendation and runtime observations absent. If telemetry recording
-was the rejected operation, do not send the record there without its own
-permission. Resume normal recommendation workflow when the failure is resolved.
+routing evidence and runtime observations absent. Resume the normal routing
+workflow when the failure is resolved.
 
-Evidence-only hooks deliver this procedure as a reminder before each native
-launch, and at session start only where routing is configured. They do not
-force a native caller to run the preflight. Codex has no verified strict routing adapter;
-Claude required mode retains its existing host gate. Do not claim that a passed
+The hooks deliver this procedure as a reminder before each native
+launch, and at session start only where `ASSAY_ROUTING_CONFIG` is set. They do not
+force a native caller to run the preflight. Do not claim that a passed
 argument check prevents a caller from launching outside this procedure.

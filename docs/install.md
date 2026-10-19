@@ -79,8 +79,6 @@ skill either way, but the descriptions carry when to use and when to skip each o
 
 Enable the full plugin and review its native hook/trust diagnostics after updates.
 Skills CLI and `install-links` do not register hooks or edit personal AGENTS.md.
-The optional required-routing protocol remains Claude-specific; selecting it on
-Codex blocks protected operations rather than silently dropping the requirement.
 
 See [hook configuration, doctor, client limits and offline replay](how-to/hooks.md).
 The guide separates installed/configured/observed evidence, explains optional state,
@@ -212,10 +210,13 @@ profiles with `python tools/assay.py uninstall-links --client codex --kind skill
 ## Route table
 
 To route subagents, add a `routes` table to the client's routing configuration
-(schema 4): a few task classes with the model and effort each launches with.
-With the plugin hooks enabled, evidence-only mode then refuses Claude and Codex
+(schema 5): a few task classes with the model and effort each launches with.
+With the plugin hooks enabled, they then refuse Claude and Codex
 spawns that do not follow it. `route-candidates` proposes pairs from the cached
 benchmarks; see the [route table reference](../skills/route-subagents/references/route-table.md).
+The hooks find the configuration through `ASSAY_ROUTING_CONFIG` or the plugin's
+`routing.json` binding, and an older setup needs the
+[upgrade from 0.28](../skills/route-subagents/references/route-table.md#upgrade-from-028).
 Confirm one refusal in a fresh session of each client after installing, because
 an untrusted hook is skipped without an error.
 

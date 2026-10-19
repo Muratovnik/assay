@@ -37,9 +37,8 @@ These are subject verdicts, separate from whether the review assignment complete
 
 ## Preflight the review assignment
 
-For `evidence-reviewer`, supply `launch_requests[packet_id]` to `prepare_routing`
-in either client and either routing mode. Alongside `profile` and the execution
-`prompt`, include a `review_context` object:
+For `evidence-reviewer`, put the review inputs in the packet before launching it,
+in either client. A `review_context` of this shape names them:
 
 ```json
 {
@@ -59,16 +58,13 @@ and oracle declaration are required. An executable oracle uses
 `{"status":"read_only","name":"declared non-mutating check"}`. An unavailable
 oracle is valid; receipts, when supplied, must name this exact snapshot.
 Missing mandatory evidence still limits the review verdict. The primary verifies
-the declarations and supplies real evidence; schema validation does not attest
-a contract revision or prove that a command is non-mutating.
+the declarations and supplies real evidence; the object does not attest a
+contract revision or prove that a command is non-mutating.
 
-The preflight adds these inputs and the reading boundary to the execution prompt.
-Evidence-only mode returns `execution_handoffs`; required mode retains the
-registered prompt. Pass task goal and criteria separately in `task_spec` for
-model adequacy. Keep machine paths in the execution prompt rather than the
-advisor's cleaned task data. The reviewer returns a receipt; the primary updates
-checklists and memory. The published reading projections inspect receipts rather
-than running the oracle themselves.
+The packet carries these inputs, the task goal and criteria, and the reading
+boundary. The reviewer returns a receipt; the primary updates checklists and
+memory. The published reading projections inspect receipts rather than running
+the oracle themselves.
 
 Use independent-audit for its investigation method when relevant; its
 [bounded-role integration](../../independent-audit/references/bounded-review.md)

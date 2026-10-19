@@ -15,19 +15,20 @@ reviewed when a model is released, not recomputed for every launch.
 ## Contents
 
 - [Configuration](#configuration)
+- [Bind the configuration to the hooks](#bind-the-configuration-to-the-hooks)
+- [Upgrade from 0.28](#upgrade-from-028)
 - [Using the table](#using-the-table)
 - [Enforcement](#enforcement)
 - [Building and reviewing the table](#building-and-reviewing-the-table)
-- [Frozen alternatives](#frozen-alternatives)
 
 ## Configuration
 
-The table lives in the client's routing configuration (schema 4), next to
+The table lives in the client's routing configuration (schema 5), next to
 `client` and `pipeline`. Model names are client facts, so they appear only there:
 
 ```json
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "client": "claude",
   "routes": {
     "basis": "FrontierCode 1.1 and CursorBench 4.0, read 2026-10-12; API cost per task, not quota",
@@ -50,6 +51,72 @@ The table lives in the client's routing configuration (schema 4), next to
 
 An invalid table is a configuration error. `routing_status` returns the table
 under `routes`, or `{"status": "not_configured"}`.
+
+A schema 5 configuration accepts only these top-level keys: `schema_version`,
+`client`, `preferences`, `inventory`, `pipeline` and `routes`. `pipeline` accepts
+`mode` (only `evidence-only`), `explicit_routes` (`require`, the default, or
+`off`), `unrouted_agents`, `host`, `inventory_file` and `inventory_ttl_hours`.
+Any other key is an error. A configuration that carries a section or key of the
+removed routing advisor, required mode or execution telemetry, or an older
+`schema_version`, is refused with one message that lists the keys to remove and
+the version to set; there is no migration command.
+
+## Bind the configuration to the hooks
+
+The Assay hooks find the configuration in one of two ways:
+
+- `ASSAY_ROUTING_CONFIG` holds the absolute path of the configuration file and is
+  used when set.
+- Otherwise the binding file `routing.json` in the plugin's data directory
+  (`PLUGIN_DATA` or `CLAUDE_PLUGIN_DATA`) names it:
+
+```json
+{"config": "/absolute/path/to/routing.json", "cache_dir": "/absolute/path/to/benchmark-evidence"}
+```
+
+Both values are absolute paths without links, and no other key is allowed.
+`config` is the configuration file. `cache_dir` is where Claude host observations
+are written (see [observed alias resolutions](claude-code-routing.md#observed-alias-resolutions));
+`routing_status` reads them from the benchmark cache of the MCP server, so use the
+same directory as that server's `--cache-dir`. Observations are written only when
+the binding exists; `ASSAY_ROUTING_CONFIG` alone records none.
+
+With neither a binding nor `ASSAY_ROUTING_CONFIG`, no launch is checked. To see
+which of them the hooks found, run `python -I -B hooks/runtime/cli.py doctor
+--client claude`: it reports `routing_binding_found` and `routing_config_found`.
+
+## Upgrade from 0.28
+
+0.28 and earlier shipped a routing advisor, a required routing mode, execution
+history and telemetry, and feedback capture. They no longer exist, and their
+settings are refused by name, not ignored, so an old setup stops launches until
+it is changed:
+
+1. In the plugin's data directory rename `routing-telemetry.json` to
+   `routing.json`; its `config` and `cache_dir` stay as they are. While the old
+   name is the only one present, route-table launches are refused with a message
+   naming the rename. `ASSAY_ROUTING_TELEMETRY_CONFIG` is refused when set: use
+   the binding file or `ASSAY_ROUTING_CONFIG`.
+2. In the routing configuration set `schema_version` to 5 and delete the sections
+   `advisor`, `policy`, `telemetry` and `task_evidence`, and the `pipeline` keys
+   `state_dir`, `agents_dir`, `mcp_server`, `advisor_route`, `profiles`,
+   `variants`, `baseline`, `approved_choices`, `profile_capabilities` and
+   `agent_templates`. `pipeline.mode` accepts only `evidence-only`.
+3. In the hook configuration (`ASSAY_HOOK_CONFIG`) delete `record_events`,
+   `feedback_capture` and `feedback_trigger`; a hook configuration that still names
+   one is refused with a message listing it (`docs/how-to/hooks.md` in the Assay
+   repository).
+4. The MCP tools `prepare_routing`, `get_advisor_input`, `complete_routing`,
+   `get_routing_decision`, `authorize_routing_launch` and `record_routing_outcome`,
+   the `claude-routes` command and the history and telemetry commands of
+   `benchmark_router.py` are gone. History and telemetry files an earlier release
+   wrote are no longer read.
+5. Delete the agent definitions that `claude-routes` generated: the files
+   `assay-<profile>-<effort>-<hash>.md`, the `.assay-routing-v2.json` ownership
+   manifest and the `.assay-routing-v2.lock` file in the directory that
+   `pipeline.agents_dir` named. Nothing removes them now. Their frontmatter calls
+   `routing_hook.py`, which no longer does anything for them, so a leftover file is
+   harmless but no longer routes.
 
 ## Using the table
 
@@ -78,7 +145,7 @@ outcome; repeated rework in one class is the signal to review its pair.
 
 ## Enforcement
 
-With a table configured in evidence-only mode, the Assay `PreToolUse` hook checks
+With a table configured, the Assay `PreToolUse` hook checks
 every native spawn of a supported client. It refuses a spawn that declares no
 class, declares an unknown class, or names a model or effort different from the
 class's pair, and a spawn whose settings the client would replace by inheritance
@@ -86,8 +153,10 @@ or by an override. The refusal lists the classes with their pairs and the rule
 for choosing one. An admitted launch gets a short note naming its class and
 asking for the one-line reason; nothing checks that the reason is written.
 
-If a configured routing file or telemetry binding cannot be read or validated,
-the hook refuses recognized launches. With no binding or routing configuration,
+If a configured routing file or the routing binding cannot be read or validated,
+the hook refuses recognized launches; a configuration written for an older
+schema or a binding left under its old name is refused with a message that says
+what to change. With no binding or routing configuration,
 ordinary delegation remains available. This refusal requires the host to invoke
 the trusted hook: a disabled, skipped or broken handler is not a verified guard.
 
@@ -124,12 +193,3 @@ subscription quota.
 
 Refresh the sources first with `refresh` when the cache is stale; which sources
 add new models within days is visible in their `source_updated_at`.
-
-## Frozen alternatives
-
-The routing advisor, required routing and local task evidence remain available
-to an owner who enables them, and their contracts are unchanged. They are
-frozen: not the default path, not extended, and not used when a table is
-configured unless the owner turns them on. Their procedures are operator
-documentation in `docs/how-to/` of the Assay repository, named in the skill's
-"Frozen alternatives" section.

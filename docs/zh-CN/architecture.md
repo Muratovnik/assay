@@ -1,15 +1,15 @@
 # assay 的组成方式
 
 默认路由是所有者在客户端路由配置中维护的路由表：若干任务类别，每个类别指定其子代理
-使用的模型和 effort。主代理选择类别；在 evidence-only 模式下，钩子会拒绝未携带所声明
+使用的模型和 effort。主代理选择类别；钩子会拒绝未携带所声明
 类别对应组合的 Claude 或 Codex 启动，以及会被继承或环境变量覆盖的组合。没有路由表时，
 Claude 启动仍须同时指明两项设置。`route-candidates` 根据缓存的基准数据提出候选组合，
 由所有者批准路由表。详见 [路由表](../../skills/route-subagents/references/route-table.md)。
 
-路由建议器（`native-economy`，或经明确同意的 Jev）和 `required` 模式已冻结：所有者
-启用后仍可使用，但不再更改，也不是默认路径。`required` 模式早于 Agent 调用中的 effort
-字段，因此仍通过生成的定义传递 effort。客户端负责权限、启动及实际配额；Assay 负责契约、
-本地元数据和诊断重放，不引入新守护进程或强制付费评测。
+启用插件的路由绑定后，钩子事件处理会记录宿主把 Claude 启动所请求的别名和 effort 实际解析
+成了什么。客户端负责权限、启动及实际配额；Assay 负责契约、本地元数据和诊断重放，不引入新守护
+进程或强制付费评测。早期版本的路由建议器、`required` 模式和执行遥测已不复存在：参见
+[从 0.28 升级](../../skills/route-subagents/references/route-table.md#upgrade-from-028)。
 
 [English](../architecture.md) · [Русский](../ru/architecture.md) · **简体中文**
 

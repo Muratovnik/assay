@@ -29,19 +29,11 @@ Verify the actual binding when it matters. Custom
 profiles should describe stable capabilities and omit model/effort defaults
 unless the owner deliberately pins them.
 
-When the owner selected required routing (`docs/how-to/required-routing.md` in the Assay
-repository), the separately
-bound native advisor fetches its private snapshot and submits the structured
-answer itself. The primary uses only the compact handoff, decision and the
-authorized worker stub, which the host completes. It does not copy benchmarks,
-forge results, start another provider's CLI or select a fallback. Only a
-separately configured eligible baseline can recover a failed advisor; otherwise
-no launch. Requested settings and model/effort fields in frontmatter are not
-observations: the hook observes the `effort.level` object and structured Agent
-`resolvedModel` and `modelsUsed` when available, records what an alias resolved
-to, and rejects conflicting environment overrides and observed mismatches.
-Owner-exempt native types get their configured model in the call. Unknown
-remains unknown. Parent permissions and actual tool access still govern.
+Requested settings and model/effort fields in frontmatter are not observations:
+the hook reads the `effort.level` object of a stop and the structured Agent
+`resolvedModel` when the host provides them, see
+[observed alias resolutions](#observed-alias-resolutions). Unknown remains
+unknown. Parent permissions and actual tool access still govern.
 
 Ordinary Agent calls do not imply filesystem isolation. Use native worktree
 isolation where supported for parallel writers and verify the resulting root.
@@ -54,11 +46,7 @@ CLAUDE_PROJECT_DIR at the launching project while hook input cwd follows the
 worktree. A hook may therefore still touch the main checkout or shared state;
 inspect its actual paths and ownership without changing unrelated registrations.
 
-Use native progress, waiting and resume mechanisms with returned identities. In
-required mode, request `authorize_routing_launch` with a routed worker's
-`resume_agent_id`; the host checks the same idle worker, original packet and
-unchanged definition. A direct unregistered resume or new task under an old
-identity is not permitted there.
+Use native progress, waiting and resume mechanisms with returned identities.
 Keep the packet self-contained where independence matters. Do not assume
 Codex context-inheritance parameters, effort values or role names work here.
 Parent permissions, tool restrictions, environment overrides and MCP exposure
@@ -108,9 +96,10 @@ and `effort`, and its reason names what is missing. These launches pass:
 
 For a declared client older than 2.1.292, which has no per-call effort, the
 refusal points to a definition whose frontmatter sets the effort instead.
-`pipeline.explicit_routes: "off"` disables the check. A missing or invalid configuration leaves
-ordinary delegation unchanged. The check establishes that a launch named both
-settings, not which model ran.
+`pipeline.explicit_routes: "off"` disables the check. Without a configuration or
+binding, ordinary delegation is unchanged; a configuration that cannot be read
+or validated, including one written for an older schema, refuses the launch. The
+check establishes that a launch named both settings, not which model ran.
 
 ## Launches from a subagent
 
@@ -127,11 +116,12 @@ then gets no Agent tool, and a fork's call fails. See the
 ## Observed alias resolutions
 
 The call accepts only aliases, while routing evidence names full model IDs.
-With the binding and telemetry not `off`, every Claude Agent launch records the
-requested alias and effort, the `resolvedModel` its return reports and the
-`effort.level` its stop reports. `routing_status` and `get_routing_context`
-return the latest as
-`host_observations`: `aliases` maps an alias to the ID it ran as, and `efforts`
+With the plugin's routing binding (`routing.json`, see
+[bind the configuration](route-table.md#bind-the-configuration-to-the-hooks)),
+every Claude Agent launch the hook does not refuse records the requested alias and
+effort, the `resolvedModel` its return reports and the `effort.level` its stop
+reports, under the binding's `cache_dir`. `routing_status` and `get_routing_context`
+return the latest as `host_observations`: `aliases` maps an alias to the ID it ran as, and `efforts`
 pairs a requested level with the applied one, which is lower when the model
 lacks the requested level. Pass the alias whose observed resolution is the
 selected ID. Without an observation the client's own model listing is the

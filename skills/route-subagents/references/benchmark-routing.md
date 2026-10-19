@@ -1,16 +1,9 @@
 # Benchmark evidence context for model and effort selection
 
-This reference describes the **evidence-only** comparison and its acquisition
+This reference describes the benchmark evidence comparison and its acquisition
 diagnostics. With a [route table](route-table.md) configured, launches follow
-the table and this surface serves building and reviewing it. When an advisor is
-enabled, ordinary delegation uses the
-recommendation workflow (`docs/how-to/routing-advisor.md` in the Assay repository) by default; do not turn a
-benchmark preference into an unexplained binding caller choice. Use this raw
-comparison surface when the advisor is disabled or unavailable. When the owner explicitly selected
-required routing (`docs/how-to/required-routing.md`), the root does not call
-`get_routing_context`; that tool is absent from the required-mode MCP surface.
-No acquisition or advisor failure changes modes. Source refresh is shared by
-both workflows.
+the table and this surface serves building and reviewing it; without one, it
+is the comparison surface for choosing a model and effort.
 
 This local tool prepares published measurements for comparison. **It does not
 select a configuration.** It does not run models, launch subagents, measure
@@ -81,7 +74,7 @@ policy, not a learned optimum or a guarantee about the current task.
 
 MCP does **not** expose a host model catalogue automatically. `--client` labels
 the connection; it is not discovery. Codex's documented App Server `model/list`
-can supply an inventory to a caller, but this adviser does not start another
+can supply an inventory to a caller, but this service does not start another
 Codex instance or silently read undocumented host files. In either client the
 primary supplies a confirmed inventory once, not a permanent model ranking.
 
@@ -89,8 +82,8 @@ primary supplies a confirmed inventory once, not a permanent model ranking.
 model. Matching uses lexical spelling plus reviewed source-local correspondences;
 see [model matching and refresh](benchmark-refresh.md) for their provenance,
 conflict rules and the candidate spellings that doctor reports for an unnamed
-model. Never guess which concrete version a rolling alias represents; required
-routing records the host's own report of it instead. Unknown effort is not low, adaptive or the default;
+model. Never guess which concrete version a rolling alias represents; on Claude
+the host's own report of it is recorded as a host observation instead. Unknown effort is not low, adaptive or the default;
 unmeasured efforts are not interpolated. Missing matches remain explicit.
 
 Preserve the user's explicit model/effort choice. This tool never overrides
@@ -120,7 +113,7 @@ installation; the host's working directory need not be the repository.
 A local JSON config may store preferences, without storing a model matrix:
 
 ```json
-{"schema_version":1,"client":"codex","preferences":{"quality_loss_pp":3,"allow_stale":true}}
+{"schema_version":5,"client":"codex","preferences":{"quality_loss_pp":3,"allow_stale":true}}
 ```
 
 The value 3 is an example, not a benchmark-derived default. Use separate client
@@ -129,11 +122,8 @@ Optionally add `inventory: {available: [...], observed_at: "...Z"}` with the
 actual confirmation time. Otherwise the agent supplies it on the first call.
 Neither config nor inventory belongs in tracked source.
 
-Version 1 keeps evidence-only behavior. The opt-in
-routing advisor (`docs/how-to/routing-advisor.md`) adds native economy and Jev adapters through
-the same service and source cache. Its separate snapshot/policy does not change
-the comparisons returned by `get_routing_context`. Schema 3 keeps this workflow
-unless it sets the separate required mode (`docs/how-to/required-routing.md`, section "One explicit mode").
+Only schema 5 is accepted; [the route table reference](route-table.md#configuration)
+lists its keys and how to upgrade an older file.
 
 Codex registration template (replace capitalized arguments with real paths):
 

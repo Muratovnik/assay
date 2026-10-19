@@ -33,7 +33,7 @@ worker gets `code-change`, a reviewer `independent-audit`, a test writer
 per-request skill check, so a packet without them leaves the method to chance.
 The worker loads each named skill before the work, may add another its work
 needs, and starts its report with the `Assay:` line unless the packet fixes an
-exact output format, such as a structured advisor answer.
+exact output format, such as a structured result.
 
 Record model and effort with the launch even when inheritance implements the
 selection; no model matrix is needed. Explain ordered implementation steps only

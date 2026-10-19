@@ -81,31 +81,23 @@ than assuming a parent process left it intact.
 
 The default route is the owner's route table in the client's routing
 configuration: a few task classes, each with the model and effort its children
-launch with. The primary chooses the class; in evidence-only mode the hook refuses
+launch with. The primary chooses the class; the hook refuses
 a Claude or Codex spawn that does not carry its declared class's pair, or whose
 pair inheritance or an environment override would replace. Without a table a
-Claude spawn must still name both settings. Every Claude launch records what the
-host ran its requested alias and effort as. `route-candidates` proposes pairs
+Claude spawn must still name both settings. With the plugin's routing binding,
+hook event processing records what the host ran each Claude launch's requested
+alias and effort as. `route-candidates` proposes pairs
 from cached benchmark measurements; the owner approves the table and reviews it
 when models change. See the
 [route table reference](../skills/route-subagents/references/route-table.md).
 
-The routing advisor and required mode are frozen: available to an owner who
-enables them, unchanged, and not the default. The advisor is served by the
-benchmark MCP/CLI application: it builds a bounded immutable snapshot, asks the
-selected adapter (`native-economy`, or Jev with explicit consent) for an answer
-and applies deterministic policy. Required mode adds a Claude hook guard that
-binds routing calls and registered launches to the host session through a
-bounded SQLite rendezvous, launches workers with the model in the Agent call and
-the effort in a generated definition (it predates the per-call effort field),
-and denies unregistered launches without granting any permission.
-
-Assay owns contracts, policy, local metadata and diagnostic replay. The client
-owns authorization, spawning, cancellation and actual quota accounting. Prepared
-state and an exact decision cache are bounded in memory; optional JSON telemetry
-has its own cache namespace and retention. Profiles and the catalog carry no
-model or runtime settings. No daemon, learned router or mandatory model
-evaluation campaign is introduced.
+Assay owns contracts, local metadata and diagnostic replay. The client owns
+authorization, spawning, cancellation and actual quota accounting. Host
+observations have their own store under the binding's cache directory and expire
+after 30 days. Profiles and the catalog carry no model or runtime settings. No
+daemon, learned router or mandatory model evaluation campaign is introduced. The
+routing advisor, required mode and execution telemetry of earlier releases no
+longer exist; see [upgrade from 0.28](../skills/route-subagents/references/route-table.md#upgrade-from-028).
 
 ## Guarded lifecycle
 

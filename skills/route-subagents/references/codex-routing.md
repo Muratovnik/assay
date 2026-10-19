@@ -35,22 +35,10 @@ Use full inheritance only when full continuity is material and the inherited
 settings also fit the task and budget. Do not discard a cheaper sufficient
 selection just to copy history. Recheck the callable schema if that changes.
 
-For a native economy advisor (`docs/how-to/routing-advisor.md` in the Assay repository), the primary passes the
-handoff's model and effort through `model` and `reasoning_effort`, with
-`fork_turns="none"` and the self-contained prompt. The advisor ranks only the
-provided snapshot and must not spawn. Forward its exact inline prompt, rather
-than a file path the no-tools advisor cannot read. Submit the returned object to
-`complete_routing` before launching the actual worker. A no-tools instruction
-is not an enforced sandbox: use a real tool restriction only when the active
-schema exposes it. No fixed model or per-child token cap is implied. Snapshot
-expiry rejects a late answer; interrupting the running advisor still belongs
-to the native client.
-
 ## Contents
 
 - [Route-table launches](#route-table-launches)
 - [Launches from a subagent](#launches-from-a-subagent)
-- [Required-mode adapter requirements](#required-mode-adapter-requirements)
 - [Workers and waits](#workers-and-waits)
 - [Model upgrades and API boundaries](#model-upgrades-and-api-boundaries)
 
@@ -68,7 +56,9 @@ and refuses a pinned value that differs from the class's pair. A type in
 
 The Assay plugin registers `PreToolUse` for Codex, and current Codex
 documentation lists `spawn_agent` among the local function tools that hook can
-refuse. The check reads only `task_name`, `agent_type`, `model`,
+refuse. It reads the
+configuration named by `ASSAY_ROUTING_CONFIG` or by the plugin's `routing.json`
+binding, see [bind the configuration](route-table.md#bind-the-configuration-to-the-hooks). The check reads only `task_name`, `agent_type`, `model`,
 `reasoning_effort` and `fork_turns`; it never needs the message, which Codex
 session files store encrypted. An untrusted hook is skipped without an error,
 so confirm the refusal once in a fresh session after installing or upgrading.
@@ -89,41 +79,7 @@ stops children from spawning. Public reports say some Codex versions do not
 enforce it, so set it explicitly and confirm in a fresh session that a child's
 `spawn_agent` call fails before relying on it.
 
-Required routing (`docs/how-to/required-routing.md`, section "One explicit mode") has no Codex adapter.
-A Codex configuration that selects it reports the unsupported host and blocks
-protected delegation; keep Codex on the evidence-only workflow. The
-reminder alone enforces nothing; the launch check above is the hook's
-evidence-only guard.
-
-## Required-mode adapter requirements
-
-These are the conditions a future Codex adapter must meet, from observations on
-Codex 0.147.0; none of it is implemented. The spawn call already carries `model`
-and `reasoning_effort`, so Codex needs no generated definitions for routing.
-
-- **Advisor confinement comes from agent configuration.** There is no tool
-  allowlist, only switches that remove capabilities. In the advisor's agent
-  file, disabling the shell, apps and goals features, a read-only sandbox and
-  `enabled_tools` limited to the two routing tools of the benchmark server took
-  effect; `approval_mode = "approve"` on those two tools was needed, or a
-  non-interactive run cancels the call.
-- **A residual set stays available.** Per-agent `view_image` and code-mode
-  switches had no effect, and image generation, plan updates and MCP resource
-  reading have no switch; `apply_patch` remains but the read-only sandbox blocks
-  its writes. Document that set, and repeat a native probe of the advisor's
-  actual tools at adapter acceptance and after every Codex upgrade, because new
-  tools arrive enabled.
-- **A hook-based guard needs proof first.** Subagents call their tools from
-  code mode's `exec` tool. Whether `PreToolUse` sees the calls inside it is not
-  established by the historical probe. Current documentation describes hooks
-  for nested calls, but the installed client still needs a fresh capture. A
-  guard that sees only `exec` would block the routing tools too. An untrusted
-  hook is skipped without an error.
-- **Output sanitizing needs another route.** Codex `PostToolUse` cannot rewrite
-  a tool's output, only block it with feedback, so the advisor's report cannot be
-  reduced to a status the way the Claude adapter does it.
-- **The inventory comes from the host.** The client's local model cache can be
-  stale; the owner confirms what the host actually offers.
+The reminder alone enforces nothing; the launch check above is the hook's guard.
 
 ## Workers and waits
 

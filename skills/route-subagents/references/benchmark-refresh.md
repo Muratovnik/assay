@@ -45,11 +45,8 @@ is parsed separately and must match a setting the caller supplied. Missing
 effort stays unknown, not `medium` or `max`.
 
 What a rolling alias currently means is not inferred here either; the host
-reports it. Evidence-only Claude routing returns recent resolutions as
-`host_observations` (see [Claude Code mechanics](claude-code-routing.md)). In
-required routing a change of that resolution suspends the alias's confirmed
-spellings until the owner confirms the inventory again; see
-`docs/how-to/required-routing.md`, section "Observations, failure and privacy boundaries".
+reports it. Claude routing returns recent resolutions as `host_observations`
+(see [Claude Code mechanics](claude-code-routing.md#observed-alias-resolutions)).
 That is a host observation, not a matching rule.
 
 ## Finding a missing spelling
@@ -69,7 +66,7 @@ model may simply not measure it.
 
 Supply the real host's current `available` list. The server still does not
 query or infer the host's model catalogue. Both `get_routing_context` and the
-advisor's `prepare_routing` acquire context through the same service.
+CLI `context` command acquire context through the same service.
 
 For each relevant benchmark, the existing cache stores bounded fingerprints
 of the inventories it has successfully checked. Each model entry's exact
@@ -96,14 +93,13 @@ Only the relevant benchmark sources this host can fetch receive these keys. A
 browser-only source keeps its TTL while the browser adapter is disabled, rather
 than recording a check that cannot succeed as a publisher failure; enabling the
 browser makes it eligible again. Generic/model-specific guides retain their
-existing TTL and scope filtering. The default advisor cache
-is downstream of this acquisition step, not an alternative to it. An early
+existing TTL and scope filtering. An early
 check is reported as `refresh_reason=inventory_changed`; a successful fetch is
 still not evidence of complete model/effort coverage.
 
 ## Interpret the diagnostics
 
-`sources[].model_matching` survives compact responses and advisor projection:
+`sources[].model_matching` survives compact responses:
 
 | Per-model status | Established scope |
 | --- | --- |

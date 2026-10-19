@@ -47,7 +47,7 @@ membership is not. A Sol/Luna-only inventory does not acquire Astra-only advice.
 `routing_status` remains a catalog/cache inspection, not a routing decision.
 
 Each available document's `matched_models` names the matching runtime IDs. This
-survives compact responses and advisor projection, so a mixed-model plan cannot
+survives compact responses, so a mixed-model plan cannot
 treat an Astra document as evidence about every candidate. Empty means no match;
 null means scope or inventory is unknown. Legacy snapshots without applicability
 remain explicitly unknown, never silently universal. The registered conditions

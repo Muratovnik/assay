@@ -1,7 +1,7 @@
 # Configure and diagnose command hooks
 
 Assay's plugin hooks are local commands, not prompt/agent hooks. They do not call
-models, install dependencies, launch advisors or modify client settings. In Claude
+models, install dependencies or modify client settings. In Claude
 Code the skill gate and the source check read the tail of the session transcript
 at `Stop` and `SubagentStop`, and the [mid-turn skill note](#mid-turn-skill-note-in-claude-code)
 reads it at `PreToolUse` when the gate's records do not show a skill loaded. Their text and any
@@ -16,14 +16,13 @@ per matching event. `PreToolUse` matches every tool, because the reading-role
 boundary and the spawn checks need to see each call; result and failure events
 match only the native spawn tools, and in Claude Code also `WebFetch` results for
 the [source check](#source-checks-in-claude-code).
-Generated definitions used by required routing retain their existing lifecycle.
 
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
 skill choice also needs `markdown-it-py` from `hooks/requirements.txt`, installed in
 an isolated environment used by that command. Repository contributors already get
 this from `requirements-tools.txt`. Assay never installs it automatically. A missing
-parser makes explicit choices unrecognized, not permission to bypass a required
-routing check; the skill check, the session/delegation reminders and the guard do
+parser makes explicit choices unrecognized, not permission to bypass a route-table
+check; the skill check, the session/delegation reminders and the guard do
 not need the Markdown parser.
 Optional rule/configuration/state failures retain the basic reminders and never
 replace a routing guard response.
@@ -51,8 +50,10 @@ installation mechanism; this change does not add a second settings installer.
 Update/remove/rollback the plugin with its native lifecycle; linked installations
 still follow [the existing external-snapshot procedure](upgrade-linked-install.md).
 Keep foreign settings unchanged. Do not copy the hook into user settings in addition
-to enabling the plugin. After rollback, review trust again. `claude-routes --remove`
-and the existing ownership manifest govern generated definitions, not plugin removal.
+to enabling the plugin. After rollback, review trust again.
+`claude-routes` no longer exists, so nothing removes the agent definitions it
+generated in an earlier release; delete them yourself, see
+[upgrade from 0.28](../../skills/route-subagents/references/route-table.md#upgrade-from-028).
 Persistent plugin data has its own lifetime and is not an install-state database.
 
 ## Input language and model-facing language
@@ -173,8 +174,7 @@ a check for the subagent instead: the skills its packet names apply, it may add
 others its work needs, it loads each before the work, through the skill tool or
 by reading `<name>/SKILL.md` under the installed `skills` directory, which the
 check names for profiles without the skill tool. It opens its first message with
-the same one-sentence announcement and does not restate it in its report. The
-required-mode routing advisor, whose answer is a fixed structure, gets no check.
+the same one-sentence announcement and does not restate it in its report.
 In Claude Code the gate above also runs at `SubagentStop`. It reads the
 subagent's own transcript, including a report delivered through
 `SubagentHandback`: a subagent that announced a skill it did not load continues
@@ -342,7 +342,7 @@ user requests subagents, use `route-subagents` before substantial solo work; no
 delegation is authorized by it. The rest of the routing checklist is added at
 session start only when `ASSAY_ROUTING_CONFIG` is set; otherwise it arrives in the
 reminder before each launch.
-A required-mode guard reply takes precedence over a suggestion. The runtime never
+A routing guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated
 failures. Assay returns no blocking Stop decision; the Claude skill gate above
 continues a turn at most once, through feedback. Assay does not ship a hook
@@ -431,26 +431,32 @@ Optional `pipeline.host` in the existing routing config records declared facts:
 These are examples, not discovered local settings. Unknown is the default. Doctor
 separates declared host, documented mechanism, configured files and observations.
 A manually supplied version is not an independently verified installed version.
-Known non-CLI surfaces are not qualified for the strict adapter. Legacy configs
-with unknown surface retain the existing guard with explicit unverified status.
+Per-call effort is reported as available only for a declared CLI surface at
+version 2.1.292 or later; any other surface leaves it unverified.
+
+### Routing configuration and binding
+
+The route-table check and the host observations read the routing configuration,
+which the hooks find through `ASSAY_ROUTING_CONFIG` or the plugin data
+directory's `routing.json` binding; see
+[bind the configuration](../../skills/route-subagents/references/route-table.md#bind-the-configuration-to-the-hooks).
+Doctor reports `routing_binding_found` and `routing_config_found`. It exits 2 with
+a message that names the rename when the data directory still holds only the old
+`routing-telemetry.json`, or when `ASSAY_ROUTING_TELEMETRY_CONFIG` is set, and
+with a message that lists the keys to remove when the configuration is written for
+an older schema. The same configuration refuses recognized launches at run time.
+[Upgrade from 0.28](../../skills/route-subagents/references/route-table.md#upgrade-from-028)
+lists the steps, including the removed hook options.
 
 ### Claude
 
-In evidence-only mode the Agent call carries both the model and the effort
-(Claude Code 2.1.292 and later). Without a route table the hook refuses a launch
-that does not name both; with one it checks the pair against the declared class, see
+The Agent call carries both the model and the effort (Claude Code 2.1.292 and
+later). Without a route table the hook refuses a launch that does not name both;
+with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
 Before either check it refuses an Agent call made inside a subagent, because only
 the primary routes; see
 [launches from a subagent](../../skills/route-subagents/references/claude-code-routing.md#launches-from-a-subagent).
-
-The frozen required mode predates the per-call effort field: its guard keeps
-effort in generated agent frontmatter and rejects a supplied per-call effort even
-for exempt agent types. It preserves the existing alias/pinned-model mechanism
-and checks immutable definition bytes.
-Plugin-scope definitions cannot preserve required permission fields, so the
-routing generator rejects that declared scope. Definition presence remains
-configured, not proof of discovery or effective permissions.
 
 Model override handling distinguishes pre-2.1.251 CLI precedence, current CLI
 precedence and unknown surfaces. Forced overrides remain conflicts. The literal
@@ -458,42 +464,21 @@ precedence and unknown surfaces. Forced overrides remain conflicts. The literal
 An unresolved `auto` effort cannot prove the selected effort. No global setting
 is changed. Model/provider/organization caps still require runtime evidence.
 
-A newly created agent directory may require reconnecting; a file watcher is not
-a universal discovery receipt. Higher-priority same-name definitions and managed
-settings remain unverified. Use native diagnostics before relying on selection.
-
-Parallel calls may share an effort definition but pass different models. Start
-order is provisional until a native return binds agent and tool-use IDs. Effort
-and model observations follow the actual agent during rebinding; mismatch is
-recomputed rather than copied to the wrong packet. Concurrent unbound advisors
-of one definition are refused because private input needs an unambiguous identity.
-
-Advisor handbacks accept only status fields. Unknown successful output envelopes
-are rebuilt as a valid native `AgentOutput` with a decision reference and bounded
-numeric telemetry, never arbitrary report/error/summary fields. Mandatory prompt
-and usage fields remain present with sanitized values, so the client accepts the
-replacement. Internal return-processing failures use the same schema.
-Private advisor launches require `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` in the
-environment that starts Claude. Otherwise the guard denies the launch: background
-completion notifications bypass this replacement.
-Failure notifications, missing hooks and input too large to parse are not a proven
-redaction boundary. Hooks are workflow checks, not isolation against a hostile
-client/process. PostToolUse cannot undo work already performed.
+With the plugin's routing binding, hook event processing also records which
+model an Agent launch's alias resolved to and which effort ran, in the binding's
+cache directory; `routing_status` returns them as `host_observations`. Hooks are
+workflow checks, not isolation against a hostile client or process. PostToolUse
+cannot undo work already performed.
 
 ### Codex
 
-Hints, read-only preflight and, with a route table in evidence-only mode, a
+Hints, read-only preflight and, with a route table, a
 `spawn_agent` check are supported: the hook refuses a spawn that does not follow
 its declared class or would inherit the parent's settings, see
 [route-table launches](../../skills/route-subagents/references/codex-routing.md#route-table-launches).
 Codex hook input does not name the calling agent, so a child's own spawn is held
 only by `agents.max_depth`; see
-[launches from a subagent](../../skills/route-subagents/references/codex-routing.md#launches-from-a-subagent). The Claude receipt-injection/private
-advisor protocol is **not** silently advertised as strict Codex routing. The
-current documented Codex rewrite requires `allow`, and its native output contract
-does not establish Claude's private return-rewriting guarantee. Explicit required
-mode therefore denies protected spawns/routing operations on Codex while leaving
-ordinary root work available. Evidence-only mode is an explicit owner choice.
+[launches from a subagent](../../skills/route-subagents/references/codex-routing.md#launches-from-a-subagent).
 
 Use the exposed tool schema, not an API's fields or Claude effort aliases. For a
 read-only check of *supplied effective inputs*:
