@@ -26,6 +26,7 @@ existing task when useful, not a mandatory report for each check.
 | A supported behavior or known bug lacks regression protection | Add or repair a test at the smallest boundary that exposes the defect. Use [test-writing](../../test-writing/SKILL.md) for the independent expectation and assertions. |
 | The cause, installed API or environment is unknown | Use a bounded diagnostic observation to decide the repair. Keep a permanent test when it protects a continuing guarantee, not merely to preserve every investigative step. |
 | Wiring, persistence or a real dependency is part of the promise | Exercise that consumer boundary. Mock-only success or compilation cannot substitute for the promised effect. Pure local behavior need not acquire end-to-end testing. |
+| The behavior depends on the consumer's environment — operating system, installed build, user profile, host process or runtime version | Check it in that environment. A pass in another environment is a reported gap, not acceptance. Behavior the environment cannot affect needs no extra environment. |
 | No meaningful new test obligation remains | Make no new test; perform the applicable existing/static/manual checks and mandatory gates. Verify their relevance rather than declaring the change too small to check. |
 
 These choices can combine. An integration regression may need both an existing
