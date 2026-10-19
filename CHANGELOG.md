@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.30.0](https://github.com/Muratovnik/assay/compare/v0.29.0...v0.30.0) (2026-10-19)
+
+Finishes the routing cleanup of 0.29.0. Exempt agent types are a plain list,
+the routing checklist at session start follows the configuration the launch
+check uses, including the plugin binding, and a worker names the skills it
+loaded on the first line of its report.
+
+### ⚠ BREAKING CHANGES
+
+* **routing:** `pipeline.unrouted_agents` takes only a list of agent types. The object form that mapped a type to `baseline`, `inherit` or a model was validated but never used after the advisor's removal; a configuration that still has it, an empty `{}` included, is refused and refuses launches with a message saying what to write instead, for example `[]` for `{}` ([fcd04d7](https://github.com/Muratovnik/assay/commit/fcd04d7c078b53d4c7e87401eacfa4fb3dbf0838))
+
+### Features
+
+* **hooks:** the routing checklist at session start appears whenever the hook resolves a routing configuration with a route table for its client, through `ASSAY_ROUTING_CONFIG` or the `routing.json` binding, instead of only when the variable is set. It now describes the route table — a task class at the start of the launch's description with exactly that class's model and effort — instead of the removed advisor. A retired or unreadable configuration keeps the checklist and adds why launches are refused; session start never fails over routing ([02d061e](https://github.com/Muratovnik/assay/commit/02d061e449ddc3f5f8fc3cf056adc8ba786afa9a), [d34c547](https://github.com/Muratovnik/assay/commit/d34c5472083b928575d0d3a3c0c84dc09bb87de5))
+
+### Bug Fixes
+
+* **route-subagents:** a packet tells its worker to name each Assay skill it loaded on the first line of the report, with an example such as Used `assay:code-change`, instead of pointing at an undefined `Assay:` line; an exact output format the packet fixes still takes precedence. In paired diagnostic runs on Haiku with identical packets, the example form named the loaded skills in 3 of 3 reports against 1 of 3 for the previous wording ([5d9e409](https://github.com/Muratovnik/assay/commit/5d9e4091b47f38c0c9fa918e49c114cc9f7137dd))
+
 ## [0.29.0](https://github.com/Muratovnik/assay/compare/v0.28.1...v0.29.0) (2026-10-19)
 
 Assay drops the parts that stopped producing evidence: the frozen routing
