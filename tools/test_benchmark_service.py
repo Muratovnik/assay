@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from test_benchmark_router import SCRIPTS, any_source, data, guide_data, request, row
+from test_benchmark_router import SCRIPTS, data, request, row
 from route_evidence.cache import Cache, FetchError, source_lock
 from route_evidence.core import EvidenceError, timestamp
 from route_evidence.processes import ProcessScope

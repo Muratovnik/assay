@@ -1,7 +1,6 @@
 """Synthetic discovery and acquisition contracts, not live model evaluations."""
 from __future__ import annotations
 
-import copy
 import sys
 import tempfile
 import unittest
@@ -12,7 +11,7 @@ from unittest.mock import Mock, patch
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, source_lock
-from route_evidence.core import EvidenceError, encoded, identity, timestamp
+from route_evidence.core import EvidenceError, encoded
 from route_evidence.model_names import bind_labels, inventory_keys, matching_diagnostics, spelling_report
 from route_evidence.providers import Fetcher, SOURCES, parse_tables, snapshot
 from route_evidence.routing import brief, build_context

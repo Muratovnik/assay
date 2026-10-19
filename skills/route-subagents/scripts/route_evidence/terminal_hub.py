@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 
 from .cache import FetchError
-from .core import MAX_BYTES, EvidenceError, digest, encoded, loads, number, text, validate_snapshot
+from .core import MAX_BYTES, digest, encoded, loads, number, text, validate_snapshot
 
 ENDPOINT = "https://ofhuhcpkvzjlejydnvyd.supabase.co/functions/v1/leaderboard-read"
 # Publisher-owned public application identifier, NOT a user secret or bearer.

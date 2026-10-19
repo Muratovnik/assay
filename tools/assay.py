@@ -18,13 +18,13 @@ from typing import Any
 import tomllib
 
 if __package__:
-    from .asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from .asset_formats import ContractError, frontmatter, openai_adapter_document
     from .skill_resources import (
         contents_problems, distribution_problems, markdown_problems, unreachable_problems,
         validate_plain_tree,
     )
 else:
-    from asset_formats import ContractError, FRONTMATTER, frontmatter, openai_adapter_document
+    from asset_formats import ContractError, frontmatter, openai_adapter_document
     from skill_resources import (
         contents_problems, distribution_problems, markdown_problems, unreachable_problems,
         validate_plain_tree,
