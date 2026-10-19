@@ -55,8 +55,12 @@ class Fixture(unittest.TestCase):
         return {'hook_event_name': 'PreToolUse', 'tool_name': 'Agent', 'session_id': 's', 'tool_use_id': tool,
                 'cwd': str(self.root), 'tool_input': {'prompt': 'Do the bounded task', **supplied}}
 
-    def decide(self, event, environment):
-        result, error = cli.process(event, 'claude', environment)
+    def spawn(self, tool='t1', **supplied):
+        return {'hook_event_name': 'PreToolUse', 'tool_name': 'spawn_agent', 'session_id': 's', 'tool_use_id': tool,
+                'cwd': str(self.root), 'tool_input': {'message': 'Do the bounded task', **supplied}}
+
+    def decide(self, event, environment, client='claude'):
+        result, error = cli.process(event, client, environment)
         output = result.get('hookSpecificOutput', {})
         denied = output.get('permissionDecision') == 'deny'
         return ('deny' if denied else 'allow'), output.get('permissionDecisionReason' if denied else 'additionalContext'), error
@@ -154,6 +158,95 @@ class BindingTests(Fixture):
         self.bind(self.config())
         self.assertEqual('allow', self.decide(self.launch(description='gather', model='haiku', effort='medium'),
                                               environment)[0])
+
+    def test_a_codex_binding_under_its_old_name_refuses_launches(self):
+        codex = {'schema_version': 5, 'client': 'codex', 'routes': TABLE}
+        environment = self.bind(self.config(codex), name='routing-telemetry.json')
+        self.assertFalse((self.data / 'routing.json').exists())
+        for supplied in ({'task_name': 'gather_survey', 'model': 'haiku', 'reasoning_effort': 'medium',
+                          'fork_turns': 'none'},
+                         {'task_name': 'survey'}):
+            with self.subTest(supplied=supplied):
+                decision, reason, _ = self.decide(self.spawn(**supplied), environment, 'codex')
+                self.assertEqual(decision, 'deny')
+                self.assertIn(RENAMED, reason)
+        # Other tools are not launches; the hook keeps answering them.
+        result, error = cli.process({**self.spawn(), 'tool_name': 'read_file'}, 'codex', environment)
+        self.assertNotEqual('deny', result.get('hookSpecificOutput', {}).get('permissionDecision'))
+        # Once renamed, the same launch is checked against the table instead.
+        self.bind(self.config(codex))
+        good = self.spawn(task_name='gather_survey', model='haiku', reasoning_effort='medium', fork_turns='none')
+        self.assertEqual('allow', self.decide(good, environment, 'codex')[0])
+
+    def test_removed_hook_options_do_not_switch_the_route_table_off(self):
+        # The hook options are refused and reported, but the launch check is decided first and stays.
+        environment = self.bind(self.config())
+        admitted = self.launch(description='gather: survey', model='haiku', effort='medium')
+        unlabelled = self.launch(description='survey', model='haiku', effort='medium')
+        removed = {'record_events': True, 'feedback_capture': 'metadata', 'feedback_trigger': 'explicit'}
+        for hook in (removed, *({name: value} for name, value in removed.items())):
+            path = self.root / 'hooks.json'
+            path.write_text(json.dumps(hook), encoding='utf-8')
+            names = sorted(hook)
+            with self.subTest(options=names):
+                scoped = {**environment, 'ASSAY_HOOK_CONFIG': str(path)}
+                decision, reason, error = self.decide(unlabelled, scoped)
+                self.assertEqual(decision, 'deny')
+                self.assertIn('task class', reason)
+                self.assertIn(', '.join(names), error)
+                decision, context, error = self.decide(admitted, scoped)
+                self.assertEqual(decision, 'allow')
+                self.assertIn('admitted as class `gather`', context)
+                self.assertIn(', '.join(names), error)
+
+    def test_a_retired_configuration_named_directly_refuses_launches(self):
+        retired = {'schema_version': 4, 'client': 'claude', 'routes': TABLE, 'advisor': {'enabled': False}}
+        bare = {'schema_version': 4, 'client': 'claude', 'routes': TABLE}
+        for document in (retired, bare):
+            environment = {'ASSAY_ROUTING_CONFIG': str(self.config(document))}
+            with self.subTest(document=sorted(document)):
+                # A launch the table would admit is refused as well: the check never silently stops applying.
+                decision, reason, _ = self.decide(self.launch(description='code: x', model='sonnet', effort='high'),
+                                                  environment)
+                self.assertEqual(decision, 'deny')
+                self.assertIn('set schema_version to 5', reason)
+                self.assertNotIn(str(self.root), reason)
+                self.assertEqual('deny', self.decide(self.launch(description='x'), environment)[0])
+        self.assertIn('advisor', self.decide(self.launch(), {'ASSAY_ROUTING_CONFIG': str(self.config(retired))})[1])
+        codex = {'ASSAY_ROUTING_CONFIG': str(self.config({'schema_version': 4, 'client': 'codex'}))}
+        decision, reason, _ = self.decide(self.spawn(task_name='x'), codex, 'codex')
+        self.assertEqual(decision, 'deny')
+        self.assertIn('set schema_version to 5', reason)
+        # The same launch under schema 5 is admitted, so the refusal comes from the retired schema.
+        current = {'ASSAY_ROUTING_CONFIG': str(self.config(name='current.json'))}
+        self.assertEqual('allow', self.decide(self.launch(description='code: x', model='sonnet', effort='high'),
+                                              current)[0])
+
+    def test_without_a_binding_or_configuration_a_launch_passes_and_nothing_is_recorded(self):
+        launch = self.launch(description='gather: survey', model='haiku', effort='medium')
+        events = (launch, {**launch, 'hook_event_name': 'PostToolUse',
+                           'tool_response': {'agentId': 'a1', 'resolvedModel': 'claude-haiku-5-5'}},
+                  {**launch, 'hook_event_name': 'SubagentStop', 'agent_id': 'a1'},
+                  # No table applies, so even a launch the table would refuse passes.
+                  self.launch(tool='t2', description='survey', model='opus', effort='max'))
+        empty = self.root / 'empty-data'; empty.mkdir()
+        for environment in ({}, {'PLUGIN_DATA': str(empty)}):
+            for event in events:
+                with self.subTest(environment=sorted(environment), event=event['hook_event_name']):
+                    result, error = cli.process(event, 'claude', environment)
+                    output = result.get('hookSpecificOutput', {})
+                    self.assertIsNone(error)
+                    self.assertNotIn('permissionDecision', output)
+                    self.assertNotIn('updatedInput', output)
+        decision, _, _ = self.decide(self.spawn(task_name='x'), {}, 'codex')
+        self.assertEqual(decision, 'allow')
+        self.assertFalse(self.cache.exists())
+        self.assertEqual([], [path for path in self.root.rglob('*') if 'host-observations' in path.parts])
+        # The binding file is what turns recording on, so the same events with one do record.
+        self.bind(self.config())
+        for event in events[:2]:
+            cli.process(event, 'claude', {'PLUGIN_DATA': str(self.data)})
+        self.assertTrue((self.cache / 'host-observations').exists())
 
     def test_the_removed_binding_variable_is_refused(self):
         binding = self.root / 'binding.json'
