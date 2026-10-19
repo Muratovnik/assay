@@ -349,7 +349,7 @@ when repeated runs should give way to tracing the consumer's prerequisites,
 At `PreToolUse`, when a `Bash` or `PowerShell` call runs the same scenario for the
 fifth time since the owner's last message and that reference was not read since
 the latest compaction, the hook adds one note: `Assay rerun note: this call is run
-5 of the same scenario (n1t-run/run.ps1) since the owner's last message. The
+5 of the same scenario (e2e/run.ps1) since the owner's last message. The
 assay:code-change reference references/diagnostic-reproducer.md governs when
 repeated runs should give way to tracing the consumer's prerequisites; it has not
 been read in this context.` The rule is `rerun-diagnostic-reproducer`.

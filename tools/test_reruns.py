@@ -13,8 +13,8 @@ sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime import activation, reruns
 from runtime.cli import process
 
-RUN = "pwsh -NoProfile -File tmp/n1t-run/run.ps1 > tmp/n1t-run/run{n}.log 2>&1; echo exit $?; tail -15 tmp/n1t-run/run{n}.log"
-ABSOLUTE = "pwsh -NoProfile -File C:/work/tmp/worktrees/n1t/tmp/n1t-run/run.ps1"
+RUN = "pwsh -NoProfile -File tmp/e2e/run.ps1 > tmp/e2e/run{n}.log 2>&1; echo exit $?; tail -15 tmp/e2e/run{n}.log"
+ABSOLUTE = "pwsh -NoProfile -File C:/work/tmp/worktrees/scenario/tmp/e2e/run.ps1"
 REFERENCE = "C:\\cache\\assay\\skills\\code-change\\references\\diagnostic-reproducer.md"
 LAST = reruns.THRESHOLD
 
@@ -67,10 +67,10 @@ def read(path=REFERENCE, ident="read1"):
 
 class SignatureTests(unittest.TestCase):
     def test_one_scenario_has_one_signature_whatever_its_path_and_redirections(self):
-        for command in (ABSOLUTE, RUN.format(n=3), "cd C:/work && pwsh -NoProfile -File tmp/n1t-run/run.ps1 *> out.log",
-                        "& ./tmp/n1t-run/run.ps1", "powershell.exe -File .\\tmp\\n1t-run\\run.ps1"):
+        for command in (ABSOLUTE, RUN.format(n=3), "cd C:/work && pwsh -NoProfile -File tmp/e2e/run.ps1 *> out.log",
+                        "& ./tmp/e2e/run.ps1", "powershell.exe -File .\\tmp\\e2e\\run.ps1"):
             with self.subTest(command=command):
-                self.assertEqual("n1t-run/run.ps1", reruns.signature(command))
+                self.assertEqual("e2e/run.ps1", reruns.signature(command))
 
     def test_arguments_are_part_of_the_scenario(self):
         cases = {
@@ -83,7 +83,7 @@ class SignatureTests(unittest.TestCase):
             "npx vitest run src/panel": "npx vitest run src/panel",
             "go test ./...": "go test ./...",
             "python -B tools/check.py --all": "tools/check.py --all",
-            "& ./tmp/n1t-run/run.ps1 -Fast": "n1t-run/run.ps1 -fast",
+            "& ./tmp/e2e/run.ps1 -Fast": "e2e/run.ps1 -fast",
             "python C:/work/tools/eol.py C:/work/src/app/main.cs --check": "tools/eol.py app/main.cs --check",
         }
         for command, expected in cases.items():
@@ -96,11 +96,11 @@ class SignatureTests(unittest.TestCase):
                 self.assertNotEqual(reruns.signature(one), reruns.signature(other))
 
     def test_inline_code_edits_and_other_commands_are_not_runs(self):
-        for command in ("python - <<'EOF'\nopen('tmp/n1t-run/run.ps1')\nEOF", "python -I -c \"import app.py\"",
+        for command in ("python - <<'EOF'\nopen('tmp/e2e/run.ps1')\nEOF", "python -I -c \"import app.py\"",
                         "mkdir -p tmp && cat > tmp/run.ps1 <<'EOF'\npwsh -File x.ps1\nEOF",
-                        "sed -i 's/a/b/' tmp/n1t-run/run.ps1", "git add src/app.py tests/test_app.py",
+                        "sed -i 's/a/b/' tmp/e2e/run.ps1", "git add src/app.py tests/test_app.py",
                         "git commit -m 'run tools/check.py'", "npm run build", "pwsh -Command \"./x.ps1\"",
-                        "grep -n run tmp/n1t-run/run.ps1", "cat tmp/n1t-run/run3.log", "", None, 7):
+                        "grep -n run tmp/e2e/run.ps1", "cat tmp/e2e/run3.log", "", None, 7):
             with self.subTest(command=command):
                 self.assertIsNone(reruns.signature(command))
 
@@ -153,9 +153,9 @@ class NoteTests(unittest.TestCase):
         self.assertEqual(5, LAST)
         path = self.transcript(owner(), runs(1, 4), current(5))
         text = self.note(self.run_event(self.pre(path)))
-        self.assertIn("run 5 of the same scenario (n1t-run/run.ps1)", text)
+        self.assertIn("run 5 of the same scenario (e2e/run.ps1)", text)
         self.assertIn("assay:code-change reference references/diagnostic-reproducer.md", text)
-        self.assertNotIn("tmp/n1t-run/run5.log", text)
+        self.assertNotIn("tmp/e2e/run5.log", text)
         self.assertLessEqual(len(text), 360)
         path = self.transcript(owner(), runs(1, 5), current(6))
         self.assertEqual({}, self.run_event(self.pre(path, 6)))
@@ -180,7 +180,7 @@ class NoteTests(unittest.TestCase):
         path = self.transcript(owner(), runs(1, 4, other, "o"), runs(1, 2), current(5, other, "o5"))
         self.assertIn("(pytest tests/test_app.py)", self.note(self.run_event(self.pre(path, command=other, ident="o5"))))
         path = self.transcript(owner(), runs(1, 4, other, "o"), runs(1, 4), current(5))
-        self.assertIn("(n1t-run/run.ps1)", self.note(self.run_event(self.pre(path))))
+        self.assertIn("(e2e/run.ps1)", self.note(self.run_event(self.pre(path))))
 
     def test_a_read_reference_keeps_it_silent_until_a_compaction_drops_it(self):
         for label, entries in {"a Read": read(), "a shell read": [call(
