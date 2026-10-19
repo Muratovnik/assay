@@ -6,6 +6,26 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.31.0](https://github.com/Muratovnik/assay/compare/v0.30.0...v0.31.0) (2026-10-19)
+
+Moves the hooks from "load the skill" to "apply its rule at the decision point".
+A question to the owner waits for critical-discussion, a scenario rerun five
+times points at the diagnostic reference, and a turn that changed code or wrote
+a plan is held to the verification, reuse and existing-solution lines the skills
+now ask for. The checks see that a line is missing, not whether it is right.
+
+### Features
+
+* **hooks:** an `AskUserQuestion` call while critical-discussion is not loaded is refused once with a note naming the need behind the choice, doing nothing, existing solutions and each option's basis; the repeated call passes. The row always takes the `deny` form because a note reaches the model only after the owner has answered. Rule `midturn-critical-discussion` ([b3cc40b](https://github.com/Muratovnik/assay/commit/b3cc40b8bee8693859b213feb50c83c21e28d037), [a1fe3a3](https://github.com/Muratovnik/assay/commit/a1fe3a3f251d26192999f51810af58eda1af9c3a))
+* **hooks:** the fifth `Bash` or `PowerShell` run of the same script or test command since the owner's last message, while code-change's `references/diagnostic-reproducer.md` is unread since the latest compaction, gets one note pointing at that reference. Task notifications and compactions do not restart the count; results and exit codes are not read. Rule `rerun-diagnostic-reproducer` ([8e736e0](https://github.com/Muratovnik/assay/commit/8e736e0badff57fd46ec468480950421c5babab3), [9ca6a86](https://github.com/Muratovnik/assay/commit/9ca6a86d400d9e308bb9565d5b349e53b967ab60))
+* **skills:** code-change asks for `Verified: <check> — <environment> — after <change>` and `Not verified: <what> — <why>` lines after editing code, and ui-delivery refers to them; the reuse line is written for every new source file, as `Reuse: not applicable — <why>` for project-specific code; implementation-planning asks a plan file for a `What already exists` section. Localized labels count ([dd36093](https://github.com/Muratovnik/assay/commit/dd3609372992373ede98c8898c7403b9c99f0c4e))
+* **hooks:** at `Stop` and `SubagentStop`, a turn that edited code, created a source file or wrote a plan without the matching line continues once with one note listing each missing line; a shell edit is seen through the files the turn stages with `git add`. It joins a branch-check note in the same continuation. Rules `report-verification`, `report-reuse`, `plan-existing` ([e0d886d](https://github.com/Muratovnik/assay/commit/e0d886d2d49873604c98d5436a85fd0baf30ba3a))
+* **critical-discussion:** the description and the skill check cue cover choosing between approaches and framing a request or decision, and the skip narrows from "plan" to "write a plan"; three discovery cases cover the change. Discovery has not been run ([3b143ec](https://github.com/Muratovnik/assay/commit/3b143ecdcff67926682fb4843b9540e8f1543ee1), [ae01c7e](https://github.com/Muratovnik/assay/commit/ae01c7ef2fd9674f3cf1cbd94db950e3770dd4b1))
+
+### Bug Fixes
+
+* **code-change:** verification scope says that behavior depending on the consumer's environment — operating system, installed build, user profile, host process or runtime version — is checked there, and a pass elsewhere is a reported gap ([7b7a361](https://github.com/Muratovnik/assay/commit/7b7a36134b38d83bc981832f075da6b510d4710d))
+
 ## [0.30.0](https://github.com/Muratovnik/assay/compare/v0.29.0...v0.30.0) (2026-10-19)
 
 Finishes the routing cleanup of 0.29.0. Exempt agent types are a plain list,
