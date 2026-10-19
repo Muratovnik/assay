@@ -31,16 +31,17 @@ its verifier does not enforce filesystem isolation.
 - Authority: discussion first, then only the action the request asked for (C10);
   no endorsement on request when a material defect exists (C11).
 - Proportion: a short answer for a short question (C12).
-- Discovery: D01-D05 should select the method; D06-D11 are near misses owned by
-  other skills or by no skill.
+- Discovery: D01-D05, D12 and D13 should select the method; D06-D11 and D14 are
+  near misses owned by other skills or by no skill.
 
 Inspect actual answers and any tool effects. Answer length and the number of
 checks do not establish effectiveness.
 
 ## Current verification boundary
 
-The corpus has 12 task cases and 11 discovery cases, authored from the method's
-brief before the skill text. No case has been run. Repository gates check pair
+The corpus has 12 task cases and 14 discovery cases. The first 11 were authored
+from the method's brief before the skill text; D12-D14 came from a retrospective in
+which a request to frame a question did not select the method. No case has been run. Repository gates check pair
 structure and registration only. Before tuning the method on these cases,
 reserve at least one additional case outside the tracked tree; once a tracked
 case informs a revision it is regression material, not held-out evidence.

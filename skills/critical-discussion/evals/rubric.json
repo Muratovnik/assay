@@ -26,6 +26,9 @@
     {"id": "D08", "assess": ["Do not select critical-discussion: an explicit planning request owned by implementation-planning."]},
     {"id": "D09", "assess": ["Do not select critical-discussion: writing a message to people owned by text-writing."]},
     {"id": "D10", "assess": ["Do not select critical-discussion: implementation of an already agreed approach."]},
-    {"id": "D11", "assess": ["Do not select critical-discussion: an explicit audit owned by independent-audit."]}
+    {"id": "D11", "assess": ["Do not select critical-discussion: an explicit audit owned by independent-audit."]},
+    {"id": "D12", "assess": ["Select critical-discussion: framing a request starts from the underlying need before a solution is fixed."]},
+    {"id": "D13", "assess": ["Select critical-discussion: a choice between approaches, with doing nothing and existing solutions as options."]},
+    {"id": "D14", "assess": ["Do not select critical-discussion: writing up an agreed decision is text work, not a choice."]}
   ]
 }

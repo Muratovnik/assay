@@ -1,6 +1,6 @@
 ---
 name: critical-discussion
-description: Challenge an idea, decision, design or existing tool in discussion instead of agreeing by default. Recover the real need, treat examples as samples rather than scope, compare with doing nothing and with existing solutions, and hold or revise a position on evidence. Use when the user asks to discuss, evaluate or stress-test an idea, or whether a tool covers its needs; skip requests to implement, plan, research sources, audit or answer a factual question.
+description: Challenge an idea, decision, design or existing tool in discussion instead of agreeing by default. Recover the real need, treat examples as samples rather than scope, compare with doing nothing and with existing solutions, and hold or revise a position on evidence. Use when the user asks to discuss, evaluate or stress-test an idea, to choose between approaches, to frame a request or decision, or whether a tool covers its needs; skip requests to implement, write a plan, research sources, audit or answer a factual question.
 license: MIT
 metadata:
   assay-optional-skills: "evidence-research implementation-planning independent-audit product-flow-mapping route-subagents software-architecture"

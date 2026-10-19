@@ -74,6 +74,9 @@
     {"id": "D08", "prompt": "Давай подумаем не как закрыть дыры, а как реализовать конечную цель. Составь план."},
     {"id": "D09", "prompt": "Напиши письмо команде с предложением обсудить график релизов."},
     {"id": "D10", "prompt": "Implement the caching approach we agreed on yesterday."},
-    {"id": "D11", "prompt": "Audit this migration plan against its brief and tell me whether it is ready."}
+    {"id": "D11", "prompt": "Audit this migration plan against its brief and tell me whether it is ready."},
+    {"id": "D12", "prompt": "Помоги сформулировать запрос подрядчику: нам нужен экспорт отчётов, но я не уверен, что именно просить."},
+    {"id": "D13", "prompt": "Which approach should we take for config reloads: file watching or an explicit reload command?"},
+    {"id": "D14", "prompt": "Сформулируй коротко текст задачи в трекере по уже согласованному решению."}
   ]
 }
