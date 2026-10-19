@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns
+from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
 from route_evidence import host_observations
@@ -285,6 +285,14 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             # A stop continues at most once: a contradicted read claim goes first.
             if not note and name in {"Stop", "SubagentStop"} and rules.branch_rules:
                 note = branches.stopped(event, rules.branch_rules, enabled)
+            if name in {"Stop", "SubagentStop"} and rules.report_rules:
+                # The report check joins a branch note in the same continuation, since a turn continues once.
+                lines = reports.stopped(event, rules.report_rules, enabled)
+                if lines and note:
+                    output = note["hookSpecificOutput"]
+                    output["additionalContext"] += "\n\n" + lines["hookSpecificOutput"]["additionalContext"]
+                elif lines:
+                    note = lines
             if note:
                 return note, None
         decision = ({"rule_ids": [], "context": ""} if protected

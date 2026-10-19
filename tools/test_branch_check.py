@@ -327,7 +327,12 @@ class CoverageCheckRuntimeTests(unittest.TestCase):
         stop = self.stop_event(prompt(), load("assay:code-change"), write("C:\\app\\src\\App.vue"), said("Done."))
         text = process(stop, "claude", self.environment)[0]["hookSpecificOutput"]["additionalContext"]
         self.assertIn("vue-structure.md", text)
-        self.assertEqual(({}, None), process(stop, "claude", self.configured(disabled_rules=["branch-vue-structure"])))
+        # The report check joins the branch note in one continuation, and has its own rule.
+        self.assertIn("Assay report check", text)
+        rest = process(stop, "claude", self.configured(disabled_rules=["branch-vue-structure"]))[0]
+        self.assertNotIn("Assay branch check", rest["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(({}, None), process(stop, "claude", self.configured(
+            disabled_rules=["branch-vue-structure", "report-verification"])))
         self.assertEqual(({}, None), process(stop, "claude", self.configured(disabled_skills=["skill/code-change"])))
 
     def test_a_contradicted_read_claim_goes_first(self):

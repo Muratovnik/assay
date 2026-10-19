@@ -337,7 +337,7 @@ came with the skill not loaded, in 32 sessions. An agent that loads the skill af
 the refusal is not refused again, so the refusal falls on the first question of a
 session, and again after a compaction that did not keep the skill.
 
-## Rerun note in Claude Code
+### Rerun note in Claude Code
 
 A run that fails on a different setup error each time looks like progress: the
 results differ, and the exit code is often 0 because the verdict is only in the
@@ -375,6 +375,39 @@ ordinary work. Replayed over two weeks of one owner's Claude sessions, the note 
 106 times in 32 sessions at three runs, 45 times in 20 sessions at four and 15 times
 in 11 sessions at five; the loop that prompted the rule was caught at every threshold
 before the owner intervened.
+
+### Report check in Claude Code
+
+A hook cannot judge whether a check was the right one or whether a ready-made
+solution existed, but it can see that the line stating it is missing. `code-change`
+asks for `Verified: <check> — <environment> — after <change>` and `Not verified:
+<what> — <why>` lines after editing code, `ui-delivery` refers to them, the reuse
+line becomes `Reuse: not applicable — <why>` when a new source file holds
+project-specific code, and `implementation-planning` asks a plan file for a
+`What already exists` section.
+
+At `Stop` and `SubagentStop`, the hook reads the turn back to its start and stops
+at a compaction. The turn continues once with one note listing each missing line:
+
+| Rule | Skill | Sign in the turn | Missing |
+| --- | --- | --- | --- |
+| `report-verification` | `code-change` | an edit or write of a source, test or interface file, or a `git add` of one | a line starting `Verified:` or `Not verified:` in the final message |
+| `report-reuse` | `code-change` | a `Write` whose result says the source file was created; not a test, interface or scratch file | a line starting `Reuse:` in the final message |
+| `plan-existing` | `implementation-planning` | a `Write` of a plan file, as the branch check recognises one | a `What already exists` heading in that plan, written then or by a later edit |
+
+A label counts at the start of a line, in a list item or in bold; `Проверено:`,
+`Не проверено:`, `Переиспользование:` and `Что уже есть` count too. Files are named
+by their last path part, and the classes of files are the mid-turn note's. A shell
+edit is seen only through the files the turn stages with `git add`. When the branch
+check also has a note for the same stop, both go out in one continuation, since a
+turn continues once. A disabled skill or the rule ID turns a row off; the check does
+not depend on the skill check. Codex gets no report check.
+
+Replayed over two weeks of one owner's Claude sessions, before the skills asked for
+these lines, 203 of 1,199 turns edited code and 197 of them ended without a
+verification line; 14 turns created a source file without a reuse line and 13 wrote
+a plan without the section. The note is the cost of that gap until the lines become
+routine.
 
 ## Hints do not grant authority
 
