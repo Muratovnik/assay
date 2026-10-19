@@ -67,7 +67,9 @@ The line points a reviewer at the decision; it is not evidence that alternatives
 were examined. A filled line without the matching reading, registry or
 documentation lookup and diff is a formal answer, not a check. Omit it for
 project-specific logic, a one-line helper or a change that touches no such
-behavior. Declining a dependency is a valid decision when the line names the fit
+behavior, except when the change creates a new source file: then write
+`Reuse: not applicable — <why no existing implementation applies>`. A localized
+label such as `Переиспользование:` serves the same. Declining a dependency is a valid decision when the line names the fit
 or obligation that rules it out.
 
 ## Apply this to UI primitives

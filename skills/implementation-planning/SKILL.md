@@ -40,6 +40,12 @@ Preserve shared interfaces and project-wide constraints across units. Give durab
 units stable identifiers; a reordered unit keeps its identity. Separate completed
 changes from verified results and name blocked or unavailable checks.
 
+A plan written to a file has a section headed `What already exists` (a localized
+heading such as `Что уже есть` serves the same): the project and platform
+capabilities and maintained external solutions the plan relies on or rejects,
+where they were looked for and why each fits or does not. When the plan adds no
+capability, one line saying so is the whole section.
+
 Order work by real dependencies and uncertainty. A bounded investigation can be
 ready while the implementation it informs is not. Pilot and staged-adoption
 completion follow [staged adoption](../code-change/references/reuse-and-migration.md#keep-staged-adoption-tied-to-the-request).
