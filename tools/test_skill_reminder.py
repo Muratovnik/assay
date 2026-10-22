@@ -128,13 +128,14 @@ class ReminderTests(unittest.TestCase):
             self.assertEqual(common | extra, set(hooks))
 
             def commands(event, value):
-                return [hook["command"] for rule in hooks[event] if re.search(rule.get("matcher") or "", value)
-                        for hook in rule["hooks"]]
+                # Claude runs the exec form (command and args), Codex one shell command.
+                return [" ".join([hook["command"], *hook.get("args", [])]) for rule in hooks[event]
+                        if re.search(rule.get("matcher") or "", value) for hook in rule["hooks"]]
 
             unified = commands("SessionStart", "startup")
             self.assertEqual(1, len(unified))
             self.assertIn("hooks/runtime/cli.py", unified[0])
-            self.assertIn("'" + client + "'", unified[0])
+            self.assertRegex(unified[0], "--client " + client + "$" if client == "claude" else "'" + client + "'")
             self.assertEqual(unified, commands("UserPromptSubmit", ""))
             # Reading-role boundaries must see ordinary and nested tool calls.
             for tool in ("Bash", "Read", "Edit", "Write", "Skill", "AgentStatus", "send_message", "wait",
@@ -158,8 +159,17 @@ class ReminderTests(unittest.TestCase):
                     self.assertEqual(1, len(rule["hooks"]))
                     for hook in rule["hooks"]:
                         self.assertEqual("command", hook["type"])
-                        timeout_limit = 3 if client == "codex" and event == "SessionEnd" else 5
+                        timeout_limit = (3 if client == "codex" and event == "SessionEnd"
+                                         else 15 if client == "claude" and event == "SubagentStop" else 5)
                         self.assertLessEqual(hook["timeout"], timeout_limit)
+            if client == "claude":
+                # Only the launch guard blocks the tool when the hook fails; the rest go ahead.
+                blocking = {tool for tool in ("Agent", "Task", "Bash", "Read", "mcp__x__Agent", "AgentStatus")
+                            for rule in hooks["PreToolUse"] if re.search(rule["matcher"], tool)
+                            for hook in rule["hooks"] if hook.get("onFailure") == "block"}
+                self.assertEqual({"Agent", "Task"}, blocking)
+                self.assertEqual({"PreToolUse"}, {event for event, rules in hooks.items() for rule in rules
+                                                  for hook in rule["hooks"] if "onFailure" in hook})
 
     def test_packaged_command_from_other_cwd_with_space_and_shell_characters(self):
         # A local fixture checks shell/path wiring without trusting a plugin or
@@ -176,23 +186,19 @@ class ReminderTests(unittest.TestCase):
             shutil.copytree(ROOT / "skills", plugin / "skills", ignore=shutil.ignore_patterns("__pycache__", "evals"))
             shutil.copyfile(ROOT / "catalog.toml", plugin / "catalog.toml")
             before = sorted(str(path.relative_to(base)) for path in base.rglob("*"))
-            command = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]["SessionStart"][0]["hooks"][0]["command"]
-            shells = (
-                [None, ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command"]]
-                if os.name == "nt" else [["/bin/sh", "-c"]]
+            hook = json.loads((ROOT / "hooks/hooks.json").read_text())["hooks"]["SessionStart"][0]["hooks"][0]
+            # Exec form, as Claude Code spawns it: the plugin root is substituted into each
+            # argument as plain text and no shell parses the result.
+            argv = [hook["command"], *(arg.replace("${CLAUDE_PLUGIN_ROOT}", str(plugin)) for arg in hook["args"])]
+            result = subprocess.run(
+                argv, cwd=base,
+                env={**{k: v for k, v in os.environ.items() if not k.startswith("ASSAY_") and k not in {"PLUGIN_DATA", "CLAUDE_PLUGIN_DATA"}},
+                     "CLAUDE_PLUGIN_ROOT": str(plugin)},
+                input=b'{"hook_event_name":"SessionStart","source":"compact"}',
+                capture_output=True, timeout=SHELL_WIRING_TIMEOUT,
             )
-            for shell in shells:
-                with self.subTest(shell=shell):
-                    result = subprocess.run(
-                        command if shell is None else [*shell, command],
-                        shell=shell is None, cwd=base,
-                        env={**{k: v for k, v in os.environ.items() if not k.startswith("ASSAY_") and k not in {"PLUGIN_DATA", "CLAUDE_PLUGIN_DATA"}},
-                             "CLAUDE_PLUGIN_ROOT": str(plugin)},
-                        input=b'{"hook_event_name":"SessionStart","source":"compact"}',
-                        capture_output=True, timeout=SHELL_WIRING_TIMEOUT,
-                    )
-                    self.assertEqual(0, result.returncode, result.stderr)
-                    self.assertEqual("SessionStart", json.loads(result.stdout)["hookSpecificOutput"]["hookEventName"])
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual("SessionStart", json.loads(result.stdout)["hookSpecificOutput"]["hookEventName"])
             self.assertEqual(before, sorted(str(path.relative_to(base)) for path in base.rglob("*")))
 
 

@@ -6,7 +6,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -17,7 +24,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -25,11 +39,36 @@
     ],
     "PreToolUse": [
       {
-        "matcher": ".*",
+        "matcher": "^(Agent|Task)$",
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
+            "timeout": 5,
+            "onFailure": "block"
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(?:Agent|Task)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -41,7 +80,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -53,8 +99,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
-            "timeout": 5
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
+            "timeout": 15
           }
         ]
       }
@@ -65,7 +118,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -76,7 +136,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -87,7 +154,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -99,7 +173,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]
@@ -111,7 +192,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I -B -c \"import os, runpy, sys; sys.argv=['assay-hooks','--client','claude']; runpy.run_path(os.path.join(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ['PLUGIN_ROOT'], 'hooks/runtime/cli.py'), run_name='__main__')\"",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
             "timeout": 5
           }
         ]

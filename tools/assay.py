@@ -1107,6 +1107,12 @@ def reminder_hooks(client: str = "claude") -> bytes:
         f"or os.environ['{fallback}'], 'hooks/runtime/cli.py'), run_name='__main__')\""
     )
     hook = {"type": "command", "command": command, "timeout": 5}
+    if client == "claude":
+        # Exec form: Claude Code starts python itself, without Git Bash on Windows
+        # or shell quoting, and substitutes the plugin root into the one argument.
+        hook = {"type": "command", "command": "python",
+                "args": ["-I", "-B", "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py", "--client", "claude"],
+                "timeout": 5}
     session_end_hook = {**hook, "timeout": 3} if client == "codex" else hook
     spawn = "Agent|Task" if client == "claude" else "spawn_agent|collaborationspawn_agent|Agent"
     hooks = {
@@ -1119,6 +1125,13 @@ def reminder_hooks(client: str = "claude") -> bytes:
         "SessionEnd": [{"hooks": [session_end_hook]}],
     }
     if client == "claude":
+        # A launch the guard could not check is refused instead of running unrouted;
+        # every other tool goes ahead when the hook fails, as before.
+        hooks["PreToolUse"] = [{"matcher": f"^({spawn})$", "hooks": [{**hook, "onFailure": "block"}]},
+                               {"matcher": f"^(?!(?:{spawn})$)", "hooks": [hook]}]
+        # A worker's report check reads its whole transcript: 33 of 1,018 live
+        # runs passed 5 s and were dropped unchecked.
+        hooks["SubagentStop"] = [{"matcher": ".*", "hooks": [{**hook, "timeout": 15}]}]
         # Only Claude reports skill loads reliably enough for the skill gate.
         hooks["Stop"] = [{"hooks": [hook]}]
         hooks["PermissionDenied"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
