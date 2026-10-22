@@ -34,9 +34,9 @@ The table lives in the client's routing configuration (schema 5), next to
   "routes": {
     "basis": "FrontierCode 1.1 and CursorBench 4.0, read 2026-10-12; API cost per task, not quota",
     "classes": {
-      "gather": {"model": "<model>", "effort": "<effort>", "when": "search and read code or sources, summarize findings"},
-      "code":   {"model": "<model>", "effort": "<effort>", "when": "ordinary implementation, fixes and tests"},
-      "hard":   {"model": "<model>", "effort": "<effort>", "when": "ambiguous multi-step work and design"}
+      "find":   {"model": "<model>", "effort": "<effort>", "when": "find and read code or sources, summarize findings"},
+      "build":  {"model": "<model>", "effort": "<effort>", "when": "ordinary implementation, fixes and tests"},
+      "design": {"model": "<model>", "effort": "<effort>", "when": "ambiguous multi-step work and design"}
     }
   }
 }

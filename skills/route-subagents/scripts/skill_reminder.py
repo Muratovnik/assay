@@ -30,7 +30,7 @@ ROUTING_SESSION_REMINDER = (
     " Before every authorized subagent launch, including replacements and "
     "reviewers, apply route-subagents (possibly named assay:route-subagents). "
     "Start the launch's description with a task class from the route table, "
-    "such as `gather: ...`, and pass exactly that class's model and effort; "
+    "as in `<class>: <task>`, and pass exactly that class's model and effort; "
     "choose the class that fits the work, the less demanding one when two fit. "
     "The table is shown by routing_status and listed in a refusal, which says "
     "what to correct; if routing itself is rejected or unavailable, read "

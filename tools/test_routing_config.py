@@ -94,7 +94,8 @@ class SessionChecklistTests(Fixture):
         text = self.start(self.bind(self.config()))
         self.assertTrue(text.startswith('Assay is installed.'))
         self.assertIn(self.CHECKLIST, text)
-        self.assertIn('`gather: ...`', text)
+        # The owner names the classes, so the reminder shows the form, not one table's class.
+        self.assertIn('`<class>: <task>`', text)
         self.assertIn('routing_status', text)
         self.assertIn('references/routing-failure.md', text)
         self.assertNotIn('routing configuration is refused', text)
