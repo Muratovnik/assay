@@ -20,6 +20,7 @@ Shared decisions, dependencies and reserved generated outputs:
 Acceptance evidence and permitted checks:
 Excluded actions and escalation conditions:
 Useful return and evidence pointers:
+Return budget, where details and long command output go:
 ```
 
 These are assignment/plan notes, not additional routing API parameters. Follow
@@ -53,7 +54,17 @@ file hashes alone. A stopped process and a successful assignment are different.
 Keep returns compact enough for their named consumer: result, changed boundary,
 decisive evidence pointers, unresolved assumptions and next dependency. Retain
 large logs in the permitted evidence location instead of forwarding them through
-every packet. For an interrupted or resumed assignment, use
+every packet. The worker does not read this skill, so the packet states the
+budget: by default about 1,500 tokens for the final message, with longer detail
+in a file in the permitted evidence location that the return names. The primary
+reads that file only when a decision needs it, and asks for a longer return when
+the decision depends on it. Without a stated budget, the median final message in
+one 129-worker session ran from 9,000 to 23,000 characters by class.
+
+The packet also tells the worker to send long command output, such as a build,
+test run or log read, to a file and keep only the lines it acts on: a worker
+re-reads everything in its context on every call. In the same session, log reads
+through the shell were 37 % of worker tool output. For an interrupted or resumed assignment, use
 [planning continuation](../../implementation-planning/references/continuation.md)
 to reconcile current bytes, completed effects and present authority before replay.
 

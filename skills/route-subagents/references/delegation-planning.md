@@ -31,6 +31,13 @@ verification, a falsifiable competing hypothesis, or a batch of related small
 changes. For an unfamiliar split, read the relevant
 [patterns and counterexamples](delegation-patterns.md), not every pattern.
 
+A dependent chain that fits the primary's context is usually cheaper kept there.
+A chain whose steps print long logs, such as merge, integration run, build and
+delivery, or a batch of task-record updates whose responses echo whole records,
+is context-heavy work with a compact useful return even when its steps depend on
+each other: the primary keeps every log it reads until compaction. Hand it to one
+worker with a short return.
+
 Compare the prospective benefit with briefing, context transfer, coordination,
 verification and likely repair. Do not invent numerical benefit scores, quota
 prices, universal worker counts or benchmark runs. Use available budget and
