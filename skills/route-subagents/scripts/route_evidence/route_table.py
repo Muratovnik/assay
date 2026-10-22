@@ -16,7 +16,7 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-from .core import EvidenceError
+from .core import EvidenceError, identity
 from .pipeline_config import EFFORT_ORDER
 
 CLASS_NAME = re.compile(r"[a-z][a-z0-9-]{0,31}\Z")
@@ -202,6 +202,36 @@ def admission(client: str, tool_name: Any, supplied: Any, table: dict, *, unrout
             f"{CHOOSING}")
 
 
+PUBLISHED_COST = "published API cost, not quota"
+DERIVED_COST = "published run total / sample count: cost per attempt, derived; API cost, not quota"
+
+
+def _cost_per_attempt(row: dict) -> float | None:
+    """A published run total over its attempts, or None unless both are positive."""
+    total = (row.get("aggregate_usage") or {}).get("total_cost_usd")
+    count = row.get("sample_count")
+    if type(total) in (int, float) and type(count) in (int, float) and total > 0 and count > 0:
+        return total / count
+    return None
+
+
+def _priced(rows: list) -> tuple[list, str | None, str | None]:
+    """Rows carrying the cost they are compared on, that cost's basis, and a refusal.
+
+    A published per-task cost wins, and the two units are never mixed. Without
+    one, a run total becomes a cost per attempt only when every priced row ran
+    the same number of attempts: a different count means a different protocol,
+    whose attempts need not cost alike. A zero total is not a measurement.
+    """
+    if any(type(row.get("cost_usd")) in (int, float) for row in rows):
+        return [row for row in rows if type(row.get("cost_usd")) in (int, float)], PUBLISHED_COST, None
+    derived = [(row, _cost_per_attempt(row)) for row in rows]
+    derived = [{**row, "cost_usd": cost} for row, cost in derived if cost is not None]
+    if len({row["sample_count"] for row in derived}) > 1:
+        return [], None, "run_totals_differ_in_sample_count"
+    return derived, DERIVED_COST, None
+
+
 def candidates(rows: list, *, band: float, subset: str | None = None, harness: str | None = None,
                match: str | None = None) -> dict:
     """Measured pairs of one benchmark subset for the owner to review, cheapest first.
@@ -210,16 +240,21 @@ def candidates(rows: list, *, band: float, subset: str | None = None, harness: s
     indistinguishable from it; the cheapest of them is the proposal. Published
     tables without intervals cannot resolve a smaller difference, so `band` is
     the owner's statement of that resolution, not a measured quantity.
+
+    A harness matches by lexical identity, so `claude-code` selects a board's
+    "Claude Code". A board that publishes only run totals is priced per attempt
+    (see `_priced`); `cost_basis` says which cost the rows carry.
     """
     if type(band) not in (int, float) or not 0 <= band < 1:
         raise EvidenceError("route_candidates_band_must_be_a_fraction")
-    usable = [row for row in rows if isinstance(row, dict)
-              and type(row.get("score")) in (int, float) and type(row.get("cost_usd")) in (int, float)
-              and (subset is None or row.get("subset") == subset)
-              and (harness is None or row.get("harness") == harness)
-              and (match is None or match.lower() in str(row.get("model", "")).lower())]
+    selected = [row for row in rows if isinstance(row, dict)
+                and type(row.get("score")) in (int, float)
+                and (subset is None or row.get("subset") == subset)
+                and (harness is None or identity(str(row.get("harness") or "")) == identity(harness))
+                and (match is None or match.lower() in str(row.get("model", "")).lower())]
+    usable, cost_basis, refusal = _priced(selected)
     if not usable:
-        return {"status": "no_measured_pairs", "rows": []}
+        return {"status": "no_measured_pairs", "rows": [], **({"reason": refusal} if refusal else {})}
     best = max(row["score"] for row in usable)
     inside = [row for row in usable if row["score"] >= best - band]
     cheapest = min(inside, key=lambda row: (row["cost_usd"], -row["score"]))
@@ -231,5 +266,4 @@ def candidates(rows: list, *, band: float, subset: str | None = None, harness: s
         result.append({"model": row.get("model"), "effort": row.get("effort"), "harness": row.get("harness"),
                        "subset": row.get("subset"), "score": row["score"], "cost_usd": row["cost_usd"],
                        "frontier": not dominated, "within_band": row in inside, "proposal": row is cheapest})
-    return {"status": "ok", "best_score": best, "band": band, "cost_basis": "published API cost, not quota",
-            "rows": result}
+    return {"status": "ok", "best_score": best, "band": band, "cost_basis": cost_basis, "rows": result}

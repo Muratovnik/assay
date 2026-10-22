@@ -301,6 +301,53 @@ class RouteTableTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             candidates(rows, band=1.5)
 
+    def test_candidates_match_a_harness_by_lexical_identity(self):
+        # Terminal-Bench labels its agent "Claude Code"; FrontierCode writes claude-code.
+        from route_evidence.route_table import candidates
+        rows = [{'model': 'A', 'effort': 'high', 'score': 0.5, 'cost_usd': 0.4, 'harness': 'Claude Code'},
+                {'model': 'B', 'effort': 'high', 'score': 0.6, 'cost_usd': 0.5, 'harness': 'Codex'}]
+        for spelling in ('claude-code', 'Claude Code', 'CLAUDE_CODE'):
+            self.assertEqual([r['model'] for r in candidates(rows, band=0.07, harness=spelling)['rows']], ['A'])
+        self.assertEqual(candidates(rows, band=0.07, harness='claude')['status'], 'no_measured_pairs')
+
+    def terminal_rows(self, *counts):
+        # Shaped like the Terminal-Bench hub rows: no per-task cost, only run totals.
+        totals = [4718.65, 7333.64, 2393.88]
+        return [{'model': f'M{i}', 'effort': 'max', 'score': 0.6 - i / 10, 'cost_usd': None, 'harness': 'Claude Code',
+                 'subset': 'all', 'sample_count': count, 'aggregate_usage': {'total_cost_usd': totals[i]}}
+                for i, count in enumerate(counts)]
+
+    def test_candidates_price_run_totals_per_attempt_when_attempt_counts_agree(self):
+        from route_evidence.route_table import candidates
+        rows = self.terminal_rows(330, 330) + [
+            {'model': 'free', 'effort': 'max', 'score': 0.1, 'cost_usd': None, 'harness': 'Claude Code',
+             'sample_count': 330, 'aggregate_usage': {'total_cost_usd': 0.0}},
+            {'model': 'unpriced', 'effort': 'max', 'score': 0.2, 'cost_usd': None, 'harness': 'Claude Code',
+             'sample_count': 330, 'aggregate_usage': {}}]
+        result = candidates(rows, band=0.07, harness='claude-code')
+        self.assertEqual(result['status'], 'ok')
+        self.assertIn('derived', result['cost_basis'])
+        costs = {r['model']: r['cost_usd'] for r in result['rows']}
+        self.assertEqual(set(costs), {'M0', 'M1'})
+        self.assertAlmostEqual(costs['M0'], 4718.65 / 330)
+        self.assertAlmostEqual(costs['M1'], 7333.64 / 330)
+        self.assertEqual([r['model'] for r in result['rows'] if r['proposal']], ['M0'])
+        self.assertIsNone(rows[0]['cost_usd'])
+
+    def test_candidates_refuse_run_totals_over_different_attempt_counts(self):
+        from route_evidence.route_table import candidates
+        result = candidates(self.terminal_rows(330, 165), band=0.07)
+        self.assertEqual(result, {'status': 'no_measured_pairs', 'rows': [],
+                                  'reason': 'run_totals_differ_in_sample_count'})
+
+    def test_candidates_prefer_published_cost_and_never_mix_units(self):
+        from route_evidence.route_table import candidates
+        rows = self.terminal_rows(330) + [{'model': 'P', 'effort': 'high', 'score': 0.4, 'cost_usd': 0.9,
+                                           'harness': 'Claude Code', 'subset': 'all'}]
+        result = candidates(rows, band=0.07)
+        self.assertEqual([r['model'] for r in result['rows']], ['P'])
+        self.assertEqual(result['cost_basis'], 'published API cost, not quota')
+
     def test_an_invalid_table_follows_the_configuration_source_contract(self):
         # Either configured source must remain closed when validation fails.
         launch = self.claude(model='sonnet', effort='high')

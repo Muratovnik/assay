@@ -202,5 +202,15 @@ Map each class to the benchmark that resembles its work, and keep a class
 provisional when no benchmark measures it. Published costs are API prices, not
 subscription quota.
 
+`--harness` matches by lexical identity, so `claude-code` also selects a board
+that prints "Claude Code". A board that publishes only run totals, such as
+Terminal-Bench, is priced per attempt: run total divided by its sample count,
+and only when every priced row ran the same number of attempts; otherwise the
+result is `no_measured_pairs` with `reason: run_totals_differ_in_sample_count`.
+A zero run total is not a cost. `cost_basis` names which cost the rows carry,
+and published per-task costs are never mixed with derived ones. This derivation
+serves the owner's review here only; routing context keeps run totals out of
+per-task expense comparisons.
+
 Refresh the sources first with `refresh` when the cache is stale; which sources
 add new models within days is visible in their `source_updated_at`.
