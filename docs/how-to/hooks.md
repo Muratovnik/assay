@@ -17,6 +17,15 @@ boundary and the spawn checks need to see each call; result and failure events
 match only the native spawn tools, and in Claude Code also `WebFetch` results for
 the [source check](#source-checks-in-claude-code).
 
+The Claude manifest uses the exec form: Claude Code starts `python` with the
+script path as an argument, without a shell, so Windows needs no Git Bash for
+it and an unusual plugin path needs no quoting. When the hook fails, cannot
+start or times out, Claude Code runs the tool anyway, except for `Agent` and
+`Task`: their entry sets `onFailure: "block"` (Claude Code 2.1.295 or later),
+so a launch the guard could not check is refused instead of running unrouted.
+`SubagentStop` allows 15 seconds, because its report check reads the worker's
+whole transcript; the other events allow 5.
+
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
 skill choice also needs `markdown-it-py` from `hooks/requirements.txt`, installed in
 an isolated environment used by that command. Repository contributors already get
@@ -94,6 +103,15 @@ whatever language it is written; the hook reads nothing in the prompt to build
 the check. In Claude Code, once the session has loaded skills, the check also
 names them (`Already loaded in this session: code-change.`) from the gate's
 records, so the agent can tell which skills are already in use.
+
+Claude Code also delivers a background task's notification and a subagent's
+hand-back as prompts. Such a prompt starts with `<task-notification>`, or carries
+`<agent-message` and `[Subagent hand-back]` in its first 600 characters, and gets
+one line instead of the list: if the report changes the task, decide again which
+skills apply, from the last full check. In 30 live sessions four of five checks
+went to these prompts, and in the largest none was followed by a skill load. A relayed prompt also
+leaves the owner's last suggestion in place for a restore after compaction. A
+message from another session can carry a task, so it gets the full check.
 
 The check exists because a skill's description is the only automatic route to it,
 and that route is unreliable on its own. Claude Code drops the descriptions of the
@@ -316,9 +334,11 @@ default, gives the text as context beside the call. `deny` refuses the first
 matching call with the same text as the reason and passes the repeated call, so
 it costs one extra turn and shows the reason in Claude Code as a refusal. Both
 forms keep the key, so a skill is named once either way. The `midturn-critical-discussion`
-row always takes the `deny` form: a note reaches the model on its next request, which
-for `AskUserQuestion` comes after the owner has answered, so only a refusal arrives
-while the options can still change.
+and `midturn-evidence-research` rows always take the `deny` form: a note reaches the model
+on its next request, which for `AskUserQuestion` comes after the owner has answered and
+for a fetch comes with the source already read, so only a refusal arrives while the
+choice can still change. In live Claude sessions the research note was followed by a
+load in 4 of 14 cases.
 
 Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
 `Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load
