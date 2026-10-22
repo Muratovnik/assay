@@ -6,6 +6,28 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.32.0](https://github.com/Muratovnik/assay/compare/v0.31.0...v0.32.0) (2026-10-22)
+
+Makes the hooks cheaper to run and quieter where they had nothing to say. A
+hook starts in about half the time, a subagent's report or a task notification
+gets one skill-check line instead of the full list, and a launch the routing
+guard could not check is refused instead of running unrouted.
+
+### Features
+
+* **hooks:** the Claude manifest starts `python` in exec form, without Git Bash or shell quoting. The `Agent` and `Task` entry sets `onFailure: "block"` (Claude Code 2.1.295 or later), so a launch the guard could not check is refused; other tools go ahead as before. `SubagentStop` allows 15 seconds, because 33 of 1,018 live report checks passed 5 and were dropped ([df78da2](https://github.com/Muratovnik/assay/commit/df78da22f9cf89964f08c6c67ffc1e9101cbf298))
+* **hooks:** a prompt that starts with `<task-notification>`, or carries `<agent-message` and `[Subagent hand-back]`, gets one line asking to decide again which skills apply if the report changes the task, and keeps the owner's last suggestion for a restore. Four of five full checks in 30 live sessions went to such prompts. A message from another session still gets the full check ([ed65d34](https://github.com/Muratovnik/assay/commit/ed65d34ff921e92ff96937f300041464c6b2f8bd))
+* **hooks:** the first external fetch while evidence-research is not loaded is refused once, like an owner question without critical-discussion; the repeat passes. As a note it arrived with the source already read and was followed by a load in 4 of 14 live cases. Rule `midturn-evidence-research` ([3156df7](https://github.com/Muratovnik/assay/commit/3156df7e0b2b88e3e8317000afbfd2fad86f4a53))
+* **route-subagents:** the assignment packet states a return budget, by default about 1,500 tokens with longer detail in a named file, and tells the worker to send long command output to a file. A dependent chain that prints long logs, or a batch of task-record updates, counts as context-heavy work for one worker ([a0b1e24](https://github.com/Muratovnik/assay/commit/a0b1e246a00a9e099023446284555fc127d9e505))
+
+### Performance Improvements
+
+* **hooks:** routing evidence and host observations load only where a launch or session start needs them. A synthetic `PreToolUse` on Windows takes 145-160 ms instead of 300-320 ms ([93089da](https://github.com/Muratovnik/assay/commit/93089da6d874c743cebf2a07196beb221d2a62d3))
+
+### Bug Fixes
+
+* **route-subagents:** route-candidates matches a harness by lexical identity, so `claude-code` finds "Claude Code", and prices a board that publishes only run totals as total per attempt when every priced row ran the same number of attempts ([f95c051](https://github.com/Muratovnik/assay/commit/f95c051f92047f9fb4f4ae53e15f5e54cff106b0))
+
 ## [0.31.0](https://github.com/Muratovnik/assay/compare/v0.30.0...v0.31.0) (2026-10-19)
 
 Moves the hooks from "load the skill" to "apply its rule at the decision point".
