@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -18,9 +17,9 @@ from runtime.events import normalize
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
-from route_evidence import host_observations
 from route_evidence import route_table
-from route_evidence.service import load_config
+# route_evidence.service (asyncio, importlib.metadata) and host_observations load
+# where a launch or session start needs them: every tool call starts this process.
 from routing_hook import explicit_launch, deny
 from skill_reminder import reminder
 
@@ -81,6 +80,7 @@ def routing_config(environment):
     binding does, so an owner who set up the binding gets the check without
     another setting.
     """
+    from route_evidence.service import load_config
     location = environment.get("ASSAY_ROUTING_CONFIG")
     if location:
         return load_config(Path(location))
@@ -326,6 +326,7 @@ def observe(event, client, environment, *, clock=None):
         return
     binding = routing_binding.configuration(environment)
     if binding is not None:
+        from route_evidence import host_observations
         host_observations.observe(event, binding["cache_dir"], **({"clock": clock} if clock else {}))
 
 
@@ -344,6 +345,7 @@ def process(event, client, environment, *, root=ROOT, clock=None):
 
 
 def doctor(client, environment, *, root=ROOT, settings_path=None):
+    import importlib.util
     settings = options(environment)
     rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
     binding = routing_binding.configuration(environment)
