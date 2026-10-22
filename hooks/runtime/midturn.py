@@ -45,12 +45,14 @@ class Row:
     decision: str  # What the skill governs in a call that shows the sign.
     # A note reaches the model on its next request. When that comes only after the call has done
     # its work, as with a question the owner answers, the row refuses the first call instead.
+    # A fetch is the same case: the note arrives with the source already read, and in live
+    # sessions it was followed by a load in 4 of 14 cases.
     refuses: bool = False
 
 
 ROWS = (
     Row("midturn-evidence-research", "evidence-research", "fetches an external source",
-        "which source is read, how much of it and what the conclusion may rest on"),
+        "which source is read, how much of it and what the conclusion may rest on", refuses=True),
     Row("midturn-code-change", "code-change", "edits source code",
         "which responsibility and callers the change touches and what check shows it works"),
     Row("midturn-test-writing", "test-writing", "edits a test file",

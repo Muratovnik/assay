@@ -223,9 +223,11 @@ class NoteTests(unittest.TestCase):
         command = "python -B tools/check.py --all"
         fetch = "curl -sL https://docs.example.dev/x -o x.html; " + command
         path = self.transcript(owner(), runs(1, 4, command, "c"), current(5, fetch, "c5"))
-        output = self.run_event(self.pre(path, command=fetch, ident="c5"))
-        self.assertIn("assay:evidence-research", self.note(output))
-        self.assertNotIn("rerun note", self.note(output))
+        output = self.run_event(self.pre(path, command=fetch, ident="c5"))["hookSpecificOutput"]
+        # The research row refuses its first call, and the refusal speaks alone.
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+        self.assertNotIn("rerun note", json.dumps(output))
 
 
 if __name__ == "__main__":

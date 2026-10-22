@@ -388,13 +388,28 @@ class NoteTests(unittest.TestCase):
                  self.pre("Bash", {"command": f"curl -sL {DOCS}/more -o more.html"}),
                  self.pre("Read", {"file_path": "C:\\work\\out\\guide.html"})]
         first = [self.run_event(event) for event in chain]
-        self.assertIn("assay:evidence-research", self.note(first[0]))
-        self.assertIn("fetches an external source (docs.example.dev)", first[0]["hookSpecificOutput"]["additionalContext"])
+        # A note would arrive with the source already read, so the first fetch is refused under either form.
+        output = first[0]["hookSpecificOutput"]
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+        self.assertIn("fetches an external source (docs.example.dev)", output["permissionDecisionReason"])
         self.assertEqual([{}, {}], first[1:])
+        # The repeat of the refused fetch passes.
+        self.assertEqual({}, self.run_event(chain[0]))
         with tempfile.TemporaryDirectory() as scratch:
             self.data = Path(scratch)
             self.run_event(self.pre("Skill", {"skill": "assay:evidence-research"}))
             self.assertEqual([{}, {}, {}], [self.run_event(event) for event in chain])
+
+    def test_a_research_profile_fetch_is_refused_once_and_its_repeat_passes(self):
+        # The read-only profile allows WebFetch, so the boundary stays silent and the row speaks.
+        fetch = self.pre("WebFetch", {"url": DOCS, "prompt": "q"}, agent_id="a1",
+                         agent_type="assay:official-docs-researcher")
+        output = self.run_event(fetch)["hookSpecificOutput"]
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+        self.assertNotIn("reading role", output["permissionDecisionReason"])
+        self.assertEqual({}, self.run_event(fetch))
 
     def test_the_fetch_note_after_a_web_fetch_is_unchanged(self):
         result = self.run_event({**self.pre("WebFetch", {"url": DOCS, "prompt": "q"}), "hook_event_name": "PostToolUse"})
