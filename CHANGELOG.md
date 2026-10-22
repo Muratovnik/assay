@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.32.2](https://github.com/Muratovnik/assay/compare/v0.32.1...v0.32.2) (2026-10-22)
+
+### Bug Fixes
+
+* **route-subagents:** the session reminder shows the launch label form `<class>: <task>` instead of a class name from one route table, so a renamed table no longer gets an example with a class it lacks ([8fde00a](https://github.com/Muratovnik/assay/commit/8fde00a0d0d30855e8376ae8bbd8a1312a56a785))
+
 ## [0.32.1](https://github.com/Muratovnik/assay/compare/v0.32.0...v0.32.1) (2026-10-22)
 
 ### Bug Fixes
