@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.32.1](https://github.com/Muratovnik/assay/compare/v0.32.0...v0.32.1) (2026-10-22)
+
+### Bug Fixes
+
+* **hooks:** the report check no longer asks again for an edit or a new file that an earlier message of the turn already reported with its line. A subagent's report or a task notification does not start a turn, so the check used to reach back to the owner's last prompt and repeat the request after every relayed message; in the live session where it repeated, 9 files were named before the fix and none after ([48d14e3](https://github.com/Muratovnik/assay/commit/48d14e3f8bac3901d06e604010842668f3af1e05))
+
 ## [0.32.0](https://github.com/Muratovnik/assay/compare/v0.31.0...v0.32.0) (2026-10-22)
 
 Makes the hooks cheaper to run and quieter where they had nothing to say. A
