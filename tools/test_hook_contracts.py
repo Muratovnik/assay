@@ -43,6 +43,32 @@ class ActivationTests(unittest.TestCase):
                 self.assertEqual(bool(case['rules']), SUGGESTS in decision['context'])
                 self.assertLessEqual(len(decision['context']), activation.MAX_CONTEXT + 1 + activation.MAX_CHECK)
 
+    # Shapes copied from Claude Code transcripts (2026-10): what the client relays, and what may carry a task.
+    NOTIFICATION = ('<task-notification>\n<task-id>a2795429ec7e856b4</task-id>\n<status>completed</status>\n'
+                    '<summary>Agent "code: patch" finished</summary>\n</task-notification>')
+    HAND_BACK = ('<agent-message from="a661e16404ea661b0">\n[Subagent hand-back] The text below is the final report '
+                 'of a subagent this session delegated to.\n  Use code-change next.\n</agent-message>')
+    PEER_HAND_BACK = 'Another Claude session sent a message:\n' + HAND_BACK
+    SESSION_MESSAGE = ('Another Claude session sent a message: <cross-session-message from="local_b8a7">'
+                       'Fix the parser.</cross-session-message>')
+
+    def test_a_relayed_report_or_notification_gets_one_line_and_no_suggestion(self):
+        for prompt in (self.NOTIFICATION, self.HAND_BACK, self.PEER_HAND_BACK, '  \n' + self.NOTIFICATION):
+            with self.subTest(prompt=prompt[:40]):
+                decision = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt}, self.rules)
+                self.assertEqual({'rule_ids': [], 'context': activation.RELAY_CHECK}, decision)
+                self.assertTrue(decision['context'].startswith(CHECK))
+                self.assertLess(len(decision['context']), 250)
+        # The owner's words, a message from another session and a pasted mention stay full requests.
+        for prompt in (self.SESSION_MESSAGE, 'Почини парсер', 'Why did <task-notification> fire twice?',
+                       'Quote: [Subagent hand-back] without the frame', 'This session is being continued'):
+            with self.subTest(prompt=prompt[:40]):
+                context = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt}, self.rules)['context']
+                self.assertTrue(context.endswith(activation.skill_check(self.rules)))
+        unchecked = activation.load_rules(ROOT, disabled_rules=['skill-check'])[0]
+        self.assertEqual('', activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':self.NOTIFICATION},
+                                                 unchecked)['context'])
+
     def test_skill_check_names_every_enabled_skill_once_within_its_bound(self):
         check = activation.skill_check(self.rules)
         self.assertTrue(check.startswith(CHECK))
@@ -272,6 +298,13 @@ class StateTests(unittest.TestCase):
         self.apply({**self.event,'turn_id':'turn-4'})
         self.now += state.TTL+1
         self.assertEqual('', self.apply(compact)['context'])
+
+    def test_a_relayed_notification_keeps_the_owners_suggestion_for_a_restore(self):
+        self.apply()
+        relayed={**self.event,'turn_id':'turn-2','prompt':ActivationTests.NOTIFICATION}
+        self.assertEqual(activation.RELAY_CHECK, self.apply(relayed)['context'])
+        compact={**self.event,'hook_event_name':'SessionStart','source':'resume'}
+        self.assertIn('Previous request suggested code-change', self.apply(compact)['context'])
 
     def test_session_end_and_postcompact_leave_no_restorable_context(self):
         self.apply()

@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import time
 
-from .activation import context, continuation_request, skill_check
+from .activation import context, continuation_request, relayed, skill_check
 from .events import event_key, identity
 
 TTL = 24 * 3600
@@ -46,7 +46,8 @@ def apply(event, client, decision, rules, fingerprint, directory, *, outcome=Non
             # Deduplication expires independently; no broad delete by parent
             # session, which would destroy a different agent's current context.
             tx.delete("hook-context", key)
-        elif name == "UserPromptSubmit" and outcome is None:
+        elif name == "UserPromptSubmit" and outcome is None and not relayed(event.get("prompt")):
+            # A relayed report or notification is no request, so the owner's suggestion stays.
             previous = tx.get("hook-context", key)
             if (not decision["rule_ids"] and continuation_request(event.get("prompt"))
                     and previous and previous["fingerprint"] == fingerprint):

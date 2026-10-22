@@ -267,6 +267,24 @@ def subagent_check(rules, *, client=None):
             + (CODEX_NOTE if client == "codex" else "") + " Skills: " + _entries(rules) + ".")
 
 
+RELAY_CHECK = ("Assay skill check: this is a relayed report or notification, not a new request. If it changes "
+               "the task, decide again which Assay skills apply; the skill list is in the last full check.")
+
+
+def relayed(prompt):
+    """Whether the client relays this prompt instead of the owner typing it.
+
+    Claude Code delivers a background task's notification and a subagent's
+    hand-back as prompts. In 30 live sessions four of five skill checks went
+    to them, and in the largest none was followed by a skill load. A message from another
+    session can carry a task, so it is not counted here.
+    """
+    if not isinstance(prompt, str):
+        return False
+    head = prompt.lstrip()[:600]
+    return head.startswith("<task-notification>") or ("<agent-message" in head and "[Subagent hand-back]" in head)
+
+
 def evaluate(event, rules, *, client=None, loaded=()):
     """Pure decision: no filesystem state, subprocesses, permissions or rewrites.
 
@@ -276,6 +294,9 @@ def evaluate(event, rules, *, client=None, loaded=()):
         return {"rule_ids": [], "context": subagent_check(rules, client=client)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}
+    if relayed(event.get("prompt")):
+        # One line keeps a mid-task change of skills possible without repeating the list.
+        return {"rule_ids": [], "context": RELAY_CHECK if getattr(rules, "skill_check", False) and rules else ""}
     try:
         ids = [rule["id"] for rule in select(event.get("prompt"), rules)]
     except ImportError:
