@@ -418,7 +418,11 @@ at a compaction. The turn continues once with one note listing each missing line
 A label counts at the start of a line, in a list item or in bold; `Проверено:`,
 `Не проверено:`, `Переиспользование:` and `Что уже есть` count too. Files are named
 by their last path part, and the classes of files are the mid-turn note's. A shell
-edit is seen only through the files the turn stages with `git add`. When the branch
+edit is seen only through the files the turn stages with `git add`. A subagent's
+report and a task notification do not start a turn, so an edit or a new file that an
+earlier message of the turn already reported with its line is not named again: in
+one live session the same three files were asked for after each of four relayed
+messages. An edit after that message is. When the branch
 check also has a note for the same stop, both go out in one continuation, since a
 turn continues once. A disabled skill or the rule ID turns a row off; the check does
 not depend on the skill check. Codex gets no report check.

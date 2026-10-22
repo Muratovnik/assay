@@ -130,6 +130,27 @@ class StopTests(unittest.TestCase):
         notification = {"type": "user", "message": {"role": "user", "content": "<task-notification> done"}}
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), notification)))
 
+    def test_an_edit_already_reported_in_the_turn_is_not_asked_for_again(self):
+        def said(text):
+            return {"type": "assistant", "message": {"content": [{"type": "text", "text": text}]}}
+        # Shapes from a live session: a hand-back is a meta user entry, a notification a queued attachment.
+        hand_back = {"type": "user", "isMeta": True, "message": {"role": "user", "content": [
+            {"type": "text", "text": "Another Claude session sent a message:\n<agent-message from=\"a1\">done"}]}}
+        queued = {"type": "attachment", "attachment": {"type": "queued_command", "prompt": "<task-notification>x"}}
+        reported = said("Fixed.\n- Проверено: suite — venv — after the fix")
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), reported, hand_back, queued, last="Waiting.")))
+        # An edit after the report is asked for, and only that one.
+        text = self.note(self.stop(prompt(), edit(APP), reported, hand_back, edit(TESTS, "e2"), last="Done."))
+        self.assertIn("this turn edited test_parser.py and", text)
+        self.assertNotIn("parser.py, ", text)
+        # Without a report the edit before the relayed messages is still asked for.
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), hand_back, queued, last="Waiting.")))
+        # A reuse line covers a new file the same way, and a verification line does not.
+        self.assertEqual("", self.note(self.stop(prompt(), write(APP), said("Verified: x — y — z\nReuse: none — w"),
+                                                 hand_back, last="Waiting.")))
+        self.assertIn("created parser.py", self.note(self.stop(prompt(), write(APP), said("Verified: x — y — z"),
+                                                               hand_back, last="Waiting.")))
+
     def test_a_new_source_file_without_a_reuse_line_is_named(self):
         text = self.note(self.stop(prompt(), write(APP)))
         self.assertIn("this turn created parser.py", text)

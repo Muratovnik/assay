@@ -83,10 +83,15 @@ def turn(path, *, subagent=False):
     """(edited code files, created source files, plans without the section) of the turn at a transcript's tail.
 
     None when the transcript cannot be read. Files are named by their last path part.
+    An edit or a new file that an earlier message of the turn already reported with
+    its line is not named again. A subagent's report or a task notification does
+    not start a turn, so without this one report would be asked for again after
+    every relayed message that follows it.
     """
     if not isinstance(path, str) or not path or len(path) > 4_096:
         return None
     edited, created, plans, written, created_ids = [], [], {}, set(), set()
+    verified = reused = False  # A later message of the turn already carries the line.
     try:
         for raw in _lines(path):
             try:
@@ -111,12 +116,16 @@ def turn(path, *, subagent=False):
                 continue
             # Newest first within the message too, so a later edit is seen before the write it follows.
             for block in reversed(content):
+                if isinstance(block, dict) and block.get("type") == "text" and isinstance(block.get("text"), str):
+                    verified = verified or bool(VERIFIED.search(block["text"][:MAX_TEXT]))
+                    reused = reused or bool(REUSE.search(block["text"][:MAX_TEXT]))
+                    continue
                 if not isinstance(block, dict) or block.get("type") != "tool_use":
                     continue
                 tool, data = block.get("name"), block.get("input")
                 if not isinstance(data, dict):
                     continue
-                if tool in SHELLS and isinstance(data.get("command"), str):
+                if tool in SHELLS and isinstance(data.get("command"), str) and not verified:
                     edited.extend(reversed(_staged(data["command"])))
                 if tool not in WRITES:
                     continue
@@ -124,9 +133,9 @@ def turn(path, *, subagent=False):
                 if not isinstance(target, str) or not target or len(target) > 4_096:
                     continue
                 name, kind, text = SEPARATOR.split(target)[-1], classify(target), _written(tool, data)
-                if kind in CODE:
+                if kind in CODE and not verified:
                     edited.append(name)
-                if kind == "midturn-code-change" and tool == "Write" and block.get("id") in created_ids:
+                if kind == "midturn-code-change" and tool == "Write" and block.get("id") in created_ids and not reused:
                     created.append(name)
                 if PLAN.search(target) and target not in written:
                     if EXISTING.search(text):
