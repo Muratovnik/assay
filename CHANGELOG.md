@@ -6,6 +6,12 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.32.3](https://github.com/Muratovnik/assay/compare/v0.32.2...v0.32.3) (2026-10-26)
+
+### Bug Fixes
+
+* **route-subagents:** a standing authorization to delegate in the user's own instructions that apply across projects now counts as authority, limited to the work its stated conditions describe; a project instruction still cannot grant it. The session reminder says "when the user authorizes subagents" instead of "requests", and eval cases O34-O35 cover the standing authorization and the repository-instruction control ([8cb7fcc](https://github.com/Muratovnik/assay/commit/8cb7fcc76a0957fdbd37e410e288a0a670836b32))
+
 ## [0.32.2](https://github.com/Muratovnik/assay/compare/v0.32.1...v0.32.2) (2026-10-22)
 
 ### Bug Fixes
