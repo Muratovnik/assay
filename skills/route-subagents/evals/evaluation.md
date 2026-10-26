@@ -36,6 +36,10 @@ a partial return, required versus optional delegation on an unavailable host,
 root-only dispatch, and immutable authorized launch inputs. These are decision
 cases, not receipts for actual launches or useful parallel execution.
 
+O34-O35 distinguish a standing authorization in the user's own cross-project
+instructions, limited to the work its conditions describe, from a repository
+instruction that tries to grant delegation authority.
+
 Run the existing hook fixture tests separately. They test the activation layer:
 ordinary English/Russian requests, composition with the first workflow, explicit
 catalog choices, negatives, quotations, disabled/missing skills and bounded

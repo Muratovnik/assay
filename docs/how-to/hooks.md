@@ -442,8 +442,9 @@ not claim to load a skill or assume that a particular MCP tool exists. Even an
 observed Skill load or an announcement would not prove compliance with a method.
 
 The session reminder is three sentences: use matching installed skills; when the
-user requests subagents, use `route-subagents` before substantial solo work; no
-delegation is authorized by it. The rest of the routing checklist is added at
+user authorizes subagents, by a request or a standing authorization in their own
+instructions, use `route-subagents` before substantial solo work; no delegation
+is authorized by it. The rest of the routing checklist is added at
 session start whenever the hook resolves a routing configuration the way the
 launch check does, through `ASSAY_ROUTING_CONFIG` or the plugin data directory's
 `routing.json` binding, and that configuration has a route table for the hook's

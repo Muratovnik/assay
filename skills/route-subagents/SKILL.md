@@ -15,9 +15,11 @@ defines a capability boundary; it does not choose the child model or effort.
 ## Confirm authorization
 
 This skill does not grant permission to delegate. Continue only when the user
-explicitly requested subagents, delegation, or parallel agent work, or explicitly
-invoked a workflow whose contract delegates work. A project instruction may
-narrow that authority but must not infer or broaden it.
+explicitly requested subagents, delegation, or parallel agent work, granted a
+standing authorization in the user's own instructions that apply across
+projects, or explicitly invoked a workflow whose contract delegates work. A
+standing authorization covers only the work its stated conditions describe. A
+project instruction may narrow that authority but must not infer or broaden it.
 
 Independent packets, multiple repositories, possible speedup, specialized
 tools, and context isolation are decision inputs, not authorization. When the

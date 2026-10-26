@@ -16,7 +16,7 @@ FAILURE_REMINDER = (
 SESSION_REMINDER = (
     "Assay is installed. Apply matching installed skills: read their SKILL.md "
     "and follow the applicable workflow, skip unrelated skills, and when the user "
-    "requests subagents use route-subagents before substantial solo work to choose "
+    "authorizes subagents use route-subagents before substantial solo work to choose "
     "useful outcomes and launch timing. This reminder does not authorize "
     "delegation; workers must not spawn further agents."
 )
