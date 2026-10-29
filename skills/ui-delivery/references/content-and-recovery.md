@@ -113,6 +113,14 @@ for unknown data. A zero baseline needs an appropriate non-percentage treatment;
 it is not evidence of zero growth. Explain the basis where it changes the user's
 interpretation, without putting a methodology paragraph on every card.
 
+When one number appears in several places, such as a tile, a tooltip, a chart
+peak and a table total, check each place against a value computed outside the
+display, and check that a series over the selected range adds up to its stated
+total; [data lifecycle](data-lifecycle.md#establish-that-a-valid-result-is-reachable)
+owns the independent-input check. A change needs a direction: where lower is
+better, a fall is good news. Show a change on a very small base or over an
+incomplete period neutrally with its basis rather than styling it as a problem.
+
 - Failure: success styling is fixed while the operation is pending or failed;
   generated events appear to be actual account activity; a trend claims change
   against a period the source does not contain.

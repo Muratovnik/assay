@@ -91,8 +91,11 @@ whether the encoding and composition make the intended interpretation clear.
   a defect. Preserve an already useful composition and the accepted system.
 - Check: walk through the actual question at representative viewport and content
   conditions, including a relevant empty or unavailable state. Can the audience
-  identify, compare or locate what the task requires? Inspect the composed result
-  where available; supplied layout facts do not establish a browser execution.
+  identify, compare or locate what the task requires? On a display that watches
+  for problems, the worst case must be at least as noticeable as a healthy one;
+  a faint cell holding the worst value inverts the display. Inspect the composed
+  result where available; supplied layout facts do not establish a browser
+  execution.
 
 This is a scoped diagnostic, not a mandatory dashboard redesign or a requirement
 for an action button on every chart. It needs no new planning document. A local
