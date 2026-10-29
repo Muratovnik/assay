@@ -6,6 +6,27 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.34.0](https://github.com/Muratovnik/assay/compare/v0.33.0...v0.34.0) (2026-10-29)
+
+A Claude subagent that hands its report back through `SubagentHandback` now
+meets the stop checks before the report is delivered, rather than at the stop,
+where they could no longer change it. retrospective counts waste only with a
+record of what was spent and asks each proposal what it could cost, and
+`routing_status` follows a route table edited in a running session.
+
+### Features
+
+* **hooks:** on a Claude subagent's `SubagentHandback`, the skill gate and the source, branch and report checks run on the subagent's transcript with the report as the final message. When one has feedback, the first hand-back is refused with it; the reason says the report has not reached the parent, that the check's advice not to repeat the answer does not apply, and that the next hand-back goes through, which it always does. At most one refusal comes per subagent and request, none without the plugin data directory, and `disabled_rules: ["handback-hold"]` turns it off. After a delivered hand-back the stop checks stay silent. The hand-back hook gets 15 seconds, like `SubagentStop`, and a hand-back it cannot check in time goes through. In one owner's sessions the stop feedback was recorded as reaching the subagent after 21 of 148 stops that followed a hand-back; in five live runs on Claude Code 2.1.304 a subagent refused once handed back again ([db23814](https://github.com/Muratovnik/assay/commit/db23814f2ff82f3902a85decdbb00e8cd9f0ddb1))
+* **retrospective:** waste is counted with a record of what was spent: a measured wait, a step repeated by hand, a fact found again, a model or effort that did not fit, cache misses and manual work a tool feature already does. Waiting, long sessions and many tool calls alone stay context, and a cost or quota claim needs an aggregate over the period's sessions. Each proposal names what it could cost in quality or safety, a gate is weakened only with evidence that it catches no real failures, and an accepted efficiency change is tracked by its measurement before and after, counting rework. In a paired pilot against 0.33.0 with the method loaded explicitly, the new text met 32 of 33 criteria against 29 ([72ca78c](https://github.com/Muratovnik/assay/commit/72ca78c98d94b0026376651ff5e82c9fae11b4b5))
+
+### Performance Improvements
+
+* **hooks:** a retried hand-back, or one in a session without the plugin data directory, skips the stop checks, since no refusal can follow ([1970d25](https://github.com/Muratovnik/assay/commit/1970d25c84de2a194633cb8e201b9fe35e46fd6a))
+
+### Bug Fixes
+
+* **route-subagents:** `routing_status` and `get_routing_context` reread the routing configuration, so a route table edited in a running session reaches the service as it already reached the launch hook. An invalid edit keeps the last valid policy and is reported under `configuration.error`; a file naming another client is refused ([2c0b071](https://github.com/Muratovnik/assay/commit/2c0b07142650ff27c6ea4da83be5d63be3d7021a))
+
 ## [0.33.0](https://github.com/Muratovnik/assay/compare/v0.32.3...v0.33.0) (2026-10-29)
 
 A review that read nothing no longer counts as a clean one, and the Claude
