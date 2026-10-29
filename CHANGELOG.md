@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.33.0](https://github.com/Muratovnik/assay/compare/v0.32.3...v0.33.0) (2026-10-29)
+
+A review that read nothing no longer counts as a clean one, and the Claude
+reviewer profiles start without the caller's CLAUDE.md. ui-delivery gains checks
+for composite widgets and for numbers repeated across a data screen. In a small
+paired pilot the new ui-delivery text found the touch-cursor and Tab-stop
+defects of a filterable menu that the previous text missed; the dashboard and
+reviewer cases showed no difference.
+
+### Features
+
+* **route-subagents:** a review or audit that reports no finding names the files, diff hunks and receipts it read. With none named, or after a read that was blocked or failed, the assignment is `partial`, and `evidence-reviewer` returns `inconclusive` rather than `ship`. The review packet asks for that list. A live probe of `codex exec -s read-only` on Windows read files and ran `git`, but could not start `rg` from a WinGet link ([09d21e8](https://github.com/Muratovnik/assay/commit/09d21e85fabffc9e20601b2bd1840f01a8dd29ee))
+* **profiles:** the Claude adapters of `evidence-reviewer` and `official-docs-researcher` set `omitClaudeMd: true` (Claude Code 2.1.271 or later, honoured for plugin agents), so a reviewer takes its contracts from the packet instead of the caller's user and project CLAUDE.md. Managed policy and the CLAUDE.md of a subdirectory whose files it reads still load. On Claude Code 2.1.304 a project agent with the field saw neither file, and the same agent without it saw both ([09d21e8](https://github.com/Muratovnik/assay/commit/09d21e85fabffc9e20601b2bd1840f01a8dd29ee))
+* **ui-delivery:** a composite's role is chosen by what it promises; a screen reader's touch or virtual cursor does not follow an `aria-activedescendant` highlight, so that route is checked separately; leaving a composite counts its Tab stops; a submenu may preview on hover without taking focus; a chart users must read has a text route to its values. On a data screen a number shown in several places is checked against a value computed outside the display, a change has a direction, a tiny base or an incomplete period is shown neutrally, and the worst case is at least as noticeable as a healthy one ([51209f4](https://github.com/Muratovnik/assay/commit/51209f46660ebb2ff25396b7f1cce9c2f767b4f4))
+
+### Bug Fixes
+
+* **ui-delivery:** a helper taken out of the Tab order, such as a clear button, keeps its action reachable from the keyboard. In the pilot the first wording led the reviewer to suggest `tabindex="-1"` alone ([bb56127](https://github.com/Muratovnik/assay/commit/bb56127d9c23481f50481c40992ca11a6866db89))
+
 ## [0.32.3](https://github.com/Muratovnik/assay/compare/v0.32.2...v0.32.3) (2026-10-26)
 
 ### Bug Fixes
