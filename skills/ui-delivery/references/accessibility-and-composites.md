@@ -31,8 +31,9 @@ focus; opening it from the keyboard moves focus into it.
   a checkbox changes selection but also opens details; a grid role lacks navigation.
 - Check: enter, move, activate and leave by keyboard, counting the Tab stops on
   the way out: a helper such as a clear button adds one only for a reason the
-  task supplies. Then sort, remove or reload the focused item and inspect the
-  logical next focus and selected identity. Check
+  task supplies, and one taken out of the Tab order keeps its action reachable
+  from the keyboard, such as Escape in the field. Then sort, remove or reload
+  the focused item and inspect the logical next focus and selected identity. Check
   exposed names, relationships and states with existing accessibility tooling;
   use relevant assistive-technology interaction when claiming that behavior works.
 - Valid control: a static table's separate controls can remain in normal Tab
