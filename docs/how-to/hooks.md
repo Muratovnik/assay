@@ -195,10 +195,21 @@ check names for profiles without the skill tool. It opens its first message with
 the same one-sentence announcement and does not restate it in its report.
 In Claude Code the gate above also runs at `SubagentStop`. It reads the
 subagent's own transcript, including a report delivered through
-`SubagentHandback`: a subagent that announced a skill it did not load continues
-once. Codex `SubagentStop` accepts no feedback context, so Codex subagents get
-the check only. `disabled_rules: ["skill-check"]` turns off the subagent check as
-well.
+`SubagentHandback`, and a subagent that announced a skill it did not load
+continues once. That continuation helps only a subagent that stops before it
+hands its report back. A subagent that reports through `SubagentHandback`
+delivers the report when it calls the tool, before it stops, so continuing
+cannot change what the parent already received. The feedback usually does not
+reach such a subagent at all: in one owner's sessions from 17 to 29 October 2026,
+the subagent's transcript shows the feedback added to its context after 21 of
+148 stops that followed a hand-back, and after all 53 stops that came before
+one, although Claude Code's
+[hooks reference](https://code.claude.com/docs/en/hooks#subagentstop) says such
+feedback keeps a subagent running. The same limit applies to the
+[source](#source-checks-in-claude-code), [branch](#branch-check-in-claude-code)
+and [report](#report-check-in-claude-code) checks at `SubagentStop`. Codex
+`SubagentStop` accepts no feedback context, so Codex subagents get the check
+only. `disabled_rules: ["skill-check"]` turns off the subagent check as well.
 
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
