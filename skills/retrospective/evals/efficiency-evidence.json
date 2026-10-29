@@ -1,0 +1,568 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "pilot": "efficiency-signals-2026-10-29",
+  "executor": {
+    "client": "Claude Code 2.1.304, claude -p --safe-mode --restricted --strict-mcp-config",
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "tools": [
+      "Read",
+      "Glob",
+      "Grep"
+    ]
+  },
+  "grader": {
+    "client": "Claude Code 2.1.304, claude -p --safe-mode --restricted --strict-mcp-config",
+    "model": "claude-opus-5-5",
+    "effort": "high",
+    "tools": [
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "reads": "prompt, context, inputs, answer and criteria of each folder; not the method, manifest or condition key"
+  },
+  "method_sha256": {
+    "prior": {
+      "agents/openai.yaml": "5a4a0211748c929a0944239ffa785ea217c8e88658894e47a887556f0865dc43",
+      "references/evidence-sources.md": "9174b2903661869f8d136baa151480642e5d62ba6fac78aa276533b9ee32a541",
+      "references/friction-signals.md": "a59fe641e45bc4e0c25d006c0f4e725f3ec7a4b7866f21e12eff8603dd30262d",
+      "references/memory-retrospective.md": "f9551a5db1b3783502e7e5dcf9645e3598d4b437e1b2a4574b4ac6c34872ff0d",
+      "references/proposals-and-tracking.md": "b1ec4d393f729f8a970539f1e427542517eb95dc451eb66839c8a2862b6a598b",
+      "SKILL.md": "a2ea93616f039c8e90598f0c253636fc40dd66cc8b1bf18294359f2bb90cb8db"
+    },
+    "candidate": {
+      "agents/openai.yaml": "5a4a0211748c929a0944239ffa785ea217c8e88658894e47a887556f0865dc43",
+      "references/evidence-sources.md": "5b671de399696eae8c87b9ad9c428ecc9b5edc94a264fb1e716001a6fe40d06c",
+      "references/friction-signals.md": "f945e384a27fcbdc6726c75cbc95835f743d7b5625b9867285c5468f46143e0d",
+      "references/memory-retrospective.md": "f9551a5db1b3783502e7e5dcf9645e3598d4b437e1b2a4574b4ac6c34872ff0d",
+      "references/proposals-and-tracking.md": "1be5ff4cd944ee30ca30cfa04049899752dd97729e8e3ca211d131f9a6aaba8a",
+      "SKILL.md": "f5fe20f2091f360b8719baefbe38ffd8c5c140e1153890e6b12b745e2cd977ff"
+    }
+  },
+  "runs": [
+    {
+      "grading_folder": "g01",
+      "case": "RE04",
+      "condition": "prior",
+      "packet_manifest_sha256": "5226a79003ff5de48fd59ef27cb4c385d3548676d7ae9fd67be331b3d60ea7d7",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 12,
+      "cost_usd": 0.158,
+      "answer": "# Gate retrospective: last month\n\nI read the inputs only and changed nothing. One change goes to you for a decision (P1). I recommend against the other suggestion in the notes, which was to take e2e out of the commit gate.\n\n## 1. Scope and sources\n\n| Source | How I read it | Notes |\n| --- | --- | --- |\n| `inputs/evidence/gate-history.md` | In full | Totals for each gate (runs, median time, failures, real defects). It has no dates and doesn't list sessions for each run, so I assumed it covers last month. |\n| `inputs/evidence/agent-notes.md` | In full | Two agent notes (s-752, s-755). These are the agent's own reading of events, not outside evidence. |\n| `inputs/instructions/AGENTS.md` | In full | The only rule in force: \"Run lint, unit and e2e gates before every commit.\" |\n| Not available | — | Session transcripts, version-control history, planning records, CI logs and any earlier retrospective's decisions. I excluded the current session. |\n\n## 2. Patterns\n\n**Lint fails because the local hook and CI use different linter versions.** Lint ran 52 times and failed 9 times. None of the 9 failures found a real defect. Every one came from \"a linter version mismatch between the local hook and CI\", and each needed a manual re-run after pinning the version locally (gate-history, lint row). Note s-755 (\"Lint failed again on the version mismatch\") shows it happening more than once.\n- **What happened:** the gate failed on tooling, not on code, and it took manual work every time.\n- **Likely cause:** the local pin is a workaround that doesn't persist. Nothing ties the hook's linter version to the one CI uses.\n- **Status:** a strong pattern (9 failures). One caveat: the history doesn't say which session each failure was in, so I can't prove the 9 are independent beyond s-755. They are separate runs out of 52.\n\n## 3. Single incidents\n\n**One e2e timeout passed on re-run** (gate-history, e2e row). It happened once and with no session given, so it's flagged here and not turned into a rule. If timeouts keep happening, the next review should look at them again.\n\n## 4. Already covered and working\n\n- **Unit gate:** 6 failures, and all 6 were real defects. It works; no change.\n- **E2e gate:** 3 failures, and 2 of them were real, serious defects: a broken login redirect (s-731) and data loss on export (s-748). The third was the timeout above. The rule in AGENTS.md held and caught both before commit.\n\n**Why I'm not proposing s-752's suggestion (move e2e from the commit gate to a weekly run):**\n- The note's evidence, \"passed 35 of 38 runs\", makes the failures look like noise. In fact 2 of the 3 failures were real defects, and one of them lost data.\n- Running weekly could have let those defects stay in the code for up to a week.\n- The 14-minute run time is not friction in itself. Nothing in the inputs shows the user objecting to it or losing work over it.\n- The change would also reverse the rule in AGENTS.md, and there's no outside evidence to justify that.\n\nIf speed becomes a real complaint later, a better question is whether parts of e2e can run in parallel or only on affected paths. Dropping the whole suite from the commit gate isn't the fix.\n\n## 5. Proposal for your decision\n\n**P1: Make the local lint hook use the same linter version as CI**\n\n| Field | Content |\n| --- | --- |\n| Evidence | 9 of 52 lint runs failed, 0 found real defects, and all 9 were caused by the version mismatch, each with a manual re-run (gate-history). The note s-755 records it happening again. |\n| Status | Strong pattern (9). Independence across sessions is only partly shown. |\n| Existing norm | AGENTS.md says to run lint before every commit. It says nothing about which linter version. No hook or CI config was in the inputs to check. |\n| Layer | Check missed: the check isn't set up right, so it fails on things that aren't defects. The rule is fine. |\n| Destination | The lint hook and CI configuration, through your normal change and review process. AGENTS.md is the wrong place, because a reworded rule wouldn't fix a version drift. |\n| Change | Define the linter version once and have both the local hook and the CI lint job read it from there, using whatever mechanism your toolchain already has. Then remove the manual \"pin locally and re-run\" step. I couldn't see the config files, so I can't give you the exact file edit. |\n| Undo | Revert the commit that adds the shared pin. Both sides go back to how they're configured now. |\n| Risk | A deliberate linter upgrade will need both sides bumped together. The pinned version may also flag existing code the first time, so plan one cleanup commit. |\n\n**Decision needed for P1:** accept, defer or reject.\n\n## 6. Earlier proposals\n\nI found no earlier retrospective decisions in the inputs, so there's nothing to track. If you keep them somewhere, tell me where and I'll check each one.\n\n## 7. Limits and open hypotheses\n\n- Without dates or per-run session IDs, I can't confirm the history covers exactly last month, or that the 9 lint failures were in separate sessions.\n- I couldn't check whether the hook config already contains a pin that CI ignores, which would make this \"conflicting\" instead of \"check missed\". I didn't have the config files.\n- There's no planning record named for storing decisions. Tell me which issue or task to use, and I won't create a new log.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "The answer declines s-752's weekly-run suggestion because '2 of the 3 failures were real defects, and one of them lost data', and names the cost: 'Running weekly could have let those defects stay in the code for up to a week.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PARTIAL",
+          "reason": "Its only speed-up idea, 'parts of e2e can run in parallel or only on affected paths', keeps e2e in the commit gate but never names a quality or safety cost, even though running only affected paths would narrow the gate."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P1 proposes making the local hook and CI read one linter version, citing '9 of 52 lint runs failed, 0 found real defects, and all 9 were caused by the version mismatch', and it does not relax lint."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "Under Single incidents it says the e2e timeout 'happened once ... so it's flagged here and not turned into a rule.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PASS",
+          "reason": "It states 'I read the inputs only and changed nothing' and asks 'Decision needed for P1: accept, defer or reject.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g02",
+      "case": "C07",
+      "condition": "prior",
+      "packet_manifest_sha256": "4afb9c13eb8ef674916a18e34dfefa0d37038dc59d38db8bee5caabf39b08580",
+      "case_source_sha256": "32cd42d2391b63d1d5cb00b8ef963d025f72c42e762e6704bcdd58bc6848cd55",
+      "turns": 10,
+      "cost_usd": 0.1268,
+      "answer": "# Retrospective for October 2026\n\n**Summary:** last month's release-checklist fix (P1) did not work. The same correction came up again in two separate sessions. The explicit-model fix (P2) held. I'm making one new proposal (P4), and it needs your decision before anything changes.\n\n## 1. Scope and sources\n\n- **Period:** October 2026 (this month).\n- **Read in full:** `inputs/evidence/this-month.md` (an already-aggregated summary) and `inputs/previous-decisions.md`.\n- **Not read, because they weren't available here:**\n  - the session transcripts behind s-401 and s-415;\n  - commits a1b2c3 and d4e5f6;\n  - your instructions, skills, checks, hooks and memory;\n  - worker transcripts.\n- **Consequence:** I can't see where the P1 rule lives, what it says, or whether it was loaded in those sessions. The summary also doesn't show how its counts were produced.\n\n## 2. Patterns\n\n**Announcing a release before running the checklist: 2 independent sessions.**\n\n- **What happened:**\n  - s-401, 2026-10-03, about a hotfix tag: \"You announced the release before running the checklist.\"\n  - s-415, 2026-10-10: \"Same again, the checklist was skipped.\"\n- **Category:** reported mismatch. The requirement was already in force as P1.\n- **What it suggests:** the rule accepted last month isn't taking effect.\n- **Possible causes (unconfirmed):**\n  - **Scope gap:** the evidence file says \"Releases this month: none\", yet both corrections are about release announcements. Whatever produced that count apparently doesn't treat a hotfix tag as a release. If the P1 rule uses the same narrow meaning, it never triggered.\n  - Otherwise, the rule wasn't loaded in these sessions, or it was loaded and not followed.\n\n## 3. Single incidents\n\nNone.\n\n## 4. Already covered and working\n\n**Explicit model on worker launches (P2).** There were 14 worker launches and all 14 named a model explicitly. No corrections came up about this.\n\n## 5. Proposal for your decision\n\n**P4: fix why the release-checklist rule isn't applied (don't reword it)**\n\n| Field | Content |\n| --- | --- |\n| Evidence | s-401 (2026-10-03, hotfix tag) and s-415 (2026-10-10) |\n| Status | Pattern, 2 sessions. This is P1 recurring. |\n| Existing norm | P1, \"Run the release checklist before announcing a release\", added in commit a1b2c3 |\n| Layer | **Unknown.** It could be a scope gap, not loaded, or loaded and not applied. There's no trace that shows which. |\n| Destination | The file commit a1b2c3 changed, wherever your routing put P1. I couldn't check this. |\n| Change | **Step 1 (diagnose):** read a1b2c3 to see where the rule is and whether it covers hotfix and other tag-only releases. Then check whether it was loaded in s-401 and s-415. **Step 2, chosen by what Step 1 finds:** if it's a scope gap, add one line to the existing rule saying that any release-type announcement, including hotfix tags, counts. If it wasn't loaded, fix the instruction that should point to it. If it was loaded and ignored, strengthen the point where it's applied: before any announcement, show the completed checklist. Your P3 decision ruled out a hook for the weekly summary only. Still, I'm not suggesting a hook here unless you want one. |\n| Undo | Revert the single edit, or the commit, made in Step 2. |\n| Risk | A wider definition of \"release\" could make the checklist run for internal or test tags that don't need it. |\n\nPlease reply **accept**, **defer** or **reject** for P4. Nothing changes until you do. Once you decide, I suggest adding a P4 row to `inputs/previous-decisions.md` with the decision and, if applied, the commit.\n\n## 6. Status of last month's proposals\n\n| ID | Status | Basis |\n| --- | --- | --- |\n| P1 | **Recurring** | s-401 and s-415. The \"Releases: none\" count doesn't mean the situation never came up, because the corrections show announcements happened. |\n| P2 | **Resolved** | 14 of 14 launches named a model, so the situation came up and the friction didn't. |\n| P3 | Rejected: \"no hooks for this\" | No new evidence, so I'm not proposing it again. |\n\n## 7. Limits and open questions\n\n- The cause of the P1 recurrence is only a guess until a1b2c3 and the two session traces are read.\n- The counts are a summary I couldn't check. I don't know if \"14 launches\" covers every launch.\n- I don't know if s-415 was also about a hotfix tag.\n- There were no context-compaction markers to look at, so I can't rule out a compaction as a cause.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "The status table marks P1 'Recurring' with s-401 and s-415 and notes that 'The \"Releases: none\" count doesn't mean the situation never came up.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "P2 is marked 'Resolved' because '14 of 14 launches named a model.'"
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P3 is listed as rejected with 'No new evidence, so I'm not proposing it again.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g03",
+      "case": "RE04",
+      "condition": "candidate",
+      "packet_manifest_sha256": "3869b2a47bb18ba1a3eb54e992ddaa2b3c74ccece51b77b232c29fa92d59ab82",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 11,
+      "cost_usd": 0.1707,
+      "answer": "# Retrospective: gates, last month\n\nI made no changes. Each proposal below needs your decision: accept, defer or reject.\n\n## 1. Scope and sources\n\n- **Period:** the last month, as `inputs/evidence/gate-history.md` covers it. That file has no dates, so I can't confirm the exact window.\n- **Read in full:**\n  - `inputs/evidence/gate-history.md`, which aggregates the lint, unit and e2e gates.\n  - `inputs/evidence/agent-notes.md`, which has notes from sessions s-752 and s-755.\n  - `inputs/instructions/AGENTS.md`, the only instruction file.\n- **Not available:** session transcripts, version-control history, hook and CI configuration, planning records and earlier retrospective decisions. Because of that, I can't confirm session IDs for most gate failures, see how the hook or CI is set up, or say where you route lessons.\n- **Excluded:** this session, as `context.txt` asks.\n\n## 2. Patterns\n\n**Lint fails on a version mismatch (false positives).**\n- **What the records show:** 9 of 52 lint runs failed, and none of them found a real defect. All 9 came from the local hook running a different linter version than CI. Each one needed a manual re-run after the version was pinned locally (`gate-history.md`). s-755 says \"Lint failed again on the version mismatch; re-ran it after pinning the version locally.\"\n- **What it means:** the same fix is being redone by hand, run after run. The local pin apparently isn't kept or shared, so it doesn't fix the cause.\n- **Likely cause (unconfirmed):** the hook and CI each get their linter version from a different place.\n- **Count:** 9 failures. \"Again\" in s-755 shows it happened in more than one session, so this is at least a pattern. The history doesn't list the session for each failure, so I can't say exactly how many independent sessions were affected.\n\n## 3. Single incidents\n\n- **e2e timeout:** one of the 3 e2e failures was a timeout that passed when re-run. That's one flaky run, so I'm not proposing a rule for it. If it happens again, it becomes a candidate.\n\n## 4. Candidates already covered\n\n- **Unit gate: covered and working.** It ran 52 times, failed 6 times, and all 6 failures were real defects, with a 3-minute median. No change.\n- **e2e gate: covered and working for catching defects.** It caught 2 real defects:\n  - s-731: a broken login redirect.\n  - s-748: data loss on export.\n\n  Its cost is real: a 14-minute median, or about 532 minutes over 38 runs. But a gate you require has a price, and that price isn't friction in itself.\n- **Agent proposal in s-752: not carried forward.** The note suggests removing e2e from the commit gate and running it weekly. That would weaken a gate that caught 2 real defects this period, one of them data loss. A slow gate that catches real defects should be made faster, not run less often. I'm listing this as a rejected direction, with that reason, so it isn't proposed again without new evidence.\n\n## 5. Proposals for decision\n\n### P1: Pin one linter version for both the local hook and CI\n\n| Field | Content |\n| --- | --- |\n| Evidence | `gate-history.md` lint row: 9/52 failures, 0 real defects, all from the version mismatch, each re-run by hand. s-755 note. **Baseline for the next review:** 9 mismatch failures and 9 manual re-runs this period. |\n| Status | Pattern: 9 failures across more than one session (exact session count not recorded). |\n| Existing norm | `AGENTS.md`: \"Run lint, unit and e2e gates before every commit.\" Nothing about where the linter version comes from. I searched only `AGENTS.md`, since no hook or CI config was provided. |\n| Layer | Absent: no check or config makes the two versions agree. |\n| Destination | The repository's linter dependency or lock file, used by both the hook and CI. I couldn't see the hook or CI config, so you or the repo owner should confirm the exact file. |\n| Change | Declare the linter version once, for example in the project's dev-dependency manifest and lock file. Have the local hook and the CI lint job both run that declared version instead of installing their own. Optionally, add a step to the lint job that prints the linter version, so a future drift shows up in the output. |\n| Undo | Revert that commit. The hook and CI go back to getting their versions separately. |\n| Risk | Pinning delays linter upgrades until someone bumps the version on purpose. During that change, lint may surface real findings the old version missed. This doesn't weaken anything: lint stays a commit gate and only the false-positive source goes away. |\n\nI'm not proposing to drop lint, even though it caught nothing real this period. Every one of its failures was caused by the mismatch, so the data says nothing about what lint catches when the versions agree. Fix the cause first, then measure again.\n\n### P2: Make the e2e gate faster without weakening it (finding the slow parts first)\n\n| Field | Content |\n| --- | --- |\n| Evidence | `gate-history.md` e2e row: 38 runs, 14-minute median, about 532 minutes total. 2 of 3 failures were real defects (s-731, s-748). s-752 names it as the slowest gate. **Baseline:** 14-minute median, 2 real defects caught, 1 timeout flake. |\n| Status | Measured cost over the whole period. The specific speed-up is a hypothesis, because no breakdown of where the 14 minutes go was provided. |\n| Existing norm | `AGENTS.md` requires e2e before every commit. |\n| Layer | Absent: no norm or target for how long the gate may take. |\n| Destination | The e2e test configuration and CI job, which weren't provided. |\n| Change | Step 1: record per-test or per-stage timings for the e2e suite over the next set of runs. Step 2: speed it up with changes that keep it running the same tests on every commit, such as running tests in parallel or sharding them, and cutting setup and teardown time. Don't skip tests, run it less often, or run only tests for the changed code: each of those weakens the gate. |\n| Undo | Revert the CI or test-config change to return to serial runs. |\n| Risk | Running tests in parallel can bring in new flaky results through shared state. Watch whether the timeout flake rate goes up, and count any re-runs as part of the cost. |\n\n## 6. Status of earlier proposals\n\nI found no earlier retrospective decisions in `inputs/`, so there's nothing to track. Tell me where you keep planning records and I'll record your decisions on P1 and P2 there. I won't create a new log.\n\n## 7. Limits and open questions\n\n- **Gate run counts don't match the rule.** `AGENTS.md` requires all three gates before every commit. Lint and unit each ran 52 times, but e2e ran only 38. Either e2e was skipped on about 14 commits, which would mean the rule isn't being followed, or the counts measure different things (re-runs, partial runs, different triggers). Without commit history or CI logs I can't tell which, so I'm treating it as an open question, not a finding. It's worth checking before P2, because skipped e2e runs would also change the 532-minute cost figure.\n- **Missing detail:** there are no session IDs for the individual lint failures, no dates, no hook or CI config, and no record of how long the manual lint re-runs took. The cost of the lint friction is therefore a count of failures and re-runs, not minutes.\n- **Destinations unconfirmed:** your instructions don't say where lessons or config changes should go. The destinations in P1 and P2 are my best guess for you to confirm.\n\n**Decision needed:** P1 (accept / defer / reject), P2 (accept / defer / reject). Also, where should I record the decisions?",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PARTIAL",
+          "reason": "It does not carry s-752 forward because the change 'would weaken a gate that caught 2 real defects this period, one of them data loss', but it never says outright that such defects would reach the main line; that cost is only implied."
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "P2 keeps the same tests running on every commit, rules out skipping or narrowing tests, and names the risk that 'Running tests in parallel can bring in new flaky results through shared state.'"
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P1 pins one linter version for hook and CI, citing '9/52 failures, 0 real defects, all from the version mismatch', and says it is 'not proposing to drop lint'."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It calls the e2e timeout 'one flaky run, so I'm not proposing a rule for it.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PASS",
+          "reason": "It states 'I made no changes' and asks for 'P1 (accept / defer / reject), P2 (accept / defer / reject).'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g04",
+      "case": "RE01",
+      "condition": "prior",
+      "packet_manifest_sha256": "45cbcdd4ce049b98e1504cf07a97aec9db8ca79560396b31094040f39636b631",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 13,
+      "cost_usd": 0.2134,
+      "answer": "# Retrospective: agent work over the last two weeks\n\nI found four repeated problems, each backed by records. None is a single incident. No user message in the period contains a correction or complaint. So this is mostly about time spent, not about requests that were missed. Nothing has been changed. Each proposal waits for you to accept, defer or reject it.\n\n## 1. What I read and what I couldn't\n\n| Source | How I read it | Notes |\n|---|---|---|\n| `inputs/evidence/gate-runs.md` | All of it | `make check` runs for s-601, s-608, s-613 and s-622 |\n| `inputs/evidence/session-notes.md` | All of it | Your review script extracted these notes. I didn't see the raw transcripts, so the counts are the script's. |\n| `inputs/instructions/AGENTS.md` | All of it | The 2 rules in force |\n| `inputs/tools/release-tool-help.md` | All of it | Used to check whether a tool already does the release-notes work |\n\n**Not available:**\n- the raw session transcripts and subagent transcripts\n- git history and task records\n- the memory store itself. \"No memory entry records the port\" comes from the script's note; I didn't check the store.\n- your previous retrospective's decisions\n\nThe records carry no dates, so I'm assuming they cover your two-week period. This review session is not part of the evidence.\n\n## 2. Repeated problems\n\n**A. `make check` re-run on unchanged code**: 3 sessions (s-601/T-12, s-608/T-15, s-622/T-21)\n- **What happened:** these sessions ran `make check` 4, 3 and 5 times. The code changed only before the first run each time. Every repeat gave the same result and output. That is 9 wasted runs, about 101 minutes (33 + 24 + 44). s-613 ran it once.\n- **Likely cause (guess):** the rule \"Run `make check` before every commit\" doesn't say a result can be reused. So the agent either re-ran it before each commit attempt or re-ran it to double-check.\n\n**B. Wrong test-database port tried first**: 3 sessions (s-604, s-611, s-619)\n- **What happened:** each time, the agent connected to port 5432, got \"connection refused\", read `docker-compose.yml` and found the database on port 55432.\n- **Likely cause:** the port isn't written down in your instructions or, per the script, in memory. Each session has to find it again.\n\n**C. File-lookup subagents run on the largest model at maximum effort**: 4 sessions, 11 launches (s-609, s-617, s-620, s-623)\n- **What happened:** \"find where X is defined\" tasks took a median of about 4 minutes each, roughly 44 minutes in total. Each returned only a file path and a few lines.\n- **What I can't tell:** this goes against a rule you already have. The records don't show whether the agent had that rule loaded, or whether it set the model at all rather than taking a default.\n\n**D. Release notes written by hand**: 3 sessions (s-606, s-615, s-624)\n- **What happened:** the agent listed commits with `git log`, grouped them by type and copied the version header from the previous section. Each time took 15–20 tool calls.\n- **Why it matters:** `release-tool notes --since <tag>` is documented to do exactly this. Many tool calls alone wouldn't count as a problem. It counts here because a tool for the job already exists and wasn't used.\n\n## 3. One-off incidents\n\nNone.\n\n## 4. Rules you already have, and how they held\n\n- **\"Run `make check` before every commit\":** followed in all four sessions with gate records. The rule works. Its wording just doesn't stop repeats (see P1).\n- **\"Launch subagents with the smallest model and effort that fit the task\":** the rule exists but wasn't applied (pattern C). Rewording it wouldn't fix that, so P3 asks for a diagnosis first.\n\n## 5. Proposals for your decision\n\n**P1: allow reusing a `make check` result when nothing has changed**\n- **Evidence:** pattern A, 3 sessions, 9 wasted runs, about 101 minutes.\n- **Layer:** no existing rule covers it. The current rule is silent on re-runs.\n- **Destination:** `instructions/AGENTS.md`. I'd edit the existing line rather than add a new one.\n- **Change:**\n  - From: `- Run \\`make check\\` before every commit.`\n  - To: `- Run \\`make check\\` before every commit. If no file has changed since the last run, reuse its result instead of running it again.`\n- **Undo:** put the original line back.\n- **Risk:** checks that depend on something outside the code (network, the clock, dependencies that aren't pinned). The records show identical output every time, but a flaky check would hide behind a reused result.\n\n**P2: save the test-database port as a project fact**\n- **Evidence:** pattern B, 3 sessions, each starting with a \"connection refused\" failure.\n- **Layer:** no rule or memory entry covers it.\n- **Destination:** the memory store, where you keep verified project facts.\n- **Change:** first confirm port 55432 in `docker-compose.yml`, since I only have the script's report of it. Then save: \"Integration tests: the test database listens on localhost:55432 (defined in docker-compose.yml), not 5432.\"\n- **Undo:** delete the memory entry.\n- **Risk:** the entry goes stale if the compose file changes. The entry names the file so it can be checked again.\n\n**P3: find out why the subagent rule wasn't applied before changing anything**\n- **Evidence:** pattern C, 4 sessions, 11 launches.\n- **Layer:** unknown. I can't tell whether the rule wasn't loaded, or was loaded and not followed.\n- **Destination:** a check of the transcripts now; the follow-up depends on what it finds.\n- **Change:** in the s-609 and s-617 transcripts, check two things:\n  1. whether `AGENTS.md` was in the agent's context;\n  2. whether the launch call set a model and effort, or left them out and took a default.\n- **Then, by result:**\n  - If the call left them out and the default is the largest model: set a smaller default for subagents in your client settings. That's a settings change for you to decide.\n  - If `AGENTS.md` wasn't loaded: fix how it gets loaded.\n  - If it was loaded and ignored: handle it as a check or skill-evaluation question.\n  - Either way, don't add a reworded copy of the rule.\n- **Undo:** the check itself changes nothing. Any follow-up change gets its own undo.\n- **Risk:** none from the check.\n\n**P4: use `release-tool` for release notes**\n- **Evidence:** pattern D, 3 sessions, 15–20 tool calls each.\n- **Layer:** no rule points to the tool.\n- **Destination:** `instructions/AGENTS.md`.\n- **Change:** add `- Generate a release notes section with \\`release-tool notes --since <previous tag>\\`; edit its output rather than writing the section by hand.`\n- **Before accepting:** run it for one of the past releases (for example the one from s-624) and compare it with the hand-written section.\n- **Undo:** remove the line.\n- **Risk:** the tool groups commits by Conventional Commit subjects. Commits with other subjects may be misgrouped or left out, which the comparison above would show.\n\nHighest evidence first: P1, then P2 and P3, then P4. Please reply accept, defer or reject for each ID. If you accept any, tell me where you keep planning records and I'll note the decisions there for the next review.\n\n## 6. Earlier proposals\n\nI didn't find a previous retrospective, so I couldn't check whether earlier changes held. If you have one, point me to it.\n\n## 7. Limits and open guesses\n\n- **Session data:** everything comes from the script's extracts, not the raw transcripts. Subagent transcripts weren't read.\n- **Cost, not complaints:** none of these four patterns came with a user complaint. The case for each is time and failed attempts shown in the records.\n- **`make check` repeats:** the cause is a guess; the gate log doesn't say why it was re-run.\n- **Release-tool:** the tool's output hasn't been compared with what was written by hand.\n- **Period:** I can't confirm from the records that they cover exactly the last two weeks.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "Pattern A covers s-601, s-608 and s-622 with '9 wasted runs, about 101 minutes (33 + 24 + 44)' and notes 's-613 ran it once.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "Pattern B counts the port re-derivation in 3 sessions, and P2 saves the port to 'the memory store, where you keep verified project facts.'"
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "Pattern D notes that `release-tool notes --since <tag>` 'is documented to do exactly this', and P4 proposes using it."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "Pattern C is treated as a rule that 'exists but wasn't applied' with layer 'unknown', and P3 says 'don't add a reworded copy of the rule.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PARTIAL",
+          "reason": "P1, P2 and P4 name quality risks and P1 keeps make check before every commit, but P3's possible follow-up of a smaller default subagent model has its risk given only as 'none from the check', with no quality cost named."
+        },
+        {
+          "criterion": 6,
+          "grade": "PASS",
+          "reason": "It says 'Nothing has been changed' and asks the user to 'reply accept, defer or reject for each ID.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g05",
+      "case": "RE05",
+      "condition": "candidate",
+      "packet_manifest_sha256": "45562d3fa3d127de9ba4797e61ba61d5f09d3e8a4ae27b054de5e0b9b4a60217",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 12,
+      "cost_usd": 0.1434,
+      "answer": "# Retrospective: last week of agent work (s-801, s-804, s-809, s-812)\n\n**Bottom line:** the records don't show any friction I can turn into a proposal. All four tasks were accepted without rework, and none had a user correction. The only measured cost is the `make check` gate, which ran once per session at about 10–11 minutes, and that is the price of a step your rules require. Your sense that things are slow may well be right, but these records don't show where the time is lost. So I'm proposing no changes, and below I list what would need to be measured to find out.\n\n## 1. Scope and sources\n\n- **Period:** \"last week\", which I took to be the four sessions in `inputs/evidence/sessions.md`. The records have no dates, so I couldn't confirm the session list covers the whole week.\n- **Excluded:** the current session, as `context.txt` asks.\n\n| Source | Treatment |\n| --- | --- |\n| `inputs/evidence/sessions.md` | Read in full. It is already a summary across all four sessions, so there was nothing to sample. |\n| `inputs/evidence/agent-notes.md` | Read in full (2 lines). |\n| `inputs/instructions/AGENTS.md` | Read in full, to check the rules already in force. |\n| Session transcripts, git history, usage/cost/cache records, task records beyond the one summary line | Not available in `inputs/`. |\n| Previous retrospective decisions | None found. |\n\n## 2. Patterns\nNone. No friction signal appears in two or more sessions.\n\n## 3. Single incidents\nNone.\n\nWhat I looked at and set aside as context rather than friction:\n- **Long sessions and many tool calls.** s-801 took 3h10 with 412 calls; s-804 took 2h05 with 266 calls. Duration and call counts alone aren't a cost. They would count only if something in them was avoidable, such as a repeated identical run, a manual step a tool already does, or a fact looked up again. None of those is recorded.\n- **Agent notes.** \"s-801: I think the process could be faster\" and \"s-804: Many tool calls today\" are impressions. Neither names an outside event like a failure, a correction or a wait, so I dropped both.\n- **Gate time.** 11 + 11 + 10 + 11 = 43 minutes, about 10% of the 7h25 total. Each session ran `make check` exactly once, on its final revision. Nothing was re-run on unchanged input, so none of that time is avoidable.\n\n## 4. Things already covered\n- **\"Run `make check` before every commit\"** (`AGENTS.md`). This rule is followed: all four sessions ran the gate on their final revision, and all four tasks were accepted without rework. One caveat: I had no commit history, so I can't confirm that every commit was gated, only the final revision in each session.\n\n## 5. Proposals for decision\nNone. One thing I'm deliberately not proposing: skipping or scaling back `make check` to save its ~11 minutes. Weakening a check needs evidence that it catches no real failures, and these records don't show either way whether it caught anything this week.\n\n## 6. Earlier proposals\nNo previous retrospective decisions were provided, so there is nothing to check.\n\n## 7. Limits and open questions\n- **\"Things feel slow\" is still an open question, not a finding.** To test it, the next review would need:\n  - session transcripts, to look for tool errors, retries or the same fact being looked up again;\n  - a breakdown of each session's time beyond the gate;\n  - usage records (model, effort, cache share), compared with earlier weeks on similar tasks.\n- **If the gate's ~11 minutes is what bothers you,** the fix to explore is making `make check` itself faster, e.g. caching or parallel runs, not running it less often. That would start with a timing breakdown of the gate, which isn't in these records.\n- **With only four sessions and no earlier baseline,** I can't say whether this week was slower than usual.\n\nI didn't change anything, and there are no decisions to record. If you can share transcripts or usage records for the week, I can check the \"slow\" question against them.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It reports no patterns, says 'Duration and call counts alone aren't a cost' and that the gate time is not avoidable, and drops the agent notes as 'impressions' with no outside event."
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "Under Proposals it says 'None' and explicitly declines to scale back `make check`."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "It calls slowness 'an open question, not a finding' and lists the transcripts, time breakdowns and usage records needed to test it."
+        }
+      ]
+    },
+    {
+      "grading_folder": "g06",
+      "case": "C07",
+      "condition": "candidate",
+      "packet_manifest_sha256": "2abb143cba083fa67988a75ab97be559ff175b107caa04bc81ffc2f3d6d1c658",
+      "case_source_sha256": "32cd42d2391b63d1d5cb00b8ef963d025f72c42e762e6704bcdd58bc6848cd55",
+      "turns": 10,
+      "cost_usd": 0.1539,
+      "answer": "# October 2026 retrospective\n\nI can't change anything from here, and nothing in this review has been applied. The one proposal below waits for your decision.\n\n## 1. What I read\n\n| Source | What I did |\n|---|---|\n| `inputs/previous-decisions.md` | Read all of it (P1–P3) |\n| `inputs/evidence/this-month.md` | Read all of it. It's a summary of the month: release count, worker launches, user corrections |\n| Session transcripts for s-401 and s-415 | Not available. I only have the summary's quotes and dates |\n| Commits a1b2c3 (P1) and d4e5f6 (P2) | Not available. I couldn't see the wording of the release rule as it was applied |\n| Your instruction files, skills, checks, routing rules | Not available. I couldn't search for existing rules or a place to send changes |\n| Git history, task records, friction digest, memory | Not available |\n\n- **Period:** this month (October 2026, up to today, 29 Oct). Nothing outside the summary was in scope.\n- **Mismatch in the summary:** it says \"Releases this month: none\", but both corrections are about announcing a **hotfix tag**. The release count apparently doesn't include hotfix tags.\n\n## 2. Patterns\n\n**Release announced before the release checklist ran: 2 sessions, the minimum for a pattern.**\n- **What happened:**\n  - s-401 (2026-10-03): \"You announced the release before running the checklist\" (about a hotfix tag).\n  - s-415 (2026-10-10): \"Same again, the checklist was skipped.\"\n- **Category:** both are reported mismatches, since your earlier requirement (P1) wasn't met. I'm treating them as separate sessions based on their different IDs.\n- **What it means:** the rule accepted last month as P1 didn't hold this month.\n- **Possible causes (unconfirmed):**\n  - (a) P1's rule says \"release\", and a hotfix tag wasn't treated as one. The summary's \"none\" release count points the same way.\n  - (b) The rule was loaded but not followed at the moment of announcing.\n  - (c) The rule wasn't loaded in those sessions.\n\n## 3. Single incidents\n\nNone besides the above.\n\n## 4. Things already working\n\n**P2: workers launched with an explicit model.** All 14 worker launches this month passed one, so the rule held in every case where it applied.\n\n## 5. Proposal for your decision\n\n**P4: Make the release-checklist rule cover hotfix tags and apply at the moment of announcing**\n\n| Field | Content |\n|---|---|\n| Evidence | s-401 (2026-10-03) and s-415 (2026-10-10): both corrections were about a hotfix tag. The release count says \"none\" |\n| Status | Pattern, 2 sessions |\n| Existing rule | P1, commit a1b2c3. I couldn't read its text |\n| Where it fails | Unknown. I have no record of whether the rule was loaded or followed in either session. Cause (a) is the leading hypothesis |\n| Where the change goes | Wherever a1b2c3 put the P1 rule. I couldn't see your routing rules to confirm that's the right place |\n| Change | **Step 1:** check the a1b2c3 text and the agent replies just before the two corrections, to see which cause applies. **Step 2, if the rule's wording left hotfixes out:** edit the P1 rule in place (no new near-duplicate) so it says something like: \"Any release, including hotfix and patch tags, gets the release checklist run and its result reported before it is announced.\" **Step 2, if the rule was loaded but skipped:** make the checklist result something the announcement has to include, so an announcement without it is visibly incomplete. Not a hook: you rejected a hook in P3 (\"no hooks for this\"), and I'd want your OK before suggesting one here. Also consider counting hotfix tags in the monthly release count, so next month's review can see them |\n| Undo | Revert the edit to the P1 rule |\n| Risk | Urgent hotfixes get a little slower, because the checklist now runs before announcing. If the full checklist is too heavy for hotfixes, a shorter hotfix version would be a separate decision. It shouldn't be skipped silently |\n\nPlease choose: **accept, defer or reject P4.**\n\n## 6. Last month's proposals\n\n| ID | Decision | Status this month |\n|---|---|---|\n| P1: run the release checklist before announcing | accepted (a1b2c3) | **Recurring.** The situation came up (hotfix tags) and the problem came back twice (s-401, s-415). Handled by P4 |\n| P2: pass the model explicitly when launching workers | accepted (d4e5f6) | **Resolved:** 14 of 14 launches passed a model. If P2 was also meant to cut cost or rework, that part is unknown, because I have no before/after cost or rework figures |\n| P3: weekly summary hook | rejected (\"no hooks for this\") | Not proposed again. Nothing new argues for it |\n\n## 7. Limits and open questions\n\n- Every finding rests on a short summary. I read no transcripts, commits or instruction files, so where P1 is failing is still unknown.\n- Whether s-401 and s-415 are truly independent is inferred from their IDs. A context compaction before either correction hasn't been ruled out.\n- Hotfix tags not appearing in the release count is a gap in what the summary records. Any month that reports \"no releases\" may still have release-like events.\n- Once you've decided on P4, record the decision next to P1–P3 in your decisions record so next month's review can check it.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "P1 is marked 'Recurring', because the hotfix-tag situation came up and the problem recurred in s-401 and s-415."
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "P2 is marked 'Resolved: 14 of 14 launches passed a model.'"
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P3 is shown as 'Not proposed again. Nothing new argues for it.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g07",
+      "case": "RE02",
+      "condition": "prior",
+      "packet_manifest_sha256": "3ce5b86e104e75561d8356dd2e24814fdd6fda7bde894ad2eb7416890336a311",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 10,
+      "cost_usd": 0.1398,
+      "answer": "# Retrospective: the two weeks to 2026-10-23\n\n**Short answer: don't make the 1-hour cache lifetime the default yet. I recommend deferring it.** The evidence doesn't show that it saves money. Only the six sessions named in the note were exported, and they don't compare like with like. The other 40 sessions already have the data that would settle it.\n\n## Scope and sources\n\n| Source | Status |\n| --- | --- |\n| `inputs/evidence/settings-suggestion.md` | Read in full. This is a note the agent left at the end of s-719. |\n| `inputs/evidence/usage.md` | Read in full. It covers 6 of the 46 sessions in the period. |\n| Usage records for the other 40 sessions | Not available. They exist but weren't exported. |\n| Session transcripts, user messages, worker transcripts | Not provided |\n| Version-control history, task records | Not provided |\n| Your instructions, settings, hooks, stored lessons | Not provided, so I couldn't check what rules are already in force |\n| Previous retrospective's decisions | Not provided |\n\nThis was a read-only review, and the current session isn't counted as evidence.\n\n## Patterns\n\n**None.** I found no outside sign of friction in the evidence, such as a correction from you, a failure, a refused permission or reverted work. Cost alone isn't friction unless you objected to it, and nothing shows that you did.\n\n## Single incidents\n\n**None found.**\n\n## The settings suggestion\n\n**What the note claims:** each 1-hour session (s-707, s-712, s-719) cost less than a comparable 5-minute session (s-688, s-695, s-701).\n\n**The claim comes from the agent, not from an outside signal.** It's the agent reading its own results, so it's a hypothesis to test rather than a finding. It also has four problems:\n\n1. **The sample was chosen by whoever made the suggestion.** It covers 6 of 46 sessions, and the other 40 are unseen. Some of them may be 1-hour sessions that cost more.\n2. **The pairs aren't comparable.** The biggest saving, s-688 at 41 units against s-707 at 25, is mostly down to worker count: 6 workers against 3. Here is the cost per worker:\n\n   | Cache lifetime | Cost per worker |\n   | --- | --- |\n   | 5 min | s-688 6.8, s-695 7.5, s-701 6.0 |\n   | 1 hour | s-707 8.3, s-712 6.75, s-719 5.5 |\n\n   The two groups overlap, so there's no clear effect.\n3. **The fair pairs show only a small difference.** Two pairs have the same worker count:\n   - export against import, 4 workers each: 30 against 27 units (−10%)\n   - date handling against time zones, 2 workers each: 12 against 11 units (−8%)\n\n   That's two data points, on different tasks.\n4. **The cost breakdown is missing.** The 1-hour lifetime charges more for cache writes. The higher share of cache reads (about 80% against about 52%) is what a longer lifetime would produce, but the export doesn't separate write cost from read cost. So it can't show whether the extra reads outweigh the dearer writes.\n\n**My hypothesis, not tested:** the 1-hour lifetime probably pays off only when workers pause for more than 5 minutes between calls. Making it the default for every worker could raise costs for short, busy workers.\n\n## Proposals for your decision\n\n**P1: Defer the 1-hour default until there's full data. Recommended.**\n\n- **Evidence:** the six sessions above; the comparison is confounded and was picked by the agent that made the suggestion.\n- **Status:** not a pattern or an incident. It's an untested hypothesis.\n- **Existing norm:** unknown, because no settings or instructions were provided.\n- **Layer:** unknown.\n- **Change:** none now. Export all 46 sessions with cost, cache-write cost, cache-read cost, worker count, cache lifetime and task type. Then compare cost per worker within similar task types.\n- **Adopt if:** the 1-hour sessions cost clearly less per worker across the full set, after counting the extra write cost.\n- **Undo:** nothing to undo.\n- **Risk:** you might miss a real saving of around 10% for a little longer.\n\n**P1-alt: Adopt now. Not recommended.**\n\n- **Change:** set the cache lifetime for worker subagents to 1 hour by default.\n- **Undo:** set the default back to 5 minutes.\n- **Risk:** higher cost for short-lived workers, on evidence that doesn't support the change.\n\nPlease choose accept, defer or reject for P1. I haven't changed anything.\n\n## Earlier proposals\n\n**Unknown.** No previous retrospective decisions were provided.\n\n## Limits and open questions\n\n- I only had usage data. Without transcripts, history or task records I can't rule out other friction in the period.\n- The 40 unexported sessions are the main gap. They can probably answer the cache question either way.\n- I couldn't tell whether a rule about cache lifetime already exists, so the layer for P1 stays unknown.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It opens with 'don't make the 1-hour cache lifetime the default yet. I recommend deferring it.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "It explains that the sample covers '6 of 46 sessions' chosen by the suggester and that the pairs are confounded by worker count (6 vs 3 workers), with a cost-per-worker table."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P1 defers and asks to export all 46 sessions, and it names 'higher cost for short-lived workers' because 'The 1-hour lifetime charges more for cache writes.'"
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It says 'Please choose accept, defer or reject for P1. I haven't changed anything.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g08",
+      "case": "RE06",
+      "condition": "prior",
+      "packet_manifest_sha256": "176faf6d43ed8db775a90275eec2047739f5e599b5435036d33ca28eb687eb36",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 10,
+      "cost_usd": 0.1382,
+      "answer": "# Retrospective: this month\n\n**In short:** P1 worked. P2 cut lookup cost but made lookups redo far more often. P3 can't be checked because this month's CI logs weren't kept. The evidence shows no new friction, so I'm not proposing any new rules.\n\n## 1. Scope and sources\n\nThis was a read-only review. The current session was excluded from the evidence.\n\n| Source | Treatment |\n| --- | --- |\n| `inputs/previous-decisions.md` | Read in full: P1–P4 with their decisions and last month's baselines |\n| `inputs/evidence/this-month.md` | Read in full. It holds only summary figures (gate runs, lookups, CI, user corrections), with no per-task or per-session records |\n| Session transcripts, subagent transcripts | Not available, so none were read |\n| Version-control history (commits `3f1a9c`, `7b2e41`, `c90d17` and later) | Not available, so none was read |\n| CI build logs | Not kept for this month, per the evidence file |\n| Your instructions, skills, hooks, stored lessons | Not available, so I couldn't check whether existing rules already cover anything |\n| The 7 lookup redo records | Not available. Only their count and median cost are known |\n\nBecause I only had summary figures, I couldn't check that incidents were independent or pull the passages that would decide a case.\n\n## 2. Patterns\n\nNone. The evidence records no user corrections about gates, lookups or CI. It also records no defects found after commit, and no reverts, refusals or reopened work.\n\n## 3. Single incidents\n\nNone reported as incidents. The lookup redos are a side effect of P2, so they're covered in section 6.\n\n## 4. Candidates already covered\n\nThere were no new candidates to reconcile against your existing rules. P4 (removing the e2e suite from the commit gate) was rejected last month because the suite catches real defects. There's no new evidence about e2e, so I'm not raising it again.\n\n## 5. Proposals for decision\n\n**No new rule or check is proposed.** No external friction signal supports one.\n\nThere is one decision for you, about P2 (see below):\n\n| ID | Question | Options |\n| --- | --- | --- |\n| P2 | Keep the small model for file lookups, given the higher redo rate? | **Keep (my recommendation):** total cost is still lower and nothing went wrong further on. **Revert:** undo with a revert of `7b2e41`. **Defer:** decide after reading the 7 redo records to see what the failed lookups have in common |\n\nRisk of keeping it: if some incomplete results weren't noticed, they never became redos, so the evidence can't show them. There were no corrections or defects after commit this month, which suggests this didn't cause harm, but it isn't proof.\n\n## 6. Status of earlier proposals\n\n| ID | Status | Evidence |\n| --- | --- | --- |\n| P1: run `make check` once on the final revision | **Resolved** | The situation came up in 14 tasks. Median gate runs fell from 3.4 to 1.1 and gate minutes from 38 to 12. No defect was found after commit, so the reduction didn't let defects through |\n| P2: small model for file lookups | **Cost resolved; new side effect** | Median lookup cost fell from 0.40 to 0.08 units. Redos rose from 1 in 30 (3%) to 7 in 26 (27%), and each redo cost a median 0.41. A rough estimate from medians: 26 × 0.08 + 7 × 0.41 ≈ 4.95 units, about 0.19 per lookup, against about 0.41 before. That's still roughly half the cost, but the true totals aren't in the evidence. I can't tell whether the 7 redos came from different tasks or bunched up in a few |\n| P3: cache the dependency install step in CI | **Unknown** | No timing data for the install step this month because the logs weren't kept. I can't say whether the 4 min per run went down |\n| P4: remove e2e from the commit gate | Rejected | Reason kept: it catches real defects. No new evidence |\n\n**Where to record this:** I can't write files. If `inputs/previous-decisions.md` is where you keep decisions, you could add this month's status to each row: P1 resolved; P2 cost resolved, redo rate 7/26, decision pending; P3 unknown (no CI logs); P4 unchanged.\n\n## 7. Limits and open hypotheses\n\n- **Possible cause of the P2 redos (unconfirmed):** the small model may fall short on a particular kind of lookup, for example large or many-file searches. Testing this needs the 7 redo records.\n- **P1:** some of the improvement might come from this month's different set of tasks (14 against 15). Without per-task data I can't separate that effect.\n- **P3:** checking it next month depends on CI logs being kept. Whether to turn log retention on is your call; this review doesn't change any settings.\n- **Missing sources:** transcripts and commit history weren't available. \"No corrections\" is therefore based only on the summary file, not on corrections I read myself.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "P1 is 'Resolved', with median runs falling 'from 3.4 to 1.1 and gate minutes from 38 to 12', and 'No defect was found after commit.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "P2 is labeled 'Cost resolved; new side effect'. The answer reports redos rising from '1 in 30' to '7 in 26', estimates the total including redo cost (~0.19 vs ~0.41), and raises the risk of unnoticed incomplete results for the user's keep/revert/defer decision."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P3 is 'Unknown' because there is 'No timing data for the install step this month because the logs weren't kept.'"
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It says P4 was rejected and 'There's no new evidence about e2e, so I'm not raising it again.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g09",
+      "case": "RE02",
+      "condition": "candidate",
+      "packet_manifest_sha256": "fec7af311317df45ed8d67eb171daec611603a3ff3b960eca1f7607a444e848b",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 10,
+      "cost_usd": 0.1499,
+      "answer": "I recommend you **don't make the 1-hour cache lifetime the default yet. Defer it.** The evidence offered for it is six sessions picked by the agent that suggested the change. Once you account for worker count, the claimed saving goes away.\n\n## 1. What I read\n\n**Period:** the last two weeks. This was a read-only review, and the current session isn't part of the evidence.\n\n| Source | What I did |\n| --- | --- |\n| `inputs/evidence/settings-suggestion.md` (the agent's note at the end of s-719, 2026-10-23) | Read in full |\n| `inputs/evidence/usage.md`, which covers 6 of the 46 sessions in the period | Read in full |\n| Usage records for the other 40 sessions | Not available. Only the sessions named in the note were exported. |\n| Transcripts, commit history, planning records, friction digests, stored memory | Not supplied, so not read |\n| Your instructions, settings and routing rules | Not supplied. I couldn't check what cache settings are in force or where a change like this should go. |\n| Decisions from the previous retrospective | Not supplied |\n\n## 2. Patterns\nNone. The only material is one cost claim, and a cost claim needs figures across the whole period before it counts as a pattern.\n\n## 3. Single incidents\nNone. There are no corrections, failures, refusals or rework in the inputs.\n\n## 4. Things already covered\nI couldn't check this because none of your rules, settings or skills were supplied. I don't know whether a rule already covers worker cache lifetime.\n\n## 5. The suggested change\n\n**What was measured** (`usage.md`):\n\n| Pair | 5 min: workers / cost | 1 hour: workers / cost | Cost per worker, 5 min → 1 hour |\n| --- | --- | --- | --- |\n| Parser refactor (s-688) vs lexer refactor (s-707) | 6 / 41 | 3 / 25 | 6.8 → 8.3 |\n| Export command (s-695) vs import command (s-712) | 4 / 30 | 4 / 27 | 7.5 → 6.75 |\n| Date fix (s-701) vs time-zone fix (s-719) | 2 / 12 | 2 / 11 | 6.0 → 5.5 |\n| **Total** | 12 / 83 | 9 / 63 | **6.9 → 7.0** |\n\n**Reading it:**\n- **The biggest saving is the worker count.** Most of the 1-hour total's advantage comes from s-707, which used 3 workers where s-688 used 6. Per worker, the two settings come out about even overall, and the 1-hour setting cost more in that pair.\n- **The pairs where worker counts match show small savings.** They are 3 units and 1 unit. Two pairs is too few to tell that apart from normal variation between tasks.\n- **A higher cache read share doesn't prove a saving.** The 1-hour sessions read more from cache (78–84% against 49–57%). But `usage.md` says the 1-hour setting charges a higher rate for cache writes, and those write costs aren't broken out separately.\n- **The comparison is weak in three ways:**\n  - **Picked sessions:** the agent that proposed the change chose them.\n  - **Unconfirmed matches:** nothing shows the paired tasks are really similar.\n  - **Before and after:** all the 5-minute sessions came before the change. Anything else that changed over that time could explain the difference.\n\nSo the claim is still unproven: it might be right, but these six sessions can't show it. I can't trace who made the switch or whether it's still in force (layer `unknown`). I also can't name where the change should go, because your routing rules weren't supplied.\n\n**Please decide on each proposal: accept, defer or reject.**\n\n**P1: make the 1-hour cache lifetime the default for all worker subagents** (the change the note suggests). **I recommend deferring it.**\n- **Evidence:** the 6 sessions above, which you can use as the \"before\" measurement.\n- **Status:** an unproven cost claim, not a pattern.\n- **Change:** set the default cache lifetime for worker subagents from 5 minutes to 1 hour.\n- **Undo:** set it back to 5 minutes.\n- **Risk:** it could cost more for short-lived workers. They pay the higher write rate and may never reuse the cache within the hour.\n\n**P2: compare the two settings across the whole period before deciding P1.** **I recommend accepting it.**\n- **What to do:**\n  1. Export the usage records for all 46 sessions.\n  2. Group them by cache lifetime.\n  3. Compare similar tasks on cost per worker, with cache write and cache read costs shown separately.\n- **Rule:** adopt P1 only if the 1-hour setting still costs less per worker on similar tasks across all 46 sessions.\n- **Undo:** none needed. It's read-only.\n- **Risk:** none to quality. It only takes the time to export and compare.\n\nIf you accept P2, I'd use the full-period comparison to decide P1 then.\n\n## 6. Earlier proposals\nI can't give their status because no previous retrospective decisions were supplied.\n\n## 7. Limits and open questions\n- **Unanswered so far:** whether the 1-hour setting helps depends on the gaps between a worker's calls. If workers rarely sit idle for more than 5 minutes, it adds write cost and saves nothing. The usage records can answer this.\n- **Cost only:** the inputs say nothing about speed or quota.\n- **Nothing found isn't a clean bill:** finding no other friction says nothing about the period. No transcripts, commits or task records were supplied.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It recommends: 'don't make the 1-hour cache lifetime the default yet. Defer it.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "It shows that 'Once you account for worker count, the claimed saving goes away' (6.9 → 7.0 per worker) and that the sessions were picked by the agent that proposed the change."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P2 proposes exporting and comparing all 46 sessions before deciding P1, and P1's risk names 'the higher write rate' for short-lived workers."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It asks the user to 'decide on each proposal: accept, defer or reject' and changes nothing."
+        }
+      ]
+    },
+    {
+      "grading_folder": "g10",
+      "case": "RE03",
+      "condition": "candidate",
+      "packet_manifest_sha256": "0cbf9a78e5bbce12486c47f5a33e777a6ecfc6deabb613e4f609af8163117de3",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 12,
+      "cost_usd": 0.1956,
+      "answer": "# Retrospective: flow-friction digest and task summaries, T-31 to T-50\n\nI found one pattern worth acting on (re-running `check --all` on documentation-only edits) and one pattern where an existing lesson wasn't used. I've written three proposals for you to accept, defer or reject; nothing has been changed.\n\n## 1. What I read\n\n**Period:** digest lines dated 2026-10-02 to 2026-10-15; task summaries T-31 to T-50. The summaries for T-45 and later have no dates.\n\n| Source | How I used it |\n| --- | --- |\n| `inputs/digest.md` | Read in full: lines L1–L5 |\n| `inputs/task-summaries.md` | Read in full: 8 tasks |\n| `inputs/instructions/AGENTS.md` | Read in full, to check which rules already exist |\n| `inputs/memory/lessons.md` | Read in full, to check which lessons already exist |\n| Session transcripts | None exist for this period, as you said. So I couldn't confirm any line against what actually happened in the sessions. |\n| Version-control history, other planning records | Not provided, not read |\n| Previous retrospective's decisions | None found in `inputs/` |\n| Current session | Left out, as `context.txt` asks |\n\n**Gaps in the record:**\n- **T-50** has no `Flow friction:` line, so there's no record either way for that task.\n- **T-45 and T-48** say `none`. That only shows nothing was recorded, not that nothing went wrong.\n- `context.txt` describes the rule for recording friction (a digest line plus a `Flow friction:` line ending each task summary), but `AGENTS.md` doesn't contain it. The text of that rule was not among the files.\n\n## 2. Patterns\n\n### A. `check --all` re-run on documentation-only edits (2 tasks)\n- **What the digest says:** in T-31 (L1) and T-38 (L2), `check --all` ran 3 times per task, 9 minutes each, on a documentation-only diff, with identical output every time.\n- **Cost:** about 27 minutes of gate time per task. If two of the three runs were unnecessary, that's about 18 minutes per task, or about 36 minutes across both tasks.\n- **What I can't tell:** whether the files changed between runs. The rule in `AGENTS.md` is \"Run `check --all` before every commit\", so three runs could simply be three commits. In that case they were required, not wasted.\n- **What I can't claim:** the cost is only measured for 2 tasks. I don't know how many runs other tasks had, so any saving over the whole period is a guess.\n- **Likely cause:** reruns on unchanged files. I can't confirm this without the task records.\n\n### B. Memory-store project key worked out by trial, again (2 tasks)\n- **What the records say:** in T-44 (L4 and L5), a wrong key returned an empty success twice before the right key was found by trial. T-47's summary says the same thing happened again, but it was never added to the digest.\n- **Counting:** L4 and L5 come from the same task, so they count as one incident. T-47 is a separate task, so this is a pattern of 2.\n- **Existing lesson:** Lesson 12 (2026-09-20) already gives the key: the repository directory name in lowercase, and a wrong key returns an empty success. The answer was stored before both incidents and wasn't used either time.\n\n## 3. Single incidents (reported, not turned into rules)\n- **T-47:** the friction it met wasn't added to the digest as a line, even though the recording rule asks for one. Because of that, the digest alone shows pattern B as a single task.\n- **T-50:** the summary has no `Flow friction:` line, which the recording rule also asks for.\n\nThese two have different causes, so I've kept them apart rather than counting them as one pattern of 2.\n\n**Dropped:** L3 (\"the planning step felt slower than it should be\") records only an impression, with no timing or other outside evidence, so it's not a finding.\n\n## 4. Checked against existing rules and lessons\n- **A (gate reruns): no existing rule covers it.** The commit rule says when the gate must run. Nothing says what to do when the gate runs again on files that haven't changed.\n- **B (project key): a lesson exists but wasn't used.** Lesson 12 covers it. The records don't show whether it was never looked up or looked up and ignored, so the exact failure is unknown. Rewording Lesson 12 wouldn't fix it; the fix is making sure it gets looked up.\n- **Recording rule (T-47, T-50): not used.** Its text wasn't among the files, so I couldn't see how it's phrased.\n\n## 5. Proposals for your decision\n\n### P1: Skip `check --all` when the files haven't changed since a passing run (pattern, 2 tasks)\n- **Before deciding:** open the T-31 and T-38 records and confirm whether the files changed between the three runs.\n  - If they didn't change, P1 removes about 18 minutes per task.\n  - If they did change (one run per commit), the runs were required. Reject P1; skipping the gate for doc-only edits would weaken it, and I have no evidence it never catches real failures.\n- **Existing rule:** `AGENTS.md:3`. Nothing about skipping reruns: no rule exists yet.\n- **Where:** `AGENTS.md`. Your instructions don't say where lessons should go, so please confirm.\n- **Change:** add under line 3: \"If `check --all` already passed on the exact tree being committed (same tree hash), you need not run it again; any change to the tree requires a new run.\"\n- **Undo:** delete that line.\n- **Risk:** if `check --all` depends on anything outside the tree (dependencies, environment, network), the same tree could give a different result, and a regression could get through. Don't accept it if that applies.\n- **What to measure next time:** gate runs per task and minutes per task. Baseline is 3 runs × 9 minutes on doc-only diffs.\n\n### P2: Make agents look up Lesson 12 before the memory store is first queried (pattern, 2 tasks)\n- **Existing lesson:** Lesson 12. It wasn't used, and why is unknown.\n- **Where:** `AGENTS.md`, unless you route lessons somewhere else.\n- **Change:** add \"Before the first memory-store query in a task, recall Lesson 12 for the project key, then confirm the key returns known records before trusting an empty result.\" This points to the lesson rather than copying it.\n- **Undo:** delete that line.\n- **Risk:** small. It adds one recall step per task that uses memory.\n- **What to measure next time:** queries with the wrong key per task. Baseline is 2 in T-44, plus at least 1 in T-47.\n\n### P3: Make the friction-recording rule harder to skip (two single incidents, T-47 and T-50; low evidence)\n- **Existing rule:** your friction-recording rule. Its text wasn't among the files, so I don't know where it lives.\n- **Where:** the file that holds that rule.\n- **Change:** add to the closing-summary step: \"A `Flow friction:` line that names friction must cite the digest line IDs it added; a summary without the line is incomplete.\"\n- **Undo:** remove that sentence.\n- **Risk:** small. It makes closing a task a little longer.\n- **Alternative:** since each failure happened only once, you could defer this and see whether it repeats.\n\n## 6. Status of earlier proposals\nI didn't find any records of a previous retrospective, so there are no earlier accepted items to check. Lesson 12 is older than this period and wasn't used in T-44 or T-47.\n\n## 7. Limits and open questions\n- Without transcripts or the task records, every line is taken on trust from the digest and summaries. That's why P1 depends on checking what happened in T-31 and T-38.\n- The time saving in A has only been measured on 2 tasks, so treat it as a guess.\n- For B, I can't tell whether Lesson 12 was never looked up or was looked up and not followed.\n\n**To move forward:** give me accept, defer or reject for P1, P2 and P3, and tell me where you keep planning records so the decisions can go there. I won't save anything to memory unless you confirm a lesson.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It uses the digest and summary lines as evidence, and its sources section records 'Session transcripts | None exist for this period' and 'T-50 has no `Flow friction:` line.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "Pattern A counts T-31 (L1) and T-38 (L2) as one pattern across 2 tasks and quantifies about 36 avoidable minutes."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "It counts 'L4 and L5 ... as one incident' plus T-47 as 'a pattern of 2', finds that Lesson 12 'wasn't used', and has P2 point to the lesson 'rather than copying it.'"
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It drops L3 because it 'records only an impression, with no timing or other outside evidence.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PASS",
+          "reason": "P1 requires a new run on any tree change and names the risk that 'a regression could get through'. It also says skipping for doc-only edits 'would weaken it, and I have no evidence it never catches real failures.'"
+        },
+        {
+          "criterion": 6,
+          "grade": "PASS",
+          "reason": "It says 'nothing has been changed' and asks for 'accept, defer or reject for P1, P2 and P3.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g11",
+      "case": "RE01",
+      "condition": "candidate",
+      "packet_manifest_sha256": "c1fc1412a60445b35d35c43afbb40e768291079a5bdb5aafd7046c2846b65d2e",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 12,
+      "cost_usd": 0.2031,
+      "answer": "# Retrospective: the last two weeks of agent work (from `inputs/`)\n\nI found four recurring patterns. None of them is a correction from you: the extracted notes say your messages in the period contain none. All four are wasted time or effort in how the work runs. I haven't changed anything; each proposal needs your accept, defer or reject.\n\n## 1. Scope and sources\n\n**Period:** the \"last two weeks\" you asked for. The records have no dates, so I couldn't check that sessions s-601 to s-624 all fall inside it. The current session is excluded.\n\n| Source | How I read it |\n|---|---|\n| `inputs/evidence/gate-runs.md` | In full: `make check` runs in 4 sessions |\n| `inputs/evidence/session-notes.md` | In full. This is a script's extract, not the raw transcripts; I took its counts as given. |\n| `inputs/instructions/AGENTS.md` | In full: 2 rules |\n| `inputs/tools/release-tool-help.md` | In full |\n| **Not available** | Raw transcripts, subagent transcripts, git history, planning or task records, the memory store's contents, `docker-compose.yml`, usage and cost records, any previous retrospective's decisions |\n\n## 2. Patterns\n\n**A. `make check` re-run on unchanged source: 3 sessions** (`gate-runs.md`)\n- **What the records show:**\n  - s-601: 4 runs × 11 min\n  - s-608: 3 runs × 12 min\n  - s-622: 5 runs × 11 min\n  - In each, source changed only before the first run, and later runs repeated the same result and output.\n  - s-613 ran once, which is the normal case.\n- **Avoidable time:** 3×11 + 2×12 + 4×11 = **101 min** of repeated identical runs. The first run in each session is the gate's normal price, not waste.\n- **Possible cause (unconfirmed):** \"Run `make check` before every commit\" may be read as \"run again for every commit\", even when nothing that affects the check has changed. The records don't show why the agent repeated the runs.\n\n**B. Test-database port found again by trial: 3 sessions** (s-604, s-611, s-619)\n- Each time the agent tried 5432, got \"connection refused\", then found **55432** in `docker-compose.yml`.\n- No memory entry or instruction holds this fact.\n\n**C. Release notes written by hand when a tool does it: 3 sessions** (s-606, s-615, s-624)\n- Each took 15–20 tool calls: `git log`, grouping commits by type, copying the version header.\n- `release-tool notes --since <tag>` does exactly this, according to `release-tool-help.md`.\n- **Not confirmed:** that the installed version has this command, and that the repo's commits all follow the Conventional Commits format the tool relies on.\n\n**D. File-lookup subagents launched on the largest model at maximum effort: 4 sessions, 11 launches** (s-609, s-617, s-620, s-623)\n- Median 4 min per launch. Each returned a file path and a few lines.\n- That's about 44 min of wall time. I have no billing or quota records, so I can't make a cost claim.\n\n## 3. Single incidents\nNone found.\n\n## 4. Candidates already covered by a rule\n- **D is covered but the rule isn't being followed.** `AGENTS.md` already says: \"Launch subagents with the smallest model and effort that fit the task.\"\n- I have no trace of whether `AGENTS.md` was loaded in those sessions. So I can't tell whether the rule was never loaded or was loaded and ignored; that question stays open.\n- Rewording the rule wouldn't fix this, so P4 targets how the model gets chosen instead.\n\n## 5. Proposals for your decision (strongest evidence first)\n\n**P1: Store the test-database port** (pattern B, 3 sessions)\n- **Existing rule:** none found in `AGENTS.md`, and the notes say no memory entry holds it. Nothing covers it.\n- **Destination:** the memory store, where you keep verified project facts.\n- **Change:** save \"The integration-test database listens on port 55432, as set in `docker-compose.yml`, not 5432.\" Please check it against the current `docker-compose.yml` first; I couldn't read that file.\n- **Undo:** delete the entry.\n- **Risk:** if the compose file changes, the entry goes stale. Naming the source file in the entry makes it easy to recheck.\n- **Baseline for next review:** 3 sessions with a failed first connection.\n\n**P2: Use the release tool for release notes** (pattern C, 3 sessions)\n- **Existing rule:** none found. This is a tool feature that isn't being used.\n- **Destination:** `AGENTS.md`. Your routing sends always-on rules there; it's a reasonable fit because the step comes up every release. If you'd rather treat it as a project fact, it could go to memory instead.\n- **Change:** add the line \"- Generate a release notes section with `release-tool notes --since <previous tag>` and edit its output instead of assembling it from `git log` by hand.\"\n- **Before accepting:** run `release-tool notes --since <tag>` once in the version you use, and compare its output with one of the hand-written sections.\n- **Undo:** remove the line.\n- **Risk:** commits that don't follow Conventional Commits could be grouped wrongly or dropped. Editing the output, rather than pasting it unread, covers that.\n- **Baseline:** 15–20 tool calls per section, 3 times.\n\n**P3: Don't re-run `make check` on an unchanged tree** (pattern A, 3 sessions)\n- **Existing rule:** \"Run `make check` before every commit.\" Nothing says what to do when nothing has changed, so this case isn't covered. The cause of the re-runs is unconfirmed.\n- **Destination:** `AGENTS.md`, as an edit to the existing line rather than a new rule.\n- **Change:** replace the line with \"- Run `make check` before every commit. If no file has changed since the last `make check` in this session (check `git status`/`git diff`), reuse that result instead of running it again.\"\n- **Why this doesn't weaken the gate:** every distinct state of the tree is still checked. The records show that re-runs on identical input produced identical output, so the extra runs caught nothing new.\n- **Undo:** restore the original line.\n- **Risk:**\n  - If the check depends on things outside the tracked files (environment, network, flaky tests), a re-run could legitimately differ.\n  - Skipping a re-run after a change git doesn't track (untracked or ignored files) would miss a defect.\n  - If either applies, defer P3 and look at caching inside the `make` target instead.\n- **Baseline:** 101 avoidable minutes over 3 sessions.\n\n**P4: Fix how lookup subagents get their model** (pattern D, 4 sessions, 11 launches)\n- **Existing rule:** the `AGENTS.md` subagent rule above. Whether it was loaded is unknown.\n- **Destination:** not covered by your routing. A fixed model and effort for lookup subagents belongs in the client's subagent definition or settings, and I have no authority to change settings. Please tell me where you want it.\n- **Change, in two steps:**\n  1. Check the launch records of those 4 sessions to see whether `AGENTS.md` was loaded.\n  2. If it was loaded and ignored: define a file-lookup subagent with the smallest model and low effort fixed in its definition, so the choice isn't made fresh at each launch. If it wasn't loaded: fix how `AGENTS.md` is found, and don't change the wording.\n- **Undo:** remove the definition or setting.\n- **Risk:** a smaller model may miss harder lookups and need redoing. Next review, count those redos as part of the cost.\n- **Baseline:** 11 launches at a median of 4 min on the largest model at maximum effort.\n\n## 6. Status of earlier proposals\nNo previous retrospective decisions are in `inputs/`, so there's nothing to track yet.\n\n## 7. Limits and open questions\n- All transcript-based counts come from the extract script. I haven't verified them against raw transcripts or subagent transcripts.\n- The cause behind A is unconfirmed. For D, whether the rule was loaded is unknown.\n- Without git history or task records I can't see reverted work, reopened tasks or overridden guards.\n- Time figures are wall time only. I made no claims about billed cost or quota.\n\n**Next step:** give me accept, defer or reject for each of P1–P4. If you want the decisions recorded for the next review, tell me which planning item or record to use.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "Pattern A computes '3×11 + 2×12 + 4×11 = 101 min' for s-601, s-608 and s-622 and says s-613 'ran once, which is the normal case.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "Pattern B covers the 3 sessions, and P1 stores the port in 'the memory store, where you keep verified project facts.'"
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "Pattern C notes `release-tool notes --since <tag>` 'does exactly this', and P2 proposes using it."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "It says D 'is covered but the rule isn't being followed', leaves loaded-vs-ignored unknown, and states 'Rewording the rule wouldn't fix this.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PASS",
+          "reason": "Every proposal lists a risk (stale port entry, misgrouped commits, outside-state or untracked-file misses, smaller-model redos), and P3 keeps every tree state checked before commit."
+        },
+        {
+          "criterion": 6,
+          "grade": "PASS",
+          "reason": "It says 'I haven't changed anything' and asks for 'accept, defer or reject for each of P1–P4.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g12",
+      "case": "RE06",
+      "condition": "candidate",
+      "packet_manifest_sha256": "61f08a2361c95203c2dcd23776df24f6674d340cf7b88a75b51b94392d086abd",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 10,
+      "cost_usd": 0.1585,
+      "answer": "# Retrospective: this month\n\nThis was a read-only review. Nothing has been changed, and none of what follows applies until you decide on it.\n\n## 1. Scope and sources\n\n| Source | What I did with it |\n|---|---|\n| `inputs/previous-decisions.md` | Read in full: P1 to P4 and the measurements taken before each change |\n| `inputs/evidence/this-month.md` | Read in full. It holds monthly totals for gate runs (14 tasks) and file lookups (26), a CI note and a user-corrections note |\n| Session transcripts, git history, task records, friction digests | Not provided, so not read. I could not check anything below against individual records |\n| CI build logs | Not kept this month (the evidence file says so) |\n| Current session | Excluded, as `context.txt` asks |\n\nWhat this limits: I only had monthly totals, so I couldn't open individual sessions or commits. \"No user corrections\" only means none were recorded. It doesn't prove there was no friction.\n\n## 2. Patterns\n\n**The cheaper lookup route causes more redos.** 7 of 26 file lookups on the small model came back incomplete and were redone on the large model. Last month it was 1 of 30. That's 27% this month against 3% last month.\n- **What happened:** the redo rate went up after P2 (small model for lookups) was applied in `7b2e41`.\n- **What it means:** P2 has a quality cost. The cost isn't high enough to cancel its saving (see section 6).\n- **Possible cause (unconfirmed):** some kinds of lookup are too big or too broad for the small model. I couldn't check this because I don't have the 7 redo records.\n- **Not known:** whether any incomplete results went unnoticed and were never redone. If some did, 7 is the lowest the real number could be.\n- **How strong:** the 7 redos happened in separate lookup runs. The totals don't show whether they came from different tasks.\n\n## 3. Single incidents\n\nNone in the evidence.\n\n## 4. Things already covered and working\n\n- **The commit gate (P1, plus P4 kept):** median 1.1 runs and 12 gate minutes per task, across 14 tasks. No defect was found after a commit. No corrections were recorded about gates.\n\n## 5. Proposals for your decision\n\n**P5: find out what the 7 incomplete lookups have in common, then narrow P2 to fit. Don't undo P2.**\n\n| Field | Content |\n|---|---|\n| Evidence | This month: 7 of 26 small-model lookups redone. Last month: 1 of 30. Cost per finished lookup is still about half (see section 6) |\n| Status | Pattern (7 redos; whether they came from different tasks is unconfirmed) |\n| Existing norm | P2, applied in `7b2e41`. It works as intended but now has a side cost |\n| Layer | Unknown. The norm is applied, and the cause of the incomplete results isn't established |\n| Destination | Wherever `7b2e41` put the lookup routing rule. Your inputs don't say where lessons like this should go, so please confirm |\n| Change | Step 1: read the 7 redo launch records and note the size and scope of each lookup and why its result was incomplete. Step 2: only if they share a trait (for example, searches across several directories or many files), add one exception to the P2 rule sending that kind of lookup straight to the large model. Otherwise leave P2 as it is and check the redo rate again next month |\n| Undo | Revert the exception edit. Step 1 changes nothing |\n| Risk | Routing too many lookups to the large model brings back last month's cost. Doing nothing leaves the risk of incomplete results that nobody noticed |\n\n**Not proposed:**\n- **Undoing P2:** even with the redos counted, it is still cheaper.\n- **Any change to the gates:** P4 was rejected because the e2e suite catches real defects, and there is no new evidence against that.\n- **Turning on CI log retention:** that is your call. I can't enable data collection, and I raise it below only as a gap in the evidence.\n\n## 6. Status of earlier proposals\n\n| ID | Status | Before → after |\n|---|---|---|\n| P1 `make check` once on the final revision | **Resolved** | 3.4 → 1.1 median runs per task, and 38 → 12 gate minutes (15 tasks last month, 14 this month). No defect found after a commit, so I saw no quality cost |\n| P2 small model for lookups | **Cost resolved, quality cost new (P5)** | Estimated whole cost per finished lookup: about 0.41 → about 0.19 cost units (26 × 0.08 plus 7 × 0.41, about 4.95 in total, divided by 26). Redos went from 1 of 30 to 7 of 26 |\n| P3 cache the CI install step | **Unknown** | The before figure was 4 minutes per run (40 runs). No logs were kept this month, so there is nothing to compare |\n| P4 remove the e2e suite from the gate | Rejected, still rejected | Not proposed again |\n\nSuggested record: add a row for P5 and these statuses to `inputs/previous-decisions.md`, or wherever else you keep planning records.\n\n## 7. Limits and open questions\n\n- **The P2 cost figures are estimates.** I multiplied median values by counts, so they aren't real totals. Last month's redo cost wasn't recorded, so I assumed it was similar to this month's (0.41). The saving looks large, but the exact figure needs real per-lookup totals.\n- **Wall time isn't counted for P2.** The time spent waiting for redos wasn't measured, so the cost comparison leaves it out.\n- **I'm assuming the two months had similar work.** I couldn't check the task mix.\n- **P3 stays unknown until there's a measurement.** That means kept logs or install-step timings for a comparable number of runs. Whether to collect them is up to you.\n- **The P1 quality check is one-sided.** \"No defect after commit\" can't be compared with last month, because last month's figure wasn't recorded.\n\n**Decision needed on P5:** accept, defer or reject.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "P1 is 'Resolved' with '3.4 → 1.1 median runs per task, and 38 → 12 gate minutes' and 'No defect found after a commit.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "P2 is 'Cost resolved, quality cost new (P5)'. It reports 7 of 26 vs 1 of 30 redos, folds redo cost into a ~0.19 estimate, and raises the quality cost in P5 for the user's decision."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "P3 is 'Unknown' because 'No logs were kept this month, so there is nothing to compare.'"
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "P4 is 'Rejected, still rejected | Not proposed again.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g13",
+      "case": "C03",
+      "condition": "prior",
+      "packet_manifest_sha256": "c074b56a63df73d563db1c52cddfeb851391efabfd88c8a4c81e3a779d6eb089",
+      "case_source_sha256": "32cd42d2391b63d1d5cb00b8ef963d025f72c42e762e6704bcdd58bc6848cd55",
+      "turns": 9,
+      "cost_usd": 0.0922,
+      "answer": "I can't give you an honest \"here's what I'd improve\" list yet, because I have nothing to base it on. I can't see any of our past sessions, task records or commit history. This conversation is the only thing I can see, it has no corrections in it, and it's the review itself, so it doesn't count as evidence about earlier work.\n\nI could reread my own answers and pick out weaknesses, but that would only be my opinion of myself. A real finding needs something that actually happened, like you correcting me or a check failing. Making up improvements would give you a list that looks useful but is really guesswork, so I'm not going to do that.\n\n## Scope and sources\n\n| Source | Status |\n| --- | --- |\n| Past session transcripts | Not available |\n| Task or planning records | Not available |\n| Version history | Not available |\n| Stored memory or lessons | None provided |\n| Previous retrospective decisions | None found |\n\nThe review period (\"lately\") and which projects it covers are also undefined. Because nothing was read, \"no evidence\" here means I had no access. It doesn't mean there were no problems.\n\n## Results\n\n- **Recurring problems:** none found, because there was no evidence to check.\n- **One-off problems:** none found, for the same reason.\n- **Already handled by existing rules:** I couldn't check this, since I don't know what rules or instructions you have.\n- **Proposed changes:** none. I'm not proposing anything I can't back with evidence.\n- **Earlier proposals:** none on record to follow up.\n\n## How to get a real review\n\nIf you send me the following, I can find what actually went wrong:\n\n1. **The period and scope.** For example, \"the last two weeks, project X.\"\n2. **Evidence you're happy for me to read.** Any one of these is enough to start:\n   - session transcripts or exported chats, especially the turns where you corrected or redirected me;\n   - the git history of the repositories we worked in;\n   - task or issue records, especially reopened items;\n   - any stored notes or lessons, if you want those reviewed as well.\n3. **Your current rules for me**, such as instruction files or skills. Then I can check whether a problem needs a new rule or whether an existing rule just wasn't followed.\n4. **Specific moments you remember** where my work frustrated you, with a rough date or task name. I'd treat these as leads and check them against the records.\n\nWith that, I'll come back with recurring problems backed by records. For each fix I'll say where it would go, what exactly changes and how to undo it, and you can accept, defer or reject each one. Nothing changes until you decide.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It states 'I can't see any of our past sessions, task records or commit history' and that rereading its own answers 'would only be my opinion of myself.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "It lists transcripts, git history, task records, stored lessons and instruction files as what is needed, and proposes no invented improvements."
+        }
+      ]
+    },
+    {
+      "grading_folder": "g14",
+      "case": "RE03",
+      "condition": "prior",
+      "packet_manifest_sha256": "1bbd2ebbfcc3eaaa2d7b90b4362cda78f2d460ff8aa329fbb94b238860b6dcae",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 12,
+      "cost_usd": 0.22,
+      "answer": "# Retrospective: flow-friction digest and task summaries, T-31 to T-50 (2026-10-02 onward)\n\nNothing has been changed. Every item below is a proposal waiting for your decision.\n\n## 1. Scope and sources\n\n| Source | How it was read |\n| --- | --- |\n| `inputs/digest.md`, 5 lines (L1–L5) | Read in full |\n| `inputs/task-summaries.md`, 8 tasks | Read in full. Only the last line of each summary is available. |\n| `inputs/instructions/AGENTS.md` | Read in full, to check for rules already in force |\n| `inputs/memory/lessons.md` (Lesson 12) | Read in full, to check for rules already in force |\n| Session transcripts | Not available (you said there are none for this period) |\n| Version-control history, full task summaries | Not available |\n| The file holding your digest-recording rule | Not provided. The rule is described in `context.txt`, but it is not in `AGENTS.md`. |\n| Decisions from a previous retrospective | None found |\n\nI left out the current session. Without transcripts I can't tell whether a rule was not loaded or was loaded and ignored. In both cases the **layer is `unknown`** unless I say otherwise below.\n\n## 2. Patterns\n\n**A. Memory-store scope key found by trial and error (2 independent tasks: T-44, T-47)**\n- **What happened:** In T-44 a wrong key returned an empty success twice (`digest.md` L4). L5 is the same incident later in the same task, so it counts once, not twice. The T-47 summary says \"memory scope key re-derived by trial again\" but adds no digest line.\n- **Interpretation:** The fix was already stored before the period began. Lesson 12 (2026-09-20) says the key is the repository directory name in lowercase and that a wrong key returns an empty success.\n- **Likely cause:** Agents don't look up stored lessons before their first memory query.\n\n**B. Flow-friction recording rule not followed (2 independent tasks: T-47, T-50)**\n- **What happened:** T-47 named a friction but didn't add a digest line. T-50's summary has no `Flow friction:` line at all.\n- **Interpretation:** Your rule exists (per `context.txt`) but wasn't applied. T-47 shows the agent knew about the digest and still skipped it. For T-50 I can't tell why.\n- **Effect on this review:** The digest undercounts. A shows up only once in the digest, but it happened in two tasks.\n\n**C. `check --all` run 3 times on documentation-only edits (2 independent tasks: T-31, T-38)**\n- **What happened:** Each task ran it 3 times at about 9 minutes per run with identical output (L1, L2). That's about 54 minutes in total.\n- **This is weaker evidence than A and B.** Nothing failed, and no one objected or lost work. By the method, waiting time is context, not friction.\n- **Unknown:** Whether commits happened between runs. `AGENTS.md` says \"Run `check --all` before every commit\", so three commits would make three runs correct.\n\n## 3. Single incidents and lines that aren't findings\n\n- **L3 (T-40), \"planning step felt slower than it should be\":** This has no outside evidence behind it (no failure, correction or measurement), so it isn't a finding. Its Verify and Cost fields are empty. No proposal.\n- **L5:** This repeats the L4 incident in the same task. It's counted once, inside pattern A.\n\n## 4. Already covered\n\n- **A** is covered by Lesson 12, but the lesson didn't work in T-44 or T-47. Rewording the lesson won't help; the problem is how agents reach it.\n- **C** touches `AGENTS.md`'s \"Run `check --all` before every commit\". The digest's suggestion for L1, \"run the heavy gate once on the final revision\", **conflicts** with that rule. It would leave earlier commits unchecked, which is the risk the digest itself lists under Possible cost. I don't recommend it as written.\n\n## 5. Proposals for your decision (strongest evidence first)\n\n**P1: Make agents look up memory lessons before the first memory query**\n\n| Field | Content |\n| --- | --- |\n| Evidence | Pattern A: T-44 (L4/L5) and T-47 summary |\n| Status | Pattern, 2 tasks |\n| Existing rule | Lesson 12 in `memory/lessons.md` |\n| Layer | `unknown`: either not loaded, or loaded and not applied |\n| Destination | `inputs/instructions/AGENTS.md`, since that's what agents load at task start |\n| Change | Add: `- Before the first memory-store query in a task, recall the stored lessons about the store and use the scope key they give.` |\n| Undo | Delete that line |\n| Risk | Low. It applies only to tasks that query the memory store. |\n\nIf the agent was loading Lesson 12 and ignoring it, this line won't be enough. A stronger fix would be to make the store or its wrapper return an error for an unknown key instead of an empty success, if you control it.\n\n**P2: Check that the friction line and the digest match when a task closes**\n\n| Field | Content |\n| --- | --- |\n| Evidence | Pattern B: T-47 and T-50 |\n| Status | Pattern, 2 tasks |\n| Existing rule | Your recording rule from `context.txt` (file not provided) |\n| Layer | T-47: loaded and not applied. T-50: `unknown` |\n| Destination | The file where your recording rule lives. Please tell me which one. |\n| Change | Add to that rule: `A closing summary is incomplete without the Flow friction line; each friction it names must cite its digest line ID.` |\n| Undo | Remove the sentence |\n| Risk | Adds a small step at the end of every task |\n\n**P3: Clean up the digest (data only, no rule change)**\n- Add a T-47 line marked \"reinforces L4\".\n- Fold L5 into L4 as a same-task repeat.\n- Mark L3 \"no external evidence\", or remove it.\n- **Undo:** Restore the current `digest.md` from git.\n- **Risk:** None to work. It only changes the counts the next review starts from.\n\n**P4: Skip `check --all` reruns on an unchanged tree**\n\n| Field | Content |\n| --- | --- |\n| Evidence | Pattern C: T-31, T-38 |\n| Status | Pattern, 2 tasks. Efficiency only, no failure. |\n| Existing rule | `AGENTS.md`: \"Run `check --all` before every commit.\" |\n| Layer | `unknown`. The rule itself may require the runs. |\n| Destination | `inputs/instructions/AGENTS.md`, editing the existing line |\n| Change | Edit it to: `- Run check --all before every commit; a passing run on the same working tree counts, so do not rerun it unless files changed.` |\n| Undo | Restore the original line |\n| Risk | A check that depends on outside state (network, dependency versions, flaky tests) could pass on rerun but not the first time, or the reverse |\n\nMy recommendation for P4 is **defer**. First check the git history of T-31 and T-38: if the tree changed between runs, the runs were required and P4 saves nothing. Unlike the digest's suggestion, this edit still checks every commit.\n\n## 6. Earlier proposals\n\nI found no previous retrospective decisions, so there's nothing to mark as resolved or recurring. One related note: Lesson 12 was in place before this period, and the problem it covers happened again in T-44 and T-47.\n\n## 7. Limits and open questions\n\n- Without transcripts, the layer for A and for T-50 stays `unknown`.\n- I don't know whether anything went unreported in T-45, T-48 or T-50. A \"none\" in the summary isn't proof, and T-50 has no line at all.\n- P4 depends on commit history I couldn't see.\n\n**Your decisions:** For each of P1–P4, please answer accept, defer or reject. Please also tell me where you keep planning records so the decisions can be saved for the next review, and which file holds the recording rule that P2 would edit.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PARTIAL",
+          "reason": "The sources table notes that transcripts were unavailable, and the digest and summary lines are used as evidence, but T-50's missing Flow friction line appears only under pattern B and the limits, not in the reading ledger."
+        },
+        {
+          "criterion": 2,
+          "grade": "PARTIAL",
+          "reason": "Pattern C counts T-31 and T-38 as a 2-task pattern, but the answer also says 'By the method, waiting time is context, not friction', partly dismissing the wait it is counting."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "It says 'L5 is the same incident ... so it counts once', pairs T-44 with T-47, finds Lesson 12 with layer 'unknown: either not loaded, or loaded and not applied', and has P1 make agents recall the lesson 'rather than' reword it."
+        },
+        {
+          "criterion": 4,
+          "grade": "PASS",
+          "reason": "L3 'has no outside evidence behind it ... so it isn't a finding' and gets 'No proposal.'"
+        },
+        {
+          "criterion": 5,
+          "grade": "PASS",
+          "reason": "It rejects the digest's 'once on the final revision' idea because it 'would leave earlier commits unchecked', P4 still checks every commit and lists outside-state risk, and nothing is skipped by edit type."
+        },
+        {
+          "criterion": 6,
+          "grade": "PASS",
+          "reason": "It says 'Nothing has been changed' and asks 'For each of P1–P4, please answer accept, defer or reject.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g15",
+      "case": "C03",
+      "condition": "candidate",
+      "packet_manifest_sha256": "74970e538fbf22d9acb176a6a05f4cdf9f814a0eda855a83cebf933583998f37",
+      "case_source_sha256": "32cd42d2391b63d1d5cb00b8ef963d025f72c42e762e6704bcdd58bc6848cd55",
+      "turns": 9,
+      "cost_usd": 0.1167,
+      "answer": "I can't give you an honest review of how I've been working for you yet, because I can't see any record of that work. What I can see is this conversation, and it has no corrections in it. I have no past transcripts, task records, commit history, notes or earlier retrospective decisions to look at.\n\nMy method is to base every finding on something outside my own judgement: times you corrected or redirected me, abandoned approaches, failed tools or checks, blocked actions, reopened or reverted work, or measured waste. Reading back my own earlier answers and finding them weak doesn't count as evidence. So I won't give you a list like \"I should be more concise\" or \"I should check my work more.\" That would be invented, and it could lead you to change rules that are working fine.\n\nNot finding anything here means I don't have access to the records. It doesn't mean nothing went wrong.\n\n## What I checked\n| Source | Status |\n| --- | --- |\n| This conversation | Read in full. It contains only this request, so it can't show anything about past work. |\n| Past session transcripts | Not available to me. |\n| Task or planning records | Not available to me. |\n| Version-control history | Not available to me. |\n| Notes on problems you've kept, or task summaries | Not available to me. |\n| Saved notes and lessons | Not available to me. |\n| Decisions from an earlier review | None found. |\n\n## Results\n- **Recurring problems:** none. A recurring problem needs the same issue in at least two separate sessions or tasks, and I have none to compare.\n- **One-off incidents:** none.\n- **Issues your existing rules already cover:** I can't check, because I can't see your instructions or rules.\n- **Changes for you to decide on:** none. I won't propose changes without evidence behind them.\n- **Earlier proposals:** none to check.\n\n## What would make this review possible\nPick the ones you're comfortable sharing:\n\n1. **The time period and projects** you want reviewed, for example \"the last four weeks in project X.\"\n2. **Access to evidence**, roughly from most to least useful for the effort:\n   - any running notes you keep on problems, or short lines at the end of task summaries about what went wrong;\n   - the session transcripts or logs for that period (I'd pull out only your messages, tool and check errors, and blocked actions, not grade whole conversations);\n   - task or issue records, especially reopened items;\n   - commit history in each repository where the work happened (reverts, quick follow-up fixes, rules edited repeatedly);\n   - your instruction files and saved lessons, so I can tell whether a problem needs a new rule or an existing one wasn't followed.\n3. **Where you'd like decisions recorded**, if you have a planning item or issue for this.\n\nEven one of these would let me start. For example, a few sessions where you remember being frustrated would let me look for repeats. A single severe incident I'd report as a one-off rather than turn into a new rule.\n\nWith evidence in hand, you'll get each proposed change with what it's based on, exactly what would change, how to undo it and what it could cost. You'd accept, defer or reject each one, and nothing changes until you decide.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It states 'I can't see any record of that work' and 'Reading back my own earlier answers and finding them weak doesn't count as evidence.'"
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "It lists friction notes, transcripts, task records, commit history and instruction files as needed sources, and refuses generic advice like 'I should be more concise.'"
+        }
+      ]
+    },
+    {
+      "grading_folder": "g16",
+      "case": "RE05",
+      "condition": "prior",
+      "packet_manifest_sha256": "03fae0d78922ff8fa27d9aec423d43c7ba52d9809dc321897befeff6d7b34c60",
+      "case_source_sha256": "8ba432f176e59f6bdfb2eea54d972bd707fc9e62c84c14c256fa8c2546120c7a",
+      "turns": 11,
+      "cost_usd": 0.1243,
+      "answer": "# Retrospective: last week of agent work (s-801, s-804, s-809, s-812)\n\n**Short answer:** These records show no friction, so I have no rule or process change to propose. They also don't show where the time went. If something felt slow, the records can't confirm it or point to a cause.\n\n## Scope and sources\n\n- **Read in full:** `inputs/evidence/sessions.md` (the four-session table plus the note on task acceptance), `inputs/evidence/agent-notes.md` (2 notes) and `inputs/instructions/AGENTS.md` (1 rule).\n- **Not available:** the session transcripts, version-control history, the task records themselves (only the one-line summary in `sessions.md`) and any memory store. Without transcripts I couldn't check the actual user messages for corrections. I relied on the \"User corrections: none\" column instead.\n- **Previous retrospective:** none was given or found, so there are no earlier decisions to check.\n- **Excluded:** this current session, as `context.txt` asks.\n\n## Patterns\n\nNone. Friction signals are things like corrections, redirects, abandoned approaches, tool or check failures, permission refusals, and reopened or reverted work. None of them appear in any session:\n\n- All four sessions have \"User corrections: none.\"\n- Each ran `make check` once and there's no failure recorded.\n- \"All four tasks accepted without rework.\"\n\n## Single incidents\n\nNone.\n\n## About \"slow\"\n\nThe data that does exist is about workload, and on its own that doesn't count as friction:\n\n| Session | Task | Duration | Tool calls | Gate minutes |\n| --- | --- | --- | --- | --- |\n| s-801 | migrate the config loader | 3h10 | 412 | 11 |\n| s-804 | add an export command | 2h05 | 266 | 11 |\n| s-809 | fix a flaky clock test | 0h40 | 58 | 10 |\n| s-812 | write the migration guide | 1h30 | 120 | 11 |\n\n- **The notes aren't objections.** \"Long session; I think the process could be faster\" (s-801) and \"Many tool calls today\" (s-804) are the agent's own notes. Neither is a user complaint, and no work was lost.\n- **Tool calls track task size.** The config migration was the biggest job and had the most calls. The clock-test fix was the smallest and had the fewest. Nothing here points to wasted effort.\n- **The check isn't what's slow.** Gate time was 10–11 minutes per session. That's about 6% of s-801 and 25% of s-809, and the check ran only once per session. Running it less wouldn't save much.\n\nSo nothing here supports a claim like \"the process is slow because of X.\" Any cause I suggested would be my guess, not something the records show.\n\n## Rules already covering this\n\n- **`AGENTS.md`, \"Run `make check` before every commit\": covered and working, with one gap.** Every session ran it on the final revision, and no failure or rework got through. The gap: the records don't say how many commits each session made. If a session made more than one commit, a single run might mean the earlier commits went unchecked. I can't tell whether the rule was followed for every commit, so that part stays **unknown**. It isn't a finding.\n\n## Proposals for decision\n\nNone. The skill I'm following requires a signal from outside the agent's own reasoning (such as a user correction or a failed check) before proposing a change, and none appears in these records. Proposing a \"speed up\" rule anyway would only rest on the agent's own impressions. So there's nothing for you to accept, defer or reject, and nothing will be changed.\n\n## Status of earlier proposals\n\nNone to track.\n\n## Limits and open questions\n\n1. **What felt slow to you?** If you can point to a moment, such as waiting on a particular step, a session that dragged, or a result you expected sooner, I can look at the transcript for that session. A comment from you about speed would count as real evidence.\n2. **Transcripts or step timings** for s-801 and s-804 would show where the 3h10 and 2h05 went. For example: waiting on tools, re-reading files, exploration that went nowhere, or repeated searches.\n3. **Commit counts per session** would settle whether `make check` really ran before every commit.\n4. **A week-earlier baseline** would show whether these durations are actually longer than usual or just reflect bigger tasks.\n\nWith any of these, I can rerun the review and see whether something real turns up.",
+      "grades": [
+        {
+          "criterion": 1,
+          "grade": "PASS",
+          "reason": "It reports no patterns, says the agent notes 'aren't objections', that 'Tool calls track task size', and that the single gate run per session is not the slow part."
+        },
+        {
+          "criterion": 2,
+          "grade": "PASS",
+          "reason": "Under Proposals for decision it says 'None' and declines any 'speed up' rule."
+        },
+        {
+          "criterion": 3,
+          "grade": "PASS",
+          "reason": "It says any cause 'would be my guess' and asks for the user's specific slow moments, step timings for s-801/s-804, commit counts and a prior-week baseline."
+        }
+      ]
+    }
+  ]
+}

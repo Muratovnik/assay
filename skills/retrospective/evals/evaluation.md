@@ -49,6 +49,76 @@ case reproduced the failure to look for norms that are not handed over; a new
 case should place the norm in the repository rather than the inputs. C01 and
 C07 are now exposed regression cases.
 
+## Efficiency-signal pilot — 2026-10-29
+
+The method had counted only failures and corrections, and it called waiting
+context rather than friction. The candidate adds a class of efficiency and
+capability signals that need a measured avoidable cost: a wait, a step repeated
+by hand, a fact found again, a model or effort that did not fit, cache misses
+and a tool feature that covers manual work. It also asks for an aggregate before
+a cost or quota conclusion. Digest lines and the friction lines of task
+summaries become candidate sources. Each proposal names what it could cost in
+quality or safety, a gate is weakened only with evidence that it catches no real
+failures, and an accepted efficiency change is tracked by its measurement before
+and after.
+
+Six new public cases test it:
+
+| Case | Defect it detects | Nearby valid behavior it must allow |
+| --- | --- | --- |
+| RE01 | Dismissing measured waste without a user complaint | Keeping the commit gate while removing repeated identical runs |
+| RE02 | Adopting a cost setting from three chosen session pairs | Deferring until the period's records are aggregated |
+| RE03 | Ignoring digest and summary lines, or counting a wait as context | Dropping a line that records only an impression |
+| RE04 | Moving a slow gate that caught real defects to a weekly run | Repairing a gate whose failures were all false positives |
+| RE05 | Inventing friction from long sessions and many tool calls | Naming the measurements that would locate a cost |
+| RE06 | Calling a cheaper route resolved while its results are redone | Marking an unmeasured change unknown |
+
+RE01–RE05 ran first on the 0.33.0 bytes, before the candidate was written.
+RE06 was held back until the candidate was final. C03 and C07 were rerun as
+regressions. Each case ran once per condition from a prepared packet, through
+headless Claude Code 2.1.304 with `--safe-mode --restricted --strict-mcp-config`.
+That run loads no CLAUDE.md, installed skill, hook or MCP server and keeps the
+file tools inside the packet; a probe confirmed both. The executor was Opus 5.5
+at medium effort with `Read`, `Glob` and `Grep`, and every run read the method
+and its three references. One grader, Opus 5.5 at high effort under the same
+isolation, graded all sixteen answers. It read only the prompt, inputs, answer
+and criteria in shuffled folders, not the method, the manifest or the condition
+key.
+
+| Case | 0.33.0 | Candidate |
+| --- | --- | --- |
+| RE01 | 5 pass, 1 partial | 6 pass |
+| RE02 | 4 pass | 4 pass |
+| RE03 | 4 pass, 2 partial | 6 pass |
+| RE04 | 4 pass, 1 partial | 4 pass, 1 partial |
+| RE05 | 3 pass | 3 pass |
+| RE06 | 4 pass | 4 pass |
+| C03 | 2 pass | 2 pass |
+| C07 | 3 pass | 3 pass |
+
+The clearest difference is RE03. Under 0.33.0 the executor counted the repeated
+gate runs as a pattern and then weakened them: "By the method, waiting time is
+context, not friction." The candidate counted the same runs with their cost and
+held a doc-only skip back until there was evidence that the gate catches nothing
+there. On RE01 and RE04, 0.33.0 left one proposal without a quality cost. On
+RE04 the candidate's speed-up named its cost and ruled out running only the
+tests for changed code. The grader marked it partial on the first criterion: it
+rejected the weekly run because the gate caught a data-loss defect, but did not
+say outright that such defects would reach the main line. Without the method's
+help, 0.33.0 already aggregated the cost pairs in RE02, counted the redos in
+RE06 and refused invented friction in RE05, so those cases sit at the ceiling
+for this executor. Executor cost was 1.21 USD for 0.33.0 and 1.29 USD for the
+candidate across eight runs each.
+
+This is one run per cell with one executor configuration and one grader. It can
+show the contradiction the old sentence caused and the absence of a regression
+on these cases; it does not measure recall of real friction or any saving. The
+[cases](efficiency-cases.json), [criteria](efficiency-rubric.json),
+[exposure metadata](efficiency-case-metadata.json) and
+[evidence](efficiency-evidence.json) are now exposed regression cases; RE06,
+the held-back case, is exposed too. The evidence holds answers, grades, packet
+digests and method hashes.
+
 ## Limits
 
 These files establish input and rubric structure only. They do not run a model,

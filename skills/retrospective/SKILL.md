@@ -25,14 +25,18 @@ it away. A review the user scopes to stored memory or lessons uses
 
 Build candidates from signals outside the model's own reasoning: user
 corrections and redirects, abandoned approaches, tool, hook and check failures,
-permission refusals, reopened or reverted work. Re-reading your own earlier
-answers and finding them weak is not evidence; without an external signal, there
-is no finding.
+permission refusals, reopened or reverted work. Measured costs of the working
+system count too: a wait, a step repeated by hand, a fact found again, a model
+or effort that did not fit the task, cache misses, or manual work a client or
+tool feature already does. Re-reading your own earlier answers and finding them
+weak is not evidence, and neither is a sense that work could be faster; without
+an external signal, there is no finding.
 
 Read each source by [evidence sources](references/evidence-sources.md): confirm
 the scope key returns known records, aggregate before sampling, and keep a list of
-what was read, sampled and not read. An empty result is a scope or access
-question before it is an absence of problems.
+what was read, sampled and not read. The owner's friction digest and the friction
+lines of task summaries are candidate sources alongside transcripts. An empty
+result is a scope or access question before it is an absence of problems.
 
 ## Form candidates
 
@@ -40,9 +44,11 @@ Classify signals by [friction signals](references/friction-signals.md). Count on
 incident once, however many messages repeat it. A **pattern** needs the same
 friction in at least two independent sessions or tasks; three or more is a strong
 pattern. A severe incident seen once is reported as an **incident**: show it, do
-not promote it into a rule. Each candidate cites its records — session, message
-time, commit, task or memory entry — and separates the observation, its
-interpretation and a cause hypothesis.
+not promote it into a rule. A cost or quota claim needs an aggregate over the
+period's sessions; a few sessions, however convincing, are a hypothesis. Each
+candidate cites its records — session, message time, commit, task or memory
+entry — and separates the observation, its interpretation and a cause
+hypothesis.
 
 ## Reconcile with what is already in force
 
@@ -65,7 +71,9 @@ trace of what was loaded and applied, the layer stays `unknown`.
 
 Write proposals by [proposals and tracking](references/proposals-and-tracking.md):
 evidence, layer, destination chosen by the owner's own routing instructions, the
-exact change and how to undo it. Present them for a decision per item — accept,
+exact change, how to undo it and what it could cost in quality or safety. Weaken
+a gate only with evidence that it catches no real failures. Present them for a
+decision per item — accept,
 defer or reject. Apply an accepted item only through the owner's normal tools and
 gates, one item at a time; a rejected or deferred item changes nothing. Record the
 decisions where the owner keeps planning records so the next review can check
@@ -73,7 +81,8 @@ them. Save only confirmed lessons to memory, never raw signals.
 
 Check the previous retrospective's accepted items: **resolved** when the friction
 stopped in the new evidence, **recurring** when it returned, **unknown** when the
-evidence cannot tell.
+evidence cannot tell. For an efficiency change, compare the measurement before
+and after it on comparable work, counting any rework it caused.
 
 ## Deliver
 

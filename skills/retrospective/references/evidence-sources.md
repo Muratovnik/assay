@@ -45,6 +45,21 @@ log does not include its children's.
 Reopened items, guard overrides, blocked reasons and closing summaries that admit
 an omission are signals. An item that took long is not a signal by itself.
 
+## Friction digests and summary lines
+
+Some owners keep a digest of working-system friction, or end each task summary
+with a line naming the friction it met. Read both before transcripts: they are
+small and already point to their evidence. Each line is a candidate, not a
+finding, on equal terms with a signal found in a transcript:
+
+- keep a line only if it names an external signal; drop one that records only an
+  impression, such as "felt slow";
+- count lines from one task as one incident, and a line that reinforces an
+  earlier one as a separate occurrence only when it comes from another task;
+- open a transcript or record only to confirm a line that decides a proposal;
+- a summary that says no friction shows only that nothing was recorded, and a
+  summary without the line is a gap in the reading ledger.
+
 ## Memory stores
 
 Stored lessons and notes are evidence of what was learned, not of what

@@ -8,14 +8,14 @@ A proposal is a decision the user can make in one reading. A direction such as
 | Field | Content |
 | --- | --- |
 | ID | Stable within this review, for example `P3`, reused when tracking it later |
-| Evidence | Record pointers and counts: which sessions, tasks or commits |
+| Evidence | Record pointers and counts: which sessions, tasks or commits; for an efficiency change, the measurement before it, for the next review to compare |
 | Status | Pattern (with count) or single incident |
 | Existing norm | The norm found during reconciliation, or "none found" with where you searched |
 | Layer | absent, not loaded, loaded and not applied, check missed, conflicting, or unknown |
 | Destination | The place the owner's own instructions route this kind of lesson to |
 | Change | The exact text, check, setting or procedure step to add, edit or retire |
 | Undo | How to revert it if it does harm |
-| Risk | A legitimate case the change could wrongly block |
+| Risk | A legitimate case the change could wrongly block, and what it could cost in quality or safety |
 
 Choose the smallest change for the layer:
 
@@ -30,6 +30,13 @@ Choose the smallest change for the layer:
 
 Prefer editing or retiring an existing entry over adding a near-duplicate.
 Never rewrite a whole instruction file to apply one proposal.
+
+A change made to save time or cost must say what it could lose: a defect a
+check would have caught, a fact taken stale, a weaker result that has to be
+redone. Weakening a gate — removing it, skipping it for some changes, running
+it less often or narrowing it — needs evidence that it catches no real failures,
+for example that all its failures in the period were false positives. A slow
+gate that caught a real defect is made faster, not weaker.
 
 ## Let the user decide
 
@@ -57,3 +64,10 @@ At the start of a review, read the previous decisions. For each accepted item:
   or the situation did not arise.
 
 Absence of complaints is not resolution unless the situation actually arose.
+
+For an accepted efficiency change, compare the measurement recorded before it
+with the same measurement in the new period, on comparable work. Count the whole
+cost of completed work, including redos and rework the change caused: a lower
+unit price with more redone results is not resolved, and a new quality cost is a
+candidate in its own right. Without a comparable measurement after the change,
+the status is unknown.

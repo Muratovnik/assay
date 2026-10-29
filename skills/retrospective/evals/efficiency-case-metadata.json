@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "cases": [
+    {
+      "id": "RE01",
+      "group": "RE-signals",
+      "purpose": "challenge",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "Efficiency signals with external evidence and no user complaint: repeated identical gate runs, a re-derived fact, a manual step a tool command covers, and an oversized model for lookups.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "RE02",
+      "group": "RE-cost",
+      "purpose": "challenge",
+      "source": "Separately authored synthetic fixture, 2026-10-29. RE02 follows an observed case in which per-session cache savings did not hold in the aggregate.",
+      "rationale": "A cost claim from hand-picked session pairs must not become a default; cost and quota need an aggregate.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "RE03",
+      "group": "RE-digest",
+      "purpose": "challenge",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "Digest lines and Flow friction lines are candidate evidence; same-task lines count once and an unsupported line is rejected.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "RE04",
+      "group": "RE-gates",
+      "purpose": "challenge",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "A slow gate that catches real defects is kept; a gate that only produced false positives may be repaired or relaxed with that evidence.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "RE05",
+      "group": "RE-control",
+      "purpose": "should-not-fire",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "Long sessions, many tool calls and required gate time without a measured avoidable cost are not friction.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "RE06",
+      "group": "RE-tracking",
+      "purpose": "challenge",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "Before-and-after tracking of accepted efficiency changes, including a quality cost and missing measurements.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

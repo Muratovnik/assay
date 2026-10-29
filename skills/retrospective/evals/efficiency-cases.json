@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "cases": [
+    {
+      "id": "RE01",
+      "prompt": "Run a retrospective of my agent work over the last two weeks from the records in inputs/ and tell me what to change.",
+      "context": "Read-only review. The current session is not part of the evidence. The owner routes always-on rules to instructions/AGENTS.md and verified project facts to the memory store.",
+      "files": {
+        "instructions/AGENTS.md": "# Project instructions\n\n- Run `make check` before every commit.\n- Launch subagents with the smallest model and effort that fit the task.\n",
+        "evidence/gate-runs.md": "| Session | Task | `make check` runs | Minutes each | Source changed between runs |\n| --- | --- | --- | --- | --- |\n| s-601 | T-12 | 4 | 11 | only before run 1 |\n| s-608 | T-15 | 3 | 12 | only before run 1 |\n| s-613 | T-17 | 1 | 11 | - |\n| s-622 | T-21 | 5 | 11 | only before run 1 |\n\nRuns on unchanged source repeated the previous result each time (same outcome and output).\n",
+        "evidence/session-notes.md": "Extracted from the period's transcripts by the review script. User messages in the period contain no corrections or complaints.\n\n- s-604, s-611, s-619: before running integration tests the agent first tried port 5432, got \"connection refused\", then read docker-compose.yml and found the test database on port 55432. No memory entry or instruction records the port.\n- s-606, s-615, s-624: the agent wrote the release notes section by hand: listed merged commits with `git log`, grouped them by type and copied the version header from the previous section. Each took 15-20 tool calls.\n- s-609, s-617, s-620, s-623: file-lookup subagents (\"find where X is defined\") were launched with the largest model at maximum effort; 11 such launches, median 4 minutes each, each returned a file path and a few lines.\n",
+        "tools/release-tool-help.md": "release-tool notes --since <tag>\n    Generate a release notes section from Conventional Commit subjects since <tag>, grouped by type, with the version header.\n"
+      }
+    },
+    {
+      "id": "RE02",
+      "prompt": "Retrospective of the last two weeks, please. Evidence is in inputs/. I mainly want to know whether to adopt the settings change suggested there.",
+      "context": "Read-only review. The current session is not part of the evidence.",
+      "files": {
+        "evidence/settings-suggestion.md": "Note left by the agent at the end of session s-719 (2026-10-23):\n\nWorker subagents in s-707, s-712 and s-719 used a 1-hour prompt-cache lifetime instead of the default 5 minutes. Each of these sessions cost less than a comparable task before the change (s-688, s-695, s-701). Suggest making the 1-hour cache lifetime the default for all worker subagents.\n",
+        "evidence/usage.md": "Usage records exist for 46 sessions in the period (cost, cache reads, cache writes, worker count and cache lifetime per session). Only the sessions named in the note were exported for this review.\n\n| Session | Task | Workers | Cache lifetime | Cost (units) | Cache read share |\n| --- | --- | --- | --- | --- | --- |\n| s-688 | refactor parser | 6 | 5 min | 41 | 52% |\n| s-695 | add export command | 4 | 5 min | 30 | 57% |\n| s-701 | fix date handling | 2 | 5 min | 12 | 49% |\n| s-707 | refactor lexer | 3 | 1 hour | 25 | 81% |\n| s-712 | add import command | 4 | 1 hour | 27 | 78% |\n| s-719 | fix time zones | 2 | 1 hour | 11 | 84% |\n\nThe 1-hour lifetime bills cache writes at a higher rate than the 5-minute lifetime.\n"
+      }
+    },
+    {
+      "id": "RE03",
+      "prompt": "Review the flow-friction digest and the task summaries in inputs/ and propose changes. There are no transcripts for this period.",
+      "context": "Read-only review. The current session is not part of the evidence. The owner's instructions ask agents to record working-system friction that has external evidence as one digest line, and to end each task summary with `Flow friction:` followed by `none` or the digest lines that task added.",
+      "files": {
+        "instructions/AGENTS.md": "# Project instructions\n\n- Run `check --all` before every commit.\n",
+        "digest.md": "# Flow friction digest\n\n| Line | Date | Task | Signal and evidence | Layer | Hypothesis | Verify | Possible cost |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| L1 | 2026-10-02 | T-31 | `check --all` ran 3 times, 9 min each, on a documentation-only edit; identical output each time | project gate | Run the heavy gate once on the final revision | Count gate runs per task | A change made after the last run goes unchecked |\n| L2 | 2026-10-09 | T-38 | Reinforces L1: 3 runs of 9 min on a documentation-only diff, identical output | project gate | as L1 | as L1 | as L1 |\n| L3 | 2026-10-11 | T-40 | The planning step felt slower than it should be | planning | Use a lighter plan template | - | - |\n| L4 | 2026-10-14 | T-44 | Re-derived the memory store's scope key by trial; a wrong key returned an empty success twice | memory | Recall the stored lesson first | Count empty-key queries | none |\n| L5 | 2026-10-15 | T-44 | Same as L4, later in the same task | memory | as L4 | as L4 | as L4 |\n",
+        "task-summaries.md": "| Task | Last line of the closing summary |\n| --- | --- |\n| T-31 | Flow friction: L1 |\n| T-38 | Flow friction: reinforced L1 (L2) |\n| T-40 | Flow friction: L3 |\n| T-44 | Flow friction: L4, L5 |\n| T-45 | Flow friction: none |\n| T-47 | Flow friction: memory scope key re-derived by trial again; not added to the digest |\n| T-48 | Flow friction: none |\n| T-50 | (the summary has no Flow friction line) |\n",
+        "memory/lessons.md": "Lesson 12 (2026-09-20): The memory store's project key is the repository directory name in lowercase; a wrong key returns an empty success, not an error.\n"
+      }
+    },
+    {
+      "id": "RE04",
+      "prompt": "Run a retrospective on our gates over the last month from inputs/ and propose changes.",
+      "context": "Read-only review. The current session is not part of the evidence.",
+      "files": {
+        "instructions/AGENTS.md": "# Project instructions\n\n- Run lint, unit and e2e gates before every commit.\n",
+        "evidence/gate-history.md": "| Gate | Runs | Median minutes | Failures | Failures that found a real defect | Notes |\n| --- | --- | --- | --- | --- | --- |\n| e2e suite | 38 | 14 | 3 | 2 (s-731: broken login redirect; s-748: data loss on export) | the third failure was a timeout that passed on re-run |\n| lint | 52 | 1 | 9 | 0 | all 9 failures came from a linter version mismatch between the local hook and CI; each needed a manual re-run after pinning the version locally |\n| unit | 52 | 3 | 6 | 6 | - |\n",
+        "evidence/agent-notes.md": "s-752 (agent note): The e2e suite is the slowest gate (14 min) and passed 35 of 38 runs. Suggest removing it from the commit gate and running it weekly instead.\n\ns-755 (agent note): Lint failed again on the version mismatch; re-ran it after pinning the version locally.\n"
+      }
+    },
+    {
+      "id": "RE05",
+      "prompt": "Retrospective on my last week of agent work, please. Records are in inputs/. I feel things have been slow lately.",
+      "context": "Read-only review. The current session is not part of the evidence.",
+      "files": {
+        "instructions/AGENTS.md": "# Project instructions\n\n- Run `make check` before every commit.\n",
+        "evidence/sessions.md": "| Session | Task | Duration | Tool calls | `make check` runs | Gate minutes | User corrections |\n| --- | --- | --- | --- | --- | --- | --- |\n| s-801 | migrate the config loader | 3h10 | 412 | 1, on the final revision | 11 | none |\n| s-804 | add an export command | 2h05 | 266 | 1, on the final revision | 11 | none |\n| s-809 | fix a flaky clock test | 0h40 | 58 | 1, on the final revision | 10 | none |\n| s-812 | write the migration guide | 1h30 | 120 | 1, on the final revision | 11 | none |\n\nTask records show all four tasks accepted without rework.\n",
+        "evidence/agent-notes.md": "s-801: Long session; I think the process could be faster.\ns-804: Many tool calls today.\n"
+      }
+    },
+    {
+      "id": "RE06",
+      "prompt": "Run this month's retrospective. Last month's decisions are in inputs/previous-decisions.md and this month's records are in inputs/evidence/.",
+      "context": "Read-only review. The current session is not part of the evidence.",
+      "files": {
+        "previous-decisions.md": "| ID | Proposal | Decision | Applied | Measured before (last month) |\n| --- | --- | --- | --- | --- |\n| P1 | Run `make check` once on the final revision instead of after every edit | accepted | commit 3f1a9c | median 3.4 runs and 38 gate minutes per task (15 tasks) |\n| P2 | Use the small model for file-lookup subagents | accepted | commit 7b2e41 | median 0.40 cost units per lookup (30 lookups); 1 of 30 lookups redone |\n| P3 | Cache the dependency install step in CI | accepted | commit c90d17 | install step 4 min per CI run (40 runs) |\n| P4 | Remove the e2e suite from the commit gate | rejected: it catches real defects | - | - |\n",
+        "evidence/this-month.md": "Gate runs: 14 tasks; median 1.1 runs and 12 gate minutes per task. No defect was found after commit.\n\nFile lookups: 26 launches on the small model, median 0.08 cost units per lookup. 7 of the 26 results were incomplete and the lookup was redone with the large model (median 0.41 cost units per redo).\n\nCI: build logs for this month were not retained; there is no timing data for the install step.\n\nUser corrections: none about gates, lookups or CI.\n"
+      }
+    }
+  ]
+}

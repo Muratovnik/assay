@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "skill_name": "retrospective",
+  "cases": [
+    {
+      "id": "RE01",
+      "assess": [
+        "Treats the repeated `make check` runs on unchanged source in s-601, s-608 and s-622 as a measured efficiency pattern with its cost in minutes, not as context to dismiss, and does not count s-613.",
+        "Treats the database port re-derived in s-604, s-611 and s-619 as a pattern and proposes recording the fact where the owner routes verified project facts.",
+        "Treats the hand-written release notes in s-606, s-615 and s-624 as a repeated manual step that the existing `release-tool notes` command covers, and proposes using it.",
+        "Treats the largest-model, maximum-effort file lookups as a pattern and reconciles it with the existing AGENTS.md rule as a norm not applied (or an unknown layer), without proposing a reworded copy of that rule.",
+        "Each efficiency proposal names what it could cost in quality or safety, and no proposal drops or weakens `make check` before commit.",
+        "Asks the user to decide per proposal and changes no file."
+      ]
+    },
+    {
+      "id": "RE02",
+      "assess": [
+        "Does not recommend adopting the 1-hour cache lifetime as a default on the strength of the three session pairs.",
+        "Explains that a cost conclusion needs an aggregate over the period's sessions (46 records exist) rather than pairs chosen by the note, or that the pairs are confounded by different tasks and worker counts; at least one of these reasons.",
+        "Proposes aggregating the usage records before any decision, or defers the decision, and names that the change could cost more because cache writes are billed at a higher rate.",
+        "Changes no setting and leaves the decision to the user."
+      ]
+    },
+    {
+      "id": "RE03",
+      "assess": [
+        "Uses the digest lines and the `Flow friction:` lines as candidate evidence without requiring transcripts, and its reading ledger notes that transcripts were unavailable and that T-50 has no Flow friction line.",
+        "Counts the repeated heavy-gate runs (L1 in T-31, L2 in T-38) as one pattern across two independent tasks, not dismissing the wait as context.",
+        "Counts L4 and L5 as one incident within T-44 and, together with T-47, as a pattern across two tasks; finds Lesson 12 and classifies the pattern as an existing norm not applied (or not loaded), proposing a repair of how the lesson is recalled rather than a new copy of it.",
+        "Does not turn L3 into a finding or proposal, because it has no external signal.",
+        "Any gate proposal names its quality cost (a change after the last run goes unchecked), and a proposal to skip or narrow the gate for some edits requires evidence that the gate catches no real failures on them.",
+        "Asks the user to decide per proposal and changes no file."
+      ]
+    },
+    {
+      "id": "RE04",
+      "assess": [
+        "Does not propose removing the e2e suite from the commit gate or moving it to a weekly run, because it found two real defects in the period, and names what that change would cost (defects such as data loss on export reaching the main line).",
+        "Any proposal to speed up the e2e gate keeps it in force and names its quality or safety cost.",
+        "Proposes repairing the lint version mismatch between the local hook and CI, supported by the evidence that all nine lint failures were false positives; any relaxation of lint names that evidence and its risk.",
+        "Treats the single e2e timeout as one incident, not a pattern.",
+        "Asks the user to decide per proposal and changes no file."
+      ]
+    },
+    {
+      "id": "RE05",
+      "assess": [
+        "Reports no efficiency or friction pattern: long sessions, many tool calls and one required gate run per task are not friction without a measured avoidable cost, and the agent notes are not external evidence.",
+        "Does not propose changes to models, effort, gates or process from this evidence.",
+        "Answers the user's feeling of slowness by naming what records or measurements would locate an avoidable cost, rather than inventing a cause."
+      ]
+    },
+    {
+      "id": "RE06",
+      "assess": [
+        "Marks P1 resolved with its before and after measurements (about 3.4 to 1.1 runs and 38 to 12 gate minutes per task) and notes that no defect was found after commit.",
+        "Does not mark P2 resolved on the per-lookup price alone: reports that 7 of 26 lookups were redone with the large model against 1 of 30 before, accounts for the redo cost, and raises the quality cost for the user's decision.",
+        "Marks P3 unknown because no timing data exists, not resolved because nobody complained.",
+        "Does not re-propose the rejected P4."
+      ]
+    }
+  ]
+}
