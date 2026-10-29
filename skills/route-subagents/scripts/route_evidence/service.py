@@ -175,7 +175,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
 """
     def __init__(self, cache: Cache, *, client="unconfigured", preferences=None, inventory=None,
                  timeout=30, browser=False, offline=False, force=False, clock=time.time, config=None,
-                 inventory_ttl=86400):
+                 inventory_ttl=86400, config_path=None):
         number(timeout, "timeout_seconds", upper=300)
         number(inventory_ttl, "inventory_ttl_seconds", upper=720 * 3600)
         if inventory_ttl < 3600:
@@ -189,6 +189,34 @@ an unqualified family alias nor the server's own guesses resolve model versions.
         self.inventory_ttl = float(inventory_ttl)
         self._lock = threading.Lock()
         self._config = copy.deepcopy(config or {})
+        self._config_path, self._config_error = config_path, None
+
+    def _follow_config(self):
+        """Adopt the policy now in the configuration file, as the hook does on every launch.
+
+        Routes, pipeline, preferences and the inventory lifetime follow the file;
+        the client stays the connection's, and the host inventory keeps its own
+        confirmation route. An unreadable or invalid file keeps the last valid
+        policy and reports the error instead of presenting that policy as current.
+        """
+        if self._config_path is None:
+            return
+        try:
+            config = load_config(self._config_path)
+            if config.get("client", self.client) != self.client:
+                raise EvidenceError("configuration names another client; start a separate service for it")
+            from .pipeline_config import inventory_ttl_seconds
+            ttl = inventory_ttl_seconds(config)
+        except (EvidenceError, OSError, ValueError) as exc:
+            with self._lock:
+                self._config_error = str(exc)
+            return
+        with self._lock:
+            if digest(config) != digest(self._config):
+                self._config = config
+                self.preferences = copy.deepcopy(config.get("preferences") or {})
+                self.inventory_ttl = ttl
+            self._config_error = None
 
     @property
     def inventory(self):
@@ -203,6 +231,7 @@ an unqualified family alias nor the server's own guesses resolve model versions.
     def prepare(self, task_types, *, available=None, constraints=None):
         if not isinstance(task_types, list) or not task_types:
             raise EvidenceError("task_types must be a nonempty list of task types")
+        self._follow_config()
         with self._lock:
             prefs = copy.deepcopy(self.preferences)
             if constraints is not None:
@@ -233,15 +262,17 @@ an unqualified family alias nor the server's own guesses resolve model versions.
     def status(self, selected=None):
         selected = selected or sorted(SOURCES)
         self._validate_sources(selected)
+        self._follow_config()
         sources = [self.cache.view(REGISTRY[sid], self.cache.read(REGISTRY[sid]), refresh="not_requested") for sid in selected]
         guides = [self.cache.view(GUIDES[gid], self.cache.read(GUIDES[gid]), refresh="not_requested")
                   for gid in self._guides()[0]]
         with self._lock:
             inv = copy.deepcopy(self._inventory)
+            routes, error = copy.deepcopy(self._config.get("routes")), self._config_error
         observed = {"host_observations": self.host_observations()} if self.client == "claude" else {}
-        routes = self._config.get("routes")
         return {"client": self.client, "preferences": copy.deepcopy(self.preferences), **observed,
-                "routes": copy.deepcopy(routes) if routes else {"status": "not_configured"},
+                "routes": routes if routes else {"status": "not_configured"},
+                "configuration": {"follows_file": self._config_path is not None, "error": error},
                 "pipeline": self.launch_check(),
                 "refresh_mode": "offline" if self.offline else "automatic",
                 "guides": brief({"sources": guides})["sources"],

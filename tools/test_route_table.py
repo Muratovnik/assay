@@ -281,6 +281,42 @@ class RouteTableTests(unittest.TestCase):
         bare = RoutingService(cache, client='claude', config=load_config(self.config()), offline=True).status()
         self.assertEqual(bare['routes'], {'status': 'not_configured'})
 
+    def test_routing_status_follows_the_table_the_hook_reads(self):
+        # The MCP service lives as long as the session while the hook rereads the
+        # file on every launch; an edited table must reach both without a restart.
+        import argparse
+        from benchmark_router import add_options, make_service
+        path = self.config(routes=CLAUDE_TABLE)
+        parser = argparse.ArgumentParser(); add_options(parser)
+        args = parser.parse_args(['--config', str(path), '--cache-dir', str(self.root / 'cache'), '--offline'])
+        with patch.dict('os.environ', {'ASSAY_ROUTING_CONFIG': str(path)}):
+            service = make_service(args)
+        self.assertEqual(set(service.status()['routes']['classes']), {'gather', 'code'})
+
+        edited = {'basis': 'fixture', 'classes': {
+            **CLAUDE_TABLE['classes'],
+            'code': {'model': 'opus', 'effort': 'high', 'when': 'ordinary implementation'},
+            'trace': {'model': 'opus', 'effort': 'medium', 'when': 'find out why something works'},
+        }}
+        self.config(routes=edited)
+        status = service.status()
+        self.assertEqual(status['routes']['classes']['code']['model'], 'opus')
+        self.assertIn('trace', status['routes']['classes'])
+        self.assertIsNone(status['configuration']['error'])
+
+        # A broken edit keeps the last valid table and says so; it is not shown as current.
+        path.write_text('{"schema_version": 5, "client": "claude", "routes": ', encoding='utf-8')
+        broken = service.status()
+        self.assertEqual(broken['routes']['classes']['code']['model'], 'opus')
+        self.assertTrue(broken['configuration']['error'])
+
+        # The service keeps the client it started with; a config for another client is refused.
+        self.config(client='codex', routes=CODEX_TABLE)
+        foreign = service.status()
+        self.assertEqual(foreign['client'], 'claude')
+        self.assertEqual(foreign['routes']['classes']['code']['model'], 'opus')
+        self.assertTrue(foreign['configuration']['error'])
+
     def test_candidates_propose_the_cheapest_pair_indistinguishable_from_the_best(self):
         from route_evidence.route_table import candidates
         rows = [{'model': 'A', 'effort': 'low', 'score': 0.40, 'cost_usd': 0.1, 'subset': 'main'},

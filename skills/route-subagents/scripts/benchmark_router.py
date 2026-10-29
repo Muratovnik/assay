@@ -47,7 +47,8 @@ def make_service(args):
                           client=args.client or config.get("client", "unconfigured"),
                           preferences=config.get("preferences"), inventory=inventory,
                           timeout=args.timeout_seconds, browser=args.browser, offline=args.offline, force=args.force,
-                          config=config, inventory_ttl=inventory_ttl_seconds(config))
+                          config=config, inventory_ttl=inventory_ttl_seconds(config),
+                          config_path=Path(args.config) if args.config else None)
 
 
 def request_document(path):

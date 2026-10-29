@@ -51,7 +51,11 @@ The table lives in the client's routing configuration (schema 5), next to
   evidence and date behind the pairs.
 
 An invalid table is a configuration error. `routing_status` returns the table
-under `routes`, or `{"status": "not_configured"}`.
+under `routes`, or `{"status": "not_configured"}`. It rereads the configuration
+file on every call, as the hook does on every launch, so an edited table shows
+without restarting the MCP server. If an edit leaves the file invalid,
+`routing_status` keeps showing the last valid table and reports the error under
+`configuration.error`.
 
 A schema 5 configuration accepts only these top-level keys: `schema_version`,
 `client`, `preferences`, `inventory`, `pipeline` and `routes`. `pipeline` accepts
