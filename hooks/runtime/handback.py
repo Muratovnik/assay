@@ -45,6 +45,16 @@ def _key(*parts):
     return hashlib.sha256(json.dumps(["handback-hold", *parts]).encode()).hexdigest()
 
 
+def pending(event, directory, *, clock=time.time):
+    """Whether a refusal is still possible here, so the stop checks are worth running."""
+    identity = _identity(event)
+    if not directory or identity is None:
+        return False
+    from route_evidence.pipeline_store import PipelineStore
+    with PipelineStore(Path(directory) / "handback-hold", clock=clock).transaction() as tx:
+        return not tx.get("hold", _key(*identity))
+
+
 def held(event, feedback, directory, *, clock=time.time):
     """The refusal of a first hand-back that the stop checks have feedback for, else {}."""
     text = (feedback or {}).get("hookSpecificOutput", {}).get("additionalContext")

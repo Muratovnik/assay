@@ -292,9 +292,11 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 # A report already handed back reached the parent; a continuation cannot change it.
                 note = {} if handback.handed_back(event) else stop_feedback(event, rules, enabled, settings, kwargs)
             elif name == "PreToolUse" and rules.handback_hold and handback.handing_back(event):
-                # The stop checks run before the report is delivered, while a refusal can still change it.
-                note = handback.held(event, stop_feedback(handback.stop_event(event), rules, enabled, settings, kwargs),
-                                     settings["state_dir"], **kwargs)
+                # The stop checks run before the report is delivered, while a refusal can still change it;
+                # a retry or a session without a place for the key cannot be refused, so it skips them.
+                note = (handback.held(event, stop_feedback(handback.stop_event(event), rules, enabled, settings, kwargs),
+                                      settings["state_dir"], **kwargs)
+                        if handback.pending(event, settings["state_dir"], **kwargs) else {})
             # How a source was read, not which skill applies.
             elif name == "PostToolUse" and rules.fetch_note:
                 note = sources.fetched(event, settings["state_dir"], **kwargs)
