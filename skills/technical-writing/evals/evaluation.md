@@ -506,3 +506,41 @@ regressions. The [evidence archive](task-completion-evidence.zip),
 [notices](task-completion-NOTICE.md) retain the study's source and result records.
 The study explains verification and restoration. Public reuse is exposed work,
 not a new unseen-case evaluation.
+
+## Defect-presentation pilot — 2026-10-29
+
+A project rule asks that documentation describe intended behavior and name a
+known defect or workaround as a defect with its tracking item, never as a rule
+or guarantee. The pilot asked whether this skill needs that criterion of its
+own. The candidate added a row to "Keep judgment calibrated", a clause to the
+source table in grounding and a sentence to "Update the semantic unit". It was
+compared with the 0.33.0 bytes on four new public cases:
+
+- TWDEF01: a draft about a known open defect;
+- TWDEF02: a review of a page that presents a known defect and its stopgap as
+  normal practice;
+- TWDEF03: a limitation with a recorded decision; it should not fire;
+- TWDEF04: behavior with no recorded intent; it should not fire.
+
+Each case ran from a prepared packet in a fresh Claude Code subagent. Drafts ran
+on Opus 5.5 at xhigh effort and reviews at high. TWDEF01 and TWDEF02 ran twice
+per condition, the controls once, and all twelve runs are retained. One grader
+at high effort graded every result, reading only the prompt, inputs and result,
+not the method, the packet manifest or the condition key.
+
+There was no demonstrated improvement. 0.33.0 named the defect with its item in
+both TWDEF01 drafts and reported the defect presented as contract in both
+TWDEF02 reviews. One prior draft placed the workaround under a plain heading
+without tying it to the open issue, graded partial; every candidate criterion
+passed. Neither condition labelled the recorded decision or the unrecorded
+behavior a defect. The candidate was not adopted. The sentence on updating a
+passage together with its fix had no case.
+
+Every failure case put the issue item in the writer's input, so the existing
+"A relevant source contradicts the document" row already applied. These cases
+measure that row, not a new one; a further test of such a criterion needs inputs
+in which no existing row fires. The [cases](defect-cases.json),
+[criteria](defect-rubric.json), [exposure metadata](defect-case-metadata.json)
+and [evidence](defect-evidence.json) are exposed working regressions. The
+evidence holds outputs, grades, packet digests, method hashes and the candidate
+text.

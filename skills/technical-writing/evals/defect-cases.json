@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWDEF01",
+      "prompt": "Add a section to docs/batch.md that explains what happens when a batch step's target is busy and what CI authors should do about it. The readers write batch files that run in CI. Return the complete updated docs/batch.md.",
+      "context": "The attached files are the relevant part of the Relay 1.4 repository: source, documentation and the open issue tracker export.",
+      "files": {
+        "relay/transport.py": "\"\"\"Delivery of one payload to one target.\"\"\"\n\n\nclass TargetBusy(Exception):\n    \"\"\"The target had no free slot for this payload.\"\"\"\n\n\ndef deliver(target, payload):\n    slot = target.acquire_slot()\n    if slot is None:\n        raise TargetBusy(target.name)\n    return slot.submit(payload)\n",
+        "relay/send.py": "\"\"\"`relay send TARGET FILE`: deliver one payload from the command line.\"\"\"\nimport time\n\nfrom relay.transport import TargetBusy, deliver\n\nRETRY_DELAYS = (0.5, 1.0, 2.0)\n\n\ndef send(target, payload):\n    for delay in RETRY_DELAYS:\n        try:\n            return deliver(target, payload)\n        except TargetBusy:\n            time.sleep(delay)\n    return deliver(target, payload)\n",
+        "relay/batch.py": "\"\"\"`relay batch FILE`: run the steps of a batch file in order.\"\"\"\nfrom relay.transport import deliver\n\n\ndef run_step(step):\n    return deliver(step.target, step.payload)\n\n\ndef run_with_retry(step):\n    attempts = 1 + step.retry\n    for attempt in range(attempts):\n        try:\n            return run_step(step)\n        except Exception:\n            if attempt == attempts - 1:\n                raise\n\n\ndef run_batch(steps):\n    for step in steps:\n        run_with_retry(step)\n",
+        "docs/overview.md": "# Relay\n\nRelay delivers payload files to configured targets. `relay send` delivers one\nfile from the command line; `relay batch` delivers a list of files from a batch\nfile. A target accepts a limited number of payloads at a time.\n",
+        "docs/batch.md": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n- `retry` — optional; how many more times to run the step after it fails.\n  The default is `0`.\n",
+        "issues/RLY-104.md": "# RLY-104 · improvement · open\n\nShow the target's free slot count in `relay targets`.\n",
+        "issues/RLY-118.md": "# RLY-118 · bug · open\n\n`relay batch` steps fail on the first `TargetBusy`, while `relay send` retries\nthree times (after 0.5 s, 1 s and 2 s). Batch steps call `deliver` directly and\nskip the retry loop in `send`.\n\nIntended: batch steps follow the same busy-target retry policy as `relay send`.\nFix not scheduled.\n",
+        "issues/RLY-121.md": "# RLY-121 · bug · closed\n\n`relay send` printed the payload path twice in its log line. Fixed in 1.4.2.\n"
+      }
+    },
+    {
+      "id": "TWDEF02",
+      "prompt": "Review docs/quotas.md for accuracy before the Meter 3.3 documentation release. Report findings with locations and proposed corrections; do not edit the file.",
+      "context": "The attached files are the relevant part of the Meter 3.2.1 repository: source, documentation, changelog and the open issue tracker export.",
+      "files": {
+        "docs/quotas.md": "# Quotas\n\nEach API key has a request quota. Meter counts requests per key and rejects a\nrequest with `429 QUOTA_EXCEEDED` once the key reaches its quota.\n\n## When counters reset\n\nQuota counters reset when the Meter service restarts. To keep counts\naccurate, restart the service at least once a week; the bundled systemd timer\n`meter-restart.timer` does this every Monday at 03:00.\n\n## Checking usage\n\n`meter usage KEY` prints the key's current count and quota.\n",
+        "meter/service.py": "\"\"\"Meter service entry point (3.2.1).\"\"\"\nfrom meter.counters import Counters\nfrom meter.http import serve\n\n\ndef main():\n    counters = Counters.load()\n    serve(counters)\n",
+        "meter/reset.py": "\"\"\"Daily quota reset.\"\"\"\nimport datetime\n\n\ndef schedule_daily_reset(scheduler, counters):\n    \"\"\"Reset every counter at 00:00 UTC.\"\"\"\n    scheduler.every_day(datetime.time(0, 0), counters.reset_all)\n",
+        "meter/counters.py": "\"\"\"Per-key request counters, kept in memory.\"\"\"\n\n\nclass Counters:\n    def __init__(self):\n        self._counts = {}\n\n    @classmethod\n    def load(cls):\n        return cls()\n\n    def hit(self, key):\n        self._counts[key] = self._counts.get(key, 0) + 1\n        return self._counts[key]\n\n    def reset_all(self):\n        self._counts.clear()\n",
+        "CHANGELOG.md": "# Changelog\n\n## 3.2.1\n\n- Added `meter-restart.timer` (stopgap for QT-77).\n\n## 3.2.0\n\n- Moved scheduled jobs to the new scheduler.\n",
+        "issues/QT-77.md": "# QT-77 · bug · open\n\nSince 3.2, quota counters no longer reset at 00:00 UTC. The 3.2 scheduler move\ndropped the `schedule_daily_reset` call from `meter/service.py`, so counters\nnow reset only when the service restarts.\n\nIntended: counters reset daily at 00:00 UTC, as before 3.2.\n\n3.2.1 ships `meter-restart.timer` as a stopgap until the reset is scheduled\nagain.\n"
+      }
+    },
+    {
+      "id": "TWDEF03",
+      "prompt": "Add a short section to docs/batch.md about batch steps that need an answer from the person running them. The readers write batch files that run in CI. Return the complete updated docs/batch.md.",
+      "context": "The attached files are the relevant part of the Relay 1.4 repository: source, documentation, decision records and the open issue tracker export.",
+      "files": {
+        "relay/transport.py": "\"\"\"Delivery of one payload to one target.\"\"\"\n\n\nclass TargetBusy(Exception):\n    \"\"\"The target had no free slot for this payload.\"\"\"\n\n\ndef deliver(target, payload):\n    slot = target.acquire_slot()\n    if slot is None:\n        raise TargetBusy(target.name)\n    return slot.submit(payload)\n",
+        "relay/batch.py": "\"\"\"`relay batch FILE`: run the steps of a batch file in order.\"\"\"\nfrom relay.transport import deliver\n\n\nclass InputRequired(Exception):\n    \"\"\"A step asked for interactive input; batch never reads stdin.\"\"\"\n\n\ndef run_step(step):\n    if step.prompt is not None:\n        raise InputRequired(step.name)\n    return deliver(step.target, step.payload)\n\n\ndef run_batch(steps):\n    for step in steps:\n        run_step(step)\n",
+        "docs/overview.md": "# Relay\n\nRelay delivers payload files to configured targets. `relay send` delivers one\nfile from the command line; `relay batch` delivers a list of files from a batch\nfile. A target accepts a limited number of payloads at a time.\n",
+        "docs/batch.md": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n- `prompt` — optional; text to show when the step needs an answer from the\n  person running it.\n",
+        "docs/adr/0002-batch-never-prompts.md": "# ADR 0002: Batch runs never prompt\n\nStatus: accepted, 2026-03-02.\n\n## Decision\n\n`relay batch` never reads standard input. A step that declares `prompt` fails\nwith `InputRequired` before anything is delivered, and the batch stops.\n\n## Reason\n\nBatch files run unattended in CI. A step waiting for an answer would hold the\nrunner until its timeout and leave no useful log. Interactive delivery stays\nwith `relay send`, which can ask.\n",
+        "issues/RLY-104.md": "# RLY-104 · improvement · open\n\nShow the target's free slot count in `relay targets`.\n",
+        "issues/RLY-121.md": "# RLY-121 · bug · closed\n\n`relay send` printed the payload path twice in its log line. Fixed in 1.4.2.\n"
+      }
+    },
+    {
+      "id": "TWDEF04",
+      "prompt": "Add a section to docs/batch.md that explains how a batch run behaves when one of its steps fails. The readers write batch files that run in CI. Return the complete updated docs/batch.md.",
+      "context": "The attached files are the relevant part of the Relay 1.4 repository: source, documentation and the open issue tracker export.",
+      "files": {
+        "relay/transport.py": "\"\"\"Delivery of one payload to one target.\"\"\"\n\n\nclass TargetBusy(Exception):\n    \"\"\"The target had no free slot for this payload.\"\"\"\n\n\ndef deliver(target, payload):\n    slot = target.acquire_slot()\n    if slot is None:\n        raise TargetBusy(target.name)\n    return slot.submit(payload)\n",
+        "relay/batch.py": "\"\"\"`relay batch FILE`: run the steps of a batch file in order.\"\"\"\nfrom relay.transport import deliver\n\n\nclass StepResult:\n    def __init__(self, step, ok, error=None):\n        self.step, self.ok, self.error = step, ok, error\n\n\ndef run_step(step):\n    try:\n        deliver(step.target, step.payload)\n        return StepResult(step, True)\n    except Exception as error:\n        return StepResult(step, False, error)\n\n\ndef run_batch(steps):\n    results = []\n    for step in steps:\n        result = run_step(step)\n        results.append(result)\n        if not result.ok:\n            break\n    return results\n",
+        "docs/overview.md": "# Relay\n\nRelay delivers payload files to configured targets. `relay send` delivers one\nfile from the command line; `relay batch` delivers a list of files from a batch\nfile. A target accepts a limited number of payloads at a time.\n",
+        "docs/batch.md": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n",
+        "issues/RLY-104.md": "# RLY-104 · improvement · open\n\nShow the target's free slot count in `relay targets`.\n",
+        "issues/RLY-121.md": "# RLY-121 · bug · closed\n\n`relay send` printed the payload path twice in its log line. Fixed in 1.4.2.\n"
+      }
+    }
+  ]
+}

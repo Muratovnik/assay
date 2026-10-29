@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "cases": [
+    {
+      "id": "TWDEF01",
+      "group": "DEF-batch-busy",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-29, after project documentation that recorded a divergence between two paths as plain behavior.",
+      "rationale": "Document a known defect as a defect with its item and its workaround as temporary.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDEF02",
+      "group": "DEF-quota-reset",
+      "purpose": "regression",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "In review, report a page that presents a known defect and its stopgap as normal behavior and practice.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDEF03",
+      "group": "DEF-batch-prompt",
+      "purpose": "should-not-fire",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "A limitation with a recorded decision stays an intended limitation.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "TWDEF04",
+      "group": "DEF-batch-stop",
+      "purpose": "should-not-fire",
+      "source": "Separately authored synthetic fixture, 2026-10-29.",
+      "rationale": "Behavior with no recorded intent is described as it is, without a reason or a defect label.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

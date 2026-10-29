@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "skill_name": "technical-writing",
+  "dimensions": [
+    "source_fidelity",
+    "required_meaning",
+    "defect_presentation"
+  ],
+  "assessment_note": "Defect-presentation cases: a document must not present a known defect, workaround or unexplained divergence as intended behavior, a rule or a guarantee, and must not turn a recorded decision or an unrecorded intent into a defect. Do not include the rubric or metadata in execution packets.",
+  "cases": [
+    {
+      "id": "TWDEF01",
+      "assess": [
+        "State the current behavior: a batch step fails on the first busy target, with no automatic retry, unlike relay send.",
+        "Present that behavior as a known open defect, naming RLY-118 or the issue, not as how batch steps are meant to work.",
+        "Give no invented reason for the behavior, such as failing fast by design or for determinism.",
+        "Present setting retry on such steps as a workaround while RLY-118 is open, not as the standing rule for busy targets.",
+        "Keep retry's meaning: further runs after a failure, default 0.",
+        "Promise no fix, release or date that the sources do not give."
+      ]
+    },
+    {
+      "id": "TWDEF02",
+      "assess": [
+        "Report as a finding that the page presents restart-only reset, the known defect QT-77, as the product's normal behavior.",
+        "Report that the weekly restart and meter-restart.timer are presented as standing practice although the sources record them as a stopgap for QT-77.",
+        "Propose a correction that states the intended daily reset at 00:00 UTC, the current restart-only behavior as defect QT-77 and the timer as a temporary workaround.",
+        "Do not claim that the daily reset currently works.",
+        "Keep the unaffected 429 QUOTA_EXCEEDED and meter usage statements as accurate, or leave them without an invented finding."
+      ]
+    },
+    {
+      "id": "TWDEF03",
+      "assess": [
+        "State that a batch step that declares prompt fails with InputRequired before delivery and the batch stops.",
+        "Present this as the intended behavior; a short reason from ADR 0002 is welcome.",
+        "Do not call it a defect, known issue, limitation awaiting a fix or workaround, and do not invent an issue reference.",
+        "Route interactive delivery to relay send, as ADR 0002 records."
+      ]
+    },
+    {
+      "id": "TWDEF04",
+      "assess": [
+        "State that the run stops at the first failed step and later steps do not run.",
+        "Give no invented reason or intent for stopping, such as by design or to keep CI deterministic.",
+        "Do not call the behavior a defect or known issue, and do not invent an issue reference.",
+        "Add no guarantee the source does not support, such as rollback of earlier steps or a particular exit code."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,656 @@
+{
+ "schema_version": 1,
+ "skill_name": "technical-writing",
+ "study": "Defect-presentation pilot, 2026-10-29",
+ "question": "Does a calibration row against presenting a known defect, workaround or unexplained divergence as intended behavior change drafts and reviews compared with the 0.33.0 bytes?",
+ "methods": {
+  "prior": {
+   "revision": "640016c (0.33.0)",
+   "files": {
+    "SKILL.md": "1f62efd2457cfe37a99db595f8b963544dc5f0db134d7a19e2b1dee9128a6d91",
+    "references/grounding.md": "6cb51fe738b4ac9cc70c470db81b70b1e6c5a04c32d8a71e233b4ca2a636ec92",
+    "references/document-design.md": "5bd362e24414e0b6a0efb9917fc2e65ebca4f1ab04610f8ca4db2ef4213e8810"
+   }
+  },
+  "candidate": {
+   "base": "640016c",
+   "files": {
+    "SKILL.md": "38a9c5613867308dc2b773042d07640c37c71ba4d6dffad468d830ebbcb65e58",
+    "references/grounding.md": "283fb60770eb8eec6827d1005550d2af7cc304aee64ebf87180a0ea306a30367",
+    "references/document-design.md": "31967a6318bb49a95702bed45122e1ed289de5912c6e6a6a0c6f19e928f79983"
+   },
+   "status": "not adopted; reverted after the pilot"
+  }
+ },
+ "candidate_changes": [
+  {
+   "file": "SKILL.md",
+   "section": "Keep judgment calibrated",
+   "added_row": "| A passage presents a known defect, workaround or unexplained divergence as intended behavior, a rule or a guarantee | A discrepancy. Keep the current behavior visible, as a defect with its item; where no source establishes intent, as observed behavior without an invented reason. A limitation with a recorded reason is a decision, not this. |"
+  },
+  {
+   "file": "references/grounding.md",
+   "row": "Source or complete CLI help",
+   "added_to_does_not_establish": "or that implemented behavior is intended"
+  },
+  {
+   "file": "references/document-design.md",
+   "section": "Update the semantic unit",
+   "added_sentence": "A fix to behavior that a passage described or justified as a defect or workaround makes that passage part of the same change."
+  }
+ ],
+ "execution": {
+  "client": "Claude Code subagents, one fresh context per run",
+  "draft_runs": "claude-opus-5-5, effort xhigh (route class write)",
+  "review_runs": "claude-opus-5-5, effort high (route class check)",
+  "trials": "TWDEF01 and TWDEF02: 2 per condition; TWDEF03 and TWDEF04: 1 per condition; 12 runs, all retained",
+  "packets": "tools/eval_assets.py prepare per case and condition, verified with verify_packet.py, copied to neutral run folders r01-r12 in shuffled order",
+  "executor_instructions": "read only the run's packet, follow skill/technical-writing, no Skill tool, web or subagents, write output/result.md",
+  "isolation": "Not enforced by the filesystem. Executor tool calls stayed in their own run folders; one executor used the parent runs folder as its working directory for a diff of its own files. manifest.json, which every executor could read, carries the case ID and file hashes only.",
+  "corpus_note": "Packets were prepared from a first write of the corpus with CRLF line endings, so their manifests record that file's source_sha256. The LF rewrite kept every case input byte-identical; it changed only the rubric assessment note and the TWDEF01 metadata source wording, which executors never see."
+ },
+ "grading": {
+  "grader": "claude-opus-5-5, effort high (route class check), one fresh context for all 12 runs",
+  "blinding": "The grader read prompt, context, inputs and result only, not skill/, manifest.json or the condition key.",
+  "scale": "pass, partial, fail per criterion of defect-rubric.json",
+  "spot_check": "The two TWDEF01 prior outputs and one TWDEF02 prior review were reread against their grades after unblinding; the grades held."
+ },
+ "result": {
+  "summary": "No demonstrated improvement. On these four cases, where the issue item is in the writer's input, 0.33.0 already names the defect with its item in drafts and reports defect-as-contract in reviews; the candidate produced no observable difference.",
+  "by_case": {
+   "TWDEF01": "prior 11 pass, 1 partial; candidate 12 pass. The partial is a workaround placed under a plain 'What to do in CI' heading, not tied to the open issue.",
+   "TWDEF02": "prior 10 pass; candidate 10 pass.",
+   "TWDEF03": "prior 4 pass; candidate 4 pass; no false defect label on a recorded decision.",
+   "TWDEF04": "prior 4 pass; candidate 4 pass; no invented reason or defect label."
+  },
+  "not_exercised": "The document-design sentence on updating a passage together with the fix had no case.",
+  "limit": "Every failure case put the issue item in the input, so the existing 'A relevant source contradicts the document' row already applied. A future test of a new criterion here needs inputs where existing rows do not already fire."
+ },
+ "runs": [
+  {
+   "run": "r01",
+   "case": "TWDEF01",
+   "condition": "candidate",
+   "trial": 2,
+   "route_class": "write",
+   "packet_manifest_sha256": "daa259b1fc2c9072d24c825e8eaca11d7b6b7444c3a166a2156262155ddc7907",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md",
+    "preservation.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n- `retry` — optional; how many more times to run the step after it fails.\n  The default is `0`.\n\n## When a target is busy\n\nA target accepts a limited number of payloads at a time. When it has no free\nslot for another payload, it is busy, and a delivery to it fails with a\n`TargetBusy` error.\n\nBatch steps do not wait for a busy target to free a slot. This is a known bug,\nRLY-118: batch steps are meant to handle a busy target the way `relay send`\ndoes, which retries up to three times, waiting 0.5 s before the first retry,\n1 s before the second and 2 s before the third. RLY-118 is open and no fix is\nscheduled. Until it is fixed:\n\n- With the default `retry: 0`, a step fails on its first attempt if its target\n  is busy.\n- With a higher `retry`, the step runs again immediately after each failure,\n  with no wait between attempts. If the target still has no free slot on the\n  last attempt, the step fails.\n\nWhen a step fails, the batch stops. The steps before it have already delivered\ntheir payloads; the steps after it do not run.\n\nFor a step whose target can be busy, you have two options:\n\n- **Set `retry` on the step.** This keeps the step in the batch file, but\n  because the extra attempts do not wait, they succeed only if a slot frees up\n  while they run. `retry` also runs the step again after any other failure, not\n  only when the target is busy.\n- **Deliver that payload with `relay send` instead.** `relay send` waits\n  between its retries as described above, and it retries only when the target\n  is busy. For the `upload-assets` step in the example above:\n\n  ```sh\n  relay send assets-eu build/assets.tar\n  ```\n\n  Run the command where the step was in the sequence: before `relay batch` for\n  a first step such as `upload-assets`, or, for a step in the middle, split the\n  batch file in two and run the command between them. If the target is still\n  busy after the third retry, `relay send` fails too.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"With the default `retry: 0`, a step fails on its first attempt if its target is busy.\" plus \"the way `relay send` does, which retries up to three times\" (When a target is busy, paras 2-3)",
+     "reason": "States first-busy failure with no automatic retry and contrasts it with relay send's retries."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"This is a known bug, RLY-118: batch steps are meant to handle a busy target the way `relay send` does ... RLY-118 is open\"",
+     "reason": "Names RLY-118 as an open bug and states the intended behavior differs."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "Section gives no rationale for the behavior beyond calling it bug RLY-118.",
+     "reason": "No invented reason such as fail-fast design or determinism."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"RLY-118 is open and no fix is scheduled. Until it is fixed:\" followed by the retry behavior and \"For a step whose target can be busy, you have two options: Set `retry` on the step...\"",
+     "reason": "Retry is offered as one coping option for the bug's current behavior, not as the standing rule, though the options list itself is not explicitly re-tied to RLY-118."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"`retry` — optional; how many more times to run the step after it fails. The default is `0`.\" and \"With a higher `retry`, the step runs again immediately after each failure\"",
+     "reason": "Retry keeps its meaning of further runs after failure with default 0."
+    },
+    {
+     "id": "6",
+     "verdict": "pass",
+     "evidence": "\"RLY-118 is open and no fix is scheduled.\"",
+     "reason": "Matches the issue and promises no fix, release or date."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0,
+   "isolation_note": "2 calls used the parent runs folder as the working directory and named only this run's own files."
+  },
+  {
+   "run": "r02",
+   "case": "TWDEF01",
+   "condition": "prior",
+   "trial": 2,
+   "route_class": "write",
+   "packet_manifest_sha256": "9aca1291edd220490837155a7ab14d1a425a539f7a1eae3633beba447033079c",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver;\n- `retry` — optional; how many more times to run the step after it fails.\n  The default is `0`.\n\n## When a target is busy\n\nA target accepts a limited number of payloads at a time. When a step's target\nhas no free slot, the delivery fails with a `TargetBusy` error, and the step\ntreats it like any other failure:\n\n- With the default `retry: 0`, the step fails on the first busy response.\n- With `retry: N`, the step runs up to N more times. Each attempt starts as soon\n  as the previous one fails, without waiting for a slot to free up, so all of\n  them can find the target still busy.\n\nWhen the last attempt fails, `relay batch` stops at that step and does not run\nthe steps after it. The steps before it have already delivered their payloads.\n\n`relay send` handles a busy target differently: it tries again up to three\ntimes, after waiting 0.5 s, 1 s and 2 s. Batch steps are meant to follow the\nsame policy but currently do not (known bug RLY-118).\n\nWhat to do in CI:\n\n- Set `retry` on each step whose target can be busy, for example a target that\n  other jobs deliver to at the same time.\n- If back-to-back attempts are not enough for a target, deliver that payload\n  with `relay send TARGET FILE` as its own CI command instead of a batch step,\n  so it waits between attempts.\n- Re-running a failed batch starts again from the first step, so the payloads\n  that were already delivered are delivered a second time. Before re-running,\n  check that this is acceptable for their targets.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"With the default `retry: 0`, the step fails on the first busy response.\" and \"`relay send` handles a busy target differently: it tries again up to three times\"",
+     "reason": "States first-busy failure without automatic retry and the contrast with relay send."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"Batch steps are meant to follow the same policy but currently do not (known bug RLY-118).\"",
+     "reason": "Names RLY-118 as a known bug against the intended policy."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "\"the step treats it like any other failure\" is a description of the code, with no rationale given.",
+     "reason": "No invented reason for the behavior."
+    },
+    {
+     "id": "4",
+     "verdict": "partial",
+     "evidence": "\"What to do in CI: - Set `retry` on each step whose target can be busy\"",
+     "reason": "The advice list stands alone under \"What to do in CI\" with no tie to RLY-118 being open, so it reads close to a standing rule; only the preceding \"currently do not\" hints it is temporary."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"`retry` — optional; how many more times to run the step after it fails. The default is `0`.\" and \"With `retry: N`, the step runs up to N more times.\"",
+     "reason": "Retry's meaning and default are kept."
+    },
+    {
+     "id": "6",
+     "verdict": "pass",
+     "evidence": "No fix, release or date is mentioned.",
+     "reason": "Promises nothing the sources do not give."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r03",
+   "case": "TWDEF01",
+   "condition": "prior",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "9aca1291edd220490837155a7ab14d1a425a539f7a1eae3633beba447033079c",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "grounding.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n- `retry` — optional; how many more times to run the step after it fails.\n  The default is `0`.\n\n## When a target is busy\n\nA target accepts a limited number of payloads at a time. When it has no free\nslot for another payload, delivery to it fails with a `TargetBusy` error.\n\nA batch step does not wait for a busy target to free up:\n\n- With the default `retry: 0`, the step fails on the first `TargetBusy`.\n- With `retry` set, the step runs again immediately, with no pause between\n  attempts, up to `retry` more times.\n\nIf the last attempt fails, the batch stops at that step and the remaining steps\ndo not run. Running the batch again starts from the first step, so payloads\ndelivered before the failure are delivered again.\n\n`relay send` handles a busy target differently: it retries up to three times,\nwaiting 0.5 s, 1 s and 2 s before the retries. Batch steps are meant to follow\nthe same policy; the difference is a known bug, RLY-118.\n\nUntil that bug is fixed, for a step whose target can be busy:\n\n- Set `retry` on the step. Because batch retries are immediate, they help only\n  if a slot frees up before the next attempt.\n- If the target is often busy, deliver that payload with\n  `relay send TARGET FILE` as a separate CI step instead of a batch step. If\n  other deliveries must happen after it, put them in a batch file that runs\n  after that CI step.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"With the default `retry: 0`, the step fails on the first `TargetBusy`.\" and \"`relay send` handles a busy target differently: it retries up to three times\"",
+     "reason": "States the current behavior and the contrast with relay send."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"Batch steps are meant to follow the same policy; the difference is a known bug, RLY-118.\"",
+     "reason": "Presents it as known bug RLY-118 against intended behavior."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No rationale given for the behavior.",
+     "reason": "No invented reason."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"Until that bug is fixed, for a step whose target can be busy: - Set `retry` on the step.\"",
+     "reason": "Retry is explicitly framed as a workaround while the bug stands."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"With `retry` set, the step runs again immediately, with no pause between attempts, up to `retry` more times.\"",
+     "reason": "Retry's meaning and default 0 are kept."
+    },
+    {
+     "id": "6",
+     "verdict": "pass",
+     "evidence": "\"Until that bug is fixed\" with no date or release.",
+     "reason": "Implies no scheduled fix or date."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r04",
+   "case": "TWDEF02",
+   "condition": "candidate",
+   "trial": 2,
+   "route_class": "check",
+   "packet_manifest_sha256": "9a504b310f10cb8446e8b03e48a29d5c15ebf2d29f88ac37c5ec8bdca88c8a4e",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "grounding.md"
+   ],
+   "output": "# Review: `docs/quotas.md` before the Meter 3.3 documentation release\n\n**Verdict: not ready.** The \"When counters reset\" section presents a known\ndefect and its stopgap as the designed reset behavior and as an operating rule.\nThe page also cannot be finalized for 3.3 until someone confirms whether 3.3\nfixes QT-77.\n\nThe sources are the supplied Meter 3.2.1 files: `meter/service.py`,\n`meter/counters.py`, `meter/reset.py`, `CHANGELOG.md` and the open issue\n`QT-77`. No 3.3 source, systemd unit file or HTTP/CLI module was supplied, and\nnothing was run.\n\n## Findings\n\n### 1. The reset section presents a bug as intended behavior (discrepancy, high)\n\n**Location:** \"When counters reset\", first sentence: \"Quota counters reset when\nthe Meter service restarts.\"\n\n**What the sources say:**\n\n- Counters are intended to reset every day at 00:00 UTC. `meter/reset.py`\n  defines `schedule_daily_reset` (\"Reset every counter at 00:00 UTC\"), and\n  QT-77 states this intent: \"counters reset daily at 00:00 UTC, as before 3.2.\"\n- In 3.2.1 the daily reset never runs. `meter/service.py` calls only\n  `Counters.load()` and `serve(counters)`, and does not call\n  `schedule_daily_reset`. QT-77 (open bug) says the 3.2 scheduler move dropped\n  that call.\n- Counters are held in memory (`meter/counters.py`), and `Counters.load()`\n  returns an empty instance. That is why a restart clears them, and the only\n  reason it does.\n\n**Consequence:** the sentence is accurate about what 3.2.1 currently does. It\nis wrong to present that as how quotas are meant to work. A reader learns\nneither that the quota is meant to cover a daily window nor that the current\nbehavior is a regression. Any restart, planned or not (a deploy, a crash), also\nclears all counts. The page does not say so.\n\n**Proposed correction:** describe the intended daily reset, then the current\nbehavior as a known defect with its issue. See the replacement text under\nfinding 2.\n\n### 2. The weekly-restart rule is unsupported and works against the intended quota (discrepancy, high)\n\n**Location:** \"When counters reset\", second sentence: \"To keep counts\naccurate, restart the service at least once a week; the bundled systemd timer\n`meter-restart.timer` does this every Monday at 03:00.\"\n\n**What the sources say:**\n\n- `CHANGELOG.md` 3.2.1 says `meter-restart.timer` was added as a \"stopgap for\n  QT-77\", and QT-77 repeats this. The timer is a temporary workaround. It is\n  not the maintenance procedure the page describes.\n- No source supports the rule to restart \"at least once a week\" or the claim\n  that this keeps counts \"accurate\". The intended reset is daily. Reasoned\n  conclusion: with weekly restarts, counts build up across several days, so a\n  key can get `429 QUOTA_EXCEEDED` earlier than a daily quota intends.\n- The timer's schedule (\"every Monday at 03:00\") cannot be checked, because the\n  unit file was not supplied. Treat it as unverified, not as false. The time\n  also names no time zone. systemd calendar times default to the host's local\n  time, while the intended reset is at 00:00 UTC.\n\n**Consequence:** operators are told to adopt a workaround as policy, with a\nguarantee of accuracy that the sources contradict.\n\n**Proposed correction**, if 3.3 still ships without the fix (confirm the timer\nschedule from the unit file before publishing):\n\n```markdown\n## When counters reset\n\nQuota counters are meant to reset every day at 00:00 UTC.\n\nSince 3.2 they do not, because of a known bug (QT-77): counters are kept in\nmemory and reset only when the Meter service restarts. Any restart clears every\nkey's count, including an unplanned one. Between restarts, counts keep\nbuilding up past the daily window, so a key can reach its quota early.\n\nUntil QT-77 is fixed, the `meter-restart.timer` systemd timer, added in 3.2.1,\nrestarts the service on a schedule as a stopgap. It runs <schedule from the\nunit file, with its time zone>.\n```\n\nIf the issue tracker is not visible to readers of the published docs, replace\n\"(QT-77)\" with \"(known issue)\" and keep the issue ID in the release notes.\n\n### 3. The page's 3.3 content depends on an undecided fix (release blocker, unverified)\n\n**Location:** the whole \"When counters reset\" section.\n\nQT-77 is open, and the supplied repository is 3.2.1. Nothing shows whether 3.3\nrestores the `schedule_daily_reset` call or keeps or removes\n`meter-restart.timer`. The correct 3.3 text depends on that:\n\n- **3.3 restores the daily reset:** the section should say \"Quota counters\n  reset every day at 00:00 UTC.\" It should then state whether the in-memory\n  counters are still lost on restart and what happens to\n  `meter-restart.timer`. Drop the stopgap text if the timer is removed.\n- **3.3 does not fix it:** use the replacement text in finding 2.\n\nDecision needed from the release owner: which of the two applies to 3.3.\n\n## Claims not covered by the supplied sources\n\nThese claims are unverified, not shown to be wrong. Check each one before\nrelease if it matters for 3.3:\n\n- `429 QUOTA_EXCEEDED` as the status and error code, and whether the\n  rejection starts at the request that *reaches* the quota or the one that\n  *exceeds* it. The HTTP module was not supplied.\n- `meter usage KEY` and what it prints (\"current count and quota\"). No CLI\n  source was supplied.\n\nThe sources do support the statement that Meter counts requests per key\n(`Counters.hit`).\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "Finding 1: \"The reset section presents a bug as intended behavior\"; \"QT-77 (open bug) says the 3.2 scheduler move dropped that call.\"",
+     "reason": "Reports restart-only reset, defect QT-77, presented as normal behavior."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "Finding 2: \"`meter-restart.timer` was added as a 'stopgap for QT-77' ... It is not the maintenance procedure the page describes\"; \"operators are told to adopt a workaround as policy\"",
+     "reason": "Reports the weekly restart and timer presented as standing practice despite being a stopgap."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "Replacement text: \"Quota counters are meant to reset every day at 00:00 UTC. Since 3.2 they do not, because of a known bug (QT-77) ... Until QT-77 is fixed, the `meter-restart.timer` ... as a stopgap.\"",
+     "reason": "Correction states intended daily 00:00 UTC reset, restart-only behavior as QT-77 and the timer as temporary."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"In 3.2.1 the daily reset never runs.\"; 3.3 fixed text is conditional (\"3.3 restores the daily reset\").",
+     "reason": "Never claims the daily reset currently works."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"These claims are unverified, not shown to be wrong\" listing `429 QUOTA_EXCEEDED` and `meter usage KEY`.",
+     "reason": "Leaves the unaffected statements without an invented finding."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r05",
+   "case": "TWDEF01",
+   "condition": "candidate",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "daa259b1fc2c9072d24c825e8eaca11d7b6b7444c3a166a2156262155ddc7907",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n- `retry` — optional; how many more times to run the step after it fails.\n  The default is `0`.\n\n## When a target is busy\n\nA target accepts a limited number of payloads at a time. When it has no free\nslot, a delivery to it fails with a `TargetBusy` error.\n\nA batch step does not wait for a slot to free up. With the default `retry: 0`,\nthe step fails on the first `TargetBusy` and the batch stops there: the steps\nafter it do not run. Running the batch file again starts from the first step, so\nthe steps that already succeeded deliver their payloads again.\n\n`relay send` handles a busy target differently: it retries up to three times,\nwaiting 0.5 s, 1 s and 2 s before the retries. Batch steps are meant to follow\nthe same policy; that they do not is a known bug, RLY-118. No fix is scheduled.\n\nUntil RLY-118 is fixed, handle a busy target in the batch file or in the CI job:\n\n- **Set `retry` on a step whose target may be busy.** Batch retries run\n  immediately, with no wait between attempts, so they help only when a slot\n  frees up almost at once. `retry` also reruns the step after failures other\n  than `TargetBusy`. With `retry: 2`, the step below runs up to three times:\n\n  ```yaml\n  steps:\n    - name: upload-assets\n      target: assets-eu\n      payload: build/assets.tar\n      retry: 2\n  ```\n\n- **Deliver a payload that needs to wait for a slot with `relay send`.** Run\n  `relay send TARGET FILE` as a separate command in the CI job instead of as a\n  batch step, for example `relay send assets-eu build/assets.tar`. It waits\n  3.5 s in total across its retries; if the target is still busy after the last\n  one, `relay send` fails too. To keep the delivery order, run the command\n  before or after `relay batch`, or split the batch file around it.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"With the default `retry: 0`, the step fails on the first `TargetBusy` and the batch stops there\" and \"`relay send` handles a busy target differently: it retries up to three times\"",
+     "reason": "States the current behavior and the contrast with relay send."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"Batch steps are meant to follow the same policy; that they do not is a known bug, RLY-118. No fix is scheduled.\"",
+     "reason": "Names RLY-118 as a known bug against intended behavior."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No rationale given for the behavior.",
+     "reason": "No invented reason."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"Until RLY-118 is fixed, handle a busy target in the batch file or in the CI job: - Set `retry` on a step whose target may be busy.\"",
+     "reason": "Retry is explicitly a workaround while RLY-118 is open."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"With `retry: 2`, the step below runs up to three times\"; field list keeps default `0`.",
+     "reason": "Retry's meaning and default are kept."
+    },
+    {
+     "id": "6",
+     "verdict": "pass",
+     "evidence": "\"No fix is scheduled.\"",
+     "reason": "Matches the issue; no promise."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r06",
+   "case": "TWDEF02",
+   "condition": "candidate",
+   "trial": 1,
+   "route_class": "check",
+   "packet_manifest_sha256": "9a504b310f10cb8446e8b03e48a29d5c15ebf2d29f88ac37c5ec8bdca88c8a4e",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "grounding.md"
+   ],
+   "output": "# Review: `docs/quotas.md` for the Meter 3.3 documentation release\n\n**Verdict: not ready.** The \"When counters reset\" section presents the 3.2.1\nstopgap for an open bug as how quotas are meant to work. The corrected text\ndepends on one fact the packet does not contain: whether 3.3 schedules the daily\nreset again (QT-77). The rest of the page is consistent with the sources it can\nbe checked against.\n\nSources read: `docs/quotas.md`, `CHANGELOG.md` (3.2.0, 3.2.1), `issues/QT-77.md`\n(open), `meter/service.py` (3.2.1), `meter/reset.py`, `meter/counters.py`. All of\nthem describe 3.2.1. Nothing in the packet shows 3.3 code, a 3.3 changelog entry\nor a resolution of QT-77. Nothing was run.\n\n## Findings\n\n### 1. The restart-based reset is a known defect, but the page presents it as the design (lines 8-10)\n\nThe page says: \"Quota counters reset when the Meter service restarts. To keep\ncounts accurate, restart the service at least once a week\".\n\nWhat the sources say:\n\n- QT-77 (open bug) states the intended behavior: \"counters reset daily at 00:00\n  UTC, as before 3.2\". The 3.2 scheduler move dropped the\n  `schedule_daily_reset` call from `meter/service.py`, \"so counters now reset\n  only when the service restarts\".\n- The code agrees. `meter/reset.py` still defines `schedule_daily_reset`\n  (\"Reset every counter at 00:00 UTC\"), but `meter/service.py` never calls it.\n  `main()` only loads the counters and serves.\n- The changelog calls `meter-restart.timer` a \"stopgap for QT-77\".\n\nConsequences for readers:\n\n- The page never states the intended quota period, so a reader concludes that\n  a quota covers the time between restarts. The design is a daily quota.\n- \"To keep counts accurate\" gets the effect wrong. A restart does not make\n  counts accurate. It clears them, which stands in for the missing daily reset.\n- With the bundled timer, a key that reaches its quota keeps getting `429` for\n  up to a week, not until the next 00:00 UTC. Presenting a weekly restart as\n  sufficient tells operators this is acceptable.\n\nProposed correction. Which version applies depends on the 3.3 status of QT-77,\nwhich the documentation owner needs to confirm:\n\n- **If 3.3 calls `schedule_daily_reset` again (QT-77 fixed):** state the\n  designed behavior and drop the restart advice. For example: \"Quota counters\n  reset every day at 00:00 UTC.\" Before release, also confirm whether 3.3 still\n  ships `meter-restart.timer`. If it does, the page should say the timer is no\n  longer needed for resets, or the timer should be removed. The packet does not\n  establish either.\n- **If 3.3 still has the defect:** keep the current behavior visible as a known\n  bug, together with its intent and its workaround. For example:\n\n  > Quota counters are meant to reset every day at 00:00 UTC. Because of a\n  > known bug (QT-77), counters currently reset only when the Meter service\n  > restarts. Until it is fixed, the bundled systemd timer\n  > `meter-restart.timer` restarts the service every Monday at 03:00 as a\n  > stopgap. Between restarts, a key that reaches its quota stays rejected.\n\n  The schedule and its time zone in this example still need confirming against\n  the shipped unit (finding 3). Keep or drop the issue ID in public docs\n  according to the project's practice.\n\n### 2. A restart clears all counters, including restarts nobody planned (lines 8-10, both outcomes)\n\n`meter/counters.py` keeps counters in memory (\"kept in memory\"), and\n`Counters.load()` returns an empty instance. Any restart therefore sets every\nkey's count back to zero: deployments, crashes and manual restarts as well as\nthe timer. The page mentions restarts only as the reset mechanism. Even after\nQT-77 is fixed, readers relying on the daily period should know that a restart\nin the middle of the day also starts every key's count over.\n\nProposed correction: add one sentence, for example \"Counters are kept in\nmemory, so restarting the service also resets them.\" The sources do not say\nwhether this is intended, so describe it as behavior without giving a reason.\n\n### 3. The timer schedule cannot be checked (line 10)\n\n\"every Monday at 03:00\" appears in no supplied source: the packet has no unit\nfile and no changelog detail. The page also gives no time zone, while the\nintended reset is defined in UTC. Before release, check the shipped\n`meter-restart.timer` unit and state its time zone. This finding applies only if\nthe timer stays on the page under finding 1.\n\n## Not verified (not disproven)\n\nThe packet does not cover these claims. They may be correct:\n\n- `429 QUOTA_EXCEEDED` as the rejection response, and whether rejection starts\n  with the request that reaches the quota or the one after it (lines 3-4).\n  `meter/http.py` is not in the packet.\n- `meter usage KEY` and its output (line 14). No CLI source is supplied.\n\n`counters.py` supports per-key counting (`hit(key)`, line 3). The changelog\nsupports that the timer is bundled from 3.2.1 onward.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "Finding 1: \"The restart-based reset is a known defect, but the page presents it as the design (lines 8-10)\"",
+     "reason": "Reports QT-77 restart-only reset presented as normal behavior."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "Finding 1 quotes \"restart the service at least once a week\" and cites \"The changelog calls `meter-restart.timer` a 'stopgap for QT-77'\"; \"Presenting a weekly restart as sufficient tells operators this is acceptable.\"",
+     "reason": "Reports the weekly restart and timer as a stopgap presented as practice, though folded into finding 1 rather than stated separately."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "\"Quota counters are meant to reset every day at 00:00 UTC. Because of a known bug (QT-77), counters currently reset only when the Meter service restarts. Until it is fixed, the bundled systemd timer `meter-restart.timer` restarts the service ... as a stopgap.\"",
+     "reason": "Correction states intended reset, the defect and the temporary timer."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"`meter/service.py` never calls it\"; fixed-version text is conditional on 3.3.",
+     "reason": "Does not claim the daily reset works now."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "\"Not verified (not disproven) ... They may be correct: `429 QUOTA_EXCEEDED` ... `meter usage KEY`\"",
+     "reason": "No invented finding on the unaffected statements."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r07",
+   "case": "TWDEF04",
+   "condition": "candidate",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "03bd1541117d3e67c7a131b23f8dfd676c8a02f4537c79ad3f83bcb8ccd4776b",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md",
+    "preservation.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n\n## When a step fails\n\nA step fails when Relay cannot deliver its payload. For example, a target\naccepts a limited number of payloads at a time, and a step fails if its target\nhas no free slot for the payload. Relay does not retry a failed step.\n\nThe run ends at the first failed step:\n\n- the steps after it do not run;\n- the steps before it have already delivered their payloads, and Relay does not\n  undo those deliveries.\n\nWith the example file above, if `upload-assets` fails, `notify` does not run.\nIf `notify` fails, `build/assets.tar` has already been delivered to `assets-eu`.\n\nRunning the batch file again starts from the first step, so it repeats the\ndeliveries that succeeded before the failure.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"The run ends at the first failed step: - the steps after it do not run\"",
+     "reason": "States the stop and that later steps do not run."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "Section gives no reason or intent for stopping.",
+     "reason": "No invented rationale."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No defect, known-issue wording or issue reference in the section.",
+     "reason": "Behavior is described neutrally."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"Relay does not undo those deliveries\"; no exit code mentioned.",
+     "reason": "Adds no rollback or exit-code guarantee; the no-undo and no-retry statements match the source."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r08",
+   "case": "TWDEF03",
+   "condition": "candidate",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "007ccb3b14cf6cd1a91a099315750a2b4de7ab64ca9fe8e68b9da610a128066c",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver;\n- `prompt` — optional; declares that the step needs an answer from the person\n  running it. `relay batch` cannot ask for that answer, so such a step fails;\n  see [Steps that need an answer](#steps-that-need-an-answer).\n\n## Steps that need an answer\n\n`relay batch` never reads standard input, so a batch run cannot ask the person\nrunning it anything. This is deliberate: batch files run unattended in CI, where\na step waiting for an answer would hold the runner until its timeout and leave\nno useful log.\n\nA step that declares `prompt` fails with `InputRequired` before its payload is\ndelivered, and the batch stops there: later steps do not run. Steps earlier in\nthe file have already been delivered by then.\n\nKeep `prompt` out of batch files. Deliver a payload that needs an answer with\n`relay send`, which can ask for it.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"A step that declares `prompt` fails with `InputRequired` before its payload is delivered, and the batch stops there\"",
+     "reason": "States the behavior exactly."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"This is deliberate: batch files run unattended in CI, where a step waiting for an answer would hold the runner until its timeout and leave no useful log.\"",
+     "reason": "Presents it as intended with ADR 0002's reason."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No defect, limitation or issue reference in the section.",
+     "reason": "Not framed as a defect or workaround."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"Deliver a payload that needs an answer with `relay send`, which can ask for it.\"",
+     "reason": "Routes interactive delivery to relay send."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r09",
+   "case": "TWDEF03",
+   "condition": "prior",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "5c256f30e7c96a20d8221d4e6b06e4b234a1edf4e7b686f46fd7468ca0e13df1",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver;\n- `prompt` — optional; marks a step that needs an answer from the person\n  running it. `relay batch` never asks, so a step that declares `prompt` fails;\n  see [Steps that need an answer](#steps-that-need-an-answer).\n\n## Steps that need an answer\n\n`relay batch` never asks for input and never reads standard input, so a batch\ncan run unattended in CI. When it reaches a step that declares `prompt`, that\nstep fails with `InputRequired` before its payload is delivered, and the batch\nstops. Steps before it have already been delivered; steps after it do not run.\nPiping an answer into `relay batch` does not change this.\n\nTo deliver a payload that needs an answer, take its step out of the batch file\nand deliver it with `relay send` from an interactive session; `relay send` can\nask.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"that step fails with `InputRequired` before its payload is delivered, and the batch stops.\"",
+     "reason": "States the behavior exactly."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "\"`relay batch` never asks for input and never reads standard input, so a batch can run unattended in CI.\"",
+     "reason": "Presents it as intended behavior with a short reason from ADR 0002."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No defect, limitation or issue reference in the section.",
+     "reason": "Not framed as a defect or workaround."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"deliver it with `relay send` from an interactive session; `relay send` can ask.\"",
+     "reason": "Routes interactive delivery to relay send."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r10",
+   "case": "TWDEF02",
+   "condition": "prior",
+   "trial": 1,
+   "route_class": "check",
+   "packet_manifest_sha256": "bd749ba0f8d3e762191a0f7d58c40c934d5342248a0fda34211036ebb781722f",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "grounding.md"
+   ],
+   "output": "# Review: docs/quotas.md for the Meter 3.3 documentation release\n\nSources read: `docs/quotas.md`, `meter/service.py`, `meter/reset.py`,\n`meter/counters.py`, `CHANGELOG.md` and issue QT-77, all at Meter 3.2.1. I made\nno edits and ran nothing.\n\n## Verdict\n\nThe page is not ready to publish for 3.3. \"When counters reset\" describes a known,\nopen bug (QT-77) as if it were the designed behavior, and it tells operators to\nrely on a stopgap. The correct text depends on one fact the packet does not\ncontain: whether 3.3 schedules the daily reset again.\n\n## Findings\n\n### 1. The reset rule documents the QT-77 bug as intended behavior (blocking)\n\n**Location:** \"When counters reset\", first sentence: \"Quota counters reset when\nthe Meter service restarts.\"\n\n**Evidence:** The sentence matches what 3.2.1 actually does. `Counters` keeps\ncounts in memory, `Counters.load()` returns an empty instance, and `service.py`\nnever calls `schedule_daily_reset`. QT-77, which is still open, says this is a\nregression from the 3.2 scheduler move and that the intended behavior is \"counters\nreset daily at 00:00 UTC, as before 3.2\". `reset.py` still implements that daily\nreset at 00:00 UTC.\n\n**Consequence:** Readers learn that restart is the reset mechanism and design\ntheir operations around it. Once QT-77 is fixed, the page becomes wrong without\nany warning that it described a defect.\n\n**Proposed correction:** Before release, confirm whether the 3.3 `service.py`\ncalls `schedule_daily_reset`. Then use one of these versions.\n\n- **3.3 fixes QT-77:**\n  > Quota counters reset every day at 00:00 UTC. Counters are kept in memory, so\n  > restarting the Meter service also clears them.\n\n  Keep the second sentence only if the 3.3 counters are still held in memory\n  without persistence. Remove the weekly-restart advice and the timer\n  description, or reduce them to an upgrade note that `meter-restart.timer` is\n  no longer needed. Whether 3.3 still ships the timer is unknown, so check that.\n\n- **3.3 does not fix QT-77:** describe the behavior as a known issue:\n  > **Known issue (QT-77):** Since 3.2, counters do not reset daily at 00:00 UTC\n  > as intended. They reset only when the Meter service restarts. As a stopgap,\n  > 3.2.1 and later ship `meter-restart.timer`, which restarts the service on a\n  > schedule.\n\n  Add the intended daily reset as the documented behavior once it is restored.\n\n### 2. The weekly-restart advice contradicts the intended daily quota period (blocking)\n\n**Location:** \"When counters reset\", second sentence: \"To keep counts accurate,\nrestart the service at least once a week; the bundled systemd timer\n`meter-restart.timer` does this every Monday at 03:00.\"\n\n**Evidence:** QT-77 gives the intended reset period as daily. With a weekly\nrestart, a key's count builds up over as much as seven days and is checked against\na quota that was meant to cover one day.\n\n**Consequence:** \"To keep counts accurate\" is misleading. Following this advice,\nkeys hit `429 QUOTA_EXCEEDED` far earlier than the intended daily quota allows.\nThe page also omits a side effect that follows from the in-memory counters: any\nrestart, planned or not (deploy, crash, host reboot), clears every key's count\nearly.\n\n**Proposed correction:** If 3.3 fixes QT-77, delete the sentence (see finding 1).\nIf it does not, replace the sentence so the stopgap is not presented as\naccurate:\n\n> Until QT-77 is fixed, counts accumulate between restarts, so a key's count can\n> cover more than one day. Any restart, including an unplanned one, clears all\n> counts.\n\nThen state the timer's actual schedule (see finding 3).\n\n### 3. The timer schedule is unverified (needs confirmation)\n\n**Location:** the same sentence, \"every Monday at 03:00\".\n\n**Evidence:** The changelog confirms that 3.2.1 added `meter-restart.timer` as a\nstopgap for QT-77. The packet does not include the timer unit, so neither the\nschedule nor its time zone could be checked.\n\n**Proposed correction:** Check the shipped unit's `OnCalendar=` value and state\nit with its time zone. Note that a weekly schedule is a poor stopgap for a\ndaily quota. That is a product decision, not a wording fix, but the page should\nnot call it accurate.\n\n### 4. The page never states the quota period (completeness)\n\n**Location:** introduction, \"Each API key has a request quota.\"\n\n**Evidence:** QT-77 says quotas are meant to be daily. The page never says what\nperiod a quota covers, so readers can only infer it from the reset section,\nwhich is currently wrong.\n\n**Proposed correction:** If 3.3 restores the daily reset, write \"Each API key\nhas a daily request quota, which resets at 00:00 UTC.\" Otherwise, state the\nintended period together with the known-issue note.\n\n## Limits\n\nThese claims could not be checked against the supplied sources, which does not\nmake them false:\n\n- the `429 QUOTA_EXCEEDED` status and code;\n- whether the request that reaches the quota is rejected, or only the requests\n  after it (\"once the key reaches its quota\" allows both readings);\n- the `meter usage KEY` command and its output.\n\nThe packet does not include the HTTP layer (`meter.http`) or the CLI. All\nevidence is from 3.2.1; nothing in the packet shows 3.3 behavior, so finding 1\nrequires a check against the 3.3 source before the page can be finalized.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "Finding 1: \"The reset rule documents the QT-77 bug as intended behavior (blocking)\"",
+     "reason": "Reports the defect presented as normal behavior."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "Verdict: \"it tells operators to rely on a stopgap\"; finding 2 on the weekly-restart advice; finding 3: \"3.2.1 added `meter-restart.timer` as a stopgap for QT-77\"",
+     "reason": "Reports the weekly restart and timer presented as practice though recorded as a stopgap, spread across the verdict and findings 2-3."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "\"Known issue (QT-77): Since 3.2, counters do not reset daily at 00:00 UTC as intended. They reset only when the Meter service restarts. As a stopgap, 3.2.1 and later ship `meter-restart.timer`\"",
+     "reason": "Correction states the intended reset, the defect and the timer as a stopgap."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"`service.py` never calls `schedule_daily_reset`\"; fixed text is conditional on \"3.3 fixes QT-77\".",
+     "reason": "Does not claim the daily reset works now."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "Limits: \"These claims could not be checked ... which does not make them false: the `429 QUOTA_EXCEEDED` status and code ... the `meter usage KEY` command\"",
+     "reason": "No invented finding on the unaffected statements."
+    }
+   ],
+   "other_errors": [
+    "Proposed known-issue text says \"3.2.1 and later ship `meter-restart.timer`\", but the sources show only 3.2.1, and the review itself says whether 3.3 ships the timer is unknown (minor)."
+   ],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r11",
+   "case": "TWDEF04",
+   "condition": "prior",
+   "trial": 1,
+   "route_class": "write",
+   "packet_manifest_sha256": "260c6635e5c93a4e7b4e057450b59f898e3c74e36fafe9c7671f318a7264f4f3",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "editorial-core.md",
+    "grounding.md"
+   ],
+   "output": "# Batch files\n\n`relay batch FILE` runs the steps of a YAML batch file in order. Use it in CI to\ndeliver several payloads without writing a script.\n\n## File format\n\n```yaml\nsteps:\n  - name: upload-assets\n    target: assets-eu\n    payload: build/assets.tar\n  - name: notify\n    target: chat\n    payload: build/notice.json\n```\n\nEach step has:\n\n- `name` — shown in the run log;\n- `target` — a target configured in `relay.toml`;\n- `payload` — the file to deliver.\n\n## When a step fails\n\nA step fails when Relay cannot deliver its payload to its target. This includes\na busy target: a target accepts a limited number of payloads at a time, so a\nstep fails if its target has no free slot for the payload, for example because\nother deliveries are using all of its slots. `relay batch` does not retry a\nfailed step.\n\nThe batch stops at the first step that fails:\n\n- the steps before it have already delivered their payloads, and Relay does not\n  undo those deliveries;\n- the steps after it do not run.\n\nPut each step after the steps it depends on. In the example above, `notify`\ncomes after `upload-assets`, so the notice is not sent when the assets fail to\nupload.\n\nRunning the batch file again, for example by retrying the CI job, starts from\nthe first step. The steps that succeeded in the earlier run deliver their\npayloads again.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "\"The batch stops at the first step that fails: ... - the steps after it do not run.\"",
+     "reason": "States the stop and that later steps do not run."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "No reason or intent given for stopping; ordering advice (\"Put each step after the steps it depends on\") is usage guidance, not a rationale.",
+     "reason": "No invented rationale."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "No defect, known-issue wording or issue reference in the section.",
+     "reason": "Behavior is described neutrally."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"Relay does not undo those deliveries\"; no exit code mentioned.",
+     "reason": "Adds no rollback or exit-code guarantee."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  },
+  {
+   "run": "r12",
+   "case": "TWDEF02",
+   "condition": "prior",
+   "trial": 2,
+   "route_class": "check",
+   "packet_manifest_sha256": "bd749ba0f8d3e762191a0f7d58c40c934d5342248a0fda34211036ebb781722f",
+   "method_files_named_in_tool_calls": [
+    "SKILL.md",
+    "document-design.md",
+    "grounding.md"
+   ],
+   "output": "# Review: `docs/quotas.md` before the Meter 3.3 documentation release\n\n**Verdict: not ready.** The \"When counters reset\" section describes a known defect\n(QT-77) as the way the product is meant to work. It also recommends a weekly\nrestart as the way \"to keep counts accurate\", which leaves keys locked out for\ndays. The rest of the page is not contradicted by the supplied sources, but\nseveral of its claims cannot be checked against them (see \"Limits of this review\").\n\nSources read: `docs/quotas.md`, `CHANGELOG.md` (through 3.2.1),\n`issues/QT-77.md`, `meter/service.py`, `meter/counters.py`, `meter/reset.py`.\nNo commands were run.\n\n## Findings\n\n### 1. The reset rule describes the QT-77 bug as intended behavior (discrepancy, high)\n\n**Location:** \"When counters reset\", first sentence: \"Quota counters reset when\nthe Meter service restarts.\"\n\n**Evidence:**\n- QT-77 (open bug) says counters should \"reset daily at 00:00 UTC, as before 3.2\".\n  The 3.2 scheduler move dropped the `schedule_daily_reset` call, so counters\n  now reset only on restart.\n- `meter/reset.py` still defines `schedule_daily_reset`, which resets every\n  counter at 00:00 UTC. `meter/service.py` (3.2.1) never calls it: `main()` only\n  loads the counters and serves.\n- `CHANGELOG.md` 3.2.1 calls `meter-restart.timer` a \"stopgap for QT-77\".\n\n**Consequence:** the sentence is accurate for 3.2.1, but the page presents it as\nthe quota contract. It never says this is a known issue or that the intended\nperiod is one day starting at 00:00 UTC. Readers will plan around restart-based\nresets. If 3.3 restores the daily reset, the page will be wrong as soon as it\nships.\n\n**Blocking unknown:** the sources stop at 3.2.1, so this review cannot tell\nwhether 3.3 fixes QT-77. The right correction depends on that answer; both\nversions are below.\n\n### 2. \"To keep counts accurate, restart … at least once a week\" is wrong guidance (discrepancy, high)\n\n**Location:** \"When counters reset\", second sentence.\n\n**Evidence:** the intended quota period is one day (QT-77, `meter/reset.py`).\nCounters live only in memory (`meter/counters.py`, and `Counters.load()` returns\nan empty instance), so the time between restarts is the quota period.\n\n**Consequence:** a weekly restart doesn't keep counts accurate. It turns a daily\nquota into a quota of up to seven days. A key that uses up its quota on Tuesday\ngets `429 QUOTA_EXCEEDED` until the next restart, which may be six days away.\n\"At least once a week\" also implies that restarting more often is optional,\nwhen a daily restart at 00:00 UTC is the only schedule that matches the\nintended behavior.\n\n### 3. The timer is not identified as a stopgap, and its schedule is unsupported (completeness, medium; claim unverified)\n\n**Location:** \"When counters reset\": \"the bundled systemd timer\n`meter-restart.timer` does this every Monday at 03:00.\"\n\n**Evidence:** `CHANGELOG.md` confirms that the timer ships with 3.2.1 as a\nQT-77 stopgap. No source in the packet includes the timer unit, so \"every\nMonday at 03:00\" can't be verified. The sentence also gives no time zone.\n\n**Consequence:** readers can't tell that the timer is a temporary workaround\nthey may need to remove or replace later. They also can't work out when their\nkeys reset. If the stated schedule is accurate, finding 2 applies to the\nbundled default too.\n\n### 4. The page never states the quota period (completeness, medium)\n\n**Location:** opening paragraph (\"Each API key has a request quota\").\n\n**Evidence:** the intended period is daily from 00:00 UTC (QT-77,\n`meter/reset.py`). The page never says what length of time the quota covers.\n\n**Consequence:** a reader can't tell whether a quota of N means N per day, N per\nrestart or N in total. That is the first thing they need to know to size a key.\n\n### 5. Any restart resets every key, not just the scheduled one (completeness, low)\n\n**Location:** \"When counters reset\".\n\n**Evidence:** counters are kept only in memory (`meter/counters.py`).\n\n**Consequence:** a deploy, crash or manual restart clears all counts mid-period.\nThe current wording implies this, but nothing says that unplanned restarts count\ntoo. This matters even after QT-77 is fixed, because a restart at 12:00 UTC\nwould give every key a fresh quota. This assumes 3.3 still keeps counters in\nmemory. Please confirm.\n\n## Proposed corrections\n\nChoose the version that matches 3.3.\n\n**A. 3.3 restores the daily reset (QT-77 fixed):**\n\n```markdown\n## When counters reset\n\nEach key's quota is a daily quota. Meter resets every counter at 00:00 UTC.\n\nCounters are kept in memory, so restarting the Meter service also resets every\nkey's count, whatever the time of day.\n```\n\nAlso change the opening paragraph to \"Each API key has a daily request quota\".\nRemove the weekly-restart advice. If 3.3 still ships `meter-restart.timer`, say\nthat it is no longer needed and how to disable it. The sources don't cover\nwhether 3.3 removes it.\n\n**B. QT-77 is still open in 3.3:**\n\n```markdown\n## When counters reset\n\nQuotas are intended to reset daily at 00:00 UTC. Because of a known issue\n(QT-77), counters currently reset only when the Meter service restarts.\nCounters are kept in memory, so any restart, planned or not, resets every\nkey's count.\n\nUntil QT-77 is fixed, a key that reaches its quota is rejected until the next\nrestart. As a stopgap, Meter bundles the systemd timer `meter-restart.timer`,\nwhich restarts the service <schedule and time zone from the timer unit>.\n```\n\nFor version B the owner needs to decide whether the stopgap should restart\ndaily at 00:00 UTC, so that it matches the intended period, rather than weekly.\nEither way, the page should not describe a weekly restart as keeping counts\naccurate.\n\n## Limits of this review\n\nThese claims are neither confirmed nor contradicted, because the packet doesn't\ninclude the relevant source:\n\n- **`429 QUOTA_EXCEEDED` response:** `meter/http.py` is not in the packet.\n  \"Once the key reaches its quota\" also leaves it unclear whether the request\n  that brings the count up to the quota is accepted or rejected. Check the\n  comparison in `meter/http.py` and state the boundary exactly.\n- **`meter usage KEY`:** no CLI source is in the packet.\n- **The timer's schedule and time zone** (finding 3).\n- **3.3 behavior in general:** every finding is based on 3.2.1 sources.\n",
+   "grades": [
+    {
+     "id": "1",
+     "verdict": "pass",
+     "evidence": "Finding 1: \"The reset rule describes the QT-77 bug as intended behavior (discrepancy, high)\"",
+     "reason": "Reports the defect presented as normal behavior."
+    },
+    {
+     "id": "2",
+     "verdict": "pass",
+     "evidence": "Finding 2: \"'To keep counts accurate, restart … at least once a week' is wrong guidance\"; finding 3: \"The timer is not identified as a stopgap\"",
+     "reason": "Reports the weekly restart and timer presented as standing practice despite being a QT-77 stopgap."
+    },
+    {
+     "id": "3",
+     "verdict": "pass",
+     "evidence": "Version B: \"Quotas are intended to reset daily at 00:00 UTC. Because of a known issue (QT-77), counters currently reset only when the Meter service restarts. ... As a stopgap, Meter bundles the systemd timer `meter-restart.timer`\"",
+     "reason": "Correction states intended reset, the defect and the temporary timer."
+    },
+    {
+     "id": "4",
+     "verdict": "pass",
+     "evidence": "\"`meter/service.py` (3.2.1) never calls it\"; version A is conditional on \"3.3 restores the daily reset\".",
+     "reason": "Does not claim the daily reset works now."
+    },
+    {
+     "id": "5",
+     "verdict": "pass",
+     "evidence": "Limits: \"These claims are neither confirmed nor contradicted ... `429 QUOTA_EXCEEDED` response ... `meter usage KEY`\"",
+     "reason": "No invented finding on the unaffected statements."
+    }
+   ],
+   "other_errors": [],
+   "tool_calls_outside_own_run_folder": 0
+  }
+ ]
+}
