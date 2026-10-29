@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
 from runtime.events import normalize
-from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports
+from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
 from route_evidence import route_table
@@ -233,6 +233,30 @@ def reviewer_boundary(event, environment, *, clock=None):
                 "task/checklist, memory, file writes, shell execution and further delegation are unavailable")
 
 
+STOPS = frozenset({"Stop", "SubagentStop"})
+
+
+def stop_feedback(event, rules, enabled, settings, kwargs):
+    """The one continuation a Claude stop gets, or {}.
+
+    The skill gate goes first, then a contradicted read claim, then the branch
+    note, which the report check joins, since a turn continues at most once. The
+    hand-back hold passes a stop event built from the report and refuses with
+    the same text.
+    """
+    if rules.skill_gate and settings["state_dir"]:
+        gate = skill_gate.apply(event, "claude", enabled, settings["state_dir"], **kwargs)
+        if gate:
+            return gate
+    note = sources.stopped(event) if rules.read_claims else {}
+    if not note and rules.branch_rules:
+        note = branches.stopped(event, rules.branch_rules, enabled)
+    lines = reports.stopped(event, rules.report_rules, enabled) if rules.report_rules else {}
+    if lines and note:
+        note["hookSpecificOutput"]["additionalContext"] += "\n\n" + lines["hookSpecificOutput"]["additionalContext"]
+    return note or lines
+
+
 def _process(event, client, environment, *, root=ROOT, clock=None):
     normalized = normalize(event, client)
     if normalized is None:
@@ -254,45 +278,36 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
         loaded = []
-        if client == "claude" and rules.skill_gate and settings["state_dir"]:
-            # Records skill loads on PreToolUse; on Stop it can hold a turn to
-            # the skills it announced. A guard reply keeps priority.
-            names = {rule["skill"].split("/", 1)[1] for rule in rules}
-            gate = skill_gate.apply(event, client, names, settings["state_dir"],
-                                    **({"clock": clock} if clock else {}))
-            if gate and not protected:
-                return gate, None
-            if event["hook_event_name"] == "UserPromptSubmit":
-                # The check names skills already loaded, so the model can stay quiet about them.
-                loaded = skill_gate.loaded(event, client, names, settings["state_dir"],
-                                           **({"clock": clock} if clock else {}))
         name = event["hook_event_name"]
         enabled = {rule["skill"].split("/", 1)[1] for rule in rules}
+        kwargs = {"clock": clock} if clock else {}
+        if client == "claude" and rules.skill_gate and settings["state_dir"] and name not in STOPS:
+            # Records skill loads on PreToolUse; the gate's stop feedback comes from stop_feedback.
+            skill_gate.apply(event, client, enabled, settings["state_dir"], **kwargs)
+            if name == "UserPromptSubmit":
+                # The check names skills already loaded, so the model can stay quiet about them.
+                loaded = skill_gate.loaded(event, client, enabled, settings["state_dir"], **kwargs)
         if client == "claude" and not protected:
-            # How a source was read, not which skill applies; the skill gate's reply keeps priority.
-            note = (sources.fetched(event, settings["state_dir"], **({"clock": clock} if clock else {}))
-                    if name == "PostToolUse" and rules.fetch_note
-                    else sources.stopped(event) if name in {"Stop", "SubagentStop"} and rules.read_claims
-                    # A tool call that shows a skill this session has not loaded; a routing reply and the
-                    # launch reminder own their PreToolUse, so this check stays silent there.
-                    else midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
-                                         form=settings["skill_note_form"], **({"clock": clock} if clock else {}))
-                    if name == "PreToolUse" and rules.midturn_rules and not legacy else {})
+            if name in STOPS:
+                # A report already handed back reached the parent; a continuation cannot change it.
+                note = {} if handback.handed_back(event) else stop_feedback(event, rules, enabled, settings, kwargs)
+            elif name == "PreToolUse" and rules.handback_hold and handback.handing_back(event):
+                # The stop checks run before the report is delivered, while a refusal can still change it.
+                note = handback.held(event, stop_feedback(handback.stop_event(event), rules, enabled, settings, kwargs),
+                                     settings["state_dir"], **kwargs)
+            # How a source was read, not which skill applies.
+            elif name == "PostToolUse" and rules.fetch_note:
+                note = sources.fetched(event, settings["state_dir"], **kwargs)
+            # A tool call that shows a skill this session has not loaded; a routing reply and the
+            # launch reminder own their PreToolUse, so this check stays silent there.
+            elif name == "PreToolUse" and rules.midturn_rules and not legacy:
+                note = midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
+                                       form=settings["skill_note_form"], **kwargs)
+            else:
+                note = {}
             # A rerun of one scenario while its reference is unread; a skill note on the same call goes first.
             if not note and name == "PreToolUse" and rules.rerun_rules and not legacy:
-                note = reruns.checked(event, rules.rerun_rules, enabled, settings["state_dir"],
-                                      **({"clock": clock} if clock else {}))
-            # A stop continues at most once: a contradicted read claim goes first.
-            if not note and name in {"Stop", "SubagentStop"} and rules.branch_rules:
-                note = branches.stopped(event, rules.branch_rules, enabled)
-            if name in {"Stop", "SubagentStop"} and rules.report_rules:
-                # The report check joins a branch note in the same continuation, since a turn continues once.
-                lines = reports.stopped(event, rules.report_rules, enabled)
-                if lines and note:
-                    output = note["hookSpecificOutput"]
-                    output["additionalContext"] += "\n\n" + lines["hookSpecificOutput"]["additionalContext"]
-                elif lines:
-                    note = lines
+                note = reruns.checked(event, rules.rerun_rules, enabled, settings["state_dir"], **kwargs)
             if note:
                 return note, None
         decision = ({"rule_ids": [], "context": ""} if protected

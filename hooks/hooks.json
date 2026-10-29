@@ -57,7 +57,24 @@
         ]
       },
       {
-        "matcher": "^(?!(?:Agent|Task)$)",
+        "matcher": "^SubagentHandback$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-I",
+              "-B",
+              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
+              "--client",
+              "claude"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(?:Agent|Task|SubagentHandback)$)",
         "hooks": [
           {
             "type": "command",

@@ -23,8 +23,9 @@ it and an unusual plugin path needs no quoting. When the hook fails, cannot
 start or times out, Claude Code runs the tool anyway, except for `Agent` and
 `Task`: their entry sets `onFailure: "block"` (Claude Code 2.1.295 or later),
 so a launch the guard could not check is refused instead of running unrouted.
-`SubagentStop` allows 15 seconds, because its report check reads the worker's
-whole transcript; the other events allow 5.
+`SubagentStop` and a subagent's `SubagentHandback` call allow 15 seconds, because
+their checks read the worker's whole transcript; the other events allow 5. A
+hand-back the hook cannot check in time goes through unchecked.
 
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
 skill choice also needs `markdown-it-py` from `hooks/requirements.txt`, installed in
@@ -193,23 +194,41 @@ others its work needs, it loads each before the work, through the skill tool or
 by reading `<name>/SKILL.md` under the installed `skills` directory, which the
 check names for profiles without the skill tool. It opens its first message with
 the same one-sentence announcement and does not restate it in its report.
-In Claude Code the gate above also runs at `SubagentStop`. It reads the
-subagent's own transcript, including a report delivered through
-`SubagentHandback`, and a subagent that announced a skill it did not load
-continues once. That continuation helps only a subagent that stops before it
-hands its report back. A subagent that reports through `SubagentHandback`
-delivers the report when it calls the tool, before it stops, so continuing
-cannot change what the parent already received. The feedback usually does not
-reach such a subagent at all: in one owner's sessions from 17 to 29 October 2026,
-the subagent's transcript shows the feedback added to its context after 21 of
-148 stops that followed a hand-back, and after all 53 stops that came before
-one, although Claude Code's
+In Claude Code the gate above also runs at `SubagentStop`, on the subagent's own
+transcript: a subagent that announced a skill it did not load continues once.
+The same holds for the [source](#source-checks-in-claude-code),
+[branch](#branch-check-in-claude-code) and [report](#report-check-in-claude-code)
+checks.
+
+A subagent that reports through `SubagentHandback` delivers the report when it
+calls the tool, before it stops, so a continuation at the stop cannot change what
+the parent received. The feedback rarely reaches such a subagent anyway: in one
+owner's sessions from 17 to 29 October 2026, the subagent's transcript shows the
+feedback added to its context after 21 of 148 stops that followed a hand-back,
+and after all 53 stops that came before one, although Claude Code's
 [hooks reference](https://code.claude.com/docs/en/hooks#subagentstop) says such
-feedback keeps a subagent running. The same limit applies to the
-[source](#source-checks-in-claude-code), [branch](#branch-check-in-claude-code)
-and [report](#report-check-in-claude-code) checks at `SubagentStop`. Codex
-`SubagentStop` accepts no feedback context, so Codex subagents get the check
-only. `disabled_rules: ["skill-check"]` turns off the subagent check as well.
+feedback keeps a subagent running. So the same checks run when the subagent
+calls `SubagentHandback`, with its report as the final message. When one of them
+has feedback, the hook refuses that first hand-back with the feedback as the
+reason. The reason says the report has not reached the parent yet, that the
+check's advice not to repeat the answer does not apply, and that the next
+hand-back goes through. The next one does, whatever it contains: a subagent that
+stops without handing back leaves its parent without the report, so a refusal
+is never repeated. At most one refusal comes per subagent and request, kept as
+one hashed key like the mid-turn note's. Without the plugin data directory,
+where that key lives, no hand-back is refused. After a delivered hand-back the
+stop checks stay silent; after a refused one they speak as before.
+
+In live runs with Claude Code 2.1.304, a subagent refused once handed back again
+in all five: three with a stand-in refusal and two with this hold. Where the
+packet allowed it, the new report kept its text and added the missing lines;
+where the packet fixed a one-line report, the subagent kept that line. A
+subagent that stopped without handing back left its parent only a notice that
+no report was delivered and that a `SendMessage` can ask for it.
+`disabled_rules: ["handback-hold"]` turns off the refusal and leaves the stop
+checks. Codex `SubagentStop` accepts no feedback context and Codex has no
+hand-back hold, so Codex subagents get the check only.
+`disabled_rules: ["skill-check"]` turns off the subagent check as well.
 
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
@@ -492,7 +511,8 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
-`"fetch-note"` and `"read-claims"` the two Claude source checks, and each
+`"fetch-note"` and `"read-claims"` the two Claude source checks, `"handback-hold"`
+the refusal of a subagent's first hand-back, and each
 rule ID of the branch check table or of the mid-turn note table one of its rows.
 `skill_note_form` is `"note"` (the default) or `"deny"`, see the mid-turn note above. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the

@@ -159,12 +159,15 @@ class ReminderTests(unittest.TestCase):
                     self.assertEqual(1, len(rule["hooks"]))
                     for hook in rule["hooks"]:
                         self.assertEqual("command", hook["type"])
+                        # A worker's stop and its hand-back read the worker's whole transcript.
+                        worker = event == "SubagentStop" or rule.get("matcher") == "^SubagentHandback$"
                         timeout_limit = (3 if client == "codex" and event == "SessionEnd"
-                                         else 15 if client == "claude" and event == "SubagentStop" else 5)
+                                         else 15 if client == "claude" and worker else 5)
                         self.assertLessEqual(hook["timeout"], timeout_limit)
             if client == "claude":
                 # Only the launch guard blocks the tool when the hook fails; the rest go ahead.
-                blocking = {tool for tool in ("Agent", "Task", "Bash", "Read", "mcp__x__Agent", "AgentStatus")
+                blocking = {tool for tool in ("Agent", "Task", "Bash", "Read", "mcp__x__Agent", "AgentStatus",
+                                              "SubagentHandback")
                             for rule in hooks["PreToolUse"] if re.search(rule["matcher"], tool)
                             for hook in rule["hooks"] if hook.get("onFailure") == "block"}
                 self.assertEqual({"Agent", "Task"}, blocking)

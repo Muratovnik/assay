@@ -34,6 +34,8 @@ MIDTURN_RULES = ("midturn-evidence-research", "midturn-code-change", "midturn-te
 RERUN_RULES = ("rerun-diagnostic-reproducer",)
 # The Claude stop check for report lines; repeated from reports.RULES, kept equal by a test.
 REPORT_RULES = ("report-verification", "report-reuse", "plan-existing")
+# The Claude refusal of a subagent's first hand-back that the stop checks have feedback for.
+HANDBACK_HOLD = "handback-hold"
 # Phrase rules retired in favor of the skill check. Old settings that disable
 # them stay valid and do nothing, instead of breaking the hooks.
 RETIRED_RULES = frozenset({"test-audit", "test-writing", "research", "reuse-lookup", "reuse-question",
@@ -49,7 +51,7 @@ class RuleSet(list):
 
     def __init__(self, rules, skill_check, skill_gate=False, skills_root="", fetch_note=False, read_claims=False,
                  branch_rules=(), midturn_rules=(), rerun_rules=(),
-                 report_rules=()):
+                 report_rules=(), handback_hold=False):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
@@ -67,6 +69,8 @@ class RuleSet(list):
         # The rerun note names a reference, not a skill to load, so it stays without the skill check.
         self.rerun_rules = frozenset(rerun_rules)
         self.report_rules = frozenset(report_rules)
+        # It applies the stop checks that remain enabled, so it needs no skill check of its own.
+        self.handback_hold = handback_hold
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -75,7 +79,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, READ_CLAIMS, *BRANCH_RULES, *MIDTURN_RULES, *RERUN_RULES, *REPORT_RULES}
+    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, *BRANCH_RULES, *MIDTURN_RULES,
+             *RERUN_RULES, *REPORT_RULES}
     if set(disabled_rules) - RETIRED_RULES - known or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
     rules, seen, content = [], [], []
@@ -103,7 +108,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                      [rule for rule in BRANCH_RULES if rule not in disabled_rules],
                      [rule for rule in MIDTURN_RULES if rule not in disabled_rules],
                      [rule for rule in RERUN_RULES if rule not in disabled_rules],
-                     [rule for rule in REPORT_RULES if rule not in disabled_rules])
+                     [rule for rule in REPORT_RULES if rule not in disabled_rules],
+                     HANDBACK_HOLD not in disabled_rules)
     # The installation path is the owner's; bound the text the catalog controls.
     if longest_check(rules) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
