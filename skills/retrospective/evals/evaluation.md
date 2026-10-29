@@ -113,6 +113,10 @@ candidate across eight runs each.
 This is one run per cell with one executor configuration and one grader. It can
 show the contradiction the old sentence caused and the absence of a regression
 on these cases; it does not measure recall of real friction or any saving. The
+executor prompt named the method file, so the runs used explicit loading and say
+nothing about discovery; the description is unchanged, and D01–D05 were not
+rerun. Some answers quote the method they followed, the RE03 sentence above
+among them, so the grader's blindness to the condition was not complete. The
 [cases](efficiency-cases.json), [criteria](efficiency-rubric.json),
 [exposure metadata](efficiency-case-metadata.json) and
 [evidence](efficiency-evidence.json) are now exposed regression cases; RE06,
