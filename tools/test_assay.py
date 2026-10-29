@@ -448,6 +448,20 @@ class AgentAssetsTests(unittest.TestCase):
         self.assertIn("that you did not rerun the oracle", claude)
         self.assertIn("read the independent-audit criteria the caller includes or names by path", claude)
         self.assertNotIn("permissionMode:", claude)
+        # A reviewer that read nothing must not return a clean verdict.
+        for projection in (codex, claude):
+            self.assertIn("Name the files, diff hunks, and receipts you actually read", projection)
+
+    def test_claude_profiles_start_without_the_callers_claude_md(self) -> None:
+        catalog = aa.load_catalog(aa.ROOT)
+        for asset in aa.profile_assets(catalog):
+            with self.subTest(profile=asset.name):
+                source = (aa.ROOT / asset.path).read_bytes()
+                claude = aa.render_profile(source, asset, "claude").decode("utf-8")
+                frontmatter = claude.split("---\n")[1].splitlines()
+                self.assertIn("omitClaudeMd: true", frontmatter)
+                codex = aa.render_profile(source, asset, "codex").decode("utf-8")
+                self.assertNotIn("omitClaudeMd", codex)
 
     def test_conditional_profile_instructions_are_validated(self) -> None:
         catalog = aa.load_catalog(aa.ROOT)

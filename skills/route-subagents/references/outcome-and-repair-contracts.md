@@ -91,6 +91,12 @@ subject failure can be the correct complete result. Keep assignment completion,
 subject verdict, and observed check exit/result separate. An audit with missing
 required investigation is partial even if one defect was found.
 
+A review or audit that reports no finding names what it actually read: the
+files, diff hunks and receipts behind that conclusion. When it names none, or
+reports that a read was blocked, failed or left the subject unverified, the
+assignment is `partial` with that gap stated, whatever its exit code or verdict.
+A process that exits cleanly after reading nothing has not reviewed anything.
+
 Reject internally inconsistent combinations, including `complete` with an unmet
 assignment acceptance condition, `expected_no_change` for `change_required`, or a
 read-only finding with unexplained mutation.

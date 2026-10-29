@@ -69,7 +69,9 @@ through the shell were 37 % of worker tool output. For an interrupted or resumed
 to reconcile current bytes, completed effects and present authority before replay.
 
 For review add the role-required mode, original brief, frozen contracts,
-candidate identity, scoped risk and receipts for primary-owned stateful gates.
-Do not supply the preferred verdict. For a finding repair send its location,
+candidate identity, scoped risk and receipts for primary-owned stateful gates,
+and ask for the files, hunks and receipts the reviewer actually read; the
+[result rules](outcome-and-repair-contracts.md#required-result-packet) say how a
+no-finding return without them counts. Do not supply the preferred verdict. For a finding repair send its location,
 observed/required behavior, affected diff and named control, preserving the
 unchanged authority and contracts.
