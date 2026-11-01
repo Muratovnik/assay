@@ -1,7 +1,8 @@
 # Evidence sources
 
 Read a source only when the user permits it and the client can reach it. No
-single source is required; name the ones that were unavailable. These are kinds
+single source is required; name the ones you tried and could not reach, with the
+error. These are kinds
 of evidence, not products: apply the same checks to whatever implements them.
 
 ## Before reading any source
@@ -14,7 +15,7 @@ of evidence, not products: apply the same checks to whatever implements them.
 - **Aggregate, then sample.** Count signals across the whole period first, then
   read only the passages that decide a candidate. Record the sampling rule.
 - **Keep a reading ledger.** For each source: what was read in full, what was
-  aggregated, what was sampled and what was skipped, with the reason.
+  aggregated, what was sampled and what was skipped.
 - **Exclude the current session** from evidence about past work; it contains
   this review itself.
 

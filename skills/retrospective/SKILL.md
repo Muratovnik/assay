@@ -86,11 +86,15 @@ and after it on comparable work, counting any rework it caused.
 
 ## Deliver
 
-Report, in this order: scope and sources actually read, sampled and skipped;
-patterns; single incidents; candidates already covered; proposals for decision;
-status of earlier proposals; limits and open hypotheses. Use pointers to records
-instead of copying transcripts; quote only the minimum a decision needs, and
-treat personal and client data as the owner's data rules require.
+Before reporting, settle each unread source that could change a finding: read it
+when a call or two reach it, and ask about it with what it costs when it takes more.
+Report, in this order: the period and the sources the findings rest on; patterns;
+single incidents; candidates already covered; proposals for decision; status of
+earlier proposals; open hypotheses. Name a source left unread only when you tried
+and it failed, with the error and the finding it leaves open; the list of what was
+read, sampled and not read goes in the report when the user asks for coverage. Use
+pointers to records instead of copying transcripts; quote only the minimum a decision
+needs, and treat personal and client data as the owner's data rules require.
 
 This method grants no write, delegation, settings, installation or publication
 authority, and it never enables data collection. Plans and recommendations it

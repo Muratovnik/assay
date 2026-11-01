@@ -107,7 +107,10 @@ class StopTests(unittest.TestCase):
                 self.assertIn("this turn edited " + path.split("\\")[-1], text)
                 self.assertIn("a table `Status | Check | Result`", text)
                 self.assertIn("labels in the reply's language", text)
-                self.assertIn("when no check ran, a `Not verified` row says so", text)
+                self.assertIn("a check a call or two can run is run now", text)
+                self.assertIn("tried and failed, with the error", text)
+                self.assertIn("what will settle it and the record that tracks it", text)
+                self.assertIn("without explaining it", text)
                 # A literal English line in the note is what a Russian reply copied.
                 self.assertNotIn("`Verified:", text)
                 self.assertNotIn("C:\\work", text)

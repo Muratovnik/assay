@@ -73,8 +73,8 @@ files no agent loads.
 Map every inventory entry to its disposition: kept, moved (destination and
 pointer), or removed by the owner's decision. An entry without a disposition is a
 silent drop. Diff exact identifiers separately. Report size before and after,
-dispositions, moves, removals awaiting decision and what was not checked, such as
-whether a client actually loaded the file.
+dispositions, moves, removals awaiting decision and, when no client has loaded the
+file yet, what will show that one did.
 
 ## Hand off
 

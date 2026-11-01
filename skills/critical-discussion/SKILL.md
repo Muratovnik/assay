@@ -32,7 +32,9 @@ holds, do it"), finish the discussion first and then do only what was asked.
    presupposes the solution. An explicit, checkable need is not re-interrogated.
 2. **An example is a sample, not the scope.** "For example, mode X" asks about
    the class X belongs to. Name the class, build an independent inventory of
-   the system and state what was and was not examined and why. Do not derive the
+   the system and state what was examined. A part the decision depends on and
+   you did not examine is examined now or asked about with what it costs; name it
+   only when you tried and it failed, with the error. Do not derive the
    inventory from what has already been discussed. An explicit narrow scope
    ("only mode X") is respected; one adjacent material observation may be named
    once, labelled as outside the scope.

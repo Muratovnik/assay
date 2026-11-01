@@ -183,10 +183,15 @@ After editing code, report the checks as a table, even for one, with the columns
 `Verified` row: `Check` names it, with its environment only when that differs from
 the user's or affects the conclusion, and `Result` gives the outcome and the last
 code change the check ran after; a documentation edit after the run needs no rerun,
-but the row then does not claim "after all changes". A remaining gap gets a `Not
-verified` row with its reason under `Result`, only when it changes the reader's
-trust in the result or their next step; when the check the request named covers
-the change, write none. Keep cells short and put longer detail under the table.
+but the row then does not claim "after all changes". Run a check a call or two can
+run rather than listing it. A `Not verified` row is for a check that was tried and
+failed, with the error and what it leaves open under `Result`, or that cannot be
+known yet, with what will settle it and the record that tracks it. Ask the user
+about any other gap that changes their trust in the result or their next step, with
+what closing it costs, and leave out the rest; do not explain a check you did not
+try, since a reason written afterwards cannot be checked. When the check the request
+named covers the change, write none. Keep cells short and put longer detail under
+the table.
 Write the labels and column names in the reply's language, such as `Проверено`,
 `Не проверено` and `Статус | Проверка | Итог`. When the change modified or removed
 existing tests, add `Tests changed: <tests> — <why>` under the table. Include the

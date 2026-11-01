@@ -453,8 +453,8 @@ before the owner intervened.
 A hook cannot judge whether a check was the right one or whether a ready-made
 solution existed, but it can see that the line stating it is missing. `code-change`
 asks for a table `Status | Check | Result` after editing code, with a `Verified` row
-per material check and a `Not verified` row for a gap that changes the reader's trust
-or next step, labels in the reply's language; `ui-delivery` refers to it, and
+per material check and a `Not verified` row for a check that was tried and failed or
+cannot be known yet, labels in the reply's language; `ui-delivery` refers to it, and
 `implementation-planning` asks a plan file for a `What already exists` section.
 
 At `Stop` and `SubagentStop`, the hook reads the turn back to its start and stops

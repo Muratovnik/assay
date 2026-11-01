@@ -229,4 +229,7 @@ def stopped(event, rules=RULES, skills=None):
     return {"hookSpecificOutput": {"hookEventName": name, "additionalContext": "\n".join([
         f"Assay report check: something the skill below asks for after {who}'s changes is missing:", *lines,
         "Add only what is missing, without repeating the answer; for a plan, add the section to the plan file. "
-        "A report states what was done: when no check ran, a `Not verified` row says so instead, with the reason."])}}
+        "A report states what was done: a check a call or two can run is run now. A `Not verified` row is for a check "
+        "that was tried and failed, with the error, or that cannot be known yet, with what will settle it and the "
+        "record that tracks it; ask about any other gap that matters and leave out the rest, without explaining it."
+        ])}}

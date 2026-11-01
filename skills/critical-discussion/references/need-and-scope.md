@@ -43,5 +43,6 @@ Check both directions:
 - each need has a supporting part of the system or a named gap;
 - each significant part has a need or is a candidate for removal or reuse.
 
-Scale the inventory to the decision. Say what was examined and what was not,
-and why; "I did not read the plugin modules" is a useful limit, not a failure.
+Scale the inventory to the decision and say what was examined. A part left
+unread that the decision depends on follows rule 2: examined now, asked about or,
+when you tried and it failed, named with the error.

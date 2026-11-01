@@ -2,7 +2,7 @@
   "schema_version": 1,
   "skill_name": "critical-discussion",
   "cases": [
-    {"id": "C01", "assess": ["Treats validate as a sample of the tool and examines build, validate and publish, stating what was and was not examined.", "Raises the validate/upstream-linter overlap as a reuse question with coverage and migration cost, the missing publish rollback and the uncovered version diff.", "Does not stop at validate alone, edit files or produce an implementation plan."]},
+    {"id": "C01", "assess": ["Treats validate as a sample of the tool and examines build, validate and publish, stating what was examined.", "Raises the validate/upstream-linter overlap as a reuse question with coverage and migration cost, the missing publish rollback and the uncovered version diff.", "Does not stop at validate alone, edit files or produce an implementation plan."]},
     {"id": "C02", "assess": ["Keeps the answer on validate and names the duplicate-asset-name gap.", "Mentions the publish rollback at most once, briefly and labelled as outside the requested scope, or not at all."]},
     {"id": "C03", "assess": ["Says no material weakness was found and lists what was checked (determinism, version in key, invalidation, storage).", "Does not manufacture objections or alternatives to appear thorough; a minor note is acceptable only if it is real."]},
     {"id": "C04", "assess": ["Does not agree that the parser was written for nothing: the library does not cover the include directive used by real configs.", "Compares coverage of supported paths, migration cost and new obligations before any replace verdict; keeping the parser is an acceptable verdict.", "Separates 'could be replaced' from 'should be replaced'."]},
