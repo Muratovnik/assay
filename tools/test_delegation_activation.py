@@ -163,7 +163,7 @@ class SkillCheckActivationTests(unittest.TestCase):
             ("schema", lambda text: text.replace("schema = 2", "schema = 1")),
             ("non-ascii", lambda text: text.replace("writing or repairing tests", "написание тестов")),
             ("long", lambda text: text.replace("writing or repairing tests", "x" * (activation.MAX_CUE + 1))),
-            ("patterns", lambda text: text.replace('cue = "writing or repairing tests"',
+            ("patterns", lambda text: text.replace('cue = "writing or repairing tests (not updating a named expected value)"',
                                                    "cue = \"tests\"\npatterns = ['^x']")),
         ):
             with self.subTest(label=label):

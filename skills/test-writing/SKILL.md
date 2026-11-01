@@ -1,6 +1,6 @@
 ---
 name: test-writing
-description: Write or repair automated tests for justified behavior and meaningful regression protection. Skip test execution alone, testing explanations and read-only audits.
+description: Write or repair automated tests for justified behavior and meaningful regression protection. Skip test execution alone, testing explanations, read-only audits and an update to an expected value the request names together with its check.
 license: MIT
 metadata:
   assay-optional-skills: "code-change product-flow-mapping"

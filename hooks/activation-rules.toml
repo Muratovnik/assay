@@ -10,11 +10,11 @@ cue = "current external facts, existing solutions or comparing options"
 
 [[skills]]
 skill = "skill/code-change"
-cue = "changing code, tooling, comments or docstrings, or diagnosing failures"
+cue = "changing code, tooling, comments, docstrings, diagnosis (not named simple edits)"
 
 [[skills]]
 skill = "skill/test-writing"
-cue = "writing or repairing tests"
+cue = "writing or repairing tests (not updating a named expected value)"
 
 [[skills]]
 skill = "skill/test-audit"

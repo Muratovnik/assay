@@ -171,8 +171,8 @@ class ActivationTests(unittest.TestCase):
         for replacement in (original.replace('skill/code-change', 'skill/unknown'),
                             original.replace('skill = "skill/test-writing"', 'skill = "skill/code-change"'),
                             original.replace('schema = 2', 'schema = 1'),
-                            original.replace('cue = "writing or repairing tests"', 'cue = "тесты"'),
-                            original.replace('cue = "writing or repairing tests"', 'cue = "' + 'x' * (activation.MAX_CUE + 1) + '"'),
+                            original.replace('cue = "writing or repairing tests (not updating a named expected value)"', 'cue = "тесты"'),
+                            original.replace('cue = "writing or repairing tests (not updating a named expected value)"', 'cue = "' + 'x' * (activation.MAX_CUE + 1) + '"'),
                             original + '\n[[rules]]\nid = "code-change"\n'):
             with self.subTest(replacement=replacement[-100:]), tempfile.TemporaryDirectory() as tmp:
                 root=Path(tmp); (root/'hooks').mkdir()

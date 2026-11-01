@@ -24,6 +24,8 @@
     {"id":"D03","expected_route":"independent-audit -> code-quality criteria, retaining read-only authority"},
     {"id":"D04","expected_route":"no code-change"},
     {"id":"D05","expected_route":"run-only task; no code-change or test audit by default"},
-    {"id":"D06","expected_route":"evidence-research; no implementation workflow by default"}
+    {"id":"D06","expected_route":"evidence-research; no implementation workflow by default"},
+    {"id":"D07","expected_route":"no code-change: the request names the edit and its check exactly and nothing needs diagnosing"},
+    {"id":"D08","expected_route":"code-change: the request describes a symptom, so its cause must be found even if the fix is one character"}
   ]
 }

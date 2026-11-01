@@ -1,6 +1,6 @@
 ---
 name: code-change
-description: Implement or refactor code with clear responsibilities, controlled state and effective quality checks. Use for changes affecting code structure, shared logic, tooling or source comments and docstrings; skip standalone prose, product documentation and read-only audits.
+description: Implement or refactor code with clear responsibilities, controlled state and effective quality checks. Use for changes affecting code structure, shared logic, tooling or source comments and docstrings; skip standalone prose, product documentation, read-only audits and an edit the request names exactly, with its check, when nothing needs diagnosing, such as a typo, rename or changed default.
 license: MIT
 metadata:
   assay-optional-skills: "evidence-research implementation-planning independent-audit software-architecture technical-writing test-writing ui-delivery"

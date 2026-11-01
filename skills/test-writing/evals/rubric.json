@@ -18,6 +18,8 @@
     {"id": "WT03", "activate": false},
     {"id": "WT04", "activate": false},
     {"id": "WT05", "activate": false},
-    {"id": "WT06", "activate": false}
+    {"id": "WT06", "activate": false},
+    {"id": "WT07", "activate": false},
+    {"id": "WT08", "activate": true}
   ]
 }
