@@ -90,9 +90,11 @@ effects, not merely any exception or a missing control in one UI.
 When fixing a reproducible bug, ordinarily demonstrate that the regression test
 fails for that bug before the fix and passes afterward. If the fix already
 exists, use a known bad revision or a narrowly altered disposable copy when
-safe and authorized. Never delete or revert valid user work to recreate a
-test-first sequence. If no trustworthy failure control is available, describe
-the narrower evidence instead of claiming demonstrated regression protection.
+safe and authorized; keep such a copy in the workspace's ignored scratch
+directory, never the system temporary directory. Never delete or revert valid
+user work to recreate a test-first sequence. If no trustworthy failure control
+is available, describe the narrower evidence instead of claiming demonstrated
+regression protection.
 
 Adding coverage to correct existing behavior may pass immediately. Examine its
 assertions and a relevant fault control when warranted; do not manufacture a
@@ -117,11 +119,19 @@ inputs and repeat/order checks as appropriate; retain the failing seed or
 sequence. Passing after a retry does not invalidate the first failure.
 
 For load-bearing checks, exercise a known-invalid control and a nearby valid
-control when feasible. Targeted mutation can help with missing conditions or
-effects, but inspect whether the mutant changes supported behavior and whether
-the intended assertion detects it. A timeout, build failure or equivalent
-mutant is not clean proof of detection. Do not mutate the live subject or adopt
-a campaign framework merely to use this skill.
+control when feasible; in a tests-only task with no failing run before a fix,
+that control is what shows the test can fail. A mutation check of your own is
+conditional. Skip it when the run before the fix already showed the test
+failing for the defect. Otherwise one or two targeted mutants can help with
+missing conditions or effects: apply them inside the test process, for example
+by substituting the function under test, rather than copying the tree, and put
+any unavoidable copy in the workspace's ignored scratch directory, never the
+system temporary directory. Make one attempt; if the harness command is
+refused, name the unverified gap instead of retrying another way. Inspect
+whether the mutant changes supported behavior and whether the intended
+assertion detects it. A timeout, build failure or equivalent mutant is not
+clean proof of detection. Do not mutate the live subject or adopt a campaign
+framework merely to use this skill.
 
 Report the guarantees added or changed, the source of disputed expectations,
 commands/results and any demonstrated failure-to-pass evidence. Distinguish
