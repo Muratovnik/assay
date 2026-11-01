@@ -11,7 +11,8 @@ visible in the tool calls, and a `Reuse: not applicable` line written to satisfy
 the check reports no decision. On Stop or SubagentStop the turn
 continues once with one note naming each missing line. It is never a block, runs
 no model and stores nothing. A write made through a shell command is seen only
-when the turn stages the file with `git add`.
+when the turn stages the file with `git add`. While a background launch of the
+main session's turn still runs, the verification line is not asked for yet.
 """
 from __future__ import annotations
 
@@ -52,6 +53,13 @@ VERIFIED = re.compile(LABEL.format(STATUS) + "|" + CELL.format(STATUS), re.I | r
 EXISTING = re.compile(r"^[ \t]*#{1,6}[ \t]+(?:\d+[.)][ \t]*)?(?:what already exists|что уже есть)\b", re.I | re.M)
 # A file that holds behavior: source, a test or an interface.
 CODE = frozenset({"midturn-code-change", "midturn-test-writing", "midturn-ui-delivery"})
+# What the client answers when a launched command or agent keeps running after the call returns.
+BACKGROUND = re.compile(r"(?:Command running in background with ID: |Async agent launched successfully)")
+LAUNCH_ID = re.compile(r"(?:with ID: |agentId: )([\w-]+)")
+NOTIFICATION = "<task-notification"
+# The names a notification gives its task.
+NOTIFIED = re.compile(r"<(?:task-id|tool-use-id)>([^<\s]+)</")
+MAX_NOTIFICATION = 4_096
 # The paths of `git add`, up to the end of that command.
 GIT_ADD = re.compile(r"\bgit(?:\s+-C\s+\S+)?\s+add\s+([^;&|\n]+)")
 
@@ -72,33 +80,87 @@ def _oldest_first(names):
     return list(dict.fromkeys(reversed(names)))
 
 
+def _relayed(content):
+    """Whether a prompt entry is a background task's notification and not the owner's message."""
+    return isinstance(content, str) and content.lstrip().startswith(NOTIFICATION)
+
+
+def _entries(path, subagent):
+    """A transcript's entries newest first, back to the turn's prompt or the latest compaction."""
+    entries = []
+    for raw in _lines(path):
+        try:
+            entry = json.loads(raw) if raw.strip() else None
+        except ValueError:
+            continue
+        if not isinstance(entry, dict) or (entry.get("isSidechain") and not subagent):
+            continue
+        if entry.get("type") == "system" and entry.get("subtype") == "compact_boundary":
+            break
+        message = entry.get("message")
+        content = message.get("content") if isinstance(message, dict) else None
+        if entry.get("type") == "user" and _prompt(entry, content) and (subagent or not _relayed(content)):
+            break
+        entries.append(entry)
+    return entries
+
+
+def _background(entries):
+    """(index of the oldest background launch or -1, whether one still runs) over a turn's entries, newest first."""
+    notified, failed, launches, oldest = set(), set(), {}, -1
+    for index, entry in enumerate(entries):
+        message = entry.get("message")
+        content = message.get("content") if isinstance(message, dict) else None
+        attachment = entry.get("attachment")
+        queued = attachment.get("prompt") if isinstance(attachment, dict) and attachment.get("type") == "queued_command" else None
+        for text in (content, queued):
+            if isinstance(text, str) and NOTIFICATION in text[:MAX_NOTIFICATION]:
+                notified.update(NOTIFIED.findall(text[:MAX_NOTIFICATION]))
+        for block in content if isinstance(content, list) else []:
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") == "tool_result":
+                ident = block.get("tool_use_id")
+                if block.get("is_error"):
+                    failed.add(ident)
+                    continue
+                result = block.get("content")
+                if isinstance(result, list):
+                    result = " ".join(part.get("text", "") for part in result if isinstance(part, dict))
+                if isinstance(result, str) and BACKGROUND.match(result):
+                    launches.setdefault(ident, {ident}).update(LAUNCH_ID.findall(result[:MAX_NOTIFICATION]))
+                    oldest = index
+            elif block.get("type") == "tool_use" and block.get("id") not in failed:
+                data = block.get("input")
+                if isinstance(data, dict) and data.get("run_in_background") is True:
+                    launches.setdefault(block.get("id"), {block.get("id")})
+                    oldest = index
+    return oldest, any(not names & notified for names in launches.values())
+
+
 def turn(path, *, subagent=False):
-    """(edited code files, plans without the section) of the turn at a transcript's tail.
+    """(edited code files, plans without the section, whether a background launch still runs) of the turn at a tail.
 
     None when the transcript cannot be read. Files are named by their last path part.
     An edit that an earlier message of the turn already reported with its line is
-    not named again. A subagent's report or a task notification does
-    not start a turn, so without this one report would be asked for again after
-    every relayed message that follows it.
+    not named again. A subagent's report or a queued notification does not start
+    a turn, so without this one report would be asked for again after every relayed
+    message that follows it. A notification delivered as a prompt starts one, unless
+    a background launch of this turn comes before it: a stop made to wait for that
+    launch asked for nothing, so the edits before the notification are still due.
     """
     if not isinstance(path, str) or not path or len(path) > 4_096:
         return None
     edited, plans, written = [], {}, set()
     verified = False  # A later message of the turn already carries the line.
     try:
-        for raw in _lines(path):
-            try:
-                entry = json.loads(raw) if raw.strip() else None
-            except ValueError:
-                continue
-            if not isinstance(entry, dict) or (entry.get("isSidechain") and not subagent):
-                continue
-            if entry.get("type") == "system" and entry.get("subtype") == "compact_boundary":
-                break
+        entries = _entries(path, subagent)
+        oldest, running = _background(entries)
+        for index, entry in enumerate(entries):
             message = entry.get("message")
             content = message.get("content") if isinstance(message, dict) else None
             if entry.get("type") == "user":
-                if _prompt(entry, content):
+                if _prompt(entry, content) and index >= oldest:
                     break
                 continue
             if entry.get("type") != "assistant" or not isinstance(content, list):
@@ -131,7 +193,7 @@ def turn(path, *, subagent=False):
                         written.add(target)
     except (OSError, ValueError):
         return None
-    return _oldest_first(edited), _oldest_first(list(plans.values()))
+    return _oldest_first(edited), _oldest_first(list(plans.values())), running
 
 
 def stopped(event, rules=RULES, skills=None):
@@ -150,8 +212,10 @@ def stopped(event, rules=RULES, skills=None):
     scan = turn(path, subagent=name == "SubagentStop")
     if not scan:
         return {}
-    edited, plans = scan
-    shown = {"report-verification": ("edited", edited if not VERIFIED.search(last) else []),
+    edited, plans, running = scan
+    # A stop to wait for a background task is not the final message; a subagent that stops has finished.
+    waiting = running and name == "Stop"
+    shown = {"report-verification": ("edited", edited if not (waiting or VERIFIED.search(last)) else []),
              "plan-existing": ("wrote", plans)}
     lines = []
     for row in rows:

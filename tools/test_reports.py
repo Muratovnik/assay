@@ -148,6 +148,47 @@ class StopTests(unittest.TestCase):
         notification = {"type": "user", "message": {"role": "user", "content": "<task-notification> done"}}
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), notification)))
 
+    def test_the_report_waits_for_a_background_task_of_the_turn(self):
+        def finished(*names):
+            tags = "".join(f"<task-id>{name}</task-id>\n" for name in names)
+            return {"type": "user", "message": {"role": "user", "content": f"<task-notification>\n{tags}<status>completed</status>"}}
+        command = [tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
+                   returned("b1", "Command running in background with ID: task1. Output is being written to: x")]
+        agent = [tool("Agent", {"description": "build: alfi — parser"}, "a1"),
+                 returned("a1", "Async agent launched successfully. (Internal metadata.) agentId: worker1 (internal ID)")]
+        # Still running: the final message is still to come.
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, last="The gate runs in the background.")))
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), agent, last="The worker is running.")))
+        # Finished: the edit before the notification is asked for, so the wait loses nothing.
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), command, finished("task1"))))
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), agent, finished("worker1"))))
+        by_call = {"type": "user", "message": {"role": "user", "content": "<task-notification>\n<tool-use-id>b1</tool-use-id>"}}
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), command, by_call)))
+        queued = {"type": "attachment", "attachment": {"type": "queued_command", "prompt": "<task-notification><task-id>task1</task-id>"}}
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), command, queued)))
+        # One of two still running keeps it waiting; a report after the wait settles it.
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, agent, finished("task1"), last="One to go.")))
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, finished("task1"), last="Verified: gate — passed")))
+
+    def test_only_a_running_launch_of_this_turn_makes_the_report_wait(self):
+        command = [tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
+                   returned("b1", "Command running in background with ID: task1.")]
+        refused = [tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
+                   {"type": "user", "message": {"role": "user", "content": [
+                       {"type": "tool_result", "tool_use_id": "b1", "is_error": True, "content": "not run"}]}}]
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), refused)))
+        self.assertIn("parser.py", self.note(self.stop(prompt("first"), command, prompt(), edit(APP))))
+        # A subagent that stops is finishing: its report is due now.
+        event = {"session_id": "s1", "hook_event_name": "SubagentStop", "agent_id": "w1", "last_assistant_message": "Done.",
+                 "agent_transcript_path": self.transcript(prompt("packet"), edit(APP), command)}
+        self.assertIn("parser.py", self.note(event))
+        # A plan is asked for whatever runs in the background.
+        self.assertIn("2026-10-ingest.md", self.note(self.stop(prompt(), write(PLAN, text="# Plan"), command)))
+        # A relayed message before any launch still starts a turn.
+        other = {"type": "user", "message": {"role": "user", "content": "<task-notification><task-id>old</task-id>"}}
+        done = {"type": "user", "message": {"role": "user", "content": "<task-notification><task-id>task1</task-id>"}}
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), other, command, done)))
+
     def test_an_edit_already_reported_in_the_turn_is_not_asked_for_again(self):
         def said(text):
             return {"type": "assistant", "message": {"content": [{"type": "text", "text": text}]}}

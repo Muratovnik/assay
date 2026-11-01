@@ -475,10 +475,23 @@ line, in a list item or in bold; `Проверено`, `Не проверено`
 too. Files are named
 by their last path part, and the classes of files are the mid-turn note's. A shell
 edit is seen only through the files the turn stages with `git add`. A subagent's
-report and a task notification do not start a turn, so an edit that an earlier
+report and a queued task notification do not start a turn, so an edit that an earlier
 message of the turn already reported with its line is not named again: in
 one live session the same three files were asked for after each of four relayed
-messages. An edit after that message is. When the branch
+messages. An edit after that message is.
+
+In the main session the verification line is not asked for while a background
+command or agent launched in this turn still runs: in one owner's sessions from 18
+October to 1 November 2026, 44 of 53 such notes came at a stop made to wait for one,
+and the agent wrote its report twice. A notification delivered as a prompt starts a
+turn, unless a background launch of this turn comes before it, so the edits made
+before the wait are still asked for at the stop after it. A subagent that stops has
+finished, so it is asked at once. The cost is that an agent that finishes without
+waiting for its background task gets no request for the line. A task is known by the
+client's words for a background launch; if those words change, the note simply comes
+at the earlier stop again.
+
+When the branch
 check also has a note for the same stop, both go out in one continuation, since a
 turn continues once. A disabled skill or the rule ID turns a row off; the check does
 not depend on the skill check. Codex gets no report check.

@@ -272,7 +272,8 @@ def subagent_check(rules, *, client=None):
             "say what is missing. Open your first message with one short sentence naming each skill in backticks "
             "and its purpose, e.g. \"Using `assay:code-change` to patch the parser.\" Name nothing when none "
             "applies, and do not restate it in your report or when the packet fixes an exact output format. "
-            "This check grants no authority beyond the packet."
+            "When the work changes code, your report carries its checks as a table `Status | Check | Result`, "
+            "verified rows first. This check grants no authority beyond the packet."
             + (CODEX_NOTE if client == "codex" else "") + " Skills: " + _entries(rules) + ".")
 
 

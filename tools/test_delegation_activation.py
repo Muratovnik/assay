@@ -143,6 +143,8 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertIn("skills your packet names apply", text)
         self.assertIn("Open your first message with one short sentence naming each skill in backticks", text)
         self.assertIn("do not restate it in your report", text)
+        # Said at the start, so a report need not be refused and written again for lacking it.
+        self.assertIn("your report carries its checks as a table `Status | Check | Result`", text)
         self.assertNotIn("Assay: none", text)
         self.assertNotIn("instructions ask for the same announcement", text)
         codex = activation.evaluate({"hook_event_name": "SubagentStart", "agent_id": "a1",
