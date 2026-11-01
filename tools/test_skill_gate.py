@@ -82,10 +82,22 @@ class SkillGateTests(unittest.TestCase):
 
     def test_the_continuation_keeps_the_answer_instead_of_asking_for_it_again(self):
         text = self.feedback(self.stop("Using `assay:code-change` to fix it."))
+        self.assertIn("The answer already given stands. Finding nothing to change is a normal result: a few words "
+                      "in the reply's language saying the answer is unchanged", text)
+        self.assertIn("Naming the skill or reference or saying the work complies gives the user nothing", text)
+        self.assertIn("nothing needs changing only to show the check had an effect", text)
+        self.assertIn("corrections that would change", text)
+        self.assertIn("without repeating the answer or the announcement", text)
+        self.assertIn("only mentioned a skill without applying it needs no load", text)
+        self.assertNotIn("one short line", text)
+        self.assertNotIn("starts with", text)
+
+    def test_a_subagent_is_not_told_to_close_on_a_few_words(self):
+        # What it writes next may be all its parent receives.
+        text = self.feedback(self.report("Using `assay:code-change` to fix it."), "SubagentStop")
         self.assertIn("The answer already given stands: after loading, one short line is enough when nothing "
                       "changes, otherwise only the corrections that would change", text)
-        self.assertIn("without repeating the answer or the announcement", text)
-        self.assertNotIn("starts with", text)
+        self.assertNotIn("a few words", text)
 
     def test_announcements_name_skills_in_code_spans_or_on_the_legacy_line(self):
         cases = {

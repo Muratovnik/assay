@@ -18,7 +18,7 @@ from dataclasses import dataclass
 import json
 import re
 
-from .skill_gate import HANDBACK, NAME, _lines, _load, _prompt
+from .skill_gate import HANDBACK, NAME, UNCHANGED, _lines, _load, _prompt
 
 
 @dataclass(frozen=True)
@@ -272,15 +272,17 @@ def stopped(event, rules=RULES, skills=None):
                 f"skill names for {row.condition}; this turn {row.sign} ({shown}).")
         if row.rule == COVERAGE:
             line += (" Evidence absent from the examined scope is not proof that it does not exist; a claim "
-                     "already limited to what was examined and naming that scope needs one line saying so.")
+                     "already limited to what was examined and naming that scope needs no correction.")
         lines.append(line)
     if not lines:
         return {}
     who = "this subagent" if name == "SubagentStop" else "this session"
+    closing = ("The answer already given stands: after reading, one short line is enough when nothing changes; "
+               "otherwise only the corrections that would change the user's code, conclusions or decisions, without "
+               "repeating the answer." if name == "SubagentStop" else
+               UNCHANGED + "Only corrections that would change the user's code, conclusions or decisions need more, "
+               "without repeating the answer.")
     # Stated as facts, as the skill gate's feedback is.
     return {"hookSpecificOutput": {"hookEventName": name, "additionalContext": "\n".join([
         f"Assay branch check: {who} loaded each skill below, this turn met the condition it names for a "
-        "reference, and that reference was not read in this context:", *lines,
-        "The answer already given stands: after reading, one short line is enough when nothing changes; "
-        "otherwise only the corrections that would change the user's code, conclusions or decisions, without "
-        "repeating the answer."])}}
+        "reference, and that reference was not read in this context:", *lines, closing])}}

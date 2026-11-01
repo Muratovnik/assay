@@ -38,6 +38,13 @@ NAME = re.compile(r"(?:assay:)?([a-z][a-z0-9-]{0,63})")
 SKILL_FILE = re.compile(r"[\\/]skills[\\/]([a-z][a-z0-9-]{0,63})[\\/]SKILL\.md$")
 # The host channel through which a subagent may deliver its report.
 HANDBACK = "SubagentHandback"
+# A continued turn still ends on text, so a rule against reporting "nothing changes" would leave a change
+# as the only thing to write. This gives that result a form that names and claims nothing. Not for a
+# subagent: what it writes next may be all its parent receives.
+UNCHANGED = ("The answer already given stands. Finding nothing to change is a normal result: a few words in the "
+             "reply's language saying the answer is unchanged then close the turn. Naming the skill or reference or "
+             "saying the work complies gives the user nothing, and nothing needs changing only to show the check "
+             "had an effect. ")
 
 
 def _key(event):
@@ -238,14 +245,17 @@ def apply(event, client, names, directory, *, clock=time.time):
         return {}
     listed = ", ".join(missing)
     who = "this subagent" if name == "SubagentStop" else "this session"
+    closing = ("The answer already given stands: after loading, one short line is enough when nothing changes, "
+               "otherwise only the corrections that would change the user's code, conclusions or decisions, without "
+               "repeating the answer or the announcement. A line that only mentioned a skill without applying it "
+               "needs one line saying so." if name == "SubagentStop" else
+               UNCHANGED + "Only corrections that would change the user's code, conclusions or decisions need more, "
+               "without repeating the answer or the announcement. A line that only mentioned a skill without "
+               "applying it needs no load.")
     # Stated as facts, not commands: the client continues the turn under the
     # same loop limits as a block, and an imperative out-of-band message is
     # what prompt-injection defenses are wary of.
     return {"hookSpecificOutput": {"hookEventName": name, "additionalContext": (
         f"Assay skill gate: this turn announces {listed}, and {who} has not loaded "
         f"{'that skill' if len(missing) == 1 else 'those skills'}. The skill check expects each announced "
-        "skill to be loaded (skill tool or its SKILL.md) and the work checked against it. The answer already "
-        "given stands: after loading, one short line is enough when nothing changes, otherwise only the "
-        "corrections that would change the user's code, conclusions or decisions, without repeating the "
-        "answer or the announcement. A line that only mentioned a skill without applying it needs one line "
-        "saying so.")}}
+        "skill to be loaded (skill tool or its SKILL.md) and the work checked against it. " + closing)}}

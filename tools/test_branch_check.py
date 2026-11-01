@@ -77,6 +77,17 @@ class CoverageCheckTests(TranscriptCase):
         self.assertIn("The answer already given stands", text)
         self.assertIn("Assay branch check", text)
 
+    def test_nothing_to_change_closes_on_a_few_words_that_name_and_claim_nothing(self):
+        text = self.feedback(self.stop(prompt(), load(), said(CLAIM_RU)))
+        self.assertIn("a few words in the reply's language saying the answer is unchanged", text)
+        self.assertIn("Naming the skill or reference or saying the work complies gives the user nothing", text)
+        # The agent must not feel it owes a change in place of the form it no longer writes.
+        self.assertIn("nothing needs changing only to show the check had an effect", text)
+        self.assertIn("corrections that would change the user's code, conclusions or decisions", text)
+        self.assertNotIn("one short line", text)
+        # A claim already limited to its scope is not a correction to report.
+        self.assertIn("naming that scope needs no correction", text)
+
     def test_reading_the_reference_in_this_context_silences_the_check(self):
         self.assertEqual({}, self.stop(prompt(), load(), read(), said(CLAIM_RU)))
         # A read in an earlier turn of the same context still counts.
@@ -147,7 +158,11 @@ class CoverageCheckTests(TranscriptCase):
         path = self.transcript(prompt("packet"), load(), report, name="agent.jsonl")
         event = {**self.base, "hook_event_name": "SubagentStop", "agent_id": "worker",
                  "agent_transcript_path": path, "last_assistant_message": ""}
-        self.assertIn("None of the candidates", self.feedback(branches.stopped(event), "SubagentStop"))
+        text = self.feedback(branches.stopped(event), "SubagentStop")
+        self.assertIn("None of the candidates", text)
+        # A few closing words could become all the parent receives, so a subagent keeps the line.
+        self.assertIn("one short line is enough when nothing changes", text)
+        self.assertNotIn("a few words", text)
         # The parent's load does not reach a worker that never loaded the skill.
         event["agent_transcript_path"] = self.transcript(prompt("packet"), report, name="agent2.jsonl")
         self.assertEqual({}, branches.stopped(event))

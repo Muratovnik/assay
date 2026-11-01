@@ -96,6 +96,8 @@ class HoldTests(unittest.TestCase):
         reason = self.run_hook(self.handing_back("Used `assay:code-change` to review the parser.\nAll good."))[
             "hookSpecificOutput"]["permissionDecisionReason"]
         self.assertIn("Assay skill gate: this turn announces code-change", reason)
+        # A report of a few closing words would pass the retry and leave the parent with nothing.
+        self.assertNotIn("a few words", reason)
         loaded = [packet(), tool("Skill", {"skill": "assay:code-change"}, "k1"), returned("k1")]
         self.worker(*loaded)
         self.assertEqual({}, self.run_hook(self.handing_back("Used `assay:code-change`.\nAll good.", prompt="p3")))

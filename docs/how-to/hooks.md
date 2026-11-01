@@ -157,12 +157,17 @@ the `Stop` hook continues the turn once with feedback saying so. An announcement
 is an `assay:<name>` in backticks on the first line of one of the turn's
 messages, or the earlier format's leading `Assay:` line. The feedback asks for the
 skill to be loaded and the work checked against it, and says that the answer
-already given stands: a single line is enough when nothing changes, otherwise
-only the corrections that matter, without repeating the answer. It is
-`additionalContext`, not a block, so Claude Code shows it as hook feedback rather
-than a hook error and applies its usual limit on stop-hook continuations. The
-gate stays silent while `stop_hook_active` is set. It needs the plugin data
-directory, so it is inert without hook state.
+already given stands. Finding nothing to change is a normal result: a few words
+saying the answer is unchanged close the turn, naming nothing read and claiming
+nothing about the work, and nothing needs changing only to show an effect. Only
+corrections that matter need more, without repeating the answer. A continued turn
+still ends on text, so without that form the only thing left to write would be a
+change. A subagent keeps a single line instead, since what it writes next may be
+all its parent receives. The feedback is `additionalContext`, not a block, so
+Claude Code shows it as hook feedback rather than a hook error and applies its
+usual limit on stop-hook continuations. The gate stays silent while
+`stop_hook_active` is set. It needs the plugin data directory, so it is inert
+without hook state.
 
 The announcement usually opens an earlier message of the turn than the final
 reply, so the gate reads the tail of the session transcript, as the
@@ -180,7 +185,7 @@ When the transcript cannot be read, the records alone decide, as before.
 The gate guarantees only that an announced skill gets loaded. It cannot tell
 whether the agent chose the right skills; a turn without an announcement passes.
 A line that only mentions a skill in backticks with the `assay:` prefix can
-continue a turn once; the feedback lets the agent answer that in one line. A
+continue a turn once; the feedback lets the agent close that without a load. A
 subagent's load does not count for the main session. Codex has no gate: its
 skill loads are not visible reliably enough to act on. Turn the gate off with
 `disabled_rules: ["skill-gate"]`; disabling the check also disables it.
@@ -274,9 +279,10 @@ At `Stop` and `SubagentStop` the hook reads the same transcript tail as the skil
 gate. When a line of the turn says a file or URL was read in full (`in full`,
 `entire`, `end to end`, `целиком`, `полностью` and similar) and names a file
 whose `Read` calls returned only part of it, or a URL opened only through
-`WebFetch`, the turn continues once with feedback naming what was read. As with
-the gate, the answer stands and one line is enough when nothing changes. The
-check fires only on positive evidence. A file printed with a shell command leaves
+`WebFetch`, the turn continues once with feedback naming what was read. The answer
+stands, and one line saying what was actually read is enough when nothing else
+changes: unlike the gate's closing words, that line corrects a claim. The check
+fires only on positive evidence. A file printed with a shell command leaves
 no `Read` in the transcript, and a URL that a shell command also names counts as
 downloaded, so neither triggers it. Reads before the latest compaction are not
 counted. A subagent's transcript records no line counts, so there a ranged read
@@ -317,11 +323,11 @@ reference with the condition the skill states and the turn's own evidence, quoti
 up to two lines or naming up to two files. A skill that compaction re-attached
 counts as loaded, but a read before compaction does not count. A session or
 subagent that has not loaded the skill is not held to its references, and a sign
-from an earlier turn does not count.
+from an earlier turn does not count. The note ends as the gate's feedback does.
 
 The signs are deliberately narrow and still approximate. A write made through a
 shell command is not seen. The absence wording can match a documented fact about
-the work; one line saying the claim is limited to what was examined answers it.
+the work; a claim already limited to what was examined needs no correction.
 A condition the transcript cannot show, such as whether a comparison is
 consequential, has no row. The skill gate's feedback and a contradicted full-read
 claim take priority at the same stop, since a turn continues at most once. Each
