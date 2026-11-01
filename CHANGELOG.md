@@ -6,6 +6,29 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.35.0](https://github.com/Muratovnik/assay/compare/v0.34.0...v0.35.0) (2026-11-01)
+
+Report lines, page downloads and mutation checks are now asked for only where
+they carry information, a format the user set wins over the default answer
+shape, and the code-change and test-writing descriptions now skip a precisely named
+small edit. skill-evaluation asks that a hooked condition's workspace stay off the paths
+the hooks treat as scratch and that a smoke show each hook class firing. These
+changes are candidates: each follows a difference observed between paired runs
+with and without the plugin, and none has yet been compared against the previous
+text in a run of its own. The changed descriptions have not been run for discovery.
+
+### Features
+
+* **code-change:** after editing code, a `Verified: <check> [— <environment>] — after <change>` line per material check names the environment only when it differs from the user's or affects the conclusion, and `<change>` is the last code change the check ran after. A `Not verified:` line appears only for a gap that changes the reader's trust or next step, and none when the check the request named covers the change. A `Tests changed: <tests> — <why>` line names modified or removed tests. The reuse line is written only when a reuse decision was taken, and a new source file no longer asks for `Reuse: not applicable`. Labels follow the reply's language. The Claude report check drops its `report-reuse` row; the ID stays accepted in `disabled_rules` and does nothing ([b66cc66](https://github.com/Muratovnik/assay/commit/b66cc66b1b5d11992b6e9b047a1dafe1e1936710))
+* **evidence-research:** a format or length the user set wins over the default **Answer / Evidence / Limits and next decision** shape, and over code-change's report lines; read state, limits, checks and gaps shrink to one phrase or a short line, and content that matters stays ([7cd794e](https://github.com/Muratovnik/assay/commit/7cd794e1aa59707da3465787620fdf87c51d38e9))
+* **skills:** code-change skips an edit the request names exactly, with its check, when nothing needs diagnosing, such as a typo, a rename or a changed default; test-writing skips an update to an expected value the request names with its check. The skill-check cues say the same, and four discovery cases cover each skip and its boundary, a symptom whose cause must be found. Discovery has not been run ([f78c3b6](https://github.com/Muratovnik/assay/commit/f78c3b602763487bb9d035ab6b7cfdb81655c999))
+
+### Bug Fixes
+
+* **hooks:** the note after a `WebFetch` result still asks that a conclusion resting on the fetch summary say so, and asks for a shell download only when the conclusion depends on exact wording, a number, a table or code the summary may have distorted, or when the page is long; it names no download tool. evidence-research adds that a narrow fact quoted from one authoritative page needs no second retrieval, and its evidence reference says where to save a download and how to read it through a filter ([c56816b](https://github.com/Muratovnik/assay/commit/c56816bdcad41d4cc041b06b9495d114977962aa))
+* **test-writing:** an own mutation check runs only when the failing run before the fix did not already show that the test detects the defect; otherwise one or two mutants run inside the test process rather than on a copy of the tree, any copy stays in the workspace's ignored scratch instead of the system temporary directory, and a refused harness command is named as a gap after one attempt ([d050333](https://github.com/Muratovnik/assay/commit/d05033306ceed7d061f47fd5ae9d692d40b34254))
+* **technical-writing:** the snapshot-number rule covers every passage in the opened scope that describes the current state, procedure steps included: a number true now that is neither a maintained inventory, a fixed capacity nor a dated record is removed rather than re-verified, and a copyedit reports it instead ([1aae4e1](https://github.com/Muratovnik/assay/commit/1aae4e1c8559502c38e9da2524df3be547b5d0c8))
+
 ## [0.34.0](https://github.com/Muratovnik/assay/compare/v0.33.0...v0.34.0) (2026-10-29)
 
 A Claude subagent that hands its report back through `SubagentHandback` now
