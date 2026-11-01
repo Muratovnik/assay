@@ -6,6 +6,23 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.39.0](https://github.com/Muratovnik/assay/compare/v0.38.0...v0.39.0) (2026-11-02)
+
+Skills no longer ask a report to list what was not checked and why: a gap is closed,
+asked about or left out, and a line about one is kept only for a check that was tried
+and failed or that cannot be known yet. In Claude Code the report check also waits for
+a background task the turn started before asking for the table of checks. Both are
+candidates: they follow counts over recorded sessions and a maintainer's corrections,
+and no run has compared them with the previous behavior.
+
+### Features
+
+* **hooks:** in the main session the report check asks for nothing while a background command or agent launched in the turn still runs, since a stop made to wait for one is not the final message: 44 of 53 such notes in one owner's sessions came at such a stop, and the agent wrote its report twice. The edits made before the wait are still asked for afterwards, and a subagent that stops is asked at once. A subagent's packet check now mentions the table, so a report need not be written again for lacking it. The cost is that an agent ending the turn without waiting gets no request for the table ([0a2298f](https://github.com/Muratovnik/assay/commit/0a2298fc88fe815564ba897b3a61a18d424beab6))
+
+### Bug Fixes
+
+* **skills:** `code-change`, `critical-discussion`, `evidence-research`, `instruction-maintenance` and `retrospective` no longer ask for lists of what was not checked or for a reason written afterwards, which nobody can check. A check a call or two can run is run; a line about a gap is for one that was tried and failed, with the error, or that cannot be known yet, with what will settle it and the record that tracks it; any other gap is asked about with its cost or left out. The report check's note says the same. A request for coverage still gets coverage, so audits keep their coverage sections, and labels such as "from memory, not opened" stay. The risk is a gap left out that the reader needed; verified rows still say what ran ([6766c23](https://github.com/Muratovnik/assay/commit/6766c23d0cde59149ec54d99e1237eda72684567))
+
 ## [0.38.0](https://github.com/Muratovnik/assay/compare/v0.37.0...v0.38.0) (2026-11-01)
 
 When a Claude Code check continues a finished turn and nothing needs changing, the
