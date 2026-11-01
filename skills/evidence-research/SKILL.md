@@ -95,3 +95,13 @@ page needs no second retrieval of that page; label what was read, such as a fetc
 tool's summary. Stop when another targeted search is
 unlikely to change the supported decision; source counts and report length are
 not completion criteria.
+
+List as sources what the conclusion rests on, each with how it was read; a fact
+the answer uses from a search snippet stays listed and labelled as such. A result
+seen only in a search listing and not used is not a source and needs no reason of
+its own: when the reader needs the search's reach, give the rest one line with
+their count and kind. A search tool's request to include its results is met this
+way. Before stopping, look through the unopened results for one that could change
+the conclusion, such as a primary source, a dissenting result or the only report
+of a claim. Open it; if it cannot be opened, name it, why and which conclusion
+stays unconfirmed. Say in a phrase why what was read is enough.
