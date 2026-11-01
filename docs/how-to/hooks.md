@@ -253,12 +253,9 @@ on it. The page's text is downloaded with a shell command and read where the
 conclusion depends on it only when that conclusion depends on exact wording, a
 number, a table or code the summary may have distorted or dropped, or when the page
 is long; a narrow fact the summary quotes from an authoritative page needs only the
-label. In paired runs a note that asked for the download after every fetch led to
-repeated retrievals of pages already read and refused shell commands, without
-better labels of what was read; the gain stayed with long sources. The note names
-no download tool, since the hook cannot see which ones the session has. How to save
-and read the download is in `evidence-research`'s evidence and claims reference.
-The note appears once per
+label. The note names no download tool, since the hook cannot see which ones the
+session has. How to save and read the download is in `evidence-research`'s
+evidence and claims reference. The note appears once per
 request and agent, keyed by the prompt ID Claude Code sends; without one, once per
 agent. It needs the plugin data directory, where it keeps one hashed key per
 request and agent.
@@ -472,7 +469,8 @@ Replayed over two weeks of one owner's Claude sessions, before the skills asked 
 these lines, 203 of 1,199 turns edited code and 197 of them ended without a
 verification line; 14 turns created a source file without a reuse line and 13 wrote
 a plan without the section. The note is the cost of that gap until the lines become
-routine.
+routine. The reuse row counted in that replay has since been removed, as described
+above.
 
 ## Hints do not grant authority
 
