@@ -1,9 +1,11 @@
-"""Point a Claude agent at the text behind a fetched summary and at a full-read claim its own reads contradict.
+"""Point a Claude agent at the text behind a fetched summary, at what a search only found and at a contradicted full-read claim.
 
-Two notes, neither a block, both stated as facts:
+Three notes, none a block, all stated as facts:
 
 - After a WebFetch, once per request and agent: the result is an answer a
   model wrote about the page, not the page's text.
+- After a WebSearch, once per request and agent: the results are found, not
+  read, and a request to include them is met by the ones the conclusion rests on.
 - On Stop or SubagentStop, once: a line of the turn that says a file or URL was
   read in full, when the transcript shows that file read only in part or that
   URL opened only through WebFetch.
@@ -11,8 +13,8 @@ Two notes, neither a block, both stated as facts:
 The claim check fires only on positive evidence. A file the transcript shows no
 Read of, for example one printed with a shell command, leaves it silent, and so
 does a URL that a shell command also names. It reads the transcript tail the
-skill gate reads and stores nothing; the fetch note stores one hashed key per
-request and agent.
+skill gate reads and stores nothing; the fetch and search notes each store one
+hashed key per request and agent.
 """
 from __future__ import annotations
 
@@ -29,6 +31,7 @@ MAX_RECORDS = 128
 MAX_CLAIMS = 3
 MAX_LINE = 2_000
 FETCH = "WebFetch"
+SEARCH = "WebSearch"
 SHELLS = frozenset({"Bash", "PowerShell"})
 # A line claiming a whole source was read; the reference must sit on the same line.
 CLAIM = re.compile(r"целиком|полностью|in full\b|in its entirety|entire(?:ly)?\b|end to end|cover to cover"
@@ -43,6 +46,10 @@ FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the 
               "conclusion depends on, when that conclusion depends on exact wording, a number, a table or code "
               "the summary may have distorted or dropped, or when the page is long; a narrow fact the summary "
               "quotes from an authoritative page needs only the label. This note appears once per request.")
+SEARCH_NOTE = ("Assay source check: search results are found, not read. A request to include search sources is met "
+               "by the ones the conclusion rests on, each labelled with how it was read; the other results take at "
+               "most one line with their count and kind, and an unopened result is named only if it could change "
+               "the conclusion, with why it stayed unopened and what that leaves uncertain.")
 
 
 def _key(*parts):
@@ -60,24 +67,32 @@ def _identity(event):
     return session, agent, turn if isinstance(turn, str) and len(turn) <= 200 else None
 
 
-def fetched(event, directory, *, clock=time.time):
-    """The fetch note for this request and agent on its first WebFetch result, else {}."""
-    if event.get("tool_name") != FETCH or not directory:
-        return {}
-    identity = _identity(event)
+def _once(event, directory, kind, note, clock):
+    """The note on the first result of its kind for this request and agent, else {}."""
+    identity = _identity(event) if directory else None
     if identity is None:
         return {}
     from route_evidence.pipeline_store import PipelineStore
     key = _key(*identity)
     with PipelineStore(Path(directory) / "source-check", clock=clock).transaction() as tx:
-        if tx.get("fetch-note", key):
+        if tx.get(kind, key):
             return {}
-        records = tx.values("fetch-note")
+        records = tx.values(kind)
         if len(records) >= MAX_RECORDS:
-            tx.delete("fetch-note", min(records, key=lambda item: item["at"])["id"])
+            tx.delete(kind, min(records, key=lambda item: item["at"])["id"])
         now = clock()
-        tx.put("fetch-note", key, {"id": key, "at": now}, now + TTL)
-    return {"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": FETCH_NOTE}}
+        tx.put(kind, key, {"id": key, "at": now}, now + TTL)
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": note}}
+
+
+def fetched(event, directory, *, clock=time.time):
+    """The fetch note for this request and agent on its first WebFetch result, else {}."""
+    return _once(event, directory, "fetch-note", FETCH_NOTE, clock) if event.get("tool_name") == FETCH else {}
+
+
+def searched(event, directory, *, clock=time.time):
+    """The search note for this request and agent on its first WebSearch result, else {}."""
+    return _once(event, directory, "search-note", SEARCH_NOTE, clock) if event.get("tool_name") == SEARCH else {}
 
 
 def _range(data, result, text):

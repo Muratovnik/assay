@@ -61,6 +61,11 @@ class SourceCheckTests(unittest.TestCase):
                  "tool_input": {"url": PAGE, "prompt": "Quote the results"}, **extra}
         return sources.fetched(event, self.directory, clock=lambda: self.now)
 
+    def search(self, **extra):
+        event = {**self.base, "hook_event_name": "PostToolUse", "tool_name": "WebSearch", "prompt_id": "p1",
+                 "tool_input": {"query": "vendor client retries"}, **extra}
+        return sources.searched(event, self.directory, clock=lambda: self.now)
+
     def transcript(self, *entries, name="session.jsonl"):
         path = self.directory / name
         flat = [item for entry in entries for item in (entry if isinstance(entry, list) else [entry])]
@@ -107,6 +112,34 @@ class SourceCheckTests(unittest.TestCase):
         event = {**self.base, "hook_event_name": "PostToolUse", "tool_name": "WebFetch", "prompt_id": "p1"}
         self.assertEqual({}, sources.fetched(event, None))
         self.assertEqual({}, self.fetch(session_id=""))
+
+    def test_the_first_search_of_a_request_gets_the_note_and_later_searches_do_not(self):
+        text = self.feedback(self.search(), "PostToolUse")
+        self.assertIn("search results are found, not read", text)
+        # What meets the client's request to include its sources, and which unopened result stays named.
+        self.assertIn("the ones the conclusion rests on, each labelled with how it was read", text)
+        self.assertIn("at most one line with their count and kind", text)
+        self.assertIn("named only if it could change the conclusion, with why", text)
+        self.assertEqual({}, self.search())
+        self.assertEqual({}, self.search(tool_use_id="another"))
+
+    def test_a_new_request_or_another_agent_gets_the_search_note_again(self):
+        self.search()
+        self.assertTrue(self.search(prompt_id="p2"))
+        self.assertTrue(self.search(agent_id="worker"))
+        self.assertEqual({}, self.search(agent_id="worker"))
+
+    def test_a_search_and_a_fetch_in_one_request_each_get_their_own_note(self):
+        self.assertIn("not the page's text", self.feedback(self.fetch(), "PostToolUse"))
+        self.assertIn("found, not read", self.feedback(self.search(), "PostToolUse"))
+        self.assertEqual({}, self.fetch())
+        self.assertEqual({}, self.search())
+
+    def test_another_tool_or_missing_state_gets_no_search_note(self):
+        self.assertEqual({}, self.search(tool_name="WebFetch"))
+        event = {**self.base, "hook_event_name": "PostToolUse", "tool_name": "WebSearch", "prompt_id": "p1"}
+        self.assertEqual({}, sources.searched(event, None))
+        self.assertEqual({}, self.search(session_id=""))
 
     def test_a_claim_about_a_partly_read_file_continues_the_turn(self):
         text = self.feedback(self.stop(prompt(), read("r1", 1, 200, 900, limit=200),
@@ -211,6 +244,8 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         self.environment = {"CLAUDE_PLUGIN_DATA": str(self.directory / "data")}
         self.fetch = {"session_id": "session", "cwd": "work", "hook_event_name": "PostToolUse", "prompt_id": "p1",
                       "tool_name": "WebFetch", "tool_use_id": "w1", "tool_input": {"url": PAGE, "prompt": "Quote"}}
+        self.search = {"session_id": "session", "cwd": "work", "hook_event_name": "PostToolUse", "prompt_id": "p1",
+                       "tool_name": "WebSearch", "tool_use_id": "s1", "tool_input": {"query": "vendor client retries"}}
 
     def configured(self, **options):
         path = self.directory / "hooks.json"
@@ -222,6 +257,22 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         self.assertIsNone(error)
         self.assertIn("not the page's text", result["hookSpecificOutput"]["additionalContext"])
         self.assertEqual(({}, None), process({**self.fetch, "prompt_id": "p2"}, "codex", self.environment))
+
+    def test_the_runtime_returns_the_search_note_for_claude_only(self):
+        result, error = process(self.search, "claude", self.environment)
+        self.assertIsNone(error)
+        self.assertIn("found, not read", result["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(({}, None), process({**self.search, "prompt_id": "p2"}, "codex", self.environment))
+
+    def test_the_search_note_and_the_fetch_note_turn_off_separately(self):
+        environment = self.configured(disabled_rules=["search-note"])
+        self.assertEqual(({}, None), process({**self.search, "prompt_id": "p7"}, "claude", environment))
+        self.assertIn("not the page's text",
+                      process({**self.fetch, "prompt_id": "p7"}, "claude", environment)[0]["hookSpecificOutput"]["additionalContext"])
+        environment = self.configured(disabled_rules=["fetch-note"])
+        self.assertEqual(({}, None), process({**self.fetch, "prompt_id": "p8"}, "claude", environment))
+        self.assertIn("found, not read",
+                      process({**self.search, "prompt_id": "p8"}, "claude", environment)[0]["hookSpecificOutput"]["additionalContext"])
 
     def test_each_source_check_rule_turns_off_only_its_own_note(self):
         environment = self.configured(disabled_rules=["read-claims"])
@@ -248,11 +299,12 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         result, _ = process(stop, "claude", self.environment)
         self.assertIn("Assay skill gate", result["hookSpecificOutput"]["additionalContext"])
 
-    def test_only_the_claude_manifest_routes_fetch_results_to_the_hook(self):
+    def test_only_the_claude_manifest_routes_fetch_and_search_results_to_the_hook(self):
         claude = json.loads((ROOT / "hooks/hooks.json").read_text(encoding="utf-8"))["hooks"]
         codex = json.loads((ROOT / "hooks/codex.json").read_text(encoding="utf-8"))["hooks"]
-        self.assertEqual("^(Agent|Task|WebFetch)$", claude["PostToolUse"][0]["matcher"])
+        self.assertEqual("^(Agent|Task|WebFetch|WebSearch)$", claude["PostToolUse"][0]["matcher"])
         self.assertNotIn("WebFetch", codex["PostToolUse"][0]["matcher"])
+        self.assertNotIn("WebSearch", codex["PostToolUse"][0]["matcher"])
 
 
 if __name__ == "__main__":

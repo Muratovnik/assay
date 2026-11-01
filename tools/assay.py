@@ -1144,8 +1144,8 @@ def reminder_hooks(client: str = "claude") -> bytes:
         hooks["Stop"] = [{"hooks": [hook]}]
         hooks["PermissionDenied"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
         hooks["PostToolUseFailure"] = [{"matcher": f"^({spawn})$", "hooks": [hook]}]
-        # The source check notes once per request that a fetch result is a summary.
-        hooks["PostToolUse"] = [{"matcher": f"^({spawn}|WebFetch)$", "hooks": [hook]}]
+        # The source check notes once per request that a fetch result is a summary and that search results are found, not read.
+        hooks["PostToolUse"] = [{"matcher": f"^({spawn}|WebFetch|WebSearch)$", "hooks": [hook]}]
     else:
         hooks["PostCompact"] = [{"hooks": [hook]}]
     return json_document({"hooks": hooks})

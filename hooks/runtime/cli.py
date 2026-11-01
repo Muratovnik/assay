@@ -298,8 +298,9 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                                       settings["state_dir"], **kwargs)
                         if handback.pending(event, settings["state_dir"], **kwargs) else {})
             # How a source was read, not which skill applies.
-            elif name == "PostToolUse" and rules.fetch_note:
-                note = sources.fetched(event, settings["state_dir"], **kwargs)
+            elif name == "PostToolUse":
+                note = ((sources.fetched(event, settings["state_dir"], **kwargs) if rules.fetch_note else {})
+                        or (sources.searched(event, settings["state_dir"], **kwargs) if rules.search_note else {}))
             # A tool call that shows a skill this session has not loaded; a routing reply and the
             # launch reminder own their PreToolUse, so this check stays silent there.
             elif name == "PreToolUse" and rules.midturn_rules and not legacy:

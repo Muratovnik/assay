@@ -14,8 +14,8 @@ The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
 `hooks/codex.json` through its plugin manifest. Both invoke one runtime command
 per matching event. `PreToolUse` matches every tool, because the reading-role
 boundary and the spawn checks need to see each call; result and failure events
-match only the native spawn tools, and in Claude Code also `WebFetch` results for
-the [source check](#source-checks-in-claude-code).
+match only the native spawn tools, and in Claude Code also `WebFetch` and
+`WebSearch` results for the [source check](#source-checks-in-claude-code).
 
 The Claude manifest uses the exec form: Claude Code starts `python` with the
 script path as an argument, without a shell, so Windows needs no Git Bash for
@@ -260,6 +260,16 @@ request and agent, keyed by the prompt ID Claude Code sends; without one, once p
 agent. It needs the plugin data directory, where it keeps one hashed key per
 request and agent.
 
+A `WebSearch` result lists what was found, not what was read, and Claude Code ends
+it with a request to include those sources in the answer. After the first such
+result of a request, the hook adds a second note: the request is met by the sources
+the conclusion rests on, each labelled with how it was read; the other results take
+at most one line with their count and kind, and an unopened result is named only if
+it could change the conclusion, with why it stayed unopened and what that leaves
+uncertain. The note appears on the same terms as the note after a fetch, under its
+own key, so a request with both gets both. `evidence-research` states the same rule
+for clients without this hook.
+
 At `Stop` and `SubagentStop` the hook reads the same transcript tail as the skill
 gate. When a line of the turn says a file or URL was read in full (`in full`,
 `entire`, `end to end`, `целиком`, `полностью` and similar) and names a file
@@ -272,8 +282,9 @@ downloaded, so neither triggers it. Reads before the latest compaction are not
 counted. A subagent's transcript records no line counts, so there a ranged read
 counts as reaching the end only when it returned fewer lines than its limit, and
 a plain `Read` counts as complete. The skill gate's feedback takes priority at the
-same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch and
-`"read-claims"` the stop check; each works without the other.
+same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch,
+`"search-note"` the note after a search and `"read-claims"` the stop check; each
+works without the others.
 
 ### Branch check in Claude Code
 

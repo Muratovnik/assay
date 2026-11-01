@@ -19,8 +19,9 @@ MAX_CUE = 80
 DELEGATION_SKILL = "skill/route-subagents"
 SKILL_CHECK = "skill-check"
 SKILL_GATE = "skill-gate"
-# Claude source checks: the note after a fetch and the stop check of full-read claims.
+# Claude source checks: the notes after a fetch and a search and the stop check of full-read claims.
 FETCH_NOTE = "fetch-note"
+SEARCH_NOTE = "search-note"
 READ_CLAIMS = "read-claims"
 # The Claude stop check of skill references a turn's own actions call for, one rule per row.
 # This file is also loaded standalone, so it repeats branches.RULES; a test keeps the two equal.
@@ -52,7 +53,7 @@ class RuleSet(list):
 
     def __init__(self, rules, skill_check, skill_gate=False, skills_root="", fetch_note=False, read_claims=False,
                  branch_rules=(), midturn_rules=(), rerun_rules=(),
-                 report_rules=(), handback_hold=False):
+                 report_rules=(), handback_hold=False, search_note=False):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
@@ -61,6 +62,7 @@ class RuleSet(list):
         self.skills_root = skills_root
         # Independent of the skill check: it reads sources, not skills.
         self.fetch_note = fetch_note
+        self.search_note = search_note
         self.read_claims = read_claims
         # Rows of the stop check that hold a turn to the references its own actions call for.
         self.branch_rules = frozenset(branch_rules)
@@ -80,8 +82,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, *BRANCH_RULES, *MIDTURN_RULES,
-             *RERUN_RULES, *REPORT_RULES}
+    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, SEARCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, *BRANCH_RULES,
+             *MIDTURN_RULES, *RERUN_RULES, *REPORT_RULES}
     if set(disabled_rules) - RETIRED_RULES - known or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
     rules, seen, content = [], [], []
@@ -110,7 +112,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                      [rule for rule in MIDTURN_RULES if rule not in disabled_rules],
                      [rule for rule in RERUN_RULES if rule not in disabled_rules],
                      [rule for rule in REPORT_RULES if rule not in disabled_rules],
-                     HANDBACK_HOLD not in disabled_rules)
+                     HANDBACK_HOLD not in disabled_rules, SEARCH_NOTE not in disabled_rules)
     # The installation path is the owner's; bound the text the catalog controls.
     if longest_check(rules) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
