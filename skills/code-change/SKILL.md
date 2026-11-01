@@ -190,7 +190,9 @@ When the change modified or removed existing tests, add `Tests changed: <tests> 
 `Не проверено:`. Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
 only when a reuse decision was taken: own code written or kept for behavior that
 commonly has an existing implementation, an existing implementation chosen or
-rejected, or a dependency changed. When the work met a concrete unchecked contract
+rejected, or a dependency changed. A format, length or language the user set wins
+over these lines: checks and gaps then shrink to one phrase or a short line, and a
+gap that matters stays. When the work met a concrete unchecked contract
 outside the requested result, you may add `Optional proposal: <missing means> —
 risk: <unchecked contract or input>; not implemented`. Omit it when an existing
 check covers that guarantee; a guarantee the result needs is never optional.

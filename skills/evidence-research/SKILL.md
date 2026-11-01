@@ -86,6 +86,8 @@ Use a predictable content contract: answer, supporting evidence, material
 alternatives or disagreement, limits and what could change the conclusion.
 An effective default is **Answer / Evidence / Limits and next decision**; adapt
 its shape to the recipient without omitting material content or inventing work.
+A format or length the user set wins over this default: read state and limits then
+shrink to one phrase or a short line, and content that matters stays.
 State actual access and verification limits rather than promising exhaustive
 coverage, error prevention or savings. Stop when another targeted search is
 unlikely to change the supported decision; source counts and report length are
