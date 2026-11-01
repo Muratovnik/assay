@@ -26,7 +26,13 @@ require a visible page version only when its absence creates real ambiguity.
 Choose precision for the statement's role and lifetime too: a standing product
 description, a maintained inventory and a dated result need different detail.
 Keep exact operational requirements; omit incidental snapshot facts from an
-introduction when they do not help recognition, suitability or use.
+introduction when they do not help recognition, suitability or use. The same
+holds for every passage in the opened scope that describes the current state,
+procedure steps included: a number that is true now but is neither a maintained
+inventory, a fixed capacity nor a dated record is such a snapshot fact, so
+remove it rather than re-verify it, and keep what the sentence still tells the
+reader. A focused edit checks the numbers in the passages it touches; a
+copyedit keeps data unchanged and reports such a number instead.
 
 - `draft`: compose the requested document from the relevant sources.
 - `edit`: a `copyedit` preserves structure, code, identifiers, data and link
