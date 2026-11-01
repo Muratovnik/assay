@@ -502,9 +502,9 @@ launch check does, through `ASSAY_ROUTING_CONFIG` or the plugin data directory's
 client; otherwise it arrives in the reminder before each launch. A configuration
 without a table, or written for the other client, gets no checklist.
 The checklist says to apply `route-subagents` before every launch, to start the
-launch's description with a task class from the route table and pass exactly that
-class's model and effort, and where a refusal's remedy is. A configuration that
-is retired or cannot be validated keeps the checklist and adds one sentence with
+launch's description with a task class from the route table and the child's next
+name, to pass exactly that class's model and effort, and where a refusal's remedy
+is. A configuration that is retired or cannot be validated keeps the checklist and adds one sentence with
 the reason, because it refuses every launch; session start itself never fails.
 A routing guard reply takes precedence over a suggestion. The runtime never
 adds `allow` to advance a workflow and never exempts a launch after repeated

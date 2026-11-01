@@ -45,8 +45,10 @@ selection just to copy history. Recheck the callable schema if that changes.
 ## Route-table launches
 
 With a [route table](route-table.md) configured, start `task_name` with the class
-name, then an underscore or the end of the name (`code_parser_fix`), and pass
-that class's `model` and `reasoning_effort` with `fork_turns="none"` or a
+name, then an underscore, the child's [name](../SKILL.md#name-each-child) and its
+purpose (`code_alfi_parser_fix`). The hook reads only the class, so it does not
+check the name. Without a table the task name starts with the name
+(`alfi_parser_fix`). Pass that class's `model` and `reasoning_effort` with `fork_turns="none"` or a
 bounded positive recent-turn count. Omitted or `"all"` fork turns inherit the
 parent's settings and ignore the requested ones, so the hook refuses them. A
 custom agent file that sets `model` or `model_reasoning_effort` outranks the

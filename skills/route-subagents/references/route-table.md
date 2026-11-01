@@ -147,7 +147,8 @@ its keys: `{}` becomes `[]` and `{"Explore": "inherit"}` becomes `["Explore"]`.
    owner to add one. State in one line, with the launch, why the work fits the
    class.
 4. Launch with that class's model and effort in the spawn call itself, and
-   declare the class at the start of the call's short label field. The field
+   declare the class at the start of the call's short label field, followed by
+   the child's [name](../SKILL.md#name-each-child) and purpose. The field
    and the inheritance rules are client mechanics:
    [Claude Code](claude-code-routing.md#route-table-launches),
    [Codex](codex-routing.md#route-table-launches).

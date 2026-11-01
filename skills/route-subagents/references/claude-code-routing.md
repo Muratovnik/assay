@@ -64,9 +64,12 @@ on frontmatter alone.
 ## Route-table launches
 
 With a [route table](route-table.md) configured, start the Agent call's
-`description` with the class name, then a colon or a space and the usual short
-summary (`code: fix the parser`), and pass that class's `model` alias and
-`effort` in the same call. The call's model outranks a definition's model and
+`description` with the class name, then a colon or a space, the child's
+[name](../SKILL.md#name-each-child) and the usual short summary
+(`code: alfi — fix the parser`), and pass that class's `model` alias and
+`effort` in the same call. The hook reads only the class, so it does not check
+the name. Without a table the description starts with the name
+(`alfi — fix the parser`). The call's model outranks a definition's model and
 its effort outranks a definition's `effort`, so a profile's frontmatter does not
 change the pair. `CLAUDE_CODE_EFFORT_LEVEL` outranks the call's effort: the hook
 refuses a routed launch while that variable names another level.

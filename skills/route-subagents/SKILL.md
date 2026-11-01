@@ -82,6 +82,27 @@ source assumptions or external effects returns to the primary for replanning.
 Workers must not spawn additional agents. The primary coordinates any repair
 or reviewer directly within the existing authorization.
 
+## Name each child
+
+Give each child launched in the session the next name from this list, so the
+user and the primary can refer to it by one short handle: `alfi`, `bero`, `dova`,
+`elko`, `fino`, `gavi`, `hano`, `kolo`, `lavi`, `mero`, `nori`, `ovi`, `pavo`,
+`rivo`, `savo`, `tavi`. After the last, start again with a number: `alfi2`. A
+replacement, repair worker or reviewer is a new launch and takes the next name;
+continuing a child keeps its name.
+
+Put the name and the child's purpose in the spawn call's short label field, after
+the class when a route table applies:
+[Claude Code](references/claude-code-routing.md#route-table-launches),
+[Codex](references/codex-routing.md#route-table-launches). Write the purpose in the
+user's language where the field allows it. Call the child by that name whenever
+you speak of it to the user, and when the user names it, map the name to the
+client's own agent identifier.
+
+The name is a handle for one session. It says nothing about ability, model or
+authority, which stay with the class and the profile. Another session reuses it,
+so a record that outlives the session names the work instead.
+
 ## Choose model and effort for the task
 
 Preserve a model or effort the user explicitly chose for a child; with a route
