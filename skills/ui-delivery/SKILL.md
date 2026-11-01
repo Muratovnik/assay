@@ -150,7 +150,7 @@ independent reviewer; otherwise the primary runs it directly.
 Report the operator outcome, relevant criterion → evidence or gap, actual
 automated and visual checks, unresolved risks and owned runtime cleanup. After
 editing interface files, state checks and gaps in code-change's
-[verification lines](../code-change/SKILL.md#inspect-the-final-structure). A clean
+[verification report](../code-change/SKILL.md#inspect-the-final-structure). A clean
 detector, skill read, existing test, successful import or matching defaults are
 not evidence of a complete transfer, a working journey, an editable system or a
 usable library; user approval is separate from verification. Keep reporting in

@@ -3,8 +3,9 @@
 A hook cannot judge whether a check was the right one or whether something
 already existed, but it can see that the line stating it is missing. Each row
 pairs a sign in the turn's own tool calls with a line the final message or the
-written plan must carry: a `Verified:` or `Not verified:` line after editing
-code, a `What already exists` section in a plan file. Localized labels count.
+written plan must carry: a table row or a line labelled `Verified` or `Not
+verified` after editing code, a `What already exists` section in a plan file.
+Localized labels count.
 There is no row for the reuse line: whether a reuse decision was taken is not
 visible in the tool calls, and a `Reuse: not applicable` line written to satisfy
 the check reports no decision. On Stop or SubagentStop the turn
@@ -32,8 +33,8 @@ class Row:
 
 
 ROWS = (
-    Row("report-verification", "code-change", "the final message has no verification line",
-        "a `Verified: <check> [— <environment>] — after <change>` line per material check"),
+    Row("report-verification", "code-change", "the final message has no verification report",
+        "a table `Status | Check | Result` with a `Verified` row per material check, labels in the reply's language"),
     Row("plan-existing", "implementation-planning", "the plan has no section on what already exists",
         "a `What already exists` section: capabilities and solutions considered, where they were looked for, why "
         "each fits or not"),
@@ -44,7 +45,10 @@ MAX_TEXT = 65_536
 MAX_ITEMS = 3
 # A label at the start of a line, optionally in a list item or bold.
 LABEL = r"^[ \t]*(?:[-*+][ \t]+)?(?:\*\*|__)?(?:{})(?:\*\*|__)?[ \t]*:"
-VERIFIED = re.compile(LABEL.format(r"not[ \t]+verified|verified|не[ \t]+проверено|проверено"), re.I | re.M)
+# The same label as the first cell of a table row.
+CELL = r"^[ \t]*\|[ \t]*(?:\*\*|__)?(?:{})(?:\*\*|__)?[ \t]*\|"
+STATUS = r"not[ \t]+verified|verified|не[ \t]+проверено|проверено"
+VERIFIED = re.compile(LABEL.format(STATUS) + "|" + CELL.format(STATUS), re.I | re.M)
 EXISTING = re.compile(r"^[ \t]*#{1,6}[ \t]+(?:\d+[.)][ \t]*)?(?:what already exists|что уже есть)\b", re.I | re.M)
 # A file that holds behavior: source, a test or an interface.
 CODE = frozenset({"midturn-code-change", "midturn-test-writing", "midturn-ui-delivery"})
@@ -159,6 +163,6 @@ def stopped(event, rules=RULES, skills=None):
         return {}
     who = "this subagent" if name == "SubagentStop" else "this session"
     return {"hookSpecificOutput": {"hookEventName": name, "additionalContext": "\n".join([
-        f"Assay report check: a line the skill below asks for after {who}'s changes is missing:", *lines,
-        "Add only the missing lines, without repeating the answer; for a plan, add the section to the plan file. "
-        "A line states what was done: when no check ran, a `Not verified: <what> — <why>` line says so instead."])}}
+        f"Assay report check: something the skill below asks for after {who}'s changes is missing:", *lines,
+        "Add only what is missing, without repeating the answer; for a plan, add the section to the plan file. "
+        "A report states what was done: when no check ran, a `Not verified` row says so instead, with the reason."])}}

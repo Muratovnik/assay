@@ -446,9 +446,9 @@ before the owner intervened.
 
 A hook cannot judge whether a check was the right one or whether a ready-made
 solution existed, but it can see that the line stating it is missing. `code-change`
-asks for a `Verified: <check> [— <environment>] — after <change>` line per material
-check after editing code, and a `Not verified: <what> — <why>` line for a gap that
-changes the reader's trust or next step; `ui-delivery` refers to them, and
+asks for a table `Status | Check | Result` after editing code, with a `Verified` row
+per material check and a `Not verified` row for a gap that changes the reader's trust
+or next step, labels in the reply's language; `ui-delivery` refers to it, and
 `implementation-planning` asks a plan file for a `What already exists` section.
 
 At `Stop` and `SubagentStop`, the hook reads the turn back to its start and stops
@@ -456,7 +456,7 @@ at a compaction. The turn continues once with one note listing each missing line
 
 | Rule | Skill | Sign in the turn | Missing |
 | --- | --- | --- | --- |
-| `report-verification` | `code-change` | an edit or write of a source, test or interface file, or a `git add` of one | a line starting `Verified:` or `Not verified:` in the final message |
+| `report-verification` | `code-change` | an edit or write of a source, test or interface file, or a `git add` of one | a table row or a line labelled `Verified` or `Not verified` in the final message |
 | `plan-existing` | `implementation-planning` | a `Write` of a plan file, as the branch check recognises one | a `What already exists` heading in that plan, written then or by a later edit |
 
 The check has no row for the reuse line. Whether a reuse decision was taken is not
@@ -464,8 +464,9 @@ visible in the tool calls, and a `Reuse: not applicable` line written to satisfy
 check reports no decision; `report-reuse`, the ID of the removed row, is still
 accepted in `disabled_rules` and does nothing.
 
-A label counts at the start of a line, in a list item or in bold; `Проверено:`,
-`Не проверено:` and `Что уже есть` count too. Files are named
+A label counts as the first cell of a table row, or before a colon at the start of a
+line, in a list item or in bold; `Проверено`, `Не проверено` and `Что уже есть` count
+too. Files are named
 by their last path part, and the classes of files are the mid-turn note's. A shell
 edit is seen only through the files the turn stages with `git add`. A subagent's
 report and a task notification do not start a turn, so an edit that an earlier

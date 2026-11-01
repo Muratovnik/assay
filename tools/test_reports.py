@@ -58,6 +58,16 @@ class LineTests(unittest.TestCase):
                 self.assertTrue(reports.EXISTING.search("# Plan\n\n" + heading + "\n- x"))
         self.assertFalse(reports.EXISTING.search("What already exists: nothing"))
 
+    def test_a_table_row_counts_only_with_a_label_in_its_first_cell(self):
+        for row in ("| Проверено | тесты | 33 из 33 |", "| Не проверено | CI | нет доступа |",
+                    "| Verified | unit suite | passes |", "| **Not verified** | Linux | no runner |"):
+            with self.subTest(row=row):
+                self.assertTrue(reports.VERIFIED.search("Done.\n\n" + row))
+        for row in ("| Статус | Проверка | Итог |", "| --- | --- | --- |", "| Проверено вручную | x |",
+                    "| Тесты | Проверено |", "Проверено | тесты"):
+            with self.subTest(row=row):
+                self.assertFalse(reports.VERIFIED.search(row))
+
     def test_the_activation_list_matches_the_module(self):
         self.assertEqual(reports.RULES, activation.REPORT_RULES)
         self.assertEqual(frozenset(reports.RULES), activation.load_rules(ROOT)[0].report_rules)
@@ -95,8 +105,11 @@ class StopTests(unittest.TestCase):
             with self.subTest(path=path):
                 text = self.note(self.stop(prompt(), edit(path)))
                 self.assertIn("this turn edited " + path.split("\\")[-1], text)
-                self.assertIn("`Verified: <check> [— <environment>] — after <change>`", text)
-                self.assertIn("when no check ran, a `Not verified", text)
+                self.assertIn("a table `Status | Check | Result`", text)
+                self.assertIn("labels in the reply's language", text)
+                self.assertIn("when no check ran, a `Not verified` row says so", text)
+                # A literal English line in the note is what a Russian reply copied.
+                self.assertNotIn("`Verified:", text)
                 self.assertNotIn("C:\\work", text)
         text = self.note(self.stop(prompt(), edit(APP), edit(TESTS, "e2"), edit(APP, "e3")))
         self.assertIn("edited parser.py, test_parser.py and", text)
@@ -117,6 +130,9 @@ class StopTests(unittest.TestCase):
     def test_a_verification_line_or_no_code_edit_keeps_it_silent(self):
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), last="Fixed.\nVerified: suite — venv — after fix")))
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), last="Не проверено: CI — нет доступа")))
+        table = "Fixed.\n\n| Статус | Проверка | Итог |\n| --- | --- | --- |\n| Проверено | тесты | проходят |"
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), last=table)))
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), last="| Статус | Итог |\n| --- | --- |")))
         for path in ("C:\\work\\docs\\guide.md", "C:\\work\\tmp\\probe.py", "C:\\work\\config.yaml",
                      "C:\\work\\.private\\x\\parse.py"):
             with self.subTest(path=path):
@@ -147,6 +163,9 @@ class StopTests(unittest.TestCase):
         self.assertNotIn("parser.py, ", text)
         # Without a report the edit before the relayed messages is still asked for.
         self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), hand_back, queued, last="Waiting.")))
+        # A table in an earlier message of the turn reports the edit too.
+        tabled = said("| Статус | Проверка | Итог |\n| --- | --- | --- |\n| Проверено | тесты | проходят |")
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), tabled, hand_back, last="Waiting.")))
 
     def test_a_new_source_file_asks_only_for_the_verification_line(self):
         # The hook cannot see whether a reuse decision was taken, so a new file adds no reuse demand.
