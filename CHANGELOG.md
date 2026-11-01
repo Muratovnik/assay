@@ -6,6 +6,17 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.38.0](https://github.com/Muratovnik/assay/compare/v0.37.0...v0.38.0) (2026-11-01)
+
+When a Claude Code check continues a finished turn and nothing needs changing, the
+turn now closes on a few words saying the answer is unchanged, not on a line that
+names what was read and says the work complies. This is a candidate: it follows
+counts over recorded sessions, and no run has compared it with the previous text.
+
+### Features
+
+* **hooks:** the skill gate and the branch check say that finding nothing to change is a normal result, that a few words in the reply's language saying the answer is unchanged close the turn, and that nothing needs changing only to show the check had an effect; corrections that would change the user's code, conclusions or decisions are written as before. A subagent keeps the single line, since what it writes next may be all its parent receives, and the source check keeps its line, which corrects a false claim. ([df9ce46](https://github.com/Muratovnik/assay/commit/df9ce468ab030b0d96ed9667d7fbf7409d712305))
+
 ## [0.37.0](https://github.com/Muratovnik/assay/compare/v0.36.0...v0.37.0) (2026-11-01)
 
 A report of checks now reads as a table in the reply's language, and each subagent
