@@ -33,13 +33,14 @@ MIDTURN_RULES = ("midturn-evidence-research", "midturn-code-change", "midturn-te
 # The Claude note on a shell call that reruns one scenario; repeated from reruns.RULES, kept equal by a test.
 RERUN_RULES = ("rerun-diagnostic-reproducer",)
 # The Claude stop check for report lines; repeated from reports.RULES, kept equal by a test.
-REPORT_RULES = ("report-verification", "report-reuse", "plan-existing")
+REPORT_RULES = ("report-verification", "plan-existing")
 # The Claude refusal of a subagent's first hand-back that the stop checks have feedback for.
 HANDBACK_HOLD = "handback-hold"
-# Phrase rules retired in favor of the skill check. Old settings that disable
-# them stay valid and do nothing, instead of breaking the hooks.
+# Phrase rules retired in favor of the skill check, and the report check's former
+# reuse row. Old settings that disable them stay valid and do nothing, instead of
+# breaking the hooks.
 RETIRED_RULES = frozenset({"test-audit", "test-writing", "research", "reuse-lookup", "reuse-question",
-                           "planning", "audit", "ui-delivery", "code-change", "delegation"})
+                           "planning", "audit", "ui-delivery", "code-change", "delegation", "report-reuse"})
 OPAQUE_TEXT = " [data] "
 SKILL_NAME = re.compile(r"(?:\$|/assay:|assay:)?([a-z][a-z0-9-]{0,63})(?![\w-])")
 EXPLAIN = re.compile(r"^(?:what|how|why|explain|что|как|почему|объясни|расскажи|не\b|do not\b|don't\b)", re.I)

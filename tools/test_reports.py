@@ -53,9 +53,6 @@ class LineTests(unittest.TestCase):
         for text in ("I verified: the parser", "Unverified: x", "Verified that it works", "Проверено вручную"):
             with self.subTest(text=text):
                 self.assertFalse(reports.VERIFIED.search(text))
-        self.assertTrue(reports.REUSE.search("Reuse: not applicable — project-specific parsing"))
-        self.assertTrue(reports.REUSE.search("- **Переиспользование:** нет готового"))
-        self.assertFalse(reports.REUSE.search("We reuse: nothing"))
         for heading in ("## What already exists", "### 2. Что уже есть", "# What already exists in the project"):
             with self.subTest(heading=heading):
                 self.assertTrue(reports.EXISTING.search("# Plan\n\n" + heading + "\n- x"))
@@ -66,6 +63,10 @@ class LineTests(unittest.TestCase):
         self.assertEqual(frozenset(reports.RULES), activation.load_rules(ROOT)[0].report_rules)
         catalog = {rule["skill"].split("/", 1)[1] for rule in activation.load_rules(ROOT)[0]}
         self.assertLessEqual({row.skill for row in reports.ROWS}, catalog)
+
+    def test_a_setting_that_disables_the_removed_reuse_row_still_loads_and_changes_nothing(self):
+        self.assertNotIn("report-reuse", reports.RULES)
+        self.assertEqual(activation.load_rules(ROOT), activation.load_rules(ROOT, disabled_rules=["report-reuse"]))
 
 
 class StopTests(unittest.TestCase):
@@ -94,7 +95,8 @@ class StopTests(unittest.TestCase):
             with self.subTest(path=path):
                 text = self.note(self.stop(prompt(), edit(path)))
                 self.assertIn("this turn edited " + path.split("\\")[-1], text)
-                self.assertIn("`Verified: <check> — <environment> — after <change>`", text)
+                self.assertIn("`Verified: <check> [— <environment>] — after <change>`", text)
+                self.assertIn("when no check ran, a `Not verified", text)
                 self.assertNotIn("C:\\work", text)
         text = self.note(self.stop(prompt(), edit(APP), edit(TESTS, "e2"), edit(APP, "e3")))
         self.assertIn("edited parser.py, test_parser.py and", text)
@@ -145,25 +147,14 @@ class StopTests(unittest.TestCase):
         self.assertNotIn("parser.py, ", text)
         # Without a report the edit before the relayed messages is still asked for.
         self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), hand_back, queued, last="Waiting.")))
-        # A reuse line covers a new file the same way, and a verification line does not.
-        self.assertEqual("", self.note(self.stop(prompt(), write(APP), said("Verified: x — y — z\nReuse: none — w"),
-                                                 hand_back, last="Waiting.")))
-        self.assertIn("created parser.py", self.note(self.stop(prompt(), write(APP), said("Verified: x — y — z"),
-                                                               hand_back, last="Waiting.")))
 
-    def test_a_new_source_file_without_a_reuse_line_is_named(self):
+    def test_a_new_source_file_asks_only_for_the_verification_line(self):
+        # The hook cannot see whether a reuse decision was taken, so a new file adds no reuse demand.
         text = self.note(self.stop(prompt(), write(APP)))
-        self.assertIn("this turn created parser.py", text)
-        self.assertIn("`Reuse: not applicable — <why>`", text)
-        self.assertEqual("", self.note(self.stop(prompt(), write(APP), last=(
-            "Verified: suite — venv — after the new parser\nReuse: own code — gap: none fits; alternatives checked: x"))))
-        # Overwriting a file, creating a test or a scratch script is not a new source file.
-        for entries in (write(APP, new=False), write(TESTS), write("C:\\work\\tmp\\probe.py"),
-                        [tool("Write", {"file_path": APP, "content": "x"}, "w1"),
-                         {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "is_error": True,
-                          "tool_use_id": "w1", "content": CREATED.format(APP)}]}}]):
-            with self.subTest(entries=entries[1]):
-                self.assertNotIn("created", self.note(self.stop(prompt(), entries, last="Verified: x — y — after z")))
+        self.assertIn("this turn edited parser.py", text)
+        self.assertNotIn("created", text)
+        self.assertNotIn("Reuse", text)
+        self.assertEqual("", self.note(self.stop(prompt(), write(APP), last="Verified: suite — after the new parser")))
 
     def test_a_plan_without_the_existing_section_is_named(self):
         text = self.note(self.stop(prompt("Plan the ingest"), write(PLAN, text="# Plan\n\n## Units\n- U1")))
@@ -182,12 +173,12 @@ class StopTests(unittest.TestCase):
     def test_all_missing_lines_come_in_one_note(self):
         text = self.note(self.stop(prompt(), write(APP), write(PLAN, "w2", text="# Plan")))
         self.assertTrue(text.startswith("Assay report check:"))
-        self.assertEqual(3, text.count("\n- "))
+        self.assertEqual(2, text.count("\n- "))
 
     def test_rules_skills_a_second_stop_and_a_subagent(self):
         event = self.stop(prompt(), write(APP))
         self.assertEqual("", self.note(event, rules=("plan-existing",)))
-        self.assertNotIn("Reuse", self.note(event, rules=("report-verification",)))
+        self.assertIn("edited parser.py", self.note(event, rules=("report-verification",)))
         self.assertEqual("", self.note(event, skills={"implementation-planning"}))
         self.assertEqual("", self.note({**event, "stop_hook_active": True}))
         self.assertEqual("", self.note({**event, "last_assistant_message": None}))
@@ -209,6 +200,11 @@ class StopTests(unittest.TestCase):
         config = self.directory / "hooks.json"
         config.write_text(json.dumps({"disabled_rules": ["report-verification"], "state_dir": str(data)}), encoding="utf-8")
         self.assertEqual(({}, None), process(event, "claude", {"ASSAY_HOOK_CONFIG": str(config)}))
+        # A configuration written for the removed reuse row keeps working and keeps the verification row.
+        config.write_text(json.dumps({"disabled_rules": ["report-reuse"], "state_dir": str(data)}), encoding="utf-8")
+        result, error = process(event, "claude", {"ASSAY_HOOK_CONFIG": str(config)})
+        self.assertIsNone(error)
+        self.assertIn("Assay report check", result["hookSpecificOutput"]["additionalContext"])
         self.assertNotIn("report check", json.dumps(process(event, "codex", {"CLAUDE_PLUGIN_DATA": str(data)})[0]))
 
 

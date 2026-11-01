@@ -178,11 +178,19 @@ Do not equate a file move with unchanged check coverage. Once evidence is
 sufficient, continue to the requested delivery; reopen verification for a changed
 relevant input, failure, concrete unresolved concern or owner requirement.
 Report the responsibility/guarantee improved, actual checks and remaining gaps.
-After editing code, give each material check its own line, `Verified: <check> —
-<environment> — after <change>`, and each remaining gap `Not verified: <what> —
-<why>`; a localized label such as `Проверено:` or `Не проверено:` serves the same.
-Name the environment even when it is not the consumer's. Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
-when the change introduced or kept such behavior or changed a dependency. When the work met a concrete unchecked contract
+After editing code, give each material check its own line, `Verified: <check>
+[— <environment>] — after <change>`, naming the environment only when it differs
+from the user's or affects the conclusion. `<change>` is the last code change the
+check ran after; a documentation edit after the run needs no rerun, but the line
+then does not claim "after all changes". Give a remaining gap a `Not verified:
+<what> — <why>` line only when it changes the reader's trust in the result or
+their next step; when the check the request named covers the change, write none.
+When the change modified or removed existing tests, add `Tests changed: <tests> —
+<why>`. Write the labels in the reply's language, such as `Проверено:` and
+`Не проверено:`. Include the [reuse line](references/reuse-and-migration.md#report-the-reuse-decision)
+only when a reuse decision was taken: own code written or kept for behavior that
+commonly has an existing implementation, an existing implementation chosen or
+rejected, or a dependency changed. When the work met a concrete unchecked contract
 outside the requested result, you may add `Optional proposal: <missing means> —
 risk: <unchecked contract or input>; not implemented`. Omit it when an existing
 check covers that guarantee; a guarantee the result needs is never optional.

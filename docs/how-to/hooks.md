@@ -430,11 +430,10 @@ before the owner intervened.
 
 A hook cannot judge whether a check was the right one or whether a ready-made
 solution existed, but it can see that the line stating it is missing. `code-change`
-asks for `Verified: <check> — <environment> — after <change>` and `Not verified:
-<what> — <why>` lines after editing code, `ui-delivery` refers to them, the reuse
-line becomes `Reuse: not applicable — <why>` when a new source file holds
-project-specific code, and `implementation-planning` asks a plan file for a
-`What already exists` section.
+asks for a `Verified: <check> [— <environment>] — after <change>` line per material
+check after editing code, and a `Not verified: <what> — <why>` line for a gap that
+changes the reader's trust or next step; `ui-delivery` refers to them, and
+`implementation-planning` asks a plan file for a `What already exists` section.
 
 At `Stop` and `SubagentStop`, the hook reads the turn back to its start and stops
 at a compaction. The turn continues once with one note listing each missing line:
@@ -442,15 +441,19 @@ at a compaction. The turn continues once with one note listing each missing line
 | Rule | Skill | Sign in the turn | Missing |
 | --- | --- | --- | --- |
 | `report-verification` | `code-change` | an edit or write of a source, test or interface file, or a `git add` of one | a line starting `Verified:` or `Not verified:` in the final message |
-| `report-reuse` | `code-change` | a `Write` whose result says the source file was created; not a test, interface or scratch file | a line starting `Reuse:` in the final message |
 | `plan-existing` | `implementation-planning` | a `Write` of a plan file, as the branch check recognises one | a `What already exists` heading in that plan, written then or by a later edit |
 
+The check has no row for the reuse line. Whether a reuse decision was taken is not
+visible in the tool calls, and a `Reuse: not applicable` line written to satisfy a
+check reports no decision; `report-reuse`, the ID of the removed row, is still
+accepted in `disabled_rules` and does nothing.
+
 A label counts at the start of a line, in a list item or in bold; `Проверено:`,
-`Не проверено:`, `Переиспользование:` and `Что уже есть` count too. Files are named
+`Не проверено:` and `Что уже есть` count too. Files are named
 by their last path part, and the classes of files are the mid-turn note's. A shell
 edit is seen only through the files the turn stages with `git add`. A subagent's
-report and a task notification do not start a turn, so an edit or a new file that an
-earlier message of the turn already reported with its line is not named again: in
+report and a task notification do not start a turn, so an edit that an earlier
+message of the turn already reported with its line is not named again: in
 one live session the same three files were asked for after each of four relayed
 messages. An edit after that message is. When the branch
 check also has a note for the same stop, both go out in one continuation, since a
@@ -516,8 +519,8 @@ the refusal of a subagent's first hand-back, and each
 rule ID of the branch check table or of the mid-turn note table one of its rows.
 `skill_note_form` is `"note"` (the default) or `"deny"`, see the mid-turn note above. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the
-rest) are still accepted and do nothing, so an existing configuration keeps
-working; any other unknown ID is an error.
+rest) and of the removed `report-reuse` row are still accepted and do nothing, so an
+existing configuration keeps working; any other unknown ID is an error.
 
 Small namespaced technical reminder records reuse the existing `PipelineStore`
 SQLite transactions, path checks and expiry, not a new storage engine. Each such
