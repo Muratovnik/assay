@@ -81,7 +81,14 @@ class SourceCheckTests(unittest.TestCase):
     def test_the_first_fetch_of_a_request_gets_the_note_and_later_fetches_do_not(self):
         text = self.feedback(self.fetch(), "PostToolUse")
         self.assertIn("not the page's text", text)
-        self.assertIn("curl", text)
+        # The label is unconditional; the download is asked for only on its stated condition.
+        self.assertIn("A conclusion that rests on the fetch summary is stated as resting on it.", text)
+        self.assertIn("shell download", text)
+        self.assertIn("when that conclusion depends on exact wording, a number, a table or code", text)
+        self.assertIn("a narrow fact the summary quotes from an authoritative page needs only the label", text)
+        # The hook cannot know which tools the session has, so it names none.
+        for name in ("curl", "gh ", "wget"):
+            self.assertNotIn(name, text)
         self.assertEqual({}, self.fetch())
         self.assertEqual({}, self.fetch(tool_use_id="another"))
 

@@ -36,8 +36,9 @@ brief changes. Do not impose a full landscape survey on a narrow correction.
 
 - For a landscape, a search gap, unfamiliar terminology or a claim of completeness,
   use [search and coverage](references/search-and-coverage.md).
-- For disputed claims, quantitative results, source chains or notes that will be
-  reused, use [evidence and claims](references/evidence-and-claims.md).
+- For disputed claims, quantitative results, source chains, notes that will be
+  reused or retrieving a page's text behind a fetch tool's summary, use
+  [evidence and claims](references/evidence-and-claims.md).
 - For choosing options, explaining causes or generalizing a pattern, use
   [comparison and synthesis](references/comparison-and-synthesis.md).
 - For consequential package freshness, maintenance or platform-support claims,
@@ -89,6 +90,8 @@ its shape to the recipient without omitting material content or inventing work.
 A format or length the user set wins over this default: read state and limits then
 shrink to one phrase or a short line, and content that matters stays.
 State actual access and verification limits rather than promising exhaustive
-coverage, error prevention or savings. Stop when another targeted search is
+coverage, error prevention or savings. A narrow fact quoted from one authoritative
+page needs no second retrieval of that page; label what was read, such as a fetch
+tool's summary. Stop when another targeted search is
 unlikely to change the supported decision; source counts and report length are
 not completion criteria.

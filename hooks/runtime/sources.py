@@ -38,9 +38,11 @@ URL = re.compile(r"https?://[^\s<>()\"'`]+")
 
 FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
               "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
-              "come back as a summary of that page. A conclusion that rests on this source needs its text: "
-              "retrieved with a shell download such as curl or gh and read at the part the conclusion depends "
-              "on, or else stated as resting on the fetch summary. This note appears once per request.")
+              "come back as a summary of that page. A conclusion that rests on the fetch summary is stated "
+              "as resting on it. Retrieve the page's text with a shell download, and read it at the part the "
+              "conclusion depends on, when that conclusion depends on exact wording, a number, a table or code "
+              "the summary may have distorted or dropped, or when the page is long; a narrow fact the summary "
+              "quotes from an authoritative page needs only the label. This note appears once per request.")
 
 
 def _key(*parts):

@@ -26,6 +26,18 @@ different observed result. Keep that distinction visible. A review can orient
 a field while a primary study supports a particular measurement. Prestige and
 citation counts do not establish methodological quality.
 
+## Retrieve a page's text
+
+A fetch tool that returns a model's summary of a page has not shown you the page.
+Retrieve the text itself when the conclusion depends on exact wording, a number, a
+table or code the summary may have distorted or dropped, or when the page is long
+and the decisive part may lie deep in it. A narrow fact the summary quotes from an
+authoritative page is labelled as resting on the summary instead of fetched again.
+Save a download you will read more than once in the working directory, not the
+system temporary directory, and read the part that matters through a filter, such
+as `curl -sL <url> | grep -n <term>` or `grep -n <term> <file>`, rather than a
+compound command that chains several steps.
+
 ## Prevent evidence drift
 
 Trace secondary reports to their origin where material. Several pages copying
