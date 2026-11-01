@@ -6,6 +6,18 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.37.0](https://github.com/Muratovnik/assay/compare/v0.36.0...v0.37.0) (2026-11-01)
+
+A report of checks now reads as a table in the reply's language, and each subagent
+gets a short name a person can use to refer to it. Both follow a maintainer's
+preference and are candidates: no run has compared them with the previous form, and
+how a table or a label renders in a client's panel has not been checked.
+
+### Features
+
+* **code-change:** a reply reports its checks as a table `Status | Check | Result`, whatever their number, with verified rows first and labels in the reply's language. The Stop check accepts a label in a table's first cell as well as a labelled line, and its note no longer shows a literal English line, which replies in other languages copied ([c8c6e5c](https://github.com/Muratovnik/assay/commit/c8c6e5c61d1821df1ded30edf9591b33263f7a90))
+* **route-subagents:** each child takes the next name from a fixed list, in launch order within the session, and the launch label carries it after the class with the child's purpose: `code: alfi — fix the parser`, or `code_alfi_parser_fix` in Codex. The name is a handle for one session and says nothing about ability, model or authority. The route check reads only the class, so it does not check the name ([ae76675](https://github.com/Muratovnik/assay/commit/ae76675c41c285a4c750ddc9851de5c3b6b9f864))
+
 ## [0.36.0](https://github.com/Muratovnik/assay/compare/v0.35.0...v0.36.0) (2026-11-01)
 
 An answer now lists what its conclusion rests on instead of repeating a search
