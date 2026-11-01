@@ -41,6 +41,13 @@ future inputs. Authorized work copies and frozen evidence packets serve differen
 purposes; use existing isolation controls without claiming a fresh context alone
 isolates the filesystem.
 
+When the plugin's hooks belong to a condition, keep each subject run's working
+directory off a path the hooks classify as scratch, and before the runs confirm
+with one smoke task that each hook class fires: a mid-turn note, a Stop check
+and the note after a web fetch. The
+[hook workspace check](eval-design.md#calibrate-the-evaluator-before-trusting-its-verdict)
+names the paths and where that classification is defined.
+
 For an untrusted or materially changed evaluation, use
 [evaluation design](eval-design.md) first. A pilot's few tasks need not be
 divided into working, selection and final splits; identify what was exposed and

@@ -110,13 +110,30 @@ failures, omit them silently, or score only completed successes as the full run.
 A stronger configuration failing to improve can prompt diagnosis; it does not
 prove the grader is wrong or justify changing labels to force a model ranking.
 
+When the plugin's hooks are part of a condition, check that they could act on
+the subject's workspace. The hooks that react to edited files stay silent for a
+path they classify as scratch: one with a directory segment named `tmp`,
+`temp`, `scratchpad`, `.private` or `.tmp`, in any letter case. Only the
+`tmp/worktrees/<name>/` part of a task worktree's path is exempt; any other
+such segment above or below it still counts. The `SCRATCH` and `WORKTREE`
+patterns in the plugin's `hooks/runtime/midturn.py` define that
+classification; read the installed revision rather than relying on this list.
+A system temporary directory often matches. Do not place a subject run's
+working directory on such a path. Before a campaign, run a smoke task in each
+hooked condition and confirm from its transcript that every hook class fires:
+a mid-turn note when a source or documentation file is edited, a Stop check of
+the report after a code edit, and the note after a web fetch. A class that
+stays silent means the condition is not the one intended; fix the workspace
+before the measured runs, since the run data alone will not show it.
+
 ## Freeze a usable measurement
 
 Before selecting candidates retain, in the existing experiment record:
 
 - task/rubric/grader bytes and their identity, task groups/roles and exposure;
 - baseline and candidate identity, client/model/effort, tools, permissions,
-  surrounding instructions, available collection and invocation route;
+  surrounding instructions, available collection and invocation route, the
+  subject's working directory and the hook smoke result where hooks apply;
 - outcome requirements, cost boundary, trial budget, repeat allocation,
   decision thresholds and stopping rule appropriate to the claim;
 - calibration controls, observed disagreements, excluded infrastructure failures
