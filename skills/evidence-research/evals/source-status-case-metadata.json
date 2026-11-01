@@ -109,6 +109,42 @@
       "rationale": "When every retriever uses the same helper, the general claim is correct.",
       "split": "working",
       "exposure": "public"
+    },
+    {
+      "id": "SS13",
+      "group": "source-listing-unused-results",
+      "purpose": "challenge",
+      "source": "Modeled on an answer that repeated a whole search listing under a status line; synthetic packet.",
+      "rationale": "A search listing the conclusion does not rest on is not a list of sources, even when the tool asks to include it.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS14",
+      "group": "source-listing-used-snippet",
+      "purpose": "challenge",
+      "source": "Synthetic control for the listing case.",
+      "rationale": "Trimming the listing must not hide a snippet the answer uses: it stays named and labelled, with why and what follows.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS15",
+      "group": "source-listing-dissenting-result",
+      "purpose": "challenge",
+      "source": "Synthetic control for the listing case.",
+      "rationale": "An unopened result that could change the decision is named with why and what stays unconfirmed, not dropped with the rest.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SS16",
+      "group": "source-listing-requested",
+      "purpose": "should-not-fire",
+      "source": "Synthetic control for the listing case.",
+      "rationale": "A reader who asks for the whole listing gets it; the one-line form is a default, not a limit.",
+      "split": "working",
+      "exposure": "public"
     }
   ]
 }
