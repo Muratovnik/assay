@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.36.0](https://github.com/Muratovnik/assay/compare/v0.35.0...v0.36.0) (2026-11-01)
+
+An answer now lists what its conclusion rests on instead of repeating a search
+listing under a status line. A result the answer did not use takes at most one line
+with the rest, and an unopened result that could change the conclusion is named with
+why and what stays unconfirmed. These changes are candidates: they follow one
+reported answer and counts over recorded runs, and none has been compared against the
+previous text in a run of its own. One live Claude Code run confirmed that the new
+note reaches the agent after a search; it says nothing about the effect on answers.
+
+### Features
+
+* **evidence-research:** sources are what the conclusion rests on, each with how it was read, and a snippet the answer uses stays listed and labelled. A result seen only in a search listing and not used needs no reason of its own: when the reader needs the search's reach, the rest take one line with their count and kind, which also meets a search tool's request to include its results. Before stopping, the unopened results are looked through for one that could change the conclusion: it is opened, or named with why and which conclusion stays unconfirmed. The answer says in a phrase why what was read is enough ([48ba808](https://github.com/Muratovnik/assay/commit/48ba80887679805d78b69cea18b29382267bd473))
+* **hooks:** after the first `WebSearch` result of a request and agent, a Claude agent gets a note: search results are found, not read, and a request to include them is met by the sources the conclusion rests on, on the terms above. It keeps its own key, so a fetch in the same request keeps its note, and `disabled_rules: ["search-note"]` turns it off. Codex's hosted `WebSearch` is outside these hooks, so there only the skill text applies ([32a1bbd](https://github.com/Muratovnik/assay/commit/32a1bbd07e6189f2eadff1beb257e6000c3bdfe2))
+
+### Bug Fixes
+
+* **critical-discussion:** stating what was and was not examined now includes why; the clause lived only in the need-and-scope reference, which a turn can skip ([8024734](https://github.com/Muratovnik/assay/commit/80247341258fee8011b477c901a242a2d70da027))
+
 ## [0.35.0](https://github.com/Muratovnik/assay/compare/v0.34.0...v0.35.0) (2026-11-01)
 
 Report lines, page downloads and mutation checks are now asked for only where
