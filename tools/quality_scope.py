@@ -107,7 +107,7 @@ def probe(*, kind: str, node: str, entry: Path, root: Path, output_parent: Path,
             "refuted" if not observations["enforced_on_selected_paths"] or observations["control_detection"] == "fail"
             else "observed" if invalid else "configuration-only"
         )
-    elif kind == "tsc":
+    else:
         if not project or not required_files:
             raise ValueError("TypeScript requires a project and required file paths")
         config, code, packet = run(["--project", project, "--showConfig"], [project, *required_files])
@@ -121,8 +121,6 @@ def probe(*, kind: str, node: str, entry: Path, root: Path, output_parent: Path,
         missing = [name for name in required_files if (root / name).resolve(strict=True) not in selected]
         observations.update({"project": project, "missing_required_files": missing,
                              "status": "refuted" if missing else "selection-only"})
-    else:
-        raise ValueError(f"unknown tool kind: {kind}")
     observations["limits"] = (
         "Only selected files/configurations and named tool entrypoints. "
         "Print-config does not lint; listFilesOnly does not type-check. "

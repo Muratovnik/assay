@@ -122,9 +122,10 @@ class ReminderTests(unittest.TestCase):
     def test_packaged_matchers_cover_reminders_guards_and_worker_stops(self):
         for client, filename in (("claude", "hooks.json"), ("codex", "codex.json")):
             hooks = json.loads((ROOT / "hooks" / filename).read_text())["hooks"]
-            common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "PostToolUse", "SessionEnd"}
+            common = {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SessionEnd"}
             # Stop carries the Claude skill gate; Codex skill loads are not observable enough for it.
-            extra = {"PermissionDenied", "PostToolUseFailure", "Stop"} if client == "claude" else {"PostCompact"}
+            extra = ({"SubagentStop", "PostToolUse", "PostToolUseFailure", "Stop"} if client == "claude"
+                     else {"PostCompact"})
             self.assertEqual(common | extra, set(hooks))
 
             def commands(event, value):
@@ -144,9 +145,10 @@ class ReminderTests(unittest.TestCase):
                     self.assertEqual(unified, commands("PreToolUse", tool))
             for tool in (("Agent", "Task") if client == "claude" else ("Agent", "spawn_agent", "collaborationspawn_agent")):
                 self.assertEqual(unified, commands("PreToolUse", tool))
-                self.assertEqual(unified, commands("PostToolUse", tool))
+                if client == "claude":
+                    self.assertEqual(unified, commands("PostToolUse", tool))
             self.assertEqual(unified, commands("PreToolUse", "SubagentHandback"))
-            for event in ("SubagentStart", "SubagentStop"):
+            for event in ("SubagentStart", "SubagentStop") if client == "claude" else ("SubagentStart",):
                 for agent_type in ("assay:evidence-reviewer", "Explore", "general-purpose", ""):
                     self.assertEqual(unified, commands(event, agent_type))
             for source in ("startup", "resume", "clear", "compact"):

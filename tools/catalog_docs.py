@@ -58,37 +58,38 @@ def documents(root: Path) -> list[Path]:
     return found
 
 
-def check(root: Path) -> bool:
+def check(root: Path) -> list[str]:
+    """The relative path of every marked document whose block differs from the catalog."""
     catalog = aa.load_catalog(root)
+    stale = []
     for path in documents(root):
         text = path.read_text(encoding="utf-8")
         if text != updated(text, catalog):
-            return False
-    return True
+            stale.append(path.relative_to(root).as_posix())
+    return stale
+
+
+def write(root: Path) -> None:
+    catalog = aa.load_catalog(root)
+    for path in documents(root):
+        text = path.read_text(encoding="utf-8")
+        candidate = updated(text, catalog)
+        if text != candidate:
+            path.write_text(candidate, encoding="utf-8", newline="\n")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=aa.ROOT)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--write", action="store_true")
     args = parser.parse_args()
     try:
-        catalog = aa.load_catalog(args.root)
-        stale: list[str] = []
-        for path in documents(args.root):
-            text = path.read_text(encoding="utf-8")
-            candidate = updated(text, catalog)
-            if text == candidate:
-                continue
-            if args.write:
-                path.write_text(candidate, encoding="utf-8", newline="\n")
-            else:
-                stale.append(path.relative_to(args.root).as_posix())
         if args.write:
+            write(aa.ROOT)
             print("catalog document: synchronized")
             return 0
+        stale = check(aa.ROOT)
         if stale:
             print(f"catalog document: stale ({', '.join(stale)}); "
                   "run python tools/catalog_docs.py --write", file=sys.stderr)

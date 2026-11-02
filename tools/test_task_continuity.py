@@ -154,7 +154,7 @@ class TaskContinuityTests(unittest.TestCase):
                 self.assertEqual({"hookEventName", "additionalContext"}, set(output["hookSpecificOutput"]))
                 self.assertIn(self.RESTORED + "code-change", output["hookSpecificOutput"]["additionalContext"])
         with PipelineStore(self.directory / "events", clock=lambda: self.now).transaction() as tx:
-            saved = json.dumps([tx.values(kind) for kind in state.KINDS])
+            saved = json.dumps([tx.values(kind) for kind in ("hook-context", "hook-seen")])
         self.assertNotIn(self.event["prompt"], saved)
         self.assertNotIn("skills_used", saved)
 

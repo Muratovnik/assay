@@ -139,7 +139,6 @@ class RouteTableTests(unittest.TestCase):
         self.assertIn('pins model_reasoning_effort', self.reason(self.codex(agent_type='same', **launch), env, 'codex'))
 
     def test_namespaced_codex_hook_name_checks_the_class_and_preserves_native_evidence(self):
-        from runtime.events import normalize
         env = self.environment('codex', CODEX_TABLE)
         event = {**self.codex(task_name='gather_probe', model='gpt-6-astra',
                               reasoning_effort='ultra', fork_turns='none'),
@@ -154,9 +153,6 @@ class RouteTableTests(unittest.TestCase):
         self.assertIn('input must be an object', self.reason({**event, 'tool_input': None}, env, 'codex'))
         self.assertIsNone(self.reason(event, {}, 'codex'))
         self.assertIsNone(self.reason({**event, 'tool_name': 'foreignspawn_agent'}, env, 'codex'))
-        normalized = normalize(event, 'codex')
-        self.assertEqual(normalized['operation'], 'spawn')
-        self.assertEqual(normalized['native_tool'], 'collaborationspawn_agent')
         self.assertEqual(json.dumps(event, sort_keys=True), original)
 
     def test_configured_launch_refuses_an_unreadable_binding_or_configuration(self):

@@ -1,6 +1,8 @@
 """Discriminating controls for adapter structure and deterministic source gates."""
 from __future__ import annotations
 
+from contextlib import redirect_stderr, redirect_stdout
+import io
 import json
 from pathlib import Path
 import subprocess
@@ -600,14 +602,14 @@ class CatalogDocumentTests(unittest.TestCase):
             path.parent.mkdir(parents=True)
             original = "History stays.\n" + docs.BEGIN + "\nold\n" + docs.END + "\nTail stays.\n"
             path.write_text(original, encoding="utf-8")
-            self.assertFalse(docs.check(root))
+            self.assertEqual(["docs/architecture.md"], docs.check(root))
             rendered = docs.updated(original, aa.load_catalog(root))
             self.assertTrue(rendered.startswith("History stays.\n"))
             self.assertTrue(rendered.endswith("\nTail stays.\n"))
             self.assertIn("~/.agents/skills/route-subagents", rendered)
             self.assertIn("~/.claude/agents/evidence-reviewer.md", rendered)
             path.write_text(rendered, encoding="utf-8")
-            self.assertTrue(docs.check(root))
+            self.assertEqual([], docs.check(root))
             self.assertEqual(rendered, docs.updated(rendered, aa.load_catalog(root)))
             with self.assertRaises(ValueError):
                 docs.updated(rendered + docs.BEGIN, aa.load_catalog(root))
@@ -621,17 +623,17 @@ class CatalogDocumentTests(unittest.TestCase):
             marked = docs.BEGIN + "\nold\n" + docs.END + "\n"
             english.write_text(marked, encoding="utf-8")
             english.write_text(docs.updated(marked, aa.load_catalog(root)), encoding="utf-8")
-            self.assertTrue(docs.check(root))
+            self.assertEqual([], docs.check(root))
 
             translated = root / "docs/ru/architecture.md"
             translated.parent.mkdir(parents=True)
             translated.write_text("Опись.\n" + marked, encoding="utf-8")
             self.assertIn(translated, docs.documents(root))
-            self.assertFalse(docs.check(root), "a stale translation must fail the gate")
+            self.assertEqual(["docs/ru/architecture.md"], docs.check(root), "a stale translation must fail the gate")
 
             translated.write_text(docs.updated(translated.read_text(encoding="utf-8"),
                                                aa.load_catalog(root)), encoding="utf-8")
-            self.assertTrue(docs.check(root))
+            self.assertEqual([], docs.check(root))
 
             unmarked = root / "docs/ru/install.md"
             unmarked.write_text("Установка без описи.\n", encoding="utf-8")
@@ -640,6 +642,36 @@ class CatalogDocumentTests(unittest.TestCase):
             english.write_text("no markers here\n", encoding="utf-8")
             with self.assertRaises(ValueError):
                 docs.documents(root)
+
+    def test_the_command_line_reports_stale_writes_and_passes(self) -> None:
+        def run(*argv: str) -> tuple[int, str, str]:
+            out, err = io.StringIO(), io.StringIO()
+            with (mock.patch.object(aa, "ROOT", root), mock.patch.object(sys, "argv", ["catalog_docs.py", *argv]),
+                  redirect_stdout(out), redirect_stderr(err)):
+                return docs.main(), out.getvalue(), err.getvalue()
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            path = root / docs.DOCUMENT
+            path.parent.mkdir(parents=True)
+            path.write_text("no markers\n", encoding="utf-8")
+            self.assertEqual((1, "", "catalog document: docs/architecture.md carries no catalog marker pair\n"),
+                             run("--check"))
+
+            stale = docs.BEGIN + "\nold\n" + docs.END + "\n"
+            path.write_text(stale, encoding="utf-8")
+            translated = root / "docs/ru/architecture.md"
+            translated.parent.mkdir(parents=True)
+            translated.write_text(stale, encoding="utf-8")
+            self.assertEqual((1, "", "catalog document: stale (docs/architecture.md, docs/ru/architecture.md); "
+                                     "run python tools/catalog_docs.py --write\n"), run("--check"))
+            self.assertEqual(stale, path.read_text(encoding="utf-8"), "a check must not write")
+
+            self.assertEqual((0, "catalog document: synchronized\n", ""), run("--write"))
+            self.assertNotIn("old", path.read_text(encoding="utf-8"))
+            self.assertNotIn("old", translated.read_text(encoding="utf-8"))
+            self.assertEqual((0, "catalog document: PASS\n", ""), run("--check"))
 
 
 class EvaluationDataTests(unittest.TestCase):

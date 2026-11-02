@@ -303,8 +303,7 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         claude = json.loads((ROOT / "hooks/hooks.json").read_text(encoding="utf-8"))["hooks"]
         codex = json.loads((ROOT / "hooks/codex.json").read_text(encoding="utf-8"))["hooks"]
         self.assertEqual("^(Agent|Task|WebFetch|WebSearch)$", claude["PostToolUse"][0]["matcher"])
-        self.assertNotIn("WebFetch", codex["PostToolUse"][0]["matcher"])
-        self.assertNotIn("WebSearch", codex["PostToolUse"][0]["matcher"])
+        self.assertNotIn("PostToolUse", codex)
 
 
 if __name__ == "__main__":

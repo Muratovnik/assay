@@ -176,10 +176,8 @@ def transcript(path, names, *, subagent=False, loads_needed=lambda announced, lo
     return list(dict.fromkeys(announced)), loaded
 
 
-def loaded(event, client, names, directory, *, clock=time.time):
-    """Skills the records say this session or subagent loaded, oldest first; never raises."""
-    if client != "claude" or not directory:
-        return []
+def loaded(event, names, directory, *, clock=time.time):
+    """Skills the records say this Claude session or subagent loaded, oldest first; never raises."""
     key = _key(event)
     if key is None:
         return []
@@ -201,14 +199,12 @@ def _save(tx, key, skills, clock):
     tx.put("loads", key, {"id": key, "at": now, "skills": skills}, now + TTL)
 
 
-def apply(event, client, names, directory, *, clock=time.time):
-    """Record a load on PreToolUse; on Stop or SubagentStop return continuation feedback or {}.
+def apply(event, names, directory, *, clock=time.time):
+    """Record a Claude load on PreToolUse; on Stop or SubagentStop return continuation feedback or {}.
 
     A subagent's tool calls carry its agent_id, and so does its SubagentStop, so
     a worker's report is held to the skills that worker loaded.
     """
-    if client != "claude" or not directory:
-        return {}
     name, key = event.get("hook_event_name"), _key(event)
     if key is None or name not in {"PreToolUse", "Stop", "SubagentStop"}:
         return {}

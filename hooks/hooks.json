@@ -184,25 +184,6 @@
         ]
       }
     ],
-    "PermissionDenied": [
-      {
-        "matcher": "^(Agent|Task)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python",
-            "args": [
-              "-I",
-              "-B",
-              "${CLAUDE_PLUGIN_ROOT}/hooks/runtime/cli.py",
-              "--client",
-              "claude"
-            ],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "PostToolUseFailure": [
       {
         "matcher": "^(Agent|Task)$",

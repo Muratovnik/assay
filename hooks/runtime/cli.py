@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
 from runtime.activation import evaluate, load_rules
-from runtime.events import normalize
+from runtime.events import recognized
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
@@ -240,7 +240,7 @@ def stop_feedback(event, rules, enabled, settings, kwargs):
     the same text.
     """
     if rules.skill_gate and settings["state_dir"]:
-        gate = skill_gate.apply(event, "claude", enabled, settings["state_dir"], **kwargs)
+        gate = skill_gate.apply(event, enabled, settings["state_dir"], **kwargs)
         if gate:
             return gate
     note = sources.stopped(event) if rules.read_claims else {}
@@ -253,8 +253,7 @@ def stop_feedback(event, rules, enabled, settings, kwargs):
 
 
 def _process(event, client, environment, *, root=ROOT, clock=None):
-    normalized = normalize(event, client)
-    if normalized is None:
+    if not recognized(event, client):
         return {}, None
     try:
         protected = reviewer_boundary(event, environment, clock=clock) or explicit_routes(event, client, environment)
@@ -278,10 +277,10 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
         kwargs = {"clock": clock} if clock else {}
         if client == "claude" and rules.skill_gate and settings["state_dir"] and name not in STOPS:
             # Records skill loads on PreToolUse; the gate's stop feedback comes from stop_feedback.
-            skill_gate.apply(event, client, enabled, settings["state_dir"], **kwargs)
+            skill_gate.apply(event, enabled, settings["state_dir"], **kwargs)
             if name == "UserPromptSubmit":
                 # The check names skills already loaded, so the model can stay quiet about them.
-                loaded = skill_gate.loaded(event, client, enabled, settings["state_dir"], **kwargs)
+                loaded = skill_gate.loaded(event, enabled, settings["state_dir"], **kwargs)
         if client == "claude" and not protected:
             if name in STOPS:
                 # A report already handed back reached the parent; a continuation cannot change it.
@@ -421,7 +420,7 @@ def main(argv=None):
                     if index >= 1000 or len(raw) > MAX_INPUT:
                         raise ValueError("replay bound exceeded")
                     event = loads(raw.decode("utf-8"))
-                    if normalize(event, args.client) is None:
+                    if not recognized(event, args.client):
                         raise ValueError("unsupported replay event")
                     result, error = process(event, args.client, {})
                     failed = failed or error is not None

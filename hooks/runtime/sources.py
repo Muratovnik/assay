@@ -37,7 +37,6 @@ SHELLS = frozenset({"Bash", "PowerShell"})
 CLAIM = re.compile(r"целиком|полностью|in full\b|in its entirety|entire(?:ly)?\b|end to end|cover to cover"
                    r"|from start to finish|whole (?:file|page|paper|article|document|text|source)", re.I)
 NUMBERED = re.compile(r"^\s*(\d+)\t", re.M)
-URL = re.compile(r"https?://[^\s<>()\"'`]+")
 
 FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
               "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "

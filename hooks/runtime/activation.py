@@ -101,8 +101,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
         if not path.is_file() or item["skill"] in disabled_skills:
             continue
         content.append((item["skill"], hashlib.sha256(path.read_bytes()).hexdigest()))
-        rules.append({"id": "explicit:" + item["skill"], "skill": item["skill"], "priority": 0,
-                      "patterns": [], "cue": cue})
+        rules.append({"id": "explicit:" + item["skill"], "skill": item["skill"], "cue": cue})
     if sorted(seen) != sorted(set(seen)) or set(seen) != set(assets):
         raise ValueError("skill map must name every catalog skill exactly once")
     skills_root = str(root.resolve() / "skills")

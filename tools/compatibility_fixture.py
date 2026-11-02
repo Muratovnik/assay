@@ -45,8 +45,6 @@ def assert_inventory(catalog: aa.Catalog) -> None:
 def assert_native_plan(catalog: aa.Catalog) -> None:
     with tempfile.TemporaryDirectory(prefix="assay-compat-") as directory:
         home = Path(directory)
-        if aa.activation_prerequisites(ROOT, home):
-            raise aa.ContractError("compatibility fixture: retired activation prerequisite returned")
         entries = aa.native_plan(ROOT, home)
         targets = {entry.target for entry in entries}
         expected_targets = {

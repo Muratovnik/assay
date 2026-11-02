@@ -231,8 +231,9 @@ where the packet fixed a one-line report, the subagent kept that line. A
 subagent that stopped without handing back left its parent only a notice that
 no report was delivered and that a `SendMessage` can ask for it.
 `disabled_rules: ["handback-hold"]` turns off the refusal and leaves the stop
-checks. Codex `SubagentStop` accepts no feedback context and Codex has no
-hand-back hold, so Codex subagents get the check only.
+checks. Codex `SubagentStop` accepts no feedback context, so the Codex manifest
+does not register it, and Codex has no hand-back hold: Codex subagents get the
+check only, at `SubagentStart`.
 `disabled_rules: ["skill-check"]` turns off the subagent check as well.
 
 Phrase rules that matched English/Russian wording were retired: they missed

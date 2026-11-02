@@ -29,7 +29,7 @@ CHECK = 'Assay skill check:'
 
 class ActivationTests(unittest.TestCase):
     def setUp(self):
-        self.rules, self.fingerprint = activation.load_rules(ROOT)
+        self.rules, _ = activation.load_rules(ROOT)
 
     def test_independent_bilingual_positive_negative_and_explicit_fixtures(self):
         cases = json.loads((ROOT / 'tools/fixtures/hooks/prompts.json').read_text(encoding='utf-8'))
@@ -89,8 +89,8 @@ class ActivationTests(unittest.TestCase):
         # A new skill adds its entry and its name in the loaded list. Without
         # this room the next skill fails load_rules and every skill hint drops.
         name = max((r['skill'].split('/', 1)[1] for r in self.rules), key=len)
-        extra = {'id': 'explicit:skill/x' + name[1:], 'skill': 'skill/x' + name[1:], 'priority': 0,
-                 'patterns': [], 'cue': 'x' * activation.MAX_CUE}
+        extra = {'id': 'explicit:skill/x' + name[1:], 'skill': 'skill/x' + name[1:],
+                 'cue': 'x' * activation.MAX_CUE}
         length = activation.longest_check([*self.rules, extra])
         self.assertLessEqual(length, activation.MAX_CHECK,
                              f'one more skill with a {len(name)}-character name and a full cue would make the '
@@ -315,10 +315,10 @@ class StateTests(unittest.TestCase):
                 self.now+=1
                 self.apply({**self.event,'turn_id':str(index)})
         with PipelineStore(self.directory, clock=lambda:self.now).transaction() as tx:
-            for kind in state.KINDS:
+            for kind in ('hook-context','hook-seen'):
                 self.assertLessEqual(len(tx.values(kind)),3)
             self.assertEqual(3,len(tx.values('hook-seen')))
-            serialized=json.dumps([tx.values(kind) for kind in state.KINDS])
+            serialized=json.dumps([tx.values(kind) for kind in ('hook-context','hook-seen')])
             for private in ('SECRET_SENTINEL',self.event['cwd'], 'transcript-parent','session'):
                 self.assertNotIn(private,serialized)
 
@@ -569,13 +569,28 @@ class RuntimeTests(unittest.TestCase):
         return subprocess.run([sys.executable,'-I','-B',str(ROOT/'hooks/runtime/cli.py'),'--client',client,*extra],
                               input=payload,capture_output=True,env=env,timeout=10)
 
-    def test_alias_normalization_preserves_native_input_and_client(self):
-        event={'hook_event_name':'PreToolUse','tool_name':'spawn_agent','tool_input':{'message':'x'}}
-        got=events.normalize(event,'codex')
-        self.assertEqual('spawn',got['operation']); self.assertEqual('spawn_agent',got['native_tool'])
-        self.assertIs(event,got['payload'])
-        self.assertIsNone(events.normalize(event,'claude')['operation'])
-        self.assertIsNone(events.normalize({'hook_event_name':'PermissionDenied'},'codex'))
+    def test_each_client_handles_only_its_registered_events(self):
+        handled={'claude':{'SessionStart','UserPromptSubmit','PreToolUse','PostToolUse','PostToolUseFailure',
+                           'SubagentStart','SubagentStop','SessionEnd','Stop'},
+                 'codex':{'SessionStart','UserPromptSubmit','PreToolUse','SubagentStart','PostCompact','SessionEnd'}}
+        unhandled={'claude':{'PermissionDenied','PostCompact'},
+                 'codex':{'PermissionDenied','PostToolUse','SubagentStop','PostToolUseFailure','Stop'}}
+        for client,manifest in (('claude','hooks.json'),('codex','codex.json')):
+            self.assertEqual(handled[client],set(json.loads((ROOT/'hooks'/manifest).read_text(encoding='utf-8'))['hooks']))
+            for name in handled[client]:
+                with self.subTest(client=client,name=name):
+                    self.assertIs(True,events.recognized({'hook_event_name':name,'tool_name':'spawn_agent'},client))
+            for name in unhandled[client]:
+                with self.subTest(client=client,name=name):
+                    self.assertIs(False,events.recognized({'hook_event_name':name},client))
+                    self.assertEqual(({},None),cli.process({'hook_event_name':name,'session_id':'s','cwd':'w'},client,{}))
+        self.assertIs(False,events.recognized({'hook_event_name':['PreToolUse']},'codex'))
+
+    def test_malformed_events_and_unknown_clients_are_refused(self):
+        for event,client in (({'hook_event_name':'PreToolUse','tool_name':{}},'codex'),
+                             ([],'codex'),({'hook_event_name':'PreToolUse'},'cursor')):
+            with self.subTest(event=event,client=client), self.assertRaises(ValueError):
+                events.recognized(event,client)
 
     def test_process_output_and_invalid_input_do_not_echo(self):
         result=self.invoke(b'{"hook_event_name":"UserPromptSubmit","prompt":"Use code-change for SECRET_SENTINEL"}')

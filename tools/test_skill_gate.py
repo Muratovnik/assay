@@ -47,9 +47,8 @@ class SkillGateTests(unittest.TestCase):
         self.now = 1000.0
         self.base = {"session_id": "session", "cwd": "work"}
 
-    def apply(self, event, client="claude", directory=None):
-        return skill_gate.apply({**self.base, **event}, client, NAMES,
-                                self.directory if directory is None else directory, clock=lambda: self.now)
+    def apply(self, event):
+        return skill_gate.apply({**self.base, **event}, NAMES, self.directory, clock=lambda: self.now)
 
     def stop(self, text, **extra):
         return self.apply({"hook_event_name": "Stop", "last_assistant_message": text, **extra})
@@ -213,10 +212,9 @@ class SkillGateTests(unittest.TestCase):
         self.load("Read", {"file_path": "C:\\plugins\\assay\\skills\\code-change\\SKILL.md"}, agent_id="worker")
         self.assertEqual({}, self.report("Using `assay:code-change`."))
         self.assertEqual({}, self.report("Assay: none"))
-        # Without an agent identity, or in Codex, nothing is held.
+        # Without an agent identity nothing is held.
         unloaded = {"hook_event_name": "SubagentStop", "last_assistant_message": "Using `assay:test-writing`."}
         self.assertEqual({}, self.apply(unloaded))
-        self.assertEqual({}, self.apply({**unloaded, "agent_id": "worker"}, client="codex"))
 
     def test_a_subagent_is_read_from_its_own_transcript(self):
         packet = prompt("Patch the parser and report.")
@@ -248,21 +246,19 @@ class SkillGateTests(unittest.TestCase):
         self.load("Skill", {"skill": "assay:test-writing"})
         event = {**self.base, "hook_event_name": "UserPromptSubmit"}
         clock = {"clock": lambda: self.now}
-        self.assertEqual(["code-change", "test-writing"], skill_gate.loaded(event, "claude", NAMES, self.directory, **clock))
-        self.assertEqual(["code-change"], skill_gate.loaded(event, "claude", {"code-change"}, self.directory, **clock))
-        self.assertEqual([], skill_gate.loaded(event, "codex", NAMES, self.directory, **clock))
-        self.assertEqual([], skill_gate.loaded({**event, "session_id": "other"}, "claude", NAMES, self.directory, **clock))
-        self.assertEqual([], skill_gate.loaded({**event, "session_id": None}, "claude", NAMES, self.directory, **clock))
-        self.assertEqual([], skill_gate.loaded(event, "claude", NAMES, "", **clock))
+        self.assertEqual(["code-change", "test-writing"], skill_gate.loaded(event, NAMES, self.directory, **clock))
+        self.assertEqual(["code-change"], skill_gate.loaded(event, {"code-change"}, self.directory, **clock))
+        self.assertEqual([], skill_gate.loaded({**event, "session_id": "other"}, NAMES, self.directory, **clock))
+        self.assertEqual([], skill_gate.loaded({**event, "session_id": None}, NAMES, self.directory, **clock))
         blocked = self.directory / "file"
         blocked.write_text("not a directory", encoding="utf-8")
-        self.assertEqual([], skill_gate.loaded(event, "claude", NAMES, blocked, **clock))
+        self.assertEqual([], skill_gate.loaded(event, NAMES, blocked, **clock))
 
-    def test_codex_missing_identity_and_missing_state_are_inert(self):
+    def test_missing_identity_and_missing_state_are_inert(self):
         stop = {"hook_event_name": "Stop", "last_assistant_message": "Using `assay:code-change`."}
-        self.assertEqual({}, self.apply(stop, client="codex"))
         self.assertEqual({}, self.apply({**stop, "session_id": None}))
-        self.assertEqual({}, self.apply(stop, directory=""))
+        # The runtime never reaches the gate without a place for its records.
+        self.assertEqual(({}, None), process({**self.base, **stop}, "claude", {}, clock=lambda: self.now))
 
     def test_runtime_continues_claude_stops_and_honours_the_setting(self):
         environment = {"CLAUDE_PLUGIN_DATA": str(self.directory / "data")}

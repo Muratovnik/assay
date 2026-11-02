@@ -1,4 +1,4 @@
-"""Preserve native payloads; client identity comes from the installed command."""
+"""Which native events each client's hooks handle; client identity comes from the installed command."""
 from __future__ import annotations
 
 import hashlib
@@ -6,25 +6,22 @@ import json
 
 EVENTS = {
     "claude": {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PostToolUseFailure",
-               "PermissionDenied", "SubagentStart", "SubagentStop", "SessionEnd", "Stop"},
-    "codex": {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStart",
-              "SubagentStop", "PostCompact", "SessionEnd"},
+               "SubagentStart", "SubagentStop", "SessionEnd", "Stop"},
+    "codex": {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "PostCompact", "SessionEnd"},
 }
-ALIASES = {"claude": {"Agent": "spawn", "Task": "spawn"},
-           "codex": {"spawn_agent": "spawn", "collaborationspawn_agent": "spawn", "apply_patch": "edit"}}
 
 
-def normalize(event, client):
+def recognized(event, client):
+    """Whether this client's hooks handle the event; malformed input raises ValueError."""
     if client not in EVENTS or not isinstance(event, dict):
         raise ValueError("unknown hook client or invalid event")
     name = event.get("hook_event_name")
     if not isinstance(name, str) or name not in EVENTS[client]:
-        return None
+        return False
     native = event.get("tool_name")
     if native is not None and not isinstance(native, str):
         raise ValueError("invalid native tool name")
-    return {"client": client, "event": name, "native_tool": native,
-            "operation": ALIASES[client].get(native), "payload": event}
+    return True
 
 
 def identity(event, client):

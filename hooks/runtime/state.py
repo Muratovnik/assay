@@ -14,7 +14,6 @@ from .events import event_key, identity
 
 TTL = 24 * 3600
 MAX_OWN_RECORDS = 128
-KINDS = ("hook-context", "hook-seen")
 
 
 def _put(tx, kind, key, payload, now):

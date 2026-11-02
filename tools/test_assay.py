@@ -158,20 +158,6 @@ def add_explicit_skill(root: Path) -> None:
             readme.write(readme_row("explicit-example"))
 
 
-def write_claude_explicit_override(
-    home: Path, value: object = "user-invocable-only"
-) -> Path:
-    settings = home / ".claude/settings.json"
-    settings.parent.mkdir(parents=True, exist_ok=True)
-    settings.write_text(
-        json.dumps({"skillOverrides": {"explicit-example": value}}, indent=2)
-        + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    return settings
-
-
 class AgentAssetsTests(unittest.TestCase):
     def test_byte_exact_declaration_covers_payload_and_nothing_else(self) -> None:
         """A `* -text` directory exempts its payload, never the prose beside it.
@@ -381,14 +367,9 @@ class AgentAssetsTests(unittest.TestCase):
             "otherwise the primary runs it directly", operations_words
         )
 
-    def test_current_catalog_needs_no_retired_activation_overrides(self) -> None:
+    def test_current_catalog_installs_without_its_retired_skills(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            self.assertEqual([], aa.activation_prerequisites(aa.ROOT, home))
-            settings = home / ".claude/settings.json"
-            settings.parent.mkdir(parents=True)
-            settings.write_text('{"skillOverrides":{"retired-example":"disabled"}}', encoding="utf-8")
-            self.assertEqual([], aa.activation_prerequisites(aa.ROOT, home))
             aa.install_links(aa.ROOT, home)
             self.assertFalse((home / ".agents/skills/orchestrated-delivery").exists())
             self.assertFalse((home / ".claude/skills/avoid-ai-design").exists())
@@ -496,6 +477,8 @@ class AgentAssetsTests(unittest.TestCase):
             )
             self.assertEqual(first, second)
             self.assertEqual(before, after)
+            self.assertEqual(3, first["schema"])
+            self.assertEqual({"schema", "source_root", "version", "entries"}, set(first))
             targets = {entry["target"] for entry in first["entries"]}
             self.assertIn(str(home / ".agents/skills/route-subagents"), targets)
             self.assertIn(str(home / ".claude/skills/route-subagents"), targets)
@@ -516,68 +499,6 @@ class AgentAssetsTests(unittest.TestCase):
                     for entry in first["entries"]
                 )
             )
-
-    def test_explicit_claude_skill_requires_user_invocable_only(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
-            root, home = base / "source", base / "home"
-            root.mkdir()
-            home.mkdir()
-            write_fixture(root, CATALOG + EXPLICIT_SKILL)
-            add_explicit_skill(root)
-
-            plan = aa.plan_document(root, home)
-            self.assertEqual(2, plan["schema"])
-            self.assertEqual("missing", plan["prerequisites"][0]["state"])
-            self.assertIn("PREREQUISITE MISSING", "\n".join(aa.format_plan(plan)))
-            with self.assertRaisesRegex(
-                aa.ContractError, "unmet activation prerequisites"
-            ):
-                aa.install_links(root, home)
-            self.assertTrue(
-                all(not aa.lexists(entry.target) for entry in aa.native_plan(root, home))
-            )
-
-            write_claude_explicit_override(home, "enabled")
-            self.assertEqual(
-                "mismatch", aa.activation_prerequisites(root, home)[0]["state"]
-            )
-            with self.assertRaisesRegex(
-                aa.ContractError, "expected 'user-invocable-only'"
-            ):
-                aa.install_links(root, home)
-
-            settings = write_claude_explicit_override(home)
-            self.assertEqual(
-                "exact", aa.activation_prerequisites(root, home)[0]["state"]
-            )
-            aa.install_links(root, home)
-            settings.unlink()
-            removed = aa.uninstall_links(root, home)
-            self.assertTrue(all(action.startswith("REMOVED ") for action in removed))
-
-    def test_explicit_claude_prerequisite_rejects_duplicate_json_keys(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
-            root, home = base / "source", base / "home"
-            root.mkdir()
-            home.mkdir()
-            write_fixture(root, CATALOG + EXPLICIT_SKILL)
-            add_explicit_skill(root)
-            settings = home / ".claude/settings.json"
-            settings.parent.mkdir(parents=True)
-            settings.write_text(
-                '{"skillOverrides":{"explicit-example":"user-invocable-only",'
-                '"explicit-example":"enabled"}}\n',
-                encoding="utf-8",
-            )
-            prerequisite = aa.activation_prerequisites(root, home)[0]
-            self.assertEqual("invalid", prerequisite["state"])
-            self.assertIn("duplicate JSON key", prerequisite["detail"])
-            with self.assertRaisesRegex(
-                aa.ContractError, "unmet activation prerequisites"
-            ):
-                aa.install_links(root, home)
 
     def test_install_and_uninstall_touch_only_exact_entries(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -659,7 +580,7 @@ class AgentAssetsTests(unittest.TestCase):
                 )
             )
 
-    def test_codex_only_selection_skips_claude_prerequisites(self) -> None:
+    def test_codex_only_selection_leaves_claude_untouched(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             root, home = base / "source", base / "home"
@@ -668,7 +589,6 @@ class AgentAssetsTests(unittest.TestCase):
             write_fixture(root, CATALOG + EXPLICIT_SKILL)
             add_explicit_skill(root)
 
-            self.assertEqual([], aa.plan_document(root, home, ["codex"])["prerequisites"])
             actions = aa.install_links(root, home, ["codex"])
             self.assertTrue(all(action.startswith("INSTALLED ") for action in actions))
             self.assertFalse((home / ".claude").exists())
@@ -706,10 +626,8 @@ class AgentAssetsTests(unittest.TestCase):
             with self.assertRaisesRegex(aa.ContractError, "unknown kind selection"):
                 aa.native_plan(root, home, kinds=["hook"])
 
-            # A plugin owns the Claude skills, so neither the skill link chain
-            # nor the explicit-skill setting may block installing profiles.
-            document = aa.plan_document(root, home, ["claude"], ["profile"])
-            self.assertEqual([], document["prerequisites"])
+            # A plugin owns the Claude skills, so the skill link chain may not
+            # block installing profiles.
             actions = aa.install_links(root, home, ["claude"], ["profile"])
             self.assertEqual(
                 [f"INSTALLED {target}" for target in profile_targets("claude")],

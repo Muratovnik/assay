@@ -206,7 +206,7 @@ def _shown_loaded(event, skill, names, directory, clock):
     forked session. What the transcript shows is added to the records, so the next call
     does not read it again.
     """
-    if skill in recorded(event, "claude", names, directory, clock=clock):
+    if skill in recorded(event, names, directory, clock=clock):
         return True
     scan = transcript(_path(event), names, subagent=event.get("agent_id") is not None)
     if not scan or not scan[1]:

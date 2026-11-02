@@ -279,8 +279,7 @@ def prepare(*, cases_path: Path, case_id: str, output_parent: Path,
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    checking = sub.add_parser("check")
-    checking.add_argument("--root", type=Path, default=ROOT)
+    sub.add_parser("check")
     building = sub.add_parser("prepare")
     building.add_argument("--cases", required=True, type=Path)
     building.add_argument("--case", required=True)
@@ -290,7 +289,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "check":
-            print(json.dumps(check(args.root), indent=2))
+            print(json.dumps(check(), indent=2))
         else:
             packet, digest = prepare(cases_path=args.cases, case_id=args.case,
                                      output_parent=args.output_parent, collection=args.collection,
