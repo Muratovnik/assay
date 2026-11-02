@@ -176,15 +176,10 @@ PROFILE_TOOLS = {"official-docs-researcher": frozenset({"WebFetch", "WebSearch",
 
 def reading_profile(role):
     """The reading profile a native agent type names, or None."""
-    import re
     if not isinstance(role, str):
         return None
     name = role.split(":")[-1]
-    if name in {"evidence-reviewer", "official-docs-researcher"}:
-        return name
-    match = re.fullmatch(
-        r"assay-(evidence-reviewer|official-docs-researcher)-(?:low|medium|high|xhigh|max|ultra)-[0-9a-f]{16}", name)
-    return match[1] if match else None
+    return name if name in {"evidence-reviewer", "official-docs-researcher"} else None
 
 
 def reading_role(role):

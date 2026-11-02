@@ -87,11 +87,11 @@ metadata (`model`, `model_reasoning_effort`), matching selected settings and a
 concrete `inheritance_reason`. A self-contained packet with explicit supported
 fields is normally simpler.
 
-For Claude use `launch.model` with a supported native alias. On CLI 2.1.292+
-with the field exposed, bind effort to `effort`, supply `host` with current
-`surface` and `version`, and pass `launch.effort`. On older/other schemas bind
-effort to `null` and supply the selected definition's checked `name`, `model`
-when pinned and `effort` in `definition`. A `subagent_type` always needs that
+For Claude use `launch.model` with a supported native alias. With the field in
+the current tool schema, bind effort to `effort` and pass `launch.effort`. A
+route through a definition binds effort to `null` and supplies the selected
+definition's checked `name`, `model` when pinned and `effort` in `definition`.
+A `subagent_type` always needs that
 `definition`, its name matching; a definition the call does not select is
 rejected. `subagent_type: "fork"` inherits the parent and is not a fallback
 route. Definition and parent metadata must come from the actual selected source,
@@ -100,7 +100,8 @@ from the call, the definition (`inherit` means the parent's),
 `CLAUDE_CODE_SUBAGENT_MODEL`, then the parent; effort from
 `CLAUDE_CODE_EFFORT_LEVEL`, the call, the definition, then the parent. It reads
 those variables from its own process, so run it from the session's shell; it
-rejects conflicts and leaves `auto` or a forced model without a value
+rejects conflicts and leaves `auto`, a forced model without a value and a
+parent's effort under a set `CLAUDE_CODE_SUBAGENT_EFFORT`
 unresolved. Deliberate session inheritance also needs matching `parent` metadata
 and `inheritance_reason`. Discovery, permissions and effective runtime still
 need native evidence. Follow [Claude mechanics](claude-code-routing.md) for that

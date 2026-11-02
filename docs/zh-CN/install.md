@@ -19,7 +19,8 @@
 
 ## 当前交付边界
 
-Claude Code/Codex 插件提醒需要可通过 `python` 调用的 Python 3.11+。
+Claude Code/Codex 插件提醒需要可通过 `python` 调用的 Python 3.11+，
+Claude Code 的子代理启动检查需要 2.1.292 及以上版本。
 skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配置。
 单个技能保留核心约定，但不包含全部可选方法。`assay-optional-skills`
 是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的

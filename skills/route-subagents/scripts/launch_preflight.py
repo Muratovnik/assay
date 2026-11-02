@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 
-from route_evidence.client_capabilities import CLAUDE_MODEL_ALIASES, claude_overrides, contract, codex_route_check
+from route_evidence.client_capabilities import CLAUDE_MODEL_ALIASES, claude_overrides, codex_route_check
 from route_evidence.core import MAX_BYTES, EvidenceError, loads, read_document, text
 from route_evidence.routing import validate_request
 
@@ -46,7 +46,7 @@ def _bound_definition(definition, launch, field, code):
 def check(document, *, environment=None):
     allowed = {"client", "mode", "failure", "packet_id", "available", "selected", "basis",
                "launch", "tool_schema", "spawn_fields", "definition", "defaults", "parent",
-               "host", "inheritance_reason"}
+               "inheritance_reason"}
     if not isinstance(document, dict) or set(document) - allowed:
         raise EvidenceError("invalid_fallback_preflight_fields")
     client = document.get("client")
@@ -106,8 +106,6 @@ def check(document, *, environment=None):
             raise EvidenceError("codex_arguments_are_not_claude_controls")
         if fields["model"] != "model" or fields["effort"] not in {None, "effort"}:
             raise EvidenceError("invalid_claude_spawn_field_binding")
-        if "effort" in launch and not contract(client, document.get("host"))["per_call_effort"]:
-            raise EvidenceError("claude_per_call_effort_not_supported")
         if "effort" in launch and fields["effort"] is None:
             raise EvidenceError("claude_effort_field_not_bound")
         if "model" in launch and launch["model"] not in CLAUDE_MODEL_ALIASES:
@@ -121,7 +119,9 @@ def check(document, *, environment=None):
         _bound_definition(definition, launch, "subagent_type", "claude_definition_type_mismatch")
         # Documented precedence: model is call, definition (inherit means the
         # parent's), CLAUDE_CODE_SUBAGENT_MODEL, then parent; the effort
-        # environment variable outranks call and definition.
+        # environment variable outranks call and definition. A client since
+        # 2.1.316 replaces the parent's effort with CLAUDE_CODE_SUBAGENT_EFFORT
+        # and an older one ignores it, so with it set neither level can be claimed.
         env = os.environ if environment is None else environment
         env_model = env.get("CLAUDE_CODE_SUBAGENT_MODEL") or None
         env_effort = env.get("CLAUDE_CODE_EFFORT_LEVEL") or None
@@ -132,9 +132,10 @@ def check(document, *, environment=None):
                             ("environment", None if env_model == "inherit" else env_model),
                             ("parent", parent.get("model"))])
         effort = _first([("environment", None if env_effort == "auto" else env_effort), ("call", launch.get("effort")),
-                         ("definition", definition.get("effort")), ("parent", parent.get("effort"))])
+                         ("definition", definition.get("effort")),
+                         ("parent", None if env.get("CLAUDE_CODE_SUBAGENT_EFFORT") else parent.get("effort"))])
         sources = {"model": model, "effort": effort}
-        result = {**claude_overrides(selected, env, document.get("host")),
+        result = {**claude_overrides(selected, env),
                   "configured": {part: value for part, (_, value) in sources.items()}}
         for part, (_, value) in sources.items():
             if value is None:

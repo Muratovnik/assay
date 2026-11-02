@@ -12,7 +12,7 @@ from .pipeline_config import EFFORT_ORDER
 
 CHECKED_AT = "2026-09-29"
 # Claude's subagent precedence and per-call effort were rechecked separately.
-CLAUDE_CHECKED_AT = "2026-10-11"
+CLAUDE_CHECKED_AT = "2026-11-02"
 # The only model values an Agent call accepts: the host rejects any other value,
 # including a full ID supplied by a hook, before launch. Each is a rolling alias
 # that the host resolves at launch and reports as the resolved full ID.
@@ -36,13 +36,6 @@ def host_effort_levels(client):
     return HOST_EFFORT_LEVELS.get(client, ())
 
 
-def version_tuple(value):
-    """Only documented stable x.y.z releases are orderable here, not SemVer."""
-    if not isinstance(value, str) or not re.fullmatch(r"[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}", value):
-        return None
-    return tuple(map(int, value.split(".")))
-
-
 def host_settings(raw=None):
     value = {"version": None, "surface": "unknown", "provider": "unknown", "agent_scope": "unknown"}
     if raw is None:
@@ -64,22 +57,18 @@ def host_settings(raw=None):
 
 def contract(client, host=None):
     host = host_settings(host)
-    known_surface = host["surface"] == "cli"
-    version = version_tuple(host["version"])
     report = {"client": client, "declared_host": host, "checked_at": CHECKED_AT,
               "evidence": "official_documentation", "installed_version_verified": False,
-              "surface_verified": False, "version_known": version is not None,
+              "surface_verified": False,
               "configured_is_not_observed": True,
               "observed_model": None, "observed_effort": None,
               "sources": [url for key, url in SOURCES.items() if key.startswith(client + "_")]}
     if client == "claude":
-        per_call_effort = bool(known_surface and version and version >= (2, 1, 292))
-        report.update(checked_at=CLAUDE_CHECKED_AT, per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=per_call_effort,
+        report.update(checked_at=CLAUDE_CHECKED_AT, per_call_model=sorted(CLAUDE_MODEL_ALIASES), per_call_effort=None,
                       effort_levels=list(EFFORT_ORDER),
-                      effort_transport="call_or_agent_definition" if per_call_effort else "agent_definition",
+                      effort_transport="inspect_exposed_tool_schema",
                       model_transport="call_alias_or_pinned_definition",
-                      model_precedence=("call_definition_environment_parent" if known_surface and version and version >= (2, 1, 251)
-                                        else "environment_call_definition_parent" if known_surface and version else "unknown"),
+                      model_precedence="call_definition_environment_parent",
                       input_rewrite_requires_allow=False,
                       plugin_ignored_fields=["hooks", "mcpServers", "permissionMode"],
                       definition_registry_loaded="unverified", effective_permissions="unverified",
@@ -94,10 +83,8 @@ def contract(client, host=None):
     return report
 
 
-def claude_overrides(expected, environment, host=None):
+def claude_overrides(expected, environment):
     """Resolve known precedence; never turn auto/inherit into literal models."""
-    host = host_settings(host)
-    version = version_tuple(host["version"]) if host["surface"] == "cli" else None
     problems, unknown = [], []
     effort = environment.get("CLAUDE_CODE_EFFORT_LEVEL")
     if effort == "auto":
@@ -106,15 +93,13 @@ def claude_overrides(expected, environment, host=None):
         unknown.append("effort_default_unresolved")
     elif effort and effort != expected["effort"]:
         problems.append("effort_environment_override")
+    # Unforced, this variable is only a default: the call and a definition outrank it.
     model = environment.get("CLAUDE_CODE_SUBAGENT_MODEL")
-    force = environment.get("CLAUDE_CODE_SUBAGENT_MODEL_FORCE", "").lower() in {"1", "true", "yes"}
-    if model == "inherit" and version and version >= (2, 1, 196):
-        model = None
-    modern = version is not None and version >= (2, 1, 251)
-    if force and not model:
-        unknown.append("forced_model_unresolved")
-    elif model and model != expected["model"] and (force or not modern):
-        problems.append("model_environment_override")
+    if environment.get("CLAUDE_CODE_SUBAGENT_MODEL_FORCE", "").lower() in {"1", "true", "yes"}:
+        if not model or model == "inherit":
+            unknown.append("forced_model_unresolved")
+        elif model != expected["model"]:
+            problems.append("model_environment_override")
     return {"conflicts": problems, "unverified": unknown,
             "observed_model": None, "observed_effort": None}
 

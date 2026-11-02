@@ -211,7 +211,7 @@ class SchemaTests(Fixture):
             load_config(self.config({'schema_version': 5, 'client': 'claude', 'pipeline': {'novel': 1}}))
 
     def test_exempt_agents_are_a_list_of_valid_unique_type_names(self):
-        for value in (['Explore', 'Explore'], [{'name': 'Explore'}], ['assay-general-purpose-low-x'], ['bad name'],
+        for value in (['Explore', 'Explore'], [{'name': 'Explore'}], ['bad name'],
                       [''], 'Explore', None, ['t%d' % n for n in range(65)]):
             with self.subTest(value=value), self.assertRaisesRegex(EvidenceError, 'invalid_pipeline_unrouted_agents'):
                 settings({'pipeline': {'unrouted_agents': value}})

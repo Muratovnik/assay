@@ -147,8 +147,7 @@ class ReminderTests(unittest.TestCase):
                 self.assertEqual(unified, commands("PostToolUse", tool))
             self.assertEqual(unified, commands("PreToolUse", "SubagentHandback"))
             for event in ("SubagentStart", "SubagentStop"):
-                self.assertEqual(unified, commands(event, "assay-general-purpose-0123456789abcdef"))
-                for agent_type in ("Explore", "general-purpose", ""):
+                for agent_type in ("assay:evidence-reviewer", "Explore", "general-purpose", ""):
                     self.assertEqual(unified, commands(event, agent_type))
             for source in ("startup", "resume", "clear", "compact"):
                 self.assertEqual(unified, commands("SessionStart", source))

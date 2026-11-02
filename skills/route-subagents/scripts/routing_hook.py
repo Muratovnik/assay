@@ -14,7 +14,6 @@ import sys
 # `python -I` intentionally ignores the working directory and PYTHONPATH. Import
 # only this installed script's sibling package, not files from the user's cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from route_evidence.client_capabilities import version_tuple
 from route_evidence.pipeline_config import AGENT_TYPE, settings
 
 SPAWN_TOOLS = {"Agent", "Task"}
@@ -28,8 +27,6 @@ def deny(reason):
     return output("PreToolUse", permissionDecision="deny", permissionDecisionReason="Assay: " + reason)
 
 
-# The Agent call has carried a per-call effort since this release.
-EFFORT_FIELD_SINCE = (2, 1, 292)
 MAX_DEFINITION_BYTES = 64 * 1024
 
 
@@ -90,10 +87,6 @@ def explicit_launch(event, config, *, home=None):
         missing = [field for field in missing if field not in pinned]
     if not missing:
         return {}
-    version = version_tuple(mode["host"]["version"])
-    if "effort" in missing and version and version < EFFORT_FIELD_SINCE:
-        return deny("this client's Agent call has no effort field; launch a definition whose frontmatter "
-                    "sets effort or exempt the type in pipeline.unrouted_agents")
     return deny("routing needs an explicit " + " and ".join(missing) + " in this Agent call; without it the "
-                "child inherits the session's settings. Choose both with route-subagents and retry: this "
-                "routing configuration is the explicit instruction the Agent effort field asks for")
+                "child falls back to the session's settings or a client default. Choose both with route-subagents "
+                "and retry: this routing configuration is the explicit instruction the Agent effort field asks for")

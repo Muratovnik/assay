@@ -62,7 +62,7 @@ A schema 5 configuration accepts only these top-level keys: `schema_version`,
 `mode` (only `evidence-only`), `explicit_routes` (`require`, the default, or
 `off`), `unrouted_agents`, `host`, `inventory_file` and `inventory_ttl_hours`.
 `unrouted_agents` is a list of agent-type names (default `[]`): letters, digits and
-`_.:-`, no `assay-` prefix, no duplicates, at most 64. The object form that
+`_.:-`, no duplicates, at most 64. The object form that
 mapped a type to a model is refused. Any other key is an error. A configuration that carries a section or key of the
 removed routing advisor, required mode or execution telemetry, or an older
 `schema_version`, is refused with one message that lists the keys to remove and

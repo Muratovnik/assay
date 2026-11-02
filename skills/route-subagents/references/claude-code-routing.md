@@ -6,17 +6,17 @@ entrypoint; request them through the supported per-child controls. Inheritance
 is suitable only when its effective settings match that selection. The Agent
 call's `model` accepts only the aliases `sonnet`, `opus`, `haiku` and `fable`
 and takes precedence over a definition's model; a full ID fails the call's
-validation. CLI 2.1.292+ supports a per-invocation `effort` for non-fork agents
-when the active tool schema exposes it; the environment override still wins.
-Clients before 2.1.292 have no effort field: a project or user definition whose
-frontmatter sets the effort expresses one and is selected by its
-`subagent_type`. Otherwise report the limitation instead of claiming the effort
-was set. Do not persist dated aliases or model rankings or
+validation. Claude Code 2.1.292+ takes a per-invocation `effort` for non-fork
+agents; the active tool schema shows the field, and the environment override
+still wins. Without the field, report the limitation instead of claiming the
+effort was set. Do not persist dated aliases or model rankings or
 change global configuration to route one child.
 
 After rejection or service failure, apply [routing failure](routing-failure.md)
 before a native launch. An explicit model with omitted effort can still inherit
-the session's maximum effort; express both settings through the actual supported
+the session's maximum effort. `CLAUDE_CODE_SUBAGENT_EFFORT` (Claude Code 2.1.316+)
+replaces that inheritance with one default level, which is no per-child choice;
+express both settings through the actual supported
 controls or establish deliberate matching inheritance. An unavailable router
 does not make either setting a valid default.
 
@@ -73,7 +73,8 @@ the name. Without a table the description starts with the name
 its effort outranks a definition's `effort`, so a profile's frontmatter does not
 change the pair. `CLAUDE_CODE_EFFORT_LEVEL` outranks the call's effort: the hook
 refuses a routed launch while that variable names another level.
-`CLAUDE_CODE_SUBAGENT_MODEL` applies only to a call without a model, which a
+`CLAUDE_CODE_SUBAGENT_MODEL` applies only to a call without a model and
+`CLAUDE_CODE_SUBAGENT_EFFORT` only to a launch that names no effort, which a
 routed launch never is. A fork, a `resume` and a type in
 `pipeline.unrouted_agents` keep their settings and are not checked; a project
 or user definition that pins both settings is no exemption here, because the
@@ -83,8 +84,8 @@ call's pair replaces them.
 
 Without a route table, this weaker check applies. The Agent tool takes a
 per-call `effort` only when an instruction asks for a level, and a child
-launched without a model or an effort runs with the session's. When the Assay
-hook finds an evidence-only Claude routing
+launched without a model or an effort runs with the session's or an environment
+default. When the Assay hook finds an evidence-only Claude routing
 configuration, through `ASSAY_ROUTING_CONFIG` or the plugin's routing binding
 (`routing.json` in its data directory), that configuration is such an
 instruction: the hook refuses an Agent launch that does not name both `model`
@@ -97,8 +98,6 @@ and `effort`, and its reason names what is missing. These launches pass:
   pins both in its frontmatter, `inherit` excepted. A plugin agent's definition
   is not read; its call names both.
 
-For a declared client older than 2.1.292, which has no per-call effort, the
-refusal points to a definition whose frontmatter sets the effort instead.
 `pipeline.explicit_routes: "off"` disables the check. Without a configuration or
 binding, ordinary delegation is unchanged; a configuration that cannot be read
 or validated, including one written for an older schema, refuses the launch. The

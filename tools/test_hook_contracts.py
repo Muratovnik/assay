@@ -185,31 +185,29 @@ class ActivationTests(unittest.TestCase):
 class CapabilitiesTests(unittest.TestCase):
     expected={'model':'sonnet','effort':'low'}
 
-    def test_claude_no_per_call_effort_and_no_configured_runtime_proof(self):
-        result=contract('claude', {'surface':'cli','version':'2.1.251'})
-        self.assertIs(result['per_call_effort'], False)
-        self.assertIsNone(result['observed_effort'])
-        self.assertFalse(result['installed_version_verified'])
-        self.assertEqual('call_definition_environment_parent', result['model_precedence'])
-        for host in ({}, {'surface':'desktop','version':'2.1.251'}, {'surface':'cli','version':'next'}):
-            self.assertEqual('unknown', contract('claude', host)['model_precedence'])
+    def test_claude_effort_follows_the_tool_schema_on_any_declared_host(self):
+        for host in ({}, {'surface':'ide','version':'2.1.314'}, {'surface':'cli','version':'2.1.295'}):
+            with self.subTest(host=host):
+                result=contract('claude', host)
+                self.assertIsNone(result['per_call_effort'])
+                self.assertEqual('inspect_exposed_tool_schema', result['effort_transport'])
+                self.assertEqual('call_definition_environment_parent', result['model_precedence'])
+                self.assertIsNone(result['observed_effort'])
+                self.assertFalse(result['installed_version_verified'])
         with self.assertRaises(EvidenceError):
             host_settings({'unsupported':True})
 
-    def test_versioned_override_precedence_and_force(self):
+    def test_override_precedence_and_force(self):
         env={'CLAUDE_CODE_SUBAGENT_MODEL':'opus'}
-        for host in ({}, {'surface':'cli','version':'2.1.250'}, {'surface':'ide','version':'2.1.251'}):
-            self.assertEqual(['model_environment_override'], claude_overrides(self.expected, env, host)['conflicts'])
-        host={'surface':'cli','version':'2.1.251'}
-        self.assertEqual([], claude_overrides(self.expected, env, host)['conflicts'])
+        self.assertEqual([], claude_overrides(self.expected, env)['conflicts'])
         forced={**env,'CLAUDE_CODE_SUBAGENT_MODEL_FORCE':'1'}
-        self.assertEqual(['model_environment_override'], claude_overrides(self.expected, forced, host)['conflicts'])
-        self.assertIn('forced_model_unresolved', claude_overrides(self.expected, {'CLAUDE_CODE_SUBAGENT_MODEL_FORCE':'true'}, host)['unverified'])
+        self.assertEqual(['model_environment_override'], claude_overrides(self.expected, forced)['conflicts'])
+        self.assertEqual([], claude_overrides(self.expected, {**forced,'CLAUDE_CODE_SUBAGENT_MODEL':'sonnet'})['conflicts'])
+        for unnamed in ({'CLAUDE_CODE_SUBAGENT_MODEL_FORCE':'true'}, {**forced,'CLAUDE_CODE_SUBAGENT_MODEL':'inherit'}):
+            self.assertIn('forced_model_unresolved', claude_overrides(self.expected, unnamed)['unverified'])
 
     def test_auto_inherit_effort_environment_are_not_literal_routes(self):
-        modern={'surface':'cli','version':'2.1.196'}
-        self.assertEqual([], claude_overrides(self.expected, {'CLAUDE_CODE_SUBAGENT_MODEL':'inherit'}, modern)['conflicts'])
-        self.assertTrue(claude_overrides(self.expected, {'CLAUDE_CODE_SUBAGENT_MODEL':'inherit'})['conflicts'])
+        self.assertEqual([], claude_overrides(self.expected, {'CLAUDE_CODE_SUBAGENT_MODEL':'inherit'})['conflicts'])
         self.assertEqual(['effort_default_unresolved'], claude_overrides(self.expected, {'CLAUDE_CODE_EFFORT_LEVEL':'auto'})['unverified'])
         self.assertEqual(['effort_environment_override'], claude_overrides(self.expected, {'CLAUDE_CODE_EFFORT_LEVEL':'high'})['conflicts'])
 
@@ -326,13 +324,6 @@ class StateTests(unittest.TestCase):
 
 
 class ReviewerBoundaryTests(unittest.TestCase):
-    def test_required_effort_variant_keeps_the_reading_boundary(self):
-        result = cli.reviewer_boundary({"hook_event_name": "PreToolUse",
-            "agent_type": "assay-evidence-reviewer-low-0123456789abcdef", "tool_name": "Write"}, {})
-        self.assertEqual(result["hookSpecificOutput"]["permissionDecision"], "deny")
-        self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse",
-            "agent_type": "assay-evidence-reviewer-not-a-variant", "tool_name": "Write"}, {}), {})
-
     def test_review_claim_tick_memory_file_and_nested_tool_calls_are_denied(self):
         for client in ("codex", "claude"):
             for tool in ("mcp__planning__claim_work_item", "mcp__planning__tick_work_item_checklist_item",
@@ -352,8 +343,7 @@ class ReviewerBoundaryTests(unittest.TestCase):
 
     def test_reading_roles_can_hand_back_their_report(self):
         for client in ("codex", "claude"):
-            for role in ("assay:evidence-reviewer", "official-docs-researcher",
-                         "assay-evidence-reviewer-medium-0123456789abcdef"):
+            for role in ("assay:evidence-reviewer", "official-docs-researcher"):
                 with self.subTest(client=client, role=role):
                     result, _ = cli.process({"hook_event_name": "PreToolUse", "agent_type": role,
                                              "tool_name": "SubagentHandback", "tool_input": {"message": "findings"}},
@@ -469,10 +459,11 @@ class ExplicitRouteTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 self.assertIn('explicit model and effort',self.reason(self.launch(subagent_type=kind),env))
 
-    def test_a_client_without_the_effort_field_is_sent_to_definitions(self):
+    def test_a_declared_host_does_not_change_the_refusal(self):
         env=self.environment({'mode':'evidence-only','host':{'version':'2.1.250','surface':'cli'}})
-        self.assertIn('definition whose frontmatter sets effort',self.reason(self.launch(model='sonnet'),env))
+        self.assertIn('explicit effort in this Agent call',self.reason(self.launch(model='sonnet'),env))
         self.assertIn('explicit model',self.reason(self.launch(effort='low'),env))
+        self.assertIsNone(self.reason(self.launch(model='sonnet',effort='low'),env))
 
     def test_other_clients_tools_modes_and_missing_bindings_are_untouched(self):
         self.assertIsNone(self.reason(self.launch(),{}))

@@ -17,7 +17,7 @@ loader invocation, followed criteria and outcome quality are different claims.
 
 | Route | Skills | Profiles | Reminders | Requirements and evidence boundary |
 | --- | --- | --- | --- | --- |
-| Claude Code plugin | Collection | Both Claude adapters | Packaged hooks | Client plus Python 3.11+ as `python`; manifest/handler checks are not a current native-run receipt |
+| Claude Code plugin | Collection | Both Claude adapters | Packaged hooks | Client plus Python 3.11+ as `python`; the routing guard needs Claude Code 2.1.292+; manifest/handler checks are not a current native-run receipt |
 | Codex plugin | Collection | Not installed into native agents directory | Packaged hooks, subject to client trust | Client plus Python 3.11+ as `python`; no discovery guarantee from packaging |
 | Third-party skills CLI, including Cursor selection | Selected directories | No | No | Node/npx and compatible client; inspect the reported destination and selected files |
 | Gemini skills installation | Skills | No Assay profile installation | No Assay plugin reminders | Gemini CLI; check its reported skill root and discovery |

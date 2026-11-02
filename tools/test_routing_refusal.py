@@ -30,8 +30,7 @@ def request(client="codex"):
             "launch": {"model": model, level_field: "medium", **({"fork_turns": "none"} if client == "codex" else {})},
             "tool_schema": {"properties": {"model": {}, level_field: {"enum": ["medium", top]},
                                            **({"fork_turns": {}} if client == "codex" else {})}},
-            "spawn_fields": {"model": "model", "effort": level_field},
-            **({"host": {"surface": "cli", "version": "2.1.295"}} if client == "claude" else {})}
+            "spawn_fields": {"model": "model", "effort": level_field}}
 
 
 def run_cli(data, env, cwd):
@@ -165,20 +164,37 @@ class RefusalPreflightTests(unittest.TestCase):
         with self.assertRaisesRegex(EvidenceError, "not_in_current_inventory"):
             check(data)
 
-    def test_claude_versioned_effort_and_definition_route(self):
-        data = request("claude"); data["host"]["version"] = "2.1.291"
-        with self.assertRaisesRegex(EvidenceError, "per_call_effort_not_supported"):
+    def test_claude_tool_schema_decides_the_effort_field_and_a_definition_stays_valid(self):
+        data = request("claude"); data["tool_schema"]["properties"].pop("effort")
+        with self.assertRaisesRegex(EvidenceError, "route_field_not_exposed"):
+            check(data, environment={})
+        data["spawn_fields"]["effort"] = None
+        with self.assertRaisesRegex(EvidenceError, "effort_field_not_bound"):
             check(data, environment={})
         data["launch"] = {"model": "sonnet", "subagent_type": "checked-reader"}
         data["definition"] = {"name": "checked-reader", "effort": "medium"}
-        data["spawn_fields"]["effort"] = None
         self.assertEqual(data["selected"], check(data, environment={})["configured"])
         data["definition"]["name"] = "another-reader"
         with self.assertRaisesRegex(EvidenceError, "definition_type_mismatch"):
             check(data, environment={})
 
+    def test_a_declared_host_is_not_a_preflight_input(self):
+        data = request("claude"); data["host"] = {"surface": "cli", "version": "2.1.295"}
+        with self.assertRaisesRegex(EvidenceError, "invalid_fallback_preflight_fields"):
+            check(data, environment={})
+
+    def test_claude_subagent_effort_default_leaves_inheritance_unresolved(self):
+        data = request("claude"); data["launch"].pop("effort")
+        data["parent"] = {"effort": "medium"}
+        data["inheritance_reason"] = "The parent's level is the selected level."
+        self.assertEqual(data["selected"], check(data, environment={})["configured"])
+        environment = {"CLAUDE_CODE_SUBAGENT_EFFORT": "medium"}
+        with self.assertRaisesRegex(EvidenceError, "fallback_route_unresolved:effort_unresolved"):
+            check(data, environment=environment)
+        self.assertEqual(data["selected"], check(request("claude"), environment=environment)["configured"])
+
     def test_claude_definition_counts_only_when_the_call_selects_it(self):
-        data = request("claude"); data["host"]["version"] = "2.1.291"
+        data = request("claude")
         data["spawn_fields"]["effort"] = None
         data["launch"] = {"model": "sonnet"}
         data["definition"] = {"effort": "medium"}
@@ -240,7 +256,8 @@ class RefusalPreflightTests(unittest.TestCase):
             cwd = Path(temporary)
             env = {**os.environ, "ASSAY_ROUTING_CONFIG": str(cwd / "missing.json"),
                    "ASSAY_ROUTING_CACHE_DIR": str(cwd / "cache")}
-            for name in ("CLAUDE_CODE_EFFORT_LEVEL", "CLAUDE_CODE_SUBAGENT_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE"):
+            for name in ("CLAUDE_CODE_EFFORT_LEVEL", "CLAUDE_CODE_SUBAGENT_EFFORT", "CLAUDE_CODE_SUBAGENT_MODEL",
+                         "CLAUDE_CODE_SUBAGENT_MODEL_FORCE"):
                 env.pop(name, None)
             for client in ("codex", "claude"):
                 data = request(client)

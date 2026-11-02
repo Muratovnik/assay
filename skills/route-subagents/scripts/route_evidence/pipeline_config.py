@@ -46,7 +46,7 @@ def _unrouted(value: Any) -> list[str]:
     if not isinstance(value, list) or len(value) > 64 or len(set(map(str, value))) != len(value):
         raise EvidenceError("invalid_pipeline_unrouted_agents")
     for name in value:
-        if not isinstance(name, str) or not AGENT_TYPE.fullmatch(name) or name.startswith("assay-"):
+        if not isinstance(name, str) or not AGENT_TYPE.fullmatch(name):
             raise EvidenceError("invalid_pipeline_unrouted_agents")
     return list(value)
 

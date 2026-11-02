@@ -606,7 +606,7 @@ Optional `pipeline.host` in the existing routing config records declared facts:
 ```json
 {
   "surface": "cli",
-  "version": "2.1.251",
+  "version": "2.1.292",
   "provider": "anthropic",
   "agent_scope": "user"
 }
@@ -614,9 +614,10 @@ Optional `pipeline.host` in the existing routing config records declared facts:
 
 These are examples, not discovered local settings. Unknown is the default. Doctor
 separates declared host, documented mechanism, configured files and observations.
-A manually supplied version is not an independently verified installed version.
-Per-call effort is reported as available only for a declared CLI surface at
-version 2.1.292 or later; any other surface leaves it unverified.
+A manually supplied version is not an independently verified installed version,
+and no check decides anything from it. Whether a launch can carry an effort shows
+in the active tool schema, so Doctor and `routing_status` report `per_call_effort`
+as `null` with `effort_transport: inspect_exposed_tool_schema`.
 
 ### Routing configuration and binding
 
@@ -641,14 +642,15 @@ The Agent call carries both the model and the effort (Claude Code 2.1.292 and
 later). Without a route table the hook refuses a launch that does not name both;
 with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
+An older client has no effort field, so no launch can pass these checks: update
+it or set `pipeline.explicit_routes` to `off`.
 Before either check it refuses an Agent call made inside a subagent, because only
 the primary routes; see
 [launches from a subagent](../../skills/route-subagents/references/claude-code-routing.md#launches-from-a-subagent).
 
-Model override handling distinguishes pre-2.1.251 CLI precedence, current CLI
-precedence and unknown surfaces. Forced overrides remain conflicts. The literal
-`inherit` is treated as unset only for a qualified version supporting that rule.
-An unresolved `auto` effort cannot prove the selected effort. No global setting
+The call and a definition outrank an unforced `CLAUDE_CODE_SUBAGENT_MODEL`; a
+forced one naming another model is a conflict, and the literal `inherit` counts
+as unset. An unresolved `auto` effort cannot prove the selected effort. No global setting
 is changed. Model/provider/organization caps still require runtime evidence.
 
 With the plugin's routing binding, hook event processing also records which
