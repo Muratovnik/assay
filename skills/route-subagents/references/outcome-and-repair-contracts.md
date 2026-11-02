@@ -76,7 +76,10 @@ DELIVERY
 - Exact changed artifact/diff, verified no-op, or finding set.
 
 ORACLE
-- Command/check, exit code or verdict, and decisive evidence.
+- Command/check, exit code or verdict, and decisive evidence. For a test run,
+  the number of tests the runner reports for each named file or test: zero
+  executed is a failed check, whatever the exit code. Read the exit code of the
+  command itself, not of a pipeline around it.
 
 SOURCE AND IDENTITY
 - Base/result identifiers and exact worker/task identity when exposed.
