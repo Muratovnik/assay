@@ -1,7 +1,6 @@
 """Offline contract tests, not model evaluations. All benchmark fixtures are synthetic."""
 from __future__ import annotations
 
-import copy
 import json
 import subprocess
 import sys
@@ -16,7 +15,7 @@ from unittest.mock import patch
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from route_evidence.cache import Cache, FetchError, source_lock
-from route_evidence.core import EvidenceError, digest, identity, loads, timestamp, validate_snapshot
+from route_evidence.core import EvidenceError, identity, loads, timestamp
 from route_evidence.providers import (Fetcher, SOURCES, SameHostRedirect, atlas, deepswe,
                                       parse_page, parse_tables, retry_delay, snapshot, table_snapshot)
 from route_evidence.guides import GUIDES, guide_snapshot

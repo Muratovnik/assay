@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Sequence
 
-FENCE = re.compile(r'^(?P<indent>[ \t]*)(?P<fence>`{3,}|~{3,})(?P<info>.*)$')
+FENCE = re.compile(r'^[ \t]*(?P<fence>`{3,}|~{3,})(?P<info>.*)$')
 CODE_RUN = re.compile(r'`+')
 LINK = re.compile(
     r'!?\[(?:[^\]\\]|\\.)*\]\([ \t]*(<[^<>\n]*>|[^\s()]*)'
@@ -137,7 +137,7 @@ def scan(text: str, endings: str, mode: str) -> Document:
         blocked.append((starts[first], starts[last] + len(lines[last])))
 
     index = 0
-    if lines and lines[0].rstrip() == '---':
+    if lines[0].rstrip() == '---':
         for end in range(1, len(lines)):
             if lines[end].rstrip() in {'---', '...'}:
                 take(document.frontmatter, 0, end)

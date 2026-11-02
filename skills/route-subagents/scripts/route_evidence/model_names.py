@@ -145,7 +145,7 @@ def _candidate_rank(model, label):
             -shared, len(theirs) - shared, label)
 
 
-def spelling_report(snapshots, available, *, limit=MAX_SPELLING_CANDIDATES, client=None):
+def spelling_report(snapshots, available, *, client=None):
     """Which cached sources name each inventory model, and spellings to review.
 
     `snapshots` lists (source_id, rows). Candidates are unbound labels of the
@@ -172,7 +172,7 @@ def spelling_report(snapshots, available, *, limit=MAX_SPELLING_CANDIDATES, clie
     report = []
     for model in sorted(models):
         entry = models[model]
-        ranked = sorted(entry["candidates"].items(), key=lambda item: item[1][0])[:limit]
+        ranked = sorted(entry["candidates"].items(), key=lambda item: item[1][0])[:MAX_SPELLING_CANDIDATES]
         report.append({"model": model, "named_in": entry["named_in"], "unnamed_in": entry["unnamed_in"],
                        "candidates": [{"label": label, "sources": sources} for label, (_, sources) in ranked]})
     return {"status": "checked" if snapshots else "no_cached_rows",

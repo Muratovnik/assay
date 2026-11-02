@@ -304,7 +304,7 @@ def build_context(request: dict, evidence: list[dict], guidance=(), guidance_sco
                          "Missing or stale evidence is reported, not imputed; unseen configurations may be better."]}
 
 
-def guidance_block(views, scope, available=None):
+def guidance_block(views, scope, available):
     """Quoted vendor material. Never merged into a measurement or a ranking."""
     documents = []
     for view in sorted(views, key=lambda v: v["source_id"]):
@@ -322,8 +322,8 @@ def guidance_block(views, scope, available=None):
                           "retrieved_at": view.get("last_success_at"), "stale": view["stale"],
                           "content_hash": data["content_hash"],
                           "extractor_version": data["extractor_version"],
-                          "applicability": copy.deepcopy(data.get("applicability")),
-                          "matched_models": matching_models(data.get("applicability"), available),
+                          "applicability": copy.deepcopy(data["applicability"]),
+                          "matched_models": matching_models(data["applicability"], available),
                           "document_caveats": data["document_caveats"],
                           "sections": data["retrieved_sections"]})
     return {"evidence_type": "vendor_guidance", "scope": scope, "documents": documents,
@@ -333,8 +333,7 @@ def guidance_block(views, scope, available=None):
                      "excerpt never drops a caveat. Applicability is registered scope, not "
                      "a vendor quotation or verified host capability. Match its model identities, "
                      "documented surfaces and conditions before transferring advice. Model-scoped "
-                     "guidance cannot justify advice for candidates outside matched_models. A null "
-                     "applicability is legacy unknown scope, not universal support.")}
+                     "guidance cannot justify advice for candidates outside matched_models.")}
 
 
 def brief(result: dict) -> dict:
@@ -347,7 +346,7 @@ def brief(result: dict) -> dict:
         if "guide_id" in data:
             source.update(document_title=data["document_title"], canonical_url=data["canonical_url"],
                           sections=len(data["retrieved_sections"]),
-                          applicability=copy.deepcopy(data.get("applicability")),
+                          applicability=copy.deepcopy(data["applicability"]),
                           extractor_version=data["extractor_version"], content_hash=data["content_hash"])
         else:
             source.update(benchmark=data["benchmark"], version=data["version"],

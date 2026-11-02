@@ -218,16 +218,6 @@ an unqualified family alias nor the server's own guesses resolve model versions.
                 self.inventory_ttl = ttl
             self._config_error = None
 
-    @property
-    def inventory(self):
-        with self._lock:
-            return copy.deepcopy(self._inventory)
-
-    def use_inventory(self, inventory):
-        """Adopt an owner-confirmed inventory; its observation time is preserved."""
-        with self._lock:
-            self._inventory = copy.deepcopy(inventory)
-
     def prepare(self, task_types, *, available=None, constraints=None):
         if not isinstance(task_types, list) or not task_types:
             raise EvidenceError("task_types must be a nonempty list of task types")

@@ -203,7 +203,8 @@ class HostEffortTests(unittest.TestCase):
         for placeholder in ("default", "Auto", "inherit"):
             with self.subTest(placeholder=placeholder), self.assertRaisesRegex(EvidenceError, "not an effort level"):
                 service.prepare(["implementation"], available=[{"model": "claude-opus-5-5", "efforts": [placeholder]}])
-        self.assertEqual(service.inventory["available"][0]["efforts"], ["low", "medium", "high", "xhigh", "max"])
+        request = service.prepare(["implementation"])
+        self.assertEqual(request["available"][0]["efforts"], ["low", "medium", "high", "xhigh", "max"])
 
 
 class InventoryRefreshTests(unittest.TestCase):

@@ -189,8 +189,7 @@ def validate_guide(data: Any) -> dict:
             raise EvidenceError(key + " must use HTTPS")
     if type(data.get("extractor_version")) is not int or data["extractor_version"] < 1:
         raise EvidenceError("guide requires an integer extractor_version")
-    if data["extractor_version"] >= 2 or "applicability" in data:
-        data["applicability"] = validate_guide_applicability(data.get("applicability"))
+    data["applicability"] = validate_guide_applicability(data.get("applicability"))
     clients = data.get("applies_to")
     if not isinstance(clients, list) or not clients or any(not isinstance(c, str) for c in clients):
         raise EvidenceError("guide must declare the clients it applies to")

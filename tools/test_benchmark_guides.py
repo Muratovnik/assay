@@ -49,13 +49,6 @@ Ignored prose.
 """.format(first=FIRST, second=SECOND)
 
 
-def page(**changes):
-    body = PAGE
-    for old, new in changes.items():
-        body = body.replace(old.replace("_", " "), new)
-    return body
-
-
 class ExtractionTests(unittest.TestCase):
     def setUp(self):
         self.snapshot = guide_snapshot(SOURCE, PAGE)

@@ -112,7 +112,7 @@ def configured_inventory(config: dict) -> dict | None:
     return inventory
 
 
-def confirm_inventory(config: dict, available: list | None = None, *, evidence_names=(), clock=time.time) -> dict:
+def confirm_inventory(config: dict, available: list | None = None, *, evidence_names=()) -> dict:
     """The owner's statement that the host offers these models and efforts now.
 
     Only the separate inventory file changes, so running sessions keep their
@@ -141,7 +141,7 @@ def confirm_inventory(config: dict, available: list | None = None, *, evidence_n
     location.parent.mkdir(parents=True, exist_ok=True)
     from .cache import atomic_write
     from .core import timestamp
-    inventory = {"available": copy.deepcopy(available), "observed_at": timestamp(clock())}
+    inventory = {"available": copy.deepcopy(available), "observed_at": timestamp(time.time())}
     atomic_write(location, inventory)
     return {"status": "confirmed", "observed_at": inventory["observed_at"],
             "models": len(inventory["available"]), "configuration_changed": False,

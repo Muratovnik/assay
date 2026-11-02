@@ -27,9 +27,6 @@ def stop_tree(process: subprocess.Popen, job=None) -> None:
     try:
         if job is not None:
             job.terminate()
-        elif os.name == "nt":
-            if process.poll() is None:
-                process.kill()  # Assignment failed; the gated target never ran.
         else:
             os.killpg(process.pid, signal.SIGKILL)
     except (ProcessLookupError, OSError, subprocess.TimeoutExpired):

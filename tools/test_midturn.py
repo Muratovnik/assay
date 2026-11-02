@@ -17,7 +17,6 @@ from runtime.cli import process
 APP = "C:\\work\\src\\app.py"
 TESTS = "C:\\work\\tests\\test_app.py"
 PAGE = "C:\\work\\web\\src\\Panel.vue"
-GUIDE = "C:\\work\\docs\\guide.md"
 SKILL = "C:\\work\\skills\\parser\\SKILL.md"
 DOCS = "https://docs.example.dev/guide/hooks"
 FETCH = f"curl -sL {DOCS} -o guide.html"

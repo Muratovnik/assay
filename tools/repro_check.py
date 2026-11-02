@@ -19,8 +19,6 @@ else:
 
 
 def classify(result: dict[str, Any], actual: bytes, good: bytes, bad: bytes) -> int:
-    if good == bad:
-        raise ValueError("good and bad controls must differ")
     if result.get("state") != "completed" or result.get("exit_code") != 0 or result.get("changed_inputs"):
         return 125
     if actual == good:

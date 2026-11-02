@@ -18,7 +18,7 @@ from .core import MAX_BYTES, EvidenceError, effort, identity, loads, number, val
 SOURCES = {
     "deepswe": {"id": "deepswe", "benchmark": "DeepSWE", "version": "1.1",
                 "url": "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json",
-                "page": "https://deepswe.datacurve.ai/", "adapter": "deepswe", "revision": 3},
+                "adapter": "deepswe", "revision": 3},
     "cursorbench": {"id": "cursorbench", "benchmark": "CursorBench", "version": "4.0",
                     "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 6},
     "frontiercode": {"id": "frontiercode", "benchmark": "FrontierCode", "version": "1.1",
@@ -138,12 +138,10 @@ def parse_page(body: str) -> Page:
     return page
 
 
-def quantity(value: str, *, percent=False):
+def quantity(value: str):
     value = value.strip().replace(",", "").replace("$", "")
     if value in ("", "—", "-", "N/A", "n/a"):
         return None
-    if percent:
-        return score_measurement(value)[0]
     found = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([kKmMbB]?)", value)
     if not found:
         raise EvidenceError("unrecognized numeric cell")

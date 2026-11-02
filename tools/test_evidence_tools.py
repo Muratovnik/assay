@@ -81,8 +81,7 @@ class ReceiptTests(unittest.TestCase):
         (self.root / "other.txt").write_text("changed", encoding="utf-8")
         for replacement in ("p.symlink_to('other.txt')", "p.symlink_to('missing.txt')", "pass"):
             with self.subTest(replacement=replacement):
-                if selected.is_symlink():
-                    selected.unlink()
+                selected.unlink()
                 selected.symlink_to("input.txt")
                 packet, result = cr.capture([sys.executable, "-c",
                     "from pathlib import Path; p=Path('selected.txt'); p.unlink(); "
@@ -243,8 +242,6 @@ class ReproducerTests(unittest.TestCase):
         self.assertEqual(125, repro.classify(result, b"other", b"good", b"bad"))
         for state in ("failed", "timeout", "launch-error"):
             self.assertEqual(125, repro.classify({**result, "state": state}, b"bad", b"good", b"bad"))
-        with self.assertRaises(ValueError):
-            repro.classify(result, b"same", b"same", b"same")
 
 
 if __name__ == "__main__":

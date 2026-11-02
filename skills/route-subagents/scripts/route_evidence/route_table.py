@@ -140,7 +140,7 @@ def _checked_kind(client: str, tool_name: Any, supplied: Any, unrouted) -> str |
 
 
 def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unrouted=(),
-                 environment: dict | None = None, cwd: Any = None, home: Path | None = None) -> str | None:
+                 environment: dict | None = None, cwd: Any = None) -> str | None:
     """The refusal for a spawn that does not follow the table, or None to let it run."""
     if tool_name in SPAWN.get(client, {}).get("tools", ()) and not isinstance(supplied, dict):
         return "routing launch input must be an object before its class and settings can be checked"
@@ -149,7 +149,6 @@ def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unr
         return None
     spec = SPAWN[client]
     environment = environment or {}
-    home = Path.home() if home is None else home
     field = spec["label"]
     name = declared_class(supplied.get(field))
     if name is None or name not in table["classes"]:
@@ -171,7 +170,7 @@ def check_launch(client: str, tool_name: Any, supplied: Any, table: dict, *, unr
             return ("a Codex spawn with omitted or \"all\" fork_turns inherits the parent's model and "
                     "effort and ignores the requested ones; pass fork_turns=\"none\" with a self-contained "
                     "message, or a bounded recent-turn count")
-        pinned = _codex_definition(kind, cwd, home)
+        pinned = _codex_definition(kind, cwd, Path.home())
         if "unreadable" in pinned:
             return f"the custom agent file for `{kind}` could not be read, so its model settings are unknown"
         conflicts = [f"{key}={value!r}" for key, value in pinned.items()

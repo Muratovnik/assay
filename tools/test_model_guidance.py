@@ -65,8 +65,6 @@ class ModelGuidanceTests(unittest.TestCase):
     def test_catalog_query_is_distinct_from_an_empty_inventory(self):
         self.assertIn("openai-gpt-6-astra-skills", guide_ids("codex"))
         self.assertEqual(guide_ids("codex", []), ["openai-reasoning"])
-        self.assertIsNone(matching_models(None, inventory("gpt-6-sol")))
-        self.assertIsNone(matching_models(GUIDES["openai-gpt-6"]["applicability"], None))
 
     def test_each_registered_guide_extracts_its_declared_scope_without_mutation(self):
         before = copy.deepcopy(GUIDES)
@@ -89,20 +87,14 @@ class ModelGuidanceTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(EvidenceError):
                 validate_guide({**good, "applicability": {**good["applicability"], **change}})
 
-    def test_new_snapshot_requires_scope_but_legacy_scope_remains_unknown(self):
+    def test_snapshot_without_scope_is_refused_at_every_extractor_version(self):
         data = fixture("openai-gpt-6")
         del data["applicability"]
         with self.assertRaises(EvidenceError):
             validate_guide(data)
         data["extractor_version"] = 1
-        legacy = validate_guide(data)
-        self.assertNotIn("applicability", legacy)
-        view = {**guide_view("openai-gpt-6"), "snapshot": legacy}
-        result = build_context({"client": "codex", "task_types": ["implementation"],
-                                "available": inventory("gpt-6-sol")}, [], guidance=[view])
-        document = result["guidance"]["documents"][0]
-        self.assertIsNone(document["applicability"])
-        self.assertIsNone(document["matched_models"])
+        with self.assertRaises(EvidenceError):
+            validate_guide(data)
 
     def test_scope_conditions_and_runtime_matches_survive_brief(self):
         result = context("openai-gpt-6", inventory("runtime-sol", "GPT-6 Sol"))

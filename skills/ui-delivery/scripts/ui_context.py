@@ -5,7 +5,7 @@ import argparse
 import hashlib
 import json
 import re
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Sequence
 
 
@@ -25,10 +25,9 @@ def inspect_sources(root: Path, sources: Sequence[str]) -> list[dict[str, str]]:
         if not separator or not re.fullmatch(r'[a-z][a-z0-9-]*', role):
             raise ValueError('source must be role=relative/path with a lowercase role')
         parts = relative.split('/')
-        if not relative or '\\' in relative or ':' in relative or any(p in {'', '.', '..'} for p in parts):
+        if '\\' in relative or ':' in relative or any(p in {'', '.', '..'} for p in parts):
             raise ValueError(f'{role}: expected a normalized project-relative file')
-        path = PurePosixPath(relative)
-        if path.is_absolute() or any(p in {'.git', 'node_modules'} or p.startswith('.env') for p in parts):
+        if any(p in {'.git', 'node_modules'} or p.startswith('.env') for p in parts):
             raise ValueError(f'{role}: unsupported source path')
         if (role, relative) in seen:
             raise ValueError(f'{role}: duplicate source')

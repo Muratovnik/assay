@@ -63,7 +63,7 @@ def _definition_route(kind, cwd, home):
     return {}
 
 
-def explicit_launch(event, config, *, home=None):
+def explicit_launch(event, config):
     """A Claude child names its model and effort; it never inherits them.
 
     A fork shares its parent's context by design and a continuation keeps its
@@ -83,7 +83,7 @@ def explicit_launch(event, config, *, home=None):
         return {}
     missing = [field for field in ("model", "effort") if not supplied.get(field)]
     if missing:
-        pinned = _definition_route(kind, event.get("cwd"), Path.home() if home is None else home)
+        pinned = _definition_route(kind, event.get("cwd"), Path.home())
         missing = [field for field in missing if field not in pinned]
     if not missing:
         return {}

@@ -28,13 +28,13 @@ QUOTED_MARKER = re.compile(r"`+|<!--")
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
 
 
-def guide(gid, publisher, clients, url, sections, *, page_url=None,
+def guide(gid, publisher, clients, url, sections, *,
           models=(), surfaces=("api",), conditions=(), reviewed_on=None):
     applicability = validate_guide_applicability({
         "models": list(models), "surfaces": list(surfaces),
         "conditions": list(conditions), "reviewed_on": reviewed_on})
     return {"id": gid, "kind": "guide", "adapter": "guide", "publisher": publisher,
-            "clients": tuple(clients), "url": url, "page_url": page_url or url.removesuffix(".md"),
+            "clients": tuple(clients), "url": url, "page_url": url.removesuffix(".md"),
             "sections": tuple(sections), "extractor_version": EXTRACTOR_VERSION,
             "applicability": applicability}
 
@@ -76,9 +76,7 @@ GUIDES = {g["id"]: g for g in (
 
 
 def matching_models(applicability, available):
-    """Resolve only declared identities; null scope/inventory stays unknown."""
-    if applicability is None or available is None:
-        return None
+    """Resolve only declared identities."""
     wanted = set(map(identity, applicability["models"]))
     return sorted(item["model"] for item in available
                   if not wanted or wanted.intersection(
