@@ -6,6 +6,33 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.40.0](https://github.com/Muratovnik/assay/compare/v0.39.0...v0.40.0) (2026-11-02)
+
+Claude Code has taken a subagent's effort in the Agent call since 2.1.292, so routing
+stops asking a declared host whether it can: the active tool schema answers, and
+`routing_status` no longer names agent definitions as the route. The release also removes
+code an audit found nothing reaches: hook registrations with no reader since 0.29.0, an
+unused activation prerequisite, unreachable branches, and unused options and parameters.
+The route table, every check with a consumer and the refusals of retired configuration
+stay as they were. The DeepSWE cache entry is refetched once.
+
+### ⚠ BREAKING CHANGES
+
+* **routing:** the routing guard needs Claude Code 2.1.292 or later; on an older client update it or set `pipeline.explicit_routes` to `off`. `launch_preflight.py` no longer accepts `host`. The capability report drops `version_known`, reports `per_call_effort` as `null` and `effort_transport` as `inspect_exposed_tool_schema`. A leftover `assay-evidence-reviewer-*` or `assay-official-docs-researcher-*` definition no longer gets the reading-role hook boundary; delete it as the 0.28 upgrade steps describe ([4848acd](https://github.com/Muratovnik/assay/commit/4848acdbedc6a7551439ff231c0cca0f995f8fd1))
+* **hooks:** `tools/assay.py plan --json` is schema 3 and no longer has `prerequisites`, and `plan` prints no `PREREQUISITE` lines. An explicitly activated skill no longer needs the Claude `skillOverrides` setting; no catalogued skill is explicit. `catalog_docs.py` and `eval_assets.py check` no longer take `--root`. `cli.py replay` refuses Claude's `PermissionDenied` and Codex's `PostToolUse` and `SubagentStop`, which are no longer registered. The activation fingerprint changes once, so a stored continuation suggestion is dropped ([98b1865](https://github.com/Muratovnik/assay/commit/98b186514aabf59cfd7031177be7e17099f0a36f))
+
+### Bug Fixes
+
+* **routing:** the launch preflight accepts an effort in the call whenever the tool schema exposes the field; it used to refuse one on an undeclared or IDE host while accepting a definition file there, and a schema without the field is still refused ([4848acd](https://github.com/Muratovnik/assay/commit/4848acdbedc6a7551439ff231c0cca0f995f8fd1))
+* **routing:** a set `CLAUDE_CODE_SUBAGENT_EFFORT` leaves an inherited effort unresolved in the preflight, because Claude Code 2.1.316 replaces the parent's level with it and an older client ignores it; an unforced `CLAUDE_CODE_SUBAGENT_MODEL` no longer counts as a conflict with a call that names a model ([4848acd](https://github.com/Muratovnik/assay/commit/4848acdbedc6a7551439ff231c0cca0f995f8fd1))
+* **routing:** a cache write retries for under a second when Windows refuses the rename for a moment, as it can while another process holds the file just written; this failed a real refresh and about one run in twelve of the affected tests, and a refusal that lasts is still raised ([7deac6f](https://github.com/Muratovnik/assay/commit/7deac6f78d98956e2d6c0cec6133bf62c5a6379f))
+* **tools:** `catalog_docs.py` runs `check` from `main`, so the tests exercise the gate instead of a copy of its logic ([98b1865](https://github.com/Muratovnik/assay/commit/98b186514aabf59cfd7031177be7e17099f0a36f))
+* **tools:** a test now covers the reproducer's refusal of equal good and bad controls ([2a21742](https://github.com/Muratovnik/assay/commit/2a21742ce152a80d51e942101ab3d83f7f0ff030))
+
+### Documentation
+
+* **routing:** name the launches an older client can still make and the boundary a leftover definition loses ([824ae64](https://github.com/Muratovnik/assay/commit/824ae64c79549f69b8d5ffb93c2cf97bcfc74393))
+
 ## [0.39.0](https://github.com/Muratovnik/assay/compare/v0.38.0...v0.39.0) (2026-11-02)
 
 Skills no longer ask a report to list what was not checked and why: a gap is closed,
