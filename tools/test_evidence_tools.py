@@ -1,11 +1,14 @@
 """Behavioral tests of the utilities, not evaluations of coding models."""
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from tools import command_receipt as cr
 from tools import native_smoke as ns
@@ -242,6 +245,26 @@ class ReproducerTests(unittest.TestCase):
         self.assertEqual(125, repro.classify(result, b"other", b"good", b"bad"))
         for state in ("failed", "timeout", "launch-error"):
             self.assertEqual(125, repro.classify({**result, "state": state}, b"bad", b"good", b"bad"))
+
+    def test_equal_controls_are_refused_before_the_command_runs(self) -> None:
+        for good, bad, verdict, ran in ((b"ok", b"ok", 125, False), (b"ok", b"no", 0, True)):
+            with self.subTest(good=good, bad=bad), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp, "work")
+                root.mkdir()
+                output = Path(tmp, "out")
+                output.mkdir()
+                (root / "good").write_bytes(good)
+                (root / "bad").write_bytes(bad)
+                marker = root / "ran"
+                command = f"import pathlib, sys; pathlib.Path({str(marker)!r}).touch(); sys.stdout.write('ok')"
+                argv = ["repro_check", "--execute", "--cwd", str(root), "--output-parent", str(output),
+                        "--good-stdout", "good", "--bad-stdout", "bad", "--input", "good", "--",
+                        sys.executable, "-c", command]
+                with mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()), \
+                        contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(verdict, repro.main())
+                self.assertEqual(ran, marker.exists())
+                self.assertEqual(ran, any(output.iterdir()))
 
 
 if __name__ == "__main__":

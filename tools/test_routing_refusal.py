@@ -192,6 +192,11 @@ class RefusalPreflightTests(unittest.TestCase):
         with self.assertRaisesRegex(EvidenceError, "fallback_route_unresolved:effort_unresolved"):
             check(data, environment=environment)
         self.assertEqual(data["selected"], check(request("claude"), environment=environment)["configured"])
+        # A definition names a level, so the default never reaches it on either kind of client.
+        data = request("claude"); data["spawn_fields"]["effort"] = None
+        data["launch"] = {"model": "sonnet", "subagent_type": "checked-reader"}
+        data["definition"] = {"name": "checked-reader", "effort": "medium"}
+        self.assertEqual(data["selected"], check(data, environment={"CLAUDE_CODE_SUBAGENT_EFFORT": "high"})["configured"])
 
     def test_claude_definition_counts_only_when_the_call_selects_it(self):
         data = request("claude")
