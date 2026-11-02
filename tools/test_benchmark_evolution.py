@@ -1,6 +1,7 @@
 """Synthetic discovery and acquisition contracts, not live model evaluations."""
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 import unittest
@@ -10,7 +11,7 @@ from unittest.mock import Mock, patch
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, source_lock
+from route_evidence.cache import Cache, FetchError, INVENTORY_REFRESH_INTERVAL, MAX_INVENTORY_KEYS, atomic_write, source_lock
 from route_evidence.core import EvidenceError, encoded
 from route_evidence.model_names import bind_labels, inventory_keys, matching_diagnostics, spelling_report
 from route_evidence.providers import Fetcher, SOURCES, parse_tables, snapshot
@@ -340,6 +341,34 @@ def hub_page(rows=None, *, total=1, page=1):
             "rows": [hub_row()] if rows is None else rows,
             "pagination": {"total": total, "total_pages": (total + hub.PAGE_SIZE - 1) // hub.PAGE_SIZE,
                            "page": page, "page_size": hub.PAGE_SIZE}}
+
+
+class AtomicWriteTests(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.path = Path(tmp.name) / "source.json"
+        sleep = patch("route_evidence.cache.time.sleep")
+        sleep.start()
+        self.addCleanup(sleep.stop)
+
+    def test_a_rename_refused_for_a_moment_still_lands(self):
+        real, refusals = os.replace, [PermissionError(13, "held"), PermissionError(13, "held")]
+
+        def held_then_free(source, target):
+            if refusals:
+                raise refusals.pop()
+            real(source, target)
+        with patch("route_evidence.cache.os.replace", held_then_free):
+            atomic_write(self.path, {"value": 1})
+        self.assertEqual(encoded({"value": 1}), self.path.read_bytes())
+        self.assertEqual(["source.json"], [path.name for path in self.path.parent.iterdir()])
+
+    def test_a_refusal_that_lasts_is_raised_and_leaves_no_temporary_file(self):
+        with patch("route_evidence.cache.os.replace", side_effect=PermissionError(13, "held")):
+            with self.assertRaises(PermissionError):
+                atomic_write(self.path, {"value": 1})
+        self.assertEqual([], list(self.path.parent.iterdir()))
 
 
 class HubSourceTests(unittest.TestCase):

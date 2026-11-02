@@ -81,6 +81,20 @@ def source_lock(path: Path):
                     fcntl.flock(handle, fcntl.LOCK_UN)
 
 
+# Windows can refuse a rename for a moment while another process, such as a scanner
+# or an indexer, holds a file just written; a refusal that lasts is still raised.
+REPLACE_RETRY_DELAYS = (0.01, 0.05, 0.1, 0.25, 0.5)
+
+
+def _replace(source: str, target: Path):
+    for delay in REPLACE_RETRY_DELAYS:
+        try:
+            return os.replace(source, target)
+        except PermissionError:
+            time.sleep(delay)
+    os.replace(source, target)
+
+
 def atomic_write(path: Path, value: dict):
     fd, name = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
     try:
@@ -88,7 +102,7 @@ def atomic_write(path: Path, value: dict):
             output.write(encoded(value))
             output.flush()
             os.fsync(output.fileno())
-        os.replace(name, path)
+        _replace(name, path)
     finally:
         if os.path.exists(name):
             os.unlink(name)
