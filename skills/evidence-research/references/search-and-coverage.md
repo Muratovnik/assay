@@ -31,6 +31,8 @@ route. Do not tune only to exact known titles, assume the probe set is complete,
 or label its recall as recall over the internet. When a counterexample or null-result
 search is warranted follows
 [comparison and synthesis](comparison-and-synthesis.md#explain-disagreement-and-causation).
+A negative result from your own probe or search counts only with a control: the
+same probe on a case known to be positive.
 
 Follow references, citations and repository trees when a likely source routes
 detail elsewhere. For a skill, inspect its applicable references, commands,
