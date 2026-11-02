@@ -13,9 +13,9 @@ Skills-only installations do not install hooks.
 The generated Claude manifest is `hooks/hooks.json`. Codex explicitly selects
 `hooks/codex.json` through its plugin manifest. Both invoke one runtime command
 per matching event. `PreToolUse` matches every tool, because the reading-role
-boundary and the spawn checks need to see each call; result and failure events
-match only the native spawn tools, and in Claude Code also `WebFetch` and
-`WebSearch` results for the [source check](#source-checks-in-claude-code).
+boundary and the spawn checks need to see each call. Only Claude Code registers
+result and failure events: they match the native spawn tools, and also `WebFetch`
+and `WebSearch` results for the [source check](#source-checks-in-claude-code).
 
 The Claude manifest uses the exec form: Claude Code starts `python` with the
 script path as an argument, without a shell, so Windows needs no Git Bash for
@@ -643,8 +643,9 @@ The Agent call carries both the model and the effort (Claude Code 2.1.292 and
 later). Without a route table the hook refuses a launch that does not name both;
 with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
-An older client has no effort field, so no launch can pass these checks: update
-it or set `pipeline.explicit_routes` to `off`.
+An older client has no effort field, so these checks pass only a fork, a `resume`,
+an exempt type and, without a route table, a definition pinning both. For any
+other launch, update it or set `pipeline.explicit_routes` to `off`.
 Before either check it refuses an Agent call made inside a subagent, because only
 the primary routes; see
 [launches from a subagent](../../skills/route-subagents/references/claude-code-routing.md#launches-from-a-subagent).

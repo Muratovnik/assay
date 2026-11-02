@@ -122,8 +122,9 @@ it is changed:
    `assay-<profile>-<effort>-<hash>.md`, the `.assay-routing-v2.json` ownership
    manifest and the `.assay-routing-v2.lock` file in the directory that
    `pipeline.agents_dir` named. Nothing removes them now. Their frontmatter calls
-   `routing_hook.py`, which no longer does anything for them, so a leftover file is
-   harmless but no longer routes.
+   `routing_hook.py`, which no longer does anything for them, so a leftover file no
+   longer routes. A leftover reviewer or researcher variant launched by name also
+   gets no reading-role hook boundary.
 
 ## Upgrade from 0.29
 
