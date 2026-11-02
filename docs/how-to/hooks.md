@@ -317,6 +317,8 @@ own actions or words show:
 | `branch-ui-acceptance` | `ui-delivery` → `scenario-testing` and `visual-judgment` | an edited component, markup or style file other than a test |
 | `branch-languages` | `technical-writing` → `languages` | a documentation file written with at least forty Cyrillic or Chinese characters, except agent memory notes |
 
+A file written under a scratch directory (`tmp`, `temp`, `scratchpad`, `.private`) gives no sign from any row, as in the mid-turn note below; a task worktree under `tmp/worktrees/<name>` is a checkout, so its files do.
+
 When a row's sign appears in this turn, the session or subagent loaded the skill
 since the latest compaction, and the reference was not read in that span by `Read`
 or a shell command naming it, the turn continues once. One note names every such

@@ -311,6 +311,34 @@ class BranchTableTests(TranscriptCase):
         self.assertEqual({}, branches.stopped(event, branches.RULES, {"ui-delivery", "evidence-research"}))
 
 
+class ScratchPathSignTests(unittest.TestCase):
+    """The write branch of signs() gives nothing for a scratch path and keeps the signs of a task worktree's checkout."""
+
+    def rules(self, path, content="text", tool="Write"):
+        data = ({"file_path": path, "content": content} if tool == "Write"
+                else {"file_path": path, "old_string": "old", "new_string": content})
+        return [rule for rule, _ in branches.signs(tool, data)]
+
+    def test_a_scratch_script_or_note_gives_no_sign(self):
+        # Control: the note is long enough to be prose, so the empty result is the scratch exclusion at work.
+        self.assertGreaterEqual(len(branches.PROSE.findall(RUSSIAN)), branches.MIN_PROSE)
+        for path in ("C:/x/scratchpad/check.py", "C:/repo/tmp/job/check.py"):
+            for tool in ("Write", "Edit"):
+                with self.subTest(path=path, tool=tool):
+                    self.assertEqual([], self.rules(path, tool=tool))
+        for path in ("C:/repo/tmp/job/notes.md", "C:/repo/.private/job/notes.md"):
+            with self.subTest(path=path):
+                self.assertEqual([], self.rules(path, RUSSIAN))
+
+    def test_a_task_worktree_is_a_checkout_and_keeps_its_signs(self):
+        self.assertEqual(["branch-quality-checks"], self.rules("C:/repo/tmp/worktrees/job/check.py"))
+        self.assertEqual(["branch-languages"], self.rules("C:/repo/tmp/worktrees/job/docs/x.md", RUSSIAN))
+
+    def test_a_checkout_outside_scratch_keeps_its_signs(self):
+        self.assertEqual(["branch-quality-checks"], self.rules("C:/repo/tools/check.py"))
+        self.assertEqual(["branch-languages"], self.rules("C:/repo/docs/x.md", RUSSIAN))
+
+
 class CoverageCheckRuntimeTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()

@@ -18,6 +18,7 @@ from dataclasses import dataclass
 import json
 import re
 
+from .scratch import is_scratch
 from .skill_gate import HANDBACK, NAME, UNCHANGED, _lines, _load, _prompt
 
 
@@ -129,7 +130,7 @@ def signs(tool, data):
         return []
     if tool in WRITES:
         path = data.get("notebook_path" if tool == "NotebookEdit" else "file_path")
-        if not isinstance(path, str) or not path or len(path) > 4_096:
+        if not isinstance(path, str) or not path or len(path) > 4_096 or is_scratch(path):
             return []
         name, text = SEPARATOR.split(path)[-1], _written(tool, data)
         found = []

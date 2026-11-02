@@ -116,7 +116,7 @@ path they classify as scratch: one with a directory segment named `tmp`,
 `temp`, `scratchpad`, `.private` or `.tmp`, in any letter case. Only the
 `tmp/worktrees/<name>/` part of a task worktree's path is exempt; any other
 such segment above or below it still counts. The `SCRATCH` and `WORKTREE`
-patterns in the plugin's `hooks/runtime/midturn.py` define that
+patterns in the plugin's `hooks/runtime/scratch.py` define that
 classification; read the installed revision rather than relying on this list.
 A system temporary directory often matches. Do not place a subject run's
 working directory on such a path. Before a campaign, run a smoke task in each

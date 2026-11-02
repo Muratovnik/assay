@@ -24,6 +24,7 @@ from pathlib import Path
 import re
 import time
 
+from .scratch import is_scratch
 from .skill_gate import _key as gate_key, _save as save_load, loaded as recorded, transcript
 
 TTL = 86_400
@@ -79,9 +80,6 @@ TEST = re.compile(r"(?:^|[\\/])(?:tests?|__tests__|spec)[\\/]|(?:^|[\\/])(?:test
 # Output of a tool or a package manager, not a file anyone maintains.
 GENERATED = re.compile(r"(?:^|[\\/])(?:node_modules|dist|build|vendor|__pycache__|\.git|\.cache|\.venv|venv|\.next|coverage)[\\/]"
                        r"|\.min\.(?:js|css)$|\.d\.ts$|_pb2(?:_grpc)?\.py$|\.generated\.\w+$|\.g\.cs$", re.I)
-# A scratch directory is no one's code, but a task worktree below tmp/worktrees holds a real checkout.
-WORKTREE = re.compile(r"(?:^|[\\/])tmp[\\/]worktrees[\\/][^\\/]+(?=[\\/])", re.I)
-SCRATCH = re.compile(r"(?:^|[\\/])(?:tmp|temp|scratchpad|\.private|\.tmp)[\\/]", re.I)
 DOCUMENT = re.compile(r"\.(?:md|mdx|markdown|rst)$", re.I)
 README = re.compile(r"(?:^|[\\/])README(?:\.[\w-]+)*\.(?:md|mdx|markdown|rst|txt)$", re.I)
 DOCS = re.compile(r"(?:^|[\\/])docs[\\/]", re.I)
@@ -107,7 +105,7 @@ def classify(path):
     """The row a written file calls for, or None."""
     if not isinstance(path, str) or not path or len(path) > MAX_PATH or GENERATED.search(path):
         return None
-    if SCRATCH.search(WORKTREE.sub("", path)):
+    if is_scratch(path):
         return None
     if SKILL_FILE.search(path):
         return "midturn-skill-evaluation"
