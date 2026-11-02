@@ -6,6 +6,19 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.40.1](https://github.com/Muratovnik/assay/compare/v0.40.0...v0.40.1) (2026-11-02)
+
+A worker's report of a test run now names how many tests ran, because a run that executes
+nothing can still exit 0. A negative result from a probe or a search counts only with a
+control. The branch checks stop asking for a skill reference because of a throwaway file in
+a scratch directory.
+
+### Bug Fixes
+
+* **evidence-research:** a negative result from your own probe or search counts only with a control, the same probe on a case known to be positive ([09a8dc1](https://github.com/Muratovnik/assay/commit/09a8dc15beccee2c0e409cdcac991dbd909b8e67))
+* **hooks:** a file written under a scratch directory gives no sign to the branch checks, by the same test the mid-turn note uses, now defined once in `hooks/runtime/scratch.py`; a file in a task worktree below `tmp/worktrees/<name>` still counts as part of a checkout ([5d69e06](https://github.com/Muratovnik/assay/commit/5d69e0688995250b8525388499b5b6c26c689d53))
+* **route-subagents:** a worker's oracle for a test run gives the number of tests the runner reports for each named file or test, treats zero executed as a failed check whatever the exit code, and reads the exit code of the command itself rather than of a pipeline around it ([0a07be1](https://github.com/Muratovnik/assay/commit/0a07be1a86269c6dc8fc87ac387952e3f3e797bd))
+
 ## [0.40.0](https://github.com/Muratovnik/assay/compare/v0.39.0...v0.40.0) (2026-11-02)
 
 Claude Code has taken a subagent's effort in the Agent call since 2.1.292, so routing
