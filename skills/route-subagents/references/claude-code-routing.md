@@ -58,6 +58,7 @@ on frontmatter alone.
 - [Route-table launches](#route-table-launches)
 - [Evidence-only launch check](#evidence-only-launch-check)
 - [Launches from a subagent](#launches-from-a-subagent)
+- [Waiting inside a background worker](#waiting-inside-a-background-worker)
 - [Observed alias resolutions](#observed-alias-resolutions)
 - [Model upgrades and completion](#model-upgrades-and-completion)
 
@@ -114,6 +115,35 @@ the worker to do the step itself or name it in its report. To stop nesting at th
 client as well, set `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` to `1`: a subagent
 then gets no Agent tool, and a fork's call fails. See the
 [nesting documentation](https://code.claude.com/docs/en/sub-agents#let-subagents-spawn-their-own-subagents).
+
+## Waiting inside a background worker
+
+A background subagent cannot wait for a long command in the foreground. In
+Claude Code 2.1.314 such a call was observed moving to the background after
+about 180 seconds, whatever its `timeout`, and the Bash tool blocks a foreground
+`sleep`. So the worker ends its turn while its own command or Monitor runs.
+
+Every such stop sends the parent a task-notification with status `completed`,
+the summary "is waiting on its own background work" and a note that the same
+task-id will notify again. The parent answers each notification with a full
+model turn. A live probe on 2.1.317 still gave one parent turn per stop; see
+[#105928](https://github.com/anthropics/claude-code/issues/105928) and
+[#103359](https://github.com/anthropics/claude-code/issues/103359).
+
+Each Monitor event and each Monitor expiry resumes the worker, so the parent's
+turns follow the worker's events, not its progress. A hand-back sent before the
+work is done costs a parent turn as well.
+
+For the one signal per run that the [packet](packet-contracts.md) asks for:
+
+- Start the run with `run_in_background`, or let Claude Code move it there: its
+  end is one notification. Give the run its own deadline, such as the runner's
+  timeout, so that a hang ends it too.
+- Use a Monitor only for a run the worker did not start. Its filter prints only
+  the terminal lines, for success and failure alike, and its `timeout_ms` is the
+  1,800,000 maximum rather than the 300,000 default.
+- Do not stream progress lines into the wait, and do not poll with a chain of
+  short watches.
 
 ## Observed alias resolutions
 

@@ -73,7 +73,10 @@ ownership, dependencies, exclusions and evidence required for completion.
 Name the Assay skills the packet's work needs; the worker loads them before the
 work and names them on the first line of its report, see
 [packet examples](references/packet-contracts.md).
-Include failure and escalation conditions when relevant. A verified no-op may
+Include failure and escalation conditions when relevant. When the worker will
+wait for a long run, the packet says how it waits, as the
+[packet examples](references/packet-contracts.md) describe: each event it waits
+through can wake the primary. A verified no-op may
 be useful; distinguish it from an unperformed required change.
 
 Keep shared decisions stable while dependents run. A local reversible choice
