@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .cache import Cache, atomic_write, source_lock
-from .core import EvidenceError, RetiredConfiguration, digest, epoch, number, read_document, validate_snapshot
+from .core import EvidenceError, digest, epoch, number, validate_snapshot
 from .processes import ProcessScope
 from .guides import GUIDES, guide_ids
 from .model_names import inventory_keys, spelling_report
@@ -21,11 +21,8 @@ from .providers import SOURCES, needs_browser
 # refresh deadline; only their payload contracts differ.
 REGISTRY = {**SOURCES, **GUIDES}
 from .routing import TASK_TYPES, brief, build_context, complete_efforts, source_ids, validate_request
-
-# Optional caller limits. None of them is required to obtain context, and none
-# of them removes a candidate; they annotate the context the caller receives.
-PREFERENCES = {"quality_loss_pp", "min_score", "max_cost_usd",
-               "max_duration_seconds", "allow_stale", "harness"}
+# The configuration loader is the launch hook's, kept light there; the service and its CLI share it.
+from .pipeline_config import PREFERENCES, load_config  # noqa: F401  (load_config is re-exported)
 
 
 def acquisition_summary(sources, *, offline, matched=True):
@@ -88,56 +85,6 @@ def ingest(cache, document, observed_at):
                      next_retry_at=None, failures=0, error=None, validators={})
         atomic_write(cache.root / (source["id"] + ".json"), state)
         return cache.view(source, state, refresh="imported")
-
-
-SCHEMA_VERSION = 5
-CONFIG_KEYS = frozenset({"schema_version", "client", "preferences", "inventory", "pipeline", "routes"})
-# Sections of the removed routing advisor and execution telemetry. A configuration
-# that still carries one is refused with the full list, never partly accepted.
-REMOVED_SECTIONS = ("advisor", "policy", "telemetry", "task_evidence")
-
-
-def retired_message(removed):
-    """One refusal naming every removed key and the schema version to set."""
-    remove = ("remove " + ", ".join(removed) + " and ") if removed else ""
-    return (f"routing configuration schema {SCHEMA_VERSION} no longer has the routing advisor, required mode "
-            f"or execution telemetry; {remove}set schema_version to {SCHEMA_VERSION}")
-
-
-def load_config(path: Path | None):
-    if path is None:
-        return {}
-    config = read_document(path)
-    if not isinstance(config, dict):
-        raise EvidenceError("configuration must be an object")
-    from .pipeline_config import removed_keys
-    removed = [key for key in REMOVED_SECTIONS if key in config] + removed_keys(config.get("pipeline"))
-    version = config.get("schema_version")
-    if removed or (type(version) is int and version < SCHEMA_VERSION):
-        raise RetiredConfiguration(retired_message(removed))
-    if type(version) is not int or version != SCHEMA_VERSION:
-        raise EvidenceError(f"configuration requires schema_version={SCHEMA_VERSION}")
-    if set(config) - CONFIG_KEYS:
-        raise EvidenceError("unknown configuration field")
-    preferences = config.get("preferences", {})
-    if not isinstance(preferences, dict) or set(preferences) - PREFERENCES:
-        raise EvidenceError("unknown routing preference")
-    inventory = config.get("inventory")
-    if inventory is not None and (not isinstance(inventory, dict) or set(inventory) != {"available", "observed_at"}):
-        raise EvidenceError("inventory requires available and actual observed_at")
-    # Validate preferences even before a live inventory is available. The
-    # placeholder is validation-only and never eligible for a recommendation.
-    validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
-                      "available": (inventory or {}).get("available", [{"model": "validation-only", "efforts": ["low"]}]),
-                      **preferences})
-    if inventory:
-        epoch(inventory["observed_at"])
-    from .pipeline_config import settings as pipeline_settings
-    config["pipeline"] = pipeline_settings(config)
-    if "routes" in config:
-        from .route_table import settings as route_settings
-        config["routes"] = route_settings(config)
-    return config
 
 
 def spelling(cache, available, client=None):

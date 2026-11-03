@@ -18,8 +18,9 @@ from runtime import state, routing_binding, skill_gate, sources, branches, midtu
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
 from route_evidence import route_table
-# route_evidence.service (asyncio, importlib.metadata) and host_observations load
-# where a launch or session start needs them: every tool call starts this process.
+# host_observations loads where a launch needs it: every tool call starts this process.
+# No hook path imports route_evidence.service (asyncio, HTTP, process control): the
+# launch check, which refuses on timeout, loads its configuration from pipeline_config.
 from routing_hook import explicit_launch, deny
 from skill_reminder import reminder
 
@@ -80,7 +81,7 @@ def routing_config(environment):
     binding does, so an owner who set up the binding gets the check without
     another setting.
     """
-    from route_evidence.service import load_config
+    from route_evidence.pipeline_config import load_config
     location = environment.get("ASSAY_ROUTING_CONFIG")
     if location:
         return load_config(Path(location))

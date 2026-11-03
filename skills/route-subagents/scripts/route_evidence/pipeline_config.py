@@ -86,6 +86,65 @@ def settings(config: dict | None = None) -> dict:
     return value
 
 
+SCHEMA_VERSION = 5
+CONFIG_KEYS = frozenset({"schema_version", "client", "preferences", "inventory", "pipeline", "routes"})
+# Sections of the removed routing advisor and execution telemetry. A configuration
+# that still carries one is refused with the full list, never partly accepted.
+REMOVED_SECTIONS = ("advisor", "policy", "telemetry", "task_evidence")
+# Optional caller limits. None of them is required to obtain context, and none
+# of them removes a candidate; they annotate the context the caller receives.
+PREFERENCES = {"quality_loss_pp", "min_score", "max_cost_usd",
+               "max_duration_seconds", "allow_stale", "harness"}
+
+
+def retired_message(removed):
+    """One refusal naming every removed key and the schema version to set."""
+    remove = ("remove " + ", ".join(removed) + " and ") if removed else ""
+    return (f"routing configuration schema {SCHEMA_VERSION} no longer has the routing advisor, required mode "
+            f"or execution telemetry; {remove}set schema_version to {SCHEMA_VERSION}")
+
+
+def load_config(path: Path | None):
+    """The validated routing configuration, or {} without a path.
+
+    It lives here, not in the evidence service, because the launch hook loads it
+    under a short timeout: the service's imports (asyncio, HTTP, process control)
+    would cost more than the whole check.
+    """
+    if path is None:
+        return {}
+    config = read_document(path)
+    if not isinstance(config, dict):
+        raise EvidenceError("configuration must be an object")
+    removed = [key for key in REMOVED_SECTIONS if key in config] + removed_keys(config.get("pipeline"))
+    version = config.get("schema_version")
+    if removed or (type(version) is int and version < SCHEMA_VERSION):
+        raise RetiredConfiguration(retired_message(removed))
+    if type(version) is not int or version != SCHEMA_VERSION:
+        raise EvidenceError(f"configuration requires schema_version={SCHEMA_VERSION}")
+    if set(config) - CONFIG_KEYS:
+        raise EvidenceError("unknown configuration field")
+    preferences = config.get("preferences", {})
+    if not isinstance(preferences, dict) or set(preferences) - PREFERENCES:
+        raise EvidenceError("unknown routing preference")
+    inventory = config.get("inventory")
+    if inventory is not None and (not isinstance(inventory, dict) or set(inventory) != {"available", "observed_at"}):
+        raise EvidenceError("inventory requires available and actual observed_at")
+    # Validate preferences even before a live inventory is available. The
+    # placeholder is validation-only and never eligible for a recommendation.
+    from .routing import validate_request
+    validate_request({"client": config.get("client", "unconfigured"), "task_types": ["implementation"],
+                      "available": (inventory or {}).get("available", [{"model": "validation-only", "efforts": ["low"]}]),
+                      **preferences})
+    if inventory:
+        epoch(inventory["observed_at"])
+    config["pipeline"] = settings(config)
+    if "routes" in config:
+        from .route_table import settings as route_settings
+        config["routes"] = route_settings(config)
+    return config
+
+
 def configured_inventory(config: dict) -> dict | None:
     """The owner's dated host inventory: a separate file when configured.
 

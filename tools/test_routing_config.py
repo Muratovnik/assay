@@ -407,6 +407,29 @@ class BindingTests(Fixture):
         self.assertEqual('deny', self.decide(self.launch(description='x', model='sonnet', effort='high'),
                                              environment)[0])
 
+    def test_a_checked_launch_does_not_load_the_evidence_service(self):
+        # The launch hook has a short timeout and refuses on it, so its path must not pay for the
+        # evidence service's imports (asyncio, HTTP, process control); the configuration loader is enough.
+        # A fresh interpreter runs the real entry point, since this test process already holds those modules.
+        heavy = ['asyncio', 'importlib.metadata', 'route_evidence.service', 'urllib.request']
+        program = ('import json, runpy, sys\n'
+                   f'sys.argv = [{str(ROOT / "hooks/runtime/cli.py")!r}, "--client", "claude"]\n'
+                   'try:\n    runpy.run_path(sys.argv[0], run_name="__main__")\n'
+                   'except SystemExit:\n    pass\n'
+                   f'print(json.dumps(sorted(set({heavy!r}) & set(sys.modules))), file=sys.stderr)\n')
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith(('ASSAY_', 'CLAUDE_PLUGIN', 'PLUGIN_DATA', 'CLAUDE_CODE_EFFORT'))}
+        environment = self.bind(self.config())
+        for supplied, expected in (({'description': 'gather: survey', 'model': 'haiku', 'effort': 'medium'},
+                                    'admitted as class `gather`'),
+                                   ({'description': 'survey'}, 'task class')):
+            with self.subTest(supplied=supplied):
+                result = subprocess.run([sys.executable, '-I', '-B', '-c', program], capture_output=True, timeout=60,
+                                        input=json.dumps(self.launch(**supplied)).encode(), env={**env, **environment})
+                output = json.loads(result.stdout)['hookSpecificOutput']
+                self.assertIn(expected, output.get('additionalContext') or output.get('permissionDecisionReason'))
+                self.assertEqual([], json.loads(result.stderr.decode().splitlines()[-1]))
+
     def test_host_observations_go_to_the_binding_cache_without_any_telemetry_setting(self):
         from route_evidence import host_observations
         environment = self.bind(self.config())
