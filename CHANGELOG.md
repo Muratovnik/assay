@@ -6,6 +6,19 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.41.0](https://github.com/Muratovnik/assay/compare/v0.40.2...v0.41.0) (2026-11-03)
+
+A packet now tells a worker that waits for a long run how to wait. In Claude Code every
+stop of a background worker that still has background work of its own costs the main
+session a full turn, so the worker waits for the events it acts on, not for a stream of
+progress lines, and hands back only when the work is done. A watch re-armed within the
+worker's 5-minute prompt cache stays allowed while it costs less than letting the cache
+expire.
+
+### Features
+
+* **route-subagents:** a packet for a worker that will wait for a long run says how it waits: for the run's end, whether success, failure or a deadline; with a stream only of the events it acts on; and with a hand-back only when the work is done. The Claude Code reference explains why each stop wakes the parent and when a keep-warm re-arm costs less than one wake at the end ([0e97534](https://github.com/Muratovnik/assay/commit/0e97534d5c3ac14c03ee853ac747cc338c07d072), [835e54e](https://github.com/Muratovnik/assay/commit/835e54e470b62f9b8f688b46529c33a35bb7725f))
+
 ## [0.40.2](https://github.com/Muratovnik/assay/compare/v0.40.1...v0.40.2) (2026-11-03)
 
 The routing guard's Agent launch check stops loading the routing evidence service, so its
