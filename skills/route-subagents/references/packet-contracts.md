@@ -67,18 +67,18 @@ re-reads everything in its context on every call. In the same session, log reads
 through the shell were 37 % of worker tool output.
 
 When the worker will wait for a long run, such as a build, a test round or a
-benchmark, the packet tells it how to wait: one signal per run. The worker waits
-for the run's end, whether success, failure or a deadline, rather than for a
-stream of progress events or a short watch it keeps re-arming, and it hands back
-only when the work is done. A worker that acts on each event, for example by
-stopping a run at its first failure, keeps a stream filtered to those events.
-Some clients wake the primary every time a background worker stops while its own
-work still runs, so each event the worker waits through costs a full primary
-turn. In one session a progress stream every 20 seconds and a watch re-armed
-every 4.5 minutes woke the primary 13 times for one worker. Across three weeks
-such wakes re-read 54.5 million cached tokens to produce about 12,000 tokens of
-replies. The worker does not read this skill, so the packet states the
-instruction; the client mechanics are in
+benchmark, the packet tells it how to wait. Some clients wake the primary every
+time a background worker stops while its own work still runs, so each event the
+worker waits through costs a primary turn. The worker therefore waits for the
+events it acts on: the run's end, whether success, failure or a deadline, and
+not a stream of progress lines. A worker that acts on each event, for example by
+stopping a run at its first failure, keeps a stream filtered to those events. It
+hands back only when the work is done. A periodic wake that keeps the worker's
+prompt cache alive can cost less than letting the cache expire; when that
+matters, the packet names the interval. In one session a progress stream every
+20 seconds woke the primary 7 times in 2 minutes for one worker. The worker does
+not read this skill, so the packet states the instruction; the client mechanics
+and the cache trade-off are in
 [Claude Code](claude-code-routing.md#waiting-inside-a-background-worker).
 
 For an interrupted or resumed assignment, use

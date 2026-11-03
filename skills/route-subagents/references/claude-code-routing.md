@@ -134,16 +134,29 @@ Each Monitor event and each Monitor expiry resumes the worker, so the parent's
 turns follow the worker's events, not its progress. A hand-back sent before the
 work is done costs a parent turn as well.
 
-For the one signal per run that the [packet](packet-contracts.md) asks for:
+For the wait the [packet](packet-contracts.md) asks for:
 
 - Start the run with `run_in_background`, or let Claude Code move it there: its
   end is one notification. Give the run its own deadline, such as the runner's
   timeout, so that a hang ends it too.
-- Use a Monitor only for a run the worker did not start. Its filter prints only
-  the terminal lines, for success and failure alike, and its `timeout_ms` is the
-  1,800,000 maximum rather than the 300,000 default.
-- Do not stream progress lines into the wait, and do not poll with a chain of
-  short watches.
+- Use a Monitor to watch a run the worker did not start, or as the keep-warm
+  timer below. Its filter prints only the terminal lines, for success and
+  failure alike.
+- Do not stream progress lines into the wait.
+
+A periodic wake can still be the cheaper choice. On 2.1.309 a background
+subagent's requests used the 5-minute prompt cache, and the main conversation's
+used the 1-hour one. A wake within 5 minutes reads both contexts from cache. A
+longer pause makes the worker's next request write its whole context again, at
+1.25 times the input price. A cache read costs 0.05 times the input price on
+Opus 5.5 and Sonnet 5.5, and 0.1 times on most other models; see
+[pricing](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pricing).
+
+Re-arming a watch every 270 seconds therefore costs less than one wake at the
+end while the wait lasts fewer than 1.25 N / (r (N + P)) re-arms. Here N and P
+are the worker's and the parent's cached context and r is the read multiplier.
+At N = 550,000, P = 340,000 and r = 0.05 that is about 15 re-arms, roughly 70
+minutes. For a longer wait, a Monitor's `timeout_ms` goes up to 1,800,000.
 
 ## Observed alias resolutions
 
