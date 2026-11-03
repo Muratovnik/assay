@@ -6,6 +6,16 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.40.2](https://github.com/Muratovnik/assay/compare/v0.40.1...v0.40.2) (2026-11-03)
+
+The routing guard's Agent launch check stops loading the routing evidence service, so its
+hook is much less likely to run past its 5 s limit and refuse a correct launch while
+several agents are starting at once.
+
+### Performance Improvements
+
+* **hooks:** the Agent launch check reads its routing configuration through `route_evidence/pipeline_config.py` instead of importing the evidence service with its asyncio, HTTP and process-control modules. That import was the largest part of the call, about 0.15-0.25 s on an idle Windows machine and up to 3.5-4 s under CPU load, where the whole call passed the hook's 5 s timeout and the launch was refused ([3db947d](https://github.com/Muratovnik/assay/commit/3db947d009e2752cc27a1e40a05f90d8601ba151))
+
 ## [0.40.1](https://github.com/Muratovnik/assay/compare/v0.40.0...v0.40.1) (2026-11-02)
 
 A worker's report of a test run now names how many tests ran, because a run that executes
