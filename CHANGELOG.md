@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.41.1](https://github.com/Muratovnik/assay/compare/v0.41.0...v0.41.1) (2026-11-04)
+
+The Claude Code hook that runs before every tool call answers at once, before it loads
+its checks or opens its stores, when the call is one no check reads: a search, an MCP
+tool, a read of an ordinary file, or a shell command that neither fetches a page nor
+reruns a script or test. That is most tool calls, and each of them now costs about as
+much as starting the interpreter. Every note, refusal and record the hook made before
+it still makes.
+
+### Performance Improvements
+
+* **hooks:** a Claude tool call that no check answers or records gets its empty reply before the hook loads its rules, routing modules and stores. The decision uses the same predicates as the checks, which now live in one light module. A reading role, a subagent call whose role is unknown, a launch, a skill load, a fetch, a search, a question to the owner, a write the mid-turn check reads and a shell command that fetches or reruns a scenario still take the full path, as does every Codex event. On the remaining Claude tool calls without a reply the hook no longer opens a store transaction, and the session's own calls skip the reading-role lookup, which could never find a record. On Windows under load such a call took about 70 ms instead of 200 ms. A broken hook configuration is now reported on the other events rather than on these calls ([4badf4f](https://github.com/Muratovnik/assay/commit/4badf4fc1f2ed46cddda3e601c283acfe48af48b))
+* **hooks:** the command lines the client manifests run are read without argparse, whose help formatter loaded `shutil` and `locale` on every event ([13944c5](https://github.com/Muratovnik/assay/commit/13944c5152725eda1780388c1af0c00917fb765f))
+
 ## [0.41.0](https://github.com/Muratovnik/assay/compare/v0.40.2...v0.41.0) (2026-11-03)
 
 A packet now tells a worker that waits for a long run how to wait. In Claude Code every
