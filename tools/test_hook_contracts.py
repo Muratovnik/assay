@@ -337,9 +337,12 @@ class ReviewerBoundaryTests(unittest.TestCase):
         for client in ("codex", "claude"):
             for role, tool in (("evidence-reviewer", "Read"), ("evidence-reviewer", "mcp__openaiDeveloperDocs__fetch_openai_doc"),
                                ("evidence-reviewer", "mcp__serena__find_symbol"), ("worker", "mcp__planning__claim_work_item")):
-                result = cli.reviewer_boundary({"hook_event_name": "PreToolUse", "agent_type": role, "tool_name": tool}, {})
+                result = cli.reviewer_boundary({"hook_event_name": "PreToolUse", "agent_type": role, "tool_name": tool},
+                                               client, {})
                 self.assertEqual(result, {})
-        self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "tool_name": "Write"}, {}), {})
+        for client in ("codex", "claude"):
+            self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "tool_name": "Write"}, client, {}),
+                             {})
 
     def test_reading_roles_can_hand_back_their_report(self):
         for client in ("codex", "claude"):
@@ -360,11 +363,11 @@ class ReviewerBoundaryTests(unittest.TestCase):
             for tool in tools:
                 with self.subTest(role=role, tool=tool):
                     self.assertEqual({}, cli.reviewer_boundary(
-                        {"hook_event_name": "PreToolUse", "agent_type": "assay:" + role, "tool_name": tool}, {}))
+                        {"hook_event_name": "PreToolUse", "agent_type": "assay:" + role, "tool_name": tool}, "claude", {}))
         for tool in sorted(set(rendered["official-docs-researcher"]) - set(rendered["evidence-reviewer"])):
             with self.subTest(denied=tool):
                 result = cli.reviewer_boundary({"hook_event_name": "PreToolUse",
-                                                "agent_type": "assay:evidence-reviewer", "tool_name": tool}, {})
+                                                "agent_type": "assay:evidence-reviewer", "tool_name": tool}, "claude", {})
                 self.assertEqual("deny", result["hookSpecificOutput"]["permissionDecision"])
 
     def test_native_start_identity_is_used_without_parent_session_guess(self):
@@ -373,12 +376,12 @@ class ReviewerBoundaryTests(unittest.TestCase):
             env = {"PLUGIN_DATA": tmp}
             worker = "11111111-2222-7333-8444-555555555555"
             cli.reviewer_boundary({"hook_event_name": "SubagentStart", "session_id": "parent", "agent_id": worker,
-                                   "agent_type": "evidence-reviewer"}, env)
+                                   "agent_type": "evidence-reviewer"}, "codex", env)
             result = cli.reviewer_boundary({"hook_event_name": "PreToolUse", "session_id": "parent",
-                "transcript_path": "/logs/rollout-" + worker + ".jsonl", "tool_name": "mcp__planning__claim_work_item"}, env)
+                "transcript_path": "/logs/rollout-" + worker + ".jsonl", "tool_name": "mcp__planning__claim_work_item"}, "codex", env)
             self.assertEqual(result["hookSpecificOutput"]["permissionDecision"], "deny")
             self.assertEqual(cli.reviewer_boundary({"hook_event_name": "PreToolUse", "session_id": "parent",
-                "agent_id": "other-worker", "tool_name": "Write"}, env), {})
+                "agent_id": "other-worker", "tool_name": "Write"}, "codex", env), {})
 
 
 class ExplicitRouteTests(unittest.TestCase):

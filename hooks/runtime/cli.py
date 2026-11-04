@@ -2,18 +2,29 @@
 """One plugin entry per event; only the routing owner can reject an operation."""
 from __future__ import annotations
 
-import argparse
 import json
 import os
-from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
 # -I ignores cwd/PYTHONPATH. Import only installed, task-owned modules.
-sys.path.insert(0, str(ROOT / "hooks"))
-sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
+_PLUGIN = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+sys.path.insert(0, os.path.join(_PLUGIN, "hooks"))
+sys.path.insert(0, os.path.join(_PLUGIN, "skills", "route-subagents", "scripts"))
+from runtime import gate
+
+# Most Claude tool calls are ones no check answers or records. Their reply is printed here,
+# before the rules, routing modules and stores below are loaded; any other run reads on.
+_STDIN = gate.read(sys.argv[1:]) if __name__ == "__main__" else None
+if _STDIN is not None and gate.quiet(_STDIN):
+    print(json.dumps({}))
+    raise SystemExit(0)
+
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
 from runtime.activation import evaluate, load_rules
 from runtime.events import recognized
+from runtime.predicates import reading_profile
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
@@ -24,7 +35,7 @@ from route_evidence import route_table
 from routing_hook import explicit_launch, deny
 from skill_reminder import reminder
 
-MAX_INPUT = 1024 * 1024
+MAX_INPUT = gate.MAX_INPUT
 # The refusal carries the rule, because an open session may hold an older skill.
 NESTED_SPAWN = ("only the primary agent launches agents, so delegation stays one level deep. "
                 "Do this part of the work yourself; if a step needs a separate agent, finish your packet and "
@@ -175,19 +186,18 @@ REPORT_TOOLS = frozenset({"SubagentHandback"})
 PROFILE_TOOLS = {"official-docs-researcher": frozenset({"WebFetch", "WebSearch", "ToolSearch"})}
 
 
-def reading_profile(role):
-    """The reading profile a native agent type names, or None."""
-    if not isinstance(role, str):
-        return None
-    name = role.split(":")[-1]
-    return name if name in {"evidence-reviewer", "official-docs-researcher"} else None
-
-
 def reading_role(role):
     return reading_profile(role) is not None
 
 
-def reviewer_boundary(event, environment, *, clock=None):
+def reviewer_boundary(event, client, environment, *, clock=None):
+    """The refusal a reading role gets for a tool outside its profile, or {}.
+
+    A Codex event does not say which agent calls, so its role comes from the
+    record its SubagentStart left under the transcript's id. A Claude tool call
+    of a subagent carries agent_id; one without it comes from the session itself,
+    which no SubagentStart records, so the lookup is skipped there.
+    """
     role = event.get("agent_type")
     reading = reading_role(role)
     if isinstance(role, str) and not reading:
@@ -196,7 +206,9 @@ def reviewer_boundary(event, environment, *, clock=None):
         return {}
     session, agent = event.get("session_id"), event.get("agent_id")
     directory = environment.get("PLUGIN_DATA") or environment.get("CLAUDE_PLUGIN_DATA")
-    if directory and isinstance(session, str) and session and (not reading or event["hook_event_name"] == "SubagentStart"):
+    top_level = client == "claude" and event["hook_event_name"] == "PreToolUse" and not agent
+    if (directory and isinstance(session, str) and session and not top_level
+            and (not reading or event["hook_event_name"] == "SubagentStart")):
         from route_evidence.core import digest
         from route_evidence.pipeline_store import PipelineStore
         import re
@@ -257,7 +269,7 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
     if not recognized(event, client):
         return {}, None
     try:
-        protected = reviewer_boundary(event, environment, clock=clock) or explicit_routes(event, client, environment)
+        protected = reviewer_boundary(event, client, environment, clock=clock) or explicit_routes(event, client, environment)
     except Exception:
         if event.get("hook_event_name") == "PreToolUse":
             return deny("read-only profile identity could not be checked; repair the profile hook state before retrying"), None
@@ -391,7 +403,9 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
     return result
 
 
-def main(argv=None):
+def main(argv=None, *, stdin=None):
+    """Run one command; `stdin` is the event input the entry already read, read here when None."""
+    import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", nargs="?", choices=("event", "doctor", "replay", "route-preflight"), default="event")
     parser.add_argument("--client", choices=("claude", "codex"), required=True)
@@ -429,7 +443,7 @@ def main(argv=None):
                                       "evidence": "synthetic_replay"}))
                     index += 1
             return 2 if index == 0 or failed else 0
-        raw = sys.stdin.buffer.read(MAX_INPUT + 1)
+        raw = stdin if stdin is not None else sys.stdin.buffer.read(MAX_INPUT + 1)
         if len(raw) > MAX_INPUT:
             raise ValueError("oversized event")
         event = loads(raw.decode("utf-8"))
@@ -452,4 +466,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(stdin=_STDIN))

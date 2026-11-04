@@ -37,6 +37,10 @@ def apply(event, client, decision, rules, fingerprint, directory, *, outcome=Non
     seen = hashlib.sha256(json.dumps([key, delivery]).encode()).hexdigest() if delivery else None
     if outcome is not None:
         decision = {"rule_ids": [], "context": ""}
+    elif client == "claude" and name == "PreToolUse" and not decision["context"]:
+        # Only a Codex compaction leaves a restore for a tool call, and only a reply with
+        # context is recorded as seen, so this call has nothing to read or write.
+        return decision
     with PipelineStore(Path(directory), clock=clock).transaction() as tx:
         duplicate = bool(seen and tx.get("hook-seen", seen))
         if duplicate:
