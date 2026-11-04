@@ -24,6 +24,8 @@ from pathlib import Path
 import re
 import time
 
+from .predicates import LOADED_SKILL
+
 TTL = 86_400
 MAX_RECORDS = 128
 MAX_SCAN = 4_096
@@ -35,7 +37,8 @@ LEGACY = re.compile(r"^[\W_]*assay[\W_]*:[\W_]*(.*)$", re.I)
 CODE_SPAN = re.compile(r"`([^`\n]+)`")
 QUALIFIED = re.compile(r"assay:([a-z][a-z0-9-]{0,63})(?![\w-])")
 NAME = re.compile(r"(?:assay:)?([a-z][a-z0-9-]{0,63})")
-SKILL_FILE = re.compile(r"[\\/]skills[\\/]([a-z][a-z0-9-]{0,63})[\\/]SKILL\.md$")
+# A Read of a SKILL.md loads that skill; the hook entry reads the same pattern before loading this module.
+SKILL_FILE = LOADED_SKILL
 # The host channel through which a subagent may deliver its report.
 HANDBACK = "SubagentHandback"
 # A continued turn still ends on text, so a rule against reporting "nothing changes" would leave a change

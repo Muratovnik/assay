@@ -19,11 +19,14 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-import re
 import time
 
 from .branches import REFERENCE_PATH
 from .midturn import SHELLS, _path
+# What a command line runs is decided in predicates, which the hook entry reads before loading this module.
+from .predicates import (INLINE, INTERPRETERS, MODULES, PREFIX, RUNNERS, SCRIPT, SEGMENT,  # noqa: F401
+                         SUBCOMMANDS, TAIL, TESTING, VALUED, WRAPPERS, _program, _run, _script, _short, _tokens,
+                         signature)
 from .skill_gate import _lines, _prompt
 
 RULE = "rerun-diagnostic-reproducer"
@@ -34,94 +37,6 @@ TTL = 86_400
 MAX_RECORDS = 128
 MAX_COMMAND = 65_536
 MAX_EVIDENCE = 80
-# Commands of one line run in order; a pipe or a redirection ends the part that names the run.
-SEGMENT = re.compile(r"\r?\n|;|&&|\|\|")
-TAIL = re.compile(r"\s(?:\||[0-9*]?>{1,2}|<).*$", re.S)
-SCRIPT = re.compile(r"\.(?:ps1|psm1|py|sh|bash|js|mjs|cjs|ts|mts|rb|lua)$", re.I)
-# Code given inline or on standard input is a new program each time, not a rerun.
-INLINE = frozenset({"-", "-c", "-e", "-command", "-encodedcommand", "--eval", "--command"})
-PREFIX = re.compile(r"^(?:&|\.|env|\w+=\S*|\$env:\w+=\S*)$", re.I)
-INTERPRETERS = frozenset({"pwsh", "powershell", "python", "python3", "py", "node", "bash", "sh", "zsh", "ruby",
-                          "deno", "tsx", "ts-node", "lua", "perl"})
-# Environment managers that run the rest of the line: `uv run pytest`, `poetry run python x.py`.
-WRAPPERS = frozenset({"uv", "uvx", "poetry", "pipenv", "pdm", "hatch", "rye"})
-VALUED = frozenset({"--with", "--python", "-p", "--project", "--directory", "--env-file", "--extra", "--group"})
-RUNNERS = frozenset({"pytest", "vitest", "jest", "mocha", "ava", "tap", "nox", "tox"})
-# A package manager or build tool runs tests only through these subcommands.
-SUBCOMMANDS = {"npm": {"test", "t", "run"}, "pnpm": {"test", "t", "run"}, "yarn": {"test", "run"},
-               "bun": {"test", "run"}, "dotnet": {"test"}, "go": {"test"}, "cargo": {"test", "nextest"},
-               "make": {"test", "check"}, "gradle": {"test", "check"}, "gradlew": {"test", "check"},
-               "mvn": {"test", "verify"}, "npx": RUNNERS | {"playwright"}}
-TESTING = re.compile(r"test|check|e2e", re.I)
-MODULES = frozenset({"pytest", "unittest"})
-
-
-def _tokens(part):
-    tokens = [token.strip("'\"") for token in TAIL.sub("", " " + part).split()]
-    while tokens and PREFIX.match(tokens[0]):
-        tokens.pop(0)
-    return [token for token in tokens if token]
-
-
-def _program(token):
-    name = re.split(r"[\\/]", token)[-1].lower()
-    return name[:-4] if name.endswith((".exe", ".cmd", ".bat")) else name
-
-
-def _short(token):
-    parts = [part for part in re.split(r"[\\/]+", token) if part and part != "."]
-    return "/".join(parts[-2:]).lower()
-
-
-def _script(tokens, index):
-    """A script by its last two path parts with its arguments, a path argument shortened the same way."""
-    return " ".join(_short(token) for token in tokens[index:])
-
-
-def _run(tokens):
-    """The signature of one command's tokens, or None."""
-    program = _program(tokens[0])
-    if SCRIPT.search(tokens[0]):
-        return _script(tokens, 0)
-    if program in WRAPPERS:
-        rest = tokens[2:] if program != "uvx" and len(tokens) > 1 and tokens[1].lower() == "run" else tokens[1:]
-        while rest and rest[0].startswith("-"):
-            rest = rest[2:] if rest[0].lower() in VALUED else rest[1:]
-        return _run(rest) if rest else None
-    if program in RUNNERS:
-        return " ".join([program, *tokens[1:]]).lower()
-    if program in SUBCOMMANDS:
-        command = tokens[1].lower() if len(tokens) > 1 else ""
-        if command not in SUBCOMMANDS[program] or (command == "run" and not TESTING.match(tokens[2] if len(tokens) > 2 else "")):
-            return None
-        return " ".join([program, *tokens[1:]]).lower()
-    if program not in INTERPRETERS:
-        return None
-    for index, token in enumerate(tokens[1:], 1):
-        lowered = token.lower()
-        if lowered in INLINE:
-            return None
-        if lowered == "-m":
-            module = tokens[index + 1].lower() if index + 1 < len(tokens) else ""
-            return " ".join([module, *tokens[index + 2:]]).lower() if module in MODULES else None
-        if SCRIPT.search(token):
-            return _script(tokens, index)
-    return None
-
-
-def signature(command):
-    """What the first run in a shell command line runs: a script's last two path parts or a test command; else None.
-
-    Text after a heredoc marker is the heredoc's body, not commands.
-    """
-    if not isinstance(command, str):
-        return None
-    for part in SEGMENT.split(command[:MAX_COMMAND].split("<<", 1)[0]):
-        tokens = _tokens(part)
-        found = _run(tokens) if tokens else None
-        if found:
-            return found
-    return None
 
 
 def _owner(entry, content):

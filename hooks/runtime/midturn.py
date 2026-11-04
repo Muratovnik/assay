@@ -21,21 +21,17 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
-import re
 import time
 
-from .scratch import is_scratch
+# Which calls show a sign is decided in predicates, which the hook entry reads before loading this module.
+from .predicates import (DOCS, DOCUMENT, FETCH, GENERATED, INTERFACE, LOCAL, MAX_COMMAND,  # noqa: F401
+                         MAX_PATH, NOT_DOCUMENTATION, PROBE, QUESTION, README, SEPARATOR, SHELLS, SKILL_FILE,
+                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external)
 from .skill_gate import _key as gate_key, _save as save_load, loaded as recorded, transcript
 
 TTL = 86_400
 MAX_RECORDS = 128
 FORMS = ("note", "deny")
-WRITES = frozenset({"Edit", "Write", "MultiEdit", "NotebookEdit"})
-SHELLS = frozenset({"Bash", "PowerShell"})
-WEB = frozenset({"WebFetch", "WebSearch"})
-QUESTION = "AskUserQuestion"
-MAX_PATH = 4_096
-MAX_COMMAND = 65_536
 
 
 @dataclass(frozen=True)
@@ -69,74 +65,6 @@ ROWS = (
         refuses=True),
 )
 RULES = tuple(row.rule for row in ROWS)
-
-SEPARATOR = re.compile(r"[\\/]")
-SOURCE = re.compile(r"\.(?:py|pyi|js|mjs|cjs|ts|mts|cts|go|rs|java|kt|cs|c|h|cc|cpp|hpp|rb|php|swift|sh|bash|ps1|psm1"
-                    r"|lua|gd|sql)$", re.I)
-INTERFACE = re.compile(r"\.(?:vue|svelte|[jt]sx|css|scss|sass|less|html?)$", re.I)
-# Python, Go and JavaScript conventions: a test directory, test_*, *_test, *.test.*, *.spec.*.
-TEST = re.compile(r"(?:^|[\\/])(?:tests?|__tests__|spec)[\\/]|(?:^|[\\/])(?:test_[^\\/]*|conftest\.py|[^\\/]*_tests?\.[^\\/.]+"
-                  r"|[^\\/]*\.(?:test|spec)\.[^\\/.]+)$", re.I)
-# Output of a tool or a package manager, not a file anyone maintains.
-GENERATED = re.compile(r"(?:^|[\\/])(?:node_modules|dist|build|vendor|__pycache__|\.git|\.cache|\.venv|venv|\.next|coverage)[\\/]"
-                       r"|\.min\.(?:js|css)$|\.d\.ts$|_pb2(?:_grpc)?\.py$|\.generated\.\w+$|\.g\.cs$", re.I)
-DOCUMENT = re.compile(r"\.(?:md|mdx|markdown|rst)$", re.I)
-README = re.compile(r"(?:^|[\\/])README(?:\.[\w-]+)*\.(?:md|mdx|markdown|rst|txt)$", re.I)
-DOCS = re.compile(r"(?:^|[\\/])docs[\\/]", re.I)
-# Plans and research are working records, not documentation for a reader.
-WORKING = re.compile(r"(?:^|[\\/])docs[\\/](?:[\w.-]+[\\/])*(?:plans?|research)[\\/]|[\\/]plans?[\\/][^\\/]+\.md$", re.I)
-# Agent instructions, memory notes and generated change logs are other work.
-NOT_DOCUMENTATION = re.compile(r"(?:^|[\\/])(?:CLAUDE|AGENTS|GEMINI|MEMORY|CHANGELOG|SKILL)\.md$|[\\/]memory[\\/][^\\/]+$", re.I)
-SKILL_FILE = re.compile(r"(?:^|[\\/])SKILL\.md$|[\\/]skills?[\\/][a-z][a-z0-9-]*[\\/](?:references|evals)[\\/]|"
-                        r"(?:^|[\\/])activation-rules\.toml$", re.I)
-# A shell command that fetches: the verb must open a command, so a commit message that
-# mentions curl does not count.
-FETCH = re.compile(r"(?:^|[;&|(`\n]|\$\()\s*(?:(?:\w+=\S+\s+)|(?:\$[\w:.]+\s*=\s*))*(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod)"
-                   r"(?:\.exe)?\b", re.I)
-URL = re.compile(r"https?://(\[[0-9a-f:]+\]|[^\s/:<>()\"'`\[\]]+)", re.I)
-LOCAL = re.compile(r"^(?:localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[?::1\]?|[^.]*\.localhost|[^.]*\.test|"
-                   r"host\.docker\.internal|example\.(?:com|org|net))$", re.I)
-# A reachability probe throws the body away or asks for the headers only.
-PROBE = re.compile(r"(?:^|\s)(?:-o|--output|-OutFile)\s+(?:/dev/null|nul|\$null)\b|\s>\s*(?:/dev/null|nul|\$null)\b"
-                   r"|(?:^|\s)(?:-I|--head)\b|-X\s+HEAD\b|-Method\s+Head\b", re.I)
-
-
-def classify(path):
-    """The row a written file calls for, or None."""
-    if not isinstance(path, str) or not path or len(path) > MAX_PATH or GENERATED.search(path):
-        return None
-    if is_scratch(path):
-        return None
-    if SKILL_FILE.search(path):
-        return "midturn-skill-evaluation"
-    if NOT_DOCUMENTATION.search(path):
-        return None
-    if README.search(path) or (DOCUMENT.search(path) and DOCS.search(path) and not WORKING.search(path)):
-        return "midturn-technical-writing"
-    if INTERFACE.search(path):
-        return None if TEST.search(path) else "midturn-ui-delivery"
-    if SOURCE.search(path):
-        return "midturn-test-writing" if TEST.search(path) else "midturn-code-change"
-    return None
-
-
-def external(command):
-    """The host the first fetching command of a shell command line reaches, or None.
-
-    The host is the first URL after the verb. A local address, a reachability probe and a
-    fetch with no URL give None.
-    """
-    if not isinstance(command, str):
-        return None
-    command = command[:MAX_COMMAND]
-    starts = [match.end() for match in FETCH.finditer(command)]
-    for index, start in enumerate(starts):
-        end = starts[index + 1] if index + 1 < len(starts) else len(command)
-        part = command[start:end]
-        found = URL.search(part)
-        if found and not LOCAL.match(found[1]) and not PROBE.search(part):
-            return found[1].lower()
-    return None
 
 
 def signs(tool, data):
