@@ -28,9 +28,11 @@ from route_evidence.pipeline_store import PipelineStore
 
 ENTRY = ROOT / "hooks/runtime/cli.py"
 NOW = 1_000_000.0
-# Modules the early exit must not load: the rules, the stores and everything behind them.
-HEAVY = ("argparse", "route_evidence.core", "route_evidence.pipeline_store", "runtime.activation", "runtime.branches",
-         "runtime.state", "sqlite3", "tomllib")
+# Modules the full path loads and the early exit must not: the rules, the stores and everything behind them.
+CHECKS = ("route_evidence.core", "route_evidence.pipeline_store", "runtime.activation", "runtime.branches",
+          "runtime.state", "sqlite3", "tomllib")
+# No event run builds the command parser; its help formatter alone loads shutil and locale.
+HEAVY = (*CHECKS, "argparse")
 CLEAN = {k: v for k, v in os.environ.items()
          if not k.startswith(("ASSAY_", "CLAUDE_PLUGIN", "PLUGIN_DATA", "CLAUDE_CODE_EFFORT"))}
 
@@ -330,7 +332,7 @@ class EntryTests(unittest.TestCase):
         self.assertEqual((0, [], []), (code, errors, heavy))
         # The same bytes the full path prints for an empty result.
         _, full, _, loaded = self.run_entry(raw(event("Read", {"file_path": "/work/skills/unknown-skill/SKILL.md"})))
-        self.assertEqual(sorted(HEAVY), loaded)
+        self.assertEqual(sorted(CHECKS), loaded)
         self.assertEqual(full, stdout)
         self.assertEqual(b"{}", stdout.strip())
 
@@ -338,7 +340,7 @@ class EntryTests(unittest.TestCase):
         code, stdout, errors, heavy = self.run_entry(raw(event("Edit", {"file_path": "/work/src/app.py"})))
         self.assertEqual((0, []), (code, errors))
         self.assertIn("assay:code-change", json.loads(stdout)["hookSpecificOutput"]["additionalContext"])
-        self.assertEqual(sorted(HEAVY), heavy)
+        self.assertEqual(sorted(CHECKS), heavy)
 
     def test_invalid_input_fails_on_the_full_path_as_before(self):
         oversized = raw(event("Grep")) + b" " * gate.MAX_INPUT
@@ -354,7 +356,20 @@ class EntryTests(unittest.TestCase):
         code, stdout, errors, heavy = self.run_entry(raw(event("Grep", transcript_path="/logs/rollout-1.jsonl")),
                                                      client="codex")
         self.assertEqual((0, b"{}", []), (code, stdout.strip(), errors))
-        self.assertEqual(sorted(HEAVY), heavy)
+        self.assertEqual(sorted(CHECKS), heavy)
+
+    def test_an_event_run_reads_its_command_line_as_the_parser_does(self):
+        for argv in cli.EVENT_RUNS:
+            with self.subTest(argv=argv):
+                built, parsed = cli.arguments(list(argv))
+                self.assertIsNone(built)
+                self.assertEqual(vars(cli.command_parser().parse_args(list(argv))), vars(parsed))
+        for argv in (["--client", "claude", "--settings", "x.json"], ["doctor", "--client", "codex"],
+                     ["--client=claude"]):
+            with self.subTest(argv=argv):
+                built, parsed = cli.arguments(argv)
+                self.assertIsNotNone(built)
+                self.assertEqual(vars(cli.command_parser().parse_args(argv)), vars(parsed))
 
 
 if __name__ == "__main__":

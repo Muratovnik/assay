@@ -403,15 +403,35 @@ def doctor(client, environment, *, root=ROOT, settings_path=None):
     return result
 
 
-def main(argv=None, *, stdin=None):
-    """Run one command; `stdin` is the event input the entry already read, read here when None."""
+def command_parser():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", nargs="?", choices=("event", "doctor", "replay", "route-preflight"), default="event")
     parser.add_argument("--client", choices=("claude", "codex"), required=True)
     parser.add_argument("--input", type=Path, help="JSONL events for replay; JSON effective inputs for route-preflight")
     parser.add_argument("--settings", type=Path, help="read-only check of an explicitly supplied client settings file")
-    args = parser.parse_args(argv)
+    return parser
+
+
+# The command lines the client manifests run, read without argparse: building its parser loads
+# its help formatter, shutil and locale on every event. Any other command line goes to the parser.
+EVENT_RUNS = {(*prefix, "--client", client): client for prefix in ((), ("event",)) for client in ("claude", "codex")}
+
+
+def arguments(argv):
+    """(parser or None, parsed arguments) for a command line; an event run gets no parser."""
+    argv = sys.argv[1:] if argv is None else argv
+    client = EVENT_RUNS.get(tuple(argv))
+    if client:
+        from types import SimpleNamespace
+        return None, SimpleNamespace(command="event", client=client, input=None, settings=None)
+    built = command_parser()
+    return built, built.parse_args(argv)
+
+
+def main(argv=None, *, stdin=None):
+    """Run one command; `stdin` is the event input the entry already read, read here when None."""
+    parser, args = arguments(argv)
     try:
         if args.command == "doctor":
             print(json.dumps(doctor(args.client, os.environ, settings_path=args.settings)))
