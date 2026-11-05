@@ -237,8 +237,24 @@ assay@assay`, or the client's plugin manager.
 
 ## Upgrading
 
-Pull the new revision and re-run the installer, keeping the same `--client`
-and `--kind` selection on every step. If the profile adapters changed
+On the Claude Code plugin route, refresh the marketplace's listing, then update
+the plugin. The new version loads in your next session, or after `/reload-plugins`
+in a running one.
+
+```text
+claude plugin marketplace update assay
+claude plugin update assay@assay
+```
+
+Cloning or refreshing a marketplace gets 120 seconds by default. If it fails on a
+large repository or a slow connection, for example with
+`Git clone timed out after 120s`, set `CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS` to a
+longer limit in milliseconds, such as `300000`, and retry in the same shell (checked
+against [Claude Code's plugin troubleshooting](https://code.claude.com/docs/en/plugins/troubleshooting#git-clone-timed-out-after-120s)
+on 2026-11-05).
+
+With the symlink installer, pull the new revision and re-run it, keeping the same
+`--client` and `--kind` selection on every step. If the profile adapters changed
 between revisions, the upgrade is two steps in order:
 
 ```text
