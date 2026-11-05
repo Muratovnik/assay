@@ -32,7 +32,11 @@ or label its recall as recall over the internet. When a counterexample or null-r
 search is warranted follows
 [comparison and synthesis](comparison-and-synthesis.md#explain-disagreement-and-causation).
 A negative result from your own probe or search counts only with a control: the
-same probe on a case known to be positive.
+same probe on a case known to be positive. A control inside the same narrowed
+scope tests the tool, not the scope, so a control that must vouch for the scope
+lies outside it, or the scope is widened. A conclusion that something is unused,
+before deleting it, comes from a search that does not honour ignore rules, such as
+`rg -uu`.
 
 Follow references, citations and repository trees when a likely source routes
 detail elsewhere. For a skill, inspect its applicable references, commands,
