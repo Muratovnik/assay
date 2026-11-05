@@ -173,7 +173,20 @@ assay@assay`，或你所用客户端的插件管理器。
 
 ## 升级
 
-拉取新版本后重新运行安装器，每一步都保持相同的 `--client` 和 `--kind` 选择。如果两个版本之间
+通过 Claude Code 插件安装时，先刷新 marketplace 的列表，再更新插件。新版本会在下一个会话中加载，
+在已运行的会话中则执行 `/reload-plugins` 后加载。
+
+```text
+claude plugin marketplace update assay
+claude plugin update assay@assay
+```
+
+克隆或刷新 marketplace 默认限时 120 秒。如果在大型仓库或慢速连接上失败，例如出现
+`Git clone timed out after 120s`，请将 `CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS` 设为更长的时限（单位为毫秒，
+例如 `300000`），然后在同一个 shell 中重试（已于 2026-11-05 对照
+[Claude Code 插件故障排除文档](https://code.claude.com/docs/en/plugins/troubleshooting#git-clone-timed-out-after-120s)核实）。
+
+使用符号链接安装器时，拉取新版本后重新运行安装器，每一步都保持相同的 `--client` 和 `--kind` 选择。如果两个版本之间
 配置适配器发生了变化，升级需要按
 以下顺序分两步进行：
 
