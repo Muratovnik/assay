@@ -58,6 +58,7 @@ on frontmatter alone.
 - [Route-table launches](#route-table-launches)
 - [Evidence-only launch check](#evidence-only-launch-check)
 - [Launches from a subagent](#launches-from-a-subagent)
+- [Files a subagent writes](#files-a-subagent-writes)
 - [Waiting inside a background worker](#waiting-inside-a-background-worker)
 - [Observed alias resolutions](#observed-alias-resolutions)
 - [Model upgrades and completion](#model-upgrades-and-completion)
@@ -115,6 +116,14 @@ the worker to do the step itself or name it in its report. To stop nesting at th
 client as well, set `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` to `1`: a subagent
 then gets no Agent tool, and a fork's call fails. See the
 [nesting documentation](https://code.claude.com/docs/en/sub-agents#let-subagents-spawn-their-own-subagents).
+
+## Files a subagent writes
+
+Claude Code 2.1.318 refuses a subagent's Write when the file name matches
+`/^(REPORT|SUMMARY|FINDINGS|ANALYSIS).*\.md$/i`, with the text "Subagents should
+return findings as text, not write report files". The check is in the client, not
+a hook. So a [packet](packet-contracts.md) asks for findings as text, and a file
+it needs beside the report takes a name that starts with none of those words.
 
 ## Waiting inside a background worker
 

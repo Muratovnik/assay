@@ -55,8 +55,11 @@ Keep returns compact enough for their named consumer: result, changed boundary,
 decisive evidence pointers, unresolved assumptions and next dependency. Retain
 large logs in the permitted evidence location instead of forwarding them through
 every packet. The worker does not read this skill, so the packet states the
-budget: by default about 1,500 tokens for the final message, with longer detail
-in a file in the permitted evidence location that the return names. The primary
+budget: by default about 1,500 tokens for the final message, which carries the
+findings, with longer detail in a file in the permitted evidence location that
+the return names. The packet has that file named for its content, not as a report
+or summary, because some clients refuse a worker's file named that way; see
+[Claude Code](claude-code-routing.md#files-a-subagent-writes). The primary
 reads that file only when a decision needs it, and asks for a longer return when
 the decision depends on it. Without a stated budget, the median final message in
 one 129-worker session ran from 9,000 to 23,000 characters by class.
