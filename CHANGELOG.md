@@ -6,6 +6,22 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.42.0](https://github.com/Muratovnik/assay/compare/v0.41.1...v0.42.0) (2026-11-05)
+
+A stop check that continues a Claude Code turn now also shows the person one line. Its
+note goes to the model, so all a person saw until now was the short reply it led to,
+with no sign of why the turn went on. The line names the check, such as `Assay: skill
+gate sent Claude a note.`, and does not say what came of it. The notes themselves and
+what the model reads are unchanged.
+
+### Features
+
+* **hooks:** the skill gate and the source, branch and report checks return `systemMessage` beside the note when they continue a stop, and a note that joins two checks names both. A refused hand-back adds no line, since the retry delivers the report ([78fb649](https://github.com/Muratovnik/assay/commit/78fb64953bed11b2e0a2725aba85df66b70ad9c3), [7d957ea](https://github.com/Muratovnik/assay/commit/7d957ea643fc7856758cf61decf10e5541cf83d0))
+
+### Documentation
+
+* **route-subagents:** say that the 37 % of worker tool output counts file reads through the shell whatever their target, and that about 18 % of that class was logs and results ([e0522bf](https://github.com/Muratovnik/assay/commit/e0522bf6f7eaeb5dd3ad113b83528cd36b8fb3df))
+
 ## [0.41.1](https://github.com/Muratovnik/assay/compare/v0.41.0...v0.41.1) (2026-11-04)
 
 The Claude Code hook that runs before every tool call answers at once, before it loads
