@@ -33,6 +33,9 @@ Retrieve the text itself when the conclusion depends on exact wording, a number,
 table or code the summary may have distorted or dropped, or when the page is long
 and the decisive part may lie deep in it. A narrow fact the summary quotes from an
 authoritative page is labelled as resting on the summary instead of fetched again.
+A conclusion about how code behaves is not such a fact: it rests on the raw file,
+because a summary can drop or smooth exactly the condition that matters. Read the
+raw source, for example the raw file through the code host's API.
 Save a download you will read more than once in the working directory, not the
 system temporary directory, and read the part that matters through a filter, such
 as `curl -sL <url> | grep -n <term>` or `grep -n <term> <file>`, rather than a

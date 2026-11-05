@@ -37,8 +37,8 @@ brief changes. Do not impose a full landscape survey on a narrow correction.
 - For a landscape, a search gap, unfamiliar terminology or a claim of completeness,
   use [search and coverage](references/search-and-coverage.md).
 - For disputed claims, quantitative results, source chains, notes that will be
-  reused or retrieving a page's text behind a fetch tool's summary, use
-  [evidence and claims](references/evidence-and-claims.md).
+  reused or retrieving a page's text or a code file behind a fetch tool's summary,
+  use [evidence and claims](references/evidence-and-claims.md).
 - For choosing options, explaining causes or generalizing a pattern, use
   [comparison and synthesis](references/comparison-and-synthesis.md).
 - For consequential package freshness, maintenance or platform-support claims,
