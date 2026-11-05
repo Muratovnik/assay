@@ -22,7 +22,7 @@ APP = "C:\\work\\src\\parser.py"
 PAGE = "C:\\app\\src\\App.vue"
 ANNOUNCED = "Using `assay:code-change`.\n\nDone."
 READ_CLAIM = "I read researcher.py in full."
-FAMILIES = ("skill gate", "read-claim check", "skill branch check", "report check")
+FAMILIES = ("skill gate", "source check", "branch check", "report check")
 MAX_LINE = 80
 
 
@@ -31,12 +31,12 @@ def cases():
     partial = read("r1", 1, 200, 900, limit=200)
     return {
         "gate": (("skill gate",), [prompt(), said(ANNOUNCED)], ANNOUNCED),
-        "read claim": (("read-claim check",), [prompt(), *partial, said(READ_CLAIM)], READ_CLAIM),
-        "branch": (("skill branch check",), [prompt(), *load(), said(CLAIM_EN)], ""),
+        "read claim": (("source check",), [prompt(), *partial, said(READ_CLAIM)], READ_CLAIM),
+        "branch": (("branch check",), [prompt(), *load(), said(CLAIM_EN)], ""),
         "report": (("report check",), [prompt(), *edit(APP)], "Done."),
-        "branch and report": (("skill branch check", "report check"),
+        "branch and report": (("branch check", "report check"),
                               [prompt(), *load("assay:code-change"), *write(PAGE), said("Done.")], ""),
-        "read claim and report": (("read-claim check", "report check"),
+        "read claim and report": (("source check", "report check"),
                                   [prompt(), *partial, *edit(APP), said(READ_CLAIM)], READ_CLAIM),
         # The gate goes first and takes the whole continuation.
         "gate over read claim": (("skill gate",), [prompt(), *partial, said(ANNOUNCED + "\n" + READ_CLAIM)],
@@ -62,8 +62,8 @@ class StopLineTests(unittest.TestCase):
     def note(self, check, event):
         """The note as the check that owns it writes it, read past the runtime that adds the line."""
         written = {"skill gate": lambda: skill_gate.apply(event, {"code-change"}, self.data),
-                   "read-claim check": lambda: sources.stopped(event),
-                   "skill branch check": lambda: branches.stopped(event),
+                   "source check": lambda: sources.stopped(event),
+                   "branch check": lambda: branches.stopped(event),
                    "report check": lambda: reports.stopped(event)}[check]()
         return written["hookSpecificOutput"]["additionalContext"]
 

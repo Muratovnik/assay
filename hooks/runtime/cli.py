@@ -261,9 +261,9 @@ def stop_feedback(event, rules, enabled, settings, kwargs):
         gate = skill_gate.apply(event, enabled, settings["state_dir"], **kwargs)
         if gate:
             return _shown(gate, "skill gate")
-    note, check = (sources.stopped(event) if rules.read_claims else {}), "read-claim check"
+    note, check = (sources.stopped(event) if rules.read_claims else {}), "source check"
     if not note and rules.branch_rules:
-        note, check = branches.stopped(event, rules.branch_rules, enabled), "skill branch check"
+        note, check = branches.stopped(event, rules.branch_rules, enabled), "branch check"
     lines = reports.stopped(event, rules.report_rules, enabled) if rules.report_rules else {}
     if lines and note:
         note["hookSpecificOutput"]["additionalContext"] += "\n\n" + lines["hookSpecificOutput"]["additionalContext"]
