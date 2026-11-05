@@ -26,7 +26,7 @@ import time
 # Which calls show a sign is decided in predicates, which the hook entry reads before loading this module.
 from .predicates import (DOCS, DOCUMENT, FETCH, GENERATED, INTERFACE, LOCAL, MAX_COMMAND,  # noqa: F401
                          MAX_PATH, NOT_DOCUMENTATION, PROBE, QUESTION, README, SEPARATOR, SHELLS, SKILL_FILE,
-                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external)
+                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external, offers_no_action)
 from .skill_gate import _key as gate_key, _save as save_load, loaded as recorded, transcript
 
 TTL = 86_400
@@ -82,9 +82,12 @@ def signs(tool, data):
         host = external(data.get("command"))
         return [("midturn-evidence-research", host)] if host else []
     if tool == QUESTION:
-        # The header is the short label the agent wrote for the first question.
         questions = data.get("questions")
-        first = questions[0] if isinstance(questions, list) and questions and isinstance(questions[0], dict) else {}
+        # A question that already offers to do nothing is rarely improved by a refusal: see the hooks guide.
+        if offers_no_action(questions):
+            return []
+        # The header is the short label the agent wrote for the first question.
+        first =questions[0] if isinstance(questions, list) and questions and isinstance(questions[0], dict) else {}
         header = first.get("header")
         return [("midturn-critical-discussion", header if isinstance(header, str) and header.strip() else "question")]
     return []

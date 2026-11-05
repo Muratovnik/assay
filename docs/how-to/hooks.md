@@ -371,7 +371,7 @@ stated as fact and runs no model.
 | `midturn-ui-delivery` | `ui-delivery` | an edit of an interface file: `.vue`, `.svelte`, `.jsx`, `.tsx`, `.css`, `.scss`, `.sass`, `.less`, `.html` |
 | `midturn-technical-writing` | `technical-writing` | an edit of a `README` or of a Markdown, MDX or reStructuredText file under `docs`, except `docs/plans` and `docs/research`; agent instructions, memory notes and change logs do not count |
 | `midturn-skill-evaluation` | `skill-evaluation` | an edit of a `SKILL.md`, a skill's `references` or `evals` file, or `activation-rules.toml` |
-| `midturn-critical-discussion` | `critical-discussion` | an `AskUserQuestion` call, the point where the owner chooses between options |
+| `midturn-critical-discussion` | `critical-discussion` | an `AskUserQuestion` call, the point where the owner chooses between options, unless every question can leave things as they are: a multi-select question, or an option labelled so, in English or Russian (`Keep`, `Later`, `Не менять`) |
 
 A path under `node_modules`, `dist`, `build`, `vendor`, `.venv`, a minified, declaration
 or generated file, and a scratch directory (`tmp`, `temp`, `scratchpad`, `.private`)
@@ -420,6 +420,12 @@ kind of work can behave differently; each rule ID turns its row off. For
 came with the skill not loaded, in 32 sessions. An agent that loads the skill after
 the refusal is not refused again, so the refusal falls on the first question of a
 session, and again after a compaction that did not keep the skill.
+
+Questions that already offer to do nothing pass for this reason. Of the 10 refusals
+from 2 to 5 November 2026, none changed what the owner chose, each cost about two more
+requests, and 9 had such an option. Of the 21 refusals since 19 October, two corrected
+the question, and neither had one. The match reads only the label, so it says nothing
+about whether the option's basis is right, and a miss refuses as before.
 
 ### Rerun note in Claude Code
 

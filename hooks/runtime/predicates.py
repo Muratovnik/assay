@@ -55,6 +55,10 @@ LOCAL = re.compile(r"^(?:localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[?::1\]?|[^.]*
 # A reachability probe throws the body away or asks for the headers only.
 PROBE = re.compile(r"(?:^|\s)(?:-o|--output|-OutFile)\s+(?:/dev/null|nul|\$null)\b|\s>\s*(?:/dev/null|nul|\$null)\b"
                    r"|(?:^|\s)(?:-I|--head)\b|-X\s+HEAD\b|-Method\s+Head\b", re.I)
+# An option that leaves things as they are, by its label. Whole words: "поставить" contains "оставить".
+NO_ACTION = re.compile(r"\b(?:оставить|ничего|не (?:делать|менять|трогать|удалять|выпускать|проводить|ставить"
+                       r"|поставлять|включать)|отлож\w*|позже|пока (?:ничего|не\w*)|сначала обсудить|(?:подо)?ждать"
+                       r"|do nothing|keep\w*|leave|defer\w*|later|skip)\b|^(?:нет|no)\b", re.I)
 
 
 def reading_profile(role):
@@ -101,6 +105,26 @@ def external(command):
         if found and not LOCAL.match(found[1]) and not PROBE.search(part):
             return found[1].lower()
     return None
+
+
+def _can_leave_as_is(question):
+    if not isinstance(question, dict):
+        return False
+    if question.get("multiSelect") is True:
+        return True
+    options = question.get("options")
+    return isinstance(options, list) and any(
+        isinstance(option, dict) and isinstance(option.get("label"), str) and NO_ACTION.search(option["label"].strip())
+        for option in options)
+
+
+def offers_no_action(questions):
+    """Whether every question to the owner can leave things as they are.
+
+    A multi-select question can, with its boxes left unticked; a single-choice one needs an
+    option whose label says so. Anything malformed cannot.
+    """
+    return isinstance(questions, list) and bool(questions) and all(_can_leave_as_is(question) for question in questions)
 
 
 # Commands of one line run in order; a pipe or a redirection ends the part that names the run.

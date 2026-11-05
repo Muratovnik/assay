@@ -129,6 +129,32 @@ class SignTableTests(unittest.TestCase):
         self.assertEqual([], midturn.signs("AskUserQuestion", "not an object"))
         self.assertEqual([], midturn.signs("ExitPlanMode", {"plan": "x"}))
 
+    def test_a_question_that_can_leave_things_as_they_are_gives_no_sign(self):
+        def question(*labels, multi=False):
+            return {"question": "Which?", "header": "Which", "multiSelect": multi,
+                    "options": [{"label": label, "description": "d"} for label in labels]}
+
+        for label in ("Оставить как есть", "Ничего не менять", "Не выпускать", "Нет", "Отложить", "Пока не трогать",
+                      "Позже", "Keep the old one", "Do nothing", "Defer", "Later", "Skip it", "No", " No, leave it "):
+            with self.subTest(label=label):
+                self.assertEqual([], midturn.signs("AskUserQuestion", {"questions": [question("Apply", label)]}))
+        # Leaving a multi-select's boxes unticked is that option.
+        self.assertEqual([], midturn.signs("AskUserQuestion", {"questions": [question("A", "B", multi=True)]}))
+        # Every question must have it: the one without it still calls for the skill.
+        mixed = {"questions": [question("Apply", "Keep"), question("A", "B")]}
+        self.assertEqual([("midturn-critical-discussion", "Which")], midturn.signs("AskUserQuestion", mixed))
+        # A word that only contains one of these names a new action.
+        for label in ("Поставить новую версию", "Предоставить доступ", "Составить план", "Lateral move",
+                      "Notify the team", "Нетто"):
+            with self.subTest(label=label):
+                self.assertEqual([("midturn-critical-discussion", "Which")],
+                                 midturn.signs("AskUserQuestion", {"questions": [question("Apply", label)]}))
+        # A label the sign cannot read counts as no such option, so the check still runs.
+        for options in ("Keep", [None], [{"label": 1}], [{}]):
+            with self.subTest(options=options):
+                self.assertEqual([("midturn-critical-discussion", "question")],
+                                 midturn.signs("AskUserQuestion", {"questions": [{"options": options}]}))
+
     def test_the_activation_list_matches_the_table(self):
         self.assertEqual(midturn.RULES, activation.MIDTURN_RULES)
         self.assertEqual(len(midturn.RULES), len(set(midturn.RULES)))
@@ -314,6 +340,11 @@ class NoteTests(unittest.TestCase):
             self.data = Path(scratch)
             environment = self.environment(disabled_rules=["midturn-critical-discussion"])
             self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), environment))
+
+    def test_a_question_that_can_leave_things_as_they_are_is_asked_without_a_refusal(self):
+        options = [{"label": "Apply", "description": "a"}, {"label": "Keep as is", "description": "b"}]
+        asked = {"questions": [{"question": "Apply it?", "header": "Apply", "multiSelect": False, "options": options}]}
+        self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), self.environment()))
 
     def test_the_default_form_is_the_note_and_both_forms_say_the_same(self):
         self.assertEqual("note", cli.options({})["skill_note_form"])
