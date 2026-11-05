@@ -63,8 +63,10 @@ one 129-worker session ran from 9,000 to 23,000 characters by class.
 
 The packet also tells the worker to send long command output, such as a build,
 test run or log read, to a file and keep only the lines it acts on: a worker
-re-reads everything in its context on every call. In the same session, log reads
-through the shell were 37 % of worker tool output.
+re-reads everything in its context on every call. In the same session, file reads
+through the shell, whatever the target, were 37 % of worker tool output. A later
+measurement of that class found about 18 % of it was logs and results; most of the
+rest was source and documents.
 
 When the worker will wait for a long run, such as a build, a test round or a
 benchmark, the packet tells it how to wait. Some clients wake the primary every
