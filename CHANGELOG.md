@@ -6,6 +6,25 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.42.1](https://github.com/Muratovnik/assay/compare/v0.42.0...v0.42.1) (2026-11-05)
+
+A question to the owner that can already leave things as they are is no longer refused
+on its first call by the `critical-discussion` check, and the guides gain the small rules
+behind recurring mistakes: how to name a worker's detail file so Claude Code keeps it,
+what a conclusion about code behavior and a conclusion that something is unused rest on,
+and how to update the Claude Code plugin.
+
+### Bug Fixes
+
+* **hooks:** an `AskUserQuestion` call gives the `midturn-critical-discussion` row no sign when every question can leave things as they are: a multi-select question, or an option labelled so in English or Russian, such as `Keep`, `Later` or `Не менять`. Of 10 refusals over four days none changed what the owner chose and each cost about two more requests. The match reads only the label, and a miss refuses as before ([5144683](https://github.com/Muratovnik/assay/commit/514468389c474d3442d9302cf8be62a2d3f370a5))
+
+### Documentation
+
+* **route-subagents:** a worker's detail file is named for its content, because Claude Code refuses a subagent's write to a file whose name starts with `REPORT`, `SUMMARY`, `FINDINGS` or `ANALYSIS` ([527ff9b](https://github.com/Muratovnik/assay/commit/527ff9bf8718c23ff8de42acc1b121a1fc1c5887))
+* **evidence-research:** a conclusion about how code behaves rests on the raw file, not on a fetch tool's summary ([086601a](https://github.com/Muratovnik/assay/commit/086601a483142ff1c3064167c2d5a853f8bdd332))
+* **evidence-research:** a control that must vouch for a narrowed search lies outside that scope, and a conclusion that something is unused comes from a search that does not honour ignore rules ([eb6a205](https://github.com/Muratovnik/assay/commit/eb6a205bcc437315bf61568ad8b1ead772f04910))
+* **install:** describe updating the Claude Code plugin through its marketplace and raising `CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS` when a clone times out, in all three languages ([bb1a159](https://github.com/Muratovnik/assay/commit/bb1a15963e3e9f1fd09db1e1e2c41b9b3835e39b), [7589ad3](https://github.com/Muratovnik/assay/commit/7589ad3ded64a6290815fb48770cc3a1ba363c84))
+
 ## [0.42.0](https://github.com/Muratovnik/assay/compare/v0.41.1...v0.42.0) (2026-11-05)
 
 A stop check that continues a Claude Code turn now also shows the person one line. Its
