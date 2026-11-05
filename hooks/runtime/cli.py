@@ -244,25 +244,31 @@ def reviewer_boundary(event, client, environment, *, clock=None):
 STOPS = frozenset({"Stop", "SubagentStop"})
 
 
+def _shown(feedback, check):
+    """The feedback with the line Claude Code shows the person, who otherwise sees only the short reply it leads to."""
+    return {**feedback, "systemMessage": f"Assay: {check} sent Claude a note."} if feedback else {}
+
+
 def stop_feedback(event, rules, enabled, settings, kwargs):
     """The one continuation a Claude stop gets, or {}.
 
     The skill gate goes first, then a contradicted read claim, then the branch
     note, which the report check joins, since a turn continues at most once. The
     hand-back hold passes a stop event built from the report and refuses with
-    the same text.
+    the same text, without the line: the retry delivers the report.
     """
     if rules.skill_gate and settings["state_dir"]:
         gate = skill_gate.apply(event, enabled, settings["state_dir"], **kwargs)
         if gate:
-            return gate
-    note = sources.stopped(event) if rules.read_claims else {}
+            return _shown(gate, "skill gate")
+    note, check = (sources.stopped(event) if rules.read_claims else {}), "read-claim check"
     if not note and rules.branch_rules:
-        note = branches.stopped(event, rules.branch_rules, enabled)
+        note, check = branches.stopped(event, rules.branch_rules, enabled), "skill branch check"
     lines = reports.stopped(event, rules.report_rules, enabled) if rules.report_rules else {}
     if lines and note:
         note["hookSpecificOutput"]["additionalContext"] += "\n\n" + lines["hookSpecificOutput"]["additionalContext"]
-    return note or lines
+        check += " and report check"
+    return _shown(note, check) or _shown(lines, "report check")
 
 
 def _process(event, client, environment, *, root=ROOT, clock=None):

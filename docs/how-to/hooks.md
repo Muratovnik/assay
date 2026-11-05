@@ -169,6 +169,15 @@ usual limit on stop-hook continuations. The gate stays silent while
 `stop_hook_active` is set. It needs the plugin data directory, so it is inert
 without hook state.
 
+The feedback goes to the model, so all a person would otherwise see is the short
+reply it leads to. Any check that continues a stop, this one and the
+[source](#source-checks-in-claude-code), [branch](#branch-check-in-claude-code)
+and [report](#report-check-in-claude-code) checks, therefore also returns
+`systemMessage`, the hook field Claude Code shows to the person: one line such as
+`Assay: skill gate sent Claude a note.` It says that a check fired, not what came
+of it. A refused hand-back adds no such line: the subagent hands back again and no
+short reply is left to explain.
+
 The announcement usually opens an earlier message of the turn than the final
 reply, so the gate reads the tail of the session transcript, as the
 [hooks reference](https://code.claude.com/docs/en/hooks) suggests for conditions

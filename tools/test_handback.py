@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
-from runtime import activation, handback
+from runtime import activation, handback, reports
 from runtime.cli import process
 
 APP = "C:\\work\\src\\parser.py"
@@ -131,6 +131,20 @@ class HoldTests(unittest.TestCase):
         self.worker(packet(), tool("SubagentHandback", {"message": REPORT}, "h0"), returned("h0", "Delivered."),
                     packet("One more fix, please."), *edited())
         self.assertIn("Assay report check", self.run_hook(self.stopping())["hookSpecificOutput"]["additionalContext"])
+
+    def test_the_hold_refuses_with_the_note_and_shows_the_person_nothing(self):
+        self.worker(packet(), *edited())
+        event = self.handing_back()
+        note = reports.stopped(handback.stop_event(event))["hookSpecificOutput"]["additionalContext"]
+        result = self.run_hook(event)
+        # The retry delivers the report, so no reply is left for a line to explain.
+        self.assertEqual({"hookSpecificOutput"}, set(result))
+        self.assertIn("\n" + note + "\n", result["hookSpecificOutput"]["permissionDecisionReason"])
+
+    def test_a_stop_after_a_refused_hand_back_shows_the_line(self):
+        self.worker(packet(), *edited(), tool("SubagentHandback", {"message": REPORT}, "h1"),
+                    returned("h1", "Assay held this hand-back once", error=True))
+        self.assertIn("report check", self.run_hook(self.stopping())["systemMessage"])
 
     def test_the_rule_and_the_manifest(self):
         self.assertTrue(activation.load_rules(ROOT)[0].handback_hold)
