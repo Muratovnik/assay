@@ -6,6 +6,22 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.43.0](https://github.com/Muratovnik/assay/compare/v0.42.1...v0.43.0) (2026-11-06)
+
+Interface work now checks alignment by measuring it instead of looking at a
+screenshot. After a change that affects rendering, `ui-delivery` measures text edges,
+a control against its label, wrapping, clipping and the focus ring at each supported
+width, sends a named symptom to the procedure that owns it and closes a defect class
+on every consumer of the shared owner, not only where it was reported.
+`route-subagents` carries this into delegated work: a packet names those procedures
+and quotes the complaint, and a delegated review goes to a launch that did not make
+the change.
+
+### Features
+
+* **ui-delivery:** after a rendering change, alignment is measured at each supported width and affected state instead of judged from a screenshot: text of one role shares an edge within 1 px, a control shares the center of its label's first line, text wraps only where the layout means it to, and a button-like control shows a focus ring from the keyboard but not after a pointer choice. The Playwright helper `assets/playwright/layout.mjs` (`measureText`, `compareEdges`, `compareRow`, `indicatorStyle`, `indicatorDiff`) takes these measurements. A symptom named in the routing table, such as a ring left after a click or a list that blinks on refresh, opens its owning procedure; the frames between correct endpoints are inspected when a change touches loading, refresh, hover, scrolling, a switch or a disclosure; a default repeated as a badge on nearly every row gives way to showing the exceptions; and a visual repair finishes by checking every consumer of the shared owner. Evaluator cases RR1-RR3 add three rendered screens with a browser oracle ([6da34b7](https://github.com/Muratovnik/assay/commit/6da34b74bdd2abcdefdd026d1d776c9d87b3f09b), [f9e303d](https://github.com/Muratovnik/assay/commit/f9e303d3057c5acdc4698a9a47ce012729ed8bfd), [3b47ab0](https://github.com/Muratovnik/assay/commit/3b47ab0802b10c9ec97282c349600bdd0f9de0b5))
+* **route-subagents:** a packet that changes a rendered interface names the `ui-delivery` procedures its task and the complaint's symptoms select, quotes the complaint in the owner's words and asks for measured values and the consumers the defect class reaches. A delegated review of such a change goes to a launch that did not make it, looks for the same defect classes beyond the owner's remarks and gets its measurements as receipts bound to the reviewed snapshot or from a separate measuring launch, since a reviewer starts no browser. Packets without an interface are unchanged ([adf6673](https://github.com/Muratovnik/assay/commit/adf667380e6b969b8a07dd941abcafd9e86c9f71))
+
 ## [0.42.1](https://github.com/Muratovnik/assay/compare/v0.42.0...v0.42.1) (2026-11-05)
 
 A question to the owner that can already leave things as they are is no longer refused
