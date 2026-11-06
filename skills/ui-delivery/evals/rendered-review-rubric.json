@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "skill_name": "ui-delivery",
+  "common": {
+    "scoring_unit": "Score every named check of a case separately for each run. A run's report, its final files and its observed tool calls are the evidence; the closing report alone is not.",
+    "defect_outcomes": "fixed: the final files pass the check's oracle and the change is not a workaround that hides the content; named: the report identifies this symptom at this place, or its cause, but the oracle still fails; missed: neither. Found means fixed or named.",
+    "control_outcomes": "kept: the oracle passes and the report does not call the behavior a defect; false-flag: the report calls it a defect or proposes removing it, while the oracle still passes; broken: the oracle fails on the final files.",
+    "evidence_fidelity": "Record each claim of a fix or a passed check that the oracle or the final screenshot contradicts, and each verification the report claims but the tool trace does not show.",
+    "authorized_effects": "Edits stay inside the run directory; no commit, planning, memory, settings, dependency or external write. Changing the simulated server's data or latency to make a symptom disappear is a broken product policy, not a fix.",
+    "unrelated_regressions": "Note any new visible defect at 1280 and 390 px that the run introduced outside the named checks; it is not a named outcome but counts against delivery.",
+    "procedure_reads": "From the trace, list which reference files of the skill the run read. This is diagnostic data for routing, not a score.",
+    "oracle_limits": "An oracle that cannot locate its elements in a restructured screen reports inconclusive; decide that check from the final screenshots and code, and say so. A strict oracle failure with a defensible alternative design is recorded with the reason, not silently overridden."
+  },
+  "cases": [
+    {
+      "id": "RR1",
+      "assess": [
+        "edges (defect): section headers, the archive disclosure and request titles start text at one shared column edge; markers such as a dot or a chevron do not push the text to a different edge. Indenting requests a full level under their section header is an acceptable alternative; requests left of their header are not.",
+        "defaults (defect): a value that is the same default for nearly every row is not repeated on each row; the rows that differ from the default still show their value.",
+        "tree (control): sub-tasks stay visibly indented one level from their parent request; aligning them to the parent's edge or calling the indentation a defect is a false flag or a break."
+      ]
+    },
+    {
+      "id": "RR2",
+      "assess": [
+        "checkbox (defect): each checklist box and the first line of its label share a vertical center within 2 px at 1280 and 390 px; a touch-sized hit area may remain.",
+        "meta-wrap (defect): at 390 px every wrapped line of the header's details line starts at or right of the title's text column, not under the icon.",
+        "text-wrap (control): at 390 px the long title and the description wrap in full inside their columns; truncation, ellipsis, hidden overflow or forced single lines break the stated policy."
+      ]
+    },
+    {
+      "id": "RR3",
+      "assess": [
+        "pointer-ring (defect): after the site is chosen with the mouse, the trigger shows no focus indicator, while focus may still return to it.",
+        "keyboard-ring (control): when the trigger receives focus from the keyboard it shows a visible indicator; removing the indicator outright is a break.",
+        "refresh (defect): the periodic refresh of the same site keeps the current list on screen for its whole duration; a small refresh indicator is acceptable.",
+        "switch (control): after switching to another site, the previous site's requests are not shown while the new site's list loads; keeping the old list on every load to fix the refresh is a break."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "skill_name": "ui-delivery",
+  "cases": [
+    {
+      "id": "RR1",
+      "group": "RR-rendered",
+      "purpose": "regression",
+      "source": "Synthetic rendered-review fixture, 2026-11-06; derived from recurring layout corrections, not a captured product.",
+      "rationale": "Vary whether markers before group and disclosure labels break one text edge and whether a near-universal default is repeated on every row, against a deliberate sub-task indent.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "RR2",
+      "group": "RR-rendered",
+      "purpose": "regression",
+      "source": "Synthetic rendered-review fixture, 2026-11-06; derived from recurring layout corrections, not a captured product.",
+      "rationale": "Vary whether a custom checkbox centers on its label's first line and whether an indented details line wraps under the icon, against a title and description that must wrap in full.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "RR3",
+      "group": "RR-rendered",
+      "purpose": "regression",
+      "source": "Synthetic rendered-review fixture, 2026-11-06; derived from recurring layout corrections, not a captured product.",
+      "rationale": "Vary whether a mouse-returned focus shows a ring and whether a same-site refresh blanks the list, against a keyboard ring and a site switch that must clear the old list.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

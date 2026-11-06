@@ -15,6 +15,16 @@ folder, fault variants or assertions to an executor in a supposedly blind trial.
 | P1 target-switch variant | B finishes before A; the old result must not be attributed to B | Controlled service promises, not transport, same-context refresh or calculation-path qualification |
 | P3; C103/C104 | A neighboring panel changes available width without resizing the viewport; draft and completion survive | Fixture-specific compact layout, not a universal breakpoint/layout rule |
 | State-specific axe | Hidden faulty control is absent from the initial scan, then detected after opening; labeled control is valid | Only the explicitly selected button-name rule; no full accessibility claim |
+| RR1-RR3 rendered review | Each shipped screen fails its named defect checks; the reference fix passes every check; controls pass on both; the oracle CLI scores an executor's final files | Chromium at 1280 and 390 px only; an oracle that cannot locate restructured elements reports inconclusive instead of a verdict |
+
+`rendered-review.test.mjs` materializes the screens of
+[rendered-review-cases.json](../rendered-review-cases.json) into a temporary
+directory and checks the oracle against them and against the evaluator-only
+reference fixes in `rendered-review-fixes.mjs`. Score a run's final files with
+`node rendered-review-oracle.mjs --case RR1 --dir <run directory>`; it prints one
+pass, fail or inconclusive result per named check. It decides geometry and
+behavior only: whether a report named a defect it did not fix is the grader's call
+under [rendered-review-rubric.json](../rendered-review-rubric.json).
 
 `browser.test.mjs` checks real Chromium interactions and outcome assertions.
 Known-bad variants must fail the named outcome assertion (`ERR_ASSERTION`); a
@@ -49,6 +59,7 @@ In that disposable copy, with the dependencies installed above it:
 node --test skills/ui-delivery/evals/browser/evidence.test.mjs
 node --test skills/ui-delivery/evals/browser/browser.test.mjs
 node --test skills/ui-delivery/evals/browser/axe.test.mjs
+node --test skills/ui-delivery/evals/browser/rendered-review.test.mjs
 ```
 
 By default Playwright uses its managed Chromium. `UI_TEST_CHROMIUM` can name an

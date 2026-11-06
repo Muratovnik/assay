@@ -18,6 +18,16 @@ private project identifiers or current product-defect claims.
 - [implementation-cases.md](implementation-cases.md) is evaluator-only guidance
   for preparing bounded practical tasks in an existing product harness. It is
   a fixture specification, not implemented fixtures or passing browser tests.
+- [rendered-review-cases.json](rendered-review-cases.json) holds three practical
+  screens, RR1-RR3, that an executor receives as an ordinary "finish and verify
+  this screen" task; build its run directory with `tools/eval_assets.py prepare`.
+  Each screen plants ordinary slips beside a valid control: one text edge in a
+  column against intended tree indentation, repeated default values, a checkbox
+  off its label's line, wrapped details under an icon against intended wrapping,
+  a focus ring after a pointer choice against keyboard focus, and a refresh that
+  blanks the list against a site switch that must withhold the old list.
+  [rendered-review-rubric.json](rendered-review-rubric.json) and the
+  [browser oracle](browser/README.md) are evaluator-only.
 
 All tasks in cases.json are read-only advice. They do not authorize editing products,
 installing dependencies, accessing live data, delegating or changing settings.
