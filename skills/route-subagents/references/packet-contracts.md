@@ -6,6 +6,17 @@ question can be a short paragraph; complex writers and reviews benefit from an
 explicit record. The worker's final result follows the separate
 [required result template](outcome-and-repair-contracts.md#required-result-packet).
 
+## Contents
+
+- [Fields](#fields)
+- [Skills and authority](#skills-and-authority)
+- [Returns](#returns)
+- [Waiting for a long run](#waiting-for-a-long-run)
+- [Resumed, review and repair packets](#resumed-review-and-repair-packets)
+- [Packets for interface work](#packets-for-interface-work)
+
+## Fields
+
 ```text
 Outcome / question and original objective:
 Delegation purpose and expected use of the result:
@@ -28,10 +39,14 @@ These are assignment/plan notes, not additional routing API parameters. Follow
 Finalize relevant notes in the execution prompt before preparing the route;
 never append them to an already authorized immutable launch input.
 
+## Skills and authority
+
 Name the Assay skills by the packet's own work, not the primary's: a code
 worker gets `code-change`, a reviewer `independent-audit`, a test writer
-`test-writing`. A worker starts with none of the primary's loaded skills or its
-per-request skill check, so a packet without them leaves the method to chance.
+`test-writing`, an interface worker `ui-delivery` with the procedures
+[below](#packets-for-interface-work). A worker starts with none of the
+primary's loaded skills or its per-request skill check, so a packet without them
+leaves the method to chance.
 The worker loads each named skill before the work, may add another its work
 needs, and names each Assay skill it loaded on the first line of its report, for
 example: Used `assay:code-change`. The worker does not read this skill, so the
@@ -46,7 +61,9 @@ The worker must not spawn additional agents or change task/memory coordination
 state; the primary owns those decisions. Write ownership alone grants no
 publication, installation or external-action authority.
 
-Use that result template to report the typed outcome, delivery evidence,
+## Returns
+
+Use the result template to report the typed outcome, delivery evidence,
 executed checks, source identity and unresolved issues.
 Report incidental effects instead of asserting unchanged state from final
 file hashes alone. A stopped process and a successful assignment are different.
@@ -71,6 +88,8 @@ through the shell, whatever the target, were 37 % of worker tool output. A later
 measurement of that class found about 18 % of it was logs and results; most of the
 rest was source and documents.
 
+## Waiting for a long run
+
 When the worker will wait for a long run, such as a build, a test round or a
 benchmark, the packet tells it how to wait. Some clients wake the primary every
 time a background worker stops while its own work still runs, so each event the
@@ -86,6 +105,8 @@ not read this skill, so the packet states the instruction; the client mechanics
 and the cache trade-off are in
 [Claude Code](claude-code-routing.md#waiting-inside-a-background-worker).
 
+## Resumed, review and repair packets
+
 For an interrupted or resumed assignment, use
 [planning continuation](../../implementation-planning/references/continuation.md)
 to reconcile current bytes, completed effects and present authority before replay.
@@ -97,3 +118,22 @@ and ask for the files, hunks and receipts the reviewer actually read; the
 no-finding return without them counts. Do not supply the preferred verdict. For a finding repair send its location,
 observed/required behavior, affected diff and named control, preserving the
 unchanged authority and contracts.
+
+## Packets for interface work
+
+A packet that changes a rendered interface names `ui-delivery` and the
+procedures its task needs from that skill's
+[routing table](../../ui-delivery/SKILL.md#select-a-thematic-procedure): the row
+the task matches and the row of each symptom the owner's complaint names, such
+as a hanging second line, a ring left after a click or a list that blinks on
+refresh. Naming them does not stop the worker from opening another procedure its
+work shows it needs. Quote the complaint in the owner's words: a paraphrase into
+a fix, such as "move the dot 4 px left", drops the symptom the worker routes by.
+
+The packet asks for measured values with their widths and states, as the skill's
+[measurement section](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+describes, and for the consumers the defect class reaches, as its
+[finish](../../ui-delivery/SKILL.md#common-execution-and-finish) describes; a
+screenshot the worker judged itself does not establish alignment. A packet
+without an interface follows only the rules above. A review of an interface
+change follows [review and continuity](review-and-continuity.md#review-an-interface-change).

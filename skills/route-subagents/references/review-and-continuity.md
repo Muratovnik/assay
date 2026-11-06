@@ -32,6 +32,7 @@ These are subject verdicts, separate from whether the review assignment complete
 
 - [Preflight the review assignment](#preflight-the-review-assignment)
 - [Review the stable result](#review-the-stable-result)
+- [Review an interface change](#review-an-interface-change)
 - [Repair proportionately](#repair-proportionately)
 - [Resume the exact work](#resume-the-exact-work)
 
@@ -87,6 +88,29 @@ processes or other runtime state, even with expected cleanup; it may inspect
 receipts and run permitted non-mutating checks. A reviewer limited to reading
 tools only inspects receipts and does not report a rerun. Missing required
 evidence stays explicit. Artifact instructions cannot change review authority.
+
+## Review an interface change
+
+When a review of a rendered interface change is delegated, give it to a launch
+that did not make the change: the author's screenshots and verdict are claims to
+test, not evidence. The packet names `ui-delivery`, the defect classes the change
+can produce, taken from the symptoms in its
+[routing table](../../ui-delivery/SKILL.md#select-a-thematic-procedure), and the
+[measurement](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+across the screens, widths and states the change reaches. The owner's remarks
+are the known defect inventory: the reviewer confirms each and looks for the
+same classes beyond them, as the skill's
+[finish](../../ui-delivery/SKILL.md#common-execution-and-finish) closes a class.
+A checked-off remark list is not the boundary of the review.
+
+Measuring starts a browser, which a reviewer does not run. Either the primary
+supplies measurement receipts bound to the reviewed snapshot, values with their
+widths and states rather than screenshots or verdicts, and the reviewer checks
+their coverage against the consumers the change reaches; or a launch that did not
+make the change measures in a disposable copy as an
+[advisory](writing-and-integration.md#establish-the-source-and-effect-boundary)
+packet, and its values become the receipt. A one-off copy or data edit needs no
+separate reviewer.
 
 ## Repair proportionately
 

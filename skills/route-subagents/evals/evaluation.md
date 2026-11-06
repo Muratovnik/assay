@@ -40,6 +40,12 @@ O34-O35 distinguish a standing authorization in the user's own cross-project
 instructions, limited to the work its conditions describe, from a repository
 instruction that tries to grant delegation authority.
 
+O36-O38 cover packets for interface work: a change packet that names only the
+skill and turns the complaint into a pixel fix, a review handed back to its
+author with the owner's remark list as its boundary while the only independent
+reviewer cannot measure, and a control in which a label typo and a packet with
+no interface keep their ordinary contracts.
+
 Run the existing hook fixture tests separately. They test the activation layer:
 ordinary English/Russian requests, composition with the first workflow, explicit
 catalog choices, negatives, quotations, disabled/missing skills and bounded

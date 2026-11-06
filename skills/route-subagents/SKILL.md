@@ -3,7 +3,7 @@ name: route-subagents
 description: Prepare and route bounded Codex or Claude subagent packets after the user or an explicitly invoked workflow has already authorized delegation. Select client-native routes, ownership, isolation, return contracts, and oracles; parallelism alone is never permission to spawn.
 license: MIT
 metadata:
-  assay-optional-skills: "code-change implementation-planning independent-audit skill-evaluation"
+  assay-optional-skills: "code-change implementation-planning independent-audit skill-evaluation ui-delivery"
 ---
 
 # Route subagents
@@ -190,6 +190,7 @@ Codex launches against their declared class.
 | Delegated writes, shared state or integration across roots | [Writing and integration](references/writing-and-integration.md) |
 | Acceptance/decision review or finding repair | [Review and continuity](references/review-and-continuity.md) |
 | Complex packet, multiple dependencies or a durable handoff | [Packet examples](references/packet-contracts.md) |
+| A packet that changes or reviews a rendered interface | [Interface packets](references/packet-contracts.md#packets-for-interface-work); for its review also [Review and continuity](references/review-and-continuity.md#review-an-interface-change) |
 | Completion, no-op, failure or repair classification | [Outcomes](references/outcome-and-repair-contracts.md) |
 | An unfamiliar split of the work | The relevant pattern in [delegation patterns](references/delegation-patterns.md) |
 | A model or client upgrade changes a routing assumption, or vendor advice conflicts across routes | [Model guidance](references/model-guidance.md) |
