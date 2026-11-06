@@ -73,7 +73,7 @@ chain; do not load the whole directory or evaluation corpus.
 | New substantial UI or unfamiliar pattern without a sufficient supplied reference | [Reference discovery](references/reference-discovery.md), before choosing a custom implementation |
 | Shared base, families, nested reuse, property effect, design-to-code mapping; one defect on several screens | [Component system](references/component-system.md) |
 | Design-system/library information architecture, consumer-facing resources, internal/example/lifecycle separation | [Design-system organization](references/design-system-organization.md) |
-| Adding/retaining primitive mechanics or standard visual states; staged library adoption | [Reuse and migration scope](../code-change/references/reuse-and-migration.md) |
+| Adding/retaining primitive mechanics or standard visual states, staged library adoption | [Reuse and migration scope](../code-change/references/reuse-and-migration.md) |
 | Action placement, draft departure, local/shared effects | [Actions and scope](references/actions-and-scope.md) |
 | Forms, field composition, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
 | Nested, filtered or bulk selection, counts/order, control classification | [Selection](references/selection.md) |
