@@ -37,6 +37,8 @@ RERUN_RULES = ("rerun-diagnostic-reproducer",)
 REPORT_RULES = ("report-verification", "plan-existing")
 # The Claude refusal of a subagent's first hand-back that the stop checks have feedback for.
 HANDBACK_HOLD = "handback-hold"
+# The language and size of the report a subagent writes, stated at its start.
+REPORT_FORM = "report-form"
 # Phrase rules retired in favor of the skill check, and the report check's former
 # reuse row. Old settings that disable them stay valid and do nothing, instead of
 # breaking the hooks.
@@ -53,7 +55,7 @@ class RuleSet(list):
 
     def __init__(self, rules, skill_check, skill_gate=False, skills_root="", fetch_note=False, read_claims=False,
                  branch_rules=(), midturn_rules=(), rerun_rules=(),
-                 report_rules=(), handback_hold=False, search_note=False):
+                 report_rules=(), handback_hold=False, search_note=False, report_form=False):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
@@ -74,6 +76,8 @@ class RuleSet(list):
         self.report_rules = frozenset(report_rules)
         # It applies the stop checks that remain enabled, so it needs no skill check of its own.
         self.handback_hold = handback_hold
+        # Independent of the skill check: it shapes the report, not the choice of skills.
+        self.report_form = report_form
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -82,7 +86,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, SEARCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, *BRANCH_RULES,
+    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, SEARCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, REPORT_FORM, *BRANCH_RULES,
              *MIDTURN_RULES, *RERUN_RULES, *REPORT_RULES}
     if set(disabled_rules) - RETIRED_RULES - known or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
@@ -111,7 +115,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                      [rule for rule in MIDTURN_RULES if rule not in disabled_rules],
                      [rule for rule in RERUN_RULES if rule not in disabled_rules],
                      [rule for rule in REPORT_RULES if rule not in disabled_rules],
-                     HANDBACK_HOLD not in disabled_rules, SEARCH_NOTE not in disabled_rules)
+                     HANDBACK_HOLD not in disabled_rules, SEARCH_NOTE not in disabled_rules,
+                     REPORT_FORM not in disabled_rules)
     # The installation path is the owner's; bound the text the catalog controls.
     if longest_check(rules) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
@@ -276,6 +281,27 @@ def subagent_check(rules, *, client=None):
             + (CODEX_NOTE if client == "codex" else "") + " Skills: " + _entries(rules) + ".")
 
 
+def report_form(rules):
+    """The language and size of a subagent's report, which the agent that launched it reads.
+
+    English like the rest of this module's model-facing text: a report is read by a
+    model. In one owner's sessions with Russian set as the reply language, 113 of 387
+    reports on English packets that named no language came back in Russian, against 6
+    of 82 when the packet asked for English. The budget is the one route-subagents asks
+    packets to state; 14 of 591 packets stated it.
+    """
+    if not getattr(rules, "report_form", False):
+        return ""
+    return ("Assay report form for this subagent: write your report to the agent that launched you in English, "
+            "even when your other instructions name a reply language, unless the packet names another language. "
+            "Files, messages, UI text, commits and translations you deliver keep the language their readers use. "
+            "Keep the report's final message within about 1,500 tokens unless the packet sets another budget: "
+            "lead with the result and cut restating the packet, narrating your steps and repeating what a table "
+            "or file already says, but keep every finding, evidence pointer, check and unresolved issue. Put "
+            "longer detail in a file only when the packet names one, and name it in the report. When the packet "
+            "fixes an exact output format, follow it instead.")
+
+
 RELAY_CHECK = ("Assay skill check: this is a relayed report or notification, not a new request. If it changes "
                "the task, decide again which Assay skills apply; the skill list is in the last full check.")
 
@@ -300,7 +326,8 @@ def evaluate(event, rules, *, client=None, loaded=()):
     The caller supplies the client and the skills already loaded; this reads neither.
     """
     if event.get("hook_event_name") == "SubagentStart":
-        return {"rule_ids": [], "context": subagent_check(rules, client=client)}
+        parts = (subagent_check(rules, client=client), report_form(rules))
+        return {"rule_ids": [], "context": "\n".join(part for part in parts if part)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}
     if relayed(event.get("prompt")):

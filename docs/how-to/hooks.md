@@ -245,6 +245,22 @@ does not register it, and Codex has no hand-back hold: Codex subagents get the
 check only, at `SubagentStart`.
 `disabled_rules: ["skill-check"]` turns off the subagent check as well.
 
+At the same start, in Claude Code and Codex, the hook states the report's form:
+the subagent writes its report to the agent that launched it in English, even
+when its other instructions name a reply language, and keeps the final message
+within about 1,500 tokens, the budget
+[route-subagents](../../skills/route-subagents/references/packet-contracts.md#returns)
+asks a packet to state. It cuts restating the packet and narrating its steps and
+keeps every finding, evidence pointer, check and unresolved issue. What it
+delivers for people, such as files, messages, UI text, commits or translations,
+keeps its readers' language, and a packet that names another language, another
+budget or an exact output format wins. In one owner's sessions to 6 November
+2026, with Russian set as the reply language, 113 of 387 reports on English
+packets that named no language came back in Russian, against 6 of 82 when the
+packet asked for English, and 14 of 591 packets stated the budget. The text adds about
+0.7 KB to each subagent's start. `disabled_rules: ["report-form"]` turns it off
+and keeps the skill check; `"skill-check"` keeps the report form.
+
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
 explicit skill choice is still recognized deterministically. It adds a short
@@ -570,7 +586,8 @@ explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
 `"fetch-note"` and `"read-claims"` the two Claude source checks, `"handback-hold"`
-the refusal of a subagent's first hand-back, and each
+the refusal of a subagent's first hand-back, `"report-form"` the report language and
+budget a subagent is told at its start, and each
 rule ID of the branch check table or of the mid-turn note table one of its rows.
 `skill_note_form` is `"note"` (the default) or `"deny"`, see the mid-turn note above. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the

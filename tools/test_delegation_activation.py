@@ -154,10 +154,37 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertIn(str((self.root / "skills").resolve()), text)
         self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(self.listed(text)))
         self.assertEqual(text, start("assay:evidence-reviewer")["context"])
-        disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check"])
+        disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check", "report-form"])
         self.assertEqual("", start("general-purpose", disabled)["context"])
         self.assertEqual("", activation.evaluate({"hook_event_name": "SubagentStop", "agent_id": "a1"},
                                                  self.rules)["context"])
+
+    def test_a_subagent_is_told_its_report_language_and_budget_at_start(self):
+        # A language setting for replies reaches subagents too; the report goes to a model, in English.
+        def start(rules, client=None):
+            return activation.evaluate({"hook_event_name": "SubagentStart", "agent_id": "a1",
+                                        "agent_type": "general-purpose"}, rules, client=client)["context"]
+        for client in (None, "codex"):
+            text = start(self.rules, client)
+            self.assertIn("write your report to the agent that launched you in English", text)
+            self.assertIn("even when your other instructions name a reply language", text)
+            self.assertIn("unless the packet names another language", text)
+            # Deliverables for people are not translated into English.
+            self.assertIn("translations you deliver keep the language their readers use", text)
+            self.assertIn("within about 1,500 tokens unless the packet sets another budget", text)
+            self.assertIn("keep every finding, evidence pointer, check and unresolved issue", text)
+            self.assertIn("When the packet fixes an exact output format, follow it instead", text)
+            self.assertIn("Assay skill check for this subagent", text)
+        # The main session keeps the owner's reply language.
+        self.assertNotIn("Assay report form", self.decide("Найди готовые плагины")["context"])
+        # Each rule turns off alone.
+        without_check, _ = activation.load_rules(self.root, disabled_rules=["skill-check"])
+        self.assertEqual(activation.report_form(self.rules), start(without_check))
+        without_form, _ = activation.load_rules(self.root, disabled_rules=["report-form"])
+        self.assertNotIn("Assay report form", start(without_form))
+        self.assertIn("Assay skill check for this subagent", start(without_form))
+        # Every subagent pays for it at start; keep it short.
+        self.assertLess(len(activation.report_form(self.rules)), 900)
 
     def test_skill_map_must_cover_the_catalog_with_short_ascii_cues(self):
         for label, transform in (

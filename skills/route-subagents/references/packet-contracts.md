@@ -81,6 +81,15 @@ reads that file only when a decision needs it, and asks for a longer return when
 the decision depends on it. Without a stated budget, the median final message in
 one 129-worker session ran from 9,000 to 23,000 characters by class.
 
+The packet names the report's language as well, English unless its consumer needs
+another. In one owner's sessions with Russian set as the reply language, 113 of
+387 reports on English packets that named no language came back in Russian,
+against 6 of 82 when the packet asked for English. What the worker
+delivers for people, such as documents, UI text, commits or translations, keeps
+its readers' language. Where the Assay hooks run, every worker is told both
+defaults at its start, so a packet names a language or a budget only to set
+another.
+
 The packet also tells the worker to send long command output, such as a build,
 test run or log read, to a file and keep only the lines it acts on: a worker
 re-reads everything in its context on every call. In the same session, file reads
