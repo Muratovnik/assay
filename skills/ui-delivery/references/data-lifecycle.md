@@ -70,6 +70,8 @@ transition that preserves that distinction. Empty and unavailable remain separat
 - Check: hold a response pending; observe before, during and after success or
   failure. Also change context and let an older response arrive last. Verify
   the visible values, attribution and available actions, not only stored data.
+  A screen that refreshes on its own schedule blinks with no user action: watch
+  it at rest through at least one refresh cycle.
 
 When rows replace the object inside an already open panel, test that transition
 separately from opening the panel. Switch A → B → A with controlled pending,

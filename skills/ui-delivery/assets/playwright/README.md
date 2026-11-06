@@ -75,6 +75,62 @@ The summaries omit raw HTML and input values. CSS selectors and images can still
 contain identifying data: inspect artifacts before sharing. DOM observation,
 accessibility scan and screenshot are different captures, not an atomic state.
 
+## Measure alignment instead of judging a screenshot
+
+```js
+import { measureText, compareEdges, compareRow, indicatorStyle, indicatorDiff } from './layout.mjs';
+
+const context = { build: testedRevision, scenario: 'settings', state: 'default', data: fixtureRevision };
+await page.setViewportSize({ width: 390, height: 844 });
+const layout = await measureText(page, { context, targets: {
+  header: '#display-header', theme: '#theme-row', units: '#units-row', contrast: '#contrast-row',
+  more: '#more-display', digest: '#digest-label', digestBox: '#digest-box',
+} });
+// Decided before measuring: contrast is a sub-item, indented at least 16px.
+const edges = compareEdges(layout, {
+  groups: [['header', 'theme', 'units', 'more']],
+  offsets: [{ target: 'contrast', from: 'theme', min: 16 }],
+});
+expect(edges.findings).toEqual([]);
+const row = compareRow(layout, { control: 'digestBox', text: 'digest' });
+expect(row.pass, row.detail).toBe(true);
+
+const snapshot = () => indicatorStyle(page, { context, target: '#apply' });
+const initial = await snapshot();
+await page.getByRole('button', { name: 'Apply changes' }).click();
+const afterPointer = await snapshot();
+await page.locator('#apply-hint').click();  // moves focus off and sets where Tab starts
+await page.keyboard.press('Tab');
+const afterKeyboard = await snapshot();
+expect(afterKeyboard.active).toBe(true);
+expect(indicatorDiff(initial, afterKeyboard)).not.toEqual([]);
+expect(indicatorDiff(initial, afterPointer)).toEqual([]);  // only if the product's policy says so
+```
+
+`measureText` returns each target's box, its visible text line boxes, the first
+line's left edge and vertical center, and clipping flags. Line boxes come from the
+rendered text, so padding, markers and wrappers that move the text are measured;
+an element's own box is not its text edge. `firstLine` is `null` when nothing is
+visible: hidden, transparent, collapsed and screen-reader-only text does not count,
+and `compareEdges` reports such a target as `missing` rather than passing it.
+`clipped.overflow` says the text is actually cut by a box that hides overflow;
+`ellipsis`, `nowrap` and `lineClamp` report the style in effect whether or not it
+truncates at this width. `compareRow` compares a control's center with the first
+line of its label, not the label block, so a wrapped label still checks. The
+indicator snapshot holds computed outline, box-shadow, border and background
+values plus the active and `:focus-visible` flags; `indicatorDiff` lists only the
+visual properties that changed. A hover style also counts as a change, so move the
+pointer away before a snapshot when the control has one.
+
+These are observations at the conditions the caller sets up: the widths, states,
+fonts and data of that run. A pass is not a design approval and says nothing
+about widths or states that were not measured. Decide groups, offsets and
+tolerances from the design before measuring; an exception declared after a
+failure only hides the finding. The helpers never scroll, click, focus, blur or
+wait, return no text contents, field values or HTML, and require each selector
+to match exactly one top-document element. Shadow-root and frame traversal are
+not implemented.
+
 ## Qualification and sources
 
 [Executable checks](../../evals/browser/README.md) exercise synthetic good/fault

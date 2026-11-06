@@ -61,6 +61,7 @@ If the design already serves the task well, a clean assessment is valid.
 - [Establish which source governs each decision](#establish-which-source-governs-each-decision)
 - [Check tokens, fonts and theme through the composition](#check-tokens-fonts-and-theme-through-the-composition)
 - [Inspect geometry at the affected depth](#inspect-geometry-at-the-affected-depth)
+- [Measure alignment instead of judging a screenshot](#measure-alignment-instead-of-judging-a-screenshot)
 - [Keep asset provenance](#keep-asset-provenance)
 - [Optional composition pilot for new surfaces](#optional-composition-pilot-for-new-surfaces)
 - [Preserve meaning across display modes](#preserve-meaning-across-display-modes)
@@ -155,6 +156,40 @@ not establish the library's information architecture: consumer findability,
 public/internal/example boundaries and family discoverability belong to
 [design-system organization](design-system-organization.md). Do not impose one
 page skeleton, fixed grid or mandatory showcase set on every project.
+
+## Measure alignment instead of judging a screenshot
+
+A screenshot judged by the agent that made the change does not establish
+alignment: a few pixels of drift, a hanging second line or a ring left after a
+click pass that look repeatedly. After a change that affects rendering, measure
+the changed screens at each supported width and in their affected states:
+
+- text of elements with one role at one level (section headers, rows, a
+  disclosure among them) starts at one edge, within 1 px; a dot, chevron or icon
+  before a label must not move the label's text off that edge;
+- a control and its label share a vertical center with the label's first line,
+  and a control is not taller than its row unless the row is meant to grow;
+- spacing uses the product's scale where it has one;
+- text wraps only where the layout means it to, and no line is clipped, cut by an
+  ellipsis or pushed outside its column; a wrapped line starts at its column, not
+  under a neighboring icon;
+- on a button-like control a focus indicator appears when focus arrives from the
+  keyboard and not after a pointer choice that returns focus by script; a text
+  field may show focus after a click.
+
+Declare the intended exceptions before measuring: indentation that encodes a
+level, an optical offset of an icon, a wrap the narrow width is meant to produce.
+An exception named only after a measurement failed is a defect until the
+product's design says otherwise. Report measured values with their widths and
+states, not "looks aligned"; a value without its condition proves nothing for
+another width. In a browser the [layout helper](browser-checks.md#measure-layout-in-the-browser)
+measures these; in a design tool, read the bounds the tool reports.
+
+- Valid control: an intended indentation, a deliberate wrap at narrow width and a
+  keyboard focus indicator stay; removing the indicator outright to silence a
+  pointer ring is a regression, not a fix.
+- Check: the same measurement on the representative before and after the fix,
+  and on every consumer the defect class reaches (see the entrypoint's finish).
 
 ## Keep asset provenance
 

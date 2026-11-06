@@ -16,6 +16,7 @@ folder, fault variants or assertions to an executor in a supposedly blind trial.
 | P3; C103/C104 | A neighboring panel changes available width without resizing the viewport; draft and completion survive | Fixture-specific compact layout, not a universal breakpoint/layout rule |
 | State-specific axe | Hidden faulty control is absent from the initial scan, then detected after opening; labeled control is valid | Only the explicitly selected button-name rule; no full accessibility claim |
 | RR1-RR3 rendered review | Each shipped screen fails its named defect checks; the reference fix passes every check; controls pass on both; the oracle CLI scores an executor's final files | Chromium at 1280 and 390 px only; an oracle that cannot locate restructured elements reports inconclusive instead of a verdict |
+| Layout measurement | Shared text edge versus a marker-shifted row, declared indentation versus a flattened sub-item, a first-line checkbox versus a hit-area wrapper, wrapped versus truncated or parent-cut text, `:focus-visible` versus `:focus` and no indicator under a real click and Tab | One synthetic page at 900 px in Chromium; observations under the conditions set up, not a design approval |
 
 `rendered-review.test.mjs` materializes the screens of
 [rendered-review-cases.json](../rendered-review-cases.json) into a temporary
@@ -60,6 +61,7 @@ node --test skills/ui-delivery/evals/browser/evidence.test.mjs
 node --test skills/ui-delivery/evals/browser/browser.test.mjs
 node --test skills/ui-delivery/evals/browser/axe.test.mjs
 node --test skills/ui-delivery/evals/browser/rendered-review.test.mjs
+node --test skills/ui-delivery/evals/browser/layout.test.mjs
 ```
 
 By default Playwright uses its managed Chromium. `UI_TEST_CHROMIUM` can name an

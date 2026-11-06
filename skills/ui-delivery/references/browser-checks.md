@@ -8,6 +8,7 @@ owns scenario design and evidence levels.
 - [Playwright actions](#playwright-actions)
 - [Establish capture readiness](#establish-capture-readiness)
 - [State-specific evidence](#state-specific-evidence)
+- [Measure layout in the browser](#measure-layout-in-the-browser)
 - [Screenshot baselines](#screenshot-baselines)
 - [Sources](#sources)
 
@@ -105,6 +106,26 @@ Reuse the product's report attachments. DOM observations and screenshots are
 separate captures, not an atomic snapshot. Review output for sensitive data;
 the example omits values and raw HTML, but selectors and screenshots can still
 identify records. Upload nothing automatically.
+
+## Measure layout in the browser
+
+[Visual judgment](visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+says what to measure; the optional [layout helper](../assets/playwright/README.md#measure-alignment-instead-of-judging-a-screenshot)
+measures it. `measureText` returns each target's box, its visible text line boxes
+and clipping flags; `compareEdges` checks a shared text edge with declared
+indentation offsets, `compareRow` a control against its label's first line, and
+`indicatorStyle` with `indicatorDiff` shows whether focus changed what is painted.
+Set the viewport for each supported width yourself and take the indicator
+snapshot before interaction, after a real pointer choice and after real keyboard
+focus; the helpers never resize, click, focus or wait. An existing project helper
+that measures the same values serves equally.
+
+For a frame check, run the real trigger, or wait through one cycle of a screen
+that refreshes itself, and sample with `observeUiSequence` or repeated
+`measureText` calls between animation frames: a placeholder, an empty list or a
+jump appears in the samples even when both endpoints are correct. Sampling can
+miss a frame, so a clean run is evidence, not proof; a recording settles a claim
+about smoothness.
 
 ## Screenshot baselines
 

@@ -18,7 +18,13 @@ animation mechanics belong to [Motion](motion-and-transitions.md).
 ## Align feedback and the hit area
 
 Hover, cursor, focus and active feedback must describe the action at that location.
-Do not make a static heading or blank form-group area look editable when only a
+On a button-like control, such as a select trigger or menu button, the focus
+indicator belongs to keyboard focus: after a pointer choice that returns focus by
+script no ring should stay, while Tab still shows one. Write it for
+`:focus-visible` or the platform's equivalent; a component that returns focus by
+script can still trigger it, so measure both paths as
+[Visual judgment](visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+describes rather than trusting the selector. Do not make a static heading or blank form-group area look editable when only a
 child responds. Separate row selection, expansion, editing and deletion so nested
 actions do not propagate accidentally. Preserve useful associated labels and
 genuinely clickable whole rows; hover alone cannot carry essential information.

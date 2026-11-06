@@ -71,25 +71,30 @@ chain; do not load the whole directory or evaluation corpus.
 | Task or decision | Procedure |
 | --- | --- |
 | New substantial UI or unfamiliar pattern without a sufficient supplied reference | [Reference discovery](references/reference-discovery.md), before choosing a custom implementation |
-| Shared base, families, nested reuse, property effect, design-to-code mapping | [Component system](references/component-system.md) |
+| Shared base, families, nested reuse, property effect, design-to-code mapping; one defect on several screens | [Component system](references/component-system.md) |
 | Design-system/library information architecture, consumer-facing resources, internal/example/lifecycle separation | [Design-system organization](references/design-system-organization.md) |
 | Adding/retaining primitive mechanics or standard visual states; staged library adoption | [Reuse and migration scope](../code-change/references/reuse-and-migration.md) |
 | Action placement, draft departure, local/shared effects | [Actions and scope](references/actions-and-scope.md) |
 | Forms, field composition, validation, typing/paste/autofill, submission | [Forms and input](references/forms-and-input.md) |
 | Nested, filtered or bulk selection, counts/order, control classification | [Selection](references/selection.md) |
-| Hit areas, gestures, popup geometry, modality, coexisting states | [Interaction](references/interaction-and-layout.md) |
-| Animation, reveal, collapse, continuity, ordered transitions | [Motion](references/motion-and-transitions.md) |
+| Hit areas, gestures, popup geometry, modality, coexisting states; hover feedback, a focus ring left after a pointer choice | [Interaction](references/interaction-and-layout.md) |
+| Animation, reveal, collapse, continuity, ordered transitions; a jump, flash or empty frame between correct endpoints | [Motion](references/motion-and-transitions.md) |
 | Tables/grids, composite keyboard behavior, assistive access | [Accessibility and composites](references/accessibility-and-composites.md) |
-| Shared screens, navigation state, panels, size owners, supported environments | [Workspace](references/workspace-consistency.md) |
-| Computed results, async refresh, writes/retries, invalidation | [Data lifecycle](references/data-lifecycle.md) |
-| Labels, status meanings, recovery guidance | [Content](references/content-and-recovery.md) |
+| Shared screens, navigation state, panels, size owners, supported environments; headers, edges or panels that differ between screens | [Workspace](references/workspace-consistency.md) |
+| Computed results, async refresh, writes/retries, invalidation; a list or value that blinks or blanks while refreshing | [Data lifecycle](references/data-lifecycle.md) |
+| Labels, status meanings, recovery guidance; repeated words, facts or default values | [Content](references/content-and-recovery.md) |
 | Acceptance/regression checks, evidence after the last write, realistic load | [Acceptance](references/scenario-testing.md) |
-| Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets | [Visual judgment](references/visual-judgment.md) |
+| Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets; misaligned edges or rows, unintended wrap or clipping | [Visual judgment](references/visual-judgment.md) |
 | Transferring an interface, selecting its target-system basis, structural replacement or migration | [Design transfer](references/design-transfer.md) |
 | Any read or write through the Figwright adapter | [Figwright](references/figwright.md), before the first operation |
 | Figma-specific design-system structure through Figwright: published components, cross-file libraries, properties and slots | [Figwright design-system mechanics](references/figwright-design-system.md), with Figwright |
 | Playwright actions, readiness waits or screenshot baselines | [Browser checks](references/browser-checks.md) |
 | A confirmed source-discovery or stale-byte problem that needs an extra source check | [UI source identity](references/ui-source-context.md) |
+
+A symptom after the semicolon in a row is a reason to open that procedure even
+when the task's own row did not select it: when a complaint names the symptom or a
+rendered result shows it, read the owning procedure before the fix. A change
+with no such symptom, such as a label edit, needs only its own row.
 
 When implementation changes component responsibilities, shared code or reactive
 ownership, use [code-change](../code-change/SKILL.md) for those decisions,
@@ -121,7 +126,8 @@ already sufficient scenario contract does not need a new product-wide map.
    nearest responsible owner. When a reusable library itself changes, preserve
    its consumer-facing organization and public/internal boundary as well as the
    components inside it. Repeated complaints require revisiting that cause and
-   omitted paths, not another isolated patch or another master.
+   omitted paths, not another isolated patch or another master; step 5 closes
+   the class.
 3. Apply the selected procedure and its distinguishing check plus valid control.
    When compatibility is unclear, make a bounded reversible probe on a
    representative and a risky case before propagating a mechanism. Scale
@@ -130,6 +136,13 @@ already sufficient scenario contract does not need a new product-wide map.
    Reuse matching gate/hook evidence, run missing and owner-required checks. Ask
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
+5. Close the defect class before finishing a visual or interaction repair: name
+   the class, find its shared owner (component, style, token or layout rule),
+   list the consumers it reaches and check each, or one representative of each
+   distinct composition, with the same measurement as the reported spot. Report
+   that list; a defect fixed only where it was reported is still open elsewhere.
+   A one-off copy or data edit needs no sweep. Defect closure stays narrower
+   than systemic acceptance, as [Acceptance](references/scenario-testing.md#derive-the-scenario) says.
 
 When an authorized multi-step mutation resumes after interruption, reconcile it
 with the available [continuation procedure](../implementation-planning/references/continuation.md)
@@ -137,8 +150,14 @@ before the next write.
 
 Whenever a rendered or drawn result exists, use Visual judgment for the composed
 artifact after the last write and show a useful preview; this applies to
-creation, implementation and transfer, not only to an explicit critique. A
-preview does not suspend authorized work; wait only for an explicit checkpoint
+creation, implementation and transfer, not only to an explicit critique. After a
+change that affects rendering, measure the changed screens at their supported
+widths as its [measurement section](references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+says; a screenshot judged by its author does not establish alignment. When the change touches
+loading, refresh, hover, scrolling, a screen or object switch or a disclosure,
+also inspect the frames between the endpoints with
+[Motion](references/motion-and-transitions.md#inspect-motion-between-its-endpoints).
+A preview does not suspend authorized work; wait only for an explicit checkpoint
 or a consequential unresolved preference. Distinguish supplied facts,
 observations, inference and gaps; missing access is not proof that no check ran.
 

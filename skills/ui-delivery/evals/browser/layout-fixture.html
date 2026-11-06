@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Layout measurement fixture</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 24px; font: 16px/24px Arial, Helvetica, sans-serif; color: #1d1d1f; }
+  [hidden] { display: none !important; }
+  button { font: inherit; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  /* Partial screen-reader-only patterns, one hiding technique each. */
+  .clip-only { position: absolute; clip: rect(1px, 1px, 1px, 1px); }
+  .inset-only { position: absolute; clip-path: inset(50%); }
+  .tiny-box { position: absolute; width: 1px; height: 1px; overflow: hidden; white-space: nowrap; line-height: 1px; }
+  #settings { width: 360px; }
+  #heading { margin: 0 0 8px; font-size: 14px; line-height: 20px; text-transform: uppercase; }
+  .row { display: flex; justify-content: space-between; padding: 6px 0; }
+  .sub { padding-left: 24px; }
+  .flat .sub { padding-left: 0; }
+  .marker #units .label::before { content: ''; display: inline-block; width: 8px; height: 8px;
+    margin-right: 6px; border-radius: 50%; background: #c01c28; }
+  .disclosure { display: block; margin-top: 4px; padding: 6px 0; border: 0; background: none;
+    color: #1a5fb4; text-align: left; }
+  .check { display: flex; gap: 8px; align-items: flex-start; width: 260px; margin-top: 16px; }
+  .hit { display: flex; align-items: center; height: 24px; flex: none; }
+  .hit-wrapper .hit { height: auto; padding: 10px; margin-left: -10px; }
+  .check input { width: 16px; height: 16px; margin: 0; }
+  #collapsed { height: 0; overflow: hidden; }
+  #panel { width: 300px; height: 160px; overflow: auto; border: 1px solid #c0bfbc; padding: 8px; }
+  #summary { margin: 0; }
+  #history { height: 400px; }
+  .ellipsis #summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cut #panel { height: 48px; overflow: hidden; }
+  #apply { padding: 8px 14px; border: 1px solid #8a8a8a; border-radius: 6px; background: #f6f6f6; outline: none; }
+  .visible-ring #apply:focus-visible, .any-focus #apply:focus { outline: 2px solid #1a5fb4; outline-offset: 2px; }
+  #far { margin-top: 1600px; }
+</style>
+<main id="main">
+  <section id="settings" hidden>
+    <h2 id="heading">Display</h2>
+    <div class="row" id="theme"><span class="label">Colour theme</span><span class="value">Follow system</span></div>
+    <div class="row" id="units"><span class="label">Measurement units<span class="sr-only"> recently changed</span></span><span class="value">Metric</span></div>
+    <div class="row sub" id="contrast"><span class="label">Higher contrast borders</span><span class="value">Standard</span></div>
+    <button class="disclosure" id="more" type="button" aria-expanded="false">More display options</button>
+    <label class="check" id="digest"><span class="hit"><input type="checkbox" id="digest-box"></span><span>Send a weekly summary of changed settings to the shared inbox</span></label>
+    <p id="quiet"><span class="sr-only">Saved automatically</span><span style="visibility: hidden">Pending sync</span><span style="opacity: 0">Draft marker</span><span style="display: none">Removed option</span><span class="clip-only">Changes saved</span><span class="inset-only">Two settings changed</span><span class="tiny-box">Sync complete</span></p>
+    <div id="collapsed"><p id="folded">Advanced colour calibration</p></div>
+  </section>
+  <section id="backups" hidden>
+    <div id="panel">
+      <p id="summary">Backups run every night at two and keep the last fourteen copies on the attached drive.</p>
+      <div id="history">Older copies are removed automatically</div>
+    </div>
+  </section>
+  <section id="device" hidden>
+    <p id="before">Changes apply to this device only.</p>
+    <button id="apply" type="button">Apply changes</button>
+    <p id="far">End of device options</p>
+  </section>
+</main>
+<script>
+  const { scenario, variant = 'good' } = window.fixture;
+  const sections = { list: 'settings', text: 'backups', focus: 'device' };
+  if (!sections[scenario]) throw new Error('Unknown fixture scenario');
+  document.getElementById(sections[scenario]).hidden = false;
+  const classes = { good: '', marker: 'marker', flat: 'flat', 'hit-wrapper': 'hit-wrapper',
+    ellipsis: 'ellipsis', cut: 'cut', 'visible-ring': 'visible-ring', 'any-focus': 'any-focus', 'no-ring': '' };
+  if (!(variant in classes)) throw new Error('Unknown fixture variant');
+  document.body.className = classes[variant];
+</script>
+</html>

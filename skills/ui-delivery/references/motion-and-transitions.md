@@ -1,8 +1,9 @@
 # Motion and transitions
 
 Use when designing or repairing animation, reveal, collapse or movement between
-views. Motion should make feedback, state or spatial relationships understandable
-while keeping the task responsive. A static surface need not gain animation.
+views, and for the frames between the endpoints of a state change. Motion should
+make feedback, state or spatial relationships understandable while keeping the
+task responsive. A static surface need not gain animation.
 
 ## Choose the mechanism for the transition
 
@@ -46,6 +47,16 @@ selection or focus, leaving a stale backdrop or blocking the next action. Check
 reduced motion separately while preserving meaningful feedback. Disabled-animation
 screenshots cannot qualify normal motion; a smooth recording alone cannot prove
 correct committed data or keyboard behavior.
+
+Inspect the frames of a state change without animation as well. When a change
+touches loading, refresh, hover, scrolling, a screen or object switch or a
+disclosure, or the screen refreshes on its own, sample the frames after the real
+trigger or through one refresh cycle. A blank, placeholder or flashing frame
+between two correct endpoints is a defect unless the transition calls for it;
+[Data lifecycle](data-lifecycle.md#separate-initial-loading-from-refreshing)
+decides when a changed context may clear the old result.
+[Browser checks](browser-checks.md#measure-layout-in-the-browser) describes the
+sampling. A change that touches none of these needs no frame check.
 
 If asynchronous object replacement causes the jump inside an open panel, use
 [Data lifecycle](data-lifecycle.md#separate-initial-loading-from-refreshing)

@@ -39,6 +39,11 @@ to the executor. Keep this table and prior answers out of its packet.
 | Repair a nested instance that ignores the parent theme | Entry + Visual judgment (theme and ancestor paint) + Component system for the binding chain | Renaming the theme or recoloring the parent only |
 | Review a delivered mockup without editing it | Entry + the applicable owners in read-only mode; Acceptance for evidence levels | Creating probes without write authority, or marking unverified effects as passed |
 | Add a Boolean property that hides an icon inside a variant set through Figwright | Entry + Figwright + Component system (property chain) | Detaching instances or adding a variant axis because the command passed |
+| Polish a list whose rows repeat the same default value as a badge on every item | Entry + Content (repeated facts); Visual judgment measurement for the changed rows | Dropping the values that differ from the default, or a sortable table column |
+| A list blinks to a loading placeholder on its own periodic refresh | Entry + Data lifecycle refresh section + Motion frame check | Keeping the previous list when the context changes, or hiding all refresh feedback |
+| Section headers, rows and a disclosure in one column start their text at different edges | Entry + Visual judgment measurement; Workspace when the edges differ between screens | Flattening an intended level indentation, or accepting the author's screenshot as the check |
+| A focus ring stays on a select trigger after a mouse choice | Entry + Interaction feedback section + Visual judgment measurement | Removing the keyboard focus indicator to silence the pointer ring |
+| The same misalignment is reported on several screens | Entry + Component system consumers + Visual judgment measurement; finish step 5 | Fixing only the reported screen, or rewriting every screen's markup instead of the shared owner |
 
 Relevant scope is evidence-dependent, not a maximum number of files. An executor
 can read another procedure when an observed dependency requires it and explain

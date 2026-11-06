@@ -37,6 +37,10 @@ filter, action, count and status can repeat the same noun or fact until useful
 content is crowded out. Keep information that changes the current choice; put
 background explanation in existing help/documentation when it is not needed at
 that point. A generic all-items filter need not be repeated as a second heading.
+The same holds across a collection: a value that is the default for nearly every
+row, repeated as a badge on each, hides the rows that differ. Show the exceptions
+and state the default once where the user needs it. A table column the user
+sorts, filters or compares by keeps its value on every row.
 
 A familiar contextual command may use an icon with an accessible name and a
 discoverable explanation, following [Interaction](interaction-and-layout.md#make-disclosed-help-usable).
