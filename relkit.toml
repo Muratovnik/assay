@@ -49,6 +49,9 @@ assets = []
 # The release tool runs checks with its own interpreter; release_check.py builds
 # the pinned tooling environment under .cache/tools-env and runs check --all there.
 checks = [["{python}", "-B", "tools/release_check.py"]]
+# check --all reached the default 600-second limit on a busy host while passing in
+# about 480 seconds on another attempt; give each command twice that headroom.
+command_timeout = 1200
 # With no artifact to download, the smoke is the one thing a consumer does with
 # this source: resolve every catalogued target into an install plan. It runs
 # against an isolated home and writes nothing.
