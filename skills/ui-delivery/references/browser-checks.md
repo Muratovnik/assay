@@ -127,6 +127,12 @@ jump appears in the samples even when both endpoints are correct. Sampling can
 miss a frame, so a clean run is evidence, not proof; a recording settles a claim
 about smoothness.
 
+Playwright starts headless Chromium with `--hide-scrollbars`: a classic scrollbar
+is neither painted nor given width, so `offsetWidth` equals `clientWidth`. For a
+question about overflow or scrolling, capture once more with
+`ignoreDefaultArgs: ['--hide-scrollbars']` before concluding that a scrollbar is
+absent or that content is cut off without a hint.
+
 ## Screenshot baselines
 
 For screenshot comparisons, review the initial baseline against the intended UI

@@ -14,6 +14,12 @@ of evidence, not products: apply the same checks to whatever implements them.
   A listing without a limit can exceed the context window on its own.
 - **Aggregate, then sample.** Count signals across the whole period first, then
   read only the passages that decide a candidate. Record the sampling rule.
+- **Count the event, not its text.** A marker string finds candidates, but it
+  also matches reads and quotes of files that contain the same text. Count a
+  refusal or an error from the tool result marked as an error on the call in
+  question, once per record id, since a transcript can repeat a record. Check
+  each count against a sample of about ten of its records before it goes into a
+  proposal.
 - **Keep a reading ledger.** For each source: what was read in full, what was
   aggregated, what was sampled and what was skipped.
 - **Exclude the current session** from evidence about past work; it contains

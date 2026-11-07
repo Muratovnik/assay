@@ -5,6 +5,14 @@ already justified typo. Reuse the available client, existing evaluation packets
 and ordinary artifact inspection. This is not a requirement to build a runner,
 dashboard, sandbox, exporter or new results database.
 
+## Contents
+
+- [Fix the question before the runs](#fix-the-question-before-the-runs)
+- [Inspect four distinct results](#inspect-four-distinct-results)
+- [Conclude within the sample](#conclude-within-the-sample)
+- [When a pilot is not enough](#when-a-pilot-is-not-enough)
+- [Prior work and limits of transfer](#prior-work-and-limits-of-transfer)
+
 ## Fix the question before the runs
 
 Choose whether the comparison is previous bytes versus candidate, or the same
@@ -40,6 +48,10 @@ executor's packet. Preserve raw outputs, artifacts and failures separately from
 future inputs. Authorized work copies and frozen evidence packets serve different
 purposes; use existing isolation controls without claiming a fresh context alone
 isolates the filesystem.
+
+An executor that runs with a shell installs no packages or browsers and runs no
+`git`: say so in its packet and deny those commands in its tool permissions. Keep
+each run's working directory in the project's ignored scratch directory.
 
 When the plugin's hooks belong to a condition, keep each subject run's working
 directory off a path the hooks classify as scratch, and before the runs confirm
