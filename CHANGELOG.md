@@ -6,6 +6,18 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.43.1](https://github.com/Muratovnik/assay/compare/v0.43.0...v0.43.1) (2026-11-07)
+
+Three guides gain a rule behind a recurring mistake: a retrospective counts an error
+event rather than every match of its text, a browser check accounts for the scrollbars
+headless Chromium hides, and a pilot's executor neither installs software nor runs Git.
+
+### Documentation
+
+* **retrospective:** a refusal or an error is counted from the tool result marked as an error on the call in question, once per record id, because a marker string also matches reads and quotes of files that contain the same text; each count is checked against a sample of about ten of its records before it goes into a proposal ([42ac0e3](https://github.com/Muratovnik/assay/commit/42ac0e3bcc967850b9bed17b16dee3778afecff2))
+* **ui-delivery:** Playwright starts headless Chromium with `--hide-scrollbars`, so a classic scrollbar is neither painted nor given width; a question about overflow or scrolling is captured once more with `ignoreDefaultArgs: ['--hide-scrollbars']` before concluding that a scrollbar is absent ([42ac0e3](https://github.com/Muratovnik/assay/commit/42ac0e3bcc967850b9bed17b16dee3778afecff2))
+* **skill-evaluation:** an executor that runs with a shell in a paired pilot installs no packages or browsers and runs no `git`, which its packet states and its tool permissions deny, and each run's working directory stays in the project's ignored scratch directory ([42ac0e3](https://github.com/Muratovnik/assay/commit/42ac0e3bcc967850b9bed17b16dee3778afecff2))
+
 ## [0.43.0](https://github.com/Muratovnik/assay/compare/v0.42.1...v0.43.0) (2026-11-06)
 
 Interface work now checks alignment by measuring it instead of looking at a
