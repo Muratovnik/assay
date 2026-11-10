@@ -44,6 +44,17 @@ def prompt(text="Fix the parser"):
     return {"type": "user", "message": {"role": "user", "content": text}}
 
 
+def load(skill="assay:implementation-planning", ident="s1"):
+    return [tool("Skill", {"skill": skill}, ident), returned(ident, "Launching skill")]
+
+
+PLANNING = load()
+
+
+def said(text):
+    return {"type": "assistant", "message": {"content": [{"type": "text", "text": text}]}}
+
+
 class LineTests(unittest.TestCase):
     def test_labels_count_at_a_line_start_in_either_language_and_form(self):
         for text in ("Verified: unit suite — local venv — after the parser fix", "- Not verified: Linux — no runner",
@@ -194,7 +205,7 @@ class StopTests(unittest.TestCase):
                  "agent_transcript_path": self.transcript(prompt("packet"), edit(APP), command)}
         self.assertIn("parser.py", self.note(event))
         # A plan is asked for whatever runs in the background.
-        self.assertIn("2026-10-ingest.md", self.note(self.stop(prompt(), write(PLAN, text="# Plan"), command)))
+        self.assertIn("2026-10-ingest.md", self.note(self.stop(prompt(), PLANNING, write(PLAN, text="# Plan"), command)))
         # A relayed message before any launch still starts a turn.
         other = {"type": "user", "message": {"role": "user", "content": "<task-notification><task-id>old</task-id>"}}
         done = {"type": "user", "message": {"role": "user", "content": "<task-notification><task-id>task1</task-id>"}}
@@ -228,7 +239,7 @@ class StopTests(unittest.TestCase):
         self.assertEqual("", self.note(self.stop(prompt(), write(APP), last="Verified: suite — after the new parser")))
 
     def test_a_plan_without_the_existing_section_is_named(self):
-        text = self.note(self.stop(prompt("Plan the ingest"), write(PLAN, text="# Plan\n\n## Units\n- U1")))
+        text = self.note(self.stop(prompt("Plan the ingest"), PLANNING, write(PLAN, text="# Plan\n\n## Units\n- U1")))
         self.assertIn("implementation-planning: this turn wrote 2026-10-ingest.md", text)
         self.assertIn("for a plan, add the section to the plan file", text)
         for entries in ([write(PLAN, text="# Plan\n\n## What already exists\n- none\n")],
@@ -236,13 +247,36 @@ class StopTests(unittest.TestCase):
                         [write(PLAN, text="# Plan\n"), edit(PLAN, "e9", text="## What already exists\n- x\n")],
                         [edit(PLAN)], [write("C:\\work\\docs\\explanation.md", text="# Notes")]):
             with self.subTest(entries=entries):
-                self.assertEqual("", self.note(self.stop(prompt("Plan the ingest"), *entries)))
+                self.assertEqual("", self.note(self.stop(prompt("Plan the ingest"), PLANNING, *entries)))
         # A later rewrite without the section brings the note back.
         self.assertIn("2026-10-ingest.md", self.note(self.stop(
-            prompt(), write(PLAN, text="## What already exists\n- x"), write(PLAN, "w2", text="# Plan v2"))))
+            prompt(), PLANNING, write(PLAN, text="## What already exists\n- x"), write(PLAN, "w2", text="# Plan v2"))))
+
+    def test_a_file_named_like_a_plan_is_held_only_when_the_planning_skill_wrote_it(self):
+        verdicts = "| Finding | Verdict |\n| --- | --- |\n| F1 | holds |\n"
+        review = "C:\\work\\tmp\\review\\plans.md"
+        # A reviewer with only the audit skill writes its verdicts to a file named like a plan.
+        for path in (review, PLAN):
+            with self.subTest(path=path):
+                self.assertEqual("", self.note(self.stop(
+                    prompt("Review the plans"), load("assay:independent-audit"), write(path, text=verdicts))))
+        # Loaded by the Skill tool, by a Read of its SKILL.md, in an earlier turn of this context or re-attached by a
+        # compaction, the skill makes it a plan.
+        read = [tool("Read", {"file_path": "C:\\cache\\assay\\skills\\implementation-planning\\SKILL.md"}, "r1"),
+                returned("r1", "1\t---")]
+        compacted = [{"type": "system", "subtype": "compact_boundary"},
+                     {"type": "attachment", "attachment": {"type": "invoked_skills",
+                                                           "skills": [{"name": "implementation-planning"}]}}]
+        for entries in ([prompt(), PLANNING], [prompt(), read], [PLANNING, prompt("earlier"), said("Ok."), prompt()],
+                        [PLANNING, *compacted, prompt()]):
+            with self.subTest(entries=entries):
+                self.assertIn("this turn wrote plans.md", self.note(self.stop(*entries, write(review, text=verdicts))))
+        # A load that a compaction did not keep is gone.
+        self.assertEqual("", self.note(self.stop(PLANNING, {"type": "system", "subtype": "compact_boundary"}, prompt(),
+                                                 write(review, text=verdicts))))
 
     def test_all_missing_lines_come_in_one_note(self):
-        text = self.note(self.stop(prompt(), write(APP), write(PLAN, "w2", text="# Plan")))
+        text = self.note(self.stop(prompt(), PLANNING, write(APP), write(PLAN, "w2", text="# Plan")))
         self.assertTrue(text.startswith("Assay report check:"))
         self.assertEqual(2, text.count("\n- "))
 

@@ -567,7 +567,15 @@ at a compaction. The turn continues once with one note listing each missing line
 | Rule | Skill | Sign in the turn | Missing |
 | --- | --- | --- | --- |
 | `report-verification` | `code-change` | an edit or write of a source, test or interface file, or a `git add` of one | a table row or a line labelled `Verified` or `Not verified` in the final message |
-| `plan-existing` | `implementation-planning` | a `Write` of a plan file, as the branch check recognises one | a `What already exists` heading in that plan, written then or by a later edit |
+| `plan-existing` | `implementation-planning` | a `Write` of a plan file, as the branch check recognises one, by an agent that has loaded `implementation-planning` | a `What already exists` heading in that plan, written then or by a later edit |
+
+A plan file is known by its name, so the skill decides what it is: the session or
+subagent has loaded `implementation-planning` since the latest compaction, counted as
+the skill gate counts loads (the Skill tool, a `Read` of its `SKILL.md`, a skill the
+compaction re-attached). A table of review verdicts written to `plans.md` by an agent
+with only `independent-audit` loaded is not asked for the section. The cost is that a
+plan written without the skill is not asked for it either; the skill check is what
+asks for the skill.
 
 The check has no row for the reuse line. Whether a reuse decision was taken is not
 visible in the tool calls, and a `Reuse: not applicable` line written to satisfy a

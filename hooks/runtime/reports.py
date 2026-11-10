@@ -5,7 +5,9 @@ already existed, but it can see that the line stating it is missing. Each row
 pairs a sign in the turn's own tool calls with a line the final message or the
 written plan must carry: a table row or a line labelled `Verified` or `Not
 verified` after editing code, a `What already exists` section in a plan file.
-Localized labels count.
+A file named like a plan is a plan only when the agent has loaded
+implementation-planning, counted as the skill gate counts loads: a file of
+verdicts named `plans.md` is not one. Localized labels count.
 There is no row for the reuse line: whether a reuse decision was taken is not
 visible in the tool calls, and a `Reuse: not applicable` line written to satisfy
 the check reports no decision. On Stop or SubagentStop the turn
@@ -22,7 +24,7 @@ import re
 
 from .branches import PLAN, WRITES, _written
 from .midturn import SEPARATOR, SHELLS, classify
-from .skill_gate import _lines, _prompt
+from .skill_gate import _lines, _prompt, transcript
 
 
 @dataclass(frozen=True)
@@ -266,6 +268,11 @@ def stopped(event, rules=RULES, skills=None):
     if not scan:
         return {}
     edited, plans, running = scan
+    if plans:
+        # Without the planning skill a file named like a plan is some other record; loads count as the gate counts them.
+        planner = next(row.skill for row in ROWS if row.rule == "plan-existing")
+        loads = transcript(path, {planner}, subagent=name == "SubagentStop")
+        plans = plans if loads and planner in loads[1] else []
     # A stop to wait for a background task is not the final message. A subagent's such stop gets no checks
     # at all (waiting); one that reaches this point is final, such as the hand-back the hold checks.
     waiting = running and name == "Stop"
