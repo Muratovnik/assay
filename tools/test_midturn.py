@@ -11,15 +11,52 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
-from runtime import activation, cli, midturn
+from runtime import activation, cli, midturn, predicates
 from runtime.cli import process
 
 APP = "C:\\work\\src\\app.py"
 TESTS = "C:\\work\\tests\\test_app.py"
 PAGE = "C:\\work\\web\\src\\Panel.vue"
-SKILL = "C:\\work\\skills\\parser\\SKILL.md"
+# A skill of this library, in its own checkout.
+SKILL = str(ROOT / "skills" / "code-change" / "SKILL.md")
 DOCS = "https://docs.example.dev/guide/hooks"
 FETCH = f"curl -sL {DOCS} -o guide.html"
+
+
+def checkout(root, manifest=None, git="directory"):
+    """A checkout under root: `.git` as a directory, as a worktree's file or absent, and a plugin manifest if named."""
+    root.mkdir(parents=True, exist_ok=True)
+    if git == "directory":
+        (root / ".git").mkdir()
+    elif git == "file":
+        (root / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+    if manifest:
+        (root / ".claude-plugin").mkdir()
+        (root / ".claude-plugin" / "plugin.json").write_text(json.dumps({"name": manifest}), encoding="utf-8")
+    return root
+
+
+def skill_files(base):
+    """(path, whether its edit is a skill-evaluation sign) for skill files in real checkouts under base."""
+    product, worktree = checkout(base / "tracker"), checkout(base / "tracker-task", git="file")
+    library, fork = checkout(base / "game-design", "game-design"), checkout(base / "fork", "assay-fork", git=None)
+    assay, assay_task = checkout(base / "assay", "assay"), checkout(base / "assay-task", "assay", git="file")
+    nested = checkout(library / "vendor" / "app")
+    existing = assay / "skills" / "parser" / "SKILL.md"
+    existing.parent.mkdir(parents=True)
+    existing.write_text("---\nname: parser\n---\n", encoding="utf-8")
+    shipped = product / "server" / "skill" / "tracker"
+    return [
+        # A repository that is not a plugin ships its own skill.
+        (shipped / "SKILL.md", False), (shipped / "references" / "limits.md", False),
+        (shipped.parent / "activation-rules.toml", False), (worktree / "server" / "skill" / "tracker" / "SKILL.md", False),
+        # The nearest repository decides: a product kept inside a library is the product's.
+        (nested / "skill" / "x" / "SKILL.md", False),
+        # Any plugin keeps the sign, whatever its name, and so does a file with no repository above it.
+        (library / "skills" / "game-design" / "SKILL.md", True), (fork / "skills" / "parser" / "SKILL.md", True),
+        (base / "loose" / "skills" / "parser" / "SKILL.md", True), (existing, True),
+        (assay / "skills" / "new-method" / "SKILL.md", True), (assay_task / "skills" / "parser" / "SKILL.md", True),
+    ]
 
 
 def tool(name, data, ident):
@@ -57,8 +94,9 @@ class SignTableTests(unittest.TestCase):
                                     "C:\\work\\web\\index.html"],
             "midturn-technical-writing": ["C:\\work\\README.md", "C:\\work\\docs\\how-to\\setup.md", "C:\\work\\docs\\adr\\0001-x.md",
                                           "C:\\work\\docs\\ru\\README.ru.md"],
-            "midturn-skill-evaluation": [SKILL, "C:\\work\\skills\\parser\\references\\rules.md",
-                                         "C:\\work\\hooks\\activation-rules.toml"],
+            "midturn-skill-evaluation": [SKILL, str(ROOT / "skills" / "code-change" / "references" / "rules.md"),
+                                         str(ROOT / "skills" / "new-method" / "SKILL.md"),
+                                         str(ROOT / "hooks" / "activation-rules.toml")],
         }
         for rule, paths in cases.items():
             for path in paths:
@@ -68,6 +106,18 @@ class SignTableTests(unittest.TestCase):
                            ("NotebookEdit", {"notebook_path": APP})):
             with self.subTest(call=call):
                 self.assertEqual(["midturn-code-change"], self.rules(call, data))
+
+    def test_a_skill_file_is_a_sign_unless_a_repository_that_is_not_a_plugin_holds_it(self):
+        # A product's own instructions decide how its skill changes; a skill library, Assay or not, keeps the sign.
+        evaluation = ["midturn-skill-evaluation"]
+        # A temporary directory is scratch, which gives no sign at all; the checkouts here stand for real ones.
+        with tempfile.TemporaryDirectory() as scratch, patch.object(predicates, "is_scratch", lambda path: False):
+            for path, sign in skill_files(Path(scratch)):
+                with self.subTest(path=path):
+                    self.assertEqual(evaluation if sign else [], self.edit(str(path)))
+                    self.assertEqual(evaluation if sign else [], self.rules("Write", {"file_path": str(path), "content": "x"}))
+        # The call does not say what a relative path is relative to, so it keeps the sign.
+        self.assertEqual(evaluation, self.edit(str(Path("skills") / "parser" / "SKILL.md")))
 
     def test_a_web_tool_or_an_external_fetch_calls_for_evidence_research(self):
         research = ["midturn-evidence-research"]
@@ -219,6 +269,15 @@ class NoteTests(unittest.TestCase):
         self.assertIn("edits a test file (test_app.py)", text)
         self.assertNotIn("C:\\work", text)
         self.assertEqual({}, self.run_event(self.pre()))
+
+    def test_a_skill_a_product_ships_names_no_skill_evaluation(self):
+        product = checkout(self.directory / "tracker") / "server" / "skill" / "tracker" / "SKILL.md"
+        shipped = {"file_path": str(product), "old_string": "a", "new_string": "b"}
+        with patch.object(predicates, "is_scratch", lambda path: False):
+            self.assertEqual({}, self.run_event(self.pre("Edit", shipped)))
+        text = self.note(self.run_event(self.pre("Edit", {**shipped, "file_path": SKILL})))
+        self.assertIn("assay:skill-evaluation", text)
+        self.assertIn("edits a skill file (SKILL.md)", text)
 
     def test_a_loaded_skill_keeps_it_silent_whether_the_load_was_a_skill_call_or_a_read(self):
         self.run_event(self.pre("Skill", {"skill": "assay:test-writing"}))

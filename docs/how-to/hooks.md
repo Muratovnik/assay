@@ -448,13 +448,21 @@ stated as fact and runs no model.
 | `midturn-test-writing` | `test-writing` | an edit of a test file: under `test`, `tests`, `__tests__` or `spec`, named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`, or `conftest.py` |
 | `midturn-ui-delivery` | `ui-delivery` | an edit of an interface file: `.vue`, `.svelte`, `.jsx`, `.tsx`, `.css`, `.scss`, `.sass`, `.less`, `.html` |
 | `midturn-technical-writing` | `technical-writing` | an edit of a `README` or of a Markdown, MDX or reStructuredText file under `docs`, except `docs/plans` and `docs/research`; agent instructions, memory notes and change logs do not count |
-| `midturn-skill-evaluation` | `skill-evaluation` | an edit of a `SKILL.md`, a skill's `references` or `evals` file, or `activation-rules.toml` |
+| `midturn-skill-evaluation` | `skill-evaluation` | an edit of a `SKILL.md`, a skill's `references` or `evals` file, or `activation-rules.toml`, except one a product ships in its own repository |
 | `midturn-critical-discussion` | `critical-discussion` | an `AskUserQuestion` call, the point where the owner chooses between options, unless every question can leave things as they are: a multi-select question, or an option labelled so, in English or Russian (`Keep`, `Later`, `Не менять`) |
 
 A path under `node_modules`, `dist`, `build`, `vendor`, `.venv`, a minified, declaration
 or generated file, and a scratch directory (`tmp`, `temp`, `scratchpad`, `.private`)
-gives no sign. A task worktree under `tmp/worktrees/<name>` is a checkout, so its files do. A
-file belongs to one row: a test file gives `test-writing` and not also `code-change`,
+gives no sign. A task worktree under `tmp/worktrees/<name>` is a checkout, so its files do.
+A skill file is a product's when the nearest directory above it, links resolved, that
+holds `.claude-plugin/plugin.json` or `.git` (a directory, or a worktree's file) holds
+`.git` and no such manifest: a repository that is not a plugin. So an edit of
+`server/skill/<name>/SKILL.md` in a product's repository asks for nothing, and a product
+kept inside a library's tree is still the product. A plugin manifest keeps the sign
+whatever its `name`, as for another skill library or a renamed fork, and so does a file
+with no `.git` above it up to the root, or a relative path. What this still misses is a
+project-local skill in a repository that is not a plugin, such as a team's own skill
+kept beside its code: it gets no note either. A file belongs to one row: a test file gives `test-writing` and not also `code-change`,
 an interface file `ui-delivery` and not `code-change`.
 
 The note appears at most once per skill, request and agent. The key is one hashed

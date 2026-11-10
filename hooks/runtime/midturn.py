@@ -8,7 +8,9 @@ On PreToolUse, when a row matches and neither the records nor the transcript
 tail show the skill loaded, the agent gets one short note stating the fact and
 the decision the skill governs in that call. The default form is that note. The
 `deny` form refuses the first matching call with the same text; the retry
-passes because the key is kept. It runs no model.
+passes because the key is kept. It runs no model. A skill file is no sign in a
+product's repository, which the file's path alone cannot show, so that row also
+looks at the directories above the file.
 
 At most one note per skill, request and agent, kept as one hashed key like the
 fetch note's. A write made through a shell command is not seen, and a skill
@@ -20,6 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 import time
 
@@ -66,6 +69,31 @@ ROWS = (
 )
 RULES = tuple(row.rule for row in ROWS)
 
+# What makes a checkout a plugin, and so a skill library rather than a product.
+MANIFEST = Path(".claude-plugin") / "plugin.json"
+
+
+def product(path):
+    """Whether a file lies in a repository that is not a plugin: a product that ships its own skill.
+
+    That is the nearest directory above the file, links resolved, holding `.git` (a
+    directory, or a worktree's file) with no plugin manifest on the way up to it,
+    whatever any manifest names. With no `.git` up to the root, or for a relative path,
+    whose base the call does not give, the answer is no.
+    """
+    if not isinstance(path, str) or not os.path.isabs(path):
+        return False
+    try:
+        folder = Path(os.path.realpath(path)).parent
+        for directory in (folder, *folder.parents):
+            if (directory / MANIFEST).is_file():
+                return False
+            if (directory / ".git").exists():
+                return True
+    except (OSError, ValueError):
+        pass
+    return False
+
 
 def signs(tool, data):
     """(rule, evidence) pairs that one tool call shows; evidence is a file name or a host, never a full URL."""
@@ -74,6 +102,9 @@ def signs(tool, data):
     if tool in WRITES:
         path = data.get("notebook_path" if tool == "NotebookEdit" else "file_path")
         rule = classify(path)
+        # A skill a product ships changes under that product's instructions, not under this library's method.
+        if rule == "midturn-skill-evaluation" and product(path):
+            return []
         return [(rule, SEPARATOR.split(path)[-1])] if rule else []
     if tool in WEB:
         found = URL.match(data["url"]) if isinstance(data.get("url"), str) else None
