@@ -53,9 +53,16 @@ VERIFIED = re.compile(LABEL.format(STATUS) + "|" + CELL.format(STATUS), re.I | r
 EXISTING = re.compile(r"^[ \t]*#{1,6}[ \t]+(?:\d+[.)][ \t]*)?(?:what already exists|что уже есть)\b", re.I | re.M)
 # A file that holds behavior: source, a test or an interface.
 CODE = frozenset({"midturn-code-change", "midturn-test-writing", "midturn-ui-delivery"})
-# What the client answers when a launched command or agent keeps running after the call returns.
-BACKGROUND = re.compile(r"(?:Command running in background with ID: |Async agent launched successfully)")
-LAUNCH_ID = re.compile(r"(?:with ID: |agentId: )([\w-]+)")
+# What the client answers when a launched command or agent keeps running after the call returns, or when
+# it moved a running command to the background; a moved command's line may follow the output it printed.
+BACKGROUND = re.compile(r"Command running in background with ID: |Async agent launched successfully"
+                        r"|Command was moved to the background \(ID: "
+                        r"|Command did not complete within its \d+s timeout and was moved to the background \(ID: ")
+LAUNCH_ID = re.compile(r"(?:with ID: |agentId: |\(ID: )([\w-]+)")
+# The calls that stop a background task, and the input naming it.
+STOPS = {"TaskStop": "task_id", "KillShell": "shell_id"}
+# How a message the coordinator sends a running subagent begins: the subagent's next packet.
+CONTINUED = "The coordinator sent a message"
 NOTIFICATION = "<task-notification"
 # The names a notification gives its task.
 NOTIFIED = re.compile(r"<(?:task-id|tool-use-id)>([^<\s]+)</")
@@ -105,9 +112,21 @@ def _entries(path, subagent):
     return entries
 
 
+def _launched(result):
+    """The lines of a tool result that say its command or agent runs on in the background."""
+    if not isinstance(result, str):
+        return []
+    lines = result[-MAX_NOTIFICATION:].rstrip("\n").splitlines()[-2:]
+    return [line for line in [result[:MAX_NOTIFICATION], *lines] if BACKGROUND.match(line)]
+
+
 def _background(entries):
-    """(index of the oldest background launch or -1, whether one still runs) over a turn's entries, newest first."""
-    notified, failed, launches, oldest = set(), set(), {}, -1
+    """(index of the oldest background launch or -1, whether one still runs) over a turn's entries, newest first.
+
+    A launch ends with a task notification that names it or a TaskStop or
+    KillShell call that did. A block whose id is not a string names nothing.
+    """
+    ended, failed, launches, oldest = set(), set(), {}, -1
     for index, entry in enumerate(entries):
         message = entry.get("message")
         content = message.get("content") if isinstance(message, dict) else None
@@ -115,44 +134,61 @@ def _background(entries):
         queued = attachment.get("prompt") if isinstance(attachment, dict) and attachment.get("type") == "queued_command" else None
         for text in (content, queued):
             if isinstance(text, str) and NOTIFICATION in text[:MAX_NOTIFICATION]:
-                notified.update(NOTIFIED.findall(text[:MAX_NOTIFICATION]))
+                ended.update(NOTIFIED.findall(text[:MAX_NOTIFICATION]))
         for block in content if isinstance(content, list) else []:
             if not isinstance(block, dict):
                 continue
-            if block.get("type") == "tool_result":
-                ident = block.get("tool_use_id")
+            if block.get("type") == "tool_result" and isinstance(block.get("tool_use_id"), str):
+                ident = block["tool_use_id"]
                 if block.get("is_error"):
                     failed.add(ident)
                     continue
                 result = block.get("content")
                 if isinstance(result, list):
                     result = " ".join(part.get("text", "") for part in result if isinstance(part, dict))
-                if isinstance(result, str) and BACKGROUND.match(result):
-                    launches.setdefault(ident, {ident}).update(LAUNCH_ID.findall(result[:MAX_NOTIFICATION]))
+                lines = _launched(result)
+                if lines:
+                    launches.setdefault(ident, {ident}).update(name for line in lines for name in LAUNCH_ID.findall(line))
                     oldest = index
-            elif block.get("type") == "tool_use" and block.get("id") not in failed:
-                data = block.get("input")
-                if isinstance(data, dict) and data.get("run_in_background") is True:
-                    launches.setdefault(block.get("id"), {block.get("id")})
+            elif (block.get("type") == "tool_use" and isinstance(block.get("id"), str)
+                  and block["id"] not in failed and isinstance(block.get("input"), dict)):
+                data, key = block["input"], STOPS.get(block.get("name")) if isinstance(block.get("name"), str) else None
+                if key and isinstance(data.get(key), str):
+                    ended.add(data[key])
+                elif data.get("run_in_background") is True:
+                    launches.setdefault(block["id"], {block["id"]})
                     oldest = index
-    return oldest, any(not names & notified for names in launches.values())
+    return oldest, any(not names & ended for names in launches.values())
+
+
+def _continued(entry):
+    """Whether an entry is a message the coordinator sent a running subagent, which starts its next packet."""
+    message = entry.get("message")
+    content = message.get("content") if isinstance(message, dict) else None
+    origin = entry.get("origin")
+    return entry.get("type") == "user" and entry.get("isMeta") is True and (
+        (isinstance(origin, dict) and origin.get("kind") == "coordinator")
+        or (isinstance(content, str) and content.lstrip().startswith(CONTINUED)))
 
 
 def waiting(event):
     """Whether a subagent stops to wait for background work of its own, so this stop is not its final answer.
 
-    The work is a background launch of the subagent's turn that no task
-    notification has reported finished. False when the transcript cannot be
-    read or names no such launch, so the stop checks then run as on a final stop.
+    The work is a background launch of the subagent's current packet, since its
+    start or the coordinator's latest message, that has not ended. False when the
+    transcript cannot be read or names no such launch, so the stop checks then
+    run as on a final stop.
     """
     path = event.get("agent_transcript_path")
     if (event.get("hook_event_name") != "SubagentStop" or not event.get("agent_id")
             or not isinstance(path, str) or not path or len(path) > 4_096):
         return False
     try:
-        return _background(_entries(path, True))[1]
+        entries = _entries(path, True)
     except (OSError, ValueError):
         return False
+    packet = next((index for index, entry in enumerate(entries) if _continued(entry)), len(entries))
+    return _background(entries[:packet])[1]
 
 
 def turn(path, *, subagent=False):

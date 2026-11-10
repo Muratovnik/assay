@@ -174,8 +174,10 @@ def ledger(path, *, subagent=False, needed=False):
                     if not claims and not needed:
                         break  # Nothing to check: earlier reads would go unused.
                 for block in content if isinstance(content, list) else []:
-                    if isinstance(block, dict) and block.get("type") == "tool_result":
-                        results[block.get("tool_use_id")] = (entry.get("toolUseResult"), _text(block.get("content")))
+                    # An id that is not a string names no call.
+                    if (isinstance(block, dict) and block.get("type") == "tool_result"
+                            and isinstance(block.get("tool_use_id"), str)):
+                        results[block["tool_use_id"]] = (entry.get("toolUseResult"), _text(block.get("content")))
                 continue
             if kind != "assistant" or not isinstance(content, list):
                 continue
@@ -190,7 +192,8 @@ def ledger(path, *, subagent=False, needed=False):
                 elif block.get("name") == HANDBACK and in_turn and isinstance(data.get("message"), str):
                     claims += [line for line in data["message"].splitlines() if CLAIM.search(line[:MAX_LINE])]
                 elif block.get("name") == "Read" and isinstance(data.get("file_path"), str):
-                    span = _range(data, *results.get(block.get("id"), (None, None)))
+                    ident = block.get("id")
+                    span = _range(data, *(results.get(ident) if isinstance(ident, str) else None) or (None, None))
                     if span:
                         reads.setdefault(data["file_path"], []).append(span)
                 elif block.get("name") == FETCH and isinstance(data.get("url"), str):

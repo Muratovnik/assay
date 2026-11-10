@@ -173,6 +173,14 @@ class StopTests(unittest.TestCase):
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, agent, finished("task1"), last="One to go.")))
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, finished("task1"), last="Verified: gate — passed")))
 
+    def test_a_command_the_client_moved_to_the_background_makes_the_report_wait(self):
+        moved = [tool("Bash", {"command": "gate"}, "b1"),
+                 returned("b1", "ok\nCommand was moved to the background (ID: bmv7q2k1x) after running for 180s. "
+                                "Output is being written to: x")]
+        self.assertEqual("", self.note(self.stop(prompt(), edit(APP), moved, last="The gate runs in the background.")))
+        done = {"type": "user", "message": {"role": "user", "content": "<task-notification><task-id>bmv7q2k1x</task-id>"}}
+        self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), moved, done)))
+
     def test_only_a_running_launch_of_this_turn_makes_the_report_wait(self):
         command = [tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
                    returned("b1", "Command running in background with ID: task1.")]
@@ -181,7 +189,7 @@ class StopTests(unittest.TestCase):
                        {"type": "tool_result", "tool_use_id": "b1", "is_error": True, "content": "not run"}]}}]
         self.assertIn("parser.py", self.note(self.stop(prompt(), edit(APP), refused)))
         self.assertIn("parser.py", self.note(self.stop(prompt("first"), command, prompt(), edit(APP))))
-        # A subagent that stops is finishing: its report is due now.
+        # The check itself asks a subagent at once; the runtime skips a subagent's wait before it runs.
         event = {"session_id": "s1", "hook_event_name": "SubagentStop", "agent_id": "w1", "last_assistant_message": "Done.",
                  "agent_transcript_path": self.transcript(prompt("packet"), edit(APP), command)}
         self.assertIn("parser.py", self.note(event))

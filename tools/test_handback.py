@@ -190,6 +190,65 @@ class HoldTests(unittest.TestCase):
         # A transcript that cannot be read shows no wait either.
         self.assertFalse(reports.waiting({**self.stopping(), "agent_transcript_path": str(self.directory / "none.jsonl")}))
 
+    def checked(self, last=REPORT):
+        """The feedback of a stop that must be checked as final."""
+        result = self.run_hook(self.stopping(last))
+        self.assertIn("hookSpecificOutput", result, "the stop was not checked")
+        return result["hookSpecificOutput"]["additionalContext"]
+
+    def test_a_stopped_launch_ends_the_wait(self):
+        stopped = [tool("TaskStop", {"task_id": "task1"}, "s1"),
+                   returned("s1", '{"message":"Successfully stopped task: task1 (python tools/check.py --all)"}')]
+        self.worker(packet(), *edited(), *launched(), *stopped, said(REPORT))
+        self.assertIn("Assay report check", self.checked())
+        killed = [tool("KillShell", {"shell_id": "task1"}, "s1"), returned("s1", "Shell task1 killed")]
+        self.worker(packet(), *edited(), *launched(), *killed, said(REPORT))
+        self.assertIn("Assay report check", self.checked())
+        # A stop the client refused stopped nothing, so the subagent still waits.
+        refused = [tool("TaskStop", {"task_id": "task1"}, "s1"),
+                   returned("s1", "<tool_use_error>No task found with ID: task1.</tool_use_error>", error=True)]
+        self.worker(packet(), *edited(), *launched(), *refused, said("Waiting for the gate."))
+        self.assertEqual({}, self.run_hook(self.stopping("Waiting for the gate.")))
+
+    def test_only_launches_of_the_current_packet_keep_a_stop_unchecked(self):
+        message = {"type": "user", "isSidechain": True, "isMeta": True, "origin": {"kind": "coordinator"},
+                   "message": {"role": "user", "content": "The coordinator sent a message while you were working:\n"
+                               "Repair the parser as well.\n\nAddress this before completing your current task."}}
+        # The earlier packet's launch never reported; the next packet's report is final all the same.
+        self.worker(packet(), *launched(), said("Waiting."), message, *edited(), said(REPORT))
+        self.assertIn("Assay report check", self.checked())
+        # A launch of the current packet still makes its stop a wait.
+        self.worker(packet(), *launched(), said("Waiting."), message, *edited(), *launched("b2", "task2"), said("Waiting."))
+        self.assertEqual({}, self.run_hook(self.stopping("Waiting.")))
+
+    def test_an_id_that_is_not_a_string_leaves_the_stop_checked_as_final(self):
+        for ident in (["b1"], {"id": "b1"}):
+            with self.subTest(ident=ident):
+                broken = [tool("Bash", {"command": "gate", "run_in_background": True}, ident),
+                          returned(ident, "Command running in background with ID: task1.")]
+                self.worker(packet(), *edited(), *broken, said(REPORT))
+                self.assertIn("Assay report check", self.checked())
+
+    def test_a_command_the_client_moved_to_the_background_is_a_launch(self):
+        # The client's two wordings, at the start of the result and after the output the command printed.
+        for result in ("Command was moved to the background (ID: bmv7q2k1x) after running for 180s. "
+                       "Output is being written to: C:/tmp/bmv7q2k1x.output",
+                       "Command did not complete within its 120s timeout and was moved to the background "
+                       "(ID: bmv7q2k1x). Output is being written to: C:/tmp/bmv7q2k1x.output",
+                       "collected 856 items\n\nCommand was moved to the background (ID: bmv7q2k1x) after running "
+                       "for 180s. Output is being written to: C:/tmp/bmv7q2k1x.output"):
+            with self.subTest(result=result[:40]):
+                moved = [tool("Bash", {"command": "python -m unittest"}, "b1"), returned("b1", result)]
+                self.worker(packet(), *edited(), *moved, said("Waiting for the suite."))
+                self.assertEqual({}, self.run_hook(self.stopping("Waiting for the suite.")))
+        # It ends like any launch: by its notification, or by a stop that names the id the client gave it.
+        ended = [notified("b1", "bmv7q2k1x"), said(REPORT)]
+        self.worker(packet(), *edited(), *moved, *ended)
+        self.assertIn("Assay report check", self.checked())
+        stopped = [tool("TaskStop", {"task_id": "bmv7q2k1x"}, "s1"), returned("s1", '{"message":"Successfully stopped"}')]
+        self.worker(packet(), *edited(), *moved, *stopped, said(REPORT))
+        self.assertIn("Assay report check", self.checked())
+
     def test_the_hold_refuses_with_the_note_and_shows_the_person_nothing(self):
         self.worker(packet(), *edited())
         event = self.handing_back()

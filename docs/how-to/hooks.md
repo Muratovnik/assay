@@ -214,18 +214,28 @@ The same holds for the [source](#source-checks-in-claude-code),
 [branch](#branch-check-in-claude-code) and [report](#report-check-in-claude-code)
 checks.
 
-A subagent that ends its turn while a background launch of its own turn has not
-reported back is waiting, not answering, so none of these checks runs at that
-stop. Its turn lasts from the packet to the final answer, because the task
-notification that resumes it does not start a new turn. Without this rule every
-wait was checked like a final answer, and the same line was quoted again at each
-wait: three workers in one day got a note at every wait for their own gate run.
-A launch is a call with `run_in_background` or a command Claude Code moved to the
-background, and it ends with the task notification that names it. A refused
-launch never ran. When the transcript cannot be read or the wait is on something
-else, such as a Monitor, the stop counts as final and is checked. The final stop
-and the hand-back hold below are checked as before. A false claim made at a wait
-is held at the final stop.
+A subagent that ends its turn while a background launch of its current packet
+is still running is waiting, not answering, so none of these checks runs at that
+stop. The task notification that resumes the subagent does not start a new turn,
+so without this rule every wait was checked like a final answer, and the same
+line was quoted again at each wait: three workers in one day got a note at every
+wait for their own gate run.
+
+- A launch is a call with `run_in_background`, or a command Claude Code moved to
+  the background. The client reports a moved command as `Command was moved to the
+  background (ID: …) after running for …` or `Command did not complete within its
+  …s timeout and was moved to the background (ID: …)`, at the start of the result
+  or after the output the command printed. A launch the client refused never ran.
+- A launch ends with the task notification that names its task or its call, or
+  with a `TaskStop` or `KillShell` call that names its task and was not refused.
+- The current packet starts with the subagent's prompt, or with the latest message
+  the coordinator sent it while it worked. A launch from an earlier packet that
+  never reported does not keep later stops unchecked.
+
+When the transcript cannot be read, an id in it is not a string, or the wait is on
+something else, such as a Monitor, the stop counts as final and is checked. The
+final stop and the hand-back hold below are checked as before. A false claim made
+at a wait is held at the final stop.
 
 A subagent that reports through `SubagentHandback` delivers the report when it
 calls the tool, before it stops, so a continuation at the stop cannot change what
