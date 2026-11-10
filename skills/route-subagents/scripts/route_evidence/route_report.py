@@ -55,12 +55,13 @@ NAME_TOKEN = re.compile(r"[\s:]*([^\s,:;]+)")
 UNITS = {
     "client": "Claude Code subagent transcripts only; their layout is observed, not a documented API",
     "launch": "one subagent transcript whose first timestamp is inside the window",
-    "reviews": "verdict counts are reviews (launches of a review class or launches whose report carries "
-               "a contract verdict, a REVIEWED or a FOLLOWS line), not pieces of work",
+    "reviews": "verdict counts are reviews, not pieces of work: each report a launch handed back that carries "
+               "a contract verdict, a REVIEWED or a FOLLOWS line, and at least one per launch of a review class",
     "tokens": "the child's own requests, deduplicated by message id; advisor calls and tokens are counted "
               "separately",
     "cache_write_5m": "includes cache writes the transcript did not split by lifetime",
-    "minutes": "wall-clock time between the first and last transcript timestamps",
+    "minutes": "wall-clock time between the first and last transcript timestamps; a resumed launch includes "
+               "the wait between its rounds",
 }
 COST_BASIS = ("API list-price equivalent computed from the supplied prices file; not subscription quota; "
               "tiered or long-context prices are not modelled")
@@ -78,16 +79,31 @@ class Launch:
     advisor: Counter = field(default_factory=Counter)
     advisor_calls: int = 0
     by_model: dict = field(default_factory=lambda: defaultdict(Counter))
-    report: str = ""
+    # Each report the child handed back, oldest first: a resumed child hands back once a round.
+    reports: list = field(default_factory=list)
     has_meta: bool = False
     model: str | None = None
     effort: str | None = None
     cls: str | None = None
     name: str | None = None
-    # Filled in when the report is read as a review.
-    review: dict | None = None
+
+
+@dataclass
+class Review:
+    """One report read as a review; a reused reviewer gives one per round."""
+    launch: Launch
+    at: datetime
+    lines: dict
     subjects: list = field(default_factory=list)
-    follows: "Launch | None" = None
+    follows: "Review | None" = None
+
+    @property
+    def name(self) -> str | None:
+        return self.launch.name
+
+    @property
+    def verdict(self) -> str:
+        return self.lines["verdict"]
 
 
 def parse_time(value: str, option: str) -> datetime:
@@ -140,7 +156,8 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
     texts: dict[str, list[str]] = {}
     order: list[str] = []
     tools: set[str] = set()
-    handback = None
+    handbacks: dict[Any, list] = {}
+    refused: set[str] = set()
     malformed = 0
     with path.open(encoding="utf-8", errors="replace") as stream:
         for line in stream:
@@ -163,9 +180,16 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
             elif moment is not None:
                 launch.end = max(launch.end, moment)
             message = entry.get("message")
-            if entry.get("type") != "assistant" or not isinstance(message, dict):
+            if not isinstance(message, dict):
                 continue
             content = message.get("content")
+            if entry.get("type") == "user":
+                # A tool result marked as an error means the call did not go through.
+                refused.update(block["tool_use_id"] for block in (content if isinstance(content, list) else ())
+                               if isinstance(block, dict) and block.get("type") == "tool_result"
+                               and block.get("is_error") is True and isinstance(block.get("tool_use_id"), str))
+            if entry.get("type") != "assistant":
+                continue
             for block in content if isinstance(content, list) else ():
                 if not isinstance(block, dict) or block.get("type") != "tool_use":
                     continue
@@ -173,7 +197,9 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
                     tools.add(block["id"])
                 supplied = block.get("input")
                 if block.get("name") == HANDBACK and isinstance(supplied, dict) and isinstance(supplied.get("message"), str):
-                    handback = supplied["message"]
+                    # A call repeated on a later line of its message is the same hand-back.
+                    key = block["id"] if isinstance(block.get("id"), str) else len(handbacks)
+                    handbacks.setdefault(key, [moment or launch.end, ""])[1] = supplied["message"]
             ident = message.get("id")
             if not isinstance(ident, str):
                 continue
@@ -203,7 +229,13 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
             else:
                 launch.own.update(tokens)
             launch.by_model[(role, name if isinstance(name, str) else None)].update(tokens)
-    launch.report = handback if handback is not None else ("\n".join(texts[order[-1]]) if order else "")
+    # A hand-back the client refused, for example one a hook held for a recheck, did not
+    # reach the caller; it stands only when the child sent no other.
+    sent = [key for key in handbacks if key not in refused] or list(handbacks)[-1:]
+    launch.reports = sorted(((at, report) for at, report in (handbacks[key] for key in sent)),
+                            key=lambda item: item[0])
+    if not launch.reports and order:
+        launch.reports = [(launch.end, "\n".join(texts[order[-1]]))]
     return launch
 
 
@@ -260,10 +292,13 @@ def review_lines(text: str) -> dict:
             name = match[1].strip().strip("`*_ ")
             if name:
                 follows.append(name)
+    # A line whose value is exactly one of the four words is the contract line; a
+    # sentence that also opens with `Verdict:` beside it is prose and decides nothing.
+    exact = {value for value in verdicts if value in VERDICTS}
     if not verdicts:
         verdict = NO_VERDICT
-    elif len(set(verdicts)) == 1 and verdicts[0] in VERDICTS:
-        verdict = verdicts[0]
+    elif len(exact) == 1:
+        verdict = exact.pop()
     else:
         verdict = UNRECOGNIZED
     return {"verdict": verdict, "reviewed": reviewed, "follows": follows[-1] if follows else None,
@@ -272,14 +307,34 @@ def review_lines(text: str) -> dict:
             "marks_review": bool(verdict in VERDICTS or reviewed or follows)}
 
 
-def _named(candidates: list[Launch], name: str, before: Launch) -> Launch | None:
-    """The latest launch of this name that started no later than `before`, else the latest one."""
+def _named(candidates: list[Launch], name: str, review: Review) -> Launch | None:
+    """The latest launch of this name that started no later than the review, else the latest one."""
     found = [launch for launch in candidates
-             if launch is not before and launch.name and launch.name.casefold() == name.casefold()]
+             if launch is not review.launch and launch.name and launch.name.casefold() == name.casefold()]
     if not found:
         return None
-    earlier = [launch for launch in found if launch.start <= before.start]
+    earlier = [launch for launch in found if launch.start <= review.at]
     return max(earlier or found, key=lambda launch: launch.start)
+
+
+def _followed(reviews: list[Review], name: str, review: Review) -> Review | None:
+    """The latest earlier review by this name; a reused reviewer follows its own earlier round."""
+    position = reviews.index(review)
+    for earlier in reversed(reviews[:position]):
+        if earlier.name and earlier.name.casefold() == name.casefold():
+            return earlier
+    return None
+
+
+def _reviews_of(launch: Launch, is_review_class: bool) -> list[Review]:
+    """The launch's reports that are reviews, oldest first."""
+    parsed = [Review(launch, at, review_lines(report)) for at, report in launch.reports]
+    found = [review for review in parsed
+             if review.lines["marks_review"] or (is_review_class and review.verdict != NO_VERDICT)]
+    if is_review_class and not found:
+        # A review-class launch is one review even when no report of it carries a line.
+        found = parsed[-1:] or [Review(launch, launch.end, review_lines(""))]
+    return found
 
 
 def _session_names(session: Path, classes: list[str] | None) -> set[str]:
@@ -344,7 +399,7 @@ def _verdict_table() -> dict:
     return {key: 0 for key in (*VERDICTS, NO_VERDICT, UNRECOGNIZED)}
 
 
-def _chains(reviews: list[Launch]) -> list[list[Launch]]:
+def _chains(reviews: list[Review]) -> list[list[Review]]:
     """Each path of reviews linked by FOLLOWS, oldest first; a lone review is no chain."""
     followed = {id(review.follows) for review in reviews if review.follows is not None}
     chains = []
@@ -394,32 +449,30 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
     for launch in launches:
         by_session[launch.session].append(launch)
     review_set = set(review_classes)
-    reviews = []
-    for launch in launches:
-        lines = review_lines(launch.report)
-        if launch.cls in review_set or lines["marks_review"]:
-            launch.review = lines
-            reviews.append(launch)
+    reviews = [review for launch in launches for review in _reviews_of(launch, launch.cls in review_set)]
+    reviews.sort(key=lambda review: review.at)
+    session_reviews = defaultdict(list)
+    for review in reviews:
+        session_reviews[review.launch.session].append(review)
 
     known_names: dict[Path, set[str]] = {}
     unresolved, outside, unresolved_follows = [], 0, 0
     for review in reviews:
-        peers = by_session[review.session]
-        for name in review.review["reviewed"]:
-            subject = _named(peers, name, review)
+        session = review.launch.session
+        for name in review.lines["reviewed"]:
+            subject = _named(by_session[session], name, review)
             if subject is not None:
                 if subject not in review.subjects:
                     review.subjects.append(subject)
                 continue
-            if review.session not in known_names:
-                known_names[review.session] = _session_names(review.session, classes)
-            if name.casefold() in known_names[review.session]:
+            if session not in known_names:
+                known_names[session] = _session_names(session, classes)
+            if name.casefold() in known_names[session]:
                 outside += 1
             else:
                 unresolved.append({"review": review.name, "name": name})
-        if review.review["follows"]:
-            review.follows = _named([peer for peer in peers if peer.review is not None],
-                                    review.review["follows"], review)
+        if review.lines["follows"]:
+            review.follows = _followed(session_reviews[session], review.lines["follows"], review)
             unresolved_follows += review.follows is None
 
     def key(launch):
@@ -431,13 +484,13 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
     reviewed = {id(subject) for review in reviews for subject in review.subjects}
     verdicts = defaultdict(lambda: {"first": _verdict_table(), "follow_up": _verdict_table()})
     for review in reviews:
-        split = "follow_up" if review.review["follows"] else "first"
+        split = "follow_up" if review.lines["follows"] else "first"
         for group in {key(subject) for subject in review.subjects}:
-            verdicts[group][split][review.review["verdict"]] += 1
+            verdicts[group][split][review.verdict] += 1
     chains = _chains(reviews)
     chains_by_group = defaultdict(list)
     for chain in chains:
-        sequence = [review.review["verdict"] for review in chain]
+        sequence = [review.verdict for review in chain]
         subjects = sorted({subject.name or "?" for review in chain for subject in review.subjects})
         entry = {"length": len(chain), "verdicts": sequence, "reviews": [review.name or "?" for review in chain],
                  "reviewed": subjects, "repeated_rework": sum(v in REWORK for v in sequence) >= 2}
@@ -481,15 +534,15 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
               "malformed_lines_skipped": sum(launch.malformed for launch in launches),
               "advisor_calls": sum(launch.advisor_calls for launch in launches),
               "reviews": len(reviews),
-              "reviews_without_verdict_line": sum(r.review["verdict"] == NO_VERDICT for r in reviews),
-              "reviews_with_unrecognized_verdict": sum(r.review["verdict"] == UNRECOGNIZED for r in reviews),
+              "reviews_without_verdict_line": sum(r.verdict == NO_VERDICT for r in reviews),
+              "reviews_with_unrecognized_verdict": sum(r.verdict == UNRECOGNIZED for r in reviews),
               "reviews_without_resolved_subject": sum(not r.subjects for r in reviews),
               "reviews_with_unresolved_names": len({entry["review"] for entry in unresolved}),
               "unresolved_reviewed_names": unresolved,
               "reviewed_names_outside_window": outside,
               "follow_ups_with_unresolved_follows": unresolved_follows,
               "chains": len(chains),
-              "chains_with_repeated_rework": sum(sum(r.review["verdict"] in REWORK for r in chain) >= 2
+              "chains_with_repeated_rework": sum(sum(r.verdict in REWORK for r in chain) >= 2
                                                  for chain in chains)}
     result = {"status": "ok", **header, "totals": totals, "classes": rows}
     if prices is not None:

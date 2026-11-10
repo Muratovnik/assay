@@ -240,7 +240,8 @@ so the command reads each field defensively and counts the lines it skips.
   its `model` alias, `effort` and `agentType`. The class and the child's name
   come from `description`, read exactly as the launch check reads it.
 - Usage is `message.usage` on assistant lines. One message is written on
-  several lines, so usage is counted once per `message.id`. When
+  several lines, so usage is counted once per `message.id`, from its last line:
+  an earlier line can hold a smaller output count. When
   `usage.iterations` is present it splits the request; an iteration of type
   `advisor_message` is an advisor call, counted apart from the child's tokens.
 - Cache writes come from `cache_creation.ephemeral_5m_input_tokens` and
@@ -248,5 +249,10 @@ so the command reads each field defensively and counts the lines it skips.
   counts as 5-minute writes.
 - Tool calls are distinct `tool_use` ids; start and end are the first and last
   `timestamp` of the file.
-- The child's report is the `message` of its last `SubagentHandback` call, or
-  its last assistant text when it made none.
+- A child's report is the `message` of a `SubagentHandback` call. A child that
+  is resumed keeps writing to the same file and hands back once per round, so
+  one file can hold several reports; a child that made no such call has one
+  report, its last assistant text. A call whose `tool_result` carries
+  `is_error` did not reach the caller, as when a hook holds a hand-back for a
+  recheck, and counts only when the child sent no other. Minutes run from the file's first timestamp
+  to its last and so include the wait between rounds.

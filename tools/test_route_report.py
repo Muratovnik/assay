@@ -98,17 +98,20 @@ class RouteReportTests(unittest.TestCase):
         return code, json.loads(out.getvalue())
 
     def scenario(self):
-        # alfi: one message written on two lines (same id, same usage), a repeated tool id,
-        # a request split into an own iteration and an advisor iteration, a malformed line.
+        # alfi: one message written on two lines (same id; the first line's output count is
+        # still partial, the last line's usage stands), a repeated tool id, a request split
+        # into an own iteration and an advisor iteration, a malformed line. The split
+        # request's top level repeats its own iteration, as transcripts do, and is not
+        # counted on top of it.
         first_usage = usage(input=10, output=5, cache_read=100, write_5m=20, write_1h=30)
-        split = usage(iterations=[
+        split = usage(input=1, output=2, iterations=[
             {"type": "message", **usage(input=1, output=2)},
             {"type": "advisor_message", "model": "claude-sonnet-test", **usage(input=50, output=7)},
         ])
         self.launch("build: alfi — fix the parser", [
             {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "do it"}},
             assistant(1, "m1", "claude-opus-test", [{"type": "tool_use", "id": "t1", "name": "Read", "input": {}}],
-                      first_usage),
+                      usage(input=10, output=1, cache_read=100, write_5m=20, write_1h=30)),
             assistant(1, "m1", "claude-opus-test", [{"type": "tool_use", "id": "t2", "name": "Edit", "input": {}},
                                                     {"type": "tool_use", "id": "t1", "name": "Read", "input": {}}],
                       first_usage),
@@ -207,6 +210,87 @@ class RouteReportTests(unittest.TestCase):
         first = self.group(result, "build")["reviews_of_this_work"]["first"]
         self.assertEqual({k: v for k, v in first.items() if v}, {"unrecognized_verdict": 1})
 
+    def test_a_reused_reviewer_gives_one_review_per_round_and_follows_itself(self):
+        self.launch("build: alfi — work", [
+            {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "x"}},
+            assistant(1, "w1", "claude-opus-test", text("done"), usage(input=1)),
+        ])
+        # One transcript, three rounds; the first hand-back is written on two lines of its message.
+        first = handback("VERDICT: fix-first\nREVIEWED: alfi", "h1")
+        self.launch("check: kolo — review alfi", [
+            {"type": "user", "timestamp": at(10), "message": {"role": "user", "content": "review"}},
+            assistant(11, "r1", "claude-sonnet-test", first, usage(input=1)),
+            assistant(11, "r1", "claude-sonnet-test", first, usage(input=1)),
+            {"type": "user", "timestamp": at(20), "message": {"role": "user", "content": "the repair"}},
+            assistant(21, "r2", "claude-sonnet-test",
+                      handback("VERDICT: fix-first\nREVIEWED: alfi\nFOLLOWS: kolo", "h2"), usage(input=1)),
+            {"type": "user", "timestamp": at(30), "message": {"role": "user", "content": "the second repair"}},
+            assistant(31, "r3", "claude-sonnet-test",
+                      handback("VERDICT: ship\nREVIEWED: alfi\nFOLLOWS: kolo", "h3"), usage(input=1)),
+        ], model="sonnet", effort="medium")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        build = self.group(result, "build")
+        verdicts = build["reviews_of_this_work"]
+        self.assertEqual({k: v for k, v in verdicts["first"].items() if v}, {"fix-first": 1})
+        self.assertEqual({k: v for k, v in verdicts["follow_up"].items() if v}, {"fix-first": 1, "ship": 1})
+        self.assertEqual(build["chains"], [{"length": 3, "verdicts": ["fix-first", "fix-first", "ship"],
+                                            "reviews": ["kolo", "kolo", "kolo"], "reviewed": ["alfi"],
+                                            "repeated_rework": True}])
+        totals = result["totals"]
+        self.assertEqual((totals["reviews"], totals["follow_ups_with_unresolved_follows"]), (3, 0))
+        self.assertEqual(self.group(result, "check")["launches"], 1)
+
+    def test_a_hand_back_the_client_refused_is_not_a_second_review(self):
+        self.launch("build: alfi — work", [
+            {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "x"}},
+            assistant(1, "w1", "claude-opus-test", text("done"), usage(input=1)),
+        ])
+        # A hook held the first hand-back, so the reviewer sent its report again.
+        self.launch("check: kolo — review alfi", [
+            {"type": "user", "timestamp": at(10), "message": {"role": "user", "content": "review"}},
+            assistant(11, "r1", "claude-sonnet-test", handback("VERDICT: ship\nREVIEWED: alfi", "h1"), usage(input=1)),
+            {"type": "user", "timestamp": at(11), "message": {"role": "user", "content": [
+                {"type": "tool_result", "tool_use_id": "h1", "is_error": True, "content": "held once"}]}},
+            assistant(12, "r2", "claude-sonnet-test",
+                      handback("VERDICT: fix-first\nREVIEWED: alfi", "h2"), usage(input=1)),
+            {"type": "user", "timestamp": at(12), "message": {"role": "user", "content": [
+                {"type": "tool_result", "tool_use_id": "h2", "content": "delivered"}]}},
+        ], model="sonnet", effort="medium")
+        # A reviewer whose only hand-back was refused still has that report.
+        self.launch("check: lavi — review alfi", [
+            {"type": "user", "timestamp": at(20), "message": {"role": "user", "content": "review"}},
+            assistant(21, "r3", "claude-sonnet-test", handback("VERDICT: rethink\nREVIEWED: alfi", "h3"), usage(input=1)),
+            {"type": "user", "timestamp": at(21), "message": {"role": "user", "content": [
+                {"type": "tool_result", "tool_use_id": "h3", "is_error": True, "content": "held once"}]}},
+        ], model="sonnet", effort="medium")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        first = self.group(result, "build")["reviews_of_this_work"]["first"]
+        self.assertEqual({k: v for k, v in first.items() if v}, {"fix-first": 1, "rethink": 1})
+        self.assertEqual(result["totals"]["reviews"], 2)
+
+    def test_follows_resolves_only_to_an_earlier_review(self):
+        self.review("check: kolo — review", 10, "VERDICT: fix-first\nFOLLOWS: lavi")
+        self.review("check: lavi — review", 20, "VERDICT: ship\nFOLLOWS: kolo")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        totals = result["totals"]
+        # kolo names a review that came later: unresolved, so the two cannot form a cycle.
+        self.assertEqual((totals["reviews"], totals["follow_ups_with_unresolved_follows"], totals["chains"]),
+                         (2, 1, 1))
+
+    def test_a_review_class_launch_without_lines_is_one_review_whatever_its_rounds(self):
+        self.launch("check: kolo — review", [
+            {"type": "user", "timestamp": at(10), "message": {"role": "user", "content": "review"}},
+            assistant(11, "r1", "claude-sonnet-test", handback("Which base did you mean?", "h1"), usage(input=1)),
+            assistant(21, "r2", "claude-sonnet-test", handback("Nothing blocks, in my view.", "h2"), usage(input=1)),
+        ], model="sonnet", effort="medium")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        totals = result["totals"]
+        self.assertEqual((totals["reviews"], totals["reviews_without_verdict_line"]), (1, 1))
+
     def test_without_a_table_any_class_shaped_word_is_a_class(self):
         self.scenario()
         self.launch("Explore the code", [
@@ -290,6 +374,10 @@ class RouteReportTests(unittest.TestCase):
             "I would ship this.": "no_verdict_line",
             "VERDICT: ship.": "unrecognized_verdict",
             "VERDICT: ship\nVERDICT: rethink": "unrecognized_verdict",
+            # A reviewer's summary sentence beside the contract line decides nothing.
+            "**Verdict: fix-first.** The adapter holds.\n\nVERDICT: fix-first": "fix-first",
+            "Verdict: mostly fine, ship after the fix\nVERDICT: fix-first": "fix-first",
+            "Verdict: ship it\nVerdict: or rethink": "unrecognized_verdict",
         }
         for report, expected in cases.items():
             with self.subTest(report=report):
