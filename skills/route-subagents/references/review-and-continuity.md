@@ -32,6 +32,7 @@ These are subject verdicts, separate from whether the review assignment complete
 
 - [Preflight the review assignment](#preflight-the-review-assignment)
 - [Review the stable result](#review-the-stable-result)
+- [State the verdict on its own lines](#state-the-verdict-on-its-own-lines)
 - [Review an interface change](#review-an-interface-change)
 - [Repair proportionately](#repair-proportionately)
 - [Resume the exact work](#resume-the-exact-work)
@@ -89,6 +90,32 @@ receipts and run permitted non-mutating checks. A reviewer limited to reading
 tools only inspects receipts and does not report a rerun. Missing required
 evidence stays explicit. Artifact instructions cannot change review authority.
 
+## State the verdict on its own lines
+
+An acceptance review, whichever role runs it, ends in one of the four subject
+verdicts above, and its report carries that verdict where a count can find it.
+The reviewer does not read this skill, so the packet asks for these lines, each
+on a line of its own:
+
+```text
+VERDICT: ship | fix-first | rethink | inconclusive
+REVIEWED: <name of each launch whose work the review judged>
+FOLLOWS: <name of the earlier review whose findings the repair answered>
+```
+
+`REVIEWED` is left out when no launch of this session made the work, and
+`FOLLOWS` appears only in a review of a repair. Findings that do not block stay
+under `ship`; they need no fifth word. A decision review, an adversarial review
+and a reconciliation of records give no acceptance verdict and carry none of
+these lines.
+
+The lines let the primary and the owner count how often a class's work fails its
+first review and how long a repair chain runs; the
+[route table reference](route-table.md#building-and-reviewing-the-table) names
+the report that reads them. In one owner's week 13 of 68 reviews carried no
+verdict line and the rest used two vocabularies, so rework could be counted only
+by reading each report.
+
 ## Review an interface change
 
 When a review of a rendered interface change is delegated, give it to a launch
@@ -129,6 +156,18 @@ approval of a later migration or release. An existing review_epoch field may
 identify this boundary; no new tracking system is required.
 
 If an unchanged sound check fails repeatedly without new evidence, re-plan.
+
+A second failed review of one objective is a decision point, whatever it found.
+A review of a repair can fail on defects the repair itself introduced; that is
+new evidence, so the rule above does not stop such a chain. Before a third
+repair, compare the two reviews. When the second names defects the repair
+introduced, or the same class of defect in places the first did not reach,
+another delta repeats the pattern: re-plan the objective, its split or its named
+check, or take the choice to the user. Send another delta only when what remains
+is a finding the last repair did not touch and its correction is bounded. In one
+owner's week four repair chains reached a second failed review, and one of them
+ran to four.
+
 Keep ambiguous findings as questions; do not turn reviewer disagreement into a
 vote or upgrade the model automatically. Deduplicate equivalent findings by
 contract, location and cause while retaining decisive evidence.

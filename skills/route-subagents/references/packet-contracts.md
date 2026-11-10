@@ -124,7 +124,11 @@ For review add the role-required mode, original brief, frozen contracts,
 candidate identity, scoped risk and receipts for primary-owned stateful gates,
 and ask for the files, hunks and receipts the reviewer actually read; the
 [result rules](outcome-and-repair-contracts.md#required-result-packet) say how a
-no-finding return without them counts. Do not supply the preferred verdict. For a finding repair send its location,
+no-finding return without them counts. Do not supply the preferred verdict. For
+an acceptance review also ask for the
+[verdict lines](review-and-continuity.md#state-the-verdict-on-its-own-lines), and
+name in the packet the launches whose work is judged and, when it reviews a
+repair, the earlier review. For a finding repair send its location,
 observed/required behavior, affected diff and named control, preserving the
 unchanged authority and contracts.
 
@@ -143,6 +147,16 @@ The packet asks for measured values with their widths and states, as the skill's
 [measurement section](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
 describes, and for the consumers the defect class reaches, as its
 [finish](../../ui-delivery/SKILL.md#common-execution-and-finish) describes; a
-screenshot the worker judged itself does not establish alignment. A packet
-without an interface follows only the rules above. A review of an interface
+screenshot the worker judged itself does not establish alignment.
+
+When the change touches a shared component or a layout rule, the packet lists
+its consumers and asks the worker to compare the base with the result across the
+variants a reviewer will try, not only those the complaint names: the widths
+between the named ones, each locale, pointer and keyboard, long and short
+content. The test the worker adds must fail on the base. In one owner's week, 12
+of 21 failed first reviews rested on a defect the worker's own check could not
+see, and the failing share fell from 13 of 18 to 8 of 27 once packets asked for
+a test that fails on the base.
+
+A packet without an interface follows only the rules above. A review of an interface
 change follows [review and continuity](review-and-continuity.md#review-an-interface-change).
