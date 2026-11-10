@@ -78,6 +78,7 @@ class SourceCheckTests(unittest.TestCase):
 
     def feedback(self, result, event="Stop"):
         self.assertNotIn("decision", result)
+        self.assertIn("hookSpecificOutput", result, "the check said nothing")
         output = result["hookSpecificOutput"]
         self.assertEqual({"hookEventName", "additionalContext"}, set(output))
         self.assertEqual(event, output["hookEventName"])
@@ -225,6 +226,49 @@ class SourceCheckTests(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertIn("researcher.py: only lines 1-200, 201-400 of 900",
                               self.feedback(self.stop(prompt(), *chunks, said(line))))
+
+    def test_common_report_forms_tie_the_claim_to_every_file_they_list(self):
+        files = {"parser": "C:\\work\\src\\parser.py", "reports": "C:\\work\\src\\reports.py",
+                 "hooks": "C:\\work\\docs\\how-to\\hooks.md", "skill": "C:\\work\\skills\\pace-log\\SKILL.md",
+                 "classify": "C:\\work\\classify.py", "agents": "C:\\work\\inputs\\instructions\\AGENTS.md"}
+        partial = [read(f"p{n}", 1, 200, 900, limit=200, path=path) for n, path in enumerate(files.values())]
+        whole = [read(f"w{n}", 1, 900, 900, path=path) for n, path in enumerate(files.values())]
+        forms = {
+            "| `parser.py` | read in full |": ["parser.py"],
+            "| parser.py | целиком | 900 строк |": ["parser.py"],
+            "| `inputs/instructions/AGENTS.md` | Read in full |": ["AGENTS.md"],
+            "Read parser.py, reports.py and hooks.md in full.": ["parser.py", "reports.py", "hooks.md"],
+            "Я прочитал parser.py, reports.py и hooks.md целиком.": ["parser.py", "reports.py", "hooks.md"],
+            "полностью прочитаны README, `skills/pace-log/SKILL.md`, `classify.py`": ["SKILL.md", "classify.py"],
+            "parser.py, read in full, sets the default.": ["parser.py"],
+            "Read parser.py in full, reports.py too.": ["parser.py", "reports.py"],
+            "parser.py — прочитан целиком, reports.py — тоже": ["parser.py", "reports.py"],
+            "Read the parser in full (`src/parser.py`).": ["parser.py"],
+            "Прочитал целиком справку по хукам (docs/how-to/hooks.md).": ["hooks.md"],
+            "[the parser](C:/work/src/parser.py) read in full.": ["parser.py"],
+            "Read parser.py in full (approx. 900 lines).": ["parser.py"],
+        }
+        for line, names in forms.items():
+            with self.subTest(line=line):
+                text = self.feedback(self.stop(prompt(), *partial, said(line)))
+                for name in names:
+                    self.assertIn(f"{name}: only lines 1-200 of 900", text)
+                self.assertEqual({}, self.stop(prompt(), *whole, said(line)))
+
+    def test_a_range_counts_only_when_it_is_attached_to_the_name(self):
+        cut = read("r1", 1, 200, 900, limit=200, path="C:\\work\\src\\parser.py")
+        for line in ("Read parser.py in full and found the bug at line 120.", "Read parser.py in full (see line 40).",
+                     "Read parser.py in full - the tokenizer is at lines 10-20."):
+            with self.subTest(line=line):
+                self.assertIn("parser.py: only lines 1-200 of 900", self.feedback(self.stop(prompt(), cut, said(line))))
+        longer = read("r2", 1, 400, 900, limit=400, path="C:\\work\\src\\parser.py")
+        for line in ("Read parser.py:120-380 in full.", "[parser.py#L10-L20](parser.py#L10-L20) read in full.",
+                     "parser.py lines 1–400 read in full.", "parser.py (1–400) read in full."):
+            with self.subTest(line=line):
+                self.assertEqual({}, self.stop(prompt(), longer, said(line)))
+        # The same reads leave a claim about the whole file contradicted.
+        self.assertIn("parser.py: only lines 1-400 of 900",
+                      self.feedback(self.stop(prompt(), longer, said("parser.py read in full."))))
 
     def test_a_file_never_read_with_the_read_tool_stays_silent(self):
         shell = tool("Bash", {"command": f"cat {SOURCE}"}, "b1")

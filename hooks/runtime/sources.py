@@ -38,14 +38,18 @@ SHELLS = frozenset({"Bash", "PowerShell"})
 CLAIM = re.compile(r"целиком|полностью|in full\b|in its entirety|entire(?:ly)?\b|end to end|cover to cover"
                    r"|from start to finish|whole (?:file|page|paper|article|document|text|source)", re.I)
 NUMBERED = re.compile(r"^\s*(\d+)\t", re.M)
-# The parts of a claim line that say which file it is about; see _clauses.
+# The parts of a claim line that say which file it is about; see _tied.
 SENTENCE = re.compile(r"[;|]|[.!?](?=\s)")
-ASIDE = re.compile(r"\([^()\n]*\)")
+# A parenthesis, but not the target of a Markdown link, which belongs to the text around it.
+ASIDE = re.compile(r"(?<!\])\([^()\n]*\)")
 QUOTED = re.compile(r'"[^"\n]*"|«[^»\n]*»|“[^”\n]*”')
 TOKEN = re.compile(r"[^\s`'\"*()\[\]<>,;|«»“”]+")
 LINE_SUFFIX = re.compile(r"(?::\d[\d\-–—]*|#L\d[\w\-–—]*)?[.:]*$")
-ATTACHED = re.compile(r"(?::|#L)(\d+)(?:[-–—]L?(\d+))?")
-WORDED = re.compile(r"\b(?:lines?|строк[аи]?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?|\((\d+)\s*[-–—]\s*(\d+)\)", re.I)
+# What may stand beside a file name in a list item: joining words and punctuation.
+JOINING = re.compile(r"(?:[\W_]|\b(?:and|or|also|too|as well|и|или|а также|тоже|также)\b)*", re.I)
+# A line range stated right after a file name: nothing but punctuation may come between.
+RANGE = re.compile(r"[^\w\s(]*\s*(?::(\d+)(?:[-–—](\d+))?|#L(\d+)(?:[-–—]L?(\d+))?"
+                   r"|(?:lines?|строк[аи]?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?|\((\d+)\s*[-–—]\s*(\d+)\))", re.I)
 
 FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
               "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
@@ -216,33 +220,9 @@ def _blank(pattern, text):
     return pattern.sub(lambda match: " " * len(match[0]), text)
 
 
-def _clauses(line):
-    """(texts whose files a claim word names, in order of preference, the clause) for each claim on a line.
-
-    A line splits into sentences at `;`, `|` and a sentence end, and a sentence
-    into clauses at its commas, except that a colon after the claim word keeps
-    the rest of the sentence, a list, with the claim. A file named inside a
-    parenthesis belongs to it alone; a claim inside one names the parenthesis's
-    files, or the clause's when it names none. A claim word inside quotation
-    marks quotes something and claims nothing. Every text has the clause's length.
-    """
-    for sentence in SENTENCE.split(line):
-        outer, bounds, start = _blank(ASIDE, sentence), [], 0
-        for comma in [match.start() for match in re.finditer(",", outer)] + [len(outer)]:
-            if comma < start:
-                continue
-            claim = _claim(outer[start:comma])
-            if claim and ":" in outer[start + claim.end():comma]:
-                comma = len(outer)
-            bounds.append((start, comma))
-            start = comma + 1
-        for first, last in bounds:
-            part, whole = outer[first:last], sentence[first:last]
-            if _claim(part):
-                yield [part], whole
-            for aside in ASIDE.finditer(whole):
-                if _claim(aside[0]):
-                    yield [" " * aside.start() + aside[0] + " " * (len(whole) - aside.end()), part], whole
+def _only(text, start, end):
+    """The text with everything outside start..end blanked."""
+    return " " * start + text[start:end] + " " * (len(text) - end)
 
 
 def _claim(text):
@@ -250,7 +230,7 @@ def _claim(text):
 
 
 def _named(text, paths):
-    """(start, end of the name, matched read paths) of each file reference in a text.
+    """(start, end of the name, end of the token, matched read paths) of each file reference in a text.
 
     A path, or its tail from a directory on, names the read files it ends;
     only without one does a bare file name of four or more characters name every
@@ -264,20 +244,90 @@ def _named(text, paths):
                   if "/" in token and (plain == token or plain.endswith("/" + token.lstrip("/")))]
         weak = [path for path, plain in paths.items() if len(token) >= 4 and plain.rsplit("/", 1)[-1] == token]
         if strong or weak:
-            found.append((match.start(), match.start() + cut, strong or weak))
+            found.append((match.start(), match.start() + cut, match.end(), strong or weak))
     return found
 
 
+def _tied(text, paths):
+    """The file references of a line that a claim on it speaks of.
+
+    The line splits into sentences at `;`, `|` and a sentence end outside
+    parentheses, and a sentence into clauses at its commas; a colon after the
+    claim word keeps the rest of the sentence, a list, with the claim. A claim
+    names the files of its clause, with the clauses before it that name files too
+    and the list items after it, which hold only file names and joining words
+    (`and`, `too`, `тоже`). A claim whose clause names no file names, in turn: a
+    parenthesis of that clause holding only file names; the list item just
+    before it, when the claim opens its clause, as in `parser.py, read in full,`;
+    in a table row, the first cell that names a file. A file named inside any
+    other parenthesis belongs to it alone, and a claim inside one names its
+    files, or the clause's. A claim word inside quotation marks claims nothing.
+    """
+    outer = _blank(ASIDE, text)
+    refs, tied = _named(outer, paths), []
+
+    def within(first, last):
+        return [ref for ref in refs if first <= ref[0] < last]
+
+    def item(first, last, found=None):
+        found = within(first, last) if found is None else found
+        rest = text[first:last]
+        for start, _, end, _ in found:
+            rest = rest[:start - first] + " " * (end - start) + rest[end - first:]
+        return bool(found) and bool(JOINING.fullmatch(rest))
+
+    sentences, start = [], 0
+    for match in [*SENTENCE.finditer(outer), None]:
+        sentences.append((start, match.start() if match else len(outer)))
+        start = match.end() if match else len(outer)
+    for first, last in sentences:
+        clauses, start = [], first
+        for comma in [match.start() + first for match in re.finditer(",", outer[first:last])] + [last]:
+            if comma < start:
+                continue
+            claim = _claim(outer[start:comma])
+            if claim and ":" in outer[start + claim.end():comma]:
+                comma = last
+            clauses.append((start, comma))
+            start = comma + 1
+        for index, (begin, end) in enumerate(clauses):
+            claim, asides = _claim(outer[begin:end]), [m for m in ASIDE.finditer(text) if begin <= m.start() < end]
+            if claim:
+                own = within(begin, end)
+                if own:
+                    tied += own
+                    back = index - 1
+                    while back >= 0 and within(*clauses[back]):
+                        tied += within(*clauses[back])
+                        back -= 1
+                else:
+                    listed = [ref for m in asides for ref in [_named(_only(text, m.start(), m.end()), paths)]
+                              if item(m.start() + 1, m.end() - 1, ref)]
+                    head = len(outer[begin:begin + claim.start()].split()) <= 1
+                    if listed:
+                        tied += [ref for found in listed for ref in found]
+                    elif index and head and item(*clauses[index - 1]):
+                        tied += within(*clauses[index - 1])
+                    elif text.lstrip().startswith("|"):
+                        tied += next((within(*cell) for cell in sentences if within(*cell)), [])
+                ahead = index + 1
+                while ahead < len(clauses) and item(*clauses[ahead]):
+                    tied += within(*clauses[ahead])
+                    ahead += 1
+            for aside in asides:
+                if _claim(aside[0]):
+                    tied += _named(_only(text, aside.start(), aside.end()), paths) or within(begin, end)
+    return list({ref[0]: ref for ref in tied}.values())
+
+
 def _wanted(text):
-    """The line range stated right after a file name, as (first, last), or None for the whole file."""
-    match = ATTACHED.match(text)
-    if match:
-        return int(match[1]), int(match[2] or match[1])
-    match = WORDED.search(text)
+    """The line range a text states right at its start, as (first, last), or None for the whole file."""
+    match = RANGE.match(text)
     if not match:
         return None
-    first = int(match[1] or match[3])
-    return first, int(match[2] or match[4] or first)
+    numbers = [int(group) if group else None for group in match.groups()]
+    first, last = next((numbers[i], numbers[i + 1]) for i in range(0, len(numbers), 2) if numbers[i] is not None)
+    return first, last or first
 
 
 def _covers(reads, wanted):
@@ -297,23 +347,18 @@ def _covers(reads, wanted):
 def _claimed(line, reads):
     """(name, reads) of each file a claim on this line names and the transcript shows read short of what it names."""
     paths = {path: path.replace("\\", "/") for path in reads}
-    found = []
-    for texts, whole in _clauses(line.replace("\\", "/")):
-        references = next((named for named in (_named(text, paths) for text in texts) if named), [])
-        starts = sorted(start for start, _, _ in _named(whole, paths))
-        for start, stop, candidates in references:
-            # A range belongs to the reference it follows, up to the next reference of the clause.
-            end = next((other for other in starts if other > start), len(whole))
-            wanted = _wanted(whole[stop:end])
-            if not any(_covers(reads[path], wanted) for path in candidates):
-                found += [(re.split(r"[\\/]", path)[-1], reads[path]) for path in candidates]
+    text, found = line.replace("\\", "/"), []
+    for _, stop, _, candidates in _tied(text, paths):
+        wanted = _wanted(text[stop:])
+        if not any(_covers(reads[path], wanted) for path in candidates):
+            found += [(re.split(r"[\\/]", path)[-1], reads[path]) for path in candidates]
     return found
 
 
 def contradicted(claims, reads, fetched_urls, shell):
     """Each claimed source the transcript shows read only in part or only through WebFetch.
 
-    A claim names the files its own clause names (see _clauses). A bare file name
+    A claim names the files _tied finds for it on its line. A bare file name
     stands for every read file of that name, and a path or its tail for the
     files it ends; the claim holds when one of them was read in full, or read
     over the line range the claim states right after the name.

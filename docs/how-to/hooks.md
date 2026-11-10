@@ -322,21 +322,43 @@ whose `Read` calls returned only part of it, or a URL opened only through
 stands, and one line saying what was actually read is enough when nothing else
 changes: unlike the gate's closing words, that line corrects a claim.
 
-A claim is about the file its own clause names. A line splits into sentences at
-`;`, `|` and a sentence end, and a sentence splits into clauses at its commas. A
-colon after the claim word keeps the list that follows with the claim. A file
-named inside a parenthesis belongs to that parenthesis, and a claim word inside
-quotation marks is a quotation. A path, or its end from a directory on, names the
-read files it ends. A bare file name names every read file with exactly that name,
-and the claim holds when one of them was read in full. A range stated right after
-the name, such as `parser.py:120-380`, `#L10-L20`, `lines 1–400` or `(1–900)`, is
-compared with the reads of that range. Replayed over the holds in one owner's
-transcripts of the two weeks to 10 November 2026, 15 of 23 no longer fire, and each
-of those was false. About half of the 8 left are true. The others use the claim word
-for something other than reading, such as a test file run in full, or name the part
-read by a symbol instead of lines. The cost is a claim whose file is in
-another clause, as in "I opened `parser.py`, and read it in full", which is no
-longer checked.
+A claim is about the files its own clause names. A line splits into sentences at
+`;`, `|` and a sentence end outside parentheses, and a sentence splits into clauses
+at its commas. These forms tie a claim to the files around it:
+
+- the files of its clause, and those of the clauses before it that also name files:
+  `Read parser.py, reports.py and hooks.md in full`;
+- the list items that follow it, which hold only file names and joining words such
+  as `and`, `too` or `тоже`: `Read parser.py in full, reports.py too`;
+- the list after a colon that follows the claim word: `Read in full: a.md, b.md`;
+- when its clause names no file: a parenthesis there that holds only file names
+  (`Read the parser in full (src/parser.py)`); the list item just before a clause
+  the claim opens (`parser.py, read in full, sets the default`); in a table row,
+  the first cell that names a file (`| parser.py | read in full |`).
+
+A Markdown link's target counts as part of the text around it. A file named in any
+other parenthesis belongs to that parenthesis, and a claim word inside quotation
+marks is a quotation. A path, or its end from a directory on, names the read files
+it ends. A bare file name names every read file with exactly that name, and the
+claim holds when one of them was read in full. A line range counts only when it
+follows the name with nothing but punctuation between them, as in
+`parser.py:120-380`, `parser.py#L10-L20`, `parser.py lines 1–400` or
+`parser.py (1–900)`; it is then compared with the reads of that range. A line
+number elsewhere in the sentence is not a range: `Read parser.py in full and found
+the bug at line 120` is held to the whole file.
+
+Replayed over the holds in one owner's transcripts of the two weeks to 10 November
+2026, 15 of 24 no longer fire, and each of those was false. About half of the 9 left
+are true. The others use the claim word for something other than reading, such as
+a test file run in full, or name the part read by a symbol instead of lines. The
+cost is that a claim is no longer checked when the file it means is named outside
+these forms:
+
+- in another clause that is not a list item, as in "I opened `parser.py`, and read
+  it in full" or "Read in full the parser, which lives in parser.py";
+- in another sentence, as in "Opened `parser.py`. Read it in full.";
+- in a parenthesis that also holds other words, as in "done in full (`tokenize` in
+  `src/parser.py`)".
 
 The check fires only on positive evidence. A file printed with a shell command leaves
 no `Read` in the transcript, and a URL that a shell command also names counts as
