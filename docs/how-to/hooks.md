@@ -214,6 +214,19 @@ The same holds for the [source](#source-checks-in-claude-code),
 [branch](#branch-check-in-claude-code) and [report](#report-check-in-claude-code)
 checks.
 
+A subagent that ends its turn while a background launch of its own turn has not
+reported back is waiting, not answering, so none of these checks runs at that
+stop. Its turn lasts from the packet to the final answer, because the task
+notification that resumes it does not start a new turn. Without this rule every
+wait was checked like a final answer, and the same line was quoted again at each
+wait: three workers in one day got a note at every wait for their own gate run.
+A launch is a call with `run_in_background` or a command Claude Code moved to the
+background, and it ends with the task notification that names it. A refused
+launch never ran. When the transcript cannot be read or the wait is on something
+else, such as a Monitor, the stop counts as final and is checked. The final stop
+and the hand-back hold below are checked as before. A false claim made at a wait
+is held at the final stop.
+
 A subagent that reports through `SubagentHandback` delivers the report when it
 calls the tool, before it stops, so a continuation at the stop cannot change what
 the parent received. The feedback rarely reaches such a subagent anyway: in one
@@ -536,8 +549,9 @@ command or agent launched in this turn still runs: in one owner's sessions from 
 October to 1 November 2026, 44 of 53 such notes came at a stop made to wait for one,
 and the agent wrote its report twice. A notification delivered as a prompt starts a
 turn, unless a background launch of this turn comes before it, so the edits made
-before the wait are still asked for at the stop after it. A subagent that stops has
-finished, so it is asked at once. The cost is that an agent that finishes without
+before the wait are still asked for at the stop after it. A subagent's wait gets no
+check at all, as [described above](#subagents), and its final stop is asked as
+before. The cost is that an agent that finishes without
 waiting for its background task gets no request for the line. A task is known by the
 client's words for a background launch; if those words change, the note simply comes
 at the earlier stop again.

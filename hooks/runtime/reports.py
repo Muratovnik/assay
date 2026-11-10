@@ -138,6 +138,23 @@ def _background(entries):
     return oldest, any(not names & notified for names in launches.values())
 
 
+def waiting(event):
+    """Whether a subagent stops to wait for background work of its own, so this stop is not its final answer.
+
+    The work is a background launch of the subagent's turn that no task
+    notification has reported finished. False when the transcript cannot be
+    read or names no such launch, so the stop checks then run as on a final stop.
+    """
+    path = event.get("agent_transcript_path")
+    if (event.get("hook_event_name") != "SubagentStop" or not event.get("agent_id")
+            or not isinstance(path, str) or not path or len(path) > 4_096):
+        return False
+    try:
+        return _background(_entries(path, True))[1]
+    except (OSError, ValueError):
+        return False
+
+
 def turn(path, *, subagent=False):
     """(edited code files, plans without the section, whether a background launch still runs) of the turn at a tail.
 
@@ -213,7 +230,8 @@ def stopped(event, rules=RULES, skills=None):
     if not scan:
         return {}
     edited, plans, running = scan
-    # A stop to wait for a background task is not the final message; a subagent that stops has finished.
+    # A stop to wait for a background task is not the final message. A subagent's such stop gets no checks
+    # at all (waiting); one that reaches this point is final, such as the hand-back the hold checks.
     waiting = running and name == "Stop"
     shown = {"report-verification": ("edited", edited if not (waiting or VERIFIED.search(last)) else []),
              "plan-existing": ("wrote", plans)}

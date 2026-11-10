@@ -37,6 +37,26 @@ def edited():
     return [tool("Edit", {"file_path": APP, "old_string": "a", "new_string": "b"}, "e1"), returned("e1", UPDATED.format(APP))]
 
 
+def said(text):
+    return {"type": "assistant", "isSidechain": True, "message": {"content": [{"type": "text", "text": text}]}}
+
+
+def launched(ident="b1", task="task1"):
+    """A gate started in the background, as Claude Code 2.1.317 answers it."""
+    return [tool("Bash", {"command": "python tools/check.py --all", "run_in_background": True}, ident),
+            returned(ident, f"Command running in background with ID: {task}. Output is being written to: x")]
+
+
+def notified(ident="b1", task="task1"):
+    """The task notification that resumes a subagent, in the shape its transcript records."""
+    return {"type": "user", "isSidechain": True, "isMeta": True, "origin": {"kind": "task-notification"},
+            "message": {"role": "user", "content": (
+                "[SYSTEM NOTIFICATION - NOT USER INPUT]\nThis is an automated background-task event.\n"
+                f"<task-notification>\n<task-id>{task}</task-id>\n<tool-use-id>{ident}</tool-use-id>\n"
+                "<status>completed</status>\n<summary>Background command completed (exit code 0)</summary>\n"
+                "</task-notification>")}}
+
+
 class HoldTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -131,6 +151,44 @@ class HoldTests(unittest.TestCase):
         self.worker(packet(), tool("SubagentHandback", {"message": REPORT}, "h0"), returned("h0", "Delivered."),
                     packet("One more fix, please."), *edited())
         self.assertIn("Assay report check", self.run_hook(self.stopping())["hookSpecificOutput"]["additionalContext"])
+
+    def test_a_subagent_waiting_on_its_own_background_run_is_checked_only_at_its_final_stop(self):
+        # The turn edits code, announces a skill it never loaded and claims a partial read in full,
+        # so a final stop has feedback from the gate, the source check and the report check.
+        work = [packet(), tool("Read", {"file_path": APP, "limit": 2}, "r1"), returned("r1", "1\ta\n2\tb\n"),
+                *edited(), said("Using `assay:code-change` for the parser.\n\nI read parser.py in full.")]
+        self.worker(*work, *launched(), said("The gate runs in the background; I end the turn until it reports."))
+        self.assertEqual({}, self.run_hook(self.stopping("The gate runs in the background.")))
+        # A second wait in the same turn, on a new launch after the first reported, is not checked either.
+        self.worker(*work, *launched(), notified(), *launched("b2", "task2"), said("Rerunning the gate."))
+        self.assertEqual({}, self.run_hook(self.stopping("Rerunning the gate.")))
+        # Once every launch has reported, the stop is final and checked as before.
+        self.worker(packet(), *edited(), *launched(), said("Waiting for the gate."), notified(), said(REPORT))
+        text = self.run_hook(self.stopping(REPORT))["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("Assay report check", text)
+        self.assertIn("this turn edited parser.py", text)
+        # A launch the client refused never ran, so it leaves nothing to wait for.
+        self.worker(packet(), *edited(), tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
+                    returned("b1", "Permission denied", error=True), said(REPORT))
+        self.assertIn("Assay report check", self.run_hook(self.stopping(REPORT))["hookSpecificOutput"]["additionalContext"])
+
+    def test_a_hand_back_during_the_wait_is_still_held(self):
+        self.worker(packet(), *edited(), *launched())
+        self.assertEqual({}, self.run_hook(self.stopping("Waiting for the gate.")))
+        # The hand-back is the subagent's answer, whatever still runs.
+        self.assertEqual("deny", self.run_hook(self.handing_back())["hookSpecificOutput"]["permissionDecision"])
+
+    def test_a_wait_the_hook_cannot_recognise_is_checked_as_a_final_stop(self):
+        self.worker(packet(), *edited(), *launched(), said("Waiting for the gate."))
+        self.assertEqual({}, self.run_hook(self.stopping("Waiting for the gate.")))
+        # A Monitor is not a launch the hook recognises, so the stop counts as final.
+        monitor = [tool("Monitor", {"command": "tail -f log", "timeout_ms": 270000}, "m1"),
+                   returned("m1", "Monitor started (task m1, expires in 4m 30s unless the source ends first).")]
+        self.worker(packet(), *edited(), *monitor, said("Watching the log."))
+        text = self.run_hook(self.stopping("Watching the log."))["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("Assay report check", text)
+        # A transcript that cannot be read shows no wait either.
+        self.assertFalse(reports.waiting({**self.stopping(), "agent_transcript_path": str(self.directory / "none.jsonl")}))
 
     def test_the_hold_refuses_with_the_note_and_shows_the_person_nothing(self):
         self.worker(packet(), *edited())

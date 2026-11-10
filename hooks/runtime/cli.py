@@ -302,8 +302,10 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 loaded = skill_gate.loaded(event, enabled, settings["state_dir"], **kwargs)
         if client == "claude" and not protected:
             if name in STOPS:
-                # A report already handed back reached the parent; a continuation cannot change it.
-                note = {} if handback.handed_back(event) else stop_feedback(event, rules, enabled, settings, kwargs)
+                # A report already handed back reached the parent; a continuation cannot change it. A subagent
+                # that stops to wait for its own background work has not answered yet: its final stop is checked.
+                note = ({} if handback.handed_back(event) or reports.waiting(event)
+                        else stop_feedback(event, rules, enabled, settings, kwargs))
             elif name == "PreToolUse" and rules.handback_hold and handback.handing_back(event):
                 # The stop checks run before the report is delivered, while a refusal can still change it;
                 # a retry or a session without a place for the key cannot be refused, so it skips them.
