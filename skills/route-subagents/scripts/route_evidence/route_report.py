@@ -88,7 +88,7 @@ class Launch:
     name: str | None = None
 
 
-@dataclass
+@dataclass(eq=False)  # two rounds with equal lines and time are still two reviews
 class Review:
     """One report read as a review; a reused reviewer gives one per round."""
     launch: Launch
