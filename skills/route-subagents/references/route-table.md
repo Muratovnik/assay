@@ -159,6 +159,8 @@ its keys: `{}` becomes `[]` and `{"Explore": "inherit"}` becomes `["Explore"]`.
 
 When a child's result needed rework at a stronger pair, record that with the
 outcome; repeated rework in one class is the signal to review its pair.
+[`route-report`](#building-and-reviewing-the-table) counts it from the
+launches' own transcripts.
 
 ## Enforcement
 
@@ -220,3 +222,47 @@ per-task expense comparisons.
 
 Refresh the sources first with `refresh` when the cache is stale; which sources
 add new models within days is visible in their `source_updated_at`.
+
+To review the table against what its launches did, run `route-report`. It reads
+Claude Code subagent transcripts only, makes no network request and writes
+nothing but its JSON output:
+
+```text
+python skills/route-subagents/scripts/benchmark_router.py --config LOCAL_CONFIG route-report --since 2026-11-04T16:00 --until 2026-11-11T00:00 --review-class check
+```
+
+`--since` is required; both bounds are ISO timestamps in UTC unless they carry an
+offset, and a launch belongs to the window its first transcript line starts in.
+With `--config`, a class is one of the table's classes and any other launch is
+unclassed; without it, any leading word shaped like a class name counts as one.
+`--projects-dir` defaults to `~/.claude/projects`. Another `--client` label, or
+a configuration for another client, is refused.
+
+For each class and requested pair, the report gives the number of launches, the
+median and total of tool calls, the median minutes, the child's own tokens by
+kind, and advisor calls with their tokens kept apart. A launch is a review when
+its class is a `--review-class` or its report carries a line of the verdict
+contract in [review and continuity](review-and-continuity.md). Each review
+counts under the class and pair of the launches its `REVIEWED` line names: the
+share of the class's launches that were reviewed, verdicts split into first
+reviews and follow-ups (a review with `FOLLOWS`), and reviews without a verdict
+line. Reviews linked by `FOLLOWS` form chains; a chain with two or more
+`fix-first` or `rethink` verdicts is listed by the child names involved, which
+is the repeated rework the table's review looks for. Verdict counts are
+reviews, not pieces of work: three reviews of one change count three times.
+Only the contract's lines are read, never prose; a verdict line with another
+value counts as unrecognized. Totals name the unclassed launches, the
+`REVIEWED` names that matched no launch of the session and the transcript lines
+that were not JSON and were skipped.
+
+Tokens are the measure. With `--prices FILE`, a JSON object mapping a fragment
+of the model id to `input`, `output` and `cache_read` dollars per million
+tokens and `cache_write_5m_multiplier` and `cache_write_1h_multiplier` of the
+input price, the report adds an API list-price equivalent per class. It is not
+subscription quota, does not model tiered or long-context prices, and names any
+model the file does not price.
+
+The command exits 0 with a report, 3 when no launch started in the window or
+the projects directory is missing, and 2 for invalid input. The transcript
+fields it reads are listed in
+[Claude Code mechanics](claude-code-routing.md#transcripts-route-report-reads).

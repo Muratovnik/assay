@@ -55,6 +55,26 @@ def request_document(path):
     return loads(sys.stdin.buffer.read(MAX_BYTES + 1).decode("utf-8")) if str(path) == "-" else read_document(Path(path))
 
 
+NO_TRANSCRIPTS = 3
+
+
+def route_report(args):
+    """Exit 0 for a report, NO_TRANSCRIPTS when no launch was found to report on."""
+    from route_evidence.route_report import parse_time, read_prices, report
+    # load_config validates the configuration and normalizes the route table it carries.
+    config = load_config(Path(args.config)) if args.config else {}
+    for label in (args.client, config.get("client")):
+        if label and label != "claude":
+            raise EvidenceError(f"route-report reads Claude Code transcripts only; client {label!r} is not supported")
+    table = config.get("routes")
+    result = report(args.projects_dir, parse_time(args.since, "--since"),
+                    parse_time(args.until, "--until") if args.until else None,
+                    classes=list(table["classes"]) if table else None, review_classes=args.review_class,
+                    prices=read_prices(args.prices) if args.prices else None)
+    print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
+    return 0 if result["status"] == "ok" else NO_TRANSCRIPTS
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     add_options(parser)
@@ -86,6 +106,15 @@ def main(argv=None):
     rc.add_argument("--harness")
     rc.add_argument("--match", help="keep rows whose model label contains this text")
     rc.add_argument("--band", type=float, default=0.07, help="score difference treated as indistinguishable")
+    rr = subs.add_parser("route-report", help="cost and review outcomes per route class from Claude Code "
+                                              "subagent transcripts; read-only, no network")
+    rr.add_argument("--since", required=True, help="ISO timestamp, UTC unless it carries an offset")
+    rr.add_argument("--until", help="ISO timestamp, exclusive; default: no upper bound")
+    rr.add_argument("--projects-dir", type=Path, default=Path.home() / ".claude" / "projects")
+    rr.add_argument("--review-class", action="append", default=[],
+                    help="class whose launches are reviews even without review lines; repeatable")
+    rr.add_argument("--prices", type=Path,
+                    help="JSON list prices to add an API-equivalent cost (not subscription quota)")
     args = parser.parse_args(argv)
     try:
         if args.command == "smoke" and (args.offline or not args.force):
@@ -117,6 +146,8 @@ def main(argv=None):
             result.update(source=args.source, source_updated_at=snapshot.get("source_updated_at"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0 if result["status"] == "ok" else 2
+        if args.command == "route-report":
+            return route_report(args)
         service = make_service(args)
         code = 0
         if args.command == "ingest":

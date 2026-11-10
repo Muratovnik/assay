@@ -62,6 +62,7 @@ on frontmatter alone.
 - [Waiting inside a background worker](#waiting-inside-a-background-worker)
 - [Observed alias resolutions](#observed-alias-resolutions)
 - [Model upgrades and completion](#model-upgrades-and-completion)
+- [Transcripts route-report reads](#transcripts-route-report-reads)
 
 ## Route-table launches
 
@@ -226,3 +227,26 @@ Primary references: [subagents](https://code.claude.com/docs/en/sub-agents),
 [model configuration](https://code.claude.com/docs/en/model-config) and
 [worktrees](https://code.claude.com/docs/en/worktrees).
 Recheck live documentation or installed help before prescribing a setting.
+
+## Transcripts route-report reads
+
+[`route-report`](route-table.md#building-and-reviewing-the-table) reads files
+Claude Code writes for its own use. Their layout below was observed on Claude
+Code 2.1.31x; it is not a documented interface and can change in any release,
+so the command reads each field defensively and counts the lines it skips.
+
+- A subagent run is `<projects-dir>/<project>/<session>/subagents/agent-*.jsonl`
+  with a sibling `agent-*.meta.json` that holds the launch's `description`,
+  its `model` alias, `effort` and `agentType`. The class and the child's name
+  come from `description`, read exactly as the launch check reads it.
+- Usage is `message.usage` on assistant lines. One message is written on
+  several lines, so usage is counted once per `message.id`. When
+  `usage.iterations` is present it splits the request; an iteration of type
+  `advisor_message` is an advisor call, counted apart from the child's tokens.
+- Cache writes come from `cache_creation.ephemeral_5m_input_tokens` and
+  `ephemeral_1h_input_tokens`; without that split, `cache_creation_input_tokens`
+  counts as 5-minute writes.
+- Tool calls are distinct `tool_use` ids; start and end are the first and last
+  `timestamp` of the file.
+- The child's report is the `message` of its last `SubagentHandback` call, or
+  its last assistant text when it made none.
