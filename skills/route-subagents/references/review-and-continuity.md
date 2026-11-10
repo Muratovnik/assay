@@ -104,7 +104,9 @@ FOLLOWS: <name of the earlier review whose findings the repair answered>
 ```
 
 `REVIEWED` is left out when no launch of this session made the work, and
-`FOLLOWS` appears only in a review of a repair. Findings that do not block stay
+`FOLLOWS` appears only in a review of a repair. A reviewer reused for the repair
+writes its own name there, and the packet for that round asks for the lines
+again. Findings that do not block stay
 under `ship`; they need no fifth word. A decision review, an adversarial review
 and a reconciliation of records give no acceptance verdict and carry none of
 these lines.

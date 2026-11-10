@@ -155,8 +155,9 @@ variants a reviewer will try, not only those the complaint names: the widths
 between the named ones, each locale, pointer and keyboard, long and short
 content. The test the worker adds must fail on the base. In one owner's week, 12
 of 21 failed first reviews rested on a defect the worker's own check could not
-see, and the failing share fell from 13 of 18 to 8 of 27 once packets asked for
-a test that fails on the base.
+see. The failing share was 13 of 18 before packets asked for a test that fails
+on the base and 8 of 27 after; the week had no control, so this is an
+association, not a measured effect.
 
 A packet without an interface follows only the rules above. A review of an interface
 change follows [review and continuity](review-and-continuity.md#review-an-interface-change).
