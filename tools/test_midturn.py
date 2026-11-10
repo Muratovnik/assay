@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import sys
 import tempfile
 import unittest
@@ -21,6 +22,8 @@ PAGE = "C:\\work\\web\\src\\Panel.vue"
 SKILL = str(ROOT / "skills" / "code-change" / "SKILL.md")
 DOCS = "https://docs.example.dev/guide/hooks"
 FETCH = f"curl -sL {DOCS} -o guide.html"
+# No path: a runner may keep its temporary directory where the path rules skip files, such as under `.git`.
+NOWHERE = re.compile(r"(?!)")
 
 
 def checkout(root, manifest=None, git="directory"):
@@ -111,7 +114,8 @@ class SignTableTests(unittest.TestCase):
         # A product's own instructions decide how its skill changes; a skill library, Assay or not, keeps the sign.
         evaluation = ["midturn-skill-evaluation"]
         # A temporary directory is scratch, which gives no sign at all; the checkouts here stand for real ones.
-        with tempfile.TemporaryDirectory() as scratch, patch.object(predicates, "is_scratch", lambda path: False):
+        with (tempfile.TemporaryDirectory() as scratch, patch.object(predicates, "is_scratch", lambda path: False),
+              patch.object(predicates, "GENERATED", NOWHERE)):
             for path, sign in skill_files(Path(scratch)):
                 with self.subTest(path=path):
                     self.assertEqual(evaluation if sign else [], self.edit(str(path)))
@@ -273,7 +277,7 @@ class NoteTests(unittest.TestCase):
     def test_a_skill_a_product_ships_names_no_skill_evaluation(self):
         product = checkout(self.directory / "tracker") / "server" / "skill" / "tracker" / "SKILL.md"
         shipped = {"file_path": str(product), "old_string": "a", "new_string": "b"}
-        with patch.object(predicates, "is_scratch", lambda path: False):
+        with patch.object(predicates, "is_scratch", lambda path: False), patch.object(predicates, "GENERATED", NOWHERE):
             self.assertEqual({}, self.run_event(self.pre("Edit", shipped)))
         text = self.note(self.run_event(self.pre("Edit", {**shipped, "file_path": SKILL})))
         self.assertIn("assay:skill-evaluation", text)
