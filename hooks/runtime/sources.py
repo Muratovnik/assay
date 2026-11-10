@@ -7,7 +7,8 @@ Three notes, none a block, all stated as facts:
 - After a WebSearch, once per request and agent: the results are found, not
   read, and a request to include them is met by the ones the conclusion rests on.
 - On Stop or SubagentStop, once: a line of the turn that says a file or URL was
-  read in full, when the transcript shows that file read only in part or that
+  read in full, when the transcript shows the file the claim's own clause names
+  read only in part, or short of the line range the claim states for it, or that
   URL opened only through WebFetch.
 
 The claim check fires only on positive evidence. A file the transcript shows no
@@ -37,6 +38,14 @@ SHELLS = frozenset({"Bash", "PowerShell"})
 CLAIM = re.compile(r"целиком|полностью|in full\b|in its entirety|entire(?:ly)?\b|end to end|cover to cover"
                    r"|from start to finish|whole (?:file|page|paper|article|document|text|source)", re.I)
 NUMBERED = re.compile(r"^\s*(\d+)\t", re.M)
+# The parts of a claim line that say which file it is about; see _clauses.
+SENTENCE = re.compile(r"[;|]|[.!?](?=\s)")
+ASIDE = re.compile(r"\([^()\n]*\)")
+QUOTED = re.compile(r'"[^"\n]*"|«[^»\n]*»|“[^”\n]*”')
+TOKEN = re.compile(r"[^\s`'\"*()\[\]<>,;|«»“”]+")
+LINE_SUFFIX = re.compile(r"(?::\d[\d\-–—]*|#L\d[\w\-–—]*)?[.:]*$")
+ATTACHED = re.compile(r"(?::|#L)(\d+)(?:[-–—]L?(\d+))?")
+WORDED = re.compile(r"\b(?:lines?|строк[аи]?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?|\((\d+)\s*[-–—]\s*(\d+)\)", re.I)
 
 FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
               "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
@@ -202,14 +211,117 @@ def _span(reads):
     return "lines " + ", ".join(parts[:4]) + (f" of {max(totals)}" if totals else "")
 
 
+def _blank(pattern, text):
+    """The text with each match of the pattern replaced by spaces, so positions stay where they were."""
+    return pattern.sub(lambda match: " " * len(match[0]), text)
+
+
+def _clauses(line):
+    """(texts whose files a claim word names, in order of preference, the clause) for each claim on a line.
+
+    A line splits into sentences at `;`, `|` and a sentence end, and a sentence
+    into clauses at its commas, except that a colon after the claim word keeps
+    the rest of the sentence, a list, with the claim. A file named inside a
+    parenthesis belongs to it alone; a claim inside one names the parenthesis's
+    files, or the clause's when it names none. A claim word inside quotation
+    marks quotes something and claims nothing. Every text has the clause's length.
+    """
+    for sentence in SENTENCE.split(line):
+        outer, bounds, start = _blank(ASIDE, sentence), [], 0
+        for comma in [match.start() for match in re.finditer(",", outer)] + [len(outer)]:
+            if comma < start:
+                continue
+            claim = _claim(outer[start:comma])
+            if claim and ":" in outer[start + claim.end():comma]:
+                comma = len(outer)
+            bounds.append((start, comma))
+            start = comma + 1
+        for first, last in bounds:
+            part, whole = outer[first:last], sentence[first:last]
+            if _claim(part):
+                yield [part], whole
+            for aside in ASIDE.finditer(whole):
+                if _claim(aside[0]):
+                    yield [" " * aside.start() + aside[0] + " " * (len(whole) - aside.end()), part], whole
+
+
+def _claim(text):
+    return CLAIM.search(_blank(QUOTED, text))
+
+
+def _named(text, paths):
+    """(start, end of the name, matched read paths) of each file reference in a text.
+
+    A path, or its tail from a directory on, names the read files it ends;
+    only without one does a bare file name of four or more characters name every
+    read file of that name. A `:12-40` or `#L12` after the name is left outside it.
+    """
+    found = []
+    for match in TOKEN.finditer(text):
+        cut = LINE_SUFFIX.search(match[0]).start()
+        token = match[0][:cut].removeprefix("./")
+        strong = [path for path, plain in paths.items()
+                  if "/" in token and (plain == token or plain.endswith("/" + token.lstrip("/")))]
+        weak = [path for path, plain in paths.items() if len(token) >= 4 and plain.rsplit("/", 1)[-1] == token]
+        if strong or weak:
+            found.append((match.start(), match.start() + cut, strong or weak))
+    return found
+
+
+def _wanted(text):
+    """The line range stated right after a file name, as (first, last), or None for the whole file."""
+    match = ATTACHED.match(text)
+    if match:
+        return int(match[1]), int(match[2] or match[1])
+    match = WORDED.search(text)
+    if not match:
+        return None
+    first = int(match[1] or match[3])
+    return first, int(match[2] or match[4] or first)
+
+
+def _covers(reads, wanted):
+    """Whether one file's reads cover the stated range, or the whole file when none is stated."""
+    if wanted is None:
+        return _covered(reads)
+    if any(not ranged and (total is None or last >= total) for _, last, total, ranged in reads):
+        return True
+    reached = wanted[0] - 1
+    for first, last, *_ in sorted(reads):
+        if first > reached + 1:
+            break
+        reached = max(reached, last)
+    return reached >= wanted[1]
+
+
+def _claimed(line, reads):
+    """(name, reads) of each file a claim on this line names and the transcript shows read short of what it names."""
+    paths = {path: path.replace("\\", "/") for path in reads}
+    found = []
+    for texts, whole in _clauses(line.replace("\\", "/")):
+        references = next((named for named in (_named(text, paths) for text in texts) if named), [])
+        starts = sorted(start for start, _, _ in _named(whole, paths))
+        for start, stop, candidates in references:
+            # A range belongs to the reference it follows, up to the next reference of the clause.
+            end = next((other for other in starts if other > start), len(whole))
+            wanted = _wanted(whole[stop:end])
+            if not any(_covers(reads[path], wanted) for path in candidates):
+                found += [(re.split(r"[\\/]", path)[-1], reads[path]) for path in candidates]
+    return found
+
+
 def contradicted(claims, reads, fetched_urls, shell):
-    """Each claimed source the transcript shows read only in part or only through WebFetch."""
+    """Each claimed source the transcript shows read only in part or only through WebFetch.
+
+    A claim names the files its own clause names (see _clauses). A bare file name
+    stands for every read file of that name, and a path or its tail for the
+    files it ends; the claim holds when one of them was read in full, or read
+    over the line range the claim states right after the name.
+    """
     found = []
     for line in claims:
-        for path, spans in reads.items():
-            name = re.split(r"[\\/]", path)[-1]
-            if (path in line or (len(name) >= 4 and name in line)) and not _covered(spans):
-                found.append(f"{name}: only {_span(spans)} were read")
+        for name, spans in _claimed(line[:MAX_LINE], reads):
+            found.append(f"{name}: only {_span(spans)} were read")
         for url in fetched_urls:
             handle = _handle(url)
             if (url in line or handle in line) and not any(handle in command for command in shell):

@@ -307,8 +307,25 @@ gate. When a line of the turn says a file or URL was read in full (`in full`,
 whose `Read` calls returned only part of it, or a URL opened only through
 `WebFetch`, the turn continues once with feedback naming what was read. The answer
 stands, and one line saying what was actually read is enough when nothing else
-changes: unlike the gate's closing words, that line corrects a claim. The check
-fires only on positive evidence. A file printed with a shell command leaves
+changes: unlike the gate's closing words, that line corrects a claim.
+
+A claim is about the file its own clause names. A line splits into sentences at
+`;`, `|` and a sentence end, and a sentence splits into clauses at its commas. A
+colon after the claim word keeps the list that follows with the claim. A file
+named inside a parenthesis belongs to that parenthesis, and a claim word inside
+quotation marks is a quotation. A path, or its end from a directory on, names the
+read files it ends. A bare file name names every read file with exactly that name,
+and the claim holds when one of them was read in full. A range stated right after
+the name, such as `parser.py:120-380`, `#L10-L20`, `lines 1–400` or `(1–900)`, is
+compared with the reads of that range. Replayed over the holds in one owner's
+transcripts of the two weeks to 10 November 2026, 15 of 23 no longer fire, and each
+of those was false. About half of the 8 left are true. The others use the claim word
+for something other than reading, such as a test file run in full, or name the part
+read by a symbol instead of lines. The cost is a claim whose file is in
+another clause, as in "I opened `parser.py`, and read it in full", which is no
+longer checked.
+
+The check fires only on positive evidence. A file printed with a shell command leaves
 no `Read` in the transcript, and a URL that a shell command also names counts as
 downloaded, so neither triggers it. Reads before the latest compaction are not
 counted. A subagent's transcript records no line counts, so there a ranged read

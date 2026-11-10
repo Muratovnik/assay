@@ -183,6 +183,49 @@ class SourceCheckTests(unittest.TestCase):
         event["agent_transcript_path"] = self.transcript(prompt(), *plain, report, name="agent3.jsonl")
         self.assertEqual({}, sources.stopped(event))
 
+    def test_a_claim_is_compared_with_the_file_its_own_clause_names(self):
+        partial = read("r1", 1, 200, 900, limit=200)
+        # The claim word speaks of something else on the line; the partly read file sits in another clause.
+        for line in ("Если закоммитить правки в `researcher.py`, в коммит целиком попадут и чужие файлы.",
+                     "Из researcher.py прочитаны строки 1–200. AGENTS.md прочитан целиком.",
+                     "The prefix is handled in full (`_route` in `src/researcher.py`).",
+                     "docs/guide.md read in full; researcher.py lines 1-200 set the default.",
+                     'researcher.py still says "read in full" in its header.'):
+            with self.subTest(line=line):
+                self.assertEqual({}, self.stop(prompt(), partial, said(line)))
+        # The clause that names the file still holds it to the claim: a list after the claim, a claim in a parenthesis.
+        for line in ("Read in full: notes.md, researcher.py and the guide.", "`researcher.py` (read in full) sets it."):
+            with self.subTest(line=line):
+                self.assertIn("researcher.py: only lines 1-200 of 900", self.feedback(self.stop(prompt(), partial, said(line))))
+
+    def test_a_claim_names_the_file_it_spells_out_not_another_of_a_similar_name(self):
+        other = "C:\\work\\old\\researcher.py"
+        whole, cut = read("r1", 1, 900, 900), read("r2", 1, 200, 900, limit=200, path=other)
+        # A path tells which of two files of one name was meant.
+        self.assertEqual({}, self.stop(prompt(), whole, cut, said("I read src/researcher.py in full.")))
+        text = self.feedback(self.stop(prompt(), whole, cut, said("I read old/researcher.py in full.")))
+        self.assertIn("researcher.py: only lines 1-200 of 900", text)
+        # A bare name holds when one file of that name was read in full.
+        self.assertEqual({}, self.stop(prompt(), whole, cut, said("I read researcher.py in full.")))
+        # A longer name that ends with a read file's name is another file.
+        common = read("r3", 1, 20, 300, limit=20, path="C:\\work\\common.md")
+        self.assertEqual({}, self.stop(prompt(), common, said("batch-common.md read in full.")))
+        self.assertIn("common.md: only lines 1-20 of 300",
+                      self.feedback(self.stop(prompt(), common, said("common.md read in full."))))
+
+    def test_a_claim_about_a_stated_range_counts_the_reads_of_that_range(self):
+        chunks = [read("r1", 1, 200, 900, limit=200), read("r2", 201, 400, 900, offset=201, limit=200)]
+        for line in ("researcher.py lines 1–400 read in full.", "Read researcher.py:120-380 in full.",
+                     "[researcher.py#L10-L20](researcher.py#L10-L20) прочитан целиком."):
+            with self.subTest(line=line):
+                self.assertEqual({}, self.stop(prompt(), *chunks, said(line)))
+        # A range beyond what was read, and a claim without one, still hold.
+        for line in ("researcher.py lines 1-600 read in full.", "researcher.py read in full (1–900).",
+                     "researcher.py read in full."):
+            with self.subTest(line=line):
+                self.assertIn("researcher.py: only lines 1-200, 201-400 of 900",
+                              self.feedback(self.stop(prompt(), *chunks, said(line))))
+
     def test_a_file_never_read_with_the_read_tool_stays_silent(self):
         shell = tool("Bash", {"command": f"cat {SOURCE}"}, "b1")
         self.assertEqual({}, self.stop(prompt(), shell, returned("b1", "..."), said("I read researcher.py in full.")))
