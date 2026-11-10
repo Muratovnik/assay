@@ -21,8 +21,8 @@ SOURCES = {
                 "adapter": "deepswe", "revision": 3},
     "cursorbench": {"id": "cursorbench", "benchmark": "CursorBench", "version": "4.0",
                     "url": "https://prod.cursor.com/evals", "adapter": "table", "revision": 6},
-    "frontiercode": {"id": "frontiercode", "benchmark": "FrontierCode", "version": "1.1",
-                     "url": "https://cognition.com/frontiercode", "adapter": "browser", "revision": 5},
+    "frontiercode": {"id": "frontiercode", "benchmark": "FrontierCode", "version": "2.0",
+                     "url": "https://cognition.com/frontiercode", "adapter": "browser", "revision": 6},
     "terminal-bench": {"id": "terminal-bench", "benchmark": "Terminal-Bench", "version": "4.0",
                        "url": "https://www.tbench.ai/", "adapter": "browser", "revision": 6,
                        "preferred_data": "harbor-public-api"},
@@ -175,6 +175,32 @@ def split_model(label: str):
     return (label[:match.start()].strip(), effort(match[1])) if match else (label, None)
 
 
+# FrontierCode renders the effort in its own element after the name, so the
+# cell's plain text glues them: "Opus 5.5max". A level is split off a digit or a
+# space only; a name ending in letters ("...Flow") is never cut into an effort.
+# "na" is the publisher's not-applicable marker: unknown, not a level.
+FRONTIER_EFFORT = re.compile(r"(?:(?<=\d)|\s+)(xhigh|max|high|medium|low|minimal|none|na)$", re.I)
+FRONTIER_COLUMNS = {"model", "harness", "score", "pass_rate", "flag_rate", "cost_usd", "output_tokens"}
+
+
+def split_frontier_model(label: str):
+    label = label.strip()
+    match = FRONTIER_EFFORT.search(label)
+    if not match:
+        return label, None
+    level = match[1].lower()
+    return label[:match.start()].strip(), None if level == "na" else effort(level)
+
+
+def percentage(value: str, field: str):
+    if value.strip() in ("", "—", "-", "N/A", "n/a"):
+        return None
+    found = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*%\s*", value)
+    if not found:
+        raise EvidenceError(field + " must have an explicit percentage unit")
+    return number(float(found[1]) / 100, field, upper=1)
+
+
 def parse_tables(source: dict, tables: list, *, subset="all") -> list:
     aliases = {"model": "model", "agent": "harness", "harness": "harness",
                "effort": "effort", "reasoning effort": "effort", "score": "score",
@@ -182,7 +208,8 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
                "cost": "cost_usd", "avg cost": "cost_usd", "avg cost / task": "cost_usd",
                "cost per task": "cost_usd", "tokens": "reported_tokens", "steps": "steps"}
     if source["id"] == "frontiercode":
-        aliases.update({"cost / rollout": "cost_usd", "output tokens": "output_tokens"})
+        aliases.update({"cost / rollout": "cost_usd", "output tokens": "output_tokens",
+                        "pass rate": "pass_rate", "flag rate": "flag_rate"})
     if not isinstance(tables, list):
         raise EvidenceError("tables must be an array")
     rows = []
@@ -210,13 +237,16 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
             continue
         if source["id"] == "cursorbench" and not {"cost_usd", "reported_tokens", "steps"} <= header.keys():
             raise EvidenceError("CursorBench: expected cost, tokens and steps columns; source layout changed")
+        if source["id"] == "frontiercode" and not FRONTIER_COLUMNS <= header.keys():
+            raise EvidenceError("FrontierCode: expected model, harness, score, pass rate, flag rate, "
+                                "cost / rollout and output tokens columns; source layout changed")
         for cells in table[1:]:
             if len(cells) != len(table[0]):
                 raise EvidenceError("leaderboard table row width changed")
             label = cells[header["model"]]
             if not label.strip():
                 continue
-            model, reasoning = split_model(label)
+            model, reasoning = (split_frontier_model if source["id"] == "frontiercode" else split_model)(label)
             if "effort" in header:
                 reasoning = effort(cells[header["effort"]])
             default_harness = "Cursor" if source["id"] == "cursorbench" else "publisher-harness-unspecified"
@@ -229,6 +259,10 @@ def parse_tables(source: dict, tables: list, *, subset="all") -> list:
             row["cost_basis"] = "published API cost per task; not subscription quota"
             if source["id"] == "frontiercode":
                 row["cost_basis"] = "published API cost per rollout; not subscription quota"
+                # Published beside the score and kept with the row, like other
+                # sources' detail fields; neither rate is a comparison axis.
+                row["published_rates"] = {key: percentage(cells[header[key]], key)
+                                          for key in ("pass_rate", "flag_rate")}
             elif source["id"] == "terminal-bench":
                 # The publisher's board schema binds these columns to run totals,
                 # just as the preferred API does. Without comparable trial counts
@@ -402,6 +436,24 @@ def heading_identity(source, heading, *, selected_version=None):
     raise FetchError("benchmark_revision_absent_or_changed")
 
 
+def frontier_model_coverage(source, capture, rows):
+    """Prove the all-levels table lists every published model, not a filtered subset.
+
+    The best-mode view (one row per model) and the page's published model count
+    must both name exactly the models the captured rows name.
+    """
+    count = capture.get("published_models")
+    views = capture.get("views")
+    best = views.get("best_reasoning_mode") if isinstance(views, dict) else None
+    if type(count) is not int or count < 1 or not isinstance(best, list):
+        raise FetchError("browser_capture_missing_model_coverage")
+    best_models = {row["model"] for row in parse_tables(source, [best])}
+    all_models = {row["model"] for row in rows}
+    if best_models != all_models or len(all_models) != count:
+        raise FetchError(f"browser_capture_incomplete_models: {len(all_models)} in all reasoning levels, "
+                         f"{len(best_models)} in best reasoning mode, {count} published")
+
+
 def captured_snapshot(source, capture):
     if not isinstance(capture, dict) or not isinstance(capture.get("identity"), dict):
         raise FetchError("browser_capture_missing_identity")
@@ -414,7 +466,7 @@ def captured_snapshot(source, capture):
             raise FetchError("browser_capture_missing_html")
         return atlas(source, capture["html"])
     parts = capture.get("parts")
-    expected = {"main", "extended"} if source["id"] == "frontiercode" else {"all"}
+    expected = {"all"}
     if not isinstance(parts, list) or len(parts) != len(expected):
         raise FetchError("browser_capture_missing_subsets")
     if any(not isinstance(p, dict) for p in parts):
@@ -432,6 +484,10 @@ def captured_snapshot(source, capture):
     warnings = [
         "Rendered-table acquisition; publisher layout and selectors may change.",
         "No per-row evaluation dates; API costs are not subscription-quota measurements."]
+    if source["id"] == "frontiercode":
+        frontier_model_coverage(source, capture, rows)
+        warnings += ["Pass and flag rates are kept in published_rates as published context, not comparison axes.",
+                     "An effort marked na or not shown stays unknown."]
     if source["id"] == "terminal-bench":
         warnings.append("Aggregate run cost/tokens are retained in aggregate_usage, not compared as per-task expenses.")
     return snapshot(source, rows, warnings=warnings)

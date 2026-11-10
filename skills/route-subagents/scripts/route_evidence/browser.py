@@ -22,8 +22,7 @@ def active(control) -> bool:
 
 
 def control_for(page, label, timeout=15):
-    count = r"(?:\s*(?:\(\d+\s+tasks?\)|\d+))?" if label in ("Main", "Extended") else ""
-    pattern = re.compile(r"^" + re.escape(label) + count + r"$", re.I)
+    pattern = re.compile(r"^" + re.escape(label) + r"$", re.I)
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         for role in ("tab", "button"):
@@ -86,14 +85,14 @@ def table_rows(scope):
     return suitable[0]
 
 
-def ready_table(page, *, control=None, previous=None, changed=False, timeout=15):
+def ready_table(page, *, control=None, previous=None, changed=False, timeout=15, scope=None):
     deadline = time.monotonic() + timeout
     last, stable_at = None, None
     while time.monotonic() < deadline:
         try:
             if control is not None and not active(control):
                 raise FetchError("browser_dataset_not_ready")
-            current = table_rows(scope_for(page, control))
+            current = table_rows(scope if scope is not None else scope_for(page, control))
             if changed and previous is not None and current == previous:
                 raise FetchError("browser_dataset_transition_unverified")
             if current != last:
@@ -106,14 +105,18 @@ def ready_table(page, *, control=None, previous=None, changed=False, timeout=15)
     raise FetchError("browser_dataset_transition_unverified")
 
 
-def observed_identity(page, source, version_control=None):
+def own_text(locator):
+    """Text of the element itself, without the labels nested inside it."""
+    return " ".join(locator.evaluate(
+        "e => [...e.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join(' ')").split())
+
+
+def observed_identity(page, source, selected=None):
+    """`selected` is a version the caller read from the element bound to the table."""
     headings = page.locator("h1:visible").all_text_contents()
     headings = list(dict.fromkeys(" ".join(h.split()) for h in headings))
     if len(headings) != 1:
         raise FetchError("browser_layout_unsupported: ambiguous active heading")
-    selected = None
-    if version_control is not None and active(version_control):
-        selected = " ".join(version_control.inner_text().split())
     if source["id"] == "terminal-bench":
         benchmark = page.get_by_role("combobox", name="Benchmark", exact=True).filter(visible=True)
         if benchmark.count() == 1:
@@ -128,66 +131,84 @@ def observed_identity(page, source, version_control=None):
     return {"heading": headings[0], "selected_version": selected}
 
 
+def leaderboard_section(page, control):
+    """The innermost element holding the view control, the table and one heading.
+
+    The version is read from that heading's own text, never from a changelog,
+    navigation link or another section of the page.
+    """
+    sections = page.locator("div:visible, section:visible").filter(has=control).filter(
+        has=page.locator("table:visible"))
+    if not sections.count():
+        raise FetchError("browser_layout_unsupported: leaderboard section not found")
+    section = sections.last
+    headings = section.locator(", ".join(f"h{n}:visible" for n in range(1, 7)))
+    if headings.count() != 1:
+        raise FetchError("browser_layout_unsupported: ambiguous leaderboard section heading")
+    return section, own_text(headings)
+
+
+def published_model_count(page):
+    """The page's own total of published models, shown by its model filter."""
+    # A slash cannot appear in a role-name pattern: the selector engine reads it as the end.
+    pattern = re.compile(r"^\s*models\s*\d+\s*\D\s*\d+\s*models\b", re.I)
+    control = page.get_by_role("button", name=pattern).filter(visible=True)
+    if control.count() != 1:
+        raise FetchError("browser_layout_unsupported: published model count not found")
+    return int(re.search(r"\d+\s*/\s*(\d+)\s*models", control.inner_text(), re.I)[1])
+
+
+def select_view(page, section, control, timeout, previous=None):
+    """Activate a view tab and return its table, which must differ from the previous one."""
+    changed = False
+    if not active(control):
+        if previous is None:
+            try:
+                previous = table_rows(section)
+            except FetchError:
+                previous = None
+        control.click(timeout=timeout * 1000)
+        changed = True
+    return ready_table(page, control=control, previous=previous, changed=changed,
+                       timeout=timeout, scope=section)
+
+
+def capture_frontiercode(page, source, timeout):
+    """All reasoning levels, plus the best-mode view and the published model count
+    the parent needs to prove that no model was left out."""
+    best = control_for(page, "Best reasoning mode", timeout)
+    every = control_for(page, "All reasoning levels", timeout)
+    section, version = leaderboard_section(page, every)
+    proof = observed_identity(page, source, version)
+    published = published_model_count(page)
+    best_rows = select_view(page, section, best, timeout)
+    rows = select_view(page, section, every, timeout, previous=best_rows)
+    if observed_identity(page, source, leaderboard_section(page, every)[1]) != proof:
+        raise FetchError("browser_dataset_identity_changed")
+    if not active(every):
+        raise FetchError("browser_reasoning_view_changed")
+    return {"identity": proof, "published_models": published,
+            "views": {"best_reasoning_mode": best_rows},
+            "parts": [{"subset": "all", "observed_subset": "all", "identity": proof, "tables": [rows]}]}
+
+
 def capture_page(page, source, *, timeout=15):
     """Separated from navigation so delayed DOM transitions can be regression-tested."""
     if source["adapter"] == "atlas":
         proof = observed_identity(page, source)
         page.get_by_text("Performance Comparison", exact=True).wait_for(timeout=timeout * 1000)
         return {"identity": proof, "html": page.content()}
-    version_control = modes = None
-    prior_version_table = None
-    version_changed = False
     if source["id"] == "frontiercode":
-        version_control = control_for(page, source["benchmark"] + " " + source["version"], timeout)
-        if not active(version_control):
-            try:
-                prior_version_table = table_rows(scope_for(page))
-            except FetchError:
-                pass
-            version_control.click(timeout=timeout * 1000)
-            version_changed = True
-        # The selected version must be observable, not merely present in a nav.
-        end = time.monotonic() + timeout
-        while not active(version_control) and time.monotonic() < end:
-            page.wait_for_timeout(50)
-        modes = control_for(page, "All reasoning levels", timeout)
-        if not active(modes):
-            prior_version_table = ready_table(page, timeout=timeout)
-            modes.click(timeout=timeout * 1000)
-            end = time.monotonic() + timeout
-            while not active(modes) and time.monotonic() < end:
-                page.wait_for_timeout(50)
-            if not active(modes):
-                raise FetchError("browser_dataset_not_ready")
-            version_changed = True
-    proof = observed_identity(page, source, version_control)
-    parts = []
-    for subset in (("Main", "Extended") if source["id"] == "frontiercode" else ("all",)):
-        control = None if subset == "all" else control_for(page, subset, timeout)
-        changed, previous = version_changed, prior_version_table
-        if control is not None and not active(control):
-            try:
-                previous = table_rows(scope_for(page))
-            except FetchError:
-                previous = None
-            control.click(timeout=timeout * 1000)
-            changed = True
-        rows = ready_table(page, control=control, previous=previous, changed=changed, timeout=timeout)
-        final_proof = observed_identity(page, source, version_control)
-        if final_proof != proof and source["id"] != "terminal-bench":
-            raise FetchError("browser_dataset_identity_changed")
-        # Terminal's static heading becomes animated during hydration. Both
-        # observations were independently checked against this exact revision.
-        if source["id"] == "terminal-bench":
-            proof = final_proof
-        if control is not None and not active(control):
-            raise FetchError("browser_dataset_identity_changed")
-        if modes is not None and not active(modes):
-            raise FetchError("browser_reasoning_view_changed")
-        parts.append({"subset": subset.lower(), "observed_subset": subset.lower(),
-                      "identity": final_proof, "tables": [rows]})
-        version_changed, prior_version_table = False, None
-    return {"identity": proof, "parts": parts}
+        return capture_frontiercode(page, source, timeout)
+    proof = observed_identity(page, source)
+    rows = ready_table(page, timeout=timeout)
+    final_proof = observed_identity(page, source)
+    if final_proof != proof and source["id"] != "terminal-bench":
+        raise FetchError("browser_dataset_identity_changed")
+    # Terminal's static heading becomes animated during hydration. Both
+    # observations were independently checked against this exact revision.
+    return {"identity": final_proof, "parts": [
+        {"subset": "all", "observed_subset": "all", "identity": final_proof, "tables": [rows]}]}
 
 
 def capture(source, *, timeout=15):

@@ -50,56 +50,86 @@ class BrowserIntegrationTests(unittest.TestCase):
         self.page = self.browser.new_page()
         self.addCleanup(self.page.close)
 
-    def fixture(self, *, delay=500, mutate=True, version="FrontierCode 1.1"):
-        value = "document.getElementById('score').textContent='10%'" if mutate else "void 0"
+    # Synthetic FrontierCode 2.0 layout: a chart block with the model filter, then
+    # the leaderboard block whose own heading names the suite, its two view tabs
+    # and one table. The effort sits in its own element after the model name.
+    FRONTIER_HEAD = ('<tr><th>#</th><th>Model</th><th>Harness</th><th><button>Score<span aria-hidden="true">'
+                     '▼</span></button></th><th>Pass rate</th><th>Flag rate</th><th>Cost / rollout</th>'
+                     '<th>Output tokens</th></tr>')
+    FRONTIER_BEST = ('<tr><td>1</td><td><span aria-hidden="true"></span>Example 5.2<span>xhigh</span></td>'
+                     '<td>Example Harness</td><td><span><span aria-hidden="true"></span><span>49.1%</span></span></td>'
+                     '<td>53.5%</td><td>1.5%</td><td>$17.73</td><td>156.0k</td></tr>'
+                     '<tr><td>2</td><td>Other 1.7<span>na</span></td><td>Other Harness</td><td>16.2%</td>'
+                     '<td>18.9%</td><td>0.8%</td><td>$3.52</td><td>89.3k</td></tr>')
+    FRONTIER_ALL = FRONTIER_BEST + (
+        '<tr><td>1</td><td>Example 5.2high</td><td>Example Harness</td><td>45.3%</td><td>49.4%</td>'
+        '<td>2.0%</td><td>$8.40</td><td>76.0k</td></tr>'
+        '<tr><td>1</td><td>Example 5.2</td><td>Example Harness</td><td>17.4%</td><td>19.4%</td>'
+        '<td>0.0%</td><td>$0.44</td><td>62.6k</td></tr>')
+
+    def frontier(self, *, delay=300, change=True, version="FrontierCode 2.0", models="1/2 models", tabs=True):
+        controls = ('<div role="tablist"><button id="best" role="tab" aria-selected="true">Best reasoning mode</button>'
+                    '<button id="every" role="tab" aria-selected="false">All reasoning levels</button></div>'
+                    if tabs else "")
+        update = ("document.getElementById('rows').innerHTML=" + json.dumps(self.FRONTIER_HEAD + self.FRONTIER_ALL)
+                  if change else "void 0")
         self.page.set_content(f'''<h1>FrontierCode Leaderboard</h1><main>
-        <button aria-pressed="true">{version}</button>
-        <button role="tab" aria-selected="true">All reasoning levels</button>
-        <button id="main" role="tab" aria-selected="true" aria-controls="results">Main</button>
-        <button id="extended" role="tab" aria-selected="false" aria-controls="results">Extended</button>
-        <div id="results"><table><tr><th>Model</th><th>Score</th><th>Cost</th></tr>
-        <tr><td>Example low</td><td id="score">90%</td><td>$1</td></tr></table></div></main>
-        <script>document.getElementById('extended').onclick=()=>{{
-          document.getElementById('main').setAttribute('aria-selected','false');
-          document.getElementById('extended').setAttribute('aria-selected','true');
-          setTimeout(()=>{{{value}}},{delay}); }};</script>''')
+        <div><h4>FrontierCode 2.0<span>chart</span></h4>
+          <button aria-expanded="true"><span>Models</span><span>{models}<span aria-hidden="true">▲</span></span></button></div>
+        <div id="board"><div><h4>{version}<span>Leaderboard</span></h4>{controls}</div>
+          <table><tbody id="rows">{self.FRONTIER_HEAD}{self.FRONTIER_BEST}</tbody></table></div>
+        <section><span>Changelog</span><a href="#">FrontierCode 2.0</a></section></main>
+        <script>{{ const every = document.getElementById('every');
+          if (every) every.onclick = () => {{
+            document.getElementById('best').setAttribute('aria-selected', 'false');
+            every.setAttribute('aria-selected', 'true');
+            setTimeout(() => {{ {update}; }}, {delay}); }}; }}</script>''')
 
-    def test_delayed_tab_data_is_not_read_as_previous_subset(self):
-        self.fixture()
-        capture = capture_page(self.page, SOURCES["frontiercode"], timeout=3)
-        result = captured_snapshot(SOURCES["frontiercode"], capture)
-        self.assertEqual({r["subset"]: r["score"] for r in result["rows"]}, {"main": .9, "extended": .1})
+    def frontier_snapshot(self, timeout=3):
+        return captured_snapshot(SOURCES["frontiercode"], capture_page(self.page, SOURCES["frontiercode"], timeout=timeout))
 
-    def test_active_tab_without_data_change_fails_closed(self):
-        self.fixture(mutate=False)
+    def test_frontier_captures_all_reasoning_levels_for_every_published_model(self):
+        self.frontier()
+        result = self.frontier_snapshot()
+        rows = {(r["model"], r["effort"]): r for r in result["rows"]}
+        self.assertEqual(result["version"], "2.0")
+        self.assertEqual(set(rows), {("Example 5.2", "xhigh"), ("Example 5.2", "high"),
+                                     ("Example 5.2", None), ("Other 1.7", None)})
+        top = rows[("Example 5.2", "xhigh")]
+        self.assertEqual((top["harness"], top["subset"], top["score"]), ("Example Harness", "all", .491))
+        self.assertEqual(top["published_rates"], {"pass_rate": .535, "flag_rate": .015})
+        self.assertEqual((top["cost_usd"], top["output_tokens"]), (17.73, 156000))
+        self.assertEqual(rows[("Other 1.7", None)]["harness"], "Other Harness")
+
+    def test_frontier_unchanged_table_after_switch_is_not_relabelled(self):
+        self.frontier(change=False)
         with self.assertRaises(EvidenceError):
-            capture_page(self.page, SOURCES["frontiercode"], timeout=.7)
+            capture_page(self.page, SOURCES["frontiercode"], timeout=1)
+
+    def test_frontier_old_version_in_the_board_heading_is_refused(self):
+        # The changelog and the chart still say 2.0; only the board's own heading counts.
+        self.frontier(version="FrontierCode 1.1")
+        with self.assertRaises(EvidenceError):
+            self.frontier_snapshot(timeout=1)
+
+    def test_frontier_missing_view_control_is_refused(self):
+        self.frontier(tabs=False)
+        with self.assertRaisesRegex(EvidenceError, "dataset control not found"):
+            capture_page(self.page, SOURCES["frontiercode"], timeout=.5)
+
+    def test_frontier_model_count_must_be_published_and_complete(self):
+        self.frontier(models="")
+        with self.assertRaisesRegex(EvidenceError, "published model count not found"):
+            capture_page(self.page, SOURCES["frontiercode"], timeout=1)
+        self.frontier(models="1/3 models")
+        with self.assertRaisesRegex(EvidenceError, "incomplete_models"):
+            self.frontier_snapshot()
 
     def test_old_version_in_changelog_does_not_validate_current_table(self):
         self.page.set_content('''<h1>Terminal-Bench 5.0</h1><p>Terminal-Bench 4.0 retired</p>
         <table><tr><th>Model</th><th>Score</th></tr><tr><td>Example low</td><td>90%</td></tr></table>''')
         with self.assertRaises(EvidenceError):
             capture_page(self.page, SOURCES["terminal-bench"], timeout=1)
-
-    def test_missing_selected_version_is_not_guessed(self):
-        self.fixture(version="FrontierCode 1.0")
-        with self.assertRaises(EvidenceError):
-            capture_page(self.page, SOURCES["frontiercode"], timeout=1)
-
-    def test_live_frontier_controls_preserve_effort_harness_and_rollout_expense(self):
-        self.fixture()
-        self.page.evaluate("""() => {
-          document.getElementById('main').innerHTML='Main<span>100</span>';
-          document.getElementById('extended').innerHTML='Extended<span>150</span>';
-          document.querySelector('table').innerHTML=
-            '<tr><th>Model</th><th>Score<span>▼</span></th><th>Cost / rollout<span>▼</span></th><th>Output tokens<span>▼</span></th></tr>'+
-            '<tr><td title="Harness: codex">Example<span>max</span></td><td id="score">90%</td><td>$4.59</td><td>30.1k</td></tr>';
-        }""")
-        result = captured_snapshot(SOURCES["frontiercode"], capture_page(self.page, SOURCES["frontiercode"], timeout=3))
-        row = result["rows"][0]
-        self.assertEqual((row["model"], row["effort"], row["harness"]), ("Example", "max", "codex"))
-        self.assertEqual((row["cost_usd"], row["output_tokens"]), (4.59, 30100))
-        self.assertIn("rollout", row["cost_basis"])
 
     def test_terminal_selected_benchmark_and_aggregate_units(self):
         self.page.set_content("""<h1>TERMINAL-BENCH <span>9 8 7 6 5 4 3 2 1 0 . 9 8 7 6 5 4 3 2 1 0</span></h1>
@@ -119,31 +149,23 @@ class BrowserIntegrationTests(unittest.TestCase):
             capture_page(self.page, SOURCES["terminal-bench"], timeout=1)
 
     def test_late_reasoning_control_is_selected_before_capturing(self):
-        self.fixture()
+        self.frontier()
         self.page.evaluate("""() => {
-          const mode = [...document.querySelectorAll('button')].find(e=>e.textContent==='All reasoning levels');
+          const mode = document.getElementById('every');
+          const list = mode.parentElement;
           mode.remove();
-          setTimeout(() => {
-            mode.setAttribute('aria-selected','false');
-            mode.onclick = () => {
-              mode.setAttribute('aria-selected','true');
-              setTimeout(()=>document.querySelector('table').insertAdjacentHTML('beforeend',
-                '<tr><td>Example high</td><td>91%</td><td>$2</td></tr>'), 300);
-            };
-            document.querySelector('main').append(mode);
-          }, 200);
+          setTimeout(() => list.append(mode), 200);
         }""")
-        result = captured_snapshot(SOURCES["frontiercode"], capture_page(self.page, SOURCES["frontiercode"], timeout=3))
+        result = self.frontier_snapshot()
         self.assertEqual(len(result["rows"]), 4)
-        self.assertEqual({r["effort"] for r in result["rows"]}, {"low", "high"})
+        self.assertEqual({r["effort"] for r in result["rows"]}, {"xhigh", "high", None})
 
-    def test_aria_panel_excludes_unrelated_visible_table(self):
-        self.fixture()
-        self.page.evaluate("""() => document.body.insertAdjacentHTML('beforeend',
-          '<table><tr><th>Model</th><th>Score</th></tr><tr><td>Other low</td><td>1%</td></tr></table>')""")
-        result = captured_snapshot(SOURCES["frontiercode"], capture_page(self.page, SOURCES["frontiercode"], timeout=3))
-        self.assertEqual(len(result["rows"]), 2)
-        self.assertTrue(all(r["model"] == "Example" for r in result["rows"]))
+    def test_board_binding_excludes_unrelated_visible_table(self):
+        self.frontier()
+        self.page.evaluate("""() => document.querySelector('main').insertAdjacentHTML('beforeend',
+          '<table><tr><th>Model</th><th>Score</th></tr><tr><td>Unrelated low</td><td>1%</td></tr></table>')""")
+        result = self.frontier_snapshot()
+        self.assertEqual({r["model"] for r in result["rows"]}, {"Example 5.2", "Other 1.7"})
 
     def test_multiple_leaderboards_without_binding_are_rejected(self):
         self.page.set_content('''<h1>Terminal-Bench 4.0</h1>

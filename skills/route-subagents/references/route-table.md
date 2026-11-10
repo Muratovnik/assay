@@ -199,7 +199,7 @@ The owner approves the table. To propose pairs from cached measurements, run
 `route-candidates`; it reads only the local benchmark cache:
 
 ```text
-python skills/route-subagents/scripts/benchmark_router.py --cache-dir CACHE route-candidates --source frontiercode --subset main --harness claude-code
+python skills/route-subagents/scripts/benchmark_router.py --cache-dir CACHE route-candidates --source frontiercode --subset all --harness claude-code
 ```
 
 Each row shows a measured pair's score and published cost, whether it is on the

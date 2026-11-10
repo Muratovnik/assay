@@ -239,8 +239,8 @@ interrupted CLI exits 130. MCP input errors are tool errors, not server crashes.
 
 | Task type | Primary evidence | Supporting evidence |
 | --- | --- | --- |
-| `implementation` | DeepSWE; FrontierCode Extended | CursorBench |
-| `hard-implementation` | DeepSWE; FrontierCode Main | CursorBench |
+| `implementation` | DeepSWE; FrontierCode | CursorBench |
+| `hard-implementation` | DeepSWE; FrontierCode | CursorBench |
 | `investigation` | SWE Atlas Codebase QnA | CursorBench |
 | `terminal` | Terminal-Bench | None |
 | `refactoring` | SWE Atlas Refactoring | CursorBench; FrontierCode |
@@ -348,7 +348,7 @@ describes the Terminal-Bench route and the remaining discovery gaps.
 | --- | --- | --- |
 | [DeepSWE 1.1](https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json) | Public JSON | pass@1, API cost, output tokens, duration, steps, CI; not pass@4 |
 | [CursorBench 4.0](https://prod.cursor.com/evals) | HTML, optional browser fallback | Generic Tokens is `reported_tokens`, not known output/total |
-| [FrontierCode 1.1](https://cognition.com/frontiercode) | Opt-in rendered tables | Main/Extended and all reasoning levels; harness tooltip, cost per rollout, output tokens |
+| [FrontierCode 2.0](https://cognition.com/frontiercode) | Opt-in rendered table | One suite (subset `all`), all reasoning levels of every published model; published harness, cost per rollout, output tokens; pass and flag rates kept in `published_rates`, not compared; effort `na` or absent stays unknown |
 | [Terminal-Bench 4.0](https://www.tbench.ai/) | Anonymous publisher JSON API; opt-in browser fallback | Exact board/version and full paging; both adapters keep run totals outside per-task expense comparisons and retain published score intervals |
 | [SWE Atlas QnA](https://labs.scale.com/leaderboard/sweatlas-qna) | Score cards, optional browser | Quality-only; unknown effort stays unknown |
 | [SWE Atlas Test Writing](https://labs.scale.com/leaderboard/sweatlas-tw) | Score cards, optional browser | Specialized quality-only evidence |
@@ -383,8 +383,12 @@ Selectors are best-effort integrations, not a stable publisher API. Local DOM
 tests qualify transition logic, **not the current live website**. Until live
 smoke passes, keep that source explicitly unavailable; do not bypass blocking.
 
-FrontierCode captures all reasoning levels, including controls added during
-hydration, and waits for the changed table before recording a subset. Terminal-
+FrontierCode reads its version from the leaderboard block's own heading, not
+the changelog. It records the best-mode view, then switches to all reasoning
+levels, including a control added during hydration, and waits for the changed
+table. The page's model filter only shapes its chart; a capture whose models
+differ from the best-mode view or from the page's published model count is
+refused. Terminal-
 Bench's animated heading is identified by its own text and the named Benchmark
 selector. Its displayed aggregate cost and generic tokens are not converted to
 per-task expenses or known total/output tokens; release dates are not eval dates.

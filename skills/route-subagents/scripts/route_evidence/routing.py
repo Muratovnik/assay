@@ -8,8 +8,8 @@ from .guides import matching_models
 from .model_names import bind_labels, matching_diagnostics
 
 TASK_TYPES = {
-    "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "extended")], "support": ["cursorbench"]},
-    "hard-implementation": {"primary": [("deepswe", "all"), ("frontiercode", "main")], "support": ["cursorbench"]},
+    "implementation": {"primary": [("deepswe", "all"), ("frontiercode", "all")], "support": ["cursorbench"]},
+    "hard-implementation": {"primary": [("deepswe", "all"), ("frontiercode", "all")], "support": ["cursorbench"]},
     "investigation": {"primary": [("swe-atlas-qna", "all")], "support": ["cursorbench"]},
     "terminal": {"primary": [("terminal-bench", "all")], "support": []},
     "refactoring": {"primary": [("swe-atlas-refactoring", "all")], "support": ["cursorbench", "frontiercode"]},

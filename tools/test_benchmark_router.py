@@ -250,6 +250,24 @@ class CacheTests(unittest.TestCase):
         self.cache.get(changed, self.fetch)
         self.assertEqual(self.calls, 2)
 
+    def test_frontier_1_1_cache_is_not_reused_or_relabelled_as_2_0(self):
+        current = SOURCES["frontiercode"]
+        old = {**current, "version": "1.1", "revision": 5}
+        old_rows = [row(subset="main"), row(subset="extended")]
+        self.cache.get(old, lambda source, validators: (snapshot(old, old_rows), {}))
+        result = self.cache.get(current, self.fetch, offline=True)
+        self.assertIsNone(result["snapshot"])
+        self.assertEqual(result["error"], "invalid_cache")
+        # Neither an import nor a fetch can store 1.1 rows under the 2.0 definition.
+        with self.assertRaises(EvidenceError):
+            ingest(self.cache, snapshot(old, old_rows), timestamp(self.now))
+        refused = self.cache.get(current, lambda source, validators: (snapshot(old, old_rows), {}))
+        self.assertEqual((refused["refresh"], refused["snapshot"]), ("failed", None))
+        self.now += 4000
+        refreshed = self.cache.get(current, self.fetch)
+        self.assertEqual(refreshed["snapshot"]["version"], "2.0")
+        self.assertEqual({r["subset"] for r in refreshed["snapshot"]["rows"]}, {"all"})
+
     def test_clock_reversal_is_not_fresh(self):
         self.cache.get(self.source, self.fetch)
         self.now -= 500
@@ -306,12 +324,47 @@ class AdapterTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             parse_tables(SOURCES["cursorbench"], [[["Model", "Score"], ["x low", ".7"]]])
 
-    def test_dynamic_frontier_subsets_are_separate(self):
-        table = [["Model", "Score", "Cost"], ["Example Low", "70%", "$2"]]
-        main = parse_tables(SOURCES["frontiercode"], [table], subset="main")
-        extended = parse_tables(SOURCES["frontiercode"], [table], subset="extended")
-        self.assertNotEqual(main[0]["subset"], extended[0]["subset"])
-        self.assertEqual(main[0]["metric"], "mergeability")
+    FRONTIER_HEADER = ["#", "Model", "Harness", "Score", "Pass rate", "Flag rate", "Cost / rollout", "Output tokens"]
+
+    def frontier(self, *labels, header=None):
+        rows = [[str(i), label, "Example Harness", "34.5%", "37.9%", "1.5%", "$2.42", "41.2k"]
+                for i, label in enumerate(labels, 1)]
+        return parse_tables(SOURCES["frontiercode"], [[header or self.FRONTIER_HEADER, *rows]])
+
+    def test_frontier_effort_is_split_from_a_glued_or_spaced_name(self):
+        for level in ("xhigh", "max", "high", "medium", "low", "minimal", "none"):
+            for label in ("Example 5.5" + level, "Example 5.5 " + level):
+                with self.subTest(label=label):
+                    (parsed,) = self.frontier(label)
+                    self.assertEqual((parsed["model"], parsed["effort"]), ("Example 5.5", level))
+
+    def test_frontier_unknown_effort_is_never_defaulted(self):
+        rows = self.frontier("Example 1.7na", "Example 2 Small", "Example Flow", "Example 3turbo")
+        # "na" is the publisher's not-applicable marker; a name ending in letters
+        # is not cut into an effort; an unrecognised suffix stays in the name.
+        self.assertEqual([(r["model"], r["effort"]) for r in rows],
+                         [("Example 1.7", None), ("Example 2 Small", None),
+                          ("Example Flow", None), ("Example 3turbo", None)])
+
+    def test_frontier_2_columns_keep_harness_rates_and_rollout_expenses(self):
+        (parsed,) = self.frontier("Example 5.5high")
+        self.assertEqual((parsed["harness"], parsed["subset"], parsed["metric"]),
+                         ("Example Harness", "all", "mergeability"))
+        self.assertAlmostEqual(parsed["score"], .345)
+        self.assertEqual(parsed["published_rates"], {"pass_rate": .379, "flag_rate": .015})
+        self.assertEqual((parsed["cost_usd"], parsed["output_tokens"]), (2.42, 41200))
+        self.assertIn("rollout", parsed["cost_basis"])
+        self.assertIsNone(parsed["reported_tokens"])
+
+    def test_frontier_changed_layout_is_refused_loudly(self):
+        for missing in ("Harness", "Pass rate", "Flag rate", "Cost / rollout", "Output tokens"):
+            header = [label for label in self.FRONTIER_HEADER if label != missing]
+            table = [header, ["1", "Example 5.5high"] + ["34.5%"] * (len(header) - 2)]
+            with self.subTest(missing=missing), self.assertRaisesRegex(EvidenceError, "source layout changed"):
+                parse_tables(SOURCES["frontiercode"], [table])
+        with self.assertRaisesRegex(EvidenceError, "percentage"):
+            parse_tables(SOURCES["frontiercode"], [[self.FRONTIER_HEADER,
+                                                    ["1", "Example low", "H", "34.5%", ".379", "1.5%", "$1", "1k"]]])
 
     def test_atlas_keeps_unknown_effort_and_missing_cost(self):
         body = '''<h2>Performance Comparison</h2><div>1</div><div>Example (Claude Code) xHigh</div><div>60.00±5.00</div>
@@ -385,8 +438,7 @@ class ContextTests(unittest.TestCase):
 
     def test_sources_disagree_without_an_arbitrary_merged_verdict(self):
         ds = view(rows=[row(cost=1), row("economy-b", "max", .79, 2)])
-        fc = view("frontiercode", [row(cost=5, subset="extended"),
-                                   row("economy-b", "max", .79, 1, subset="extended")])
+        fc = view("frontiercode", [row(cost=5), row("economy-b", "max", .79, 1)])
         result = build_context(request(), [ds, fc])
         comparisons = result["tasks"][0]["primary_comparisons"]
         self.assertEqual(len(comparisons), 2)

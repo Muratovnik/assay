@@ -342,7 +342,7 @@ class RouteTableTests(unittest.TestCase):
             candidates(rows, band=1.5)
 
     def test_candidates_match_a_harness_by_lexical_identity(self):
-        # Terminal-Bench labels its agent "Claude Code"; FrontierCode writes claude-code.
+        # Boards label the agent "Claude Code"; a caller may write claude-code.
         from route_evidence.route_table import candidates
         rows = [{'model': 'A', 'effort': 'high', 'score': 0.5, 'cost_usd': 0.4, 'harness': 'Claude Code'},
                 {'model': 'B', 'effort': 'high', 'score': 0.6, 'cost_usd': 0.5, 'harness': 'Codex'}]

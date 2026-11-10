@@ -20,8 +20,7 @@ def primary_pair(a=.8, b=.79, a_cost=1, b_cost=2):
 
 
 def frontier_pair(a=.8, b=.79, a_cost=1, b_cost=2, **kwargs):
-    return view("frontiercode", [row(score=a, cost=a_cost, subset="extended"),
-                                row("economy-b", "max", b, b_cost, subset="extended")], **kwargs)
+    return view("frontiercode", [row(score=a, cost=a_cost), row("economy-b", "max", b, b_cost)], **kwargs)
 
 
 def by_source(result, source_id, task=0, kind="primary_comparisons"):
@@ -76,7 +75,7 @@ class ReviewRegressionTests(unittest.TestCase):
         support = view("cursorbench", [row(), row("economy-b", "max", .79, 2)])
         result = build_context(two_config_request(), [view(), support])
         task = result["tasks"][0]
-        self.assertIn({"source_id": "frontiercode", "subset": "extended"}, task["missing_primary"])
+        self.assertIn({"source_id": "frontiercode", "subset": "all"}, task["missing_primary"])
         self.assertEqual(len(task["unmeasured"]), 2)
         self.assertEqual(by_source(result, "cursorbench", kind="supporting_comparisons")["source_id"], "cursorbench")
 
@@ -90,6 +89,13 @@ class ReviewRegressionTests(unittest.TestCase):
     def test_complete_agreement_leaves_no_gaps(self):
         result = build_context(two_config_request(), [primary_pair(), frontier_pair()])
         self.assertEqual(result["tasks"][0]["evidence_gaps"], [])
+
+    def test_one_frontier_suite_is_primary_for_both_implementation_types(self):
+        result = build_context(two_config_request("implementation", "hard-implementation"),
+                               [primary_pair(), frontier_pair()])
+        for task in result["tasks"]:
+            self.assertEqual([c["source_id"] for c in task["primary_comparisons"]], ["deepswe", "frontiercode"])
+            self.assertEqual(task["evidence_gaps"], [])
 
     def test_complete_singleton_is_still_not_comparative(self):
         req = request("terminal", available=[{"model": "frontier-a", "efforts": ["low"]}])
@@ -157,21 +163,54 @@ class CaptureProofTests(unittest.TestCase):
         source = SOURCES["frontiercode"]
         with self.assertRaises(EvidenceError):
             heading_identity(source, "FrontierCode Leaderboard")
-        heading_identity(source, "FrontierCode Leaderboard", selected_version="FrontierCode 1.1")
-        with self.assertRaises(EvidenceError):
-            heading_identity(source, "FrontierCode Leaderboard", selected_version="FrontierCode 1.0")
+        heading_identity(source, "FrontierCode Leaderboard", selected_version="FrontierCode 2.0")
+        for old in ("FrontierCode 1.1", "FrontierCode 1.0"):
+            with self.assertRaises(EvidenceError):
+                heading_identity(source, "FrontierCode Leaderboard", selected_version=old)
 
-    def test_parent_rejects_missing_or_wrong_subset_proof(self):
-        proof = {"heading": "FrontierCode Leaderboard", "selected_version": "FrontierCode 1.1"}
-        table = [["Model", "Score", "Cost"], ["Example low", "70%", "$1"]]
-        capture = {"identity": proof, "parts": [
-            {"subset": s, "observed_subset": s, "identity": proof, "tables": [table]}
-            for s in ("main", "extended")]}
-        result = captured_snapshot(SOURCES["frontiercode"], capture)
-        self.assertEqual({r["subset"] for r in result["rows"]}, {"main", "extended"})
-        capture["parts"][1]["observed_subset"] = "main"
+    FRONTIER_HEADER = ["Model", "Harness", "Score", "Pass rate", "Flag rate", "Cost / rollout", "Output tokens"]
+
+    def frontier_capture(self, version="FrontierCode 2.0", published=2):
+        proof = {"heading": "FrontierCode Leaderboard", "selected_version": version}
+        every = [self.FRONTIER_HEADER,
+                 ["Example A high", "H", "70%", "75%", "1%", "$1", "1k"],
+                 ["Example A low", "H", "60%", "65%", "1%", "$0.5", "0.5k"],
+                 ["Example B max", "H", "50%", "55%", "2%", "$2", "2k"]]
+        return {"identity": proof, "published_models": published,
+                "views": {"best_reasoning_mode": [every[0], every[1], every[3]]},
+                "parts": [{"subset": "all", "observed_subset": "all", "identity": proof, "tables": [every]}]}
+
+    def test_frontier_capture_is_one_subset_with_every_published_model(self):
+        result = captured_snapshot(SOURCES["frontiercode"], self.frontier_capture())
+        self.assertEqual((result["version"], len(result["rows"])), ("2.0", 3))
+        self.assertEqual({r["subset"] for r in result["rows"]}, {"all"})
+
+    def test_frontier_capture_refuses_old_version_and_wrong_subset_proof(self):
+        with self.assertRaises(EvidenceError):
+            captured_snapshot(SOURCES["frontiercode"], self.frontier_capture(version="FrontierCode 1.1"))
+        capture = self.frontier_capture()
+        capture["parts"][0]["observed_subset"] = "main"
         with self.assertRaises(EvidenceError):
             captured_snapshot(SOURCES["frontiercode"], capture)
+        capture = self.frontier_capture()
+        capture["parts"] = [{**capture["parts"][0], "subset": s, "observed_subset": s} for s in ("main", "extended")]
+        with self.assertRaises(EvidenceError):
+            captured_snapshot(SOURCES["frontiercode"], capture)
+
+    def test_frontier_capture_refuses_a_filtered_model_list(self):
+        # The page's default model filter shows part of the models; the capture
+        # must prove that the table carries every published one.
+        with self.assertRaisesRegex(EvidenceError, "incomplete_models"):
+            captured_snapshot(SOURCES["frontiercode"], self.frontier_capture(published=3))
+        capture = self.frontier_capture()
+        capture["views"]["best_reasoning_mode"].pop()
+        with self.assertRaisesRegex(EvidenceError, "incomplete_models"):
+            captured_snapshot(SOURCES["frontiercode"], capture)
+        for key in ("published_models", "views"):
+            capture = self.frontier_capture()
+            del capture[key]
+            with self.subTest(missing=key), self.assertRaisesRegex(EvidenceError, "missing_model_coverage"):
+                captured_snapshot(SOURCES["frontiercode"], capture)
 
     def test_parent_rejects_duplicate_parts_even_if_set_matches(self):
         proof = {"heading": "Terminal-Bench 4.0", "selected_version": None}
