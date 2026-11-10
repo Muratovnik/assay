@@ -47,6 +47,9 @@ TOKEN = re.compile(r"[^\s`'\"*()\[\]<>,;|«»“”]+")
 LINE_SUFFIX = re.compile(r"(?::\d[\d\-–—]*|#L\d[\w\-–—]*)?[.:]*$")
 # What may stand beside a file name in a list item: joining words and punctuation.
 JOINING = re.compile(r"(?:[\W_]|\b(?:and|or|also|too|as well|и|или|а также|тоже|также)\b)*", re.I)
+# A name that reads as a file whether or not the transcript shows a Read of it: a path, a name with
+# an extension, or an extensionless one such as README, LICENSE or Makefile.
+FILE_LIKE = re.compile(r"[^/\s]*/\S*|[\w.-]*\w\.[A-Za-z][\w-]{0,9}|[A-Z][A-Z0-9_-]{2,}|[A-Z][a-z]+file")
 # A line range stated right after a file name: nothing but punctuation may come between.
 RANGE = re.compile(r"[^\w\s(]*\s*(?::(\d+)(?:[-–—](\d+))?|#L(\d+)(?:[-–—]L?(\d+))?"
                    r"|(?:lines?|строк[аи]?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?|\((\d+)\s*[-–—]\s*(\d+)\))", re.I)
@@ -259,7 +262,9 @@ def _tied(text, paths):
     claim word keeps the rest of the sentence, a list, with the claim. A claim
     names the files of its clause, with the clauses before it that name files too
     and the list items after it, which hold only file names and joining words
-    (`and`, `too`, `тоже`). A claim whose clause names no file names, in turn: a
+    (`and`, `too`, `тоже`). A file-like name without a Read, such as `notes.txt`
+    or `README`, is such a name too, so it neither ends the list before or after
+    the claim nor keeps an item from counting. A claim whose clause names no file names, in turn: a
     parenthesis of that clause holding only file names; the list item just
     before it, when the claim opens its clause, as in `parser.py, read in full,`;
     in a table row, the first cell that names a file. A file named inside any
@@ -272,12 +277,20 @@ def _tied(text, paths):
     def within(first, last):
         return [ref for ref in refs if first <= ref[0] < last]
 
-    def item(first, last, found=None):
+    def listing(first, last, found=None):
+        """Whether a span holds file names and joining words only, a name without a Read included."""
         found = within(first, last) if found is None else found
-        rest = text[first:last]
+        rest, names = text[first:last], bool(found)
         for start, _, end, _ in found:
             rest = rest[:start - first] + " " * (end - start) + rest[end - first:]
-        return bool(found) and bool(JOINING.fullmatch(rest))
+        for match in TOKEN.finditer(rest):
+            if FILE_LIKE.fullmatch(match[0][:LINE_SUFFIX.search(match[0]).start()].removeprefix("./")):
+                rest, names = rest[:match.start()] + " " * len(match[0]) + rest[match.end():], True
+        return names and bool(JOINING.fullmatch(rest))
+
+    def item(first, last, found=None):
+        found = within(first, last) if found is None else found
+        return bool(found) and listing(first, last, found)
 
     sentences, start = [], 0
     for match in [*SENTENCE.finditer(outer), None]:
@@ -300,7 +313,7 @@ def _tied(text, paths):
                 if own:
                     tied += own
                     back = index - 1
-                    while back >= 0 and within(*clauses[back]):
+                    while back >= 0 and (within(*clauses[back]) or listing(*clauses[back])):
                         tied += within(*clauses[back])
                         back -= 1
                 else:
@@ -314,7 +327,7 @@ def _tied(text, paths):
                     elif text.lstrip().startswith("|"):
                         tied += next((within(*cell) for cell in sentences if within(*cell)), [])
                 ahead = index + 1
-                while ahead < len(clauses) and item(*clauses[ahead]):
+                while ahead < len(clauses) and listing(*clauses[ahead]):
                     tied += within(*clauses[ahead])
                     ahead += 1
             for aside in asides:

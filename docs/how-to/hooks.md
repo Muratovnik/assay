@@ -346,6 +346,15 @@ at its commas. These forms tie a claim to the files around it:
   the claim opens (`parser.py, read in full, sets the default`); in a table row,
   the first cell that names a file (`| parser.py | read in full |`).
 
+In these lists and parentheses a name that looks like a file counts as a file name
+even when the transcript has no `Read` of it: a path, a name with an extension such
+as `notes.txt`, or an extensionless name in capitals such as `README`, or such as
+`Makefile`. It ties nothing itself and does not end the list, so
+`полностью прочитаны parser.py, notes.txt, reports.py` and
+`Прочитал целиком parser.py, README и reports.py` hold both partly read files. Any
+other word still ends a list: in `Read parser.py in full, notes.txt was skipped,
+reports.py too` the claim is about `parser.py` alone.
+
 A Markdown link's target counts as part of the text around it. A file named in any
 other parenthesis belongs to that parenthesis, and a claim word inside quotation
 marks is a quotation. A path, or its end from a directory on, names the read files

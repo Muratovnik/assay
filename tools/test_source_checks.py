@@ -247,6 +247,11 @@ class SourceCheckTests(unittest.TestCase):
             "Прочитал целиком справку по хукам (docs/how-to/hooks.md).": ["hooks.md"],
             "[the parser](C:/work/src/parser.py) read in full.": ["parser.py"],
             "Read parser.py in full (approx. 900 lines).": ["parser.py"],
+            # A name the transcript shows no Read of is still a list item and does not end the list.
+            "полностью прочитаны parser.py, notes.txt, reports.py": ["parser.py", "reports.py"],
+            "Прочитал целиком parser.py, README и reports.py.": ["parser.py", "reports.py"],
+            "Read parser.py, notes.txt, reports.py in full.": ["parser.py", "reports.py"],
+            "Read in full (notes.txt, `src/parser.py`).": ["parser.py"],
         }
         for line, names in forms.items():
             with self.subTest(line=line):
@@ -254,6 +259,16 @@ class SourceCheckTests(unittest.TestCase):
                 for name in names:
                     self.assertIn(f"{name}: only lines 1-200 of 900", text)
                 self.assertEqual({}, self.stop(prompt(), *whole, said(line)))
+
+    def test_words_after_a_name_without_a_read_still_end_the_list(self):
+        partial = [read("p1", 1, 200, 900, limit=200, path="C:\\work\\src\\parser.py"),
+                   read("p2", 1, 200, 900, limit=200, path="C:\\work\\src\\reports.py")]
+        for line in ("Read parser.py in full, notes.txt was skipped, reports.py too.",
+                     "Read parser.py in full, notes.txt, then skimmed reports.py."):
+            with self.subTest(line=line):
+                text = self.feedback(self.stop(prompt(), *partial, said(line)))
+                self.assertIn("parser.py: only lines 1-200 of 900", text)
+                self.assertNotIn("reports.py", text)
 
     def test_a_range_counts_only_when_it_is_attached_to_the_name(self):
         cut = read("r1", 1, 200, 900, limit=200, path="C:\\work\\src\\parser.py")
