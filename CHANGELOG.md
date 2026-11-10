@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.44.1](https://github.com/Muratovnik/assay/compare/v0.44.0...v0.44.1) (2026-11-10)
+
+The hooks hold and prompt less where nothing was wrong. The source check ties a
+"read in full" claim to the files its own sentence names, a subagent waiting for its
+own background run is checked at its final stop only, and two notes that went by a
+file's name now look at the repository that holds the file and at the loaded skill.
+
+### Bug Fixes
+
+* **hooks:** the source check compares a "read in full" claim with the files its own sentence names, not with every partly read file named on the line, and a bare name no longer matches inside a longer one (`common.md` in `batch-common.md`). The claim reaches the files of a comma list before or after it, a parenthesis that holds only file names, the first cell of its table row that names a file and a Markdown link's target; a list goes on past a name that looks like a file but has no `Read` in the transcript. A line range counts only when it directly follows the name, as in `parser.py:120-380` or `parser.py lines 1–400`, so a line number cited elsewhere in the sentence leaves the claim on the whole file. Replayed over one owner's holds of two weeks, 15 of 24 no longer fire and each of those was false. The cost is that a claim whose file is named in another clause or sentence, as in "I opened `parser.py`, and read it in full", is not checked ([3a54922](https://github.com/Muratovnik/assay/commit/3a549220daaab19da2312256b9e580197a08affb), [96025c5](https://github.com/Muratovnik/assay/commit/96025c5db320e8c1deed1b7e4929bb4116b72d56), [b9a95a1](https://github.com/Muratovnik/assay/commit/b9a95a17bc286832c749c1b9889eec2c09ba3ade))
+* **hooks:** a subagent that ends its turn while a background launch of its current packet has not reported is waiting, so the stop checks no longer run at that stop; before, every wait was checked like a final answer and the same line was quoted at each one. A launch is a `run_in_background` call or a command Claude Code moved to the background, and it ends with its task notification or with a `TaskStop` or `KillShell` call that names it. The final stop and the hand-back hold are checked as before, and so is a stop whose transcript cannot be read or whose wait is on something else, such as a Monitor ([a429633](https://github.com/Muratovnik/assay/commit/a4296331f79ef0c4c3d789e1b9e012ccac1441b2), [8ae69f3](https://github.com/Muratovnik/assay/commit/8ae69f3ea37bd75a9950004ef35da327872fbae6))
+* **hooks:** the mid-turn note that names `skill-evaluation` no longer appears for a skill a product ships in its own repository, such as `server/skill/<name>/SKILL.md`: the file gives no sign when the nearest directory above it that holds `.git` or a plugin manifest holds `.git` and no manifest. A skill in any plugin still gets the note, whatever the plugin's name; a project-local skill in a repository that is not a plugin gets none ([9955444](https://github.com/Muratovnik/assay/commit/99554442b6c2ba0fd4704cfe8ecaeb85c494c304))
+* **hooks:** the report check asks a plan for its `What already exists` section only when the agent has loaded `implementation-planning` since the latest compaction. A file merely named like a plan, such as a table of review verdicts written to `plans.md`, is no longer held for it; a plan written without the skill is not asked for the section either ([c3c54c8](https://github.com/Muratovnik/assay/commit/c3c54c88168effb5221309c4d1147a00f3feada9))
+
 ## [0.44.0](https://github.com/Muratovnik/assay/compare/v0.43.1...v0.44.0) (2026-11-10)
 
 A route table can now be reviewed against what its launches did. `route-report`
