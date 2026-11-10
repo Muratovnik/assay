@@ -196,11 +196,14 @@ class RouteReportTests(unittest.TestCase):
         ])
         self.review("check: kolo — review", 10, "Verdict: looks fine overall\nREVIEWED: alfi")
         self.review("check: lavi — review", 12, "No verdict line here, though I would ship.")
+        self.review("trace: mero — diagnosis", 14, "Verdict: the cache is the cause")
+        self.review("trace: nori — acceptance", 16, "VERDICT: ship")
         code, result = self.run_cli()  # no --review-class: only review lines mark a review
         self.assertEqual(code, 0)
         totals = result["totals"]
+        # mero's bare `Verdict:` prose judges no work; nori's contract verdict does.
         self.assertEqual((totals["reviews"], totals["reviews_with_unrecognized_verdict"],
-                          totals["reviews_without_verdict_line"]), (1, 1, 0))
+                          totals["reviews_without_verdict_line"]), (2, 1, 0))
         first = self.group(result, "build")["reviews_of_this_work"]["first"]
         self.assertEqual({k: v for k, v in first.items() if v}, {"unrecognized_verdict": 1})
 

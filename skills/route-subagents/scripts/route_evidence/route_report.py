@@ -56,7 +56,7 @@ UNITS = {
     "client": "Claude Code subagent transcripts only; their layout is observed, not a documented API",
     "launch": "one subagent transcript whose first timestamp is inside the window",
     "reviews": "verdict counts are reviews (launches of a review class or launches whose report carries "
-               "review lines), not pieces of work",
+               "a contract verdict, a REVIEWED or a FOLLOWS line), not pieces of work",
     "tokens": "the child's own requests, deduplicated by message id; advisor calls and tokens are counted "
               "separately",
     "cache_write_5m": "includes cache writes the transcript did not split by lifetime",
@@ -267,7 +267,9 @@ def review_lines(text: str) -> dict:
     else:
         verdict = UNRECOGNIZED
     return {"verdict": verdict, "reviewed": reviewed, "follows": follows[-1] if follows else None,
-            "has_lines": bool(verdicts or reviewed or follows)}
+            # A bare `Verdict:` line with another value also closes reports that
+            # are not acceptance reviews, so alone it marks no review.
+            "marks_review": bool(verdict in VERDICTS or reviewed or follows)}
 
 
 def _named(candidates: list[Launch], name: str, before: Launch) -> Launch | None:
@@ -395,7 +397,7 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
     reviews = []
     for launch in launches:
         lines = review_lines(launch.report)
-        if launch.cls in review_set or lines["has_lines"]:
+        if launch.cls in review_set or lines["marks_review"]:
             launch.review = lines
             reviews.append(launch)
 

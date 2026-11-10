@@ -241,8 +241,11 @@ a configuration for another client, is refused.
 For each class and requested pair, the report gives the number of launches, the
 median and total of tool calls, the median minutes, the child's own tokens by
 kind, and advisor calls with their tokens kept apart. A launch is a review when
-its class is a `--review-class` or its report carries a line of the verdict
-contract in [review and continuity](review-and-continuity.md). Each review
+its class is a `--review-class`, or its report carries one of the four verdicts
+or a `REVIEWED` or `FOLLOWS` line of the verdict contract in
+[review and continuity](review-and-continuity.md#state-the-verdict-on-its-own-lines).
+A `Verdict:` line with another value marks no review in another class, because
+reports that judge nothing end that way too. Each review
 counts under the class and pair of the launches its `REVIEWED` line names: the
 share of the class's launches that were reviewed, verdicts split into first
 reviews and follow-ups (a review with `FOLLOWS`), and reviews without a verdict
