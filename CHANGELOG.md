@@ -6,6 +6,28 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.44.0](https://github.com/Muratovnik/assay/compare/v0.43.1...v0.44.0) (2026-11-10)
+
+A route table can now be reviewed against what its launches did. `route-report`
+reads Claude Code subagent transcripts and counts, for each class, its launches,
+tokens and the verdicts of the reviews that judged its work. Acceptance reviews end
+in three lines that make those verdicts countable, and the FrontierCode source reads
+the 2.0 leaderboard.
+
+### Features
+
+* **route-subagents:** `benchmark_router.py route-report --since … --review-class <class>` reads Claude Code subagent transcripts and reports, for each route class and requested pair, the launches, tool calls, minutes and the child's own tokens by kind, with advisor calls kept apart. It also gives the share of launches a review judged, the verdicts of first and follow-up reviews, and the repair chains that hold two or more failed reviews. A review is one delivered report, so a reviewer reused for a repair gives one review per round, and a hand-back the client refused is not counted. Only the lines of the verdict contract are read, never prose. `--prices FILE` adds an API list-price equivalent, which is not subscription quota and models no tiered or long-context prices. The command makes no network request and writes nothing but its JSON output ([62170eb](https://github.com/Muratovnik/assay/commit/62170ebb756235b0d164efa8de645296c15a1eac), [4c433ae](https://github.com/Muratovnik/assay/commit/4c433ae8f4bd82715ba4015dbbbc27b678c58639), [f45b3bf](https://github.com/Muratovnik/assay/commit/f45b3bfe6853a03a57ff81238f54410f5b24904a), [e86b2ac](https://github.com/Muratovnik/assay/commit/e86b2aca199fd0280f975ad36e0babeba3346753))
+
+### Bug Fixes
+
+* **route-subagents:** the FrontierCode source reads the 2.0 leaderboard: every model at every effort level of the "All reasoning levels" view, with the effort split from the model name, the harness taken from its column, and pass and flag rates kept as published context. Its single task set is the primary source for both `implementation` and `hard-implementation`. A changed layout, a table that stays the same after the view switch, a capture that misses a published model, and a 1.1 cache or import are refused instead of guessed ([b590524](https://github.com/Muratovnik/assay/commit/b5905241a7be100cb6aecc3dc82e02edb534c339))
+
+### Documentation
+
+* **route-subagents:** an acceptance review ends with the lines `VERDICT: ship | fix-first | rethink | inconclusive`, `REVIEWED:` naming the launches whose work it judged and, in a review of a repair, `FOLLOWS:` naming the earlier review, which is the reviewer's own name when it is reused. The packet asks for these lines, because the reviewer does not read the skill. In one owner's week 13 of 68 reviews carried no verdict line ([562b6ab](https://github.com/Muratovnik/assay/commit/562b6ab8739137a2c3d1c17bffd136b0fcf1a997), [311d8cc](https://github.com/Muratovnik/assay/commit/311d8ccef677bd94ee36663d7fae80edfad2751b))
+* **route-subagents:** a second failed review of one objective is a decision point. Before a third repair the primary compares the two reviews, and re-plans or takes the choice to the user when the second names defects the repair introduced or the same class of defect in places the first did not reach. In the same week four repair chains reached a second failed review ([562b6ab](https://github.com/Muratovnik/assay/commit/562b6ab8739137a2c3d1c17bffd136b0fcf1a997))
+* **route-subagents:** a packet that changes a shared component or a layout rule lists its consumers and asks the worker to compare the base with the result across the variants a reviewer will try, with a test that fails on the base. In the same week 12 of 21 failed first reviews rested on a defect the worker's own check could not see ([562b6ab](https://github.com/Muratovnik/assay/commit/562b6ab8739137a2c3d1c17bffd136b0fcf1a997), [311d8cc](https://github.com/Muratovnik/assay/commit/311d8ccef677bd94ee36663d7fae80edfad2751b))
+
 ## [0.43.1](https://github.com/Muratovnik/assay/compare/v0.43.0...v0.43.1) (2026-11-07)
 
 Three guides gain a rule behind a recurring mistake: a retrospective counts an error
