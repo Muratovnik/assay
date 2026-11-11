@@ -143,7 +143,8 @@ refuses a launch that does not name both. Suggest that the owner configure a tab
 Do not average unrelated benchmark scores, borrow another test's costs or treat
 API prices as subscription quota.
 
-If routing is rejected, unavailable or fails, read
+If routing is rejected, unavailable or fails, or a subscription or rate limit
+stops a worker, read
 [routing failure](references/routing-failure.md) before any launch. A failure
 does not justify inheriting the primary's model or maximum effort. Respect the
 denied operation.
