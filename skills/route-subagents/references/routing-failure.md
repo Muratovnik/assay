@@ -10,6 +10,7 @@ class or the pair as the refusal states and launch again.
 
 - [Establish what failed](#establish-what-failed)
 - [Choose the next authorized action](#choose-the-next-authorized-action)
+- [A worker stopped by a limit](#a-worker-stopped-by-a-limit)
 - [Check the native arguments locally](#check-the-native-arguments-locally)
 
 ## Establish what failed
@@ -39,6 +40,13 @@ human's explicit choice justifies it.
 If no supported, justified pair is known, do not launch that packet. Continue
 permitted local work or report the exact selection/capability blocker. Do not
 change the primary's settings or client-wide defaults to route one child.
+
+## A worker stopped by a limit
+
+A worker stopped by a subscription or rate limit keeps its context. Do not redo
+its packet in the primary session or start a replacement: continue that worker
+once with its scope unchanged. If the limit still stands, tell the user when it
+resets and leave the packet until then.
 
 ## Check the native arguments locally
 
