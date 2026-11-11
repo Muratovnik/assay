@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -41,11 +42,42 @@ GATES: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 
+UNITTEST = ("-m", "unittest")
+# unittest's closing summary on stderr: "Ran 3 tests in 0.01s", then
+# "OK (skipped=1)" or "FAILED (failures=1, skipped=1)".
+RAN = re.compile(r"^Ran (\d+) tests? in ", re.MULTILINE)
+SKIPPED = re.compile(r"\bskipped=(\d+)")
+
+
+def verdict(arguments: tuple[str, ...], completed: subprocess.CompletedProcess[str]) -> tuple[bool, str]:
+    """Whether a finished gate passed, and the status its line shows.
+
+    A test suite's status names how many tests ran. One that ran none, or whose
+    count is missing, inspected nothing and fails even on exit code 0, which
+    interpreters before 3.12 return when discovery finds no tests.
+    """
+    passed = completed.returncode == 0
+    status = "PASS" if passed else "FAIL"
+    if arguments[:2] != UNITTEST:
+        return passed, status
+    counts = list(RAN.finditer(completed.stderr))
+    ran = int(counts[-1].group(1)) if counts else 0
+    if not ran:
+        return False, "FAIL (no tests ran)"
+    detail = f"{ran} test" if ran == 1 else f"{ran} tests"
+    skipped = SKIPPED.search(completed.stderr, counts[-1].end())
+    if skipped:
+        detail += f", {skipped.group(1)} skipped"
+    return passed, f"{status} ({detail})"
+
+
 def run_all() -> int:
-    """Run every gate, report each, and fail if any failed.
+    """Run every gate, report each as it finishes, and fail if any failed.
 
     Gates run to completion rather than stopping at the first failure: one run
     that lists everything wrong beats five runs that each reveal one thing.
+    Each line is flushed when its gate ends, so output redirected to a file
+    shows progress during a run of several minutes rather than all at the end.
     """
     SCRATCH.mkdir(parents=True, exist_ok=True)
     environment = dict(os.environ, AUDIT_EVAL_TEST_TMP=str(SCRATCH))
@@ -59,13 +91,13 @@ def run_all() -> int:
             text=True,
             check=False,
         )
-        status = "PASS" if completed.returncode == 0 else "FAIL"
-        print(f"{label:24} {status}")
-        if completed.returncode != 0:
+        passed, status = verdict(arguments, completed)
+        print(f"{label:24} {status}", flush=True)
+        if not passed:
             failed.append(label)
             output = (completed.stdout + completed.stderr).strip()
             if output:
-                print("\n".join(f"    {line}" for line in output.splitlines()))
+                print("\n".join(f"    {line}" for line in output.splitlines()), flush=True)
     print()
     if failed:
         print(f"check --all: FAILED ({', '.join(failed)})")

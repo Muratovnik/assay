@@ -42,14 +42,15 @@ one, and nothing should start.
 
 ## The gates
 
-Run them before sending a change. They take seconds.
+Run them before sending a change. They take a few minutes.
 
 ```text
 python -B tools/check.py --all
 ```
 
-That runs every gate, reports each one, and keeps going rather than stopping at
-the first failure. `make check` is the same command, and it creates the scratch
+That runs every gate, prints each one's result as soon as it finishes, with the
+number of tests a test suite ran, and keeps going rather than stopping at the
+first failure. `make check` is the same command, and it creates the scratch
 directory the audit-packet suite needs, so there is nothing to set up first.
 
 To run one gate on its own, the list lives in `tools/check.py`. Continuous

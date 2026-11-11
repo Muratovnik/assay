@@ -28,13 +28,13 @@ python -m pip install -r requirements-tools.txt
 
 ## 校验
 
-提交改动前先跑一遍，只需几秒。
+提交改动前先跑一遍，需要几分钟。
 
 ```text
 python -B tools/check.py --all
 ```
 
-这条命令运行全部校验并逐项报告，不会在第一个失败处停下。`make check` 是同一条
+这条命令运行全部校验，每项一结束就输出其结果（测试集还会给出运行的测试数），不会在第一个失败处停下。`make check` 是同一条
 命令，并会创建审计材料包测试集所需的临时目录，因此无需事先准备任何东西。
 
 要单独运行某一项校验，清单在 `tools/check.py` 中。持续集成在 Linux 与 Windows 上
