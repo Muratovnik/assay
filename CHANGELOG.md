@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.45.0](https://github.com/Muratovnik/assay/compare/v0.44.1...v0.45.0) (2026-11-11)
+
+`route-subagents` says what the primary does when a subscription or rate limit stops
+a worker, and `tools/check.py --all` reports each gate when it finishes instead of
+all of them at the end.
+
+### Features
+
+* **check:** `tools/check.py --all` prints each gate's line as soon as that gate finishes, so output redirected to a file or a pipe shows progress during the run; before, every line arrived at the end. The lines of the three test suites name how many tests ran and how many were skipped, as in `PASS (36 tests, 1 skipped)`. A suite that ran no tests, or whose count cannot be read, fails with `FAIL (no tests ran)` even on exit code 0. The closing summary and the exit code are unchanged ([d9605ee](https://github.com/Muratovnik/assay/commit/d9605eee4e7a34865342c3359ff33ad9d37ebed5))
+
+### Documentation
+
+* **route-subagents:** a worker stopped by a subscription or rate limit keeps its context, so the primary continues that worker once with its scope unchanged instead of redoing its packet itself or starting a replacement; if the limit still stands, it tells the user when the limit resets and leaves the packet until then. The skill points to this rule when a limit stops a worker, not only when routing fails. The rule rests on two incidents in which the primary redid a stopped worker's packet; its effect has not been measured ([d237f08](https://github.com/Muratovnik/assay/commit/d237f08ac2cf6746da959b0cec2c854dc370b139), [5cbd61d](https://github.com/Muratovnik/assay/commit/5cbd61d6e7cb241e0842a0f9523b4e3da30ed303))
+
 ## [0.44.1](https://github.com/Muratovnik/assay/compare/v0.44.0...v0.44.1) (2026-11-10)
 
 The hooks hold and prompt less where nothing was wrong. The source check ties a
