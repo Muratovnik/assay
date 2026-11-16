@@ -51,6 +51,8 @@ VERDICT_LINE = _review_line("verdict")
 REVIEWED_LINE = _review_line("reviewed")
 FOLLOWS_LINE = _review_line("follows")
 NAME_TOKEN = re.compile(r"[\s:]*([^\s,:;]+)")
+# The name runs to the dash, set off by spaces, that opens the label's purpose.
+NAME_BEFORE_DASH = re.compile(r"[\s:]*([^\s,:;—–-][^,:;—–]*?)\s+[—–-]\s")
 
 UNITS = {
     "client": "Claude Code subagent transcripts only; their layout is observed, not a documented API",
@@ -240,15 +242,16 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
 
 
 def child_name(description: str, has_class: bool) -> str | None:
-    """The child's name: the word after the class, or the first word without one."""
+    """The child's name: the words after the class, or from the start without one,
+    up to the dash that opens the purpose; without that dash, the first word."""
     rest = description
     if has_class:
         match = LABEL.match(description)
         rest = description[match.end():] if match else description
-    token = NAME_TOKEN.match(rest)
+    token = NAME_BEFORE_DASH.match(rest) or NAME_TOKEN.match(rest)
     if not token:
         return None
-    name = token[1].strip("`*_.,;:-–—")
+    name = token[1].strip("`*_.,;:-–— ")
     return name if any(c.isalnum() for c in name) else None
 
 

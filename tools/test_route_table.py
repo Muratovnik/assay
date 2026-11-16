@@ -72,9 +72,9 @@ class RouteTableTests(unittest.TestCase):
         self.assertIsNone(self.reason(self.claude(description='gather', model='haiku', effort='medium'),
                                       env, 'claude'))
         # The child's name follows the class; the class stays first.
-        self.assertIsNone(self.reason(self.claude(description='code: alfi — fix the parser', model='sonnet',
-                                                  effort='high'), env, 'claude'))
-        self.assertIn('task class', self.reason(self.claude(description='alfi: code — fix the parser',
+        self.assertIsNone(self.reason(self.claude(description='code: parser errors — show the failing line',
+                                                  model='sonnet', effort='high'), env, 'claude'))
+        self.assertIn('task class', self.reason(self.claude(description='parser errors: code — show the failing line',
                                                             model='sonnet', effort='high'), env, 'claude'))
         for supplied, expected in (
                 ({'description': 'fix the parser', 'model': 'sonnet', 'effort': 'high'}, 'task class'),
@@ -113,8 +113,8 @@ class RouteTableTests(unittest.TestCase):
                 'fork_turns': 'none', 'agent_type': 'worker'}
         self.assertIsNone(self.reason(self.codex(**good), env, 'codex'))
         self.assertIsNone(self.reason(self.codex(**{**good, 'fork_turns': 3}), env, 'codex'))
-        self.assertIsNone(self.reason(self.codex(**{**good, 'task_name': 'code_alfi_parser_fix'}), env, 'codex'))
-        self.assertIn('task class', self.reason(self.codex(**{**good, 'task_name': 'alfi_code_parser_fix'}),
+        self.assertIsNone(self.reason(self.codex(**{**good, 'task_name': 'code_parser_errors_fix'}), env, 'codex'))
+        self.assertIn('task class', self.reason(self.codex(**{**good, 'task_name': 'parser_errors_code_fix'}),
                                                 env, 'codex'))
         for change, expected in (({'fork_turns': None}, 'fork_turns'), ({'fork_turns': 'all'}, 'fork_turns'),
                                  ({'reasoning_effort': 'low'}, "reasoning_effort='low'"),

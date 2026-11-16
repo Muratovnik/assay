@@ -46,10 +46,11 @@ selection just to copy history. Recheck the callable schema if that changes.
 
 With a [route table](route-table.md) configured, start `task_name` with the class
 name, then an underscore, the child's [name](../SKILL.md#name-each-child) and its
-purpose (`code_alfi_parser_fix`). The hook reads only the class, so it does not
-check the name. Without a table the task name starts with the name
-(`alfi_parser_fix`). Pass that class's `model` and `reasoning_effort` with `fork_turns="none"` or a
-bounded positive recent-turn count. Omitted or `"all"` fork turns inherit the
+purpose in the field's underscore form (`code_parser_errors_fix`). The hook reads
+only the class, so it does not check the name. Without a table the task name
+starts with the name (`parser_errors_fix`). Pass that class's `model` and
+`reasoning_effort` with `fork_turns="none"` or a bounded positive recent-turn
+count. Omitted or `"all"` fork turns inherit the
 parent's settings and ignore the requested ones, so the hook refuses them. A
 custom agent file that sets `model` or `model_reasoning_effort` outranks the
 call; the hook reads the project's and the user's `.codex/agents/<agent_type>.toml`

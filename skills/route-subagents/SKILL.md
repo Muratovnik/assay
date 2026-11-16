@@ -87,24 +87,30 @@ or reviewer directly within the existing authorization.
 
 ## Name each child
 
-Give each child launched in the session the next name from this list, so the
-user and the primary can refer to it by one short handle: `alfi`, `bero`, `dova`,
-`elko`, `fino`, `gavi`, `hano`, `kolo`, `lavi`, `mero`, `nori`, `ovi`, `pavo`,
-`rivo`, `savo`, `tavi`. After the last, start again with a number: `alfi2`. A
-replacement, repair worker or reviewer is a new launch and takes the next name;
-continuing a child keeps its name.
+Name each child launched in the session by the subject of its task, in one to
+three words, so the user and the primary can refer to it by a short handle that
+says what it works on: `VS Code link`, `route report`. Name the subject, not the
+action, which the class and the purpose already give. Words from a fixed list
+told nothing about the task, and look-alike words such as `alfi` and `alfi2` read
+as related work. No two launches of the session share a name: when two tasks
+share a subject, add the aspect that tells them apart (`parser errors`,
+`parser tests`). A name holds no comma and no dash set off by spaces: they
+separate the names of a review's `REVIEWED` line and the name from the purpose.
+A new launch, such as a reviewer or a replacement, takes a name of its own; a
+child resumed for a correction keeps its name.
 
 Put the name and the child's purpose in the spawn call's short label field, after
 the class when a route table applies:
 [Claude Code](references/claude-code-routing.md#route-table-launches),
-[Codex](references/codex-routing.md#route-table-launches). Write the purpose in the
-user's language where the field allows it. Call the child by that name whenever
-you speak of it to the user, and when the user names it, map the name to the
-client's own agent identifier.
+[Codex](references/codex-routing.md#route-table-launches). Write the name and the
+purpose in the user's language where the field allows it. Call the child by that
+name whenever you speak of it to the user, and when the user names it, map the
+name to the client's own agent identifier.
 
 The name is a handle for one session. It says nothing about ability, model or
-authority, which stay with the class and the profile. Another session reuses it,
-so a record that outlives the session names the work instead.
+authority, which stay with the class and the profile. Another session may give the
+same name to other work, so a record that outlives the session names the work
+instead.
 
 ## Choose model and effort for the task
 

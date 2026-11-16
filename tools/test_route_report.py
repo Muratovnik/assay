@@ -192,6 +192,25 @@ class RouteReportTests(unittest.TestCase):
         self.assertEqual((totals["chains"], totals["chains_with_repeated_rework"]), (1, 1))
         self.assertIn("not pieces of work", result["units"]["reviews"])
 
+    def test_a_name_of_several_words_runs_to_the_dash_before_the_purpose(self):
+        # A name is the task's subject; two subjects that share a first word stay apart.
+        for description, minute, model, effort in (("build: parser errors — show the failing line", 0, "opus", "high"),
+                                                   ("find: parser tests — list the gaps", 2, "haiku", "medium")):
+            self.launch(description, [
+                {"type": "user", "timestamp": at(minute), "message": {"role": "user", "content": "x"}},
+                assistant(minute + 1, f"w{minute}", "claude-opus-test", text("done"), usage(input=1)),
+            ], model=model, effort=effort)
+        self.review("check: parser review — first pass", 10, "VERDICT: fix-first\nREVIEWED: parser errors")
+        self.review("check: parser re-review — after the fix", 20,
+                    "VERDICT: ship\nREVIEWED: `parser errors`\nFOLLOWS: parser review")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        build, find = self.group(result, "build"), self.group(result, "find")
+        self.assertEqual((build["reviewed_launches"], find["reviewed_launches"]), (1, 0))
+        self.assertEqual([(chain["reviews"], chain["reviewed"]) for chain in build["chains"]],
+                         [(["parser review", "parser re-review"], ["parser errors"])])
+        self.assertEqual(result["totals"]["unresolved_reviewed_names"], [])
+
     def test_a_review_line_alone_marks_a_review_and_an_unknown_value_is_not_guessed(self):
         self.launch("build: alfi — work", [
             {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "x"}},

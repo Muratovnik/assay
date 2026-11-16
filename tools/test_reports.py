@@ -168,7 +168,7 @@ class StopTests(unittest.TestCase):
             return {"type": "user", "message": {"role": "user", "content": f"<task-notification>\n{tags}<status>completed</status>"}}
         command = [tool("Bash", {"command": "gate", "run_in_background": True}, "b1"),
                    returned("b1", "Command running in background with ID: task1. Output is being written to: x")]
-        agent = [tool("Agent", {"description": "build: alfi — parser"}, "a1"),
+        agent = [tool("Agent", {"description": "build: parser — fix the error message"}, "a1"),
                  returned("a1", "Async agent launched successfully. (Internal metadata.) agentId: worker1 (internal ID)")]
         # Still running: the final message is still to come.
         self.assertEqual("", self.note(self.stop(prompt(), edit(APP), command, last="The gate runs in the background.")))
