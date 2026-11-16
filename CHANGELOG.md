@@ -6,6 +6,15 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.46.0](https://github.com/Muratovnik/assay/compare/v0.45.0...v0.46.0) (2026-11-16)
+
+`route-subagents` names each child by the subject of its task instead of the next
+word of a fixed list, and `route-report` reads a name of several words.
+
+### Features
+
+* **route-subagents:** each child is named by the subject of its task in one to three words, unique in the session, such as `parser errors`; when two tasks share a subject, the name adds the aspect that tells them apart. A name holds no comma and no dash set off by spaces. Before, a child took the next word of a sixteen-word list and a number after the last (`alfi2`, `alfi7`): the words said nothing about the task, look-alike words read as related work, and the count was kept from memory, so in one session of 37 named launches nine names were wrong. A reviewer or a replacement takes a name of its own and a child resumed for a correction keeps its name. The session reminder and the Claude Code and Codex references show the new form. `route-report` reads the name up to the dash that opens the label's purpose, so two subjects that share a first word stay apart and a `REVIEWED` line with a longer name finds its launch; a label without that dash still gives its first word, as older transcripts need. The rule follows the owner's decision; its effect on naming has not been measured in live sessions ([595a9bb](https://github.com/Muratovnik/assay/commit/595a9bbeb7f822b25bea398188fda3f73f6729d6))
+
 ## [0.45.0](https://github.com/Muratovnik/assay/compare/v0.44.1...v0.45.0) (2026-11-11)
 
 `route-subagents` says what the primary does when a subscription or rate limit stops
