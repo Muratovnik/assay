@@ -128,45 +128,57 @@ it needs beside the report takes a name that starts with none of those words.
 
 ## Waiting inside a background worker
 
-A background subagent cannot wait for a long command in the foreground. In
-Claude Code 2.1.314 such a call was observed moving to the background after
-about 180 seconds, whatever its `timeout`, and the Bash tool blocks a foreground
-`sleep`. So the worker ends its turn while its own command or Monitor runs.
+A background subagent waits for a long run in a foreground loop that ends
+before the client takes the call away. The packet line:
 
-Every such stop sends the parent a task-notification with status `completed`,
-the summary "is waiting on its own background work" and a note that the same
-task-id will notify again. The parent answers each notification with a full
-model turn. A live probe on 2.1.317 still gave one parent turn per stop; see
+> A subagent waits for a long run in the foreground: `timeout 170 bash -c
+> 'until <the run has ended>; do sleep 5; done'`, sent with the tool's `timeout`
+> set to 200000, and again until the run ends. The client moves a background
+> subagent's call to the background at 180 s, and any call at the tool's own
+> timeout, 120 s unless set. After 30 minutes of waiting in total, or when the
+> run is queued behind a machine-wide lock, end your turn once and name the
+> run's output file.
+
+The form is named because a bare foreground `sleep` is blocked by the Bash
+tool, and the tool's `timeout` because without it the call moves to the
+background at 120 seconds. In a probe on Claude Code 2.1.328 three such loops in
+a row returned inside the worker's turn, the parent got no notification in nine
+minutes, and each next request read the worker's context from cache. The move
+at 180 seconds was observed for a background subagent, not in `claude -p`.
+
+A worker that instead ends its turn while its own command or Monitor runs sends
+the parent a task-notification with status `completed`, the summary "is waiting
+on its own background work" and a note that the same task-id will notify again.
+The parent answers each notification with a full model turn. A live probe on
+2.1.317 still gave one parent turn per stop; see
 [#105928](https://github.com/anthropics/claude-code/issues/105928) and
-[#103359](https://github.com/anthropics/claude-code/issues/103359).
-
-Each Monitor event and each Monitor expiry resumes the worker, so the parent's
-turns follow the worker's events, not its progress. A hand-back sent before the
-work is done costs a parent turn as well.
+[#103359](https://github.com/anthropics/claude-code/issues/103359). Each Monitor
+event and each Monitor expiry resumes the worker the same way, so a Monitor
+re-armed every few minutes wakes the parent at every expiry: in one measured
+window 10 workers re-armed 859 times. A hand-back sent before the work is done
+costs a parent turn as well.
 
 For the wait the [packet](packet-contracts.md) asks for:
 
-- Start the run with `run_in_background`, or let Claude Code move it there: its
-  end is one notification. Give the run its own deadline, such as the runner's
-  timeout, so that a hang ends it too.
-- Use a Monitor to watch a run the worker did not start, or as the keep-warm
-  timer below. Its filter prints only the terminal lines, for success and
-  failure alike.
+- Start the run with `run_in_background` and give it its own deadline, such as
+  the runner's timeout, so that a hang ends it too. The loop's condition reads
+  the run's output file or the marker the run leaves at its end.
 - Do not stream progress lines into the wait.
+- Keep a Monitor for a worker that acts on each event, such as stopping a run
+  at its first failure. Its filter prints only the lines the worker acts on.
 
-A periodic wake can still be the cheaper choice. On 2.1.309 a background
-subagent's requests used the 5-minute prompt cache, and the main conversation's
-used the 1-hour one. A wake within 5 minutes reads both contexts from cache. A
-longer pause makes the worker's next request write its whole context again, at
-1.25 times the input price. A cache read costs 0.05 times the input price on
-Opus 5.5 and Sonnet 5.5, and 0.1 times on most other models; see
+The limits come from the prompt cache. On 2.1.309 a background subagent's
+requests used the 5-minute prompt cache, and the main conversation's used the
+1-hour one. A pause past 5 minutes makes the worker's next request write its
+whole context again, at 1.25 times the input price; a cache read costs 0.05
+times the input price on Opus 5.5 and Sonnet 5.5, and 0.1 times on most other
+models; see
 [pricing](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pricing).
-
-Re-arming a watch every 270 seconds therefore costs less than one wake at the
-end while the wait lasts fewer than 1.25 N / (r (N + P)) re-arms. Here N and P
-are the worker's and the parent's cached context and r is the read multiplier.
-At N = 550,000, P = 340,000 and r = 0.05 that is about 15 re-arms, roughly 70
-minutes. For a longer wait, a Monitor's `timeout_ms` goes up to 1,800,000.
+Each loop is one request that reads the worker's context from cache, so at a
+read multiplier of 0.1 about 12 loops, some 35 minutes, cost what one rewrite
+does. Past that the worker ends its turn once: the run's end is then one
+notification and one rewrite. The 30 minutes are this calculation, not a
+measurement.
 
 ## Observed alias resolutions
 

@@ -106,13 +106,13 @@ worker waits through costs a primary turn. The worker therefore waits for the
 events it acts on: the run's end, whether success, failure or a deadline, and
 not a stream of progress lines. A worker that acts on each event, for example by
 stopping a run at its first failure, keeps a stream filtered to those events. It
-hands back only when the work is done. A periodic wake that keeps the worker's
-prompt cache alive can cost less than letting the cache expire; when that
-matters, the packet names the interval. In one session a progress stream every
-20 seconds woke the primary 7 times in 2 minutes for one worker. The worker does
-not read this skill, so the packet states the instruction; the client mechanics
-and the cache trade-off are in
-[Claude Code](claude-code-routing.md#waiting-inside-a-background-worker).
+hands back only when the work is done. Where the client lets a worker wait
+inside its own turn, the packet gives that wait, its limit and what the worker
+does past it; a periodic wake costs a primary turn each time. In one session a
+progress stream every 20 seconds woke the primary 7 times in 2 minutes for one
+worker. The worker does not read this skill, so the packet states the
+instruction; the line to copy, the client mechanics and the cache trade-off are
+in [Claude Code](claude-code-routing.md#waiting-inside-a-background-worker).
 
 ## Resumed, review and repair packets
 
