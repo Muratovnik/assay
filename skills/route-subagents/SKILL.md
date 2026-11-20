@@ -68,8 +68,9 @@ limit instead of a ceremonial launch. If delegation is required, a later local
 fallback in this skill does not override that requirement.
 
 Read the actual owner instructions and target state before assigning work.
-Define the outcome, source identity, smallest sufficient read scope, write
-ownership, dependencies, exclusions and evidence required for completion.
+Define the outcome, the premises it stands on with their sources, source
+identity, smallest sufficient read scope, write ownership, dependencies,
+exclusions and evidence required for completion.
 Name the Assay skills the packet's work needs; the worker loads them before the
 work and names them on the first line of its report, see
 [packet examples](references/packet-contracts.md).

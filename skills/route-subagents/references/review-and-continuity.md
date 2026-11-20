@@ -4,7 +4,8 @@ Use for requested decision or acceptance review, a targeted risk investigation,
 or follow-up on prior findings. The primary defines scope and owns acceptance;
 the reviewer independently challenges evidence within its role boundary.
 
-Give the reviewer the original objective, applicable contracts, exact artifact
+Give the reviewer the original objective, the premises to challenge first,
+applicable contracts, exact artifact
 or base-to-result diff, permitted oracle and risk scope. Before packing, read
 which capabilities the selected reviewer's adapter names unavailable. Where it
 cannot run the oracle, include snapshot-bound receipts for that oracle; where it
@@ -114,9 +115,7 @@ these lines.
 The lines let the primary and the owner count how often a class's work fails its
 first review and how long a repair chain runs; the
 [route table reference](route-table.md#building-and-reviewing-the-table) names
-the report that reads them. In one owner's week 13 of 68 reviews carried no
-verdict line and the rest used two vocabularies, so rework could be counted only
-by reading each report.
+the report that reads them.
 
 ## Review an interface change
 

@@ -46,6 +46,10 @@ author with the owner's remark list as its boundary while the only independent
 reviewer cannot measure, and a control in which a label typo and a packet with
 no interface keep their ordinary contracts.
 
+O39-O40 cover the premises of a packet: a review packet that would pass an
+unchecked statement of the product's purpose on as fact, and a control in which
+sourced premises need no invented doubt, second reviewer or owner sign-off.
+
 Run the existing hook fixture tests separately. They test the activation layer:
 ordinary English/Russian requests, composition with the first workflow, explicit
 catalog choices, negatives, quotations, disabled/missing skills and bounded

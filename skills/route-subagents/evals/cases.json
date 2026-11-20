@@ -191,6 +191,16 @@
       "id": "O38",
       "prompt": "Assess the proposed packets using only the supplied facts. Do not call tools, launch agents or change state.",
       "context": "Delegation is authorized. One worker packet corrects a typo in a button label; the label keeps its length. Another packet refactors a CSV export module that renders nothing. Because the same session also contains interface repairs, the proposal is to add ui-delivery procedures, measurement at every supported width, a defect-class sweep across consumers and a separate non-author reviewer to both packets."
+    },
+    {
+      "id": "O39",
+      "prompt": "Prepare the acceptance review packet using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "Delegation is authorized. Four worker packets built a Markdown export for a note tool. Each packet opened with the sentence 'the tool is a team wiki, so every export includes the author list'; the primary wrote it after a first reading and never checked it. The project's README, line 3, says the tool is a single-user notebook with no accounts, and the export contract, docs/export.md lines 3-5, names a title and a body and no author line. The workers report four passing tests. The proposed review packet carries the diff, the test receipt and the acceptance criteria copied from the worker packets."
+    },
+    {
+      "id": "O40",
+      "prompt": "Assess the proposed review packet using only the supplied facts. Do not call tools, launch agents or change state.",
+      "context": "Delegation is authorized. A worker changed the retry delay of an upload queue. The packet listed two premises, each with its source: the queue retries only idempotent uploads (docs/queue.md line 12) and the delay is read once at start (src/queue.py line 40); both lines say what the packet says. The proposal for the review is to add a second reviewer who re-derives the product's purpose from scratch, to mark both premises as doubtful so that the reviewer has something to challenge, and to hold the result until the owner confirms each premise in writing."
     }
   ]
 }

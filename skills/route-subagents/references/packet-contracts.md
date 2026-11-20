@@ -19,6 +19,7 @@ explicit record. The worker's final result follows the separate
 
 ```text
 Outcome / question and original objective:
+Premises the work stands on, each with file:line or marked inferred:
 Delegation purpose and expected use of the result:
 Why delegate now; dependency or reconsideration trigger when deferred:
 Primary-owned work while this runs (or why sequential isolation is useful):
@@ -38,6 +39,13 @@ These are assignment/plan notes, not additional routing API parameters. Follow
 [delegation planning](delegation-planning.md) when the split or timing is unclear.
 Finalize relevant notes in the execution prompt before preparing the route;
 never append them to an already authorized immutable launch input.
+
+A premise is what the packet states as fact and the work depends on: what the
+product or component is for, which behaviour is intended, what an earlier step
+established. Give each its source, a file and line, or mark it `inferred`. A
+worker does not question the packet's facts, so a wrong one is copied into the
+work and into every later packet: in one project a wrong statement of the
+product's purpose went into 11 packets.
 
 ## Skills and authority
 
@@ -78,13 +86,10 @@ the return names. The packet has that file named for its content, not as a repor
 or summary, because some clients refuse a worker's file named that way; see
 [Claude Code](claude-code-routing.md#files-a-subagent-writes). The primary
 reads that file only when a decision needs it, and asks for a longer return when
-the decision depends on it. Without a stated budget, the median final message in
-one 129-worker session ran from 9,000 to 23,000 characters by class.
+the decision depends on it.
 
 The packet names the report's language as well, English unless its consumer needs
-another. In one owner's sessions with Russian set as the reply language, 113 of
-387 reports on English packets that named no language came back in Russian,
-against 6 of 82 when the packet asked for English. What the worker
+another. What the worker
 delivers for people, such as documents, UI text, commits or translations, keeps
 its readers' language. Where the Assay hooks run, every worker is told both
 defaults at its start, so a packet names a language or a budget only to set
@@ -92,10 +97,7 @@ another.
 
 The packet also tells the worker to send long command output, such as a build,
 test run or log read, to a file and keep only the lines it acts on: a worker
-re-reads everything in its context on every call. In the same session, file reads
-through the shell, whatever the target, were 37 % of worker tool output. A later
-measurement of that class found about 18 % of it was logs and results; most of the
-rest was source and documents.
+re-reads everything in its context on every call.
 
 ## Waiting for a long run
 
@@ -108,9 +110,8 @@ not a stream of progress lines. A worker that acts on each event, for example by
 stopping a run at its first failure, keeps a stream filtered to those events. It
 hands back only when the work is done. Where the client lets a worker wait
 inside its own turn, the packet gives that wait, its limit and what the worker
-does past it; a periodic wake costs a primary turn each time. In one session a
-progress stream every 20 seconds woke the primary 7 times in 2 minutes for one
-worker. The worker does not read this skill, so the packet states the
+does past it; a periodic wake costs a primary turn each time. The worker does
+not read this skill, so the packet states the
 instruction; the line to copy, the client mechanics and the cache trade-off are
 in [Claude Code](claude-code-routing.md#waiting-inside-a-background-worker).
 
@@ -124,7 +125,9 @@ For review add the role-required mode, original brief, frozen contracts,
 candidate identity, scoped risk and receipts for primary-owned stateful gates,
 and ask for the files, hunks and receipts the reviewer actually read; the
 [result rules](outcome-and-repair-contracts.md#required-result-packet) say how a
-no-finding return without them counts. Do not supply the preferred verdict. For
+no-finding return without them counts. Repeat the premises of the judged work
+and ask, as the review's first item, which of them are wrong, unsupported by
+their source or only inferred. Do not supply the preferred verdict. For
 an acceptance review also ask for the
 [verdict lines](review-and-continuity.md#state-the-verdict-on-its-own-lines), and
 name in the packet the launches whose work is judged and, when it reviews a
