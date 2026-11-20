@@ -21,6 +21,19 @@ else:
     from asset_formats import ContractError, FRONTMATTER, frontmatter
 
 OPTIONAL_SKILLS = "assay-optional-skills"
+# Directories a tool writes wherever it runs: a bytecode cache beside each
+# imported module, Git metadata in each nested checkout. None is source at any
+# depth. The rule compares names rather than asking Git, so it holds the same
+# in the release tool's Git-free snapshot.
+GENERATED_DEFAULTS = frozenset({".git", "__pycache__"})
+
+
+def tree_paths(directory: Path, pattern: str = "*") -> list[Path]:
+    """Sorted paths below directory matching pattern, outside generated directories."""
+    return sorted(
+        path for path in directory.rglob(pattern)
+        if GENERATED_DEFAULTS.isdisjoint(path.relative_to(directory).parts)
+    )
 
 
 class _HTMLReferences(HTMLParser):
@@ -187,7 +200,7 @@ def unreachable_problems(skill: Path, root: Path) -> list[str]:
         f"{label}/SKILL.md; link it there with the condition for reading it, "
         "or move or delete it"
         for directory in REACHABLE_DIRECTORIES
-        for path in sorted((skill / directory).rglob("*"))
+        for path in tree_paths(skill / directory)
         if path.is_file() and path.resolve(strict=True) not in reached
     ]
 
@@ -208,7 +221,7 @@ def contents_problems(skill: Path, root: Path) -> list[str]:
     """
     problems: list[str] = []
     for directory in REACHABLE_DIRECTORIES:
-        for path in sorted((skill / directory).rglob("*.md")):
+        for path in tree_paths(skill / directory, "*.md"):
             label = path.relative_to(root).as_posix()
             try:
                 text = path.read_text(encoding="utf-8", errors="strict")
@@ -302,7 +315,7 @@ def selection_problems(skills_root: Path, known: set[str]) -> list[str]:
             if len(optional) != len(set(optional)) or set(optional) - (known - {skill.name}):
                 raise ContractError(f"{OPTIONAL_SKILLS} contains duplicate, unknown or self dependencies")
             used: set[str] = set()
-            for path in sorted(skill.rglob("*.md")):
+            for path in tree_paths(skill, "*.md"):
                 if "evals" in path.relative_to(skill).parts:
                     continue
                 for target in markdown_targets(path.read_text(encoding="utf-8", errors="strict")):

@@ -230,6 +230,35 @@ class AgentAssetsTests(unittest.TestCase):
                         f"skills/route-subagents/evals/{name}: {expected}", problems
                     )
 
+    def test_generated_directories_are_not_source_at_any_depth(self) -> None:
+        # A Python run without -B writes a bytecode cache beside the module it
+        # imports, and a nested checkout carries its own .git: neither is source
+        # at any depth, so the check reads neither its bytes nor its Markdown.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            skill = root / "skills/route-subagents"
+            module = skill / "scripts/route_evidence/cache.py"
+            module.parent.mkdir(parents=True)
+            module.write_bytes(b"VALUE = 1\n")
+            generated = {
+                skill / "scripts/route_evidence/__pycache__/cache.cpython-315.pyc":
+                    b"\xa7\r\r\n\x00\x00\x00\x00",
+                skill / "references/__pycache__/stale.md": b"[gone](missing.md)\n",
+                skill / "examples/demo/.git/index": b"DIRC\x00\x00\x00\x02\xff",
+                skill / "examples/demo/.git/description.md": b"[gone](missing.md)\n",
+            }
+            for path, data in generated.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+
+            self.assertEqual([], aa.check(root))
+            files, problems = aa.source_paths(root, aa.load_catalog(root))
+            self.assertEqual([], problems)
+            self.assertEqual([], sorted(set(files) & set(generated)))
+            self.assertIn(module, files)
+
     def test_zip_suffix_does_not_exempt_runtime_or_uncatalogued_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

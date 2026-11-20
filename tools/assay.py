@@ -20,14 +20,14 @@ import tomllib
 if __package__:
     from .asset_formats import ContractError, frontmatter, openai_adapter_document
     from .skill_resources import (
-        contents_problems, distribution_problems, markdown_problems, unreachable_problems,
-        validate_plain_tree,
+        GENERATED_DEFAULTS, contents_problems, distribution_problems, markdown_problems,
+        tree_paths, unreachable_problems, validate_plain_tree,
     )
 else:
     from asset_formats import ContractError, frontmatter, openai_adapter_document
     from skill_resources import (
-        contents_problems, distribution_problems, markdown_problems, unreachable_problems,
-        validate_plain_tree,
+        GENERATED_DEFAULTS, contents_problems, distribution_problems, markdown_problems,
+        tree_paths, unreachable_problems, validate_plain_tree,
     )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,7 +41,6 @@ ASSET_ID = re.compile(r"^(?:skill|profile)/[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 LITERAL_MACHINE_PATH = re.compile(
     r"(?:[A-Za-z]:\\Users\\[^\\/\s]+|/(?:Users|home)/[^/\s]+)"
 )
-GENERATED_DEFAULTS = {".git", "__pycache__"}
 # One canonical text rendered into the skills that share it. A skill installs
 # alone and cannot link outside its directory, so each keeps its own copy; the
 # source check compares those copies byte for byte like every other render.
@@ -335,7 +334,7 @@ def source_paths(root: Path, catalog: Catalog) -> tuple[list[Path], list[str]]:
         for name in sorted(directories):
             path = parent / name
             relative = path.relative_to(root)
-            if relative.parts[0] in GENERATED_DEFAULTS or generated(relative, catalog):
+            if name in GENERATED_DEFAULTS or generated(relative, catalog):
                 continue
             if path.is_symlink() or is_reparse(path):
                 problems.append(f"{relative.as_posix()}: source links are forbidden")
@@ -345,7 +344,7 @@ def source_paths(root: Path, catalog: Catalog) -> tuple[list[Path], list[str]]:
         for name in sorted(names):
             path = parent / name
             relative = path.relative_to(root)
-            if relative.parts[0] in GENERATED_DEFAULTS or generated(relative, catalog):
+            if name in GENERATED_DEFAULTS or generated(relative, catalog):
                 continue
             if path.is_symlink() or is_reparse(path):
                 problems.append(f"{relative.as_posix()}: source links are forbidden")
@@ -870,7 +869,7 @@ def check(root: Path = ROOT) -> list[str]:
                 problems.append(f"{asset.path}: missing SKILL.md")
             else:
                 problems.extend(skill_problems(definition, asset, root))
-            for markdown in sorted(source.rglob("*.md")):
+            for markdown in tree_paths(source, "*.md"):
                 problems.extend(markdown_problems(markdown, root))
             problems.extend(unreachable_problems(source, root))
             problems.extend(contents_problems(source, root))
