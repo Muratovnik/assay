@@ -487,7 +487,7 @@ class RouteReportTests(unittest.TestCase):
             "VERDICT: inconclusive  ": "inconclusive",
             "The verdict: ship": "no_verdict_line",
             "I would ship this.": "no_verdict_line",
-            "VERDICT: ship.": "unrecognized_verdict",
+            "VERDICT: ship.": "ship",
             "VERDICT: ship\nVERDICT: rethink": "unrecognized_verdict",
             # A reviewer's summary sentence beside the contract line decides nothing.
             "**Verdict: fix-first.** The adapter holds.\n\nVERDICT: fix-first": "fix-first",
@@ -499,6 +499,94 @@ class RouteReportTests(unittest.TestCase):
                 self.assertEqual(review_lines(report)["verdict"], expected)
         lines = review_lines("REVIEWED: alfi, `bero`\nreviewed: alfi\nFOLLOWS: kolo")
         self.assertEqual((lines["reviewed"], lines["follows"]), (["alfi", "bero"], "kolo"))
+
+    def test_a_verdict_line_reads_its_opening_word_in_either_vocabulary(self):
+        # Shapes reviewers wrote: bold closing after the word, a sentence on the same
+        # line, a heading, and independent-audit's words, which its bounded review maps
+        # PASS and PASS WITH NON-BLOCKING FINDINGS to ship and INCONCLUSIVE to inconclusive.
+        cases = {
+            "**VERDICT: ship.** The parser change holds; one note stays open.": "ship",
+            "VERDICT: fix-first. Two defects break the second requirement.": "fix-first",
+            "**Verdict: rethink** — the approach cannot hold the contract.": "rethink",
+            "**VERDICT: inconclusive.** The test receipt is missing.": "inconclusive",
+            "VERDICT: PASS": "ship",
+            "**Verdict: PASS WITH NON-BLOCKING FINDINGS.** Every clause holds.": "ship",
+            "**Verdict: PASS WITH NON-BLOCKING FINDINGS** for commit 1a2b3c4 of the parser.": "ship",
+            "**Verdict: PASS WITH NON-BLOCKING FINDINGS (source read only).** The first requirement holds.": "ship",
+            "**Verdict: INCONCLUSIVE.** No failure found.": "inconclusive",
+            "**Verdict: ship.** That is PASS in the audit's words.": "ship",
+            "## 1. Verdict: FAIL": "fail",
+            "## Verdict: INCONCLUSIVE, one receipt missing": "inconclusive",
+            "## Verdict\n\n**PASS WITH NON-BLOCKING FINDINGS.** All rows hold.": "ship",
+            "### 2. Verdict\nFAIL. The cache test is missing.": "fail",
+        }
+        for report, expected in cases.items():
+            with self.subTest(report=report):
+                self.assertEqual(review_lines(report)["verdict"], expected)
+
+    def test_an_audit_fail_is_a_rejection_that_names_its_kind_only_when_the_review_does(self):
+        # FAIL blocks acceptance, and the audit leaves fix-first or rethink to the
+        # reviewer: alone it is a rejection of its own, beside the word that names
+        # which it is that word, and a word inside its sentence is not read.
+        cases = {
+            "**Verdict: FAIL.** One defect blocks the release.": "fail",
+            "Verdict: FAIL, on the second check.": "fail",
+            "**Verdict: FAIL, a small repair (fix-first) would do.**": "fail",
+            "**Verdict: FAIL.** Two defects.\nVERDICT: fix-first": "fix-first",
+            "VERDICT: rethink\n## Verdict: FAIL": "rethink",
+        }
+        for report, expected in cases.items():
+            with self.subTest(report=report):
+                self.assertEqual(review_lines(report)["verdict"], expected)
+
+    def test_two_verdicts_or_a_verdict_word_inside_other_prose_is_not_read(self):
+        unrecognized, absent = "unrecognized_verdict", "no_verdict_line"
+        cases = {
+            # Two different verdicts, on two lines or on one.
+            "VERDICT: ship\n**Verdict: FAIL.** The parser drops a line.": unrecognized,
+            "**Verdict: PASS.**\nVERDICT: fix-first": unrecognized,
+            "VERDICT: fix-first\n**Verdict: FAIL.**\nVERDICT: rethink": unrecognized,
+            "VERDICT: ship | fix-first | rethink | inconclusive": unrecognized,
+            "VERDICT: ship or fix-first, depending on the owner": unrecognized,
+            # An earlier verdict quoted, and a hypothetical one.
+            "VERDICT: the first round's fix-first is answered by this repair": unrecognized,
+            "The earlier review returned VERDICT: fix-first; this repair answers it.": absent,
+            "> VERDICT: fix-first\n\nThis repair answers the quoted round.\nVERDICT: ship": "ship",
+            "VERDICT: ship if the full gate passes": unrecognized,
+            "Verdict: would be ship once the receipt arrives": unrecognized,
+            "## Verdict\n\nShip would need the full gate, which did not run.": absent,
+            "## Verdict for the repaired half: **ship**": absent,
+            # Words neither vocabulary defines.
+            "**Verdict: PASS WITH NON-BLOCKING FINDINGS as far as I read.**": unrecognized,
+            "**Verdict: risk-found.** One risk stands.": unrecognized,
+            "VERDICT: accept with required fixes": unrecognized,
+        }
+        for report, expected in cases.items():
+            with self.subTest(report=report):
+                self.assertEqual(review_lines(report)["verdict"], expected)
+
+    def test_an_audit_fail_counts_as_a_first_review_rejection_and_as_rework(self):
+        self.launch("build: alfi — work", [
+            {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "x"}},
+            assistant(1, "w1", "claude-opus-test", text("done"), usage(input=1)),
+        ])
+        self.review("check: kolo — review", 10, "**Verdict: FAIL.** One blocking defect.\nREVIEWED: alfi")
+        self.review("check: lavi — re-review", 20, "VERDICT: fix-first\nREVIEWED: alfi\nFOLLOWS: kolo")
+        self.review("check: mero — re-review", 30,
+                    "**Verdict: PASS WITH NON-BLOCKING FINDINGS.** Both repairs hold.\nREVIEWED: alfi\nFOLLOWS: lavi")
+        # An audit word alone marks no review outside a review class, like any `Verdict:` prose.
+        self.review("trace: nori — diagnosis", 40, "**Verdict: PASS.** The cache is not the cause.")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        reviews = self.group(result, "build")["reviews_of_this_work"]
+        self.assertEqual({k: v for k, v in reviews["first"].items() if v}, {"fail": 1})
+        self.assertEqual({k: v for k, v in reviews["follow_up"].items() if v}, {"fix-first": 1, "ship": 1})
+        self.assertEqual([(chain["verdicts"], chain["repeated_rework"]) for chain in self.group(result, "build")["chains"]],
+                         [(["fail", "fix-first", "ship"], True)])
+        totals = result["totals"]
+        self.assertEqual((totals["reviews"], totals["reviews_with_unrecognized_verdict"],
+                          totals["chains_with_repeated_rework"]), (3, 0, 1))
+        self.assertIn("fail being an audit FAIL", result["units"]["verdicts"])
 
 
 if __name__ == "__main__":

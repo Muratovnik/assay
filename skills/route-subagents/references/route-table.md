@@ -241,34 +241,35 @@ a configuration for another client, is refused.
 For each class and requested pair, the report gives the number of launches, the
 median and total of tool calls, the median minutes, the child's own tokens by
 kind, and advisor calls with their tokens kept apart. A review is one report a
-launch handed back, so a reviewer that is reused for a repair gives one review
-per round. A report is a review when it carries one of the four verdicts or a
-`REVIEWED` or `FOLLOWS` line of the verdict contract in
+launch handed back, so a reused reviewer gives one per round. A report is a
+review when it carries one of the four verdicts or a `REVIEWED` or `FOLLOWS`
+line of the verdict contract in
 [review and continuity](review-and-continuity.md#state-the-verdict-on-its-own-lines);
 in a `--review-class`, a `Verdict:` line with another value marks one too, and a
 launch none of whose reports carries a line still counts as one review without
 a verdict line. That count therefore includes the decision and adversarial
-reviews of the class, which carry no lines by contract. In another class a
-`Verdict:` line with another value marks no review, because reports that judge
-nothing end that way too. Each review
+reviews of the class, which carry no lines by contract. Elsewhere such a line
+marks none: reports that judge nothing end that way too. Each review
 counts under the class and pair of the launches its `REVIEWED` line names or,
 without a name there, of the one launch that reported a commit the review names
 as its own: in a hand-back no later than the review, where no earlier request to
 it named that commit. Commits on the `REVIEWED` line decide; without them, those
 in the review's report and its requests. A commit two launches reported pairs
-with neither and is listed. The report gives the
-share of the class's launches that were reviewed, verdicts split into first
-reviews and follow-ups (a review with `FOLLOWS`), and reviews without a verdict
-line. `FOLLOWS` resolves to the latest earlier review by that name in the
-session, which for a reused reviewer is its own previous round. Reviews linked
-by `FOLLOWS` form chains; a chain with two or more
-`fix-first` or `rethink` verdicts is listed by the child names involved, which
-is the repeated rework the table's review looks for. Verdict counts are
-reviews, not pieces of work. Only the contract's lines are read for verdicts
-and names, never prose. The verdict is the one line
-whose value is exactly one of the four words, so a summary sentence that also
-opens with `Verdict:` does not disturb it; a report whose verdict lines hold no
-such value, or two different ones, counts as unrecognized. Totals name the unclassed launches, the follow-ups
+with neither and is listed. It gives the share of the class's launches
+reviewed, verdicts split into first reviews and follow-ups (a review with
+`FOLLOWS`), and reviews without a verdict line. `FOLLOWS` resolves to the latest
+earlier review by that name in the session, for a reused reviewer its own
+previous round. Reviews linked by `FOLLOWS` form chains; a chain with two or
+more rejections is listed by the child names involved, which is the repeated
+rework the table's review looks for. Only the contract's lines
+are read for verdicts and names, never prose: a `Verdict:` line, or the line
+under a `Verdict` heading, gives its opening word when Markdown or punctuation
+ends it, in the contract's vocabulary or
+[independent-audit's](../../independent-audit/references/bounded-review.md#preserve-meaning-across-verdict-vocabularies).
+`PASS`, with or without non-blocking findings, counts as `ship`; `FAIL`, which
+leaves `fix-first` or `rethink` open, as the rejection `fail` unless another
+line names which. A line opening with another word decides nothing; a report
+with no word read, or two verdicts, counts as unrecognized. Totals name the unclassed launches, the follow-ups
 whose `FOLLOWS` matched no earlier review, the
 `REVIEWED` names that matched no launch of the session, the reviews paired by a
 commit, the ambiguous commits and the skipped lines that were not JSON.

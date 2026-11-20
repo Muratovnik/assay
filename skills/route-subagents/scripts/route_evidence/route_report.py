@@ -10,9 +10,9 @@ A launch is one subagent transcript whose first timestamp falls in the window.
 Its class is the first word of its meta `description`, read exactly as the launch
 check reads it. A review is a launch of a review class, or any launch whose report
 carries a review line; verdict counts are therefore counts of reviews, not of
-pieces of work. Only the line form of the verdict contract is parsed: prose is
-never interpreted. A review's subject is the launch its REVIEWED line names, or
-else the one launch that reported, as its own, a commit the review names; a commit
+pieces of work. Only verdict lines are parsed, by the word they open with in the
+contract's vocabulary or independent-audit's: prose is never interpreted. A
+review's subject is the launch its REVIEWED line names, or else the one launch that reported, as its own, a commit the review names; a commit
 id is matched as a token, not read for meaning.
 """
 from __future__ import annotations
@@ -30,10 +30,18 @@ from typing import Any
 from .core import EvidenceError, read_document
 from .route_table import CLASS_NAME, LABEL
 
-VERDICTS = ("ship", "fix-first", "rethink", "inconclusive")
-REWORK = frozenset({"fix-first", "rethink"})
+CONTRACT_VERDICTS = ("ship", "fix-first", "rethink", "inconclusive")
+# independent-audit's FAIL blocks acceptance but leaves the choice between fix-first
+# and rethink to the reviewer, so a review that names neither is a rejection of its own.
+FAIL = "fail"
+VERDICTS = (*CONTRACT_VERDICTS, FAIL)
+REWORK = frozenset({"fix-first", "rethink", FAIL})
 NO_VERDICT = "no_verdict_line"
 UNRECOGNIZED = "unrecognized_verdict"
+# The words a verdict line may open with, in the contract's vocabulary and in the
+# audit's, as independent-audit's bounded review maps them to the contract.
+VERDICT_WORDS = {"ship": "ship", "fix-first": "fix-first", "rethink": "rethink", "inconclusive": "inconclusive",
+                 "pass": "ship", "pass with non-blocking findings": "ship", "fail": FAIL}
 TOKEN_KINDS = ("input", "output", "cache_read", "cache_write_5m", "cache_write_1h")
 PRICE_KEYS = frozenset({"input", "output", "cache_read", "cache_write_5m_multiplier", "cache_write_1h_multiplier"})
 HANDBACK = "SubagentHandback"
@@ -50,6 +58,14 @@ def _review_line(keyword: str) -> re.Pattern:
 
 
 VERDICT_LINE = _review_line("verdict")
+# A Markdown heading, numbered or not, may carry the verdict line, or say only
+# `Verdict` and leave the value to the line after it.
+HEADING = re.compile(r"^\s*#{1,6}\s+(?:\d+[.)]\s*)?")
+VERDICT_ALONE = re.compile(rf"^{_EMPHASIS}\s*verdict\s*{_EMPHASIS}\s*$", re.IGNORECASE)
+# The value's opening word is the verdict when the value ends there or Markdown or
+# punctuation closes the word; a word that runs on into the sentence is not read.
+VERDICT_WORD = re.compile(r"(pass\s+with\s+non-blocking\s+findings|fix-first|rethink|inconclusive|ship|pass|fail)"
+                          r"(?=[*_]*\s*$|[*_]*\s*[.,;:(—–]|[*_]+\s)", re.IGNORECASE)
 REVIEWED_LINE = _review_line("reviewed")
 FOLLOWS_LINE = _review_line("follows")
 NAME_TOKEN = re.compile(r"[\s:]*([^\s,:;]+)")
@@ -64,6 +80,9 @@ UNITS = {
     "launch": "one subagent transcript whose first timestamp is inside the window",
     "reviews": "verdict counts are reviews, not pieces of work: each report a launch handed back that carries "
                "a contract verdict, a REVIEWED or a FOLLOWS line, and at least one per launch of a review class",
+    "verdicts": "ship accepts the work; fix-first, rethink and fail reject it, fail being an audit FAIL that "
+                "named neither; inconclusive, no_verdict_line and unrecognized_verdict decide nothing. The audit's "
+                "PASS and PASS WITH NON-BLOCKING FINDINGS count as ship, its INCONCLUSIVE as inconclusive",
     "tokens": "the child's own requests, deduplicated by message id; advisor calls and tokens are counted "
               "separately",
     "cache_write_5m": "includes cache writes the transcript did not split by lifetime",
@@ -322,12 +341,32 @@ def read_meta(launch: Launch, classes: list[str] | None) -> None:
     launch.name = child_name(description, launch.cls is not None)
 
 
+def _verdict_word(value: str) -> str | None:
+    """The verdict a value opens with, or None when it opens with any other word."""
+    match = VERDICT_WORD.match(value.strip().lstrip("*_ "))
+    return VERDICT_WORDS[" ".join(match[1].lower().split())] if match else None
+
+
+def _verdict_line(line: str) -> str | None:
+    """A verdict line's value, the line set as a heading or not; None for any other line."""
+    heading = HEADING.match(line)
+    match = VERDICT_LINE.match(line[heading.end():] if heading else line)
+    return match[1].strip() if match else None
+
+
 def review_lines(text: str) -> dict:
     """The verdict contract's lines in a report; nothing else in it is read."""
-    verdicts, reviewed, follows = [], [], []
-    for line in text.splitlines():
-        if match := VERDICT_LINE.match(line):
-            verdicts.append(match[1].strip().lower())
+    verdicts, contract, reviewed, follows = [], set(), [], []
+    lines = text.splitlines()
+    for number, line in enumerate(lines):
+        if (value := _verdict_line(line)) is not None:
+            verdicts.append(_verdict_word(value))
+            if value.lower() in CONTRACT_VERDICTS:
+                contract.add(value.lower())
+        elif (heading := HEADING.match(line)) and VERDICT_ALONE.match(line[heading.end():]):
+            following = next((later for later in lines[number + 1:] if later.strip()), "")
+            if _verdict_line(following) is None and (word := _verdict_word(following)) is not None:
+                verdicts.append(word)
         elif match := REVIEWED_LINE.match(line):
             for name in match[1].split(","):
                 name = name.strip().strip("`*_ ")
@@ -337,19 +376,23 @@ def review_lines(text: str) -> dict:
             name = match[1].strip().strip("`*_ ")
             if name:
                 follows.append(name)
-    # A line whose value is exactly one of the four words is the contract line; a
-    # sentence that also opens with `Verdict:` beside it is prose and decides nothing.
-    exact = {value for value in verdicts if value in VERDICTS}
+    # A line that opens with another word is prose beside the verdict and decides
+    # nothing; two lines that read different verdicts leave the review unread. FAIL
+    # beside the fix-first or rethink that says which rejection it is reads as that one.
+    read = {word for word in verdicts if word is not None}
+    named = read - {FAIL}
+    if FAIL in read and len(named) == 1 and named <= REWORK:
+        read = named
     if not verdicts:
         verdict = NO_VERDICT
-    elif len(exact) == 1:
-        verdict = exact.pop()
+    elif len(read) == 1:
+        verdict = read.pop()
     else:
         verdict = UNRECOGNIZED
     return {"verdict": verdict, "reviewed": reviewed, "follows": follows[-1] if follows else None,
-            # A bare `Verdict:` line with another value also closes reports that
-            # are not acceptance reviews, so alone it marks no review.
-            "marks_review": bool(verdict in VERDICTS or reviewed or follows)}
+            # Only the contract's own line, with exactly one of its four words, marks a
+            # review: a `Verdict:` line in other words also closes reports that judge no work.
+            "marks_review": bool(len(contract) == 1 or reviewed or follows)}
 
 
 def _named(candidates: list[Launch], name: str, review: Review) -> Launch | None:
