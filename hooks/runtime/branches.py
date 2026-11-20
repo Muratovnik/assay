@@ -20,9 +20,8 @@ from dataclasses import dataclass
 import json
 import re
 
-from .activation import relay
 from .scratch import is_scratch
-from .skill_gate import HANDBACK, NAME, UNCHANGED, _lines, _load, _prompt
+from .skill_gate import HANDBACK, NAME, UNCHANGED, _lines, _load, _prompt, _relayed_entry, _tool_result
 
 
 @dataclass(frozen=True)
@@ -160,20 +159,6 @@ def signs(tool, data):
     return []
 
 
-# The origins Claude Code gives the prompt entries it relays.
-RELAYED_ORIGINS = frozenset({"task-notification", "peer"})
-
-
-def _relayed_entry(entry, content):
-    """Whether a user entry is a message the client relayed: a notification, a hand-back or a peer's message."""
-    origin = entry.get("origin")
-    if isinstance(origin, dict) and origin.get("kind") in RELAYED_ORIGINS:
-        return True
-    text = content if isinstance(content, str) else next(
-        (block.get("text") for block in content or [] if isinstance(block, dict) and block.get("type") == "text"), None)
-    return relay(text) is not None
-
-
 def opened_by_relay(path):
     """Whether the session's turn at a transcript's tail began with relayed messages only; False when unsure.
 
@@ -208,8 +193,7 @@ def opened_by_relay(path):
                 opened = True
             elif _prompt(entry, content):
                 return False
-            elif opened and isinstance(content, list) and any(
-                    isinstance(block, dict) and block.get("type") == "tool_result" for block in content):
+            elif opened and _tool_result(content):
                 return False  # Delivered inside a running turn, which began earlier.
     except (OSError, ValueError):
         return False

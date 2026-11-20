@@ -24,6 +24,7 @@ from pathlib import Path
 import re
 import time
 
+from .activation import relay
 from .predicates import LOADED_SKILL
 
 TTL = 86_400
@@ -122,6 +123,25 @@ def _prompt(entry, content):
             and not any(block.get("type") == "tool_result" for block in blocks))
 
 
+# The origins Claude Code gives the prompt entries it relays.
+RELAYED_ORIGINS = frozenset({"task-notification", "peer"})
+
+
+def _relayed_entry(entry, content):
+    """Whether a user entry is a message the client relayed: a notification, a hand-back or a peer's message."""
+    origin = entry.get("origin")
+    if isinstance(origin, dict) and origin.get("kind") in RELAYED_ORIGINS:
+        return True
+    text = content if isinstance(content, str) else next(
+        (block.get("text") for block in content or [] if isinstance(block, dict) and block.get("type") == "text"), None)
+    return relay(text) is not None
+
+
+def _tool_result(content):
+    return isinstance(content, list) and any(isinstance(block, dict) and block.get("type") == "tool_result"
+                                             for block in content)
+
+
 def transcript(path, names, *, subagent=False, loads_needed=lambda announced, loaded: True):
     """(announced, loaded) from a transcript's tail, or None when it cannot be read.
 
@@ -130,11 +150,15 @@ def transcript(path, names, *, subagent=False, loads_needed=lambda announced, lo
     plus the skills that compaction re-attached; an older load did not survive
     it. The scan stops at the turn's start when loads_needed(announced, loaded)
     is false.
+    A turn starts at a prompt. In the session's own transcript it also starts at
+    relayed messages that follow the previous turn's last message: a hand-back
+    or a peer's message is a meta entry, which is no prompt. One that follows a
+    tool result arrived inside a running turn.
     In the main transcript a subagent's entries are skipped.
     """
     if not isinstance(path, str) or not path or len(path) > 4_096:
         return None
-    announced, loaded, in_turn = [], set(), True
+    announced, loaded, in_turn, relayed = [], set(), True, False
     try:
         for raw in _lines(path):
             try:
@@ -156,7 +180,12 @@ def transcript(path, names, *, subagent=False, loads_needed=lambda announced, lo
                 continue
             message = entry.get("message")
             content = message.get("content") if isinstance(message, dict) else None
-            if kind == "user" and in_turn and _prompt(entry, content):
+            if kind == "user" and in_turn and not subagent and not _prompt(entry, content):
+                if _relayed_entry(entry, content):
+                    relayed = True
+                elif _tool_result(content):
+                    relayed = False
+            if in_turn and ((kind == "user" and _prompt(entry, content)) or (kind == "assistant" and relayed)):
                 in_turn = False
                 if not loads_needed(announced, loaded):
                     break

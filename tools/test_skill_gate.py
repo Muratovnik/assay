@@ -34,6 +34,20 @@ def called(skill, tool="Skill", **extra):
     return {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": tool, "input": data}]}, **extra}
 
 
+# Claude Code relays a subagent's hand-back and another session's message as meta prompt entries.
+def hand_back(sender="a6d2e4f8a0b1c3d5"):
+    return {"type": "user", "isMeta": True, "origin": {"kind": "peer", "from": sender},
+            "message": {"role": "user", "content": f"Another Claude session sent a message:\n<agent-message from=\"{sender}\">\n"
+                        "[Subagent hand-back] The text below is the final report of a subagent this session delegated to.\n"
+                        "  The parser is fixed.\n</agent-message>"}}
+
+
+def session_message():
+    return {"type": "user", "isMeta": True, "origin": {"kind": "peer", "from": "local_c41d"},
+            "message": {"role": "user", "content": "Another Claude session sent a message: <cross-session-message "
+                        "from=\"local_c41d\">Is the review finished?</cross-session-message>"}}
+
+
 def reattached(*names):
     return {"type": "attachment", "attachment": {"type": "invoked_skills", "skills": [
         {"name": "assay:" + name, "path": "plugin:assay:" + name, "content": "..."} for name in names]}}
@@ -322,6 +336,29 @@ class SkillGateTests(unittest.TestCase):
         codex = json.loads((ROOT / "hooks/codex.json").read_text(encoding="utf-8"))["hooks"]
         self.assertIn("Stop", claude)
         self.assertNotIn("Stop", codex)
+
+    # The owner's turn announced a skill it never loaded; its own stop already continued once.
+    EARLIER = (prompt(), said("Using `assay:code-change` to fix the parser."), said("The answer is unchanged."))
+
+    def test_a_relayed_turn_does_not_carry_the_previous_turns_announcement(self):
+        bare = {key: value for key, value in hand_back().items() if key != "origin"}
+        for index, opening in enumerate(([hand_back()], [session_message()], [hand_back(), hand_back("b1")], [bare])):
+            with self.subTest(opening=[entry.get("origin", {}).get("kind") for entry in opening]):
+                path = self.transcript(*self.EARLIER, *opening, said("The worker reports the parser fixed."),
+                                       name=f"relayed{index}.jsonl")
+                self.assertEqual({}, self.stop("The worker reports the parser fixed.", transcript_path=path))
+
+    def test_a_relayed_turn_is_held_to_what_it_announces_itself(self):
+        path = self.transcript(*self.EARLIER, hand_back(), said("Using `assay:test-writing` to add the test."))
+        text = self.feedback(self.stop("Added.", transcript_path=path))
+        self.assertIn("announces test-writing", text)
+        self.assertNotIn("code-change", text)
+
+    def test_a_message_delivered_inside_a_running_turn_keeps_the_turn(self):
+        # A tool result before the relayed entry shows the turn was still running when it arrived.
+        path = self.transcript(prompt(), said("Using `assay:code-change` to fix the parser."), called("ls", tool="Bash"),
+                               RESULT, hand_back(), said("Done."))
+        self.assertIn("announces code-change", self.feedback(self.stop("Done.", transcript_path=path)))
 
 
 if __name__ == "__main__":

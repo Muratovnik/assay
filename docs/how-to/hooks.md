@@ -192,7 +192,11 @@ context. A record's 24-hour lifetime restarts each time the gate uses it, so a
 long session keeps its loads. The transcript is written asynchronously and may
 not yet hold the turn's latest messages; the gate reads at most the last 16 MB,
 skips the subagents' entries in the main transcript, and stores only skill names.
-When the transcript cannot be read, the records alone decide, as before.
+When the transcript cannot be read, the records alone decide, as before. A
+subagent's hand-back or another session's message that arrives after the turn
+ended opens a turn of its own, as a task notification does, so the reply to it is
+not held to the previous turn's announcements; one that arrives while tools are
+still running stays part of the turn.
 
 The gate guarantees only that an announced skill gets loaded. It cannot tell
 whether the agent chose the right skills; a turn without an announcement passes.
