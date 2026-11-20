@@ -5,6 +5,9 @@ import logging
 import sys
 from typing import Any, Literal
 
+# A plain `python` would write a bytecode cache into this skill's directory,
+# which is a source checkout or an installed copy, not scratch space.
+sys.dont_write_bytecode = True
 from benchmark_router import add_options, make_service
 from route_evidence.core import EvidenceError
 

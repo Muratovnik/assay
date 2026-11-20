@@ -11,6 +11,10 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
+# A plain `python` would write a bytecode cache into this skill's directory,
+# which is a source checkout or an installed copy, not scratch space.
+sys.dont_write_bytecode = True
+
 # `python -I` intentionally ignores the working directory and PYTHONPATH. Import
 # only this installed script's sibling package, not files from the user's cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))

@@ -7,6 +7,9 @@ import os
 from pathlib import Path
 import sys
 
+# A plain `python` would write a bytecode cache into this skill's directory,
+# which is a source checkout or an installed copy, not scratch space.
+sys.dont_write_bytecode = True
 from route_evidence.client_capabilities import CLAUDE_MODEL_ALIASES, claude_overrides, codex_route_check
 from route_evidence.core import MAX_BYTES, EvidenceError, loads, read_document, text
 from route_evidence.routing import validate_request

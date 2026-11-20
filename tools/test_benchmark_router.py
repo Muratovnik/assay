@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -511,6 +513,35 @@ class ContextTests(unittest.TestCase):
             self.assertEqual(payload["data_status"], "offline")
             self.assertEqual(payload["usage"], "diagnostic_only")
             self.assertTrue(payload["tasks"][0]["missing_primary"])
+
+
+class EntryScriptTests(unittest.TestCase):
+    def test_entry_scripts_write_no_bytecode_beside_the_skill(self):
+        # The skill directory is a source checkout or an installed copy, and an
+        # agent may start a script with a plain `python`: the script itself, not
+        # the command line, keeps its package free of bytecode caches.
+        environment = {key: value for key, value in os.environ.items()
+                       if key not in {"PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX"}}
+        runs = {"benchmark_router.py": ["--help"], "benchmark_mcp.py": ["--help"],
+                "launch_preflight.py": ["--help"], "routing_hook.py": []}
+        with tempfile.TemporaryDirectory() as directory:
+            for script, arguments in runs.items():
+                with self.subTest(script=script):
+                    copy = Path(directory) / script.removesuffix(".py") / "scripts"
+                    shutil.copytree(SCRIPTS, copy, ignore=shutil.ignore_patterns("__pycache__"))
+                    process = subprocess.run([sys.executable, str(copy / script), *arguments],
+                                             cwd=copy, env=environment, stdin=subprocess.DEVNULL,
+                                             capture_output=True, timeout=60)
+                    self.assertEqual(0, process.returncode, process.stderr.decode("utf-8", "replace"))
+                    self.assertEqual([], sorted(path.relative_to(copy).as_posix()
+                                                for path in copy.rglob("__pycache__")))
+            # Control: this interpreter and environment do write a cache for a
+            # plain import, so the empty lists above come from the scripts.
+            control = Path(directory) / "control" / "scripts"
+            shutil.copytree(SCRIPTS, control, ignore=shutil.ignore_patterns("__pycache__"))
+            subprocess.run([sys.executable, "-c", "import route_evidence.core"], cwd=control,
+                           env=environment, check=True, timeout=60)
+            self.assertTrue((control / "route_evidence" / "__pycache__").is_dir())
 
 
 if __name__ == "__main__":
