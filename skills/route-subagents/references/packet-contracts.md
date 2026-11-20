@@ -127,7 +127,8 @@ and ask for the files, hunks and receipts the reviewer actually read; the
 [result rules](outcome-and-repair-contracts.md#required-result-packet) say how a
 no-finding return without them counts. Repeat the premises of the judged work
 and ask, as the review's first item, which of them are wrong, unsupported by
-their source or only inferred. Do not supply the preferred verdict. For
+their source or only inferred, and which of its conclusions rest on one that
+fails. Do not supply the preferred verdict. For
 an acceptance review also ask for the
 [verdict lines](review-and-continuity.md#state-the-verdict-on-its-own-lines), and
 name in the packet the launches whose work is judged and, when it reviews a
