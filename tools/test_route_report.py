@@ -73,10 +73,10 @@ class RouteReportTests(unittest.TestCase):
                 {"description": description, "model": model, "effort": effort, "agentType": "general-purpose"}),
                 encoding="utf-8")
 
-    def review(self, description, minute, report, *, as_handback=True, session="s1"):
+    def review(self, description, minute, report, *, as_handback=True, session="s1", prompt="review"):
         content = handback(report) if as_handback else text(report)
         self.launch(description, [
-            {"type": "user", "timestamp": at(minute), "message": {"role": "user", "content": "review"}},
+            {"type": "user", "timestamp": at(minute), "message": {"role": "user", "content": prompt}},
             assistant(minute + 1, f"r{self.count}", "claude-sonnet-test", content, usage(input=1, output=1)),
         ], model="sonnet", effort="medium", session=session)
 
@@ -141,6 +141,14 @@ class RouteReportTests(unittest.TestCase):
             {"type": "user", "timestamp": at(200), "message": {"role": "user", "content": "x"}},
             assistant(201, "m6", "claude-haiku-test", text("x"), usage(input=1000, output=1000)),
         ], model="haiku", effort="medium")
+
+    def worker(self, description, minute, prompt, *reports, model="opus", effort="high"):
+        """A launch that is asked `prompt` and hands back each report a minute apart."""
+        lines = [{"type": "user", "timestamp": at(minute), "message": {"role": "user", "content": prompt}}]
+        for index, report in enumerate(reports, 1):
+            lines.append(assistant(minute + index, f"w{self.count}-{index}", "claude-opus-test",
+                                   handback(report, f"hb{index}"), usage(input=1)))
+        self.launch(description, lines, model=model, effort=effort)
 
     def group(self, result, cls):
         rows = [row for row in result["classes"] if row["class"] == cls]
@@ -288,6 +296,94 @@ class RouteReportTests(unittest.TestCase):
         first = self.group(result, "build")["reviews_of_this_work"]["first"]
         self.assertEqual({k: v for k, v in first.items() if v}, {"fix-first": 1, "rethink": 1})
         self.assertEqual(result["totals"]["reviews"], 2)
+
+    def test_a_review_that_names_a_commit_judges_the_launch_that_reported_it(self):
+        # All three workers start from one base their prompts name; only their own commits link.
+        self.worker("build: alfi — the parser", 0, "Work on top of 5a5a5a5a.", "Committed 1a2b3c4d on 5a5a5a5a.")
+        self.worker("build: bero — the cache", 1, "Work on top of 5a5a5a5a.", "Committed 9f8e7d6c on 5a5a5a5a.")
+        self.worker("build: dova — the index", 2, "Work on top of 5a5a5a5a.", "Committed 7c7c7c7c on 5a5a5a5a.")
+        # kolo abbreviates alfi's commit on its REVIEWED line; lavi has no such line, and the
+        # commit is named only in the request it answered.
+        self.review("check: kolo — first review", 20, "VERDICT: fix-first\nREVIEWED: 1a2b3c4 on 5a5a5a5a")
+        self.review("check: lavi — second review", 22, "VERDICT: ship\nNo findings.",
+                    prompt="Review commit 9f8e7d6c of the cache work.")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        build = self.group(result, "build")
+        # The base is no launch's own commit, so it neither pairs dova nor reads as reported by all three.
+        self.assertEqual((build["reviewed_launches"], build["share_reviewed"]), (2, 0.667))
+        first = build["reviews_of_this_work"]["first"]
+        self.assertEqual({k: v for k, v in first.items() if v}, {"fix-first": 1, "ship": 1})
+        totals = result["totals"]
+        self.assertEqual((totals["reviews_resolved_by_commit"], totals["reviews_without_resolved_subject"]), (2, 0))
+        self.assertEqual((totals["unresolved_reviewed_names"], totals["ambiguous_reviewed_commits"]), ([], []))
+
+    def test_a_commit_is_the_launchs_own_only_in_reports_up_to_the_review(self):
+        self.launch("build: alfi — the parser", [
+            {"type": "user", "timestamp": at(0), "message": {"role": "user", "content": "Start from 5a5a5a5a."}},
+            assistant(1, "w1", "claude-opus-test", handback("Committed 1a2b3c4d.", "h1"), usage(input=1)),
+            # The coordinator's later message repeats the first commit; it stays alfi's own.
+            {"type": "user", "timestamp": at(30), "isMeta": True, "origin": {"kind": "coordinator"},
+             "message": {"role": "user", "content": "The coordinator sent a message: repair 1a2b3c4d."}},
+            assistant(31, "w2", "claude-opus-test", handback("Committed 2b3c4d5e on 1a2b3c4d.", "h2"),
+                      usage(input=1)),
+        ])
+        self.review("check: kolo — review", 20, "VERDICT: fix-first\nREVIEWED: 1a2b3c4d")
+        # lavi names a commit alfi reported only after this review.
+        self.review("check: lavi — review", 25, "VERDICT: ship\nREVIEWED: 2b3c4d5e")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        first = self.group(result, "build")["reviews_of_this_work"]["first"]
+        self.assertEqual({k: v for k, v in first.items() if v}, {"fix-first": 1})
+        totals = result["totals"]
+        self.assertEqual(totals["reviews_resolved_by_commit"], 1)
+        self.assertEqual(totals["unresolved_reviewed_names"], [{"review": "lavi", "name": "2b3c4d5e"}])
+
+    def test_a_launch_name_still_decides_before_any_commit_in_the_report(self):
+        self.worker("build: alfi — the parser", 0, "x", "Committed 1a2b3c4d.")
+        self.worker("build: bero — the cache", 1, "x", "Committed 9f8e7d6c.")
+        self.review("check: kolo — review", 20,
+                    "VERDICT: ship\nREVIEWED: alfi\nThe cache commit 9f8e7d6c was read for context only.")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.group(result, "build")["reviewed_launches"], 1)
+        totals = result["totals"]
+        self.assertEqual((totals["reviews_without_resolved_subject"], totals["reviews_resolved_by_commit"]), (0, 0))
+
+    def test_a_commit_two_launches_reported_pairs_with_neither_and_is_listed(self):
+        self.worker("build: alfi — the parser", 0, "x", "Committed 1a2b3c4d.")
+        self.worker("build: bero — the merge", 1, "x", "Merged; the branch head is 1a2b3c4d.")
+        self.review("check: kolo — review", 20, "VERDICT: ship\nREVIEWED: 1a2b3c4d")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.group(result, "build")["reviewed_launches"], 0)
+        totals = result["totals"]
+        self.assertEqual(totals["ambiguous_reviewed_commits"],
+                         [{"review": "kolo", "commit": "1a2b3c4d", "launches": ["alfi", "bero"]}])
+        self.assertEqual((totals["reviews_with_ambiguous_commits"], totals["reviews_without_resolved_subject"],
+                          totals["unresolved_reviewed_names"]), (1, 1, []))
+
+    def test_a_review_naming_neither_a_launch_nor_a_reported_commit_stays_unpaired(self):
+        # An id inside a UUID is not a commit, and a commit nobody reported names no one.
+        self.worker("build: alfi — the parser", 0, "x",
+                    "Committed 1a2b3c4d; claim held by session 4b1c2d3e-0000-4a4a-8b8b-0123456789ab.")
+        self.review("check: kolo — review", 20,
+                    "VERDICT: fix-first\nREVIEWED: the parser change as a whole\n"
+                    "Read 0d0d0d0d on main and session 4b1c2d3e-0000-4a4a-8b8b-0123456789ab.")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.group(result, "build")["reviewed_launches"], 0)
+        totals = result["totals"]
+        self.assertEqual((totals["reviews_without_resolved_subject"], totals["reviews_resolved_by_commit"]), (1, 0))
+        self.assertEqual(totals["unresolved_reviewed_names"],
+                         [{"review": "kolo", "name": "the parser change as a whole"}])
+
+    def test_a_commit_id_is_a_hex_token_standing_alone(self):
+        from route_evidence import route_report
+        text = ("abc1234 and abc1234def0 name one commit; 1234567 is a number, deadbeef a word; "
+                "4b1c2d3e-0000 is part of a UUID, fix_a1b2c3d of a name; 41ce3b73..44067f05 is a range; "
+                + "a1" * 32 + " is a digest")
+        self.assertEqual(route_report.commits(text), {"abc1234def0", "41ce3b73", "44067f05"})
 
     def test_follows_resolves_only_to_an_earlier_review(self):
         self.review("check: kolo — review", 10, "VERDICT: fix-first\nFOLLOWS: lavi")

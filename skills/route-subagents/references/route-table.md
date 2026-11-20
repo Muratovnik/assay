@@ -251,7 +251,12 @@ a verdict line. That count therefore includes the decision and adversarial
 reviews of the class, which carry no lines by contract. In another class a
 `Verdict:` line with another value marks no review, because reports that judge
 nothing end that way too. Each review
-counts under the class and pair of the launches its `REVIEWED` line names: the
+counts under the class and pair of the launches its `REVIEWED` line names or,
+without a name there, of the one launch that reported a commit the review names
+as its own: in a hand-back no later than the review, where no earlier request to
+it named that commit. Commits on the `REVIEWED` line decide; without them, those
+in the review's report and its requests. A commit two launches reported pairs
+with neither and is listed. The report gives the
 share of the class's launches that were reviewed, verdicts split into first
 reviews and follow-ups (a review with `FOLLOWS`), and reviews without a verdict
 line. `FOLLOWS` resolves to the latest earlier review by that name in the
@@ -259,14 +264,14 @@ session, which for a reused reviewer is its own previous round. Reviews linked
 by `FOLLOWS` form chains; a chain with two or more
 `fix-first` or `rethink` verdicts is listed by the child names involved, which
 is the repeated rework the table's review looks for. Verdict counts are
-reviews, not pieces of work: three reviews of one change count three times.
-Only the contract's lines are read, never prose. The verdict is the one line
+reviews, not pieces of work. Only the contract's lines are read for verdicts
+and names, never prose. The verdict is the one line
 whose value is exactly one of the four words, so a summary sentence that also
 opens with `Verdict:` does not disturb it; a report whose verdict lines hold no
 such value, or two different ones, counts as unrecognized. Totals name the unclassed launches, the follow-ups
 whose `FOLLOWS` matched no earlier review, the
-`REVIEWED` names that matched no launch of the session and the transcript lines
-that were not JSON and were skipped.
+`REVIEWED` names that matched no launch of the session, the reviews paired by a
+commit, the ambiguous commits and the skipped lines that were not JSON.
 
 Tokens are the measure. With `--prices FILE`, a JSON object mapping a fragment
 of the model id to `input`, `output` and `cache_read` dollars per million

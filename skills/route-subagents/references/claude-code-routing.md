@@ -268,3 +268,9 @@ so the command reads each field defensively and counts the lines it skips.
   `is_error` did not reach the caller, as when a hook holds a hand-back for a
   recheck, and counts only when the child sent no other. Minutes run from the file's first timestamp
   to its last and so include the wait between rounds.
+- A child's requests are its launch prompt and the coordinator's messages: the
+  `user` lines that are not tool results, `isCompactSummary` or `isMeta`, except
+  that an `isMeta` line whose `origin.kind` is `coordinator` counts. The `cwd`
+  and `gitBranch` on each line are
+  the session's, not the worktree the child worked in, so commits are what link
+  a review to its subject.

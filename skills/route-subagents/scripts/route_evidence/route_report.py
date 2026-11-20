@@ -11,7 +11,9 @@ Its class is the first word of its meta `description`, read exactly as the launc
 check reads it. A review is a launch of a review class, or any launch whose report
 carries a review line; verdict counts are therefore counts of reviews, not of
 pieces of work. Only the line form of the verdict contract is parsed: prose is
-never interpreted.
+never interpreted. A review's subject is the launch its REVIEWED line names, or
+else the one launch that reported, as its own, a commit the review names; a commit
+id is matched as a token, not read for meaning.
 """
 from __future__ import annotations
 
@@ -53,6 +55,9 @@ FOLLOWS_LINE = _review_line("follows")
 NAME_TOKEN = re.compile(r"[\s:]*([^\s,:;]+)")
 # The name runs to the dash, set off by spaces, that opens the label's purpose.
 NAME_BEFORE_DASH = re.compile(r"[\s:]*([^\s,:;—–-][^,:;—–]*?)\s+[—–-]\s")
+# A Git commit id as reports write it: 7 to 40 lowercase hex digits standing alone. A
+# hyphen or underscore beside it makes it part of a UUID, a branch or a file name.
+COMMIT_ID = re.compile(r"(?<![0-9A-Za-z_-])[0-9a-f]{7,40}(?![0-9A-Za-z_-])")
 
 UNITS = {
     "client": "Claude Code subagent transcripts only; their layout is observed, not a documented API",
@@ -83,6 +88,8 @@ class Launch:
     by_model: dict = field(default_factory=lambda: defaultdict(Counter))
     # Each report the child handed back, oldest first: a resumed child hands back once a round.
     reports: list = field(default_factory=list)
+    # Each request it answered, oldest first: the launch prompt, then the coordinator's messages.
+    requests: list = field(default_factory=list)
     has_meta: bool = False
     model: str | None = None
     effort: str | None = None
@@ -98,6 +105,8 @@ class Review:
     lines: dict
     subjects: list = field(default_factory=list)
     follows: "Review | None" = None
+    # Commit ids named in this report and in the requests the launch had received by then.
+    commits: set = field(default_factory=set)
 
     @property
     def name(self) -> str | None:
@@ -151,6 +160,37 @@ def _text(content: Any) -> str:
                      if isinstance(block, dict) and block.get("type") == "text" and isinstance(block.get("text"), str))
 
 
+def _request(entry: dict, content: Any) -> str:
+    """The text of a request the child answered: its launch prompt or a message the
+    coordinator sent it; a reminder, a compaction summary or a tool result is none."""
+    origin = entry.get("origin")
+    if entry.get("isCompactSummary") is True or (
+            entry.get("isMeta") is True and not (isinstance(origin, dict) and origin.get("kind") == "coordinator")):
+        return ""
+    if isinstance(content, str):
+        return content
+    if any(isinstance(block, dict) and block.get("type") == "tool_result" for block in content or ()):
+        return ""
+    return _text(content)
+
+
+def commits(text: str) -> set[str]:
+    """Commit ids in a text, each in its longest spelling there. A run of digits alone is a
+    number and a run of letters alone a word, so an id needs both."""
+    found = sorted({token for token in COMMIT_ID.findall(text)
+                    if not token.isdigit() and any(c.isdigit() for c in token)}, key=len, reverse=True)
+    kept: list[str] = []
+    for token in found:
+        if not any(longer.startswith(token) for longer in kept):
+            kept.append(token)
+    return set(kept)
+
+
+def same_commit(a: str, b: str) -> bool:
+    """Two spellings of one commit: the shorter abbreviates the longer."""
+    return a.startswith(b) or b.startswith(a)
+
+
 def read_transcript(path: Path, since: datetime, until: datetime | None) -> Launch | None:
     """The launch a transcript records, or None when it did not start inside the window."""
     launch = None
@@ -190,6 +230,8 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
                 refused.update(block["tool_use_id"] for block in (content if isinstance(content, list) else ())
                                if isinstance(block, dict) and block.get("type") == "tool_result"
                                and block.get("is_error") is True and isinstance(block.get("tool_use_id"), str))
+                if request := _request(entry, content):
+                    launch.requests.append((moment or launch.end, request))
             if entry.get("type") != "assistant":
                 continue
             for block in content if isinstance(content, list) else ():
@@ -331,13 +373,63 @@ def _followed(reviews: list[Review], name: str, review: Review) -> Review | None
 
 def _reviews_of(launch: Launch, is_review_class: bool) -> list[Review]:
     """The launch's reports that are reviews, oldest first."""
-    parsed = [Review(launch, at, review_lines(report)) for at, report in launch.reports]
+    parsed = [Review(launch, at, review_lines(report), commits=commits("\n".join([report, *_asked(launch, at)])))
+              for at, report in launch.reports]
     found = [review for review in parsed
              if review.lines["marks_review"] or (is_review_class and review.verdict != NO_VERDICT)]
     if is_review_class and not found:
         # A review-class launch is one review even when no report of it carries a line.
-        found = parsed[-1:] or [Review(launch, launch.end, review_lines(""))]
+        found = parsed[-1:] or [Review(launch, launch.end, review_lines(""),
+                                       commits=commits("\n".join(_asked(launch, launch.end))))]
     return found
+
+
+def _asked(launch: Launch, at: datetime) -> list[str]:
+    """The requests the launch had received by this moment."""
+    return [text for moment, text in launch.requests if moment <= at]
+
+
+def _own_commits(launch: Launch) -> list[tuple[datetime, set[str]]]:
+    """Per report, the commits it names that no earlier request to the launch named: the
+    work it reports as its own, not the base or the target it was given."""
+    found = []
+    for at, report in launch.reports:
+        given = commits("\n".join(_asked(launch, at)))
+        found.append((at, {commit for commit in commits(report) if not any(same_commit(commit, g) for g in given)}))
+    return found
+
+
+def _reporters(reported: list, commit: str, review: Review) -> list[Launch]:
+    """Launches that reported this commit as their own no later than the review."""
+    found = []
+    for launch, at, own in reported:
+        if launch is not review.launch and at <= review.at and all(launch is not other for other in found) \
+                and any(same_commit(commit, mine) for mine in own):
+            found.append(launch)
+    return found
+
+
+def _pair_by_commit(review: Review, reported: list) -> tuple[set[str], bool, list[dict]]:
+    """Add the subjects the review's commits name: the commits on its REVIEWED line, or,
+    with none there and no name resolved, those in its report and the requests it had
+    received. Returns the commits some launch reported, whether one paired, and each
+    commit two or more launches reported, which pairs with none of them."""
+    line_commits = commits("\n".join(review.lines["reviewed"]))
+    if not line_commits and review.subjects:
+        return set(), False, []
+    settled, paired, unclear = set(), False, []
+    for commit in sorted(line_commits or review.commits):
+        owners = _reporters(reported, commit, review)
+        if len(owners) > 1:
+            unclear.append({"review": review.name, "commit": commit,
+                            "launches": sorted(launch.name or "?" for launch in owners)})
+        elif owners:
+            paired = True
+            if all(owners[0] is not other for other in review.subjects):
+                review.subjects.append(owners[0])
+        if owners:
+            settled.add(commit)
+    return settled, paired, unclear
 
 
 def _session_names(session: Path, classes: list[str] | None) -> set[str]:
@@ -458,14 +550,22 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
     for review in reviews:
         session_reviews[review.launch.session].append(review)
 
+    # A launch that judged work is not its author, so only the other launches report commits.
+    reviewers = {id(review.launch) for review in reviews}
+    reported = defaultdict(list)
+    for launch in launches:
+        if id(launch) not in reviewers:
+            reported[launch.session].extend((launch, at, own) for at, own in _own_commits(launch) if own)
+
     known_names: dict[Path, set[str]] = {}
-    unresolved, outside, unresolved_follows = [], 0, 0
+    unresolved, outside, unresolved_follows, ambiguous, ambiguous_reviews, by_commit = [], 0, 0, [], set(), 0
     for review in reviews:
         session = review.launch.session
+        unmatched = []
         for name in review.lines["reviewed"]:
             subject = _named(by_session[session], name, review)
             if subject is not None:
-                if subject not in review.subjects:
+                if all(subject is not other for other in review.subjects):
                     review.subjects.append(subject)
                 continue
             if session not in known_names:
@@ -473,7 +573,14 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
             if name.casefold() in known_names[session]:
                 outside += 1
             else:
-                unresolved.append({"review": review.name, "name": name})
+                unmatched.append(name)
+        settled, paired, unclear = _pair_by_commit(review, reported[session])
+        by_commit += paired
+        ambiguous.extend(unclear)
+        if unclear:
+            ambiguous_reviews.add(id(review))
+        unresolved.extend({"review": review.name, "name": name} for name in unmatched
+                          if not any(same_commit(commit, known) for commit in commits(name) for known in settled))
         if review.lines["follows"]:
             review.follows = _followed(session_reviews[session], review.lines["follows"], review)
             unresolved_follows += review.follows is None
@@ -540,6 +647,9 @@ def report(projects_dir: Path, since: datetime, until: datetime | None, *, class
               "reviews_without_verdict_line": sum(r.verdict == NO_VERDICT for r in reviews),
               "reviews_with_unrecognized_verdict": sum(r.verdict == UNRECOGNIZED for r in reviews),
               "reviews_without_resolved_subject": sum(not r.subjects for r in reviews),
+              "reviews_resolved_by_commit": by_commit,
+              "reviews_with_ambiguous_commits": len(ambiguous_reviews),
+              "ambiguous_reviewed_commits": ambiguous,
               "reviews_with_unresolved_names": len({entry["review"] for entry in unresolved}),
               "unresolved_reviewed_names": unresolved,
               "reviewed_names_outside_window": outside,
