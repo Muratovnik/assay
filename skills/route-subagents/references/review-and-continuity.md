@@ -131,6 +131,13 @@ same classes beyond them, as the skill's
 [finish](../../ui-delivery/SKILL.md#common-execution-and-finish) closes a class.
 A checked-off remark list is not the boundary of the review.
 
+A product rule the reviewer judges by, such as a line of the project's design
+document, is a premise of the review: the packet gives its source, the owner's
+decision or `written by an agent, not confirmed by the owner`. Conformance to an
+unconfirmed rule does not close an owner's remark: the reviewer returns the
+conflict as a question for the owner. In one project four remarks closed on such
+a rule came back from the owner.
+
 Measuring starts a browser, which a reviewer does not run. Either the primary
 supplies measurement receipts bound to the reviewed snapshot, values with their
 widths and states rather than screenshots or verdicts, and the reviewer checks
