@@ -176,6 +176,68 @@ SKILLS = "C:\\agent\\.claude\\plugins\\cache\\assay\\assay\\0.25.0\\skills\\"
 RUSSIAN = "Этот раздел объясняет, как включить проверку веток навыков и что делать, когда она срабатывает."
 
 
+# Relayed prompt entries as Claude Code records them in a session's transcript (shapes of 2026-11): a
+# notification is a plain prompt with its origin; a hand-back or another session's message is a meta entry.
+def notification(task="b7f3k2q9x"):
+    return {"type": "user", "origin": {"kind": "task-notification", "producer": "session-task"},
+            "message": {"role": "user", "content": f"<task-notification>\n<task-id>{task}</task-id>\n"
+                        "<status>completed</status>\n<summary>Background command finished</summary>\n</task-notification>"}}
+
+
+def hand_back(sender="a6d2e4f8a0b1c3d5"):
+    return {"type": "user", "isMeta": True, "origin": {"kind": "peer", "from": sender},
+            "message": {"role": "user", "content": f"Another Claude session sent a message:\n<agent-message from=\"{sender}\">\n"
+                        "[Subagent hand-back] The text below is the final report of a subagent this session delegated to.\n"
+                        f"  {CLAIM_EN}\n</agent-message>"}}
+
+
+def session_message():
+    return {"type": "user", "isMeta": True, "origin": {"kind": "peer", "from": "local_c41d"},
+            "message": {"role": "user", "content": "Another Claude session sent a message: <cross-session-message "
+                        "from=\"local_c41d\">Is the review finished?</cross-session-message>"}}
+
+
+def sidechain(*entries):
+    return [{**item, "isSidechain": True} for entry in entries for item in (entry if isinstance(entry, list) else [entry])]
+
+
+class RelayedTurnTests(TranscriptCase):
+    """A session's turn opened by a relayed message passes on what it relays; the owner's turns keep the check."""
+
+    def earlier(self):
+        return [prompt(), load(), said("Searching now."), *launch("research: survey skills"), said("Done.")]
+
+    def test_a_turn_opened_by_a_notification_a_hand_back_or_a_session_message_gets_no_note(self):
+        for opening in ([notification()], [hand_back()], [session_message()], [notification(), hand_back()]):
+            with self.subTest(opening=[entry["origin"]["kind"] for entry in opening]):
+                # The coordinator restates the report's claim: the sign that fired on such turns.
+                self.assertEqual({}, self.stop(*self.earlier(), *opening, said(CLAIM_EN), last=CLAIM_EN))
+        # Without an origin the text alone shows the relay.
+        bare = {key: value for key, value in notification().items() if key != "origin"}
+        self.assertEqual({}, self.stop(*self.earlier(), bare, said(CLAIM_EN), last=CLAIM_EN))
+
+    def test_the_owners_turn_with_the_same_actions_keeps_the_note(self):
+        text = self.feedback(self.stop(*self.earlier(), prompt("And now?"), said(CLAIM_EN), last=CLAIM_EN))
+        self.assertIn("search-and-coverage.md", text)
+        # A notification right before or after the owner's prompt leaves the turn the owner's.
+        for opening in ([notification(), prompt("And now?")], [prompt("And now?"), notification()]):
+            with self.subTest(first=opening[0]["message"]["content"][:12]):
+                self.assertIn("search-and-coverage.md", self.feedback(
+                    self.stop(*self.earlier(), *opening, said(CLAIM_EN), last=CLAIM_EN)))
+
+    def test_a_notification_inside_a_running_turn_leaves_that_turn_the_owners(self):
+        turn = [prompt(), load(), tool("Bash", {"command": "pytest", "run_in_background": True}, "b1"),
+                returned("b1", "Command running in background with ID: b7f3k2q9x"), notification(), said(CLAIM_EN)]
+        self.assertIn("search-and-coverage.md", self.feedback(self.stop(*turn, last=CLAIM_EN)))
+
+    def test_a_subagent_keeps_the_check_after_its_own_notification(self):
+        path = self.transcript(*sidechain(prompt("packet"), load(), said("Waiting."), notification(), said(CLAIM_EN)),
+                               name="agent.jsonl")
+        event = {**self.base, "hook_event_name": "SubagentStop", "agent_id": "worker",
+                 "agent_transcript_path": path, "last_assistant_message": CLAIM_EN}
+        self.assertIn("search-and-coverage.md", self.feedback(branches.stopped(event), "SubagentStop"))
+
+
 def reference(skill, name):
     return f"{SKILLS}{skill}\\references\\{name}"
 

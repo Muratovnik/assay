@@ -10,7 +10,9 @@ compaction and the reference was not read in that span, the turn continues
 once with one note naming every such reference. It is never a block, runs no
 model and stores nothing. A condition the transcript cannot show, such as
 whether a comparison is consequential, has no row; a write made through a shell
-command is not seen. It reads the transcript tail the skill gate reads.
+command is not seen. It reads the transcript tail the skill gate reads. A
+session's turn opened by a relayed message, a task notification or another
+session's or agent's message, gets no note: such turns mostly pass on a report.
 """
 from __future__ import annotations
 
@@ -18,6 +20,7 @@ from dataclasses import dataclass
 import json
 import re
 
+from .activation import relay
 from .scratch import is_scratch
 from .skill_gate import HANDBACK, NAME, UNCHANGED, _lines, _load, _prompt
 
@@ -157,6 +160,62 @@ def signs(tool, data):
     return []
 
 
+# The origins Claude Code gives the prompt entries it relays.
+RELAYED_ORIGINS = frozenset({"task-notification", "peer"})
+
+
+def _relayed_entry(entry, content):
+    """Whether a user entry is a message the client relayed: a notification, a hand-back or a peer's message."""
+    origin = entry.get("origin")
+    if isinstance(origin, dict) and origin.get("kind") in RELAYED_ORIGINS:
+        return True
+    text = content if isinstance(content, str) else next(
+        (block.get("text") for block in content or [] if isinstance(block, dict) and block.get("type") == "text"), None)
+    return relay(text) is not None
+
+
+def opened_by_relay(path):
+    """Whether the session's turn at a transcript's tail began with relayed messages only; False when unsure.
+
+    A peer's message is a meta entry, which does not start a turn for the other
+    checks, so it counts here by its origin. The turn's opening is the run of user
+    entries before its first assistant entry; one prompt the owner typed among them
+    makes the turn the owner's.
+    """
+    if not isinstance(path, str) or not path or len(path) > 4_096:
+        return False
+    opened = False
+    try:
+        for raw in _lines(path):
+            try:
+                entry = json.loads(raw) if raw.strip() else None
+            except ValueError:
+                continue
+            if not isinstance(entry, dict) or entry.get("isSidechain"):
+                continue
+            kind = entry.get("type")
+            if kind == "system" and entry.get("subtype") == "compact_boundary":
+                return opened
+            if kind == "assistant":
+                if opened:
+                    return True
+                continue
+            if kind != "user":
+                continue
+            message = entry.get("message")
+            content = message.get("content") if isinstance(message, dict) else None
+            if _relayed_entry(entry, content):
+                opened = True
+            elif _prompt(entry, content):
+                return False
+            elif opened and isinstance(content, list) and any(
+                    isinstance(block, dict) and block.get("type") == "tool_result" for block in content):
+                return False  # Delivered inside a running turn, which began earlier.
+    except (OSError, ValueError):
+        return False
+    return opened
+
+
 def ledger(path, rows, *, subagent=False, needed=False):
     """(evidence, loaded, read) from a transcript's tail, or None when it cannot be read.
 
@@ -253,9 +312,12 @@ def stopped(event, rules=RULES, skills=None):
     rows = [row for row in BRANCHES if row.rule in rules and (skills is None or row.skill in skills)]
     if not rows:
         return {}
+    path = event.get("agent_transcript_path") if name == "SubagentStop" else event.get("transcript_path")
+    # A subagent's notifications arrive inside its packet, whose final stop stays checked.
+    if name == "Stop" and opened_by_relay(path):
+        return {}
     last = event.get("last_assistant_message")
     final = _absent(last[:MAX_TEXT]) if isinstance(last, str) and any(row.rule == COVERAGE for row in rows) else []
-    path = event.get("agent_transcript_path") if name == "SubagentStop" else event.get("transcript_path")
     scan = ledger(path, rows, subagent=name == "SubagentStop", needed=bool(final))
     if not scan:
         return {}

@@ -110,9 +110,12 @@ hand-back as prompts. Such a prompt starts with `<task-notification>`, or carrie
 `<agent-message` and `[Subagent hand-back]` in its first 600 characters, and gets
 one line instead of the list: if the report changes the task, decide again which
 skills apply, from the last full check. In 30 live sessions four of five checks
-went to these prompts, and in the largest none was followed by a skill load. A relayed prompt also
-leaves the owner's last suggestion in place for a restore after compaction. A
-message from another session can carry a task, so it gets the full check.
+went to these prompts, and in the largest none was followed by a skill load. A
+message that another session or a running agent sends this one starts with
+`Another Claude session sent a message` and a `<cross-session-message` or
+`<agent-message` tag. It can carry a task, so its one line says to decide again
+if it brings one, without repeating the list. A relayed prompt of either kind
+leaves the owner's last suggestion in place for a restore after compaction.
 
 The check exists because a skill's description is the only automatic route to it,
 and that route is unreliable on its own. Claude Code drops the descriptions of the
@@ -423,6 +426,14 @@ up to two lines or naming up to two files. A skill that compaction re-attached
 counts as loaded, but a read before compaction does not count. A session or
 subagent that has not loaded the skill is not held to its references, and a sign
 from an earlier turn does not count. The note ends as the gate's feedback does.
+
+A session's turn that a relayed message opened gets no note: a task notification,
+a subagent's hand-back or a message from another session or agent, recognized by
+the origin Claude Code records for the entry or by its opening text. Such a turn
+mostly passes on a report, and a claim it restates is the report's. A turn stays
+the owner's when the owner's prompt is among the messages that open it, or when a
+notification arrives while the turn is still running. A subagent's final stop is
+checked as before, since its notifications arrive inside its packet.
 
 The signs are deliberately narrow and still approximate. A write made through a
 shell command is not seen. The absence wording can match a documented fact about

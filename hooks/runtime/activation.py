@@ -304,20 +304,37 @@ def report_form(rules):
 
 RELAY_CHECK = ("Assay skill check: this is a relayed report or notification, not a new request. If it changes "
                "the task, decide again which Assay skills apply; the skill list is in the last full check.")
+# A message can carry a task, so the line says so; the list itself stays in the last full check.
+MESSAGE_CHECK = ("Assay skill check: this is a message from another session or agent, not the owner's request. If it "
+                 "brings a task or changes this one, decide again which Assay skills apply; the skill list is in the "
+                 "last full check.")
+# How Claude Code opens a message another session or agent sends this one.
+PEER = "Another Claude session sent a message"
+PEER_TAGS = ("<cross-session-message", "<agent-message")
+
+
+def relay(prompt):
+    """What the client relays in this prompt instead of the owner typing it: "report", "message" or None.
+
+    Claude Code delivers a background task's notification and a subagent's
+    hand-back as prompts ("report"). In 30 live sessions four of five skill
+    checks went to them, and in the largest none was followed by a skill load.
+    A message another session or agent sends ("message") opens with a fixed
+    line and a message tag; it can carry a task, which its own short line names.
+    """
+    if not isinstance(prompt, str):
+        return None
+    head = prompt.lstrip()[:600]
+    if head.startswith("<task-notification>") or ("<agent-message" in head and "[Subagent hand-back]" in head):
+        return "report"
+    if head.startswith(PEER) and any(tag in head for tag in PEER_TAGS):
+        return "message"
+    return None
 
 
 def relayed(prompt):
-    """Whether the client relays this prompt instead of the owner typing it.
-
-    Claude Code delivers a background task's notification and a subagent's
-    hand-back as prompts. In 30 live sessions four of five skill checks went
-    to them, and in the largest none was followed by a skill load. A message from another
-    session can carry a task, so it is not counted here.
-    """
-    if not isinstance(prompt, str):
-        return False
-    head = prompt.lstrip()[:600]
-    return head.startswith("<task-notification>") or ("<agent-message" in head and "[Subagent hand-back]" in head)
+    """Whether the client relays this prompt instead of the owner typing it."""
+    return relay(prompt) is not None
 
 
 def evaluate(event, rules, *, client=None, loaded=()):
@@ -330,9 +347,11 @@ def evaluate(event, rules, *, client=None, loaded=()):
         return {"rule_ids": [], "context": "\n".join(part for part in parts if part)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}
-    if relayed(event.get("prompt")):
+    kind = relay(event.get("prompt"))
+    if kind:
         # One line keeps a mid-task change of skills possible without repeating the list.
-        return {"rule_ids": [], "context": RELAY_CHECK if getattr(rules, "skill_check", False) and rules else ""}
+        line = RELAY_CHECK if kind == "report" else MESSAGE_CHECK
+        return {"rule_ids": [], "context": line if getattr(rules, "skill_check", False) and rules else ""}
     try:
         ids = [rule["id"] for rule in select(event.get("prompt"), rules)]
     except ImportError:

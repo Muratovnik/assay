@@ -51,6 +51,9 @@ class ActivationTests(unittest.TestCase):
     PEER_HAND_BACK = 'Another Claude session sent a message:\n' + HAND_BACK
     SESSION_MESSAGE = ('Another Claude session sent a message: <cross-session-message from="local_b8a7">'
                        'Fix the parser.</cross-session-message>')
+    # A running subagent's message that is not its final report.
+    AGENT_MESSAGE = ('Another Claude session sent a message:\n<agent-message from="a5c0ffee00d1">\n'
+                     'Blocked on a missing fixture; which directory holds it?\n</agent-message>')
 
     def test_a_relayed_report_or_notification_gets_one_line_and_no_suggestion(self):
         for prompt in (self.NOTIFICATION, self.HAND_BACK, self.PEER_HAND_BACK, '  \n' + self.NOTIFICATION):
@@ -59,15 +62,29 @@ class ActivationTests(unittest.TestCase):
                 self.assertEqual({'rule_ids': [], 'context': activation.RELAY_CHECK}, decision)
                 self.assertTrue(decision['context'].startswith(CHECK))
                 self.assertLess(len(decision['context']), 250)
-        # The owner's words, a message from another session and a pasted mention stay full requests.
-        for prompt in (self.SESSION_MESSAGE, 'Почини парсер', 'Why did <task-notification> fire twice?',
-                       'Quote: [Subagent hand-back] without the frame', 'This session is being continued'):
+        # The owner's words and a pasted mention stay full requests.
+        for prompt in ('Почини парсер', 'Why did <task-notification> fire twice?',
+                       'Quote: [Subagent hand-back] without the frame', 'This session is being continued',
+                       'Another Claude session sent a message, you said; what did it say?'):
             with self.subTest(prompt=prompt[:40]):
                 context = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt}, self.rules)['context']
                 self.assertTrue(context.endswith(activation.skill_check(self.rules)))
         unchecked = activation.load_rules(ROOT, disabled_rules=['skill-check'])[0]
-        self.assertEqual('', activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':self.NOTIFICATION},
-                                                 unchecked)['context'])
+        for prompt in (self.NOTIFICATION, self.SESSION_MESSAGE):
+            self.assertEqual('', activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt},
+                                                     unchecked)['context'])
+
+    def test_a_message_from_another_session_or_agent_gets_its_own_short_line(self):
+        # It can carry a task, so its line says so; the full list is not repeated on every such message.
+        for prompt in (self.SESSION_MESSAGE, self.AGENT_MESSAGE, '\n' + self.SESSION_MESSAGE):
+            with self.subTest(prompt=prompt[:60]):
+                decision = activation.evaluate({'hook_event_name':'UserPromptSubmit','prompt':prompt}, self.rules)
+                self.assertEqual([], decision['rule_ids'])
+                self.assertTrue(decision['context'].startswith(CHECK))
+                self.assertIn('task', decision['context'])
+                self.assertNotIn('Skills: ', decision['context'])
+                self.assertLess(len(decision['context']), 250)
+                self.assertNotEqual(activation.RELAY_CHECK, decision['context'])
 
     def test_skill_check_names_every_enabled_skill_once_within_its_bound(self):
         check = activation.skill_check(self.rules)
@@ -301,6 +318,8 @@ class StateTests(unittest.TestCase):
         self.apply()
         relayed={**self.event,'turn_id':'turn-2','prompt':ActivationTests.NOTIFICATION}
         self.assertEqual(activation.RELAY_CHECK, self.apply(relayed)['context'])
+        message={**self.event,'turn_id':'turn-3','prompt':ActivationTests.SESSION_MESSAGE}
+        self.assertEqual(activation.MESSAGE_CHECK, self.apply(message)['context'])
         compact={**self.event,'hook_event_name':'SessionStart','source':'resume'}
         self.assertIn('Previous request suggested code-change', self.apply(compact)['context'])
 
