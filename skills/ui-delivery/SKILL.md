@@ -161,10 +161,10 @@ A preview does not suspend authorized work; wait only for an explicit checkpoint
 or a consequential unresolved preference. Distinguish supplied facts,
 observations, inference and gaps; missing access is not proof that no check ran.
 
-For a cross-screen milestone, run a separate contrarian pass on the exact tested
-artifact and challenge at least one stale, failed or recovery state. When
-delegation is already authorized, the primary may assign that pass to an
-independent reviewer; otherwise the primary runs it directly.
+Before showing users a non-wording interface change (install, release, build for
+checking), run a separate contrarian pass on the exact tested artifact,
+challenging at least one stale, failed or recovery state. With delegation
+authorized, a non-author reviewer runs it; otherwise the primary runs it directly.
 
 Report the operator outcome, relevant criterion → evidence or gap, actual
 automated and visual checks, unresolved risks and owned runtime cleanup. After
