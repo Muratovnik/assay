@@ -84,6 +84,7 @@ chain; do not load the whole directory or evaluation corpus.
 | Computed results, async refresh, writes/retries, invalidation; a list or value that blinks or blanks while refreshing | [Data lifecycle](references/data-lifecycle.md) |
 | Labels, status meanings, recovery guidance; repeated words, facts or default values | [Content](references/content-and-recovery.md) |
 | Acceptance/regression checks, evidence after the last write, realistic load | [Acceptance](references/scenario-testing.md) |
+| A user's remark on a delivered interface, before acting on it; a defect fixed only where it was reported | [User remarks](references/user-remarks.md) |
 | Composed result, sources of truth, tokens/fonts/theme, geometry depth, library readability, assets; misaligned edges or rows, unintended wrap or clipping | [Visual judgment](references/visual-judgment.md) |
 | Transferring an interface, selecting its target-system basis, structural replacement or migration | [Design transfer](references/design-transfer.md) |
 | Any read or write through the Figwright adapter | [Figwright](references/figwright.md), before the first operation |
@@ -136,13 +137,8 @@ already sufficient scenario contract does not need a new product-wide map.
    Reuse matching gate/hook evidence, run missing and owner-required checks. Ask
    whether a check could pass while the complaint remains true. Observe the risky
    state before helpers repair it. For test design, use Acceptance above.
-5. Close the defect class before finishing a visual or interaction repair: name
-   the class, find its shared owner (component, style, token or layout rule),
-   list the consumers it reaches and check each, or one representative of each
-   distinct composition, with the same measurement as the reported spot. Report
-   that list; a defect fixed only where it was reported is still open elsewhere.
-   A one-off copy or data edit needs no sweep. Defect closure stays narrower
-   than systemic acceptance, as [Acceptance](references/scenario-testing.md#derive-the-scenario) says.
+5. Before finishing a visual or interaction repair, close its defect class as
+   [User remarks](references/user-remarks.md#close-the-defect-class) says.
 
 When an authorized multi-step mutation resumes after interruption, reconcile it
 with the available [continuation procedure](../implementation-planning/references/continuation.md)

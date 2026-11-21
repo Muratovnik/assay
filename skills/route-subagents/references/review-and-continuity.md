@@ -128,7 +128,7 @@ defect classes the change can produce, taken from the symptoms in its
 across the screens, widths and states the change reaches. The owner's remarks
 are the known defect inventory: the reviewer confirms each and looks for the
 same classes beyond them, as the skill's
-[finish](../../ui-delivery/SKILL.md#common-execution-and-finish) closes a class.
+[class closure](../../ui-delivery/references/user-remarks.md#close-the-defect-class) does.
 A checked-off remark list is not the boundary of the review.
 
 A product rule the reviewer judges by, such as a line of the project's design

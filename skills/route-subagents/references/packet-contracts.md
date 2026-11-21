@@ -160,7 +160,7 @@ UI check:
   values per width and state; its self-judged screenshot establishes no
   alignment.
 - `class`: as the skill's
-  [finish](../../ui-delivery/SKILL.md#common-execution-and-finish) closes one.
+  [class closure](../../ui-delivery/references/user-remarks.md#close-the-defect-class) closes one.
   For a shared component or layout rule, list its consumers and have the worker
   compare base and result across the variants a reviewer will try, not only the
   named ones: the widths between them, each locale, pointer and keyboard,

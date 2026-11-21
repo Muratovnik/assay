@@ -189,7 +189,7 @@ measures these; in a design tool, read the bounds the tool reports.
   keyboard focus indicator stay; removing the indicator outright to silence a
   pointer ring is a regression, not a fix.
 - Check: the same measurement on the representative before and after the fix,
-  and on every consumer the defect class reaches (see the entrypoint's finish).
+  and on every consumer the defect class reaches (see [class closure](user-remarks.md#close-the-defect-class)).
 
 ## Keep asset provenance
 
