@@ -6,6 +6,30 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.48.0](https://github.com/Muratovnik/assay/compare/v0.47.0...v0.48.0) (2026-11-21)
+
+Interface checks run where the defects live. A product's measurement matrix names
+the widths, states, data and visible scrollbars every rendered change is measured
+in, and a helper walks it. A user's remark on a delivered interface is taken by
+its kind, an interface packet carries a check block to fill in, and every
+interface change other than a wording edit is reviewed by a launch that did not
+make it before users see it.
+
+### Features
+
+* **ui-delivery:** a product keeps one short measurement matrix file: its supported widths, its states with the steps that enter each from a fresh load, worst-case data, and a browser launch that shows scrollbars. A rendered change is measured in every cell, one width and one state, and a state that cannot be entered is unmeasured, not passed; interface work in a project without the file starts by writing it. The Playwright helper `matrix.mjs` reads the file, refuses a launch that hides scrollbars and runs the product's own measurements in each cell after a fresh load. In one product the defects users reported lived in open panels and menus, a table view, a window near the end of its span, real long names and under scrollbars that headless Chromium hides, while the checks measured the default screen; on a synthetic holdout the state sweep found both open-state faults that a default-state check missed ([9d501b8](https://github.com/Muratovnik/assay/commit/9d501b88b477e2fc09b65fa40bc6dc0debd1c5ea))
+
+### Bug Fixes
+
+* **ui-delivery:** the layout helper's `measureText` sets `clipped.ellipsis`, `clipped.nowrap` and `clipped.lineClamp` only on text a box actually cuts, beside `clipped.overflow`; `measureText(page, { ..., declared: true })` adds the styles in effect, cut or not, as `declared`. Before, the flags were set whenever the style was in effect: on one product's live screens 110 of 127 elements in open states were flagged with nothing cut ([34ce8d1](https://github.com/Muratovnik/assay/commit/34ce8d148502570015bf9d91b3f05789c9f98bab))
+
+### Documentation
+
+* **route-subagents:** a packet for interface work fills in a `UI check:` block, one line each for the `ui-delivery` procedures the work needs, the product's measurement matrix, and the defect class with the consumers it reaches, so a missing item shows at a glance. It replaces the paragraphs that asked for the same items in prose ([cd45503](https://github.com/Muratovnik/assay/commit/cd45503d9c987bee53970460c7a4a9831e3a017a))
+* **ui-delivery:** before users see any interface change other than a wording edit (an install, a release, a build for checking), a separate contrarian pass runs on the exact tested artifact, and with delegation authorized a non-author reviewer runs it. Before, the pass was asked for only at a cross-screen milestone; in one project seven installs in a row reached the user without a rendered review and 47 remarks followed ([c350b98](https://github.com/Muratovnik/assay/commit/c350b988f648449cdb8136261539462ac155dc3d))
+* **route-subagents:** the review of an interface change states the same condition: a launch that did not make the rendered change reviews it before users see any change other than a wording edit ([341fb50](https://github.com/Muratovnik/assay/commit/341fb50e773ca61e2ce3bfe44d8a50ad65db5115))
+* **ui-delivery:** a user's remark on a delivered interface is taken by its kind. Against a written rule: find the property, state or data the check missed and fix the check before the spot. Regression: a test that fails on the revision the user saw. New requirement: propose the rule, show its consequence on real data and make it a check only after the user confirms it. The remark's record starts with `rule:`, `regression:` or `requirement:`, and the class closure that was step 5 of the finish moved there unchanged. In one product 42 of 94 remarks broke a written rule, 9 were regressions and 43 asked for something no rule said ([c7e6982](https://github.com/Muratovnik/assay/commit/c7e698218fef67defad4caf416d71cdb8646247e))
+
 ## [0.47.0](https://github.com/Muratovnik/assay/compare/v0.46.0...v0.47.0) (2026-11-20)
 
 A subagent packet states the premises its work stands on, each with its source,
