@@ -47,9 +47,8 @@ the property it did not measure, the state it did not enter (an open panel or
 menu, a table view, a window near the end of its span) or the data it did not
 use (real long names, a full list, a scrollbar the test browser hid). Fix the
 check first, so that it fails on the reported spot, then fix the spot and see it
-pass. A missing state or data set joins those the product's
-[measurement](visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
-covers. Fixing only the spot leaves the next breach of the same rule for the user to
+pass. A missing state or data set goes into the product's
+[measurement matrix](browser-checks.md#walk-the-measurement-matrix). Fixing only the spot leaves the next breach of the same rule for the user to
 find.
 
 ## Regression

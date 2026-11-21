@@ -147,9 +147,9 @@ before the next write.
 Whenever a rendered or drawn result exists, use Visual judgment for the composed
 artifact after the last write and show a useful preview; this applies to
 creation, implementation and transfer, not only to an explicit critique. After a
-change that affects rendering, measure the changed screens at their supported
-widths as its [measurement section](references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
-says; a screenshot judged by its author does not establish alignment. When the change touches
+change that affects rendering, measure the changed screens as its
+[measurement section](references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+says, in every cell of the product's [measurement matrix](references/browser-checks.md#walk-the-measurement-matrix); a screenshot judged by its author does not establish alignment. When the change touches
 loading, refresh, hover, scrolling, a screen or object switch or a disclosure,
 also inspect the frames between the endpoints with
 [Motion](references/motion-and-transitions.md#inspect-motion-between-its-endpoints).

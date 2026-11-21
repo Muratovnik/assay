@@ -17,6 +17,7 @@ folder, fault variants or assertions to an executor in a supposedly blind trial.
 | State-specific axe | Hidden faulty control is absent from the initial scan, then detected after opening; labeled control is valid | Only the explicitly selected button-name rule; no full accessibility claim |
 | RR1-RR3 rendered review | Each shipped screen fails its named defect checks; the reference fix passes every check; controls pass on both; the oracle CLI scores an executor's final files | Chromium at 1280 and 390 px only; an oracle that cannot locate restructured elements reports inconclusive instead of a verdict |
 | Layout measurement | Shared text edge versus a marker-shifted row, declared indentation versus a flattened sub-item, a first-line checkbox versus a hit-area wrapper, wrapped versus truncated, clamped or parent-cut text, a declared ellipsis or clamp that cuts nothing, `:focus-visible` versus `:focus` and no indicator under a real click and Tab | One synthetic page at 900 px in Chromium; observations under the conditions set up, not a design approval |
+| Measurement matrix | A title cut only with the filters panel open at 900 px versus titles that wrap under a declared ellipsis, across 2 widths and 3 states; a state that cannot be entered; visible versus hidden scrollbars; malformed matrices | One synthetic page with fixture data; the measurements are the fixture's own, not a product rule |
 
 `rendered-review.test.mjs` materializes the screens of
 [rendered-review-cases.json](../rendered-review-cases.json) into a temporary
@@ -62,6 +63,7 @@ node --test skills/ui-delivery/evals/browser/browser.test.mjs
 node --test skills/ui-delivery/evals/browser/axe.test.mjs
 node --test skills/ui-delivery/evals/browser/rendered-review.test.mjs
 node --test skills/ui-delivery/evals/browser/layout.test.mjs
+node --test skills/ui-delivery/evals/browser/matrix.test.mjs
 ```
 
 By default Playwright uses its managed Chromium. `UI_TEST_CHROMIUM` can name an

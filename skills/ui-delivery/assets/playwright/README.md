@@ -136,6 +136,59 @@ wait, return no text contents, field values or HTML, and require each selector
 to match exactly one top-document element. Shadow-root and frame traversal are
 not implemented.
 
+## Walk a measurement matrix
+
+```js
+import { chromium } from 'playwright';
+import { readFile } from 'node:fs/promises';
+import { parseMatrix, sweepMatrix } from './matrix.mjs';
+import { measureText } from './layout.mjs';
+
+const matrix = parseMatrix(await readFile('ui-matrix.json', 'utf8'));
+const browser = await chromium.launch(matrix.launch);  // keeps scrollbars visible
+const page = await browser.newPage();
+const result = await sweepMatrix(page, {
+  context: { build: testedRevision, scenario: 'orders' }, matrix,
+  load: async ({ width, state, data }) => { await page.goto(ordersUrl); },  // data is in place
+  measurements: {
+    'text-cut': async (page, cell) => {
+      const { targets } = await measureText(page, { context: cell, targets: orderTitles });
+      return { findings: Object.entries(targets).filter(([, t]) => t.clipped.overflow)
+        .map(([name]) => ({ class: 'text-cut', kind: 'cut', targets: [name] })) };
+    },
+    'row-edges': rowEdges,  // the product's own, built on compareEdges
+  },
+});
+expect(result.unmeasured).toEqual([]);
+expect(result.findings).toEqual([]);
+```
+
+`matrix.mjs` walks the product's
+[measurement matrix](../../references/browser-checks.md#walk-the-measurement-matrix):
+widths, states with their entry steps and measurement names, a data source and
+the launch. It is a harness, not a detector: it finds nothing itself. For each
+width it sets the viewport; for the default state and each declared state it
+calls `load`, runs the entry steps with Playwright's waiting locators (`click`,
+`hover`, `focus`, `fill`, `press`, `wait`), lets animations and smooth scrolling
+settle, and runs that cell's measurements. Each returns `{ findings, inconclusive }`;
+results carry their width, state and measurement, and a finding absent from the
+default state at that width is marked `onlyInState`. `cells` lists every cell
+with its measurement names, whether it was measured and its finding count. A
+state that cannot be entered, or a measurement that throws, leaves its cell in
+`unmeasured` with the reason, and `pass` stays false.
+
+`parseMatrix` refuses a file without `launch.ignoreDefaultArgs: ['--hide-scrollbars']`
+(or `true`): headless Chromium otherwise paints no classic scrollbar and gives it
+no width, so content under it and a missing one both pass. It also refuses
+duplicate or missing widths, a data entry that is not exactly one `path` or
+`command`, unknown actions and state widths outside the matrix, and
+`sweepMatrix` refuses a measurement name with no function, before anything runs.
+The data source is noted in every context as `path:` or `command:`; the helper
+never runs the command or reads the file, `load` puts the data in place.
+`enterState`, `sweepStates` and `settle` are exported for a harness that keeps
+its own loop. Settling waits at most one second; a spinner that never stops
+reaches that bound and `settle` returns `false`.
+
 ## Qualification and sources
 
 [Executable checks](../../evals/browser/README.md) exercise synthetic good/fault

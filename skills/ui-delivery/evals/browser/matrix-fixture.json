@@ -1,0 +1,13 @@
+{
+  "widths": [1280, 900],
+  "height": 720,
+  "launch": { "ignoreDefaultArgs": ["--hide-scrollbars"] },
+  "data": { "path": "matrix-data.json" },
+  "measure": ["titles-cut"],
+  "states": [
+    { "name": "filters-open", "enter": [{ "action": "click", "selector": "#open-panel" }],
+      "measure": ["titles-cut", "panel-edges"] },
+    { "name": "list-end", "enter": [{ "action": "press", "selector": "#order-list", "key": "End" }],
+      "measure": ["last-title-cut"] }
+  ]
+}

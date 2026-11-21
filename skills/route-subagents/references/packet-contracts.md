@@ -155,7 +155,9 @@ UI check:
   of the task and of each symptom the complaint names, such as a hanging second
   line, a ring left after a click or a list that blinks on refresh. The worker may
   open others its work needs.
-- `matrix`: where the worker
+- `matrix`: the product's
+  [measurement matrix](../../ui-delivery/references/browser-checks.md#walk-the-measurement-matrix),
+  in whose cells the worker
   [measures](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
   values per width and state; its self-judged screenshot establishes no
   alignment.

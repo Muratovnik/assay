@@ -9,6 +9,7 @@ owns scenario design and evidence levels.
 - [Establish capture readiness](#establish-capture-readiness)
 - [State-specific evidence](#state-specific-evidence)
 - [Measure layout in the browser](#measure-layout-in-the-browser)
+- [Walk the measurement matrix](#walk-the-measurement-matrix)
 - [Screenshot baselines](#screenshot-baselines)
 - [Sources](#sources)
 
@@ -114,12 +115,11 @@ says what to measure; the optional [layout helper](../assets/playwright/README.m
 measures it. `measureText` returns each target's box, its visible text line boxes
 and the clipping of text that is actually cut; `compareEdges` checks a shared text
 edge with declared indentation offsets, `compareRow` a control against its label's
-first line, and
-`indicatorStyle` with `indicatorDiff` shows whether focus changed what is painted.
-Set the viewport for each supported width yourself and take the indicator
-snapshot before interaction, after a real pointer choice and after real keyboard
-focus; the helpers never resize, click, focus or wait. An existing project helper
-that measures the same values serves equally.
+first line, and `indicatorStyle` with `indicatorDiff` shows whether focus changed what is painted.
+Take the indicator snapshot before interaction, after a real pointer choice and
+after real keyboard focus; the layout helpers never resize, click, focus or wait,
+and the [matrix](#walk-the-measurement-matrix) sets the widths and states. An
+existing project helper that measures the same values serves equally.
 
 For a frame check, run the real trigger, or wait through one cycle of a screen
 that refreshes itself, and sample with `observeUiSequence` or repeated
@@ -128,11 +128,49 @@ jump appears in the samples even when both endpoints are correct. Sampling can
 miss a frame, so a clean run is evidence, not proof; a recording settles a claim
 about smoothness.
 
-Playwright starts headless Chromium with `--hide-scrollbars`: a classic scrollbar
-is neither painted nor given width, so `offsetWidth` equals `clientWidth`. For a
-question about overflow or scrolling, capture once more with
-`ignoreDefaultArgs: ['--hide-scrollbars']` before concluding that a scrollbar is
-absent or that content is cut off without a hint.
+## Walk the measurement matrix
+
+A measurement holds only for the widths, states and data it ran with, and a check
+of the default screen misses what lives in an open panel, a menu, a table view, a
+window near the end of its span, real long names or under a scrollbar. The
+product keeps these in one short file, its measurement matrix, and names its path
+in its instructions or test setup; interface work in a project without one starts
+by writing it:
+
+- `widths`: the supported widths, with one `height`;
+- `states`: each with a `name`, the `enter` steps that reach it from a fresh load
+  and the names of the measurements that apply there (`measure`, by default the
+  file's own); the default state is always measured;
+- `data`: a worst-case fixture set or a copy of real data, as a `path` or the
+  `command` that puts it in place;
+- `launch`: browser options that show scrollbars. Playwright starts headless
+  Chromium with `--hide-scrollbars`, so a classic scrollbar is neither painted
+  nor given width and `offsetWidth` equals `clientWidth`;
+  `ignoreDefaultArgs: ['--hide-scrollbars']` keeps it, so that content under a
+  scrollbar and a missing scrollbar show.
+
+```json
+{ "widths": [1280, 390], "height": 800,
+  "launch": { "ignoreDefaultArgs": ["--hide-scrollbars"] },
+  "data": { "command": "npm run seed:worst-case" },
+  "measure": ["row-edges", "text-cut"],
+  "states": [
+    { "name": "filters-open", "enter": [{ "action": "click", "selector": "#filters" }] },
+    { "name": "timeline-end", "enter": [{ "action": "press", "selector": "#timeline", "key": "End" }],
+      "measure": ["text-cut"] } ] }
+```
+
+A cell is one width and one state. Each starts from a fresh load and enters its
+state through the real steps, never from what the previous cell left; a state
+that cannot be entered is unmeasured, not passed. Each measurement is the
+product's: what to measure stays with
+[Visual judgment](visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot),
+and the values are reported with their cell. The
+[matrix helper](../assets/playwright/README.md#walk-a-measurement-matrix) walks
+this file; a project harness that does the same serves equally. On a synthetic
+holdout, a sweep of open states caught both open-state faults that a check of
+the default state missed. When a remark shows a state or data set the matrix
+lacked, add it as [User remarks](user-remarks.md#against-a-written-rule) says.
 
 ## Screenshot baselines
 
