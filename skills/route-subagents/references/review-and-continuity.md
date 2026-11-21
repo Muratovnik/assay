@@ -119,9 +119,9 @@ the report that reads them.
 
 ## Review an interface change
 
-Before users see a non-wording interface change (install, release, build for
-checking), a launch that did not make it reviews it: the author's screenshots and
-verdict are claims to test, not evidence. The packet names `ui-delivery`, the
+A launch that did not make a rendered interface change reviews it, before users
+see any non-wording change (install, release, check build): author's screenshots
+and verdict are claims to test, not evidence. The packet names `ui-delivery`, the
 defect classes the change can produce, taken from the symptoms in its
 [routing table](../../ui-delivery/SKILL.md#select-a-thematic-procedure), and the
 [measurement](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
