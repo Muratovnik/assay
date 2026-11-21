@@ -138,30 +138,38 @@ unchanged authority and contracts.
 
 ## Packets for interface work
 
-A packet that changes a rendered interface names `ui-delivery` and the
-procedures its task needs from that skill's
-[routing table](../../ui-delivery/SKILL.md#select-a-thematic-procedure): the row
-the task matches and the row of each symptom the owner's complaint names, such
-as a hanging second line, a ring left after a click or a list that blinks on
-refresh. Naming them does not stop the worker from opening another procedure its
-work shows it needs. Quote the complaint in the owner's words: a paraphrase into
-a fix, such as "move the dot 4 px left", drops the symptom the worker routes by.
+A packet that changes a rendered interface names `ui-delivery`, quotes the
+owner's complaint verbatim, since a paraphrase into a fix such as
+"move the dot 4 px left" drops the symptom the worker routes by, and fills in
+every key of this block:
 
-The packet asks for measured values with their widths and states, as the skill's
-[measurement section](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
-describes, and for the consumers the defect class reaches, as its
-[finish](../../ui-delivery/SKILL.md#common-execution-and-finish) describes; a
-screenshot the worker judged itself does not establish alignment.
+```text
+UI check:
+- procedures: <rows of the ui-delivery routing table this work needs>
+- matrix: <path to the product's measurement matrix file> | widths <…>; states <…>; data <worst-case source>
+- class: <defect class and the consumers it reaches> | new screen
+```
 
-When the change touches a shared component or a layout rule, the packet lists
-its consumers and asks the worker to compare the base with the result across the
-variants a reviewer will try, not only those the complaint names: the widths
-between the named ones, each locale, pointer and keyboard, long and short
-content. The test the worker adds must fail on the base. In one owner's week, 12
-of 21 failed first reviews rested on a defect the worker's own check could not
-see. The failing share was 13 of 18 before packets asked for a test that fails
-on the base and 8 of 27 after; the week had no control, so this is an
-association, not a measured effect.
+- `procedures`: the
+  [routing table](../../ui-delivery/SKILL.md#select-a-thematic-procedure) rows
+  of the task and of each symptom the complaint names, such as a hanging second
+  line, a ring left after a click or a list that blinks on refresh. The worker may
+  open others its work needs.
+- `matrix`: where the worker
+  [measures](../../ui-delivery/references/visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
+  values per width and state; its self-judged screenshot establishes no
+  alignment.
+- `class`: as the skill's
+  [finish](../../ui-delivery/SKILL.md#common-execution-and-finish) closes one.
+  For a shared component or layout rule, list its consumers and have the worker
+  compare base and result across the variants a reviewer will try, not only the
+  named ones: the widths between them, each locale, pointer and keyboard,
+  long and short content.
+
+The worker's test must fail on the base. In one owner's week, 12 of 21
+failed first reviews rested on a defect the worker's own check could not see;
+the failing share was 13 of 18 before packets asked for such a test and 8 of 27
+after: an uncontrolled association, not a measured effect.
 
 A packet without an interface follows only the rules above. A review of an interface
 change follows [review and continuity](review-and-continuity.md#review-an-interface-change).
