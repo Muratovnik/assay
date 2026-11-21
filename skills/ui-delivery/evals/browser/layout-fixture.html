@@ -32,6 +32,10 @@
   #history { height: 400px; }
   .ellipsis #summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cut #panel { height: 48px; overflow: hidden; }
+  .styled-ellipsis #summary { overflow: hidden; text-overflow: ellipsis; }
+  .styled-clamp #summary, .clamp #summary { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+    -webkit-line-clamp: 6; }
+  .clamp #summary { -webkit-line-clamp: 1; }
   #apply { padding: 8px 14px; border: 1px solid #8a8a8a; border-radius: 6px; background: #f6f6f6; outline: none; }
   .visible-ring #apply:focus-visible, .any-focus #apply:focus { outline: 2px solid #1a5fb4; outline-offset: 2px; }
   #far { margin-top: 1600px; }
@@ -65,7 +69,8 @@
   if (!sections[scenario]) throw new Error('Unknown fixture scenario');
   document.getElementById(sections[scenario]).hidden = false;
   const classes = { good: '', marker: 'marker', flat: 'flat', 'hit-wrapper': 'hit-wrapper',
-    ellipsis: 'ellipsis', cut: 'cut', 'visible-ring': 'visible-ring', 'any-focus': 'any-focus', 'no-ring': '' };
+    ellipsis: 'ellipsis', cut: 'cut', 'styled-ellipsis': 'styled-ellipsis', 'styled-clamp': 'styled-clamp',
+    clamp: 'clamp', 'visible-ring': 'visible-ring', 'any-focus': 'any-focus', 'no-ring': '' };
   if (!(variant in classes)) throw new Error('Unknown fixture variant');
   document.body.className = classes[variant];
 </script>

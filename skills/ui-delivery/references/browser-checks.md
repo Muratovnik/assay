@@ -112,8 +112,9 @@ identify records. Upload nothing automatically.
 [Visual judgment](visual-judgment.md#measure-alignment-instead-of-judging-a-screenshot)
 says what to measure; the optional [layout helper](../assets/playwright/README.md#measure-alignment-instead-of-judging-a-screenshot)
 measures it. `measureText` returns each target's box, its visible text line boxes
-and clipping flags; `compareEdges` checks a shared text edge with declared
-indentation offsets, `compareRow` a control against its label's first line, and
+and the clipping of text that is actually cut; `compareEdges` checks a shared text
+edge with declared indentation offsets, `compareRow` a control against its label's
+first line, and
 `indicatorStyle` with `indicatorDiff` shows whether focus changed what is painted.
 Set the viewport for each supported width yourself and take the indicator
 snapshot before interaction, after a real pointer choice and after real keyboard

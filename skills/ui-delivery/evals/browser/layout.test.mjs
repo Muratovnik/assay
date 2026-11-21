@@ -107,6 +107,28 @@ test('Fault control: nowrap with ellipsis is reported as truncated', () => withP
   assert.throws(() => fullyShown(summary), { code: 'ERR_ASSERTION' });
   assert.deepEqual(summary.clipped, { overflow: true, ellipsis: true, nowrap: true, lineClamp: false });
   assert.equal(summary.lines.length, 1);
+  await assert.rejects(measureText(page, { context, targets: TEXT, declared: 'yes' }), TypeError);
+}));
+
+const NOT_CUT = { overflow: false, ellipsis: false, nowrap: false, lineClamp: false };
+for (const [variant, style] of [['styled-ellipsis', 'ellipsis'], ['styled-clamp', 'lineClamp']]) {
+  test(`A declared ${style} that cuts nothing is not reported unless asked for`, () => withPage('text', variant, async (page) => {
+    const { targets: { summary } } = await measureText(page, { context, targets: TEXT });
+    assert.deepEqual(summary.clipped, NOT_CUT, 'a style that hides nothing is not a cut');
+    fullyShown(summary);
+    assert.equal(Object.hasOwn(summary, 'declared'), false);
+    const { targets: { summary: asked } } = await measureText(page, { context, targets: TEXT, declared: true });
+    assert.deepEqual(asked.clipped, NOT_CUT);
+    assert.equal(asked.declared[style], true, `the ${style} style is in effect`);
+  }));
+}
+
+test('Fault control: a line clamp that hides lines is reported as cut', () => withPage('text', 'clamp', async (page) => {
+  const { targets: { summary } } = await measureText(page, { context, targets: TEXT, declared: true });
+  assert.throws(() => fullyShown(summary), { code: 'ERR_ASSERTION' });
+  assert.deepEqual(summary.clipped, { overflow: true, ellipsis: false, nowrap: false, lineClamp: true });
+  assert.deepEqual(summary.declared, { ellipsis: false, nowrap: false, lineClamp: true });
+  assert.equal(summary.lines.length, 1, 'one line stays visible');
 }));
 
 test('Fault control: a short clipping parent cuts the wrapped text', () => withPage('text', 'cut', async (page) => {

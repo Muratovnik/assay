@@ -39,12 +39,15 @@ const measured = (targets, name, role) => {
 const px = (value) => `${Math.round(value * 10) / 10}px`;
 
 /** Text line boxes, first-line position and clipping of each target, as currently rendered.
+ * `clipped` reports only text that is actually cut: `overflow` when a box hiding overflow cuts it,
+ * and `ellipsis`, `nowrap` or `lineClamp` when that style is in effect on the cut text. With
+ * `declared: true`, `declared` also lists those styles wherever they are in effect, cut or not.
  * Visible text: a non-blank text node whose box is displayed, not visibility-hidden, not under
  * opacity 0 and not cut away by an ancestor with non-visible overflow; screen-reader-only text
  * (a clip box of 2px or less, a zero clip rect, clip-path inset(50%)) does not count.
  * Field values and placeholders are not text nodes and are not measured.
  */
-export async function measureText(page, { context, targets } = {}) {
+export async function measureText(page, { context, targets, declared = false } = {}) {
   const provenance = evidenceContext(context);
   if (!targets || typeof targets !== 'object' || Array.isArray(targets)) {
     throw new TypeError('targets must be a selector map');
@@ -54,7 +57,8 @@ export async function measureText(page, { context, targets } = {}) {
     selector(value, name);
   }
   if (!Object.keys(targets).length) throw new TypeError('at least one target is required');
-  const observed = await page.evaluate((targets) => {
+  if (typeof declared !== 'boolean') throw new TypeError('declared must be a boolean');
+  const observed = await page.evaluate(({ targets, declared }) => {
     const SKIP = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT', 'TITLE']);
     const one = (selector) => {
       const matches = document.querySelectorAll(selector);
@@ -151,6 +155,7 @@ export async function measureText(page, { context, targets } = {}) {
     const measure = (element) => {
       const visible = [];
       const clipped = { overflow: false, ellipsis: false, nowrap: false, lineClamp: false };
+      const styles = { ellipsis: false, nowrap: false, lineClamp: false };
       const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         if (!rendered(node)) continue;
@@ -159,15 +164,22 @@ export async function measureText(page, { context, targets } = {}) {
         const shown = rects.filter((rect) => !clippedAway(rect, node));
         if (!shown.length) continue;
         visible.push(...shown);
-        if (cut(node, rects)) clipped.overflow = true;
         const parentStyle = getComputedStyle(node.parentElement);
-        if (parentStyle.textWrapMode === 'nowrap' || /^(nowrap|pre)$/.test(parentStyle.whiteSpace)) clipped.nowrap = true;
+        const style = { ellipsis: false, lineClamp: false,
+          nowrap: parentStyle.textWrapMode === 'nowrap' || /^(nowrap|pre)$/.test(parentStyle.whiteSpace) };
         // text-overflow and line-clamp act on the block container that holds the text.
         for (let box = node.parentElement; box; box = box.parentElement) {
-          const style = getComputedStyle(box);
-          if (style.textOverflow === 'ellipsis' && hidesX(style)) clipped.ellipsis = true;
-          if ([style.webkitLineClamp, style.lineClamp].some((value) => value && value !== 'none')) clipped.lineClamp = true;
-          if ((box === element || !element.contains(box)) && boxed(style)) break;
+          const boxStyle = getComputedStyle(box);
+          if (boxStyle.textOverflow === 'ellipsis' && hidesX(boxStyle)) style.ellipsis = true;
+          if ([boxStyle.webkitLineClamp, boxStyle.lineClamp].some((value) => value && value !== 'none')) style.lineClamp = true;
+          if ((box === element || !element.contains(box)) && boxed(boxStyle)) break;
+        }
+        const isCut = cut(node, rects);
+        if (isCut) clipped.overflow = true;
+        for (const name of Object.keys(styles)) {
+          if (!style[name]) continue;
+          styles[name] = true;
+          if (isCut) clipped[name] = true;
         }
       }
       const lines = mergeLines(visible);
@@ -177,12 +189,13 @@ export async function measureText(page, { context, targets } = {}) {
         lines,
         firstLine: lines.length ? { x: lines[0].x, centerY: lines[0].y + lines[0].height / 2 } : null,
         clipped,
+        ...(declared ? { declared: styles } : {}),
       };
     };
     const result = {};
     for (const [name, selector] of Object.entries(targets)) result[name] = { selector, ...measure(one(selector)) };
     return { viewport: { width: innerWidth, height: innerHeight }, targets: result };
-  }, targets);
+  }, { targets, declared });
   return { context: provenance, ...observed };
 }
 

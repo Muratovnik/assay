@@ -113,10 +113,15 @@ rendered text, so padding, markers and wrappers that move the text are measured;
 an element's own box is not its text edge. `firstLine` is `null` when nothing is
 visible: hidden, transparent, collapsed and screen-reader-only text does not count,
 and `compareEdges` reports such a target as `missing` rather than passing it.
-`clipped.overflow` says the text is actually cut by a box that hides overflow;
-`ellipsis`, `nowrap` and `lineClamp` report the style in effect whether or not it
-truncates at this width. `compareRow` compares a control's center with the first
-line of its label, not the label block, so a wrapped label still checks. The
+`clipped` reports only text that is actually cut: `overflow` when a box that
+hides overflow cuts it, and `ellipsis`, `nowrap` or `lineClamp` when that style is
+in effect on the cut text. A style that cuts nothing at this width is not
+reported. This default changed: earlier, the three style flags were set whenever
+the style was in effect, and on one product's live screens that gave 110 flags
+among 127 elements in open states where nothing was cut. Pass `declared: true`
+to also get `declared`, the same three styles wherever they are in effect, cut or
+not. `compareRow` compares a control's center with the first line of its label,
+not the label block, so a wrapped label still checks. The
 indicator snapshot holds computed outline, box-shadow, border and background
 values plus the active and `:focus-visible` flags; `indicatorDiff` lists only the
 visual properties that changed. A hover style also counts as a change, so move the
