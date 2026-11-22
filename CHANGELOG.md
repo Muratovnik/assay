@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.50.0](https://github.com/Muratovnik/assay/compare/v0.49.0...v0.50.0) (2026-11-22)
+
+A page read through Claude Code's built-in `web-fetch` agent is asked for the
+research skill again, now at the launch where the page is chosen, and the launch
+is treated as the tool call it stands in for rather than routed work.
+
+### Features
+
+* **hooks:** the first `Agent` launch of the built-in `web-fetch` agent in a request is refused when `evidence-research` is not loaded, with the host of the first URL in the prompt as its evidence, and the same launch passes when repeated. Since 0.49.0 the agent itself gets no research refusal, because it can load no skill and takes a refused fetch for a permanent failure; the launch is where the agent that can load the skill chooses the page ([6b6aab5](https://github.com/Muratovnik/assay/commit/6b6aab5369745028060ca9784c732ad30c5b8d31))
+
+### Bug Fixes
+
+* **routing:** a launch of the built-in `web-fetch` agent is exempt from the launch check, like a fork or a `resume`, and gets neither a routing note nor the launch reminder. Claude Code offers the agent in place of the `WebFetch` tool and tells the model to call it like one, so a launch without a task class was refused, and an admitted one got a routing note meant for delegated work ([ba64ee9](https://github.com/Muratovnik/assay/commit/ba64ee94126714918feb75582ded4adfb1f2e005))
+
 ## [0.49.0](https://github.com/Muratovnik/assay/compare/v0.48.0...v0.49.0) (2026-11-22)
 
 Every Claude Code subagent learns at its start how to wait for a long run, so a
