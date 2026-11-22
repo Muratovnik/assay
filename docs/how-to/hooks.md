@@ -291,6 +291,21 @@ packet asked for English, and 14 of 591 packets stated the budget. The text adds
 0.7 KB to each subagent's start. `disabled_rules: ["report-form"]` turns it off
 and keeps the skill check; `"skill-check"` keeps the report form.
 
+In Claude Code the same start also says how to wait for a long run, in the
+words of the
+[route-subagents packet line](../../skills/route-subagents/references/claude-code-routing.md#waiting-inside-a-background-worker):
+start the run in the background with its own deadline, wait for it in a
+foreground loop of at most 170 seconds sent with the Bash tool's `timeout` set
+to 200000, and after 30 minutes of waiting, or behind a machine-wide lock, end
+the turn once and name the run's output file. A packet carries that line only
+when its author expected a long wait, and a worker that meets one anyway ends
+its turn on its run: each such stop wakes the agent that launched it, and a
+pause past five minutes makes the worker's next request write its whole context
+again. A packet that says how to wait wins. Codex gets no such line: its calls
+are not moved to the background. The text adds about 0.6 KB to each Claude Code
+subagent's start, waiting or not. `disabled_rules: ["wait-form"]` turns it off
+and keeps the other two.
+
 Phrase rules that matched English/Russian wording were retired: they missed
 paraphrases and every other language and needed a rule per phrasing. Only an
 explicit skill choice is still recognized deterministically. It adds a short
@@ -698,7 +713,8 @@ explicitly, which does not prevent the user or model from using it directly.
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
 `"fetch-note"` and `"read-claims"` the two Claude source checks, `"handback-hold"`
 the refusal of a subagent's first hand-back, `"report-form"` the report language and
-budget a subagent is told at its start, and each
+budget a subagent is told at its start, `"wait-form"` how a Claude Code subagent is
+told to wait for a long run, and each
 rule ID of the branch check table or of the mid-turn note table one of its rows.
 `skill_note_form` is `"note"` (the default) or `"deny"`, see the mid-turn note above. The
 IDs of the retired phrase rules (`research`, `delegation`, `planning` and the

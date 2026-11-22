@@ -39,6 +39,8 @@ REPORT_RULES = ("report-verification", "plan-existing")
 HANDBACK_HOLD = "handback-hold"
 # The language and size of the report a subagent writes, stated at its start.
 REPORT_FORM = "report-form"
+# How a Claude Code subagent waits for a long run, stated at its start.
+WAIT_FORM = "wait-form"
 # Phrase rules retired in favor of the skill check, and the report check's former
 # reuse row. Old settings that disable them stay valid and do nothing, instead of
 # breaking the hooks.
@@ -55,7 +57,7 @@ class RuleSet(list):
 
     def __init__(self, rules, skill_check, skill_gate=False, skills_root="", fetch_note=False, read_claims=False,
                  branch_rules=(), midturn_rules=(), rerun_rules=(),
-                 report_rules=(), handback_hold=False, search_note=False, report_form=False):
+                 report_rules=(), handback_hold=False, search_note=False, report_form=False, wait_form=False):
         super().__init__(rules)
         self.skill_check = skill_check
         # The Claude stop gate holds a reply to the skills its check line names.
@@ -78,6 +80,7 @@ class RuleSet(list):
         self.handback_hold = handback_hold
         # Independent of the skill check: it shapes the report, not the choice of skills.
         self.report_form = report_form
+        self.wait_form = wait_form
 
 
 def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
@@ -86,7 +89,8 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
     if set(document) != {"schema", "skills"} or document["schema"] != 2 or not isinstance(document["skills"], list):
         raise ValueError("invalid skill map document")
     assets = {asset["id"]: asset for asset in catalog["assets"] if asset["kind"] == "skill"}
-    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, SEARCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, REPORT_FORM, *BRANCH_RULES,
+    known = {SKILL_CHECK, SKILL_GATE, FETCH_NOTE, SEARCH_NOTE, READ_CLAIMS, HANDBACK_HOLD, REPORT_FORM, WAIT_FORM,
+             *BRANCH_RULES,
              *MIDTURN_RULES, *RERUN_RULES, *REPORT_RULES}
     if set(disabled_rules) - RETIRED_RULES - known or set(disabled_skills) - set(assets):
         raise ValueError("unknown disabled rule/skill")
@@ -116,7 +120,7 @@ def load_rules(root: Path, *, disabled_rules=(), disabled_skills=()):
                      [rule for rule in RERUN_RULES if rule not in disabled_rules],
                      [rule for rule in REPORT_RULES if rule not in disabled_rules],
                      HANDBACK_HOLD not in disabled_rules, SEARCH_NOTE not in disabled_rules,
-                     REPORT_FORM not in disabled_rules)
+                     REPORT_FORM not in disabled_rules, WAIT_FORM not in disabled_rules)
     # The installation path is the owner's; bound the text the catalog controls.
     if longest_check(rules) > MAX_CHECK:
         raise ValueError("skill check exceeds its context bound")
@@ -302,6 +306,25 @@ def report_form(rules):
             "fixes an exact output format, follow it instead.")
 
 
+def wait_form(rules, *, client=None):
+    """How a Claude Code subagent waits for a long run, whatever its packet foresaw.
+
+    The route-subagents packet line reaches only the workers whose launcher expected a
+    long wait; a reviewer that met one unforeseen ended its turn on its run, which wakes
+    the launcher at every stop and lets the worker's 5-minute cache expire. The client
+    moves a background subagent's call to the background at 180 s and any call at the
+    tool's timeout, 120 s unless set; Codex has neither move, so it gets no line.
+    """
+    if client == "codex" or not getattr(rules, "wait_form", False):
+        return ""
+    return ("Assay wait form for this subagent: start a long run with `run_in_background` and its own deadline, "
+            "then wait for it in the foreground: `timeout 170 bash -c 'until <the run has ended>; do sleep 5; "
+            "done'`, sent with the Bash tool's `timeout` set to 200000, and again until the run ends. A longer "
+            "call moves to the background, and ending your turn while your own run goes on wakes the agent that "
+            "launched you. After 30 minutes of waiting in total, or when the run is queued behind a machine-wide "
+            "lock, end your turn once and name the run's output file. A packet that says how to wait wins.")
+
+
 RELAY_CHECK = ("Assay skill check: this is a relayed report or notification, not a new request. If it changes "
                "the task, decide again which Assay skills apply; the skill list is in the last full check.")
 # A message can carry a task, so the line says so; the list itself stays in the last full check.
@@ -343,7 +366,7 @@ def evaluate(event, rules, *, client=None, loaded=()):
     The caller supplies the client and the skills already loaded; this reads neither.
     """
     if event.get("hook_event_name") == "SubagentStart":
-        parts = (subagent_check(rules, client=client), report_form(rules))
+        parts = (subagent_check(rules, client=client), report_form(rules), wait_form(rules, client=client))
         return {"rule_ids": [], "context": "\n".join(part for part in parts if part)}
     if event.get("hook_event_name") != "UserPromptSubmit":
         return {"rule_ids": [], "context": ""}

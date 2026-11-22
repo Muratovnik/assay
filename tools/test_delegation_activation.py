@@ -50,7 +50,8 @@ class SkillCheckActivationTests(unittest.TestCase):
         )
 
     def listed(self, text):
-        section = text.split("Skills: ", 1)[1].rstrip(".")
+        # The list ends its line; other start lines may follow.
+        section = text.split("Skills: ", 1)[1].split("\n", 1)[0].rstrip(".")
         return [entry.split(" - ", 1)[0] for entry in section.split("; ")]
 
     def write_map(self, transform):
@@ -154,7 +155,7 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertIn(str((self.root / "skills").resolve()), text)
         self.assertEqual(sorted(name.split("/", 1)[1] for name in self.skills), sorted(self.listed(text)))
         self.assertEqual(text, start("assay:evidence-reviewer")["context"])
-        disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check", "report-form"])
+        disabled, _ = activation.load_rules(self.root, disabled_rules=["skill-check", "report-form", "wait-form"])
         self.assertEqual("", start("general-purpose", disabled)["context"])
         self.assertEqual("", activation.evaluate({"hook_event_name": "SubagentStop", "agent_id": "a1"},
                                                  self.rules)["context"])
@@ -179,12 +180,44 @@ class SkillCheckActivationTests(unittest.TestCase):
         self.assertNotIn("Assay report form", self.decide("Найди готовые плагины")["context"])
         # Each rule turns off alone.
         without_check, _ = activation.load_rules(self.root, disabled_rules=["skill-check"])
-        self.assertEqual(activation.report_form(self.rules), start(without_check))
+        self.assertEqual(activation.report_form(self.rules), start(without_check, "codex"))
         without_form, _ = activation.load_rules(self.root, disabled_rules=["report-form"])
         self.assertNotIn("Assay report form", start(without_form))
         self.assertIn("Assay skill check for this subagent", start(without_form))
         # Every subagent pays for it at start; keep it short.
         self.assertLess(len(activation.report_form(self.rules)), 900)
+
+    def test_a_claude_subagent_is_told_how_to_wait_for_a_long_run_at_start(self):
+        # A packet carries the wait only when its launcher foresaw one; the start reaches every worker.
+        def start(rules, client=None):
+            return activation.evaluate({"hook_event_name": "SubagentStart", "agent_id": "a1",
+                                        "agent_type": "general-purpose"}, rules, client=client)["context"]
+        for client in (None, "claude"):
+            text = start(self.rules, client)
+            self.assertIn("Assay wait form for this subagent", text)
+            self.assertIn("start a long run with `run_in_background` and its own deadline", text)
+            # The loop ends before the client's 180 s move, and the tool's timeout lets it.
+            self.assertIn("`timeout 170 bash -c 'until <the run has ended>; do sleep 5; done'`", text)
+            self.assertIn("`timeout` set to 200000", text)
+            self.assertIn("After 30 minutes of waiting in total", text)
+            self.assertIn("queued behind a machine-wide lock, end your turn once and name the run's output file",
+                          text)
+            self.assertIn("A packet that says how to wait wins", text)
+            # The other start lines stay.
+            self.assertIn("Assay skill check for this subagent", text)
+            self.assertIn("Assay report form for this subagent", text)
+        # Codex has no move to the background at 180 s nor this tool timeout.
+        self.assertNotIn("Assay wait form", start(self.rules, "codex"))
+        # The main session gets no wait form.
+        self.assertNotIn("Assay wait form", self.decide("Найди готовые плагины")["context"])
+        # It turns off alone, and stays when the other two are off.
+        without_wait, _ = activation.load_rules(self.root, disabled_rules=["wait-form"])
+        self.assertNotIn("Assay wait form", start(without_wait))
+        self.assertIn("Assay report form for this subagent", start(without_wait))
+        only_wait, _ = activation.load_rules(self.root, disabled_rules=["skill-check", "report-form"])
+        self.assertEqual(activation.wait_form(self.rules), start(only_wait))
+        # Every Claude subagent pays for it at start, waiting or not; keep it short.
+        self.assertLess(len(activation.wait_form(self.rules)), 700)
 
     def test_skill_map_must_cover_the_catalog_with_short_ascii_cues(self):
         for label, transform in (
