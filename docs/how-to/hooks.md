@@ -483,7 +483,7 @@ stated as fact and runs no model.
 
 | Rule | Skill | Sign in one tool call |
 | --- | --- | --- |
-| `midturn-evidence-research` | `evidence-research` | `WebFetch`, `WebSearch`, or a shell command whose `curl`, `wget`, `Invoke-WebRequest` or `Invoke-RestMethod` targets a non-local URL; a reachability probe (`-I`, output discarded), `gh api` and a local address do not count |
+| `midturn-evidence-research` | `evidence-research` | `WebFetch`, `WebSearch`, an `Agent` (earlier `Task`) launch of Claude Code's built-in `web-fetch` agent, or a shell command whose `curl`, `wget`, `Invoke-WebRequest` or `Invoke-RestMethod` targets a non-local URL; a reachability probe (`-I`, output discarded), `gh api` and a local address do not count |
 | `midturn-code-change` | `code-change` | an edit or write of a source file (Python, Go, JavaScript and TypeScript, C#, Java, shell and PowerShell scripts and similar) that is not a test, an interface file or generated output |
 | `midturn-test-writing` | `test-writing` | an edit of a test file: under `test`, `tests`, `__tests__` or `spec`, named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`, or `conftest.py` |
 | `midturn-ui-delivery` | `ui-delivery` | an edit of an interface file: `.vue`, `.svelte`, `.jsx`, `.tsx`, `.css`, `.scss`, `.sass`, `.less`, `.html` |
@@ -515,7 +515,7 @@ reads the transcript once. A subagent is judged by its own records and its own
 transcript, the file under `<session>/subagents/`. A skill read with a shell command is not
 seen as loaded, and neither is a write made with one. A routing guard's reply, a read-only profile's
 refusal and the launch reminder on the same call take priority and the note is
-not given. The note needs the plugin data directory and goes with the skill check:
+not given, except on a `web-fetch` launch, described below. The note needs the plugin data directory and goes with the skill check:
 `disabled_rules: ["skill-check"]` turns it off with the check, and a disabled skill
 drops its row.
 
@@ -533,9 +533,13 @@ load in 4 of 14 cases.
 Claude Code's built-in `web-fetch` agent gets neither form. It has `WebFetch` alone,
 so it can load no skill, and its prompt takes any refused fetch for a permanent
 failure: in a session on 22 November 2026 it reported the refused page as unread,
-and the page had to be read again in the main session. It reads the page that the
-agent launching it chose, and that agent's `Agent` call gives no sign, so a session
-that reads pages through `web-fetch` gets no research note for them.
+and the page had to be read again in the main session. The refusal falls instead on
+the `Agent` call that launches it, where the page is chosen: the first such launch
+of a request without `evidence-research` loaded is refused, with the host of the
+first URL in the prompt as its evidence, or `web-fetch` when the prompt has none. That refusal
+comes before the routing guard's note and the launch reminder, which the repeated
+launch receives; a routing guard's refusal still comes first, and the corrected
+launch is then refused for the skill.
 
 Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
 `Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load

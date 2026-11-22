@@ -18,6 +18,8 @@ READING_ROLES = frozenset({"evidence-reviewer", "official-docs-researcher"})
 # can load no skill; it starts without the SubagentStart context, its prompt takes any refused fetch for a
 # permanent failure, and its WebFetch result is the page's text rather than an answer about the page.
 PAGE_READER = "web-fetch"
+# The Claude Code tools that launch a subagent; Task is the name earlier versions gave Agent.
+LAUNCHES = frozenset({"Agent", "Task"})
 
 WRITES = frozenset({"Edit", "Write", "MultiEdit", "NotebookEdit"})
 SHELLS = frozenset({"Bash", "PowerShell"})

@@ -27,9 +27,10 @@ from pathlib import Path
 import time
 
 # Which calls show a sign is decided in predicates, which the hook entry reads before loading this module.
-from .predicates import (DOCS, DOCUMENT, FETCH, GENERATED, INTERFACE, LOCAL, MAX_COMMAND,  # noqa: F401
-                         MAX_PATH, NOT_DOCUMENTATION, PROBE, QUESTION, README, SEPARATOR, SHELLS, SKILL_FILE,
-                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external, offers_no_action, page_reader)
+from .predicates import (DOCS, DOCUMENT, FETCH, GENERATED, INTERFACE, LAUNCHES, LOCAL, MAX_COMMAND,  # noqa: F401
+                         MAX_PATH, NOT_DOCUMENTATION, PAGE_READER, PROBE, QUESTION, README, SEPARATOR, SHELLS,
+                         SKILL_FILE, SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external, offers_no_action,
+                         page_reader)
 from .skill_gate import _key as gate_key, _save as save_load, loaded as recorded, transcript
 
 TTL = 86_400
@@ -112,6 +113,10 @@ def signs(tool, data):
     if tool in SHELLS:
         host = external(data.get("command"))
         return [("midturn-evidence-research", host)] if host else []
+    if tool in LAUNCHES and data.get("subagent_type") == PAGE_READER:
+        # The launch is where the page is chosen, by the agent that can load the skill; the reader cannot.
+        found = URL.search(data["prompt"]) if isinstance(data.get("prompt"), str) else None
+        return [("midturn-evidence-research", found[1].lower() if found else PAGE_READER)]
     if tool == QUESTION:
         questions = data.get("questions")
         # A question that already offers to do nothing is rarely improved by a refusal: see the hooks guide.

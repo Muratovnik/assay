@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 from runtime.activation import evaluate, load_rules
 from runtime.events import recognized
-from runtime.predicates import reading_profile
+from runtime.predicates import LAUNCHES, reading_profile
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
@@ -300,6 +300,14 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             if name == "UserPromptSubmit":
                 # The check names skills already loaded, so the model can stay quiet about them.
                 loaded = skill_gate.loaded(event, enabled, settings["state_dir"], **kwargs)
+        if (client == "claude" and name == "PreToolUse" and not denied and rules.midturn_rules
+                and event.get("tool_name") in LAUNCHES):
+            # A launch of the web-fetch agent reads a page: its refusal comes before the routing note and
+            # the launch reminder, which the repeated launch receives. A routing refusal still goes first.
+            refusal = midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
+                                      form=settings["skill_note_form"], **kwargs)
+            if refusal:
+                return refusal, None
         if client == "claude" and not protected:
             if name in STOPS:
                 # A report already handed back reached the parent; a continuation cannot change it. A subagent
@@ -317,7 +325,8 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 note = ((sources.fetched(event, settings["state_dir"], **kwargs) if rules.fetch_note else {})
                         or (sources.searched(event, settings["state_dir"], **kwargs) if rules.search_note else {}))
             # A tool call that shows a skill this session has not loaded; a routing reply and the
-            # launch reminder own their PreToolUse, so this check stays silent there.
+            # launch reminder own their PreToolUse, so this check stays silent there. A web-fetch
+            # launch was checked above.
             elif name == "PreToolUse" and rules.midturn_rules and not legacy:
                 note = midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
                                        form=settings["skill_note_form"], **kwargs)

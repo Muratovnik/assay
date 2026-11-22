@@ -133,6 +133,17 @@ class SignTableTests(unittest.TestCase):
                 with self.subTest(command=command):
                     self.assertEqual(research, self.rules(shell, {"command": command}))
 
+    def test_a_launch_of_the_web_fetch_agent_calls_for_evidence_research(self):
+        for call in ("Agent", "Task"):
+            with self.subTest(call=call):
+                self.assertEqual([("midturn-evidence-research", "docs.example.dev")],
+                                 midturn.signs(call, {"subagent_type": "web-fetch", "prompt": f"Quote {DOCS} on hooks"}))
+        # A prompt without a URL still reads a page; the agent's name stands for the host.
+        self.assertEqual([("midturn-evidence-research", "web-fetch")],
+                         midturn.signs("Agent", {"subagent_type": "web-fetch", "prompt": "the hooks page"}))
+        # Another agent's launch reads no page by itself.
+        self.assertEqual([], self.rules("Agent", {"subagent_type": "general-purpose", "prompt": f"Read {DOCS}"}))
+
     def test_near_valid_files_call_for_nothing(self):
         for path in ("C:\\work\\docs\\plans\\2026-roadmap.md", "C:\\work\\docs\\research\\notes\\study.md",
                      "C:\\work\\plans\\next.md", "C:\\work\\CLAUDE.md", "C:\\work\\AGENTS.md", "C:\\work\\CHANGELOG.md",
@@ -512,6 +523,34 @@ class NoteTests(unittest.TestCase):
         output = self.run_event({**fetch, "agent_type": "general-purpose"})["hookSpecificOutput"]
         self.assertEqual("deny", output["permissionDecision"])
         self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+
+    def launch(self):
+        return self.pre("Agent", {"description": "read", "subagent_type": "web-fetch", "prompt": f"Quote {DOCS}"})
+
+    def test_the_first_web_fetch_launch_of_a_request_is_refused_and_its_repeat_gets_the_reminder(self):
+        output = self.run_event(self.launch())["hookSpecificOutput"]
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+        self.assertIn("fetches an external source (docs.example.dev)", output["permissionDecisionReason"])
+        # The launch reminder the refusal held back reaches the repeated launch.
+        self.assertIn("Assay routing checkpoint", self.note(self.run_event(self.launch())))
+        # With the skill loaded the first launch is not refused.
+        with tempfile.TemporaryDirectory() as scratch:
+            self.data = Path(scratch)
+            self.run_event(self.pre("Skill", {"skill": "assay:evidence-research"}))
+            self.assertIn("Assay routing checkpoint", self.note(self.run_event(self.launch())))
+
+    def test_a_routing_note_waits_for_the_refusal_and_a_routing_refusal_goes_first(self):
+        note = {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "Route by the table."}}
+        with patch.object(cli, "explicit_routes", return_value=cli.deny("name the route")):
+            output = self.run_event(self.launch())["hookSpecificOutput"]
+        self.assertEqual("Assay: name the route", output["permissionDecisionReason"])
+        # The routing refusal used up nothing: the corrected launch is refused for the skill, then passes with the note.
+        with patch.object(cli, "explicit_routes", return_value=note):
+            output = self.run_event(self.launch())["hookSpecificOutput"]
+            self.assertEqual("deny", output["permissionDecision"])
+            self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+            self.assertEqual(note, self.run_event(self.launch()))
 
     def test_the_fetch_note_after_a_web_fetch_is_unchanged(self):
         result = self.run_event({**self.pre("WebFetch", {"url": DOCS, "prompt": "q"}), "hook_event_name": "PostToolUse"})

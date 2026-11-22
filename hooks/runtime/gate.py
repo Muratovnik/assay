@@ -16,14 +16,15 @@ from __future__ import annotations
 import json
 import sys
 
-from .predicates import LOADED_SKILL, QUESTION, SHELLS, WEB, WRITES, classify, external, reading_profile, signature
+from .predicates import (LAUNCHES, LOADED_SKILL, QUESTION, SHELLS, WEB, WRITES, classify, external, reading_profile,
+                         signature)
 
 MAX_INPUT = 1024 * 1024
 # The command lines of a Claude event run that argparse reads exactly as written here.
 ENTRIES = (["--client", "claude"], ["event", "--client", "claude"])
 # Calls a check reads whatever their input: a launch and its routing, the hand-back hold, a skill load,
 # a fetch or search and a question to the owner.
-FULL = frozenset({"Agent", "Task", "SubagentHandback", "Skill", QUESTION, *WEB})
+FULL = frozenset({*LAUNCHES, "SubagentHandback", "Skill", QUESTION, *WEB})
 
 
 def read(argv):
