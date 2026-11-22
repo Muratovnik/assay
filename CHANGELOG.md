@@ -6,6 +6,20 @@ preset. Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.49.0](https://github.com/Muratovnik/assay/compare/v0.48.0...v0.49.0) (2026-11-22)
+
+Every Claude Code subagent learns at its start how to wait for a long run, so a
+worker no longer ends its turn on a run it did not expect, and Claude Code's
+built-in `web-fetch` agent no longer gets notes it cannot act on.
+
+### Features
+
+* **hooks:** the SubagentStart context tells every Claude Code subagent how to wait for a long run: start it with `run_in_background` and its own deadline, then wait in the foreground with a `timeout 170` loop and the Bash tool's `timeout` at 200000, again until it ends, not by ending its turn; after 30 minutes in total, or behind a machine-wide lock, end the turn once and name the run's output file. A packet that says how to wait wins, and `disabled_rules: ["wait-form"]` turns the line off. Before, only a packet whose author expected a long wait carried the `route-subagents` wait line; a worker that met one anyway ended its turn on it, which woke the launching agent at every stop and let the worker's 5-minute prompt cache expire. The line is about 430 characters, and a test keeps its loop identical to the packet line. Codex gets no line: the norm was measured on Claude Code's Bash tool only ([e464843](https://github.com/Muratovnik/assay/commit/e4648436ad5236c587b60b7e3b3dad0af2934483), [b98a558](https://github.com/Muratovnik/assay/commit/b98a5588e94037f572e0dec88d5c72d1b44f773b))
+
+### Bug Fixes
+
+* **hooks:** Claude Code's built-in `web-fetch` agent gets neither the skill note nor the fetch note. It has `WebFetch` alone, so it can load no skill and has no shell to download a page, and its prompt takes any refused fetch for a permanent failure: the research refusal cost it the page, which then had to be read again by the agent that launched it ([5dc58ab](https://github.com/Muratovnik/assay/commit/5dc58abfa3d39c72c8d3b602ca1b113a65adf01b))
+
 ## [0.48.0](https://github.com/Muratovnik/assay/compare/v0.47.0...v0.48.0) (2026-11-21)
 
 Interface checks run where the defects live. A product's measurement matrix names
