@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -198,10 +199,10 @@ class SkillCheckActivationTests(unittest.TestCase):
             self.assertIn("start a long run with `run_in_background` and its own deadline", text)
             # The loop ends before the client's 180 s move, and the tool's timeout lets it.
             self.assertIn("`timeout 170 bash -c 'until <the run has ended>; do sleep 5; done'`", text)
-            self.assertIn("`timeout` set to 200000", text)
-            self.assertIn("After 30 minutes of waiting in total", text)
-            self.assertIn("queued behind a machine-wide lock, end your turn once and name the run's output file",
-                          text)
+            self.assertIn("the Bash tool's `timeout` at 200000", text)
+            self.assertIn("not by ending your turn", text)
+            self.assertIn("After 30 minutes in total", text)
+            self.assertIn("behind a machine-wide lock, end your turn once and name the run's output file", text)
             self.assertIn("A packet that says how to wait wins", text)
             # The other start lines stay.
             self.assertIn("Assay skill check for this subagent", text)
@@ -217,7 +218,11 @@ class SkillCheckActivationTests(unittest.TestCase):
         only_wait, _ = activation.load_rules(self.root, disabled_rules=["skill-check", "report-form"])
         self.assertEqual(activation.wait_form(self.rules), start(only_wait))
         # Every Claude subagent pays for it at start, waiting or not; keep it short.
-        self.assertLess(len(activation.wait_form(self.rules)), 700)
+        self.assertLess(len(activation.wait_form(self.rules)), 500)
+        # The loop is the route-subagents packet line's, so the two cannot drift apart.
+        routing = (ROOT / "skills/route-subagents/references/claude-code-routing.md").read_text(encoding="utf-8")
+        loop = re.search(r"`(timeout 170 bash -c '[^`]*')`", activation.wait_form(self.rules)).group(1)
+        self.assertIn(loop, " ".join(line.removeprefix(">").strip() for line in routing.splitlines()))
 
     def test_skill_map_must_cover_the_catalog_with_short_ascii_cues(self):
         for label, transform in (

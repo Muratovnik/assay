@@ -313,16 +313,16 @@ def wait_form(rules, *, client=None):
     long wait; a reviewer that met one unforeseen ended its turn on its run, which wakes
     the launcher at every stop and lets the worker's 5-minute cache expire. The client
     moves a background subagent's call to the background at 180 s and any call at the
-    tool's timeout, 120 s unless set; Codex has neither move, so it gets no line.
+    tool's timeout, 120 s unless set. The norm was measured on Claude Code's Bash tool
+    only, so Codex gets no line.
     """
     if client == "codex" or not getattr(rules, "wait_form", False):
         return ""
     return ("Assay wait form for this subagent: start a long run with `run_in_background` and its own deadline, "
-            "then wait for it in the foreground: `timeout 170 bash -c 'until <the run has ended>; do sleep 5; "
-            "done'`, sent with the Bash tool's `timeout` set to 200000, and again until the run ends. A longer "
-            "call moves to the background, and ending your turn while your own run goes on wakes the agent that "
-            "launched you. After 30 minutes of waiting in total, or when the run is queued behind a machine-wide "
-            "lock, end your turn once and name the run's output file. A packet that says how to wait wins.")
+            "then wait in the foreground with `timeout 170 bash -c 'until <the run has ended>; do sleep 5; done'` "
+            "and the Bash tool's `timeout` at 200000, again until it ends, not by ending your turn. After 30 "
+            "minutes in total, or behind a machine-wide lock, end your turn once and name the run's output file. "
+            "A packet that says how to wait wins.")
 
 
 RELAY_CHECK = ("Assay skill check: this is a relayed report or notification, not a new request. If it changes "

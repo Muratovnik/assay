@@ -301,9 +301,9 @@ the turn once and name the run's output file. A packet carries that line only
 when its author expected a long wait, and a worker that meets one anyway ends
 its turn on its run: each such stop wakes the agent that launched it, and a
 pause past five minutes makes the worker's next request write its whole context
-again. A packet that says how to wait wins. Codex gets no such line: its calls
-are not moved to the background. The text adds about 0.6 KB to each Claude Code
-subagent's start, waiting or not. `disabled_rules: ["wait-form"]` turns it off
+again. A packet that says how to wait wins. The norm was measured on Claude
+Code's Bash tool only, so Codex gets no such line. The text adds about 0.4 KB to
+each Claude Code subagent's start, waiting or not. `disabled_rules: ["wait-form"]` turns it off
 and keeps the other two.
 
 Phrase rules that matched English/Russian wording were retired: they missed
