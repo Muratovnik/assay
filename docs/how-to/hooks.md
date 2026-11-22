@@ -515,7 +515,7 @@ reads the transcript once. A subagent is judged by its own records and its own
 transcript, the file under `<session>/subagents/`. A skill read with a shell command is not
 seen as loaded, and neither is a write made with one. A routing guard's reply, a read-only profile's
 refusal and the launch reminder on the same call take priority and the note is
-not given, except on a `web-fetch` launch, described below. The note needs the plugin data directory and goes with the skill check:
+not given. The note needs the plugin data directory and goes with the skill check:
 `disabled_rules: ["skill-check"]` turns it off with the check, and a disabled skill
 drops its row.
 
@@ -536,10 +536,10 @@ failure: in a session on 22 November 2026 it reported the refused page as unread
 and the page had to be read again in the main session. The refusal falls instead on
 the `Agent` call that launches it, where the page is chosen: the first such launch
 of a request without `evidence-research` loaded is refused, with the host of the
-first URL in the prompt as its evidence, or `web-fetch` when the prompt has none. That refusal
-comes before the routing guard's note and the launch reminder, which the repeated
-launch receives; a routing guard's refusal still comes first, and the corrected
-launch is then refused for the skill.
+first URL in the prompt as its evidence, or `web-fetch` when the prompt has none. The routing
+guard neither checks that launch nor adds a note to it, and it gets no launch
+reminder, since the agent stands in for a tool; a routing guard's refusal, such as
+the one for a launch from a subagent, still comes first.
 
 Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
 `Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load
@@ -809,7 +809,7 @@ later). Without a route table the hook refuses a launch that does not name both;
 with one it checks the pair against the declared class, see
 [route-table launches](../../skills/route-subagents/references/claude-code-routing.md#route-table-launches).
 An older client has no effort field, so these checks pass only a fork, a `resume`,
-an exempt type and, without a route table, a definition pinning both. For any
+the built-in `web-fetch` agent, an exempt type and, without a route table, a definition pinning both. For any
 other launch, update it or set `pipeline.explicit_routes` to `off`.
 Before either check it refuses an Agent call made inside a subagent, because only
 the primary routes; see

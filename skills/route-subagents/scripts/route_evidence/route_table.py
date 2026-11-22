@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from .core import EvidenceError, identity
-from .pipeline_config import EFFORT_ORDER
+from .pipeline_config import EFFORT_ORDER, exempt_launch
 
 CLASS_NAME = re.compile(r"[a-z][a-z0-9-]{0,31}\Z")
 # A label starts with the class and then a separator; a bare class is valid too.
@@ -132,7 +132,7 @@ def _checked_kind(client: str, tool_name: Any, supplied: Any, unrouted) -> str |
         return None
     if client == "claude":
         kind = supplied.get("subagent_type") or "general-purpose"
-        if kind == "fork" or supplied.get("resume"):
+        if exempt_launch(kind, supplied):
             return None
     else:
         kind = supplied.get("agent_type") or "default"

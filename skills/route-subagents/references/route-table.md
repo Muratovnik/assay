@@ -179,10 +179,11 @@ what to change. With no binding or routing configuration,
 ordinary delegation remains available. This refusal requires the host to invoke
 the trusted hook: a disabled, skipped or broken handler is not a verified guard.
 
-Exemptions are the client's continuation mechanisms and the owner's
+Exemptions are the client's continuation mechanisms, a client's built-in agent
+that stands in for a tool, and the owner's
 `pipeline.unrouted_agents` types. `pipeline.explicit_routes: "off"` turns the
 check off. A spawn the check skips for either reason gets a short pointer to the
-table instead of the generic launch reminder. Without a table, a Claude spawn must still name both settings and a
+table instead of the generic launch reminder; a tool's stand-in gets neither. Without a table, a Claude spawn must still name both settings and a
 Codex spawn is not checked.
 
 Clients differ in what they allow:

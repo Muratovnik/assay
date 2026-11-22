@@ -24,6 +24,23 @@ UNROUTED_OBJECT_REMOVED = (
     "to a model was removed because the launch check never used the model. Replace it with the list of its agent "
     "types, for example {} with [] and {\"Explore\": \"inherit\"} with [\"Explore\"]")
 AGENT_TYPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}\Z")
+# Claude Code's built-in agents that stand in for a tool the main conversation lacks. The client
+# describes a call to one as ordinary tool use, so it carries no task class.
+TOOL_AGENTS = frozenset({"web-fetch"})
+
+
+def exempt_launch(kind: str, supplied: dict) -> bool:
+    """Whether a Claude launch is outside routing by its nature, whatever the configuration says.
+
+    A fork shares its parent's context and settings, a continuation keeps its
+    settings and a tool agent stands in for a tool.
+    """
+    return kind == "fork" or kind in TOOL_AGENTS or bool(supplied.get("resume"))
+
+
+def tool_agent(supplied: Any) -> bool:
+    """Whether a Claude launch input starts a tool agent, which nothing about routing applies to."""
+    return isinstance(supplied, dict) and supplied.get("subagent_type") in TOOL_AGENTS
 DEFAULT_INVENTORY_TTL_HOURS = 24
 MAX_INVENTORY_TTL_HOURS = 720
 

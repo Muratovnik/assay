@@ -527,30 +527,41 @@ class NoteTests(unittest.TestCase):
     def launch(self):
         return self.pre("Agent", {"description": "read", "subagent_type": "web-fetch", "prompt": f"Quote {DOCS}"})
 
-    def test_the_first_web_fetch_launch_of_a_request_is_refused_and_its_repeat_gets_the_reminder(self):
-        output = self.run_event(self.launch())["hookSpecificOutput"]
-        self.assertEqual("deny", output["permissionDecision"])
-        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
-        self.assertIn("fetches an external source (docs.example.dev)", output["permissionDecisionReason"])
-        # The launch reminder the refusal held back reaches the repeated launch.
-        self.assertIn("Assay routing checkpoint", self.note(self.run_event(self.launch())))
-        # With the skill loaded the first launch is not refused.
+    def routed(self, routes):
+        """The plugin data directory together with a Claude routing configuration, with or without a table."""
+        path = self.directory / ("table.json" if routes else "launches.json")
+        document = {"schema_version": 5, "client": "claude", **({"routes": routes} if routes else {})}
+        path.write_text(json.dumps(document), encoding="utf-8")
+        return {"CLAUDE_PLUGIN_DATA": str(self.data), "ASSAY_ROUTING_CONFIG": str(path)}
+
+    def test_the_first_web_fetch_launch_of_a_request_is_refused_and_its_repeat_passes_quietly(self):
+        table = {"basis": "fixture", "classes": {"find": {"model": "haiku", "effort": "medium", "when": "read"}}}
+        # No configuration, one without a table and one with a table: the launch carries no class either way.
+        for environment in (None, self.routed(None), self.routed(table)):
+            with self.subTest(routing=environment and "ASSAY_ROUTING_CONFIG" in environment), \
+                    tempfile.TemporaryDirectory() as scratch:
+                self.data = Path(scratch)
+                environment = environment and {**environment, "CLAUDE_PLUGIN_DATA": scratch}
+                output = self.run_event(self.launch(), environment)["hookSpecificOutput"]
+                self.assertEqual("deny", output["permissionDecision"])
+                self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+                self.assertIn("fetches an external source (docs.example.dev)", output["permissionDecisionReason"])
+                # The repeat runs with no routing note or launch reminder: web-fetch stands in for a tool.
+                self.assertEqual({}, self.run_event(self.launch(), environment))
+        # With the skill loaded the first launch passes too.
         with tempfile.TemporaryDirectory() as scratch:
             self.data = Path(scratch)
             self.run_event(self.pre("Skill", {"skill": "assay:evidence-research"}))
-            self.assertIn("Assay routing checkpoint", self.note(self.run_event(self.launch())))
+            self.assertEqual({}, self.run_event(self.launch()))
 
-    def test_a_routing_note_waits_for_the_refusal_and_a_routing_refusal_goes_first(self):
-        note = {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "Route by the table."}}
-        with patch.object(cli, "explicit_routes", return_value=cli.deny("name the route")):
-            output = self.run_event(self.launch())["hookSpecificOutput"]
-        self.assertEqual("Assay: name the route", output["permissionDecisionReason"])
-        # The routing refusal used up nothing: the corrected launch is refused for the skill, then passes with the note.
-        with patch.object(cli, "explicit_routes", return_value=note):
-            output = self.run_event(self.launch())["hookSpecificOutput"]
-            self.assertEqual("deny", output["permissionDecision"])
-            self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
-            self.assertEqual(note, self.run_event(self.launch()))
+    def test_a_routing_refusal_goes_before_the_research_refusal(self):
+        # Only the primary routes, so a subagent's launch is refused for routing first and uses up nothing.
+        nested = {**self.launch(), "agent_id": "child-1", "agent_type": "general-purpose"}
+        output = self.run_event(nested, self.routed(None))["hookSpecificOutput"]
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertNotIn("evidence-research", output["permissionDecisionReason"])
+        self.assertIn("assay:evidence-research", self.run_event(self.launch(), self.routed(None))
+                      ["hookSpecificOutput"]["permissionDecisionReason"])
 
     def test_the_fetch_note_after_a_web_fetch_is_unchanged(self):
         result = self.run_event({**self.pre("WebFetch", {"url": DOCS, "prompt": "q"}), "hook_event_name": "PostToolUse"})

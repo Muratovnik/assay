@@ -18,7 +18,7 @@ sys.dont_write_bytecode = True
 # `python -I` intentionally ignores the working directory and PYTHONPATH. Import
 # only this installed script's sibling package, not files from the user's cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from route_evidence.pipeline_config import AGENT_TYPE, settings
+from route_evidence.pipeline_config import AGENT_TYPE, exempt_launch, settings
 
 SPAWN_TOOLS = {"Agent", "Task"}
 
@@ -70,8 +70,8 @@ def _definition_route(kind, cwd, home):
 def explicit_launch(event, config):
     """A Claude child names its model and effort; it never inherits them.
 
-    A fork shares its parent's context by design and a continuation keeps its
-    settings. An owner-exempt type and a definition pinning both are explicit
+    A fork shares its parent's context by design, a continuation keeps its
+    settings and a tool agent such as web-fetch stands in for a tool. An owner-exempt type and a definition pinning both are explicit
     already. Any other launch missing either field is refused with the remedy,
     because the Agent tool otherwise discourages a per-call effort.
     """
@@ -83,7 +83,7 @@ def explicit_launch(event, config):
     if not isinstance(supplied, dict):
         return {}
     kind = supplied.get("subagent_type") or "general-purpose"
-    if kind == "fork" or supplied.get("resume") or kind in mode["unrouted_agents"]:
+    if exempt_launch(kind, supplied) or kind in mode["unrouted_agents"]:
         return {}
     missing = [field for field in ("model", "effort") if not supplied.get(field)]
     if missing:

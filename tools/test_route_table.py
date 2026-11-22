@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'hooks'))
 sys.path.insert(0, str(ROOT / 'skills/route-subagents/scripts'))
 from runtime import cli
+from route_evidence import route_table
 from route_evidence.core import EvidenceError
 from route_evidence.service import load_config
 
@@ -221,6 +222,18 @@ class RouteTableTests(unittest.TestCase):
                 self.assertNotIn('routing checkpoint', note)
         # Without a table the generic reminder stays.
         self.assertIn('routing checkpoint', self.context(self.claude(subagent_type='fork'), self.environment(), 'claude'))
+
+    def test_the_web_fetch_agent_stands_in_for_a_tool_and_is_not_routed(self):
+        # Claude Code tells the model to call it like WebFetch: a class, a pair or a routing note would be wrong.
+        launch = self.claude(description='read the hooks page', subagent_type='web-fetch')
+        table = {'ASSAY_ROUTING_CONFIG': str(self.config(routes=CLAUDE_TABLE, name='claude.json'))}
+        for environment in (table, self.environment(), {}):
+            with self.subTest(environment=environment):
+                self.assertEqual('', self.context(launch, environment, 'claude'))
+        self.assertIsNone(route_table.check_launch('claude', 'Agent', launch['tool_input'], CLAUDE_TABLE))
+        # Only the primary routes, so a subagent's launch of it is still refused.
+        nested = {**launch, 'agent_id': 'child-1', 'agent_type': 'general-purpose'}
+        self.assertIn('only the primary agent launches agents', self.reason(nested, table, 'claude'))
 
     def test_without_a_table_codex_is_untouched_and_claude_keeps_the_explicit_check(self):
         self.assertIsNone(self.reason(self.codex(task_name='x'), self.environment('codex'), 'codex'))

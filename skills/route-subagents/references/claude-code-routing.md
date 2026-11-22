@@ -78,7 +78,7 @@ profile's frontmatter does not change the pair. `CLAUDE_CODE_EFFORT_LEVEL` outra
 refuses a routed launch while that variable names another level.
 `CLAUDE_CODE_SUBAGENT_MODEL` applies only to a call without a model and
 `CLAUDE_CODE_SUBAGENT_EFFORT` only to a launch that names no effort, which a
-routed launch never is. A fork, a `resume` and a type in
+routed launch never is. A fork, a `resume`, the built-in `web-fetch` agent and a type in
 `pipeline.unrouted_agents` keep their settings and are not checked; a project
 or user definition that pins both settings is no exemption here, because the
 call's pair replaces them.
@@ -96,6 +96,9 @@ and `effort`, and its reason names what is missing. These launches pass:
 
 - a fork, which shares the parent's context and settings by design;
 - a `resume` of an existing worker, which keeps its settings;
+- the built-in `web-fetch` agent, which Claude Code offers in place of the
+  WebFetch tool and tells the model to call like one; with or without a table
+  it gets no routing note or launch reminder either;
 - a type listed in `pipeline.unrouted_agents`;
 - a type whose nearest project or user definition (`.claude/agents/<type>.md`)
   pins both in its frontmatter, `inherit` excepted. A plugin agent's definition

@@ -24,11 +24,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 from runtime.activation import evaluate, load_rules
 from runtime.events import recognized
-from runtime.predicates import LAUNCHES, reading_profile
+from runtime.predicates import reading_profile
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
 from route_evidence.core import RetiredConfiguration, loads
 from route_evidence import route_table
+from route_evidence.pipeline_config import tool_agent
 # host_observations loads where a launch needs it: every tool call starts this process.
 # No hook path imports route_evidence.service (asyncio, HTTP, process control): the
 # launch check, which refuses on timeout, loads its configuration from pipeline_config.
@@ -136,7 +137,8 @@ def explicit_routes(event, client, environment):
     reminder; without one a Claude spawn must still name both settings. A
     Claude spawn from inside a subagent is refused before either check: only
     the primary routes. Codex hook input does not say which agent calls, so its
-    depth stays with `agents.max_depth`. A missing, unreadable or retired
+    depth stays with `agents.max_depth`. A tool agent such as web-fetch, which
+    stands in for a tool, gets neither check nor note. A missing, unreadable or retired
     configuration refuses a recognized launch; no configuration keeps ordinary
     delegation.
     """
@@ -150,6 +152,8 @@ def explicit_routes(event, client, environment):
             return {}
         if client == "claude" and event.get("agent_id") is not None and config.get("client") == client:
             return deny(NESTED_SPAWN)
+        if client == "claude" and tool_agent(event.get("tool_input")):
+            return {}  # A tool agent stands in for a tool: no class to check and no routing to point at.
         table = config.get("routes")
         if table is None:
             return explicit_launch(event, config) if client == "claude" else {}
@@ -286,7 +290,9 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
     try:
         # Basic reminders do not depend on prompt rules, the parser or state.
         # Keep them as a fallback; a routing reply always remains authoritative.
-        if not protected and event["hook_event_name"] in {"SessionStart", "PreToolUse"}:
+        # A tool agent such as web-fetch stands in for a tool, so the launch reminder is not for it.
+        if (not protected and event["hook_event_name"] in {"SessionStart", "PreToolUse"}
+                and not (client == "claude" and tool_agent(event.get("tool_input")))):
             legacy = reminder(event, environment, **session_routing(event, client, environment))
         settings = options(environment)
         rules, fingerprint = load_rules(root, disabled_rules=settings["disabled_rules"], disabled_skills=settings["disabled_skills"])
@@ -300,14 +306,6 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             if name == "UserPromptSubmit":
                 # The check names skills already loaded, so the model can stay quiet about them.
                 loaded = skill_gate.loaded(event, enabled, settings["state_dir"], **kwargs)
-        if (client == "claude" and name == "PreToolUse" and not denied and rules.midturn_rules
-                and event.get("tool_name") in LAUNCHES):
-            # A launch of the web-fetch agent reads a page: its refusal comes before the routing note and
-            # the launch reminder, which the repeated launch receives. A routing refusal still goes first.
-            refusal = midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
-                                      form=settings["skill_note_form"], **kwargs)
-            if refusal:
-                return refusal, None
         if client == "claude" and not protected:
             if name in STOPS:
                 # A report already handed back reached the parent; a continuation cannot change it. A subagent
@@ -325,8 +323,7 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                 note = ((sources.fetched(event, settings["state_dir"], **kwargs) if rules.fetch_note else {})
                         or (sources.searched(event, settings["state_dir"], **kwargs) if rules.search_note else {}))
             # A tool call that shows a skill this session has not loaded; a routing reply and the
-            # launch reminder own their PreToolUse, so this check stays silent there. A web-fetch
-            # launch was checked above.
+            # launch reminder own their PreToolUse, so this check stays silent there.
             elif name == "PreToolUse" and rules.midturn_rules and not legacy:
                 note = midturn.checked(event, rules.midturn_rules, enabled, settings["state_dir"],
                                        form=settings["skill_note_form"], **kwargs)
