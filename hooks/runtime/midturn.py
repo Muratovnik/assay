@@ -29,7 +29,7 @@ import time
 # Which calls show a sign is decided in predicates, which the hook entry reads before loading this module.
 from .predicates import (DOCS, DOCUMENT, FETCH, GENERATED, INTERFACE, LOCAL, MAX_COMMAND,  # noqa: F401
                          MAX_PATH, NOT_DOCUMENTATION, PROBE, QUESTION, README, SEPARATOR, SHELLS, SKILL_FILE,
-                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external, offers_no_action)
+                         SOURCE, TEST, URL, WEB, WORKING, WRITES, classify, external, offers_no_action, page_reader)
 from .skill_gate import _key as gate_key, _save as save_load, loaded as recorded, transcript
 
 TTL = 86_400
@@ -188,9 +188,11 @@ def checked(event, rules, names, directory, *, form="note", clock=time.time):
 
     Rules are the enabled row IDs and names the enabled skills. A skill is named at most once
     per request and agent: the key is stored whichever form answers, so a refused call passes
-    on its retry.
+    on its retry. The web-fetch agent gets nothing: it cannot load a skill, does not repeat a
+    refused fetch, and reads the page the agent that launched it chose.
     """
-    if event.get("hook_event_name") != "PreToolUse" or not directory or not isinstance(event.get("tool_name"), str):
+    if (event.get("hook_event_name") != "PreToolUse" or not directory or not isinstance(event.get("tool_name"), str)
+            or page_reader(event)):
         return {}
     identity = _identity(event)
     if identity is None:

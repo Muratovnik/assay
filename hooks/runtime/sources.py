@@ -25,6 +25,7 @@ from pathlib import Path
 import re
 import time
 
+from .predicates import page_reader
 from .skill_gate import HANDBACK, _lines, _prompt
 
 TTL = 86_400
@@ -101,8 +102,13 @@ def _once(event, directory, kind, note, clock):
 
 
 def fetched(event, directory, *, clock=time.time):
-    """The fetch note for this request and agent on its first WebFetch result, else {}."""
-    return _once(event, directory, "fetch-note", FETCH_NOTE, clock) if event.get("tool_name") == FETCH else {}
+    """The fetch note for this request and agent on its first WebFetch result, else {}.
+
+    The web-fetch agent gets none: its result is the page's text, and it has no shell to download one.
+    """
+    if event.get("tool_name") != FETCH or page_reader(event):
+        return {}
+    return _once(event, directory, "fetch-note", FETCH_NOTE, clock)
 
 
 def searched(event, directory, *, clock=time.time):

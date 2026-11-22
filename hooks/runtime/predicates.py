@@ -14,6 +14,10 @@ from .scratch import is_scratch
 
 # The profiles that may only read and report; any plugin prefix before the last ":" is ignored.
 READING_ROLES = frozenset({"evidence-reviewer", "official-docs-researcher"})
+# Claude Code's built-in agent that reads a page the agent launching it chose. It has WebFetch alone, so it
+# can load no skill; it starts without the SubagentStart context, its prompt takes any refused fetch for a
+# permanent failure, and its WebFetch result is the page's text rather than an answer about the page.
+PAGE_READER = "web-fetch"
 
 WRITES = frozenset({"Edit", "Write", "MultiEdit", "NotebookEdit"})
 SHELLS = frozenset({"Bash", "PowerShell"})
@@ -67,6 +71,11 @@ def reading_profile(role):
         return None
     name = role.split(":")[-1]
     return name if name in READING_ROLES else None
+
+
+def page_reader(event):
+    """Whether Claude Code's built-in web-fetch agent makes this call: a skill note or the fetch note asks what it cannot do."""
+    return event.get("agent_type") == PAGE_READER
 
 
 def classify(path):

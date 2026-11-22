@@ -108,6 +108,12 @@ class SourceCheckTests(unittest.TestCase):
         self.assertTrue(self.fetch(prompt_id=None))
         self.assertEqual({}, self.fetch(prompt_id=None))
 
+    def test_the_web_fetch_agent_gets_no_fetch_note(self):
+        # Its WebFetch result is the page's text, and it has no shell to download the page.
+        self.assertEqual({}, self.fetch(agent_id="f1", agent_type="web-fetch"))
+        # Its result kept no key: another agent's first fetch in the same request is still noted.
+        self.assertTrue(self.fetch(agent_id="f1", agent_type="general-purpose"))
+
     def test_other_tools_or_missing_state_get_no_note(self):
         self.assertEqual({}, self.fetch(tool_name="WebSearch"))
         event = {**self.base, "hook_event_name": "PostToolUse", "tool_name": "WebFetch", "prompt_id": "p1"}

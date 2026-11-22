@@ -504,6 +504,15 @@ class NoteTests(unittest.TestCase):
         self.assertNotIn("reading role", output["permissionDecisionReason"])
         self.assertEqual({}, self.run_event(fetch))
 
+    def test_the_web_fetch_agent_is_neither_refused_nor_noted(self):
+        # It has WebFetch alone, so it cannot load the skill, and its prompt takes a refused fetch for a permanent failure.
+        fetch = self.pre("WebFetch", {"url": DOCS, "prompt": "q"}, agent_id="f1", agent_type="web-fetch")
+        self.assertEqual({}, self.run_event(fetch))
+        # Its call kept no key: the same call from an agent that can load the skill is still refused.
+        output = self.run_event({**fetch, "agent_type": "general-purpose"})["hookSpecificOutput"]
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertIn("assay:evidence-research", output["permissionDecisionReason"])
+
     def test_the_fetch_note_after_a_web_fetch_is_unchanged(self):
         result = self.run_event({**self.pre("WebFetch", {"url": DOCS, "prompt": "q"}), "hook_event_name": "PostToolUse"})
         self.assertIn("Assay source check", self.note({"hookSpecificOutput": {**result["hookSpecificOutput"],

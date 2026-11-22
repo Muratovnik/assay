@@ -319,7 +319,8 @@ session has. How to save and read the download is in `evidence-research`'s
 evidence and claims reference. The note appears once per
 request and agent, keyed by the prompt ID Claude Code sends; without one, once per
 agent. It needs the plugin data directory, where it keeps one hashed key per
-request and agent.
+request and agent. Claude Code's built-in `web-fetch` agent gets no note: its
+`WebFetch` result is the page's text, and it has no shell to download one.
 
 A `WebSearch` result lists what was found, not what was read, and Claude Code ends
 it with a request to include those sources in the answer. After the first such
@@ -513,6 +514,13 @@ on its next request, which for `AskUserQuestion` comes after the owner has answe
 for a fetch comes with the source already read, so only a refusal arrives while the
 choice can still change. In live Claude sessions the research note was followed by a
 load in 4 of 14 cases.
+
+Claude Code's built-in `web-fetch` agent gets neither form. It has `WebFetch` alone,
+so it can load no skill, and its prompt takes any refused fetch for a permanent
+failure: in a session on 22 November 2026 it reported the refused page as unread,
+and the page had to be read again in the main session. It reads the page that the
+agent launching it chose, and that agent's `Agent` call gives no sign, so a session
+that reads pages through `web-fetch` gets no research note for them.
 
 Codex gets no note. A Codex agent reads a `SKILL.md` with a shell command such as
 `Get-Content`, often inside a longer command or the code-mode `exec` wrapper, and the gate keeps no load
