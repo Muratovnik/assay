@@ -69,8 +69,9 @@ VERDICT_WORD = re.compile(r"(pass\s+with\s+non-blocking\s+findings|fix-first|ret
 REVIEWED_LINE = _review_line("reviewed")
 FOLLOWS_LINE = _review_line("follows")
 NAME_TOKEN = re.compile(r"[\s:]*([^\s,:;]+)")
-# The name runs to the dash, set off by spaces, that opens the label's purpose.
-NAME_BEFORE_DASH = re.compile(r"[\s:]*([^\s,:;—–-][^,:;—–]*?)\s+[—–-]\s")
+# The name runs to the first dash set off by spaces, which opens the label's purpose;
+# a dash inside a word or a range, as in 9318–9599, stays part of the name.
+NAME_BEFORE_DASH = re.compile(r"[\s:]*([^\s,:;—–-][^,:;]*?)\s+[—–-]\s")
 # A Git commit id as reports write it: 7 to 40 lowercase hex digits standing alone. A
 # hyphen or underscore beside it makes it part of a UUID, a branch or a file name.
 COMMIT_ID = re.compile(r"(?<![0-9A-Za-z_-])[0-9a-f]{7,40}(?![0-9A-Za-z_-])")

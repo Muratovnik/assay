@@ -13,7 +13,7 @@ import unittest
 SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "route-subagents" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from benchmark_router import NO_TRANSCRIPTS, main
-from route_evidence.route_report import review_lines
+from route_evidence.route_report import child_name, review_lines
 
 T0 = datetime(2026, 1, 5, 10, 0, tzinfo=timezone.utc)
 SINCE, UNTIL = "2026-01-05T09:59", "2026-01-05T12:00"
@@ -217,6 +217,25 @@ class RouteReportTests(unittest.TestCase):
         self.assertEqual((build["reviewed_launches"], find["reviewed_launches"]), (1, 0))
         self.assertEqual([(chain["reviews"], chain["reviewed"]) for chain in build["chains"]],
                          [(["parser review", "parser re-review"], ["parser errors"])])
+        self.assertEqual(result["totals"]["unresolved_reviewed_names"], [])
+
+    def test_a_name_holding_a_dash_runs_to_the_dash_set_off_by_spaces(self):
+        # Two pieces of one subject told apart by their ranges are two names, not a repeat.
+        self.assertEqual(child_name("check: покрытие строк 9318–9599 — дописать тесты", True),
+                         "покрытие строк 9318–9599")
+        self.assertEqual(child_name("покрытие строк 9620—9898 - дописать тесты", False), "покрытие строк 9620—9898")
+        self.assertEqual(child_name("build: parser re-review — after the fix", True), "parser re-review")
+        self.assertEqual(child_name("build: alfi", True), "alfi")
+        for minute, description in ((0, "build: покрытие строк 9318–9599 — дописать тесты"),
+                                    (2, "build: покрытие строк 9620–9898 — дописать тесты")):
+            self.launch(description, [
+                {"type": "user", "timestamp": at(minute), "message": {"role": "user", "content": "x"}},
+                assistant(minute + 1, f"w{minute}", "claude-opus-test", text("done"), usage(input=1)),
+            ])
+        self.review("check: kolo — first pass", 10, "VERDICT: ship\nREVIEWED: покрытие строк 9318–9599")
+        code, result = self.run_cli("--review-class", "check")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.group(result, "build")["reviewed_launches"], 1)
         self.assertEqual(result["totals"]["unresolved_reviewed_names"], [])
 
     def test_a_review_line_alone_marks_a_review_and_an_unknown_value_is_not_guessed(self):
