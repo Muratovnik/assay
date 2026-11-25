@@ -162,9 +162,13 @@ class ReminderTests(unittest.TestCase):
                         self.assertEqual("command", hook["type"])
                         # A worker's stop and its hand-back read the worker's whole transcript.
                         worker = event == "SubagentStop" or rule.get("matcher") == "^SubagentHandback$"
+                        # The launch guard blocks on its own timeout, so load must not reach it.
+                        launch = client == "claude" and "onFailure" in hook
                         timeout_limit = (3 if client == "codex" and event == "SessionEnd"
-                                         else 15 if client == "claude" and worker else 5)
+                                         else 15 if client == "claude" and worker else 10 if launch else 5)
                         self.assertLessEqual(hook["timeout"], timeout_limit)
+                        if launch:
+                            self.assertEqual(10, hook["timeout"])
             if client == "claude":
                 # Only the launch guard blocks the tool when the hook fails; the rest go ahead.
                 blocking = {tool for tool in ("Agent", "Task", "Bash", "Read", "mcp__x__Agent", "AgentStatus",

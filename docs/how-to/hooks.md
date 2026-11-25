@@ -23,9 +23,11 @@ it and an unusual plugin path needs no quoting. When the hook fails, cannot
 start or times out, Claude Code runs the tool anyway, except for `Agent` and
 `Task`: their entry sets `onFailure: "block"` (Claude Code 2.1.295 or later),
 so a launch the guard could not check is refused instead of running unrouted.
-`SubagentStop` and a subagent's `SubagentHandback` call allow 15 seconds, because
-their checks read the worker's whole transcript; the other events allow 5. A
-hand-back the hook cannot check in time goes through unchecked.
+That includes a guard that times out, so it allows 10 seconds: under machine
+load a guard has run past 5 seconds and refused a correct launch. `SubagentStop` and a subagent's `SubagentHandback`
+call allow 15 seconds, because their checks read the worker's whole transcript;
+the other events allow 5. A hand-back the hook cannot check in time goes through
+unchecked.
 
 Use Python 3.11+ as `python` in the client's environment. Recognizing an explicit
 skill choice also needs `markdown-it-py` from `hooks/requirements.txt`, installed in

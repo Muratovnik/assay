@@ -1130,8 +1130,10 @@ def reminder_hooks(client: str = "claude") -> bytes:
     if client == "claude":
         # A launch the guard could not check is refused instead of running unrouted;
         # every other tool goes ahead when the hook fails, as before. The hand-back
-        # gets the worker stop's time, since it runs the same checks.
-        hooks["PreToolUse"] = [{"matcher": f"^({spawn})$", "hooks": [{**hook, "onFailure": "block"}]},
+        # gets the worker stop's time, since it runs the same checks. A blocking hook
+        # turns its own timeout into a refused launch: under load about one launch a
+        # week ran past 5 s, the longest recorded one 5.3 s, so the guard gets 10.
+        hooks["PreToolUse"] = [{"matcher": f"^({spawn})$", "hooks": [{**hook, "timeout": 10, "onFailure": "block"}]},
                                {"matcher": "^SubagentHandback$", "hooks": [{**hook, "timeout": 15}]},
                                {"matcher": f"^(?!(?:{spawn}|SubagentHandback)$)", "hooks": [hook]}]
         # Only Claude reports skill loads reliably enough for the skill gate.
