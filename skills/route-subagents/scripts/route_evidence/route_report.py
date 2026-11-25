@@ -77,7 +77,8 @@ COMMIT_ID = re.compile(r"(?<![0-9A-Za-z_-])[0-9a-f]{7,40}(?![0-9A-Za-z_-])")
 
 UNITS = {
     "client": "Claude Code subagent transcripts only; their layout is observed, not a documented API",
-    "launch": "one subagent transcript whose first timestamp is inside the window",
+    "launch": "one subagent transcript whose first timestamp of its own session is inside the window; "
+              "lines another session wrote, as a fork's copies of its parent's transcripts, are not read",
     "reviews": "verdict counts are reviews, not pieces of work: each report a launch handed back that carries "
                "a contract verdict, a REVIEWED or a FOLLOWS line, and at least one per launch of a review class",
     "verdicts": "ship accepts the work; fix-first, rethink and fail reject it, fail being an audit FAIL that "
@@ -211,7 +212,9 @@ def same_commit(a: str, b: str) -> bool:
 
 
 def read_transcript(path: Path, since: datetime, until: datetime | None) -> Launch | None:
-    """The launch a transcript records, or None when it did not start inside the window."""
+    """The launch a transcript records, or None when it did not start inside the window
+    or holds no line of its own session."""
+    session = path.parent.parent
     launch = None
     messages: dict[str, tuple[Any, dict]] = {}
     texts: dict[str, list[str]] = {}
@@ -231,13 +234,17 @@ def read_transcript(path: Path, since: datetime, until: datetime | None) -> Laun
             if not isinstance(entry, dict):
                 malformed += 1
                 continue
+            # A forked session's folder holds copies of the parent session's subagent
+            # files; their lines keep the parent's id and are counted in the parent.
+            if isinstance(entry.get("sessionId"), str) and entry["sessionId"] != session.name:
+                continue
             moment = _timestamp(entry.get("timestamp"))
             if launch is None:
                 if moment is None:
                     continue
                 if moment < since or (until is not None and moment >= until):
                     return None
-                launch = Launch(path=path, session=path.parent.parent, start=moment, end=moment)
+                launch = Launch(path=path, session=session, start=moment, end=moment)
             elif moment is not None:
                 launch.end = max(launch.end, moment)
             message = entry.get("message")

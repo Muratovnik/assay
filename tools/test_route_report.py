@@ -462,6 +462,30 @@ class RouteReportTests(unittest.TestCase):
         self.assertEqual(counts, {"build": 1, "find": 1, None: 1})
         self.assertEqual(result["totals"]["reviews"], 0)
 
+    def test_a_forked_sessions_copy_of_a_parent_transcript_is_not_a_second_launch(self):
+        # A fork copies the parent session's subagent files into its own folder, without a
+        # meta file; their lines keep the parent's session id. A child resumed in the fork
+        # appends lines of its own after the copied ones.
+        def lines(session, ident, minute, output):
+            return [{"type": "user", "sessionId": session, "timestamp": at(minute),
+                     "message": {"role": "user", "content": "do it"}},
+                    {**assistant(minute + 1, ident, "claude-opus-test", text("done"), usage(input=1, output=output)),
+                     "sessionId": session}]
+        parent = lines("s1", "m1", 0, 100)
+        self.launch("build: alfi — fix the parser", parent, session="s1")
+        self.launch("", parent, session="s2", meta=False)
+        self.launch("build: alfi — fix the parser", parent + lines("s2", "m2", 30, 7), session="s2")
+        code, result = self.run_cli()
+        self.assertEqual(code, 0)
+        totals = result["totals"]
+        self.assertEqual((totals["launches"], totals["unclassed_launches"], totals["launches_without_meta"]),
+                         (2, 0, 0))
+        build = self.group(result, "build")
+        self.assertEqual((build["launches"], build["tokens"]["output"], build["minutes"]), (2, 107, {"median": 1}))
+        # The resumed round starts the fork's launch at its own first line.
+        code, result = self.run_cli(since="2026-01-05T10:10")
+        self.assertEqual((code, result["totals"]["launches"]), (0, 1))
+
     def test_another_client_and_invalid_input_are_refused(self):
         self.scenario()
         out = io.StringIO()

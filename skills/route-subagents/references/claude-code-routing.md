@@ -254,6 +254,11 @@ so the command reads each field defensively and counts the lines it skips.
   with a sibling `agent-*.meta.json` that holds the launch's `description`,
   its `model` alias, `effort` and `agentType`. The class and the child's name
   come from `description`, read exactly as the launch check reads it.
+- Each line carries the `sessionId` of the session that wrote it. A forked
+  session's folder holds copies of the parent's subagent files, without a meta
+  file, whose lines keep the parent's id; those lines are skipped, since the
+  parent already counts them, and a file with no line of its own is no launch.
+  A child resumed in the fork appends its own lines, which are read.
 - Usage is `message.usage` on assistant lines. One message is written on
   several lines, so usage is counted once per `message.id`, from its last line:
   an earlier line can hold a smaller output count. When
@@ -263,7 +268,7 @@ so the command reads each field defensively and counts the lines it skips.
   `ephemeral_1h_input_tokens`; without that split, `cache_creation_input_tokens`
   counts as 5-minute writes.
 - Tool calls are distinct `tool_use` ids; start and end are the first and last
-  `timestamp` of the file.
+  `timestamp` of the file's own lines.
 - A child's report is the `message` of a `SubagentHandback` call. A child that
   is resumed keeps writing to the same file and hands back once per round, so
   one file can hold several reports; a child that made no such call has one
