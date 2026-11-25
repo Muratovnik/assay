@@ -66,6 +66,18 @@ Organization policy, the launching environment's variables and the client's
 built-in defaults also remain: name the model, the effort and any second model
 the client can attach, such as an advisor or a permission reviewer, or turn it
 off, and confirm from the run's per-model usage that no unnamed model was called.
+A tool can call a model of its own, as a web search does: attribute that usage
+to the tool's calls before treating it as an unnamed model.
+
+A cost limit passed to the client is shown to the subject, and a subject can
+name it as its reason to skip a check. Enforce the limit from the cost each run
+reports instead, or hold it equal across conditions and say that it was visible.
+
+When the user's real configuration is itself the subject, the run cannot start
+from an empty one, and the user's hooks then record each run in the user's own
+memory and tracking services. Mark those runs with one identifier the services
+store, keep the list of their sessions, and remove them with the user's
+permission when the runs end.
 
 When the plugin's hooks belong to a condition, keep each subject run's working
 directory off a path the hooks classify as scratch, and before the runs confirm
