@@ -87,12 +87,17 @@ CLAUDE_PROFILE_TOOLS = {
 }
 # Capabilities a client surface cannot keep inside a profile's read-only
 # boundary. Claude ignores a plugin subagent's permissionMode and lets some parent
-# modes override a native one, so a shell there is not held read-only. The neutral
-# profile keeps the capability; the projection names it unavailable, omits its
-# tools and renders the profile's instructions for its absence.
+# modes override a native one, so a shell there is not held read-only. Codex reads
+# and searches files only through its shell, which the projection turns off, and
+# has no separate file-reading tool, so a Codex profile cannot read the workspace
+# either: the caller carries the text. The neutral profile keeps the capability;
+# the projection names it unavailable, omits its tools and renders the profile's
+# instructions for its absence.
 SURFACE_UNAVAILABLE = {
     "claude": frozenset({"read-only-oracle", "skill-discovery"}),
-    "codex": frozenset({"read-only-oracle", "skill-discovery"}),
+    "codex": frozenset(
+        {"read-only-oracle", "skill-discovery", "workspace-read", "workspace-search"}
+    ),
 }
 # A projection that lost a capability does not get tools that extend a session at
 # runtime, so it cannot widen itself back.

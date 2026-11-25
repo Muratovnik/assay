@@ -9,7 +9,9 @@ applicable contracts, exact artifact
 or base-to-result diff, permitted oracle and risk scope. Before packing, read
 which capabilities the selected reviewer's adapter names unavailable. Where it
 cannot run the oracle, include snapshot-bound receipts for that oracle; where it
-cannot load skills, name the owner criteria it must read by path. Keep the known defect
+cannot load skills, name the owner criteria it must read by path; where it
+cannot read the workspace, carry the text of the artifact or diff, the contracts
+and those criteria in the packet instead of their paths. Keep the known defect
 inventory separate from the original outcome. Omit the implementer's preferred
 verdict. A bounded semantic profile may require an explicit review mode and
 response vocabulary; follow that contract rather than inventing a parallel one.

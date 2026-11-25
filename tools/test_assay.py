@@ -517,6 +517,33 @@ class AgentAssetsTests(unittest.TestCase):
         for projection in (codex, claude):
             self.assertIn("Name the files, diff hunks, and receipts you actually read", projection)
 
+    def test_codex_profiles_name_workspace_reading_unavailable(self) -> None:
+        # Codex reads files only through the shell its projection turns off, so a
+        # Codex profile cannot read or search the workspace; the packet carries
+        # the text. Claude keeps its reading tools.
+        catalog = aa.load_catalog(aa.ROOT)
+        assets = {item.name: item for item in aa.profile_assets(catalog)}
+        packet_only = "review only the text the packet carries"
+        reviewer = assets["evidence-reviewer"]
+        source = (aa.ROOT / reviewer.path).read_bytes()
+        codex = tomllib.loads(aa.render_profile(source, reviewer, "codex").decode("utf-8"))
+        claude = aa.render_profile(source, reviewer, "claude").decode("utf-8")
+        instructions = codex["developer_instructions"]
+        self.assertTrue(instructions.startswith(
+            "Capabilities unavailable in this projection: read-only-oracle, "
+            "skill-discovery, workspace-read, workspace-search.\n\n"
+        ))
+        self.assertIn(packet_only, instructions)
+        self.assertIn("names only by path, without its text, is missing: return refused", instructions)
+        self.assertNotIn(packet_only, claude)
+        self.assertNotIn("workspace-read", claude)
+        researcher = assets["official-docs-researcher"]
+        source = (aa.ROOT / researcher.path).read_bytes()
+        codex = tomllib.loads(aa.render_profile(source, researcher, "codex").decode("utf-8"))
+        self.assertTrue(codex["developer_instructions"].startswith(
+            "Capabilities unavailable in this projection: workspace-read, workspace-search.\n\n"
+        ))
+
     def test_claude_profiles_start_without_the_callers_claude_md(self) -> None:
         catalog = aa.load_catalog(aa.ROOT)
         for asset in aa.profile_assets(catalog):

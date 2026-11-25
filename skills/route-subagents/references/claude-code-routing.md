@@ -231,7 +231,8 @@ discovery unavailable, and returns `refused` without snapshot-bound receipts for
 the named oracle. Give it those receipts, and pass audit criteria such as the
 installed `independent-audit` `SKILL.md` and `references/bounded-review.md` by
 path, since it cannot load the skill. The Codex reading projection also treats
-shell oracles and skill loading as unavailable and reads supplied receipts.
+shell oracles and skill loading as unavailable, and workspace reading and search
+too, so its packet carries the text it reviews and the receipts.
 The plugin-wide profile hook denies mutating tools for a confirmed reading
 role. It keeps the tools that role's projection lists and `SubagentHandback`,
 the channel that returns its report; it does not change the primary's or a
