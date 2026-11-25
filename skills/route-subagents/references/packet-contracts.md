@@ -25,6 +25,7 @@ Why delegate now; dependency or reconsideration trigger when deferred:
 Primary-owned work while this runs (or why sequential isolation is useful):
 Expected effect: change_required | no_change_acceptable | read_only_finding
 Relevant root, base or snapshot, owned dirty inputs:
+Project rule files to follow, by path; limits added beyond them, with reasons:
 Selected model and reasoning effort, brief task/quota rationale:
 Assay skills the work needs (or none), loaded before the work:
 Read scope, owned paths/hunks and runtime write set:
@@ -46,6 +47,17 @@ established. Give each its source, a file and line, or mark it `inferred`. A
 worker does not question the packet's facts, so a wrong one is copied into the
 work and into every later packet: in one project a wrong statement of the
 product's purpose went into 11 packets.
+
+Name the project's rule files the work follows, such as the repository's
+`AGENTS.md` or a shared brief, by path, and do not retell their commands or
+limits: a retelling drifts from its source, and the worker acts on the
+retelling. In one project five packets in two days restated a rule wrongly,
+among them an older interpreter version, a lock the rule had lifted for a
+targeted run and a commit of generated output the rule excludes. A limit the
+packet adds beyond a rule is stated as an override the packet chose, with the
+reason. The worker does not read this skill, so the packet also says that where
+it and a named rule file still disagree, the rule file wins and the worker names
+the disagreement in its report.
 
 ## Skills and authority
 
