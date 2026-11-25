@@ -149,7 +149,10 @@ Commit subjects use the Conventional Commit types `build`, `chore`, `ci`, `docs`
 `feat`, `fix`, `perf`, `refactor`, `revert`, `style` and `test`, with an optional
 lowercase scope and `!` for a breaking change. A release's `CHANGELOG.md` entry
 is written by hand in the release commit, in the Angular preset's sections, and
-checked with `relkit notes <version> --strict`. A generated draft is optional and
+checked with `relkit notes <version> --strict`. Before that commit, check each
+statement the entry makes about the state of the work, such as `not yet`,
+`has not run` or `pending`, against the current records: the commits it is
+written from describe the state at their own time. A generated draft is optional and
 needs a `[changelog.generator]` in `relkit.toml`, which this repository does not
 declare, so `relkit notes <version> --draft --write` is refused here. A vague
 subject still stays in the history for good: nobody can fix it later without
