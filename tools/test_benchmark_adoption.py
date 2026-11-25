@@ -193,17 +193,25 @@ class ProcessOwnershipTests(unittest.TestCase):
         self.assertTrue(stops_within(pid))
 
     def test_deadline_owns_descendant_after_direct_parent_exit(self):
+        # The deadline has to outlast the parent's start, or there is no
+        # descendant to own. A fixed 0.7 s did not on a loaded machine, so it
+        # is taken from how long the same interpreter start takes right now;
+        # on a quiet machine the numbers stay 0.7 s and 3 s.
+        started = time.monotonic()
+        subprocess.run([sys.executable, "-B", "-S", "-c", "import subprocess, pathlib"], check=True)
+        deadline = max(.7, 4 * (time.monotonic() - started))
+        limit = 3 + 4 * (deadline - .7)
         with tempfile.TemporaryDirectory() as temp:
             pidfile = Path(temp) / "descendant.pid"
             code = ("import subprocess,sys; from pathlib import Path; "
-                    "p=subprocess.Popen([sys.executable,'-B','-S','-c','import time; time.sleep(8)']); "
+                    f"p=subprocess.Popen([sys.executable,'-B','-S','-c','import time; time.sleep({limit + 5})']); "
                     "Path(sys.argv[1]).write_text(str(p.pid))")
             started = time.monotonic()
             with self.assertRaisesRegex(EvidenceError, "deadline"):
-                ProcessScope(.7).run([sys.executable, "-B", "-S", "-c", code, str(pidfile)])
+                ProcessScope(deadline).run([sys.executable, "-B", "-S", "-c", code, str(pidfile)])
             elapsed = time.monotonic() - started
             self.assertTrue(pidfile.exists(), "worker did not reach readiness")
-            self.assertLess(elapsed, 3)
+            self.assertLess(elapsed, limit)
             self.assertTrue(stops_within(int(pidfile.read_text())), "owned descendant still running")
 
     def test_cancel_after_parent_exit_preserves_unrelated_process(self):
