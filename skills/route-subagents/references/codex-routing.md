@@ -78,11 +78,15 @@ does not establish either result.
 
 The hook cannot hold delegation to one level here: Codex documents no field in
 `PreToolUse` input that names the calling agent, and a subagent's hooks report
-the parent's session. The client limit is `agents.max_depth` in
-`config.toml`; its documented default, `1`, lets the root spawn children and
-stops children from spawning. Public reports say some Codex versions do not
-enforce it, so set it explicitly and confirm in a fresh session that a child's
-`spawn_agent` call fails before relying on it.
+the parent's session. The client setting is `agents.max_depth` in
+`config.toml`; its documented default, `1`, would let the root spawn children
+and stop children from spawning. It does not hold on codex-cli 0.171.0: on
+2026-11-25, with `[agents] max_depth = 1` set, a child at depth 1 called
+`spawn_agent` and its grandchild at depth 2 ran and answered, with no warning
+about the key. Public reports describe the same on earlier versions. The ban on
+a child's own delegation therefore rests on the instructions alone. Keeping the
+setting is harmless and takes effect if the client starts enforcing it; confirm
+in a fresh session that a child's `spawn_agent` call fails before relying on it.
 
 The reminder alone enforces nothing; the launch check above is the hook's guard.
 

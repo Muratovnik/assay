@@ -899,8 +899,9 @@ Hints, read-only preflight and, with a route table, a
 `spawn_agent` check are supported: the hook refuses a spawn that does not follow
 its declared class or would inherit the parent's settings, see
 [route-table launches](../../skills/route-subagents/references/codex-routing.md#route-table-launches).
-Codex hook input does not name the calling agent, so a child's own spawn is held
-only by `agents.max_depth`; see
+Codex hook input does not name the calling agent, so the hook cannot refuse a
+child's own spawn. `agents.max_depth = 1` did not stop one on codex-cli 0.171.0
+(observed 2026-11-25), so that ban rests on the instructions alone; see
 [launches from a subagent](../../skills/route-subagents/references/codex-routing.md#launches-from-a-subagent).
 
 Use the exposed tool schema, not an API's fields or Claude effort aliases. For a

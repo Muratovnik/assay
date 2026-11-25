@@ -137,7 +137,8 @@ def explicit_routes(event, client, environment):
     reminder; without one a Claude spawn must still name both settings. A
     Claude spawn from inside a subagent is refused before either check: only
     the primary routes. Codex hook input does not say which agent calls, so its
-    depth stays with `agents.max_depth`. A tool agent such as web-fetch, which
+    depth is left to the instructions; `agents.max_depth` did not hold on
+    codex-cli 0.171.0. A tool agent such as web-fetch, which
     stands in for a tool, gets neither check nor note. A missing, unreadable or retired
     configuration refuses a recognized launch; no configuration keeps ordinary
     delegation.
