@@ -115,8 +115,8 @@ tests.
 
 ## Repeat run design
 
-Proposed volume, not yet agreed: 10 sessions on Sonnet at medium effort and at
-most 2 judge sessions on Opus at high effort.
+Volume: 10 sessions on Sonnet at medium effort and at most 2 judge sessions on
+Opus at high effort.
 
 - Arms: the parent of the commit that adds this section, whose
   `skills/test-writing` outside `evals/` is the 0.51.0 text, against that commit.
@@ -146,3 +146,33 @@ The repeat will not show behaviour on another model or effort, under automatic
 selection rather than explicit loading, or a difference smaller than two runs of
 three. W11 and W12 are selection cases that informed this candidate, so a pass is
 tuning evidence, not held-out evidence, and W10 and W07 are not rerun.
+
+## Repeat run outcome (2026-11-25)
+
+- Compared: frozen plugin trees at `103d651` (baseline) and `1712507`
+  (candidate), without `skills/*/evals`. They differ only in
+  `skills/test-writing/SKILL.md`, by the candidate sentence.
+- Volume: 10 subject sessions, all observed as Sonnet at medium effort, and two
+  blind judge sessions on Opus at high effort. No session failed, so none was
+  replaced.
+- Departures from the design: two workers ran the arms of each pair side by
+  side in a fixed order, and, as in the first pilot, the packets were not built
+  with `tools/eval_assets.py prepare`.
+- Hard requirement, baseline and candidate: W11 0 and 3 of 3, W12 2 and 2 of 2.
+  Every baseline W11 test again passed with `role="alert"` removed from the
+  error; every candidate W11 test failed on that change.
+- Reading the saved W11 tests, knowing the arm: a presence control with the same
+  locator in 0 of 3 baseline tests and 3 of 3 candidate tests. A set-size
+  assertion was in all three tests of both arms, so the repeat shows nothing
+  for that half of the sentence.
+- Blind judge: on W11 the presence-control item was not met in 3 of 3 baseline
+  runs and met in 3 of 3 candidate runs, and the candidate was judged better in
+  all three pairs. On W12 every item was met in both arms and both pairs were
+  ties.
+- Trace: the new sentence was in context in all five candidate runs and in no
+  baseline run. The reference was read in none of the 10 runs.
+- Cost, summed over a cell's runs, baseline and candidate: W11 25 and 20 turns,
+  6,798 and 5,845 output tokens, 79.6 s and 57.0 s; W12 17 and 18 turns, 5,275
+  and 6,091 output tokens, 50.5 s and 52.5 s.
+- Verdict: effect, a W11 difference of three with no W12 failure in either arm.
+  The sentence is kept.
