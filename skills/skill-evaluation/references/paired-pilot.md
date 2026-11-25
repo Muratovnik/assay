@@ -53,6 +53,20 @@ An executor that runs with a shell installs no packages or browsers and runs no
 `git`: say so in its packet and deny those commands in its tool permissions. Keep
 each run's working directory in the project's ignored scratch directory.
 
+A run also inherits the client's setup. Start each subject run with a new, empty
+client configuration directory, which keeps out the user's settings,
+instructions, skills, plugins, hooks, memory and earlier runs' history; supply
+credentials and what the condition includes, such as the skill under test,
+explicitly. It does not keep out what the working directory brings: instruction
+files in it and above it, so a run inside a project loads that project's
+instructions, and that project's settings, hooks and tool servers. Switch that
+discovery off for the run, checking what else the switch drops, or record which
+files loaded; none may carry the method under test into its baseline.
+Organization policy, the launching environment's variables and the client's
+built-in defaults also remain: name the model, the effort and any second model
+the client can attach, such as an advisor or a permission reviewer, or turn it
+off, and confirm from the run's per-model usage that no unnamed model was called.
+
 When the plugin's hooks belong to a condition, keep each subject run's working
 directory off a path the hooks classify as scratch, and before the runs confirm
 with one smoke task that each hook class fires: a mid-turn note, a Stop check
@@ -75,10 +89,17 @@ keep the conclusion explicitly diagnostic.
 | Was the completed task cheaper? | Total observed effort/cost through accepted delivery | Worker API price or token count alone |
 
 Count preparation, optional advisor work, failed attempts, review, integration
-and remaining user corrections. Keep wall time, billed usage and subscription
-quota distinct. Record missing measurements as missing. Use deterministic checks
-for objective properties and review artifacts for qualities those checks cannot
-establish. A harness failure is not evidence against the method.
+and remaining user corrections. Count usage call by call: each model call once,
+even where a transcript repeats it, with its model and its token kinds, such as
+fresh input, cache writes, cache reads and output, priced at that model's rates,
+including subagents and models the run did not name. A token total across models
+or kinds is not a cost: their prices differ many times over, so fewer tokens can
+cost more. Reconcile the sum with the bill where it can be split by run; a
+client's cost estimate is not the bill. Keep wall time, billed usage and
+subscription quota distinct. Record missing measurements as missing. Use
+deterministic checks for objective properties and review artifacts for qualities
+those checks cannot establish. A harness failure is not evidence against the
+method.
 
 ## Conclude within the sample
 

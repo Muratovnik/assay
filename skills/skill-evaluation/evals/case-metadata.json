@@ -217,6 +217,33 @@
       "rationale": "Calibration family. Protect the grader from instructions carried in the material it evaluates.",
       "split": "working",
       "exposure": "public"
+    },
+    {
+      "id": "SE25",
+      "group": "SE25",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Calibration family. Only a task whose own correct and shortcut controls were graded can show a difference.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE26",
+      "group": "SE26",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Cost family. A token total across models and token kinds, missing unnamed calls, is not a cost; a reconciled per-call count is.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "SE27",
+      "group": "SE27",
+      "purpose": "challenge",
+      "source": "Synthetic maintainer-authored scenario; not a captured run.",
+      "rationale": "Isolation family. An empty configuration directory keeps out the user's setup, not what the working directory loads.",
+      "split": "working",
+      "exposure": "public"
     }
   ],
   "discovery_cases": [

@@ -80,6 +80,14 @@ requirement about the order of actions, such as reading a criterion before
 writing code, needs a trace of that order; graded from the final answer alone it
 stays unknown, neither met nor failed.
 
+Before grading any candidate, run two control solutions of every task through
+that task's grader: a correct one, and a plausible shortcut of the kind the
+method should prevent rather than an empty answer. Both are grading keys; keep
+their results with the measurement. A task whose correct control fails is broken
+or unsolvable as set: repair or exclude it before the comparison and record why.
+One whose shortcut passes cannot show the claimed improvement; keep it only as a
+guard. Controls on some tasks vouch for no other task.
+
 For receipt-based acceptance, identify the claim, actual subject/input identity,
 operation and discriminating observation. Reading an evidence file or receiving
 an executor's PASS does not establish that claim. Unrelated evidence cannot
@@ -133,7 +141,9 @@ Before selecting candidates retain, in the existing experiment record:
 - task/rubric/grader bytes and their identity, task groups/roles and exposure;
 - baseline and candidate identity, client/model/effort, tools, permissions,
   surrounding instructions, available collection and invocation route, the
-  subject's working directory and the hook smoke result where hooks apply;
+  subject's working and configuration directories with
+  [what a run inherits](paired-pilot.md#fix-the-question-before-the-runs) and
+  the hook smoke result where hooks apply;
 - outcome requirements, cost boundary, trial budget, repeat allocation,
   decision thresholds and stopping rule appropriate to the claim;
 - calibration controls, observed disagreements, excluded infrastructure failures

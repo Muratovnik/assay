@@ -50,9 +50,10 @@ content. Preserve disagreements. Judge changes require a new measurement version
 and consistent regrading of both conditions; changed task inputs can require new
 execution. A reviewer who authored the change is performing self-review.
 
-`SE01`–`SE24` cover attribution, calibration, adaptive selection, grouping, full
+`SE01`–`SE27` cover attribution, calibration, adaptive selection, grouping, full
 cost, routing, plateau diagnosis, subtraction, coverage, leakage, noise and hard
-constraints, including legitimate controls. `SD01`–`SD09` cover positive and
+constraints, including legitimate controls. `SE25`–`SE27` add per-task control
+solutions, cost counted by calls and what a run inherits from the client setup. `SD01`–`SD09` cover positive and
 negative invocation boundaries; `SD09` is a near miss on the test-audit boundary.
 All shipped examples are public working material,
 not a hidden final set. A generalization claim needs separately reserved groups;
