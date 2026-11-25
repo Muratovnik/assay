@@ -9,8 +9,10 @@ from __future__ import annotations
 import os
 import shutil
 import stat
+import subprocess
 import tempfile
 import unicodedata
+from collections.abc import Iterable
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
@@ -28,11 +30,74 @@ OPTIONAL_SKILLS = "assay-optional-skills"
 GENERATED_DEFAULTS = frozenset({".git", "__pycache__"})
 
 
-def tree_paths(directory: Path, pattern: str = "*") -> list[Path]:
-    """Sorted paths below directory matching pattern, outside generated directories."""
+class PublishedTree:
+    """The files Git would publish from a checkout: tracked or not ignored.
+
+    In a checkout the gates read this set rather than the disk, so an ignored
+    file anywhere in the tree (a tool cache, an editor backup, a local draft)
+    is no input to them, whatever its bytes. A tree without Git, such as the
+    release tool's snapshot, holds no ignored files and is walked on disk.
+    """
+
+    def __init__(self, root: Path, files: Iterable[str]) -> None:
+        self.root = root
+        self.files = frozenset(files)
+        self.directories = frozenset(
+            parent.as_posix()
+            for name in self.files
+            for parent in PurePosixPath(name).parents
+        )
+
+    def __contains__(self, path: object) -> bool:
+        """Whether path is a published file or a directory that holds one."""
+        if not isinstance(path, Path):
+            return False
+        try:
+            relative = path.relative_to(self.root).as_posix()
+        except ValueError:
+            return False
+        return relative in self.files or relative in self.directories
+
+
+def published_tree(root: Path) -> PublishedTree | None:
+    """The published file set of the checkout whose top level is root, or None.
+
+    Git answers for whichever repository contains a directory, and a tree that
+    an outer checkout ignores would list no files at all. Only a root that is
+    itself a work tree's top level takes its file set from Git; every other
+    tree, and any run where Git is missing or fails, is walked on disk.
+    """
+    git = shutil.which("git")
+    if git is None:
+        return None
+    try:
+        top = subprocess.run([git, "-C", str(root), "rev-parse", "--show-toplevel"],
+                             capture_output=True, text=True, check=False)
+        if top.returncode or not os.path.samefile(top.stdout.strip(), root):
+            return None
+        listing = subprocess.run(
+            [git, "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            capture_output=True, check=True,
+        )
+    except (OSError, ValueError, subprocess.CalledProcessError):
+        return None
+    # An untracked nested repository is listed as its directory, with a
+    # trailing slash; Git publishes none of its files.
+    names = listing.stdout.decode("utf-8", "surrogateescape").split("\0")
+    return PublishedTree(root, (name for name in names if name and not name.endswith("/")))
+
+
+def tree_paths(directory: Path, pattern: str = "*",
+               published: PublishedTree | None = None) -> list[Path]:
+    """Sorted paths below directory matching pattern that are source.
+
+    Generated directories are never source; with a published set, neither is
+    anything Git would not publish.
+    """
     return sorted(
         path for path in directory.rglob(pattern)
         if GENERATED_DEFAULTS.isdisjoint(path.relative_to(directory).parts)
+        and (published is None or path in published)
     )
 
 
@@ -164,7 +229,8 @@ REACHABLE_DIRECTORIES = ("references", "examples")
 UNREAD_DIRECTORIES = ("evals",)
 
 
-def unreachable_problems(skill: Path, root: Path) -> list[str]:
+def unreachable_problems(skill: Path, root: Path,
+                         published: PublishedTree | None = None) -> list[str]:
     """Name each file under references/ or examples/ that SKILL.md does not link.
 
     The link must be in SKILL.md itself. A file reached only through another
@@ -200,7 +266,7 @@ def unreachable_problems(skill: Path, root: Path) -> list[str]:
         f"{label}/SKILL.md; link it there with the condition for reading it, "
         "or move or delete it"
         for directory in REACHABLE_DIRECTORIES
-        for path in tree_paths(skill / directory)
+        for path in tree_paths(skill / directory, published=published)
         if path.is_file() and path.resolve(strict=True) not in reached
     ]
 
@@ -209,7 +275,8 @@ CONTENTS_THRESHOLD = 100
 CONTENTS_TITLE = "Contents"
 
 
-def contents_problems(skill: Path, root: Path) -> list[str]:
+def contents_problems(skill: Path, root: Path,
+                      published: PublishedTree | None = None) -> list[str]:
     """Name each long Markdown file under references/ or examples/ without a contents list.
 
     A file over CONTENTS_THRESHOLD lines opens its section list with a
@@ -221,7 +288,7 @@ def contents_problems(skill: Path, root: Path) -> list[str]:
     """
     problems: list[str] = []
     for directory in REACHABLE_DIRECTORIES:
-        for path in tree_paths(skill / directory, "*.md"):
+        for path in tree_paths(skill / directory, "*.md", published):
             label = path.relative_to(root).as_posix()
             try:
                 text = path.read_text(encoding="utf-8", errors="strict")
@@ -270,8 +337,12 @@ def contents_problems(skill: Path, root: Path) -> list[str]:
     return problems
 
 
-def validate_plain_tree(path: Path) -> None:
-    """Refuse links, reparse points and special files before reading/copying."""
+def validate_plain_tree(path: Path, published: PublishedTree | None = None) -> None:
+    """Refuse links, reparse points and special files before reading/copying.
+
+    With a published set, what Git would not publish is neither inspected nor
+    descended into: it is not part of the source being read or copied.
+    """
     def inspect(item: Path) -> None:
         info = item.lstat()
         if stat.S_ISLNK(info.st_mode) or (
@@ -284,6 +355,9 @@ def validate_plain_tree(path: Path) -> None:
 
     inspect(path)
     for current, directories, files in os.walk(path, followlinks=False):
+        if published is not None:
+            directories[:] = [name for name in directories if Path(current) / name in published]
+            files = [name for name in files if Path(current) / name in published]
         for name in directories + files:
             inspect(Path(current) / name)
 
@@ -348,21 +422,31 @@ def selection_problems(skills_root: Path, known: set[str]) -> list[str]:
     return problems
 
 
-def distribution_problems(sources: list[Path]) -> list[str]:
-    """Check the collection and every singleton copy without installing it."""
+def distribution_problems(sources: list[Path],
+                          published: PublishedTree | None = None) -> list[str]:
+    """Check the collection and every singleton copy without installing it.
+
+    With a published set, the copies hold only what Git would publish.
+    """
     known = {source.name for source in sources}
     if not sources or len(known) != len(sources):
         return ["distribution: expected distinct, non-empty skill sources"]
     try:
         for source in sources:
-            validate_plain_tree(source)
+            validate_plain_tree(source, published)
+
+        def unpublished(directory: str, names: list[str]) -> list[str]:
+            if published is None:
+                return []
+            return [name for name in names if Path(directory) / name not in published]
+
         problems: list[str] = []
         for selected in [sources] + [[source] for source in sources]:
             with tempfile.TemporaryDirectory(prefix="assay-skill-copy-") as directory:
                 copied = Path(directory) / "skills"
                 copied.mkdir()
                 for source in selected:
-                    shutil.copytree(source, copied / source.name, symlinks=True)
+                    shutil.copytree(source, copied / source.name, symlinks=True, ignore=unpublished)
                 label = "collection" if len(selected) > 1 else selected[0].name
                 problems.extend(
                     f"distribution ({label}): {problem}"

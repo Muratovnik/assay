@@ -20,14 +20,16 @@ import tomllib
 if __package__:
     from .asset_formats import ContractError, frontmatter, openai_adapter_document
     from .skill_resources import (
-        GENERATED_DEFAULTS, contents_problems, distribution_problems, markdown_problems,
-        tree_paths, unreachable_problems, validate_plain_tree,
+        GENERATED_DEFAULTS, PublishedTree, contents_problems, distribution_problems,
+        markdown_problems, published_tree, tree_paths, unreachable_problems,
+        validate_plain_tree,
     )
 else:
     from asset_formats import ContractError, frontmatter, openai_adapter_document
     from skill_resources import (
-        GENERATED_DEFAULTS, contents_problems, distribution_problems, markdown_problems,
-        tree_paths, unreachable_problems, validate_plain_tree,
+        GENERATED_DEFAULTS, PublishedTree, contents_problems, distribution_problems,
+        markdown_problems, published_tree, tree_paths, unreachable_problems,
+        validate_plain_tree,
     )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -323,7 +325,14 @@ def generated(relative: Path, catalog: Catalog) -> bool:
     )
 
 
-def source_paths(root: Path, catalog: Catalog) -> tuple[list[Path], list[str]]:
+def source_paths(root: Path, catalog: Catalog,
+                 published: PublishedTree | None = None) -> tuple[list[Path], list[str]]:
+    """Every source file below root, and each path the source may not contain.
+
+    Generated directories and catalogued generated paths are skipped. With a
+    published set, so is everything Git would not publish; without one, as in
+    the release tool's Git-free snapshot, every other file on disk is source.
+    """
     files: list[Path] = []
     problems: list[str] = []
     if root.is_symlink() or is_reparse(root):
@@ -334,7 +343,8 @@ def source_paths(root: Path, catalog: Catalog) -> tuple[list[Path], list[str]]:
         for name in sorted(directories):
             path = parent / name
             relative = path.relative_to(root)
-            if name in GENERATED_DEFAULTS or generated(relative, catalog):
+            if (name in GENERATED_DEFAULTS or generated(relative, catalog)
+                    or (published is not None and path not in published)):
                 continue
             if path.is_symlink() or is_reparse(path):
                 problems.append(f"{relative.as_posix()}: source links are forbidden")
@@ -344,7 +354,8 @@ def source_paths(root: Path, catalog: Catalog) -> tuple[list[Path], list[str]]:
         for name in sorted(names):
             path = parent / name
             relative = path.relative_to(root)
-            if name in GENERATED_DEFAULTS or generated(relative, catalog):
+            if (name in GENERATED_DEFAULTS or generated(relative, catalog)
+                    or (published is not None and path not in published)):
                 continue
             if path.is_symlink() or is_reparse(path):
                 problems.append(f"{relative.as_posix()}: source links are forbidden")
@@ -376,16 +387,19 @@ def parse_version(root: Path = ROOT) -> str:
     return text[:-1]
 
 
-def canonical_inventory(root: Path) -> dict[str, tuple[str, str]]:
+def canonical_inventory(root: Path,
+                        published: PublishedTree | None = None) -> dict[str, tuple[str, str]]:
     result: dict[str, tuple[str, str]] = {}
     skills = root / "skills"
     if skills.is_dir():
         for path in sorted(item for item in skills.iterdir() if item.is_dir()):
-            result[f"skills/{path.name}"] = ("skill", path.name)
+            if published is None or path in published:
+                result[f"skills/{path.name}"] = ("skill", path.name)
     profiles = root / "profiles"
     if profiles.is_dir():
         for path in sorted(profiles.glob("*.json")):
-            result[path.relative_to(root).as_posix()] = ("profile", path.stem)
+            if published is None or path in published:
+                result[path.relative_to(root).as_posix()] = ("profile", path.stem)
     return result
 
 
@@ -807,7 +821,10 @@ def check(root: Path = ROOT) -> list[str]:
         parse_version(root)
     except ContractError as error:
         problems.append(str(error))
-    files, path_problems = source_paths(root, catalog)
+    # One file set for every walk below: what Git would publish in a
+    # checkout, everything outside generated paths in a Git-free tree.
+    published = published_tree(root)
+    files, path_problems = source_paths(root, catalog, published)
     problems.extend(path_problems)
     known = {path.relative_to(root).as_posix() for path in files}
     for required in BASE_FILES:
@@ -845,7 +862,7 @@ def check(root: Path = ROOT) -> list[str]:
                 f"{relative}: literal machine-specific user path is forbidden"
             )
 
-    inventory = canonical_inventory(root)
+    inventory = canonical_inventory(root, published)
     expected = {asset.path: (asset.kind, asset.name) for asset in catalog.assets}
     uncatalogued = sorted(set(inventory) - set(expected))
     stale = sorted(set(expected) - set(inventory))
@@ -869,10 +886,10 @@ def check(root: Path = ROOT) -> list[str]:
                 problems.append(f"{asset.path}: missing SKILL.md")
             else:
                 problems.extend(skill_problems(definition, asset, root))
-            for markdown in tree_paths(source, "*.md"):
+            for markdown in tree_paths(source, "*.md", published):
                 problems.extend(markdown_problems(markdown, root))
-            problems.extend(unreachable_problems(source, root))
-            problems.extend(contents_problems(source, root))
+            problems.extend(unreachable_problems(source, root, published))
+            problems.extend(contents_problems(source, root, published))
             adapter = source / "agents" / "openai.yaml"
             if adapter.is_file():
                 problems.extend(openai_adapter_problems(adapter, asset, root))
@@ -898,7 +915,7 @@ def check(root: Path = ROOT) -> list[str]:
     # links. Unsafe source trees never enter the copying boundary.
     skill_sources = [root / asset.path for asset in catalog.assets if asset.kind == "skill"]
     if skill_sources and not path_problems and not stale:
-        problems.extend(distribution_problems(skill_sources))
+        problems.extend(distribution_problems(skill_sources, published))
 
     bridge = root / "CLAUDE.md"
     if bridge.is_file() and bridge.read_bytes() != b"@AGENTS.md\n":

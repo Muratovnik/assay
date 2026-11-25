@@ -5,6 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -642,6 +643,25 @@ class CatalogDocumentTests(unittest.TestCase):
             english.write_text("no markers here\n", encoding="utf-8")
             with self.assertRaises(ValueError):
                 docs.documents(root)
+
+    @unittest.skipUnless(shutil.which("git"), "needs Git to build a checkout")
+    def test_an_ignored_document_is_not_read(self) -> None:
+        # A local draft Git ignores is not part of the docs, whatever its bytes.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            english = root / docs.DOCUMENT
+            english.parent.mkdir(parents=True)
+            english.write_text(docs.updated(docs.BEGIN + "\n" + docs.END + "\n", aa.load_catalog(root)),
+                               encoding="utf-8")
+            (root / ".gitignore").write_bytes(b"*.local.md\n")
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            draft = root / "docs/notes/draft.local.md"
+            draft.parent.mkdir()
+            draft.write_bytes(b"\xff" + docs.BEGIN.encode("ascii") + b"\n")
+
+            self.assertEqual([english], docs.documents(root))
+            self.assertEqual([], docs.check(root))
 
     def test_the_command_line_reports_stale_writes_and_passes(self) -> None:
         def run(*argv: str) -> tuple[int, str, str]:

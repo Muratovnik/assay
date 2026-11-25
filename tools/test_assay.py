@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -258,6 +260,59 @@ class AgentAssetsTests(unittest.TestCase):
             self.assertEqual([], problems)
             self.assertEqual([], sorted(set(files) & set(generated)))
             self.assertIn(module, files)
+
+    @unittest.skipUnless(shutil.which("git"), "needs Git to build a checkout")
+    def test_ignored_files_are_not_source_in_a_git_checkout(self) -> None:
+        # Git publishes no ignored file, so a tool cache or a local draft deep
+        # in the tree is no input to any walk of the check, whatever its bytes.
+        # A file nothing ignores is still read, so the listing cannot hide a
+        # defect by coming back empty.
+        bad = b"\xff\xfe[gone](missing.md)\r\n"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            aa.write_rendered(root)
+            (root / ".gitignore").write_bytes(b".ruff_cache/\n*.local.md\n")
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            skill = root / "skills/route-subagents"
+            ignored = {
+                skill / "scripts/route_evidence/.ruff_cache/0.8/cache": bad,
+                skill / "references/notes.local.md": bad,
+                skill / "examples/deep/draft.local.md": bad,
+            }
+            for path, data in ignored.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+
+            self.assertEqual([], aa.check(root))
+            files, problems = aa.source_paths(root, aa.load_catalog(root), aa.published_tree(root))
+            self.assertEqual([], problems)
+            self.assertEqual([], sorted(set(files) & set(ignored)))
+            self.assertIn(skill / "SKILL.md", files)
+
+            visible = skill / "references/notes.md"
+            visible.write_bytes(bad)
+            self.assertIn("skills/route-subagents/references/notes.md: invalid UTF-8 at byte 0",
+                          aa.check(root))
+
+    @unittest.skipUnless(shutil.which("git"), "needs Git to build a checkout")
+    def test_a_tree_inside_another_checkout_is_walked_on_disk(self) -> None:
+        # Git answers for the repository that contains a directory. A tree the
+        # outer checkout ignores would list no files at all, so only a root
+        # that is itself a work tree's top level takes its file set from Git.
+        with tempfile.TemporaryDirectory() as directory:
+            outer = Path(directory)
+            subprocess.run(["git", "init", "-q", str(outer)], check=True)
+            (outer / ".gitignore").write_bytes(b"inner/\n")
+            root = outer / "inner"
+            write_fixture(root)
+            aa.write_rendered(root)
+            notes = root / "skills/route-subagents/references/notes.md"
+            notes.parent.mkdir()
+            notes.write_bytes(b"\xff\n")
+
+            self.assertIn("skills/route-subagents/references/notes.md: invalid UTF-8 at byte 0",
+                          aa.check(root))
 
     def test_zip_suffix_does_not_exempt_runtime_or_uncatalogued_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

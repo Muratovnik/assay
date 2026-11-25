@@ -47,7 +47,7 @@ def documents(root: Path) -> list[Path]:
     report success just because a path moved.
     """
     found = []
-    for path in aa.tree_paths(root / "docs", "*.md"):
+    for path in aa.tree_paths(root / "docs", "*.md", aa.published_tree(root)):
         if BEGIN not in path.read_text(encoding="utf-8"):
             continue
         if path.is_symlink():
