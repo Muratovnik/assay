@@ -143,6 +143,36 @@ class SkillGateTests(unittest.TestCase):
                 self.assertEqual([], skill_gate.declared(text, NAMES))
                 self.assertEqual({}, self.stop(text))
 
+    def test_a_negated_mention_is_no_announcement(self):
+        for text in ("I did not use `assay:code-change`, a short answer was enough.",
+                     "The plan was weak. Я не применял навык `assay:code-change`, так как хватило короткого ответа.",
+                     "I didn't load `assay:code-change`.", "Answered without the `assay:code-change` skill.",
+                     "Ответил без навыка `assay:code-change`.", "Not loaded: `assay:code-change`, `assay:test-writing`.",
+                     "Не загружены: `assay:code-change` и `assay:test-writing`.",
+                     "`assay:code-change` was not needed here.", "Навык `assay:code-change` здесь не нужен.",
+                     "`assay:code-change` and `assay:test-writing` do not apply to a read-only review.",
+                     "This is a throwaway probe, so `assay:test-writing` does not apply."):
+            with self.subTest(text=text):
+                self.assertEqual([], skill_gate.declared(text, NAMES))
+                self.assertEqual({}, self.stop(text))
+
+    def test_an_announcement_survives_negations_it_does_not_govern(self):
+        cases = {
+            "Using `assay:code-change`; I did not use `assay:test-writing`.": ["code-change"],
+            "Использую `assay:code-change`, а не `assay:test-writing`.": ["code-change"],
+            "Using `assay:code-change`, not `assay:test-writing`, for the parser.": ["code-change"],
+            "Using `assay:code-change` without touching the public API.": ["code-change"],
+            "Использую `assay:code-change` не только для правки, но и для чистки.": ["code-change"],
+            "Using `assay:code-change` to fix what does not parse and `assay:test-writing` for its test.":
+                ["code-change", "test-writing"],
+            "Not guessing, using `assay:evidence-research` to check the claim.": ["evidence-research"],
+            "Применяю навык `assay:evidence-research`: без источников вывод не проверить.": ["evidence-research"],
+            "I did not guess: using `assay:evidence-research`.": ["evidence-research"],
+        }
+        for text, names in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(names, skill_gate.declared(text, NAMES))
+
     def test_skill_tool_or_skill_file_read_satisfies_the_gate(self):
         self.assertEqual({}, self.load("Skill", {"skill": "assay:evidence-research"}))
         self.assertEqual({}, self.stop("Using `assay:evidence-research`."))

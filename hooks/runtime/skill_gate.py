@@ -40,6 +40,24 @@ LEGACY = re.compile(r"^[\W_]*assay[\W_]*:[\W_]*(.*)$", re.I)
 CODE_SPAN = re.compile(r"`([^`\n]+)`")
 QUALIFIED = re.compile(r"assay:([a-z][a-z0-9-]{0,63})(?![\w-])")
 NAME = re.compile(r"(?:assay:)?([a-z][a-z0-9-]{0,63})")
+# A span a negation governs is a mention, not an announcement: "I did not use `assay:x`", "без навыка
+# `assay:x`", "Not loaded: `assay:x`, `assay:y`", "`assay:x` does not apply", «навык `assay:x` здесь не нужен».
+# The negation stands in the span's clause, at most two words before or after it; after it only a verb's
+# negation counts, so "Using `assay:x` without touching the API" stays an announcement. Spans listed together
+# share a reading. A description with no negation still reads as an announcement.
+NEGATIONS = frozenset({"not", "no", "never", "without", "nor", "neither", "cannot", "instead", "except", "skip",
+                       "skipped", "skipping", "не", "ни", "нет", "без", "вместо", "кроме"})
+TRAILING_NEGATIONS = frozenset({"not", "never", "cannot", "не", "нет", "ни"})
+# "Not only", «не только»: a negation these follow negates nothing.
+LIMITERS = frozenset({"only", "just", "merely", "только", "лишь", "просто"})
+JOINS = frozenset({"and", "or", "plus", "и", "или"})
+REACH = 3
+WORD = re.compile(r"[^\W_]+(?:['’][^\W_]+)*")
+SENTENCE_END = re.compile(r"[.;!?]")
+# A colon ends the clause after a span, and before one only when words follow it: "Not loaded: `assay:x`"
+# lists what it negates.
+LEAD_END = re.compile(r"[.;!?,—]")
+TAIL_END = re.compile(r"[.;!?,:—]")
 # A Read of a SKILL.md loads that skill; the hook entry reads the same pattern before loading this module.
 SKILL_FILE = LOADED_SKILL
 # Claude Code hands a skill's body to the model as a meta user entry opening with this line, whether a Skill
@@ -84,12 +102,51 @@ def loaded_name(event, names):
     return _load(event.get("tool_name"), event.get("tool_input"), names)
 
 
+def _words(text):
+    return [word.lower() for word in WORD.findall(text)]
+
+
+def _negated(words, negations, window):
+    """Whether a negation that no "only" follows stands in the window of these words."""
+    pairs = list(zip(words, [*words[1:], ""]))[window]
+    return any((word in negations or word.endswith(("n't", "n’t"))) and following not in LIMITERS
+               for word, following in pairs)
+
+
+def _announced_spans(line):
+    """Names in a line's `assay:<name>` code spans that no negation governs, in order."""
+    spans = [(span, tokens) for span in CODE_SPAN.finditer(line)
+             if (tokens := [match[1] for match in QUALIFIED.finditer(span[1])])]
+    negated, before = [], None
+    for index, (span, _) in enumerate(spans):
+        lead = line[spans[index - 1][0].end() if index else 0:span.start()]
+        clause = LEAD_END.split(lead)[-1]
+        words = _words(clause.rsplit(":", 1)[-1]) or _words(clause)
+        listed = before is not None and not SENTENCE_END.search(lead) and (not words or words[-1] in JOINS)
+        if not listed:
+            before = _negated(words, NEGATIONS, slice(-REACH, None))
+        negated.append(before)
+    after = False
+    for index in reversed(range(len(spans))):
+        gap = line[spans[index][0].end():spans[index + 1][0].start() if index + 1 < len(spans) else len(line)]
+        listed = index + 1 < len(spans) and not SENTENCE_END.search(gap) and set(_words(gap)) <= JOINS
+        if not listed:
+            after = _negated(_words(TAIL_END.split(gap)[0]), TRAILING_NEGATIONS, slice(0, REACH))
+        negated[index] = negated[index] or after
+    return [token for (_, tokens), off in zip(spans, negated) if not off for token in tokens]
+
+
 def declared(text, names):
-    """Skills a message's first line announces: `assay:<name>` in code spans, or the legacy "Assay:" line."""
+    """Skills a message's first line announces: `assay:<name>` in code spans, or the legacy "Assay:" line.
+
+    A span a negation governs is not announced (see NEGATIONS).
+    """
     if not isinstance(text, str):
         return []
     line = next((line.strip() for line in text[:MAX_SCAN].splitlines() if line.strip()), "")
-    tokens = [match[1] for span in CODE_SPAN.findall(line) for match in QUALIFIED.finditer(span)]
+    tokens = _announced_spans(line)
+    if not tokens and any(QUALIFIED.search(span) for span in CODE_SPAN.findall(line)):
+        return []  # Every span was a negated mention; the legacy line cannot apply.
     legacy = None if tokens else LEGACY.match(line)
     if legacy:
         names_found = (NAME.fullmatch(token.strip(".*`'\"")) for token in re.split(r"[\s,;()]+", legacy[1]))
