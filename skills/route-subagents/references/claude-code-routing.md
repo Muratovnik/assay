@@ -85,7 +85,10 @@ call's pair replaces them. An agent a Workflow script starts with `agent()` does
 not pass the PreToolUse hook for Agent or Task (observed on Claude Code
 2.1.328: the hook fires once, on the Workflow call), so the route table does not
 check it; the script sets its model and effort with `opts.model` and
-`opts.effort`, and otherwise it inherits them.
+`opts.effort`. Without `opts.effort` the agent ran at the level
+`CLAUDE_CODE_SUBAGENT_EFFORT` names, above or below the session's, and without
+that variable at the session's level; without `opts.model` it ran on the
+session's model.
 
 ## Evidence-only launch check
 
