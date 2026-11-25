@@ -1,4 +1,4 @@
-# Preservation pointer: rationale and owed pilot
+# Preservation pointer: rationale and pilot
 
 Maintainer material for one wording change, not runtime instructions or a run
 report. The cases are synthetic and public; none has been run by a model.
@@ -48,7 +48,7 @@ correct move failed only on the pointer's added path and the re-based archive
 link. These runs calibrate the probes; they say nothing about a model's
 behaviour.
 
-## Owed paired pilot
+## Paired pilot
 
 Proposed volume, not yet agreed: 30 sessions and 2 spare on Opus 5.5 at high
 effort, the model that made most of the observed instruction edits.
@@ -87,3 +87,28 @@ Three runs per arm show a large difference or a regression; they cannot show a
 small one. These are selection cases: if the text is revised after the pilot,
 they become regression material, and a new held-out case is written outside the
 tracked tree first.
+
+## Pilot outcome (2026-11-25)
+
+The pilot ran as planned: 30 sessions on Opus 5.5 at high effort, three per case
+and arm, the baseline at the text before this change and the candidate at this
+change, graded by the coordinator from the saved files with the rubric's probes.
+No spare session was needed.
+
+- Effect, met: the candidate read the reference or ran the check in 6 of its 9
+  PP01 to PP03 runs, the baseline in 0 of 9, and the candidate in 0 of its 6
+  control runs.
+- Outcome, no claim: both arms met the hard requirement in 9 of 9 PP01 to PP03
+  runs, so the pilot shows no improvement in meaning preserved.
+- Harm, none: no control run ran the check, and the candidate met the hard
+  requirement as often as the baseline.
+- Cost: on PP01 to PP03 the candidate spent 42% more than the baseline ($2.39
+  against $1.69) and took 36% more turns; the controls cost the same.
+
+The effect rests on reading the reference, not on the check, which produced a
+report in 1 of the 9 candidate runs. In 7 of 9 the executor tried to save the old
+text outside its run directory and was refused, and Git was not allowed in the
+pilot, so the old text was the obstacle; a working copy with Git has it in the
+last commit. The change is kept as a candidate with process support: it changes
+what the agent reads when it compresses, merges or moves text, and no outcome
+improvement is shown. PP01 to PP05 are regression material from here on.

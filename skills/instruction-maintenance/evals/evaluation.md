@@ -62,5 +62,5 @@ before tuning on these cases, for example a SKILL.md body compression with a
 reference that must keep its reading condition; once a tracked case informs a
 revision it is regression material, not held-out evidence.
 
-The condition for running the preservation check has its own cases and owed
-pilot in [pointer-evaluation.md](pointer-evaluation.md).
+The condition for running the preservation check has its own cases and pilot
+in [pointer-evaluation.md](pointer-evaluation.md).
