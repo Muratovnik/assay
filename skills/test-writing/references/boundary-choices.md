@@ -70,11 +70,18 @@ promote a fixture's chosen identifier into a product requirement.
 
 ## UI and snapshots
 
-Choose stable user-facing roles/names or explicit test hooks for interaction.
-Assert visibility, accessibility, focus, viewport presence and actual state
-only when the intended flow requires each. A locator can auto-scroll and a
-helper can set focus: observe application-driven transitions before helpers
-repair them. Hiding a button does not establish server authorization.
+Choose stable user-facing roles/names or explicit test hooks for interaction and
+for the elements an assertion collects, counts or orders. A styling class or
+nesting depth selects whatever the markup holds, so a restyle or a legitimate new
+element breaks the set. Before asserting that all or none of a collected set
+match, or its minimum or maximum, assert its size against the fixture: an empty
+set satisfies every such claim. Give a check that an element is absent a control
+in which the same locator finds it present; otherwise a renamed hook or a class
+nothing writes passes vacuously. Assert visibility, accessibility, focus,
+viewport presence and actual state only when the intended flow requires each.
+A locator can auto-scroll and a helper can set focus: observe application-driven
+transitions before helpers repair them. Hiding a button does not establish
+server authorization.
 
 Use focused snapshots for a reviewed expected representation. Keep meaningful
 fields precise and control irrelevant volatile fields without masking errors.

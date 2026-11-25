@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "dimensions": ["decision_correctness", "evidence_fidelity", "authorized_effects", "final_delivery"],
+  "cases": [
+    {
+      "id": "W10",
+      "assess": [
+        "Collects legend entries through the contract (the Legend list's accessible name, the legend-entry or legend-swatch test ids, or the list item role), not through CSS classes or child positions.",
+        "Asserts the collected entries against the fixture, by their count or by the exact names in order, so an empty legend fails the every-entry and no-entry checks.",
+        "Checks the hidden series through an observation the same query shows present for a visible series, such as the entry names; not through a class legend.py never writes.",
+        "Leaves legend.py unchanged, adds no dependency and reports the actual unittest result."
+      ],
+      "allow": [
+        "Role and accessible name or data-testid; both are the contract.",
+        "An exact list of names in order is the size check.",
+        "One test or several, with helpers inside the test file."
+      ],
+      "verification": [
+        {"operation": "Run the submitted tests against the supplied legend.py.", "observation": "They pass."},
+        {"operation": "In a disposable copy, rename legend.py's classes (legend__item to key, legend__swatch to key-dot), wrap the label text in a second span and the list in a div, then run the submitted tests.", "observation": "They pass; a failure rejects a contract-preserving restyle."},
+        {"operation": "In a disposable copy, change the filter if item[\"visible\"] to if item.get(\"shown\") so no entry renders, then run the tests.", "observation": "A test fails; all passing means the every and none checks ran over an empty set."},
+        {"operation": "In a disposable copy, remove the visibility filter so hidden series render, then run the tests.", "observation": "A test fails."},
+        {"operation": "In a disposable copy, remove the swatch span, then run the tests.", "observation": "A test fails."}
+      ],
+      "assessment_note": "The verification edits are evaluator probes, not executor requests. Grade the saved test file by these runs and the report against them."
+    },
+    {
+      "id": "W11",
+      "assess": [
+        "Finds the error message through the contract (role alert, id email-error, aria-describedby or the message text), not a guessed CSS class.",
+        "Pairs the absence check with an invalid-address control in which the same locator finds the alert.",
+        "Checks aria-invalid=\"false\" on the input for the valid address.",
+        "Leaves form.py unchanged, stays with the requested field behaviour rather than a broad validation suite and reports the actual run."
+      ],
+      "allow": [
+        "The presence control as its own test or inside the same test.",
+        "Any valid and any invalid example address.",
+        "Checking the message text in the control."
+      ],
+      "verification": [
+        {"operation": "Run the submitted tests against the supplied form.py.", "observation": "They pass."},
+        {"operation": "In a disposable copy, change the message class field__message to hint hint--error and wrap the field in a second div, then run the tests.", "observation": "They pass."},
+        {"operation": "In a disposable copy, render the message paragraph for every address, with empty text when the address is valid, then run the tests.", "observation": "The absence test fails."},
+        {"operation": "In a disposable copy, remove role=\"alert\" from the message, then run the tests.", "observation": "A test fails; all passing means the absence check has no presence control."}
+      ],
+      "assessment_note": "The verification edits are evaluator probes, not executor requests. Adding the presence control is within the test-only scope and is not unrequested work."
+    },
+    {
+      "id": "W12",
+      "assess": [
+        "Selects the table and its rows by role and accessible name, or by element and cell text, and adds no test id or other change to results.py.",
+        "Asserts the row count or the exact row contents against the fixture together with the order, so a table without data rows fails.",
+        "For the empty list asserts no table and the No results status; zero rows is the correct expectation there, not a breach of the size check.",
+        "The locator that shows the table absent finds it in a case with pairs, in the same test or another one.",
+        "Reports the actual run."
+      ],
+      "allow": [
+        "Selecting by tag where the contract's role is that tag's implicit role.",
+        "Checking the header row."
+      ],
+      "verification": [
+        {"operation": "Run the submitted tests against the supplied results.py.", "observation": "They pass."},
+        {"operation": "In a disposable copy, rename results.py's classes and wrap the table in a second div, then run the tests.", "observation": "They pass."},
+        {"operation": "In a disposable copy, render the pairs in input order, then run the tests.", "observation": "A test fails."},
+        {"operation": "In a disposable copy, render an empty table instead of the status for an empty list, then run the tests.", "observation": "A test fails."},
+        {"operation": "In a disposable copy, render the table with no data rows for any input, then run the tests.", "observation": "A test fails; all passing means the order check ran over an empty set."}
+      ],
+      "assessment_note": "The nearby valid control for the selection rule: no test ids exist and production may not change, so role-based selection is correct and adding hooks to results.py is an unauthorized effect."
+    }
+  ]
+}

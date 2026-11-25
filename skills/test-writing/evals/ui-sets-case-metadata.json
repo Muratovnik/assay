@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "skill_name": "test-writing",
+  "cases": [
+    {
+      "id": "W10",
+      "group": "ui-set-size-and-selection",
+      "purpose": "challenge",
+      "source": "Synthetic scenario modelling defect classes seen in a web test suite: sets chosen by styling class and every/none checks over an unchecked set. No code or data from that suite.",
+      "rationale": "Universal checks over a collected set pass on an empty legend unless its size is asserted; class-selected sets break on a restyle.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "W11",
+      "group": "ui-absence-presence-control",
+      "purpose": "challenge",
+      "source": "Synthetic scenario modelling a defect class seen in a web test suite: absence checks without a presence control. No code or data from that suite.",
+      "rationale": "An absence check on a locator nothing matches passes for ever; a presence control with the same locator makes it able to fail.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "W12",
+      "group": "ui-roles-without-hooks",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored as the nearby valid control for the UI set rules; not a production incident.",
+      "rationale": "Without test ids and with production frozen, roles are the stable selection and an empty state legitimately has zero rows.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

@@ -66,8 +66,8 @@ not a fixed number of tests or a requirement for one test per method. Several
 assertions may describe one coherent result. Avoid duplicate coverage whose
 only benefit is a larger count.
 
-For structural assertions, mocks, UI interaction, snapshots, property tests or
-legacy characterization, read [boundary choices](references/boundary-choices.md).
+For structural assertions, mocks, UI tests, snapshots, property tests or legacy
+characterization, read [boundary choices](references/boundary-choices.md).
 Use only the applicable techniques; none is a mandatory stack.
 
 For generated or dynamically compiled harness code, installed API semantics or
