@@ -98,7 +98,7 @@ it with hidden persistence. Reusing the browser's normal links/history may suffi
 
 Choose input methods independently of viewport width: a desktop can have touch
 and a tablet a keyboard. Exercise the relevant non-hover route rather than treating
-a narrow screenshot as touch coverage. Respect supported locales and direction;
+a narrow screenshot as touch coverage. Where touch is supported, a style that exists only on hover belongs under `@media (hover: hover)`: otherwise a tap leaves it on until the next tap elsewhere, where it reads as a selected state. Tap under touch emulation and compare the computed style with the resting one. Respect supported locales and direction;
 check long names and formatted numbers/dates against the same underlying meaning,
 including the product's time-zone contract where relevant. Translation should
 not change identity, quantity or ordering semantics.
