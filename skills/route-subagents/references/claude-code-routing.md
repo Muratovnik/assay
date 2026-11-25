@@ -81,7 +81,11 @@ refuses a routed launch while that variable names another level.
 routed launch never is. A fork, a `resume`, the built-in `web-fetch` agent and a type in
 `pipeline.unrouted_agents` keep their settings and are not checked; a project
 or user definition that pins both settings is no exemption here, because the
-call's pair replaces them.
+call's pair replaces them. An agent a Workflow script starts with `agent()` does
+not pass the PreToolUse hook for Agent or Task (observed on Claude Code
+2.1.328: the hook fires once, on the Workflow call), so the route table does not
+check it; the script sets its model and effort with `opts.model` and
+`opts.effort`, and otherwise it inherits them.
 
 ## Evidence-only launch check
 
