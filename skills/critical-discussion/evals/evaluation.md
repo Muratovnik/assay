@@ -213,5 +213,30 @@ validate reads nothing else or that the packaging hash covers exactly its
 inputs, and the judge names that as the reason in each. Neither suspect named
 in the decision rule explains it: reframing the idea as one means among several
 appeared in none of the 6. Without an arm that has no skill the run cannot tell
-a habit of the model from a rule of the skill; that arm on C13 is the next
-step.
+a habit of the model from a rule of the skill; that arm on C13 ran next.
+
+### The arm without the skill on C13
+
+The arm ran on 2026-11-25: 3 subject sessions at Sonnet medium on the baseline
+tree with `skills/critical-discussion` removed, the same case prompt, and one
+blind judge session at Opus high, none lost. The rule was fixed before the
+first session: the behaviour in 2 or 3 of 3 answers is a habit of the model, in
+none a rule of the skill, in 1 undecided at this volume.
+
+- All 3 answers ask to verify what the context states as fact, and the judge
+  marks the point about manufactured objections not met in all 3 for that
+  reason. By the rule it is a habit of the model at this setting, not a rule of
+  the skill.
+- None of the 3 has an alternatives section, against 3 of 3 for the baseline
+  with the skill: the skill adds that section, not the doubt.
+- The first rubric point is partial in all 3: no answer says that no material
+  weakness was found.
+- The calibration held in the same packet: both points for the correct control,
+  neither for the shortcut.
+
+The judge packet differs from the repeat's: five single answers, the two
+controls among them, instead of pairs, so rates across the two runs are
+indicative. Both counts are at the ceiling, 6 of 6 with the skill and 3 of 3
+without, so the run cannot show whether the skill strengthens the habit, and
+it does not show whether a rule in the skill could suppress it, or the
+behaviour on another model, effort or sound-idea case.
