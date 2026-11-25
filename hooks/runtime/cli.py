@@ -335,8 +335,13 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
                         if handback.pending(event, settings["state_dir"], **kwargs) else {})
             # How a source was read, not which skill applies.
             elif name == "PostToolUse":
-                note = ((sources.fetched(event, settings["state_dir"], **kwargs) if rules.fetch_note else {})
-                        or (sources.searched(event, settings["state_dir"], **kwargs) if rules.search_note else {}))
+                # A fetch can show a summary and a cut page at once; one context carries both notes.
+                parts = [part["hookSpecificOutput"]["additionalContext"] for part in (
+                    sources.fetched(event, settings["state_dir"], **kwargs) if rules.fetch_note else {},
+                    sources.cut(event, settings["state_dir"], **kwargs) if rules.truncation_note else {},
+                    sources.searched(event, settings["state_dir"], **kwargs) if rules.search_note else {}) if part]
+                note = ({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": "\n\n".join(parts)}}
+                        if parts else {})
             # A tool call that shows a skill this session has not loaded; a routing reply and the
             # launch reminder own their PreToolUse, so this check stays silent there.
             elif name == "PreToolUse" and rules.midturn_rules and not legacy:

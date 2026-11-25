@@ -414,6 +414,109 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         self.assertNotIn("PostToolUse", codex)
 
 
+DOCS = "https://docs.example.dev/en/hooks"
+# The line Claude Code ends a WebFetch result with when the answer covers part of a long page, as it appears
+# in recorded results; the result object keeps the fields a transcript's toolUseResult shows.
+CUT_LINE = ("[WebFetch note: this page's text is 286092 characters long and the answer above covers only characters "
+            "0 to 100000; the final 186092 were not read — to read on, call WebFetch again with the same url and "
+            "offset: 100000.]")
+
+
+def fetched_result(text, url=DOCS):
+    return {"bytes": 286102, "code": 200, "codeText": "OK", "result": text, "durationMs": 900, "url": url}
+
+
+class CutPageTests(unittest.TestCase):
+    """A WebFetch result that covers only part of a page is named once per page, with the page's Markdown address."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.directory = Path(temporary.name)
+        self.environment = {"CLAUDE_PLUGIN_DATA": str(self.directory / "data")}
+
+    def event(self, url=DOCS, text="The hooks are listed below.\n\n" + CUT_LINE, *, response=None, data=None, **extra):
+        return {"session_id": "session", "cwd": "work", "hook_event_name": "PostToolUse", "prompt_id": "p1",
+                "tool_name": "WebFetch", "tool_input": data or {"url": url, "prompt": "List the hook events"},
+                "tool_response": fetched_result(text, url) if response is None else response, **extra}
+
+    def note(self, event):
+        result = sources.cut(event, self.directory)
+        return result["hookSpecificOutput"]["additionalContext"] if result else None
+
+    def test_a_cut_page_is_named_with_its_size_the_part_read_and_its_markdown_address(self):
+        text = self.note(self.event())
+        self.assertIn("its text is 286092 characters, and this answer covers characters 0 to 100000", text)
+        self.assertIn("`https://docs.example.dev/en/hooks.md`", text)
+        self.assertIn("download its text once with a shell command and search the file", text)
+        self.assertIn("Check that the download is Markdown, not an HTML or error page", text)
+
+    def test_the_markdown_address_drops_query_fragment_and_trailing_slash(self):
+        cases = {"https://docs.example.dev/en/hooks/": ("https://docs.example.dev/en/hooks.md", True),
+                 "https://docs.example.dev/en/hooks?tab=1#events": ("https://docs.example.dev/en/hooks.md", True),
+                 "https://docs.example.dev/en/hooks.md": ("https://docs.example.dev/en/hooks.md", False),
+                 "http://docs.example.dev/guide.MD": ("http://docs.example.dev/guide.MD", False)}
+        for url, expected in cases.items():
+            with self.subTest(url=url):
+                self.assertEqual(expected, sources.markdown_address(url))
+        for url in ("https://docs.example.dev/", "https://docs.example.dev", "ftp://docs.example.dev/a", "not a url",
+                    None, "https://[::1/a"):
+            with self.subTest(url=url):
+                self.assertIsNone(sources.markdown_address(url))
+
+    def test_an_address_that_is_already_markdown_or_names_no_page_gets_the_fitting_sentence(self):
+        self.assertIn("This address already names the page's Markdown: `https://docs.example.dev/en/hooks.md`",
+                      self.note(self.event("https://docs.example.dev/en/hooks.md")))
+        text = self.note(self.event("https://docs.example.dev/"))
+        self.assertIn("Download the page itself.", text)
+        self.assertNotIn(".md", text)
+
+    def test_one_note_per_page_request_and_agent_and_reading_on_is_the_same_page(self):
+        self.assertTrue(self.note(self.event()))
+        self.assertIsNone(self.note(self.event()))
+        on = self.event(data={"url": DOCS, "prompt": "Continue", "offset": 100000},
+                        text="More hooks.\n\n" + CUT_LINE.replace("0 to 100000", "100000 to 200000"))
+        self.assertIsNone(self.note(on))
+        self.assertIsNone(self.note(self.event(DOCS + "/#events")))
+        self.assertTrue(self.note(self.event("https://docs.example.dev/en/settings")))
+        self.assertTrue(self.note(self.event(prompt_id="p2")))
+        self.assertTrue(self.note(self.event(agent_id="worker")))
+
+    def test_a_whole_page_another_tool_the_web_fetch_agent_or_missing_state_get_no_note(self):
+        self.assertIsNone(self.note(self.event(text="The hooks are listed below.")))
+        # The client's line must close the result, not appear inside a quoted page.
+        self.assertIsNone(self.note(self.event(text=CUT_LINE + "x" * 5000)))
+        self.assertIsNone(self.note({**self.event(), "tool_name": "WebSearch"}))
+        self.assertIsNone(self.note(self.event(agent_id="f1", agent_type="web-fetch")))
+        self.assertIsNone(self.note(self.event(response="not an object")))
+        self.assertIsNone(self.note(self.event(response={"result": None})))
+        self.assertEqual({}, sources.cut(self.event(), None))
+        self.assertIsNone(self.note(self.event(session_id="")))
+        # A plain string response, as a failed or older call may carry, is read the same way.
+        self.assertTrue(self.note(self.event(response="Answer.\n\n" + CUT_LINE, prompt_id="p9")))
+
+    def test_the_runtime_joins_the_fetch_note_and_the_cut_note_and_each_turns_off_alone(self):
+        result, error = process(self.event(), "claude", self.environment)
+        self.assertIsNone(error)
+        text = result["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("not the page's text", text)
+        self.assertIn("covers characters 0 to 100000", text)
+        self.assertLess(text.index("not the page's text"), text.index("covers characters"))
+        # Reading on in the same request brings neither again.
+        self.assertEqual(({}, None), process(self.event(tool_use_id="w2"), "claude", self.environment))
+        path = self.directory / "hooks.json"
+        for rule, kept, gone in (("truncation-note", "not the page's text", "covers characters"),
+                                 ("fetch-note", "covers characters", "not the page's text")):
+            with self.subTest(rule=rule):
+                path.write_text(json.dumps({"disabled_rules": [rule], "state_dir": str(self.directory / rule)}),
+                                encoding="utf-8")
+                text = process(self.event(), "claude", {"ASSAY_HOOK_CONFIG": str(path)})[0][
+                    "hookSpecificOutput"]["additionalContext"]
+                self.assertIn(kept, text)
+                self.assertNotIn(gone, text)
+        self.assertEqual(({}, None), process(self.event(prompt_id="p3"), "codex", self.environment))
+
+
 QUESTION = {"questions": [{"question": "Which approach?", "header": "Approach", "multiSelect": False,
                            "options": [{"label": "A", "description": "1.2x faster"},
                                        {"label": "B", "description": "no change"}]}]}

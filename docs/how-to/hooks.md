@@ -337,6 +337,22 @@ agent. It needs the plugin data directory, where it keeps one hashed key per
 request and agent. Claude Code's built-in `web-fetch` agent gets no note: its
 `WebFetch` result is the page's text, and it has no shell to download one.
 
+A long page is read only in part. Claude Code then ends the `WebFetch` result with a
+line giving the page's length, the characters the answer covers and the offset to
+read on from. Reading on gives one more answer per part, and agents that needed the
+whole of a long documentation page downloaded it again by guesswork. When a result
+ends with that line, the hook adds a note with the page's length and the part read,
+and asks for one shell download of the whole text, searched as a file. It names the
+address to try: the page's address without query or fragment, with `.md` appended,
+which many documentation sites serve as the page's Markdown, or the address itself
+when it already ends in `.md`. The hook cannot see whether that address exists, so
+the note asks to check that the download is Markdown and not an HTML or error page.
+The note appears once per request, agent and page, so reading on from an offset does
+not repeat it, and it joins the note after a fetch when both apply. The hook
+recognises the line by its wording, which Claude Code does not document; if the
+wording changes, the note stops and nothing else does. The `web-fetch` agent gets no
+such note either.
+
 A `WebSearch` result lists what was found, not what was read, and Claude Code ends
 it with a request to include those sources in the answer. After the first such
 result of a request, the hook adds a second note: the request is met by the sources
@@ -431,6 +447,7 @@ refusal carries both notes, skill note first, and the retry passes both. Like th
 other source checks it runs in Claude Code only.
 
 `disabled_rules: ["fetch-note"]` turns off the note after a fetch,
+`"truncation-note"` the note on a page read in part,
 `"search-note"` the note after a search, `"read-claims"` the stop check and
 `"question-sources"` the refusal before a question; each works without the others.
 
@@ -737,7 +754,7 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
-`"fetch-note"`, `"search-note"`, `"read-claims"` and `"question-sources"` the Claude
+`"fetch-note"`, `"truncation-note"`, `"search-note"`, `"read-claims"` and `"question-sources"` the Claude
 source checks, `"handback-hold"`
 the refusal of a subagent's first hand-back, `"report-form"` the report language and
 budget a subagent is told at its start, `"wait-form"` how a Claude Code subagent is

@@ -1,10 +1,13 @@
 """Point a Claude agent at the text behind a fetched summary, at what a search only found, at a contradicted
 full-read claim and at the sources of a question to the owner.
 
-Three notes, none a block, all stated as facts:
+Four notes, none a block, all stated as facts:
 
 - After a WebFetch, once per request and agent: the result is an answer a
   model wrote about the page, not the page's text.
+- After a WebFetch result that Claude Code says covers only part of a long page,
+  once per request, agent and page: the page's length, the part read and the
+  address of its Markdown to download and search instead.
 - After a WebSearch, once per request and agent: the results are found, not
   read, and a request to include them is met by the ones the conclusion rests on.
 - On Stop or SubagentStop, once: a line of the turn that says a file or URL was
@@ -21,7 +24,7 @@ The claim check fires only on positive evidence. A file the transcript shows no
 Read of, for example one printed with a shell command, leaves it silent, and so
 does a URL that a shell command also names. It reads the transcript tail the
 skill gate reads and stores nothing; the fetch, search and question checks each
-store one hashed key per request and agent.
+store one hashed key per request and agent, the note on a cut page one per page too.
 """
 from __future__ import annotations
 
@@ -30,6 +33,7 @@ import json
 from pathlib import Path
 import re
 import time
+from urllib.parse import urlsplit, urlunsplit
 
 from .predicates import owner_question, page_reader
 from .skill_gate import HANDBACK, _lines, _prompt
@@ -60,6 +64,13 @@ FILE_LIKE = re.compile(r"[^/\s]*/\S*|[\w.-]*\w\.[A-Za-z][\w-]{0,9}|[A-Z][A-Z0-9_
 # A line range stated right after a file name: nothing but punctuation may come between.
 RANGE = re.compile(r"[^\w\s(]*\s*(?::(\d+)(?:[-–—](\d+))?|#L(\d+)(?:[-–—]L?(\d+))?"
                    r"|(?:lines?|строк[аи]?)\s+(\d+)(?:\s*[-–—]\s*(\d+))?|\((\d+)\s*[-–—]\s*(\d+)\))", re.I)
+
+# The line Claude Code ends a WebFetch result with when the answer covers only part of a long page. Its
+# wording is not documented; it is read from results, so a changed wording only silences the note.
+CUT = re.compile(r"\[WebFetch note: this page's text is (\d{1,12}) characters long and the answer above covers "
+                 r"only characters (\d{1,12}) to (\d{1,12});")
+MAX_CUT_TAIL = 2_000
+MAX_URL = 2_048
 
 FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
               "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
@@ -95,13 +106,13 @@ def _identity(event):
     return session, agent, turn if isinstance(turn, str) and len(turn) <= 200 else None
 
 
-def _first(event, directory, kind, clock):
-    """Whether this is the first call of its kind for this request and agent; the answer is recorded."""
+def _first(event, directory, kind, clock, *about):
+    """Whether this is the first call of its kind for this request and agent, and for what `about` names; recorded."""
     identity = _identity(event) if directory else None
     if identity is None:
         return False
     from route_evidence.pipeline_store import PipelineStore
-    key = _key(*identity)
+    key = _key(*identity, *about)
     with PipelineStore(Path(directory) / "source-check", clock=clock).transaction() as tx:
         if tx.get(kind, key):
             return False
@@ -133,6 +144,55 @@ def fetched(event, directory, *, clock=time.time):
 def searched(event, directory, *, clock=time.time):
     """The search note for this request and agent on its first WebSearch result, else {}."""
     return _once(event, directory, "search-note", SEARCH_NOTE, clock) if event.get("tool_name") == SEARCH else {}
+
+
+def markdown_address(url):
+    """(address, appended) of the Markdown a documentation page may be served as, or None.
+
+    The page's address without query or fragment, with `.md` appended unless its path
+    already ends so; a site's root names no page.
+    """
+    try:
+        parts = urlsplit(url) if isinstance(url, str) and len(url) <= MAX_URL else None
+    except ValueError:
+        return None
+    path = parts.path.rstrip("/") if parts else ""
+    if not parts or parts.scheme not in ("http", "https") or not parts.netloc or not path:
+        return None
+    appended = not path.lower().endswith(".md")
+    return urlunsplit((parts.scheme, parts.netloc, path + (".md" if appended else ""), "", "")), appended
+
+
+def cut(event, directory, *, clock=time.time):
+    """The note on a WebFetch result that Claude Code says covers only part of the page, else {}.
+
+    Once per request, agent and page; the page is its address without query or
+    fragment, so reading on with an offset is the same page. The web-fetch agent
+    gets none: it has no shell to download the page with.
+    """
+    response = event.get("tool_response")
+    text = response.get("result") if isinstance(response, dict) else response
+    found = CUT.search(text[-MAX_CUT_TAIL:]) if event.get("tool_name") == FETCH and isinstance(text, str) else None
+    data = event.get("tool_input")
+    url = data.get("url") if isinstance(data, dict) else None
+    if not found or page_reader(event) or not isinstance(url, str):
+        return {}
+    address = markdown_address(url)
+    page = address[0] if address else url[:MAX_URL]
+    if not _first(event, directory, "cut-note", clock, page):
+        return {}
+    total, first, last = (int(number) for number in found.groups())
+    if not address:
+        where = "Download the page itself."
+    else:
+        where = (f"Many documentation sites serve a page's Markdown at its address with .md appended: `{address[0]}`."
+                 if address[1] else f"This address already names the page's Markdown: `{address[0]}`.")
+        where += " Check that the download is Markdown, not an HTML or error page; otherwise download the page itself."
+    note =(f"Assay source check: Claude Code read only part of this page: its text is {total} characters, and "
+            f"this answer covers characters {first} to {last}. Reading on with the offset it names gives one more "
+            "answer per part. To read or search the whole page, download its text once with a shell command and "
+            "search the file. " + where)
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": note}}
 
 
 def asked(event, directory, *, clock=time.time):
