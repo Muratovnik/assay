@@ -44,7 +44,7 @@ than the boundary. That rule, the system inventory and the verifiable
 | --- | --- | --- |
 | [Research quality §2.1](foundations/research-quality.md): separate the problem from the proposed explanation; the question must not presuppose it | Recover the need separately from the proposed solution. | Need and scope; a verified, explicit need is not re-interrogated. |
 | [LLM reasoning control §3.2](foundations/llm-reasoning-control.md): hidden reference class | An example raises "a sample of what?" | Need and scope; an explicit narrow scope is respected (case C02). |
-| LLM reasoning control §12.1: item counts are weak proxies | No quotas for objections, options or questions. | Sound-idea control (C03). |
+| LLM reasoning control §12.1: item counts are weak proxies | No quotas for objections, options or questions. | Sound-idea control (C13); C03 is the real-caveat case. |
 | LLM reasoning control §12.3 and verification table: sycophancy; contrast the user's position with unchanged facts | Hold without new evidence, revise with it. | Paired cases C06/C07. |
 | LLM reasoning control §11.1-11.2: same-context critics share blind spots and anchor on the proposal | Offer an independent challenger for costly decisions, only where delegation is authorized. | Dialogue; ordinary discussion uses no subagents. |
 | LLM reasoning control §15.2: ownership bias | The agent's own counter-proposals receive the same checks. | Case C08. |

@@ -180,3 +180,38 @@ result, is accepted by C13's rubric as a minor real note.
   bytes are unchanged. Whether a judge that passes two controls grades every
   answer correctly. One model setting, one client and one judge; single-turn
   prompts; automatic selection.
+
+### Result of the repeat
+
+The repeat ran on 2026-11-25: 6 subject sessions at Sonnet medium and 2 judge
+sessions at Opus high, none lost. The calibration held: the judge met both
+rubric points for the correct control, neither for the shortcut, and preferred
+the correct one.
+
+| | Baseline | Candidate |
+| --- | --- | --- |
+| Alternatives section, counted by reading | 3 of 3 | 1 of 3 |
+| Both rubric points met | 0 of 3 | 0 of 3 |
+| Rubric points met in total | 1 of 6 | 2 of 6 |
+| Judged better in the pair | 0 of 3 | 3 of 3 |
+
+- No alternatives section in any candidate answer: not met. The one counted is
+  a labelled item inside the answer's list of what was checked.
+- Both rubric points met in at least 2 of 3 candidate answers: not met.
+- The candidate judged better in at least 2 of 3 pairs: met. The draw put the
+  candidate first in all three pairs.
+
+By the decision rule above the candidate is rejected. It was merged all the
+same, by the owner's decision taken with these numbers, as a candidate with
+partial support: across the check and the repeat the alternatives section
+appears in 2 of its 6 sound-idea answers against 6 of 6 for the baseline, C01
+and C05 show no regression, and no threshold on the rubric points is met.
+
+The rubric point that fails is no longer about alternatives. All 6 answers of
+both arms ask to verify what the context already states as fact, such as that
+validate reads nothing else or that the packaging hash covers exactly its
+inputs, and the judge names that as the reason in each. Neither suspect named
+in the decision rule explains it: reframing the idea as one means among several
+appeared in none of the 6. Without an arm that has no skill the run cannot tell
+a habit of the model from a rule of the skill; that arm on C13 is the next
+step.
