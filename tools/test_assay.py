@@ -497,7 +497,6 @@ class AgentAssetsTests(unittest.TestCase):
         self.assertIn("did not rerun the oracle", codex)
         self.assertFalse(tomllib.loads(codex)["features"]["shell_tool"])
         self.assertFalse(tomllib.loads(codex)["features"]["apps"])
-        self.assertFalse(tomllib.loads(codex)["agents"]["enabled"])
         # Claude ignores a plugin subagent's permissionMode, so its projection is
         # a bounded reader: no shell, no runtime tool or skill loading.
         tool_line = next(line for line in claude.splitlines() if line.startswith("tools: "))
@@ -516,9 +515,10 @@ class AgentAssetsTests(unittest.TestCase):
         for projection in (codex, claude):
             self.assertIn("Name the files, diff hunks, and receipts you actually read", projection)
 
-    def test_codex_profiles_request_no_sandbox_and_name_the_parents(self) -> None:
+    def test_codex_profiles_request_no_setting_codex_ignores(self) -> None:
         # Codex keeps the parent session's sandbox whatever a custom agent file
-        # asks for, so a requested sandbox would be configuration it ignores.
+        # asks for, and a role file cannot turn off goals or delegation, so those
+        # settings would be configuration it ignores; the instructions hold them.
         catalog = aa.load_catalog(aa.ROOT)
         for asset in aa.profile_assets(catalog):
             with self.subTest(profile=asset.name):
@@ -532,7 +532,10 @@ class AgentAssetsTests(unittest.TestCase):
                 )
                 self.assertIn("rests on these instructions and the disabled shell tool",
                               codex["developer_instructions"])
-                self.assertFalse(codex["features"]["shell_tool"])
+                self.assertEqual({"shell_tool": False, "apps": False}, codex["features"])
+                self.assertNotIn("agents", codex)
+                self.assertIn("do not create goals and do not spawn or delegate to another agent",
+                              codex["developer_instructions"])
                 self.assertNotIn("parent session's sandbox", claude)
 
     def test_codex_profiles_name_workspace_reading_unavailable(self) -> None:

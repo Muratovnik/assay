@@ -16,9 +16,10 @@ For a semantic role, choose the requested capability boundary independently of
 model choice. Use only combinations exposed by the current tool and distinguish
 configured settings from an observed role/model/permission binding.
 
-The published reading profiles disable shell, connectors, goals and further
-delegation and mark shell oracles, skill loading and workspace reading and
-search unavailable: Codex reads files only through its shell. Carry the text of
+The published reading profiles disable shell and connectors and mark shell
+oracles, skill loading and workspace reading and search unavailable: Codex reads
+files only through its shell. A role file cannot turn off goals or further
+delegation, so the profile's instructions alone forbid them. Carry the text of
 the frozen artifacts, audit criteria and snapshot-bound receipts in the packet
 rather than paths or rerun gates. A file sandbox alone does not prohibit MCP
 task or memory writes. The profile hook denies tools outside its reading list

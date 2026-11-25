@@ -101,12 +101,18 @@ SURFACE_UNAVAILABLE = {
 }
 # Codex applies only a closed set of keys from a custom agent file and keeps the
 # parent session's sandbox and approval policy (codex-rs/core/src/agent/role.rs,
-# rust-v0.171.0; its subagent documentation says the same), so the adapter
-# requests no sandbox and tells the role what its boundary rests on.
-CODEX_SANDBOX_NOTE = (
+# rust-v0.171.0; its subagent documentation says the same). Of the features a
+# role file may turn off, it applies only the shell, apps, plugins, memories and
+# the permission-request tool, so neither goals nor further delegation can be
+# turned off there. The adapter requests none of these and tells the role what
+# its boundary rests on.
+CODEX_BOUNDARY_NOTE = (
     "This projection runs in the parent session's sandbox and approval policy: "
     "Codex does not apply a sandbox from an agent file. Its read-only boundary "
-    "rests on these instructions and the disabled shell tool.\n\n"
+    "rests on these instructions and the disabled shell tool. Codex does not "
+    "turn off goals or further delegation from an agent file either, so these "
+    "instructions hold that ban: do not create goals and do not spawn or "
+    "delegate to another agent.\n\n"
 )
 # A projection that lost a capability does not get tools that extend a session at
 # runtime, so it cannot widen itself back.
@@ -511,9 +517,8 @@ def render_profile(data: bytes, asset: Asset, client: str) -> bytes:
             f"name = {json.dumps(asset.name, ensure_ascii=False)}\n"
             f"description = {json.dumps(description, ensure_ascii=False)}\n"
             "developer_instructions = "
-            f"{json.dumps(notice + CODEX_SANDBOX_NOTE + instructions, ensure_ascii=False)}\n"
-            '\n[features]\nshell_tool = false\napps = false\ngoals = false\n'
-            '\n[agents]\nenabled = false\n'
+            f"{json.dumps(notice + CODEX_BOUNDARY_NOTE + instructions, ensure_ascii=False)}\n"
+            '\n[features]\nshell_tool = false\napps = false\n'
         )
         return text.encode("utf-8")
     tools: list[str] = []

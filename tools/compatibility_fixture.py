@@ -192,10 +192,17 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
             raise aa.ContractError(
                 "compatibility fixture: Codex reviewer hides its unavailable shell oracle"
             )
-        if (any(codex_document.get("features", {}).get(feature) is not False
-                for feature in ("shell_tool", "apps", "goals"))
-                or codex_document.get("agents", {}).get("enabled") is not False):
-            raise aa.ContractError("compatibility fixture: Codex reading profile enables execution or delegation")
+        if any(codex_document.get("features", {}).get(feature) is not False
+               for feature in ("shell_tool", "apps")):
+            raise aa.ContractError("compatibility fixture: Codex reading profile enables execution")
+        # A role file cannot turn off goals or delegation, so the adapter does not
+        # pretend to and its instructions hold the ban.
+        if ("goals" in codex_document.get("features", {}) or "agents" in codex_document
+                or "do not spawn or delegate to another agent"
+                not in codex_document.get("developer_instructions", "")):
+            raise aa.ContractError(
+                "compatibility fixture: Codex reading profile leaves its delegation ban to a setting Codex ignores"
+            )
         profile = json.loads(source.decode("utf-8", "strict"))
         if "read-only-oracle" not in profile["capabilities"]:
             raise aa.ContractError(
