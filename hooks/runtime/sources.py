@@ -208,7 +208,7 @@ def asked(event, directory, *, clock=time.time):
             or not _first(event, directory, "question-note", clock)):
         return {}
     return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
-                                   "permissionDecisionReason": "Assay: " + QUESTION_NOTE}}
+                                   "permissionDecisionReason": QUESTION_NOTE}}
 
 
 def _range(data, result, text):

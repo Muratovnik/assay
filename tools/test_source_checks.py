@@ -581,7 +581,8 @@ class OwnerQuestionTests(unittest.TestCase):
     def test_the_first_question_of_a_request_is_refused_with_the_note_and_the_retry_passes(self):
         self.loaded()
         reason = self.refusal(self.pre())
-        self.assertTrue(reason.startswith("Assay: Assay source check: "))
+        # The note names its check once; a second "Assay: " in front only repeats it.
+        self.assertTrue(reason.startswith("Assay source check: the owner decides"), reason[:40])
         # What the item asks for: a command or read made for this question and its revision, else an assumption.
         self.assertIn("each rests on a command or read made for this question, named with the revision", reason)
         self.assertIn("or is marked as an assumption", reason)
