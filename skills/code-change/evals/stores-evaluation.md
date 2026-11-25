@@ -1,7 +1,9 @@
 # Shared stores and migrations: rationale and evaluation
 
-Maintainer material for one method change, not runtime instructions or a run
-report. The cases are synthetic and public; none has been run by a model.
+Maintainer material for one proposed method change, not runtime instructions or
+a run report. The cases are synthetic and public. The paired pilot below found
+no effect, and the reference it tested was removed; the cases, rubric and probes
+stay as regression data for any later change on this subject.
 
 ## Decision and gap
 
@@ -12,8 +14,8 @@ to implement a read-check-write under concurrent writers, where uniqueness is
 enforced, that an external call stays out of a transaction, how a repeated
 request avoids a repeated effect, or that a migration needs a reverse step that
 has been run and an expand stage the previous release can live with. The change
-adds a conditional reference to code-change and one route line in its skill
-file. Deciding whether the contract needs these guarantees stays with
+added a conditional reference, `references/stores-and-migrations.md`, to
+code-change and one route line in its skill file (`687d78b`). Deciding whether the contract needs these guarantees stays with
 software-architecture, and test design with test-writing.
 
 The approach was studied in an external MIT-licensed set of backend skills on
@@ -46,7 +48,7 @@ a committed pending order with a unique request id, and a plain read against a
 copy that touched an existing function. Only the second of each pair passed.
 These runs calibrate the probes; they say nothing about a model's behaviour.
 
-## Owed paired pilot
+## Paired pilot design
 
 Agreed volume: 18 sessions on Sonnet at medium effort.
 
@@ -77,3 +79,35 @@ Agreed volume: 18 sessions on Sonnet at medium effort.
 
 A tie is no demonstrated improvement, not equivalence. Two runs per arm show a
 large difference or a regression; they cannot show a small one.
+
+## Pilot outcome (2026-11-25)
+
+- Compared: the candidate, a frozen plugin tree at `687d78b`, against the same
+  tree without the reference and its route line, whose code-change bytes equal
+  `6242086`; test-writing and software-architecture were identical in both.
+  Each session loaded code-change explicitly in its own directory, with no MCP
+  servers, `git` or `pip`.
+- Volume: 16 sessions of the 18, all observed as Sonnet at medium effort; no
+  invalid run, so the two spare sessions stayed unspent. Run order was fixed
+  in advance and alternated the arms.
+- Departure from the design: the packets were not built with
+  `tools/eval_assets.py prepare`; every session had the whole frozen plugin
+  tree. The arms differed only in the reference and its route line.
+- Grading: the probes, recalibrated on hand-written implementations first,
+  then the `required` and `reject` items blind to the arm, by one grader.
+- Hard requirement: baseline 6 of 6 on SM01 to SM03 and 2 of 2 on SM04;
+  candidate the same. Probes passed in 16 of 16 runs, and no `reject` item
+  applied in any.
+- The reference was read in 1 of the 8 candidate runs (an SM02 run).
+- Required items, outside the hard requirement: SM01, SM03 and SM04 full in
+  every run; SM02 baseline 4 and 3 of 5, candidate 4 and 4 of 5.
+- Cost: baseline 110 turns, 315 s and 39,333 output tokens; candidate 105
+  turns, 276 s and 33,695.
+- Verdict: no effect, a difference of none with both arms at six of six, which
+  the design reads as the base method already getting this right. No harm.
+
+The reference was removed for that reason: it cost context without changing an
+outcome. Two runs per arm on one model cannot exclude a small effect, and with
+one read in eight the pilot barely exercised the reference's text. A later
+change on this subject reuses these cases and needs a case the base method
+fails.

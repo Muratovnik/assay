@@ -126,9 +126,6 @@ continuation procedure linked there.
   read [runtime boundaries](references/runtime-boundaries.md). It owns input,
   compile and execution preflight; resource cleanup stays with the lifecycle
   procedure above.
-- Before writing to a store that several requests, processes or retries can
-  write at once, or changing a stored schema, read
-  [shared stores and migrations](references/stores-and-migrations.md).
 - Before writing or keeping own code for behavior that commonly has an existing
   implementation in the platform, engine or installed dependencies — format
   parsing and serialization, schema and input validation, retries, timeouts and
