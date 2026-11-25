@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "cases": [
+    {
+      "id": "SM01",
+      "group": "store-conditional-write",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the shared-store reference; not a production incident.",
+      "rationale": "Held out from the reference text: a read-check-write under concurrent workers must become one conditional step, while a last-writer-wins edit stays unguarded.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "SM02",
+      "group": "store-migration-rollback",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the shared-store reference; not a production incident.",
+      "rationale": "Held out from the reference text: a requested rename under a rolling release must expand first so the previous release and a rollback keep working; an additive column needs one plain migration.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "SM03",
+      "group": "store-external-call",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored for the shared-store reference; not a production incident.",
+      "rationale": "Held out from the reference text: a network charge must leave the transaction and a retried request must not charge twice, while equal-content requests stay distinct.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "SM04",
+      "group": "store-read-only",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored for the shared-store reference; shares the SM01 service files but not its task.",
+      "rationale": "A read-only query on a store with concurrent writers needs no locking, migration or idempotency machinery.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

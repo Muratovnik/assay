@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "skill_name": "code-change",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "SM01",
+      "required": [
+        "reserve makes the stock check part of the write, by a conditional update read through its affected row count or by a transaction that takes the write lock before it reads, so concurrent reservations never sell more than the stock.",
+        "set_price stays a plain last-writer-wins update that never refuses an edit.",
+        "Adds a test with concurrent reservations on a real SQLite file that asserts the final stock and the number of successes, and reports the checks actually run."
+      ],
+      "reject": [
+        "Reads the stock, compares it in Python and writes the new value in a separate statement without a lock.",
+        "Adds a version or previous-price check that can refuse a concurrent price edit.",
+        "Claims concurrency safety from single-threaded tests alone."
+      ],
+      "verification": [
+        {"operation": "Before importing the submitted modules, replace sqlite3.connect with a wrapper that calls set_trace_callback on each new connection with a function sleeping 5 ms. Initialise a fresh database, add product mug with stock 10, and start 20 threads behind a barrier, each calling reserve(path, 'mug', 1).", "observation": "Exactly 10 calls return True and the final stock is 0."},
+        {"operation": "Under the same wrapper, call set_price(path, 'mug', 1000) and set_price(path, 'mug', 1100) from two threads behind a barrier, then set_price(path, 'mug', 1200).", "observation": "Neither concurrent call raises or returns False; the final price is 1200."},
+        {"operation": "Add product cap with stock 1 and call reserve(path, 'cap', 2).", "observation": "It returns False and the stock stays 1."}
+      ],
+      "assessment_note": "The verification steps are evaluator probes, not executor requests. A transaction with BEGIN IMMEDIATE and a conditional update are equally correct."
+    },
+    {
+      "id": "SM02",
+      "required": [
+        "Leaves migration 001 byte for byte unchanged and adds new numbered migrations, each with a down step.",
+        "Adds display_name without removing or renaming fullname in this release, fills it for existing rows, and keeps rows written by the previous release readable by the new code, by a fallback, a trigger or an equivalent.",
+        "Has the new code write fullname as well, so the previous release, still running or rolled back to, reads every row; states that dropping fullname is a later release's migration.",
+        "Adds phone as one nullable column in its own migration with a down step.",
+        "Runs the migrations up, down and up again in a test or a reported check."
+      ],
+      "reject": [
+        "Renames or drops fullname in this release, or edits migration 001.",
+        "Adds display_name as NOT NULL without a default, or stops writing fullname, so the previous release's writes or reads fail.",
+        "Splits the additive phone column into several releases or adds dual writes for it."
+      ],
+      "verification": [
+        {"operation": "Keep the supplied app.py and migrate.py as the previous release. On a fresh database apply the supplied migrations, add Ann Lee <ann@example.com> with the previous release, then run the submitted migrate.py up.", "observation": "The previous release adds Bo Ray <bo@example.com> and labels Ann correctly."},
+        {"operation": "Label Ann and Bo with the submitted app.py, then add Cy Moss <cy@example.com> with it and label Cy with the previous release.", "observation": "All three labels read name <email> correctly."},
+        {"operation": "Run the submitted migrate.py down once per new migration, label all three customers with the previous release, then run up again and label Ann with the submitted app.py.", "observation": "Every label is correct and no step raises."},
+        {"operation": "Compare both 001 files with the supplied bytes.", "observation": "They are identical."}
+      ],
+      "assessment_note": "The verification steps are evaluator probes, not executor requests. A column named display_name that coexists with fullname meets the request in this release; the report must say when fullname goes."
+    },
+    {
+      "id": "SM03",
+      "required": [
+        "Makes the provider call outside any open write transaction: the order or its intent is committed first and the outcome recorded after the call.",
+        "Gives request_id a unique constraint, or an equivalent conflict-safe insert, and returns the existing order for a repeat instead of creating or charging another.",
+        "Passes a key derived from the request or its order to provider.charge, so a repeat that reaches the provider charges once.",
+        "Records declined as a status without leaving the order paid, and keeps two different request_ids with the same content as two orders.",
+        "Adds tests for a repeat and a decline and reports the checks actually run."
+      ],
+      "reject": [
+        "Calls provider.charge while the transaction that inserted or updated the order is still open.",
+        "Detects a repeat only by a lookup before an insert that the store does not constrain.",
+        "Deduplicates by customer and amount, so a second legitimate order is refused or merged."
+      ],
+      "verification": [
+        {"operation": "Wrap sqlite3.connect with the 5 ms statement sleep before importing the submitted modules. Call place_order with a provider whose charge first opens another connection with timeout 0.2 and executes BEGIN IMMEDIATE then ROLLBACK, recording any OperationalError.", "observation": "No error is recorded and the order is paid."},
+        {"operation": "Repeat the same request_id with a new FakeProvider.", "observation": "The same order id is returned, the order table holds one row for that request_id, and no new key is charged."},
+        {"operation": "Start five threads behind a barrier calling place_order with one new request_id and a FakeProvider with delay 0.05.", "observation": "All five return the same id without an exception, one row exists for that request_id and one key is charged."},
+        {"operation": "Call place_order with FakeProvider(decline=True), then twice with two new request_ids for the same customer and amount.", "observation": "The declined order has status declined; the two later calls return different ids and charge two keys."}
+      ],
+      "assessment_note": "The verification steps are evaluator probes, not executor requests. Committing a pending order before the call and charging first with an idempotency key are both acceptable when the probes hold."
+    },
+    {
+      "id": "SM04",
+      "required": [
+        "Adds low_stock as a plain read query returning ['cap', 'bag', 'mug'] for the probe's products and a threshold of 5.",
+        "Adds a focused test and reports it.",
+        "Leaves db.py and the existing functions unchanged."
+      ],
+      "reject": [
+        "Adds a schema change, an index migration, a lock, a transaction or an idempotency key for a read-only query.",
+        "Rewrites reserve or the other existing functions.",
+        "Adds a concurrency test or a store-safety section to the report for this read."
+      ],
+      "verification": [
+        {"operation": "Initialise a fresh database with the submitted db.py, add mug 2, cap 0, pen 9, bag 2 and hat 5, then call low_stock(path, 5).", "observation": "It returns ['cap', 'bag', 'mug']."},
+        {"operation": "Compare db.py bytes and the syntax tree of each supplied function in shop.py with the supplied files.", "observation": "They are unchanged."}
+      ],
+      "assessment_note": "The should-not-fire control for the store reference: the service has concurrent writers, but this change only reads."
+    }
+  ]
+}
