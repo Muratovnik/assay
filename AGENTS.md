@@ -104,6 +104,14 @@ It builds from the Python that runs it, or from the one `ASSAY_TOOLS_PYTHON`
 names, and takes prebuilt wheels only: a Python the pinned requirements publish
 no wheel for is refused in one line rather than compiled for.
 
+`check --all` skips the browser and MCP routing integrations: its environment
+has no Playwright, Chromium or MCP SDK. Before a release, `relkit.toml` also runs
+`python -B tools/routing_check.py`, which builds the ignored `.cache/routing-env`
+from the tooling and routing requirements, installs the Chromium build of the
+pinned Playwright into it and runs those suites with neither allowed to be
+missing. Its first run downloads that browser; one it cannot install fails the
+gate in one line naming the Playwright version and the reason.
+
 Generated client manifests, profile adapters and the skills index are produced by
 `python -B tools/assay.py render` and verified byte-for-byte by the source check,
 so a hand-edited manifest fails rather than drifting quietly.

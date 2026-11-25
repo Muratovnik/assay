@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest import mock
 
 from tools import release_check as rc
+from tools import routing_check as gate
 
 
 class ReleaseCheckEnvironment(unittest.TestCase):
@@ -42,7 +44,7 @@ class ReleaseCheckEnvironment(unittest.TestCase):
     def test_changed_requirements_rebuild_the_environment(self):
         self.build("stale")
         provision, _ = self.run_main([])
-        provision.assert_called_once_with(self.environment, rc.requirements_digest())
+        provision.assert_called_once_with(self.environment, rc.requirements_digest(), (rc.REQUIREMENTS,))
 
     def test_the_smoke_names_its_own_environment_and_command(self):
         # The smoke runs in a Git-free snapshot with no ignored files, so it builds
@@ -50,9 +52,21 @@ class ReleaseCheckEnvironment(unittest.TestCase):
         smoke = self.environment.parent / "smoke-env"
         provision, command = self.run_main(["--environment", str(smoke), "--", "tools/assay.py", "plan",
                                             "--home", "HOME"])
-        provision.assert_called_once_with(smoke.resolve(), rc.requirements_digest())
+        provision.assert_called_once_with(smoke.resolve(), rc.requirements_digest(), (rc.REQUIREMENTS,))
         self.assertEqual(command, [str(rc.interpreter(smoke.resolve())), "-B", "tools/assay.py", "plan",
                                    "--home", "HOME"])
+
+    def test_named_requirements_build_their_own_environment(self):
+        # A gate with more dependencies than the tooling names every file it
+        # needs; the environment is current only for all of them together.
+        extra = Path(self.directory.name) / "requirements-extra.txt"
+        extra.write_text("example==1.0\n", "utf-8")
+        files = (rc.REQUIREMENTS, extra)
+        self.build(rc.requirements_digest())
+        provision, _ = self.run_main(["--requirements", "requirements-tools.txt",
+                                      "--requirements", str(extra)])
+        provision.assert_called_once_with(self.environment, rc.requirements_digest(files), files)
+        self.assertNotEqual(rc.requirements_digest(files), rc.requirements_digest())
 
 
 class ReleaseCheckInterpreter(unittest.TestCase):
@@ -79,6 +93,21 @@ class ReleaseCheckInterpreter(unittest.TestCase):
             if named is None:
                 rc.os.environ.pop(rc.PYTHON_VARIABLE, None)
             rc.provision(self.environment, "digest")
+
+    def test_every_requirements_file_is_installed(self):
+        extra = Path(self.directory.name) / "requirements-extra.txt"
+        self.calls.clear()
+
+        def run(command, **_):
+            self.calls.append(command)
+            if command[1:3] == ["-m", "venv"]:
+                rc.interpreter(self.environment).parent.mkdir(parents=True)
+            return mock.Mock(returncode=0, stdout="3.14.7\n", stderr="")
+
+        with mock.patch.object(rc.subprocess, "run", side_effect=run):
+            rc.provision(self.environment, "digest", (rc.REQUIREMENTS, extra))
+        pip = self.calls[-1]
+        self.assertEqual(pip[-4:], ["-r", str(rc.REQUIREMENTS), "-r", str(extra)])
 
     def test_the_environment_takes_prebuilt_wheels_only(self):
         # A missing wheel must not turn into a native build that needs a compiler.
@@ -115,6 +144,85 @@ class ReleaseCheckInterpreter(unittest.TestCase):
             self.provision(version="3.10.14")
         self.assertIn("older than 3.11", str(raised.exception.code))
         self.assertEqual(1, len(self.calls))
+
+
+class RoutingGate(unittest.TestCase):
+    """The pre-release gate for the browser and MCP routing integrations."""
+
+    def setUp(self):
+        self.calls = []
+
+    def run_inside(self, install_returncode=0, install_output="", suite_stderr="Ran 4 tests in 0.1s\n\nOK\n",
+                   suite_returncode=0, version="1.57.0"):
+        environment = Path(sys.prefix)
+
+        def run(command, **options):
+            self.calls.append((command, options))
+            if command[1:4] == ["-m", "playwright", "install"]:
+                return mock.Mock(returncode=install_returncode, stdout="", stderr=install_output)
+            return mock.Mock(returncode=suite_returncode, stdout="", stderr=suite_stderr)
+
+        with mock.patch.object(gate, "ENVIRONMENT", environment), \
+                mock.patch.object(gate.importlib.metadata, "version", return_value=version), \
+                mock.patch.object(gate.subprocess, "run", side_effect=run), \
+                mock.patch("builtins.print"):
+            return gate.main()
+
+    def test_outside_its_environment_the_gate_builds_it_and_runs_itself_there(self):
+        # The release tool starts the gate with its own interpreter, which has
+        # neither the SDK nor Playwright; the routing environment has both.
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(gate, "ENVIRONMENT", Path(directory) / "routing-env"), \
+                mock.patch.object(gate.release_check, "main", return_value=5) as build:
+            self.assertEqual(5, gate.main())
+        arguments = build.call_args.args[0]
+        self.assertEqual(arguments[:2], ["--environment", str(Path(directory) / "routing-env")])
+        named = [arguments[index + 1] for index, value in enumerate(arguments) if value == "--requirements"]
+        self.assertEqual(named, ["requirements-tools.txt",
+                                 "skills/route-subagents/scripts/requirements-mcp.txt",
+                                 "skills/route-subagents/scripts/requirements-browser.txt"])
+        for name in named:
+            self.assertTrue((rc.ROOT / name).is_file(), name)
+        self.assertEqual(arguments[-2:], ["--", "tools/routing_check.py"])
+
+    def test_the_browser_goes_into_the_environment_and_the_suites_require_it(self):
+        self.assertEqual(0, self.run_inside())
+        browsers = str(Path(sys.prefix) / "browsers")
+        (install, install_options), *suites = self.calls
+        self.assertEqual(install, [sys.executable, "-m", "playwright", "install", "chromium"])
+        self.assertEqual(browsers, install_options["env"]["PLAYWRIGHT_BROWSERS_PATH"])
+        self.assertEqual([arguments for _, arguments in gate.SUITES],
+                         [tuple(command[2:]) for command, _ in suites])
+        for command, options in suites:
+            with self.subTest(suite=command[-1]):
+                self.assertEqual("1", options["env"]["REQUIRE_ROUTING_INTEGRATIONS"])
+                self.assertEqual(browsers, options["env"]["PLAYWRIGHT_BROWSERS_PATH"])
+
+    def test_a_browser_that_cannot_be_installed_fails_in_one_line(self):
+        output = "Downloading Chromium 143.0 from https://cdn.example/chromium.zip\nError: getaddrinfo ENOTFOUND cdn.example\n"
+        with self.assertRaises(SystemExit) as raised:
+            self.run_inside(install_returncode=1, install_output=output)
+        message = str(raised.exception.code)
+        self.assertEqual(1, len(message.splitlines()))
+        self.assertIn("Playwright 1.57.0", message)
+        self.assertIn("getaddrinfo ENOTFOUND cdn.example", message)
+        self.assertEqual(1, len(self.calls), "no suite runs without the browser")
+
+    def test_a_missing_playwright_fails_before_any_install(self):
+        with self.assertRaises(SystemExit) as raised, \
+                mock.patch.object(gate.importlib.metadata, "version",
+                                  side_effect=gate.importlib.metadata.PackageNotFoundError("playwright")), \
+                mock.patch.object(gate, "ENVIRONMENT", Path(sys.prefix)), \
+                mock.patch.object(gate.subprocess, "run") as run:
+            gate.main()
+        self.assertIn("Playwright is not installed", str(raised.exception.code))
+        run.assert_not_called()
+
+    def test_a_suite_that_fails_or_runs_nothing_fails_the_gate(self):
+        self.assertEqual(1, self.run_inside(suite_stderr="Ran 3 tests in 0.1s\n\nFAILED (errors=1)\n",
+                                            suite_returncode=1))
+        self.calls.clear()
+        self.assertEqual(1, self.run_inside(suite_stderr="Ran 0 tests in 0.0s\n\nOK\n"))
 
 
 if __name__ == "__main__":

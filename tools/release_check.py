@@ -41,8 +41,10 @@ def interpreter(environment: Path) -> Path:
     return environment / "bin" / "python"
 
 
-def requirements_digest() -> str:
-    return hashlib.sha256(REQUIREMENTS.read_bytes()).hexdigest()
+def requirements_digest(requirements: tuple[Path, ...] = (REQUIREMENTS,)) -> str:
+    # pip installs the union of the files, so their bytes in order identify
+    # the environment; one file hashes as it always has, keeping old stamps.
+    return hashlib.sha256(b"".join(path.read_bytes() for path in requirements)).hexdigest()
 
 
 def current(environment: Path, digest: str) -> bool:
@@ -91,7 +93,7 @@ def last_error(output: str) -> str:
     return (errors or lines or ["pip failed without output"])[-1]
 
 
-def provision(environment: Path, digest: str) -> None:
+def provision(environment: Path, digest: str, requirements: tuple[Path, ...] = (REQUIREMENTS,)) -> None:
     # The environment is deleted before a rebuild, so neither it nor a parent
     # inside this repository may be a link that would redirect the deletion.
     inside = environment.is_relative_to(ROOT)
@@ -106,12 +108,14 @@ def provision(environment: Path, digest: str) -> None:
     if environment.exists():
         shutil.rmtree(environment)
     subprocess.run([python, "-m", "venv", str(environment)], check=True)
+    files = [argument for path in requirements for argument in ("-r", str(path))]
     installed = subprocess.run([str(interpreter(environment)), "-m", "pip", "install", "--disable-pip-version-check",
-                                "--quiet", "--only-binary", ":all:", "-r", str(REQUIREMENTS)],
+                                "--quiet", "--only-binary", ":all:", *files],
                                capture_output=True, text=True, check=False)
     if installed.returncode:
         shutil.rmtree(environment, ignore_errors=True)
-        raise refuse(f"cannot install {REQUIREMENTS.name} as prebuilt wheels for Python {version} ({python}): "
+        names = ", ".join(path.name for path in requirements)
+        raise refuse(f"cannot install {names} as prebuilt wheels for Python {version} ({python}): "
                      f"{last_error(installed.stdout + installed.stderr)}; "
                      f"name a Python they support with {PYTHON_VARIABLE}")
     (environment / STAMP).write_text(digest + "\n", "utf-8")
@@ -121,14 +125,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--environment", type=Path, default=ENVIRONMENT,
                         help="tooling environment to build or reuse (default: .cache/tools-env)")
+    parser.add_argument("--requirements", type=Path, action="append",
+                        help="requirements file to build from, relative to the repository; "
+                             "repeat for several (default: requirements-tools.txt)")
     parser.add_argument("command", nargs=argparse.REMAINDER,
                         help="arguments for the environment's Python after --; default: tools/check.py --all")
     arguments = parser.parse_args(argv)
     command = arguments.command[1:] if arguments.command[:1] == ["--"] else arguments.command
     environment = arguments.environment.resolve()
-    digest = requirements_digest()
+    requirements = tuple(ROOT / path for path in arguments.requirements or [REQUIREMENTS])
+    digest = requirements_digest(requirements)
     if not current(environment, digest):
-        provision(environment, digest)
+        provision(environment, digest, requirements)
     return subprocess.run([str(interpreter(environment)), "-B", *(command or CHECK_ALL)],
                           cwd=ROOT, check=False).returncode
 
