@@ -48,6 +48,15 @@ def session_message():
                         "from=\"local_c41d\">Is the review finished?</cross-session-message>"}}
 
 
+# Claude Code records a skill's slash command as the prompt and the skill's body as a meta entry after it.
+def slash_command(name, directory="C:\\plugins\\assay\\skills\\"):
+    return [{"type": "user", "message": {"role": "user", "content": (
+                f"<command-message>assay:{name}</command-message>\n<command-name>/assay:{name}</command-name>\n"
+                "<command-args>Fix the parser</command-args>")}},
+            {"type": "user", "isMeta": True, "message": {"role": "user", "content": [
+                {"type": "text", "text": f"Base directory for this skill: {directory}{name}\n\n# Title\n\nBody."}]}}]
+
+
 def reattached(*names):
     return {"type": "attachment", "attachment": {"type": "invoked_skills", "skills": [
         {"name": "assay:" + name, "path": "plugin:assay:" + name, "content": "..."} for name in names]}}
@@ -187,6 +196,25 @@ class SkillGateTests(unittest.TestCase):
         text = self.feedback(self.stop("Using `assay:code-change` and `assay:test-writing`.", transcript_path=path))
         self.assertIn("announces test-writing", text)
         self.assertNotIn("code-change", text)
+
+    def test_a_skill_its_slash_command_expanded_is_loaded(self):
+        path = self.transcript(*slash_command("code-change"), said("Using `assay:code-change` to fix the parser."),
+                               RESULT)
+        self.assertEqual({}, self.stop("Done.", transcript_path=path))
+        # The scan's find joins the records, so the next turn needs no transcript.
+        self.assertEqual({}, self.stop("Using `assay:code-change`."))
+        # The same text in a tool result or a typed prompt, a command with no expansion or a subagent's
+        # expansion is no load of the session's.
+        command, expansion = slash_command("test-writing")
+        echoed = expansion["message"]["content"][0]["text"]
+        result = {"type": "user", "message": {"role": "user", "content": [
+            {"type": "tool_result", "content": echoed}, {"type": "text", "text": echoed}]}}
+        cases = {"tool result": [prompt(), result], "typed": [prompt(echoed)], "unexpanded": [command],
+                 "subagent": [command, {**expansion, "isSidechain": True}]}
+        for case, entries in cases.items():
+            with self.subTest(case=case):
+                path = self.transcript(*entries, said("Using `assay:test-writing`."), name="other.jsonl")
+                self.assertIn("test-writing", self.feedback(self.stop("Done.", transcript_path=path)))
 
     def test_a_subagent_entry_in_the_main_transcript_is_not_a_root_load(self):
         path = self.transcript(prompt(), called("assay:code-change", isSidechain=True), prompt())

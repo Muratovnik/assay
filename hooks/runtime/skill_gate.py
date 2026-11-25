@@ -2,7 +2,8 @@
 
 The skill check asks the agent to announce a skill it starts applying in one
 sentence naming it as `assay:<name>`. This gate records which skills the
-session actually loaded (Skill tool calls and reads of a SKILL.md) and, when
+session actually loaded (Skill tool calls, reads of a SKILL.md and slash
+commands) and, when
 the turn announces a skill that was never loaded, continues the turn once with
 hook feedback saying so. The feedback is not a block: Claude Code shows no hook
 error for it. It judges nothing about whether the announced skills were the
@@ -11,8 +12,9 @@ right choice.
 An announcement usually opens an earlier message of the turn, so on Stop the
 gate reads the tail of the transcript, as the hooks reference suggests for
 conditions the input alone cannot settle. The same read finds loads the
-records miss: a continued, resumed or forked session gets a new session id,
-and compaction re-attaches the skills it keeps. The transcript is written
+records miss: a skill loaded by its slash command, which passes no tool hook,
+a continued, resumed or forked session, which gets a new session id, and the
+skills compaction re-attaches. The transcript is written
 asynchronously, so it is a best-effort source; an unreadable one leaves the
 gate exactly as strict as the records alone.
 """
@@ -40,6 +42,9 @@ QUALIFIED = re.compile(r"assay:([a-z][a-z0-9-]{0,63})(?![\w-])")
 NAME = re.compile(r"(?:assay:)?([a-z][a-z0-9-]{0,63})")
 # A Read of a SKILL.md loads that skill; the hook entry reads the same pattern before loading this module.
 SKILL_FILE = LOADED_SKILL
+# Claude Code hands a skill's body to the model as a meta user entry opening with this line, whether a Skill
+# call or the skill's slash command loaded it; a slash command passes no tool hook, so this is its only record.
+EXPANDED = re.compile(r"Base directory for this skill: [^\n]*[\\/]skills[\\/]([a-z][a-z0-9-]{0,63})[\\/]?[ \t]*(?:\n|$)")
 # The host channel through which a subagent may deliver its report.
 HANDBACK = "SubagentHandback"
 # A continued turn still ends on text, so a rule against reporting "nothing changes" would leave a change
@@ -137,6 +142,19 @@ def _relayed_entry(entry, content):
     return relay(text) is not None
 
 
+def _expanded(entry, content, names):
+    """The Assay skill whose body a meta user entry delivers, or None; a prompt or tool result never counts."""
+    if not entry.get("isMeta"):
+        return None
+    texts = [content] if isinstance(content, str) else [
+        block.get("text") for block in content or [] if isinstance(block, dict) and block.get("type") == "text"]
+    for text in texts:
+        match = EXPANDED.match(text) if isinstance(text, str) else None
+        if match and match[1] in names:
+            return match[1]
+    return None
+
+
 def _tool_result(content):
     return isinstance(content, list) and any(isinstance(block, dict) and block.get("type") == "tool_result"
                                              for block in content)
@@ -146,7 +164,8 @@ def transcript(path, names, *, subagent=False, loads_needed=lambda announced, lo
     """(announced, loaded) from a transcript's tail, or None when it cannot be read.
 
     Announced: skills the first lines of this turn's messages announce, newest
-    first. Loaded: Skill calls and SKILL.md reads since the latest compaction,
+    first. Loaded: Skill calls, SKILL.md reads and skill bodies the client
+    delivered (a slash command's among them) since the latest compaction,
     plus the skills that compaction re-attached; an older load did not survive
     it. The scan stops at the turn's start when loads_needed(announced, loaded)
     is false.
@@ -180,6 +199,9 @@ def transcript(path, names, *, subagent=False, loads_needed=lambda announced, lo
                 continue
             message = entry.get("message")
             content = message.get("content") if isinstance(message, dict) else None
+            skill = _expanded(entry, content, names) if kind == "user" else None
+            if skill:
+                loaded.add(skill)
             if kind == "user" and in_turn and not subagent and not _prompt(entry, content):
                 if _relayed_entry(entry, content):
                     relayed = True
