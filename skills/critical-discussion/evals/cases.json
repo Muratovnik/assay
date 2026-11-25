@@ -61,6 +61,11 @@
       "id": "C12",
       "prompt": "Коротко: стоит ли переводить сборку с make на just?",
       "context": "The Makefile has 12 targets, no pattern rules and is used by two developers on Linux and one on Windows through an extra shell. CI calls make directly."
+    },
+    {
+      "id": "C13",
+      "prompt": "Есть идея: кэшировать результат validate по хешу входных файлов и версии инструмента. Что думаешь?",
+      "context": "validate is a pure function of the contents and paths of its input files and the tool version: it takes no options and reads no other file, environment variable, clock or network, and the tool version changes with every build, including development builds. It takes about 40 seconds and is rerun on every save in the project; most saves change files outside its inputs, such as documentation and scripts, so most reruns see unchanged inputs. The packaging step already hashes the contents and paths of exactly these input files. A cache entry would hold the full report and exit status of a finished run and live in the existing local cache directory, whose store already writes entries atomically, versions their format, caps its size and is removed by the clean command."
     }
   ],
   "discovery_cases": [

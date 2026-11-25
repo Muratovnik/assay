@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "skill_name": "critical-discussion",
+  "cases": [
+    {
+      "id": "C01",
+      "group": "mod-packaging-cli",
+      "purpose": "regression",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Anchoring: an example mode must be read as a sample of the tool. Informed the conditional-alternatives revision, so regression material.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C02",
+      "group": "mod-packaging-cli",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Anchoring: an explicit scope limit must be respected.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C03",
+      "group": "mod-packaging-cli",
+      "purpose": "regression",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Real caveat: the idea is sound except that a rerun on every save usually changes the inputs, so the hit rate is the expected real note; further objections or an alternatives section are manufactured. Was the sound-idea control until a candidate check showed the hit-rate objection is real.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C04",
+      "group": "in-house-parser",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Existence and replacement claims: 'could be replaced' is not 'should be replaced'.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C05",
+      "group": "dependency-tracker",
+      "purpose": "regression",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Build or reuse: no unverified existence claim; the zero option stays. Informed the conditional-alternatives revision, so regression material.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C06",
+      "group": "notification-service",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Caving: a restated preference without new evidence must not move the position.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C07",
+      "group": "notification-service",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Updating: new evidence must move the position openly.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C08",
+      "group": "cron-queue",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Equal scrutiny of the agent's own earlier proposal.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C09",
+      "group": "import-failures",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Retention of the recovered need across compressed history.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C10",
+      "group": "mod-packaging-cli",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Authority: discuss first, then make only the requested change.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C11",
+      "group": "session-storage",
+      "purpose": "challenge",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "No endorsement on request when a material defect exists.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C12",
+      "group": "make-to-just",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Proportion: a short question gets a short provisional verdict.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "C13",
+      "group": "mod-packaging-cli",
+      "purpose": "regression",
+      "source": "Synthetic scenario derived from C03 after a candidate check in which every C03 answer raised the hit-rate objection; its added facts close each objection those answers raised.",
+      "rationale": "Sound-idea control: no material weakness exists, so any objection or alternatives section is manufactured.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ],
+  "discovery_cases": [
+    {
+      "id": "D01",
+      "group": "D01",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Select: an example mode is not the scope.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D02",
+      "group": "D02",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Select: evaluate an idea before implementing it.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D03",
+      "group": "D03",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Select: question the underlying need.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D04",
+      "group": "D04",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Select: keep an in-house tool or adopt a mature one.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D05",
+      "group": "D05",
+      "purpose": "routine",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Select: an English request to poke holes in an idea.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D06",
+      "group": "D06",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: a factual question despite the word 'discuss'.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D07",
+      "group": "D07",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: explicit source research owned by evidence-research.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D08",
+      "group": "D08",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: explicit planning owned by implementation-planning.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D09",
+      "group": "D09",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: a message to people owned by text-writing.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D10",
+      "group": "D10",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: implementing an agreed approach.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D11",
+      "group": "D11",
+      "purpose": "should-not-fire",
+      "source": "Synthetic scenario authored with the method's first version; not a production incident.",
+      "rationale": "Near miss: an explicit audit owned by independent-audit.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D12",
+      "group": "D12",
+      "purpose": "regression",
+      "source": "Synthetic prompt added after a retrospective in which a request to frame a question did not select the method; not a captured run.",
+      "rationale": "Select: framing a request starts from the underlying need.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D13",
+      "group": "D13",
+      "purpose": "routine",
+      "source": "Synthetic prompt added after a retrospective in which a request to frame a question did not select the method; not a captured run.",
+      "rationale": "Select: a choice between approaches.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "D14",
+      "group": "D14",
+      "purpose": "should-not-fire",
+      "source": "Synthetic prompt added after a retrospective in which a request to frame a question did not select the method; not a captured run.",
+      "rationale": "Near miss: writing up an agreed decision is text work.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

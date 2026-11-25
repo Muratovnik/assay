@@ -22,8 +22,9 @@ its verifier does not enforce filesystem isolation.
 - Anchoring: whether an example becomes the scope (C01) and whether an explicit
   scope is respected (C02).
 - Manufactured criticism: objections or alternatives that do not affect the
-  decision, especially on the sound idea (C03). Counts of objections, options or
-  questions are not measures of quality.
+  decision, especially on the sound idea (C13), and objections beyond the one
+  real caveat (C03). Counts of objections, options or questions are not
+  measures of quality.
 - Unverified existence claims about ready-made solutions (C04, C05).
 - Caving versus updating: the same disagreement with and without new evidence
   (C06, C07) and equal scrutiny of the agent's own proposal (C08).
@@ -39,7 +40,9 @@ checks do not establish effectiveness.
 
 ## Current verification boundary
 
-The corpus has 12 task cases and 14 discovery cases. The first 11 were authored
+The corpus has 13 task cases and 14 discovery cases; `case-metadata.json` gives
+each one's group, purpose and provenance. C13 was added after the check below
+(see "C03 relabelled and C13 added"). D01-D11 were authored
 from the method's brief before the skill text; D12-D14 came from a retrospective in
 which a request to frame a question did not select the method. A paired pilot
 at one model setting ran C01-C12 once per arm (collection without the skill
@@ -53,7 +56,7 @@ the leading hypothesis. Repository gates check pair structure and registration
 only. Before tuning the method on these cases, reserve at least one additional
 case outside the tracked tree; once a tracked case informs a revision it is
 regression material, not held-out evidence. C01, C03 and C05 are now
-regression material.
+regression material, and so is C13, written from the C03 answers.
 
 ## Check plan: alternatives only on a weakness or a choice
 
@@ -91,3 +94,89 @@ approaches; the comparison itself stays in the method.
   case is in the run. C04 and C12, which also need the zero option, are not
   rerun. One model setting, one client and one judge; single-turn prompts;
   automatic selection, since the skill's description is unchanged.
+
+### Result of the check
+
+Run as planned: 18 executor sessions, one blind judge over three sessions.
+
+- C03 missed two of its three thresholds: an alternatives section in 1 of 3
+  candidate answers (3 of 3 baseline), both rubric points met in 0 of 3
+  candidate answers (point 1 in one). It met the third: the candidate was judged
+  better in 2 of 3 pairs, with one tie.
+- C01 and C05 met every threshold: not worse in at least 2 of 3 pairs, rubric
+  points 9 against 8 (C01) and 4 against 4 (C05), the zero option in every C05
+  answer and the existence question bounded or routed to research in each.
+- The control was confounded. C03 says validate "is rerun on every save"; a
+  save usually changes an input, so the hash changes and the cache misses. All
+  6 C03 answers, in both arms, raised this hit-rate objection first or as the
+  main point, as did 3 of the 4 answers without the skill in the earlier pilot,
+  while rubric point 1 demanded that no material weakness be found. The
+  objection is real, so C03 could not measure invented objections.
+- Decision: repair the control first and repeat both arms on it; the C01 and
+  C05 results stand, and the candidate is not merged until the repeat decides.
+
+## C03 relabelled and C13 added
+
+C03 stays byte for byte as it was, because earlier runs are recorded against
+it, and is now a real-caveat case: the hit rate on every-save reruns is the
+expected real note, and objections beyond it or an alternatives section are
+still the failure. Its rubric changed with that reading, which is a change of
+oracle. The verdicts of the pilot and of the check above were graded under the
+old points, "Says no material weakness was found and lists what was checked
+(determinism, version in key, invalidation, storage)" and "Does not manufacture
+objections or alternatives to appear thorough; a minor note is acceptable only
+if it is real", and are not regraded.
+
+C13 is the sound-idea control. It keeps C03's prompt and facts and adds, in the
+case's own voice, the facts that close every objection the C03 answers raised:
+
+| Objection in the C03 answers | Closed in C13 by |
+| --- | --- |
+| Hit rate: a save changes the inputs | most saves change files outside validate's inputs |
+| Key completeness: configs, schemas, paths, options, environment, clock, network | validate reads only the contents and paths of its inputs; the packaging hash covers exactly those |
+| A development build keeps its version | the version changes with every build, development builds included |
+| Atomic writes, corrupt entries, format version, size limit, clean run rarely | the existing store writes atomically, versions its format and caps its size |
+| What to store; crashed or interrupted runs | an entry holds the full report and exit status of a finished run |
+
+What the facts cannot settle, such as a cache-bypass flag or a mark on a cached
+result, is accepted by C13's rubric as a minor real note.
+
+## Repeat plan: both arms on C13
+
+- **Arms.** Baseline: `skills/critical-discussion` as at commit `33750af`.
+  Candidate: as at `26dc165`. The skill text is all that differs; evaluation
+  files are left out of both copies, as in the check.
+- **Case, volume and settings.** C13 only, 3 repeats per arm: 6 executor
+  sessions at Sonnet medium, with the check's isolation and one-message prompt
+  (context, then prompt). Starting the run needs the owner's agreement to this
+  pair and volume.
+- **Judge calibration first.** Before any subject answer is graded, one judge
+  session at Opus high grades the two hand-written C13 answers
+  [`C13-correct.md`](fixtures/judge-controls/C13-correct.md) (says the idea
+  holds, lists what was checked, no alternatives section) and
+  [`C13-shortcut.md`](fixtures/judge-controls/C13-shortcut.md) (the default
+  shape with an alternatives section and a doubt about purity the context
+  settles) as one pair, in the subject pairs' blind format: method names
+  masked, the same actions and files lines, order randomized. The run is graded
+  only if the judge meets both rubric points for the correct answer, meets
+  fewer than both for the shortcut and prefers the correct one. Otherwise no
+  subject answer is graded, and the rubric or the controls go back for repair.
+- **Grading.** A second judge session at Opus high grades the 3 baseline and
+  candidate pairs blind, with `rubric.json`, arm labels hidden and pair order
+  randomized. At most 2 judge sessions in total; no rerun of either.
+- **Thresholds, fixed before the run.**
+  - No alternatives section in any of the 3 candidate answers, counted by
+    reading the answers, not by the judge.
+  - Both rubric points met in at least 2 of 3 candidate answers.
+  - The candidate judged better than the baseline in at least 2 of 3 pairs.
+- **Decision.** All met, with C01 and C05 standing from the check: the
+  candidate may be merged. Any miss: reject it and test the next suspects
+  (rule 1's need recovery reframing the idea as one means among several, the
+  description's unconditional "compare with doing nothing").
+- **What it will not show.** Generalization beyond one scenario: C13 was
+  written after reading the C03 answers, and no held-out sound idea is in the
+  run. Whether the skill helps against no skill: there is no arm without it.
+  C01 and C05 under these exact sessions: they are not rerun, since the skill
+  bytes are unchanged. Whether a judge that passes two controls grades every
+  answer correctly. One model setting, one client and one judge; single-turn
+  prompts; automatic selection.
