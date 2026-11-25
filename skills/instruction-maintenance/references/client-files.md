@@ -14,8 +14,14 @@ a global `AGENTS.override.md` or `AGENTS.md` in the Codex home directory, then,
 from the project root (typically the Git root) down to the working directory, at
 most one file per directory: `AGENTS.override.md`, else `AGENTS.md`, else a
 configured fallback name. Files are concatenated root first, so a nearer file
-appears later. Loading stops at a combined size limit (32 KiB by default), so
-text past the limit is silently absent.
+appears later. The project files share a size limit (`project_doc_max_bytes`,
+32 KiB by default); the global file is loaded apart and does not count toward
+it. A project file past the limit is cut or skipped, and Codex warns that it
+was. A separate warning comes when the whole text, global file included,
+exceeds the setting; on its own it does not mean that anything was cut. The
+guide leaves the count open; checked on 2026-11-25 against the
+[Codex source](https://github.com/openai/codex/blob/main/codex-rs/core/src/agents_md.rs)
+and the warnings of Codex CLI 0.171.0.
 
 **Claude Code** ([memory](https://code.claude.com/docs/en/memory)): `CLAUDE.md`,
 `.claude/CLAUDE.md` and `CLAUDE.local.md` in the working directory and every
@@ -47,8 +53,8 @@ route is taken.
 - **Order is not priority.** Concatenated files do not override each other by
   rule; a nearer file only appears later. Contradictions between levels stay
   contradictions until one is removed or explicitly scoped.
-- **Size limits truncate silently.** Measure the combined size a client loads
-  when a file grows near a known limit.
+- **Size limits truncate.** Measure the size of the files a limit counts when a
+  file grows near it, and read the client's warnings about what it cut.
 
 To confirm what loaded, use the client's own listing of loaded instruction files
 in a fresh session. A file's presence on disk is not evidence that it was read.
