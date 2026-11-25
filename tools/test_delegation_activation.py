@@ -170,7 +170,10 @@ class SkillCheckActivationTests(unittest.TestCase):
             text = start(self.rules, client)
             self.assertIn("write your report to the agent that launched you in English", text)
             self.assertIn("even when your other instructions name a reply language", text)
-            self.assertIn("unless the packet names another language", text)
+            # Only a language named for the report changes it: one named for a file or a comment does not.
+            self.assertIn("unless the packet names another language for the report itself;", text)
+            self.assertIn("a language it names for a file, a comment or other output does not change the report's",
+                          text)
             # Deliverables for people are not translated into English.
             self.assertIn("translations you deliver keep the language their readers use", text)
             self.assertIn("within about 1,500 tokens unless the packet sets another budget", text)

@@ -302,13 +302,17 @@ def report_form(rules):
     model. In one owner's sessions with Russian set as the reply language, 113 of 387
     reports on English packets that named no language came back in Russian, against 6
     of 82 when the packet asked for English. The budget is the one route-subagents asks
-    packets to state; 14 of 591 packets stated it.
+    packets to state; 14 of 591 packets stated it. A later count found most of the
+    remaining Russian reports on packets that named Russian for a file or a comment,
+    which a bare "unless the packet names another language" let change the report too.
     """
     if not getattr(rules, "report_form", False):
         return ""
     return ("Assay report form for this subagent: write your report to the agent that launched you in English, "
-            "even when your other instructions name a reply language, unless the packet names another language. "
-            "Files, messages, UI text, commits and translations you deliver keep the language their readers use. "
+            "even when your other instructions name a reply language, unless the packet names another language "
+            "for the report itself; a language it names for a file, a comment or other output does not change the "
+            "report's. Files, messages, UI text, commits and translations you deliver keep the language their "
+            "readers use. "
             "Keep the report's final message within about 1,500 tokens unless the packet sets another budget: "
             "lead with the result and cut restating the packet, narrating your steps and repeating what a table "
             "or file already says, but keep every finding, evidence pointer, check and unresolved issue. Put "

@@ -285,12 +285,13 @@ within about 1,500 tokens, the budget
 asks a packet to state. It cuts restating the packet and narrating its steps and
 keeps every finding, evidence pointer, check and unresolved issue. What it
 delivers for people, such as files, messages, UI text, commits or translations,
-keeps its readers' language, and a packet that names another language, another
-budget or an exact output format wins. In one owner's sessions to 6 November
-2026, with Russian set as the reply language, 113 of 387 reports on English
-packets that named no language came back in Russian, against 6 of 82 when the
-packet asked for English, and 14 of 591 packets stated the budget. The text adds about
-0.7 KB to each subagent's start. `disabled_rules: ["report-form"]` turns it off
+keeps its readers' language, and a packet that names another language for the
+report itself, another budget or an exact output format wins. A language the
+packet names for a file, a comment or other output does not change the report's.
+In one owner's sessions to 6 November 2026, with Russian set as the reply
+language, 113 of 387 reports on English packets that named no language came back
+in Russian, against 6 of 82 when the packet asked for English, and 14 of 591
+packets stated the budget. The text adds about 0.85 KB to each subagent's start. `disabled_rules: ["report-form"]` turns it off
 and keeps the skill check; `"skill-check"` keeps the report form.
 
 In Claude Code the same start also says how to wait for a long run, in the
