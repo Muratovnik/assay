@@ -106,32 +106,41 @@ volume.
 
     Как посмотреть, что `synctool push` загрузил бы из папки docs/, ничего не загружая?
     ````
-- Order, fixed before the run: for each prompt in turn, run 1 baseline then
-  candidate, run 2 candidate then baseline, run 3 as run 1.
+- Order, fixed before the run, 9 pairs in three rounds; each round runs its P3
+  pair first, so a stop at the cost limit cuts a must-fire pair, never the
+  control:
+  1. P3, P1, P2, each baseline then candidate;
+  2. P3, P1, P2, each candidate then baseline;
+  3. as round 1.
 - Bounds, equal in both arms: 10 turns, 12 tool calls, 480 s.
 - Measures, read from the stream and transcript with the skill gate's own
   readers, without a judge:
-  - L, the primary one: `evidence-research` loaded in the main thread before
-    the last reply, by the skill tool or a read of its `SKILL.md`.
+  - L, the primary one: `evidence-research` loaded in the main thread, by the
+    skill tool or a read of its `SKILL.md`, before the last reply and before
+    any Assay note (the note before a web call, a Stop continuation). This is
+    the selection the cue targets. A load that follows such a note is counted
+    apart as L after a note, and so is the sum.
   - Named in the opening sentence of the visible text; named in thinking,
     counted apart.
   - W: a web call returned before the last reply. Web use without L is the
     earlier state, not success.
-  - On P3, any Assay skill named or loaded, and any web call.
-- Thresholds, fixed before the run, over P1 and P2 together (6 runs per arm):
-  - Effect: candidate L in at least 4 of 6, at least 2 of 3 on each prompt, at
-    least 3 more than the baseline, and P3 clean in all three candidate runs.
-  - Baseline at ceiling: baseline L in at least 4 of 6. The candidate is not
+  - P3 clean: no Assay skill named in the visible text or loaded, and no web
+    call. A mention in thinking alone is recorded, not counted against it.
+- Thresholds, fixed before the run, over the complete pairs of P1 and P2:
+  - Effect: candidate L in at least 2 runs of each must-fire prompt, at least
+    3 more than the baseline over both, and every candidate P3 run clean.
+  - Baseline at ceiling: baseline L in at least 4 runs. The candidate is not
     shown, whatever its count; the earlier result is then read, without a
     pairing, as mainly the visible budget's.
-  - No effect: a difference of one or none with the baseline at 1 of 6 or less.
-    The cue is rejected for this model and effort; the next suspect is that the
+  - No effect: a difference of one or none with the baseline at 1 or less. The
+    cue is rejected for this model and effort; the next suspect is that the
     check leaves the decision optional. Another paraphrase is not the next step.
-  - Harm, which outranks effect: a candidate P3 run naming or loading an Assay
-    skill where the baseline P3 runs do not, or candidate L two or more below
-    the baseline.
+  - Harm, which outranks effect: a candidate P3 run that is not clean while
+    every baseline P3 run is, or candidate L two or more below the baseline.
   - Anything else, such as a difference of two or 2 of 3 on one prompt only:
     inconclusive, and the candidate is not merged.
+  - Any verdict but baseline at ceiling needs all 3 P3 pairs and at least 5 of
+    the 6 must-fire pairs; with fewer, the result is inconclusive.
 - Cost: from the earlier sessions, $0.17 to $0.23 for an answer from memory
   and $0.25 to $0.30 with one search; a session that loads the skill and reads
   pages was not measured, and $0.30 to $0.45 is assumed. Expected total: about
@@ -140,7 +149,8 @@ volume.
   a launch that could pass the cap and stops the set on a session that reports
   more than $0.60. A pair cut by the cap or by an infrastructure failure is
   reported and left out of the comparison, not replaced. An incomplete set is
-  judged on its complete pairs and says how many there were.
+  judged on its complete pairs, by the rule above, and says how many there
+  were.
 - Records: every session carries one project key for the user's memory capture
   hooks, and the list of its sessions is kept so their records can be removed
   afterwards.
