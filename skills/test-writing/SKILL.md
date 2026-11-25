@@ -85,7 +85,10 @@ Make setup, the actual action and observations distinguishable. Setup must not
 perform the behavior the application is supposed to provide. Await asynchronous
 work and assertions, and verify that the intended test is discovered and runs.
 For negative cases, check the required rejection and absence of prohibited
-effects, not merely any exception or a missing control in one UI.
+effects, not merely any exception or a missing control in one UI. Pair a check
+that an element is absent with a control in which the same locator finds it
+present, and before asserting that all or none of a collected set match, or its
+minimum or maximum, assert the set's size against the fixture.
 
 When fixing a reproducible bug, ordinarily demonstrate that the regression test
 fails for that bug before the fix and passes afterward. If the fix already

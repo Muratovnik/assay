@@ -2,7 +2,8 @@
 
 Maintainer material for one method change, not runtime instructions or a run
 report. The cases are synthetic and public. A paired pilot ran them on
-2026-11-25; its outcome is below.
+2026-11-25; its outcome is below, followed by a candidate that states two of the
+points in the skill file and the plan of its repeat run.
 
 ## Decision and gap
 
@@ -99,3 +100,49 @@ The pilot does not test the three points themselves, since no run read them; it
 shows that the reference does not reach a UI test through its reading
 condition. W11 fails in the base method, so it remains the case for a change
 that places the size and presence-control rule where the work reads it.
+
+## Candidate: the rule in the skill file
+
+The candidate adds one sentence to `SKILL.md`, after the negative-case rule under
+"Implement without manufacturing success", which loads with the skill rather
+than on a reading condition: pair a
+check that an element is absent with a control in which the same locator finds
+it present, and assert a collected set's size against the fixture before an all,
+none, minimum or maximum claim over it. The reference keeps the detail and the
+selection point unchanged; the sentence restates only those two of its points.
+That reading the sentence will change the W11 test is a hypothesis this repeat
+tests.
+
+## Repeat run design
+
+Proposed volume, not yet agreed: 10 sessions on Sonnet at medium effort and at
+most 2 judge sessions on Opus at high effort.
+
+- Arms: the parent of the commit that adds this section, whose
+  `skills/test-writing` outside `evals/` is the 0.51.0 text, against that commit.
+  Both arms load test-writing explicitly with the same code-change bytes.
+- Cases and repeats: W11 three runs per arm and W12, the nearby valid control,
+  two runs per arm. Fix the run order before starting and alternate the arms.
+- Packets and harness as in the first pilot: the whole frozen tree of each arm
+  without `skills/*/evals`, its own directory, no MCP servers, no instruction
+  files and a shell limited to `python -m unittest`.
+- Grading: the rubric's verification probes on every saved test file, then the
+  `assess` items blind to the arm, by one grader. Record from the trace whether
+  `SKILL.md`'s new sentence was in context and whether `boundary-choices.md` was
+  read, and tokens, turns and wall time per run.
+- Hard requirement: as in the first pilot, every probe result in the rubric
+  holds and the production file is unchanged.
+- Effect: the candidate meets W11's hard requirement in at least two more of its
+  three runs than the baseline and has no more W12 failures than the baseline.
+- No effect: a W11 difference of one or none. Both arms at none means the
+  sentence did not change the assertion either: read the saved tests and traces
+  for an attempted presence control before revising text; another paraphrase is
+  not the next step.
+- Harm: the baseline ahead on W11 by two or more, or a W12 failure only in the
+  candidate.
+
+An infrastructure failure is replaced once; it is not a result for either arm.
+The repeat will not show behaviour on another model or effort, under automatic
+selection rather than explicit loading, or a difference smaller than two runs of
+three. W11 and W12 are selection cases that informed this candidate, so a pass is
+tuning evidence, not held-out evidence, and W10 and W07 are not rerun.
