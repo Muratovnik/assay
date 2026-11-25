@@ -408,9 +408,31 @@ downloaded, so neither triggers it. Reads before the latest compaction are not
 counted. A subagent's transcript records no line counts, so there a ranged read
 counts as reaching the end only when it returned fewer lines than its limit, and
 a plain `Read` counts as complete. The skill gate's feedback takes priority at the
-same stop. `disabled_rules: ["fetch-note"]` turns off the note after a fetch,
-`"search-note"` the note after a search and `"read-claims"` the stop check; each
-works without the others.
+same stop.
+
+A question to the owner is where an unchecked number does the most harm: the owner
+decides on what the question states. Rewriting a question after the owner has read
+it does not undo that, so the hook holds the question before it is asked. At
+`PreToolUse` it refuses the first question of a request and agent with a note: each
+number, count, status and claim about behaviour in the question, its options and
+their costs included, rests on a command or read made for this question and names
+the revision or date it ran on, or is marked as an assumption; a figure carried over
+from a report, a summary, memory or an earlier message is not a source. The question,
+as asked or corrected, passes when repeated, and later questions of the same request
+pass without a refusal. The note never repeats the question. It needs the plugin data
+directory and is keyed like the note after a fetch.
+
+A question is an `AskUserQuestion` call or a planning service's question write: an
+MCP tool named `create_work_item_request`, or `apply_work_item_changes` with a
+non-empty `questions` group, under any server name. The
+same batch tool without questions passes untouched. When the
+`midturn-critical-discussion` row refuses the same `AskUserQuestion` call, the one
+refusal carries both notes, skill note first, and the retry passes both. Like the
+other source checks it runs in Claude Code only.
+
+`disabled_rules: ["fetch-note"]` turns off the note after a fetch,
+`"search-note"` the note after a search, `"read-claims"` the stop check and
+`"question-sources"` the refusal before a question; each works without the others.
 
 ### Branch check in Claude Code
 
@@ -715,7 +737,8 @@ An optional `state_dir` must be absolute. Skill IDs use the catalogue's
 explicitly, which does not prevent the user or model from using it directly.
 `disabled_rules: ["skill-check"]` turns the per-request check and the gate off
 and keeps explicit choices; `"skill-gate"` turns off only the Claude gate, and
-`"fetch-note"` and `"read-claims"` the two Claude source checks, `"handback-hold"`
+`"fetch-note"`, `"search-note"`, `"read-claims"` and `"question-sources"` the Claude
+source checks, `"handback-hold"`
 the refusal of a subagent's first hand-back, `"report-form"` the report language and
 budget a subagent is told at its start, `"wait-form"` how a Claude Code subagent is
 told to wait for a long run, and each

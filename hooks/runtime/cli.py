@@ -275,6 +275,21 @@ def stop_feedback(event, rules, enabled, settings, kwargs):
     return _shown(note, check) or _shown(lines, "report check")
 
 
+def _joined(note, refusal):
+    """One reply for a call that a note or refusal and the question refusal both answer.
+
+    Two refusals in a row would cost the owner's question a third call, so the
+    refusal carries the other text before its own; each check has kept its key, so
+    the retry passes both.
+    """
+    if not refusal or not note:
+        return note or refusal
+    output = note["hookSpecificOutput"]
+    first = output.get("permissionDecisionReason") or output.get("additionalContext", "")
+    reason = refusal["hookSpecificOutput"]["permissionDecisionReason"]
+    return {"hookSpecificOutput": {**refusal["hookSpecificOutput"], "permissionDecisionReason": first + "\n\n" + reason}}
+
+
 def _process(event, client, environment, *, root=ROOT, clock=None):
     if not recognized(event, client):
         return {}, None
@@ -332,6 +347,9 @@ def _process(event, client, environment, *, root=ROOT, clock=None):
             # A rerun of one scenario while its reference is unread; a skill note on the same call goes first.
             if not note and name == "PreToolUse" and rules.rerun_rules and not legacy:
                 note = reruns.checked(event, rules.rerun_rules, enabled, settings["state_dir"], **kwargs)
+            # A question to the owner, refused once so its numbers and claims rest on sources checked for it.
+            if name == "PreToolUse" and rules.question_sources and not legacy:
+                note = _joined(note, sources.asked(event, settings["state_dir"], **kwargs))
             if note:
                 return note, None
         decision = ({"rule_ids": [], "context": ""} if protected

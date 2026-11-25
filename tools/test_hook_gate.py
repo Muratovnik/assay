@@ -21,7 +21,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
-from runtime import activation, cli, gate, midturn, predicates, reruns, skill_gate, state
+from runtime import activation, cli, gate, midturn, predicates, reruns, skill_gate, sources, state
 from route_evidence import route_table
 from route_evidence.core import digest
 from route_evidence.pipeline_store import PipelineStore
@@ -49,7 +49,8 @@ def raw(value):
 # Calls no check reads, by tool class: (tool, input).
 QUIET = [
     ("Grep", {"pattern": "TODO"}), ("Glob", {"pattern": "**/*.py"}), ("ToolSearch", {"query": "select:Monitor"}),
-    ("mcp__planning__claim_work_item", {"id": "X-1"}), ("Monitor", {}), ("TaskStop", {}), ("SendMessage", {}),
+    ("mcp__planning__claim_work_item", {"id": "X-1"}), ("mcp__planning__apply_work_item_changes", {"questions": []}),
+    ("mcp__planning__apply_work_item_changes", {"id": "X-1", "comment": {"body": "done"}}), ("Monitor", {}), ("TaskStop", {}), ("SendMessage", {}),
     ("Read", {"file_path": "/work/src/app.py"}), ("Read", {"file_path": "/work/skills/parser/references/x.md"}),
     ("Read", {"file_path": "/work/skills/parser/SKILL.md.bak"}), ("Read", "not an object"),
     ("Edit", {"file_path": "/work/notes.txt"}), ("Edit", {"file_path": "/work/tmp/probe.py"}),
@@ -66,6 +67,8 @@ FULL = [
     ("Agent", {"description": "x"}), ("Task", {}), ("SubagentHandback", {"message": "done"}),
     ("Skill", {"skill": "assay:code-change"}), ("WebFetch", {"url": "https://docs.example.dev"}),
     ("WebSearch", {"query": "hooks"}), ("AskUserQuestion", {"questions": []}),
+    ("mcp__planning__create_work_item_request", {"id": "X-1"}),
+    ("mcp__planning__apply_work_item_changes", {"id": "X-1", "questions": [{"prompt": "Which?"}]}),
     ("Read", {"file_path": "/work/skills/code-change/SKILL.md"}),
     ("Read", {"file_path": "C:\\cache\\skills\\test-writing\\SKILL.md"}),
     ("Read", {"file_path": "/work/skills/unknown-skill/SKILL.md"}),
@@ -89,6 +92,8 @@ class PredicateTests(unittest.TestCase):
         self.assertIs(predicates.SKILL_FILE, midturn.SKILL_FILE)
         self.assertIsNot(midturn.SKILL_FILE, skill_gate.SKILL_FILE)
         self.assertIs(predicates.reading_profile, cli.reading_profile)
+        self.assertIs(predicates.owner_question, gate.owner_question)
+        self.assertIs(predicates.owner_question, sources.owner_question)
 
     def test_the_gate_sends_every_tool_a_check_owns_the_full_path(self):
         owned = (route_table.SPAWN["claude"]["tools"] | {skill_gate.HANDBACK, midturn.QUESTION, "Skill"}

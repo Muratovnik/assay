@@ -16,8 +16,8 @@ from __future__ import annotations
 import json
 import sys
 
-from .predicates import (LAUNCHES, LOADED_SKILL, QUESTION, SHELLS, WEB, WRITES, classify, external, reading_profile,
-                         signature)
+from .predicates import (LAUNCHES, LOADED_SKILL, QUESTION, SHELLS, WEB, WRITES, classify, external, owner_question,
+                         reading_profile, signature)
 
 MAX_INPUT = 1024 * 1024
 # The command lines of a Claude event run that argparse reads exactly as written here.
@@ -75,6 +75,8 @@ def _quiet(event):
         return False
     data = event.get("tool_input")
     data = data if isinstance(data, dict) else {}
+    if owner_question(tool, data):
+        return False  # The source check holds every question to the owner, whichever tool asks it.
     if tool == "Read":
         path = data.get("file_path")
         return not (isinstance(path, str) and LOADED_SKILL.search(path))

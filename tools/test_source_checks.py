@@ -11,7 +11,7 @@ import unittest.mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
 sys.path.insert(0, str(ROOT / "skills/route-subagents/scripts"))
-from runtime import sources
+from runtime import gate, predicates, sources
 from runtime.cli import process
 
 SOURCE = "C:\\work\\src\\researcher.py"
@@ -412,6 +412,138 @@ class SourceCheckRuntimeTests(unittest.TestCase):
         codex = json.loads((ROOT / "hooks/codex.json").read_text(encoding="utf-8"))["hooks"]
         self.assertEqual("^(Agent|Task|WebFetch|WebSearch)$", claude["PostToolUse"][0]["matcher"])
         self.assertNotIn("PostToolUse", codex)
+
+
+QUESTION = {"questions": [{"question": "Which approach?", "header": "Approach", "multiSelect": False,
+                           "options": [{"label": "A", "description": "1.2x faster"},
+                                       {"label": "B", "description": "no change"}]}]}
+PLANNING_REQUEST = {"id": "X-1", "kind": "decision", "prompt": "Ship it?", "fields": [{"type": "choice"}]}
+PLANNING_BATCH = {"id": "X-1", "comment": {"body": "done"},
+                 "questions": [{"kind": "question", "prompt": "Which?", "fields": [{"type": "text"}]}]}
+
+
+class OwnerQuestionTests(unittest.TestCase):
+    """The first question to the owner of a request is refused once with the note on its sources; the retry passes."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.directory = Path(temporary.name)
+        self.environment = {"CLAUDE_PLUGIN_DATA": str(self.directory / "data")}
+
+    def pre(self, tool="AskUserQuestion", data=None, **extra):
+        return {"session_id": "session", "cwd": "work", "hook_event_name": "PreToolUse", "prompt_id": "p1",
+                "tool_name": tool, "tool_input": QUESTION if data is None else data, **extra}
+
+    def configured(self, **options):
+        path = self.directory / "hooks.json"
+        path.write_text(json.dumps({**options, "state_dir": str(self.directory / "data")}), encoding="utf-8")
+        return {"ASSAY_HOOK_CONFIG": str(path)}
+
+    def refusal(self, event, environment=None):
+        result, error = process(event, "claude", self.environment if environment is None else environment)
+        self.assertIsNone(error)
+        output = result.get("hookSpecificOutput", {})
+        if not output:
+            return None
+        self.assertEqual("deny", output["permissionDecision"])
+        self.assertNotIn("additionalContext", output)
+        return output["permissionDecisionReason"]
+
+    def loaded(self, skill="assay:critical-discussion", **extra):
+        process(self.pre("Skill", {"skill": skill}, **extra), "claude", self.environment)
+
+    def test_which_calls_put_a_question_to_the_owner(self):
+        for tool, data in (("AskUserQuestion", QUESTION), ("AskUserQuestion", {}),
+                           ("mcp__planning__create_work_item_request", PLANNING_REQUEST),
+                           ("mcp__plugin_tracker_planning__create_work_item_request", {}),
+                           ("mcp__planning__apply_work_item_changes", PLANNING_BATCH)):
+            with self.subTest(tool=tool):
+                self.assertTrue(predicates.owner_question(tool, data))
+        for tool, data in (("mcp__planning__apply_work_item_changes", {"id": "X-1", "comment": {"body": "x"}}),
+                           ("mcp__planning__apply_work_item_changes", {"questions": []}),
+                           ("mcp__planning__apply_work_item_changes", {"questions": "Which?"}),
+                           ("mcp__planning__apply_work_item_changes", "not an object"),
+                           ("mcp__planning__get_work_item_request", {}), ("create_work_item_request", {}),
+                           ("mcp__planning__create_work_item_request_list", {}), ("Bash", {"command": "x"}), (None, {})):
+            with self.subTest(tool=tool, data=data):
+                self.assertFalse(predicates.owner_question(tool, data))
+
+    def test_the_first_question_of_a_request_is_refused_with_the_note_and_the_retry_passes(self):
+        self.loaded()
+        reason = self.refusal(self.pre())
+        self.assertTrue(reason.startswith("Assay: Assay source check: "))
+        # What the item asks for: a command or read made for this question and its revision, else an assumption.
+        self.assertIn("each rests on a command or read made for this question, named with the revision", reason)
+        self.assertIn("or is marked as an assumption", reason)
+        self.assertIn("A figure carried over from a report, a summary, memory or an earlier message is not a source",
+                      reason)
+        self.assertIn("This call was not run; the same call, or the corrected one, passes when repeated.", reason)
+        # The note never repeats the question it holds.
+        self.assertNotIn("Which approach?", reason)
+        self.assertNotIn("1.2x", reason)
+        self.assertIsNone(self.refusal(self.pre()))
+        # A corrected question and a later question of the same request pass too.
+        self.assertIsNone(self.refusal(self.pre(data={"questions": [{"question": "Other?", "options": []}]})))
+
+    def test_a_new_request_or_another_agent_is_refused_once_again(self):
+        self.loaded()
+        self.loaded(prompt_id="p2")
+        self.loaded(agent_id="worker")
+        self.assertTrue(self.refusal(self.pre()))
+        self.assertTrue(self.refusal(self.pre(prompt_id="p2")))
+        self.assertIsNone(self.refusal(self.pre(prompt_id="p2")))
+        self.assertTrue(self.refusal(self.pre(agent_id="worker")))
+        self.assertIsNone(self.refusal(self.pre(agent_id="worker")))
+
+    def test_a_planning_question_is_refused_on_the_first_call_and_passes_on_the_second(self):
+        for tool, data in (("mcp__planning__create_work_item_request", PLANNING_REQUEST),
+                           ("mcp__planning__apply_work_item_changes", PLANNING_BATCH)):
+            with self.subTest(tool=tool):
+                event = self.pre(tool, data, prompt_id=tool)
+                self.assertIn("Assay source check", self.refusal(event))
+                self.assertIsNone(self.refusal(event))
+
+    def test_a_batch_write_without_questions_passes_and_leaves_the_next_question_refused(self):
+        batch = self.pre("mcp__planning__apply_work_item_changes", {"id": "X-1", "checklist_ticks": [{"item_id": "a"}]})
+        self.assertIsNone(self.refusal(batch))
+        self.assertIn("Assay source check",
+                      self.refusal(self.pre("mcp__planning__create_work_item_request", PLANNING_REQUEST)))
+
+    def test_the_skill_note_on_the_same_question_joins_the_one_refusal(self):
+        # critical-discussion is not loaded, so its row refuses this question too; one refusal carries both.
+        reason = self.refusal(self.pre())
+        self.assertIn("assay:critical-discussion", reason)
+        self.assertIn("Assay source check", reason)
+        self.assertLess(reason.index("assay:critical-discussion"), reason.index("Assay source check"))
+        self.assertIsNone(self.refusal(self.pre()))
+
+    def test_the_rule_turns_off_alone_and_codex_or_missing_state_get_nothing(self):
+        environment = self.configured(disabled_rules=["question-sources"])
+        self.assertIsNone(self.refusal(self.pre("mcp__planning__create_work_item_request", PLANNING_REQUEST),
+                                       environment))
+        # The skill note keeps refusing without it, alone.
+        reason = self.refusal(self.pre(), environment)
+        self.assertIn("assay:critical-discussion", reason)
+        self.assertNotIn("Assay source check", reason)
+        self.assertIsNone(self.refusal(self.pre(), environment))
+        self.assertEqual(({}, None), process(self.pre(prompt_id="p6"), "codex", self.environment))
+        self.assertEqual({}, sources.asked(self.pre(), None))
+        self.assertEqual({}, sources.asked(self.pre(session_id=""), self.directory))
+        self.assertEqual({}, sources.asked({**self.pre(), "hook_event_name": "PostToolUse"}, self.directory))
+
+    def test_the_hook_entry_sends_every_owner_question_the_full_path(self):
+        for tool, data in (("AskUserQuestion", QUESTION), ("mcp__planning__create_work_item_request", PLANNING_REQUEST),
+                           ("mcp__planning__apply_work_item_changes", PLANNING_BATCH)):
+            with self.subTest(tool=tool):
+                self.assertFalse(gate.quiet(json.dumps(self.pre(tool, data)).encode()))
+        quiet = self.pre("mcp__planning__apply_work_item_changes", {"id": "X-1", "comment": {"body": "x"}})
+        self.assertTrue(gate.quiet(json.dumps(quiet).encode()))
+        # Claude Code runs the hook for these tools: the catch-all PreToolUse matcher covers MCP names.
+        import re
+        claude = json.loads((ROOT / "hooks/hooks.json").read_text(encoding="utf-8"))["hooks"]["PreToolUse"]
+        for tool in ("AskUserQuestion", "mcp__planning__create_work_item_request"):
+            self.assertTrue(any(re.search(group["matcher"], tool) for group in claude), tool)
 
 
 if __name__ == "__main__":

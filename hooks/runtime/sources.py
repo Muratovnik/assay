@@ -1,4 +1,5 @@
-"""Point a Claude agent at the text behind a fetched summary, at what a search only found and at a contradicted full-read claim.
+"""Point a Claude agent at the text behind a fetched summary, at what a search only found, at a contradicted
+full-read claim and at the sources of a question to the owner.
 
 Three notes, none a block, all stated as facts:
 
@@ -11,11 +12,16 @@ Three notes, none a block, all stated as facts:
   read only in part, or short of the line range the claim states for it, or that
   URL opened only through WebFetch.
 
+And one refusal: the first question to the owner of a request and agent, through
+AskUserQuestion or a planning service's question write, is refused with a note
+that each number and claim in it rests on a command or read made for it, or is
+marked as an assumption; the retry passes.
+
 The claim check fires only on positive evidence. A file the transcript shows no
 Read of, for example one printed with a shell command, leaves it silent, and so
 does a URL that a shell command also names. It reads the transcript tail the
-skill gate reads and stores nothing; the fetch and search notes each store one
-hashed key per request and agent.
+skill gate reads and stores nothing; the fetch, search and question checks each
+store one hashed key per request and agent.
 """
 from __future__ import annotations
 
@@ -25,7 +31,7 @@ from pathlib import Path
 import re
 import time
 
-from .predicates import page_reader
+from .predicates import owner_question, page_reader
 from .skill_gate import HANDBACK, _lines, _prompt
 
 TTL = 86_400
@@ -66,6 +72,12 @@ SEARCH_NOTE = ("Assay source check: search results are found, not read. A reques
                "by the ones the conclusion rests on, each labelled with how it was read; the other results take at "
                "most one line with their count and kind, and an unopened result is named only if it could change "
                "the conclusion, with why it stayed unopened and what that leaves uncertain.")
+QUESTION_NOTE = ("Assay source check: the owner decides on what this question states. Before asking, check each "
+                 "number, count, status and claim about how something behaves in it, the options and their costs "
+                 "included: each rests on a command or read made for this question, named with the revision or date "
+                 "it ran on, or is marked as an assumption. A figure carried over from a report, a summary, memory "
+                 "or an earlier message is not a source: run or read it again, or mark it so. This call was not run; "
+                 "the same call, or the corrected one, passes when repeated. This check comes once per request.")
 
 
 def _key(*parts):
@@ -83,21 +95,28 @@ def _identity(event):
     return session, agent, turn if isinstance(turn, str) and len(turn) <= 200 else None
 
 
-def _once(event, directory, kind, note, clock):
-    """The note on the first result of its kind for this request and agent, else {}."""
+def _first(event, directory, kind, clock):
+    """Whether this is the first call of its kind for this request and agent; the answer is recorded."""
     identity = _identity(event) if directory else None
     if identity is None:
-        return {}
+        return False
     from route_evidence.pipeline_store import PipelineStore
     key = _key(*identity)
     with PipelineStore(Path(directory) / "source-check", clock=clock).transaction() as tx:
         if tx.get(kind, key):
-            return {}
+            return False
         records = tx.values(kind)
         if len(records) >= MAX_RECORDS:
             tx.delete(kind, min(records, key=lambda item: item["at"])["id"])
         now = clock()
         tx.put(kind, key, {"id": key, "at": now}, now + TTL)
+    return True
+
+
+def _once(event, directory, kind, note, clock):
+    """The note on the first result of its kind for this request and agent, else {}."""
+    if not _first(event, directory, kind, clock):
+        return {}
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": note}}
 
 
@@ -114,6 +133,20 @@ def fetched(event, directory, *, clock=time.time):
 def searched(event, directory, *, clock=time.time):
     """The search note for this request and agent on its first WebSearch result, else {}."""
     return _once(event, directory, "search-note", SEARCH_NOTE, clock) if event.get("tool_name") == SEARCH else {}
+
+
+def asked(event, directory, *, clock=time.time):
+    """The refusal of this request and agent's first question to the owner, else {}.
+
+    A note would reach the model only after the owner answered, so the first call is
+    refused with the note as its reason, and its retry, as asked or corrected, passes.
+    """
+    if (event.get("hook_event_name") != "PreToolUse"
+            or not owner_question(event.get("tool_name"), event.get("tool_input"))
+            or not _first(event, directory, "question-note", clock)):
+        return {}
+    return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+                                   "permissionDecisionReason": "Assay: " + QUESTION_NOTE}}
 
 
 def _range(data, result, text):

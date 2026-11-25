@@ -396,7 +396,8 @@ class NoteTests(unittest.TestCase):
         for options in ({}, {"skill_note_form": "deny"}):
             with self.subTest(options=options), tempfile.TemporaryDirectory() as scratch:
                 self.data = Path(scratch)
-                environment = self.environment(**options)
+                # The source check refuses a question on its own terms; see test_source_checks.
+                environment = self.environment(disabled_rules=["question-sources"], **options)
                 output = self.run_event(self.pre("AskUserQuestion", asked), environment)["hookSpecificOutput"]
                 # A note would reach the model only after the owner answered, so the first call is refused.
                 self.assertEqual("deny", output["permissionDecision"])
@@ -412,13 +413,14 @@ class NoteTests(unittest.TestCase):
                 self.assertEqual("deny" if options else None, result.get("permissionDecision"))
         with tempfile.TemporaryDirectory() as scratch:
             self.data = Path(scratch)
-            environment = self.environment(disabled_rules=["midturn-critical-discussion"])
+            environment = self.environment(disabled_rules=["midturn-critical-discussion", "question-sources"])
             self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), environment))
 
     def test_a_question_that_can_leave_things_as_they_are_is_asked_without_a_refusal(self):
         options = [{"label": "Apply", "description": "a"}, {"label": "Keep as is", "description": "b"}]
         asked = {"questions": [{"question": "Apply it?", "header": "Apply", "multiSelect": False, "options": options}]}
-        self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked), self.environment()))
+        self.assertEqual({}, self.run_event(self.pre("AskUserQuestion", asked),
+                                            self.environment(disabled_rules=["question-sources"])))
 
     def test_the_default_form_is_the_note_and_both_forms_say_the_same(self):
         self.assertEqual("note", cli.options({})["skill_note_form"])

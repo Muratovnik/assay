@@ -25,6 +25,10 @@ WRITES = frozenset({"Edit", "Write", "MultiEdit", "NotebookEdit"})
 SHELLS = frozenset({"Bash", "PowerShell"})
 WEB = frozenset({"WebFetch", "WebSearch"})
 QUESTION = "AskUserQuestion"
+# A planning service's MCP tools that put a question to the owner, under whatever server name the client
+# registered them (`mcp__planning__…`, `mcp__plugin_tracker_planning__…`). The batch write asks only through
+# its `questions` group.
+PLANNING_QUESTION = re.compile(r"^mcp__.+__(create_work_item_request|apply_work_item_changes)$")
 MAX_PATH = 4_096
 MAX_COMMAND = 65_536
 
@@ -78,6 +82,23 @@ def reading_profile(role):
 def page_reader(event):
     """Whether Claude Code's built-in web-fetch agent makes this call: a skill note or the fetch note asks what it cannot do."""
     return event.get("agent_type") == PAGE_READER
+
+
+def owner_question(tool, data):
+    """Whether one tool call puts a question to the owner: AskUserQuestion, or a planning service's question write.
+
+    That write is `create_work_item_request`, or `apply_work_item_changes` with a non-empty
+    `questions` group; the same batch tool without one writes no question.
+    """
+    if tool == QUESTION:
+        return True
+    found = PLANNING_QUESTION.match(tool) if isinstance(tool, str) else None
+    if not found:
+        return False
+    if found[1] == "create_work_item_request":
+        return True
+    questions = data.get("questions") if isinstance(data, dict) else None
+    return isinstance(questions, list) and bool(questions)
 
 
 def classify(path):
