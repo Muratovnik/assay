@@ -425,7 +425,9 @@ enforce provider-side quota limits.
 
 Failures back off from five minutes to one hour; Retry-After is capped at 24h and
 respected under force. Caller cancellation is not charged as a publisher failure.
-Offline never starts a fetch worker. Clock reversal marks data stale.
+A failed refresh never replaces a cache file written for another source
+definition, as by newer code while an older service still runs: that process
+reports the failure and keeps its retry time in memory. Offline never starts a fetch worker. Clock reversal marks data stale.
 `allow_stale=false` excludes stale data, while the status still shows the gap.
 
 ## Import and verification

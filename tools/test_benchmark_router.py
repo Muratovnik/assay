@@ -252,6 +252,31 @@ class CacheTests(unittest.TestCase):
         self.cache.get(changed, self.fetch)
         self.assertEqual(self.calls, 2)
 
+    def test_a_failed_refresh_leaves_another_revisions_cache_file_untouched(self):
+        # A service started before a registry change keeps the older definition while
+        # newer code refreshes the same cache directory.
+        older, newer = self.source, {**self.source, "revision": 99}
+        current = Cache(self.cache.root, clock=lambda: self.now)
+        self.assertEqual(current.get(newer, self.fetch)["refresh"], "updated")
+        path = self.cache.root / "deepswe.json"
+        stored = path.read_bytes()
+        def mismatch(*args):
+            raise FetchError("source identity mismatch")
+        failed = self.cache.get(older, mismatch)
+        self.assertEqual((failed["refresh"], failed["snapshot"]), ("failed", None))
+        self.assertIn("source identity mismatch", failed["error"])
+        self.assertEqual(path.read_bytes(), stored)
+        self.assertEqual(current.get(newer, self.fetch, offline=True)["availability"], "fresh")
+        # The refusal and its retry time stay with the process that met them.
+        calls = self.calls
+        self.assertEqual(self.cache.get(older, self.fetch)["refresh"], "backoff")
+        self.assertEqual((self.calls, path.read_bytes()), (calls, stored))
+        self.assertEqual(Cache(self.cache.root).read(older).get("failures", 0), 0)
+        # A failure against the process's own file, or against none, is still recorded there.
+        other = SOURCES["cursorbench"]
+        self.cache.get(other, mismatch)
+        self.assertEqual(Cache(self.cache.root).read(other)["failures"], 1)
+
     def test_frontier_1_1_cache_is_not_reused_or_relabelled_as_2_0(self):
         current = SOURCES["frontiercode"]
         old = {**current, "version": "1.1", "revision": 5}

@@ -25,6 +25,7 @@ CONTRACTS = {"benchmark": (validate_snapshot, (("source_id", "id"), ("source_url
 # but cannot turn successive requests into an unbounded source poller.
 MAX_INVENTORY_KEYS = 256
 INVENTORY_REFRESH_INTERVAL = 300
+FAILURE_KEYS = ("last_attempt_at", "failures", "error", "next_retry_at")
 
 
 def checked_inventory_keys(value, limit=100):
@@ -114,15 +115,26 @@ class Cache:
         if not math.isfinite(ttl) or not math.isfinite(retry_base) or ttl <= 0 or retry_base <= 0:
             raise EvidenceError("TTL and retry delay must be positive")
         self.root, self.ttl, self.retry_base, self.clock = root, ttl, retry_base, clock
+        # A failed refresh over another definition's file is kept here, not written:
+        # (source id, fingerprint) -> the FAILURE_KEYS of the last attempt.
+        self._unsaved: dict[tuple[str, str], dict] = {}
         root.mkdir(parents=True, exist_ok=True)
 
     def read(self, source: dict) -> dict:
+        return self._load(source)[0]
+
+    def _load(self, source: dict) -> tuple[dict, bool]:
+        """The source's state, and whether its file was written for another source
+        definition or cache schema, as by a service started before a registry change."""
         path = self.root / (source["id"] + ".json")
         try:
             state = read_document(path)
-            if (not isinstance(state, dict) or state.get("cache_schema") != 1
-                    or state.get("source_fingerprint") != digest(source)):
-                raise EvidenceError("cache schema or source definition changed")
+            if not isinstance(state, dict):
+                raise EvidenceError("invalid cache document")
+            if state.get("cache_schema") != 1 or state.get("source_fingerprint") != digest(source):
+                # Not this definition's data; a failure over it is this process's own.
+                return {"error": "invalid_cache", "snapshot": None,
+                        **self._unsaved.get((source["id"], digest(source)), {})}, True
             if state.get("snapshot") is not None:
                 validate, identity = contract(source)
                 state["snapshot"] = validate(state["snapshot"])
@@ -138,12 +150,12 @@ class Cache:
             if not isinstance(state.get("validators", {}), dict):
                 raise EvidenceError("invalid cache validators")
             checked_inventory_keys(state.get("inventory_checked", []), MAX_INVENTORY_KEYS)
-            return state
+            return state, False
         except FileNotFoundError:
-            return {}
+            return {}, False
         except (EvidenceError, OSError, UnicodeError):
             # No partial salvage of unvalidated data. Online calls may recover.
-            return {"error": "invalid_cache", "snapshot": None}
+            return {"error": "invalid_cache", "snapshot": None}, False
 
     def view(self, source: dict, state: dict, **extra) -> dict:
         now = self.clock()
@@ -193,7 +205,7 @@ class Cache:
         with source_lock(self.root / (source["id"] + ".lock")) as acquired:
             if not acquired:
                 return self.view(source, self.read(source), refresh="update_in_progress")
-            state = self.read(source)
+            state, foreign = self._load(source)
             current, early, deferred = decision(state)
             if not force and not current["stale"] and not early:
                 return cached(current, deferred)
@@ -245,6 +257,13 @@ class Cache:
                              error=f"{type(exc).__name__}: {str(exc)[:300]}",
                              next_retry_at=timestamp(self.clock() + delay))
                 action = "failed"
-            atomic_write(self.root / (source["id"] + ".json"), state)
+            unsaved = (source["id"], digest(source))
+            if foreign and action == "failed":
+                # Another definition's file may hold the only good snapshot, as one newer
+                # code refreshed: report the failure but leave the file alone.
+                self._unsaved[unsaved] = {key: state[key] for key in FAILURE_KEYS}
+            else:
+                self._unsaved.pop(unsaved, None)
+                atomic_write(self.root / (source["id"] + ".json"), state)
             return self.view(source, state, refresh=action,
                              **({"refresh_reason": "inventory_changed"} if early else {}))
