@@ -150,7 +150,9 @@ A subagent's packet is not a user prompt, so subagents get a variant at their
 start instead, see [subagents](#subagents). The agent leaves the sentence out
 when a request fixes an exact output format. For scripted runs whose output must
 stay clean, such as `claude -p` pipelines, turn the check off with
-`disabled_rules: ["skill-check"]` (see below).
+`disabled_rules: ["skill-check"]` (see below). The checks at a stop can still
+continue such a run's turn, so its consumer reads every text of the turn, not
+only the final `result`; see [the skill gate](#the-skill-gate-in-claude-code).
 
 ### The skill gate in Claude Code
 
@@ -182,6 +184,18 @@ and [report](#report-check-in-claude-code) checks, therefore also returns
 `Assay: skill gate sent Claude a note.` It says that a check fired, not what came
 of it. A refused hand-back adds no such line: the subagent hands back again and no
 short reply is left to explain.
+
+A headless run, `claude -p` or the Agent SDK, has no person watching the turn: a
+program reads its output. A continued stop adds another assistant text to the
+turn, and the final `result` holds only the last one. In one of two `claude -p`
+runs with Claude Code 2.1.328 on 25 November 2026, that last text was the few
+words saying the answer was unchanged, and the answer itself, a file path the
+prompt asked for, was only in the earlier text. A program that runs Claude Code
+headless with Assay's hooks enabled therefore reads every assistant text of the
+turn, from `--output-format stream-json --verbose` or the SDK's assistant
+messages, not only the final `result`. The checks cannot ask for the whole
+answer again in such a run alone, because the hook input does not say whether a
+person is watching.
 
 The announcement usually opens an earlier message of the turn than the final
 reply, so the gate reads the tail of the session transcript, as the
