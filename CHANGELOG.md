@@ -1,8 +1,9 @@
 # Changelog
 
-Generated from the commit history under the
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) Angular
-preset. Sections and entry format follow
+Each release's entry is written by hand in the release commit, from the
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) subjects
+since the previous release, and checked with `relkit notes <version> --strict`.
+Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 

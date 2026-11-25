@@ -147,9 +147,13 @@ handoff. Preserve any pre-existing staged work.
 
 Commit subjects use the Conventional Commit types `build`, `chore`, `ci`, `docs`,
 `feat`, `fix`, `perf`, `refactor`, `revert`, `style` and `test`, with an optional
-lowercase scope and `!` for a breaking change. `CHANGELOG.md` is generated from
-those subjects under the Angular preset, so a vague subject becomes a vague
-changelog entry that nobody can fix later without rewriting history. Do not credit an AI tool as an
+lowercase scope and `!` for a breaking change. A release's `CHANGELOG.md` entry
+is written by hand in the release commit, in the Angular preset's sections, and
+checked with `relkit notes <version> --strict`. A generated draft is optional and
+needs a `[changelog.generator]` in `relkit.toml`, which this repository does not
+declare, so `relkit notes <version> --draft --write` is refused here. A vague
+subject still stays in the history for good: nobody can fix it later without
+rewriting history. Do not credit an AI tool as an
 author, co-author, reviewer or generator anywhere in a commit, pull request,
 release note or tracked file.
 
