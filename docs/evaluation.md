@@ -77,9 +77,10 @@ whether the loader events actually occurred. Its verdict is deliberately narrow,
 and for Codex it returns `unverified` because there is no qualified mapping from
 its events to a skill activation.
 
-The same caution applies to sandboxes. An agent profile's adapter asks for a
-read-only sandbox; whether the session honoured it is a property of the run, not
-of the file. Verify the effective policy rather than reading the adapter.
+The same caution applies to sandboxes. An agent profile runs in the sandbox its
+client gives the session, on Codex the parent session's, whatever the adapter
+says; whether the session stayed read-only is a property of the run, not of the
+file. Verify the effective policy rather than reading the adapter.
 
 ## If you want to evaluate a skill yourself
 

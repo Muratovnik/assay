@@ -159,9 +159,16 @@ def assert_native_plan(catalog: aa.Catalog) -> None:
         codex = aa.render_profile(source, evidence, "codex").decode("utf-8", "strict")
         claude = aa.render_profile(source, evidence, "claude").decode("utf-8", "strict")
         codex_document = tomllib.loads(codex)
-        if codex_document.get("sandbox_mode") != "read-only":
+        # Codex keeps the parent's sandbox whatever an agent file asks for, so the
+        # adapter must not request one and must say what its boundary rests on.
+        if "sandbox_mode" in codex_document:
             raise aa.ContractError(
-                "compatibility fixture: Codex reviewer lost read-only sandbox"
+                "compatibility fixture: Codex reviewer requests a sandbox Codex ignores"
+            )
+        if "runs in the parent session's sandbox" not in codex_document.get(
+                "developer_instructions", ""):
+            raise aa.ContractError(
+                "compatibility fixture: Codex reviewer does not name the parent's sandbox"
             )
         header, body = claude.split("\n---\n", 1)
         if "\ntools: Read, Grep, Glob\n" not in header + "\n":

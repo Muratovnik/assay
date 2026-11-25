@@ -493,7 +493,6 @@ class AgentAssetsTests(unittest.TestCase):
         source = (aa.ROOT / asset.path).read_bytes()
         codex = aa.render_profile(source, asset, "codex").decode("utf-8")
         claude = aa.render_profile(source, asset, "claude").decode("utf-8")
-        self.assertEqual("read-only", tomllib.loads(codex)["sandbox_mode"])
         self.assertNotIn("You may run the caller's declared read-only oracle", codex)
         self.assertIn("did not rerun the oracle", codex)
         self.assertFalse(tomllib.loads(codex)["features"]["shell_tool"])
@@ -516,6 +515,25 @@ class AgentAssetsTests(unittest.TestCase):
         # A reviewer that read nothing must not return a clean verdict.
         for projection in (codex, claude):
             self.assertIn("Name the files, diff hunks, and receipts you actually read", projection)
+
+    def test_codex_profiles_request_no_sandbox_and_name_the_parents(self) -> None:
+        # Codex keeps the parent session's sandbox whatever a custom agent file
+        # asks for, so a requested sandbox would be configuration it ignores.
+        catalog = aa.load_catalog(aa.ROOT)
+        for asset in aa.profile_assets(catalog):
+            with self.subTest(profile=asset.name):
+                source = (aa.ROOT / asset.path).read_bytes()
+                codex = tomllib.loads(aa.render_profile(source, asset, "codex").decode("utf-8"))
+                claude = aa.render_profile(source, asset, "claude").decode("utf-8")
+                self.assertNotIn("sandbox_mode", codex)
+                self.assertIn(
+                    "runs in the parent session's sandbox and approval policy",
+                    codex["developer_instructions"],
+                )
+                self.assertIn("rests on these instructions and the disabled shell tool",
+                              codex["developer_instructions"])
+                self.assertFalse(codex["features"]["shell_tool"])
+                self.assertNotIn("parent session's sandbox", claude)
 
     def test_codex_profiles_name_workspace_reading_unavailable(self) -> None:
         # Codex reads files only through the shell its projection turns off, so a

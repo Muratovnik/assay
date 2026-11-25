@@ -69,13 +69,15 @@ never creates another agent. `route-subagents` owns that policy once, and the
 other skills do not restate it.
 
 Profiles are capability boundaries, not roles with a model attached. The Codex
-adapter asks for a read-only sandbox and the Claude adapter uses plan mode with a
-capability-derived tool list. Only the evidence reviewer declares an executable
-oracle. Codex runs it inside the read-only sandbox; Claude ignores a plugin
-subagent's permission mode, so the Claude projection names the oracle unavailable,
-keeps only reading tools and reads the caller's receipts instead. An adapter's
-requested sandbox is configuration: verify the effective session policy rather
-than assuming a parent process left it intact.
+adapter turns off the shell and apps and requests no sandbox: Codex keeps the
+parent session's sandbox and approval policy whatever an agent file asks for, so
+the projection says that its read-only boundary rests on its instructions and the
+disabled shell tool. The Claude adapter carries a capability-derived tool list.
+Only the evidence reviewer declares an executable oracle, and neither projection
+runs it: Codex has no shell there, and Claude ignores a plugin subagent's
+permission mode, so both name the oracle unavailable and read the caller's
+receipts instead. Verify the effective session policy rather than assuming a
+parent process kept it read-only.
 
 ## Routing
 

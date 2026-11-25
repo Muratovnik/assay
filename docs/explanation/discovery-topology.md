@@ -88,24 +88,28 @@ it to be noticed later.
 
 A profile is a capability boundary, not a role with a model attached: it
 carries no model, no effort level, no machine path and no runtime state. Both
-rendered adapters ask the client to constrain itself accordingly — the Codex
-adapter asks for a read-only sandbox, and the Claude adapter uses plan mode
-with a capability-derived tool list.
+rendered adapters constrain the tools the client offers — the Codex adapter
+turns off the shell and apps, and the Claude adapter carries a
+capability-derived tool list. Neither sets the session's sandbox: Codex keeps
+the parent session's sandbox and approval policy whatever a custom agent file
+asks for, so the Codex adapter requests none and tells the role that its
+read-only boundary rests on its instructions and the disabled shell tool.
 
 Only the `evidence-reviewer` profile declares an executable oracle, because a
-review that cannot rerun its check means less. Codex receives it inside a
-read-only sandbox. Claude ignores a plugin subagent's `permissionMode`, and some
-parent modes override a native one, so a shell there would not stay read-only:
-the Claude projection is a bounded reader with `Read`, `Grep` and `Glob`, names
-the oracle unavailable and reads the snapshot-bound receipts the caller supplies
-instead. That is a real loss of the rerun on Claude, accepted in exchange for not
-promising a boundary the client does not keep. `official-docs-researcher` gets no
-execution capability at all, consistent with a read-only research role.
+review that cannot rerun its check means less. Neither client holds that shell
+read-only. Codex turns it off in the projection. Claude ignores a plugin
+subagent's `permissionMode`, and some parent modes override a native one, so a
+shell there would not stay read-only: the Claude projection is a bounded reader
+with `Read`, `Grep` and `Glob`. Both name the oracle unavailable and read the
+snapshot-bound receipts the caller supplies instead. That is a real loss of the
+rerun, accepted in exchange for not promising a boundary the client does not
+keep. `official-docs-researcher` gets no execution capability at all,
+consistent with a read-only research role.
 
-That distinction has a limit worth stating plainly: an adapter's requested
-sandbox is configuration, not a guarantee. Whether a given session actually
-enforced a read-only sandbox is a property of that run, and has to be
-verified rather than assumed from the file that requested it. The same is
+That distinction has a limit worth stating plainly: an adapter file is
+configuration, not a guarantee. Whether a given session actually stayed
+read-only is a property of that run and of the sandbox its parent gave it, and
+has to be verified rather than assumed from the file. The same is
 true one level up — a skill activating automatically is not permission to
 delegate to another agent or to mutate anything; that boundary belongs to the
 skill's own instructions and the profile's declared capabilities, not to the

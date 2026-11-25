@@ -99,6 +99,15 @@ SURFACE_UNAVAILABLE = {
         {"read-only-oracle", "skill-discovery", "workspace-read", "workspace-search"}
     ),
 }
+# Codex applies only a closed set of keys from a custom agent file and keeps the
+# parent session's sandbox and approval policy (codex-rs/core/src/agent/role.rs,
+# rust-v0.171.0; its subagent documentation says the same), so the adapter
+# requests no sandbox and tells the role what its boundary rests on.
+CODEX_SANDBOX_NOTE = (
+    "This projection runs in the parent session's sandbox and approval policy: "
+    "Codex does not apply a sandbox from an agent file. Its read-only boundary "
+    "rests on these instructions and the disabled shell tool.\n\n"
+)
 # A projection that lost a capability does not get tools that extend a session at
 # runtime, so it cannot widen itself back.
 SESSION_EXTENDING_TOOLS = frozenset({"Skill", "ToolSearch"})
@@ -501,8 +510,8 @@ def render_profile(data: bytes, asset: Asset, client: str) -> bytes:
             f"# source-sha256: {digest}\n"
             f"name = {json.dumps(asset.name, ensure_ascii=False)}\n"
             f"description = {json.dumps(description, ensure_ascii=False)}\n"
-            'sandbox_mode = "read-only"\n'
-            f"developer_instructions = {json.dumps(notice + instructions, ensure_ascii=False)}\n"
+            "developer_instructions = "
+            f"{json.dumps(notice + CODEX_SANDBOX_NOTE + instructions, ensure_ascii=False)}\n"
             '\n[features]\nshell_tool = false\napps = false\ngoals = false\n'
             '\n[agents]\nenabled = false\n'
         )
