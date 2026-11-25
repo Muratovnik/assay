@@ -145,6 +145,45 @@ class ReleaseCheckInterpreter(unittest.TestCase):
         self.assertIn("older than 3.11", str(raised.exception.code))
         self.assertEqual(1, len(self.calls))
 
+    def test_a_directory_this_script_did_not_build_is_refused_and_left_alone(self):
+        # An environment something else built, such as one a running service
+        # was started from, must not be deleted to make room for this one.
+        module = self.environment / "Lib" / "site-packages" / "service.py"
+        module.parent.mkdir(parents=True)
+        module.write_text("in use\n", "utf-8")
+        with self.assertRaises(SystemExit) as raised:
+            self.provision()
+        message = str(raised.exception.code)
+        self.assertEqual(1, len(message.splitlines()))
+        self.assertIn(str(self.environment), message)
+        self.assertIn("--environment", message)
+        self.assertEqual("in use\n", module.read_text("utf-8"))
+        self.assertFalse(any(call[1:3] == ["-m", "venv"] for call in self.calls))
+
+    def test_an_interrupted_build_of_its_own_is_replaced(self):
+        self.environment.mkdir(parents=True)
+        (self.environment / rc.STAMP).write_text("building\n", "utf-8")
+        leftover = self.environment / "half-installed"
+        leftover.write_text("", "utf-8")
+        self.assertFalse(rc.current(self.environment, "digest"))
+        self.provision()
+        self.assertFalse(leftover.exists())
+        self.assertEqual("digest\n", (self.environment / rc.STAMP).read_text("utf-8"))
+
+    def test_a_build_is_stamped_as_its_own_before_the_install(self):
+        stamps = []
+
+        def run(command, **_):
+            if command[1:3] == ["-m", "venv"]:
+                rc.interpreter(self.environment).parent.mkdir(parents=True)
+            elif command[1:3] == ["-m", "pip"]:
+                stamps.append((self.environment / rc.STAMP).read_text("utf-8"))
+            return mock.Mock(returncode=0, stdout="3.14.7\n", stderr="")
+
+        with mock.patch.object(rc.subprocess, "run", side_effect=run):
+            rc.provision(self.environment, "digest")
+        self.assertEqual(["building\n"], stamps)
+
 
 class RoutingGate(unittest.TestCase):
     """The pre-release gate for the browser and MCP routing integrations."""

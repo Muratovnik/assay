@@ -3,7 +3,7 @@
 `check --all` runs in the tooling environment, which carries neither
 Playwright nor the MCP SDK, so the browser adapter and the stdio MCP service
 are skipped there. This gate runs before a release instead. It builds its own
-pinned environment in the ignored `.cache/routing-env` through
+pinned environment in the ignored `.cache/routing-check-env` through
 `release_check.py`, installs the Chromium build the pinned Playwright expects
 into that environment's `browsers` directory, and runs the suites with
 REQUIRE_ROUTING_INTEGRATIONS=1, so a missing SDK or browser fails rather than
@@ -24,7 +24,9 @@ else:
     import release_check
 
 ROOT = release_check.ROOT
-ENVIRONMENT = ROOT / ".cache" / "routing-env"
+# A directory of its own: `.cache/routing-env` is where a checkout's registered
+# routing service may be running from, and a rebuild deletes its environment.
+ENVIRONMENT = ROOT / ".cache" / "routing-check-env"
 SCRIPTS = Path("skills/route-subagents/scripts")
 REQUIREMENTS = (
     Path("requirements-tools.txt"),

@@ -106,8 +106,17 @@ def provision(environment: Path, digest: str, requirements: tuple[Path, ...] = (
             break
     python, version = base_interpreter()
     if environment.exists():
+        # Only an environment this script built is replaced. A directory
+        # without its stamp belongs to something else and may be in use:
+        # deleting it would break whatever runs from it.
+        if not (environment / STAMP).is_file():
+            raise refuse(f"{environment} exists and was not built by this script (it has no {STAMP}); "
+                         "remove it yourself or name another directory with --environment")
         shutil.rmtree(environment)
     subprocess.run([python, "-m", "venv", str(environment)], check=True)
+    # Stamped before the install, so an interrupted build is still this
+    # script's to replace; it is not current until the digest is written.
+    (environment / STAMP).write_text("building\n", "utf-8")
     files = [argument for path in requirements for argument in ("-r", str(path))]
     installed = subprocess.run([str(interpreter(environment)), "-m", "pip", "install", "--disable-pip-version-check",
                                 "--quiet", "--only-binary", ":all:", *files],

@@ -106,7 +106,7 @@ no wheel for is refused in one line rather than compiled for.
 
 `check --all` skips the browser and MCP routing integrations: its environment
 has no Playwright, Chromium or MCP SDK. Before a release, `relkit.toml` also runs
-`python -B tools/routing_check.py`, which builds the ignored `.cache/routing-env`
+`python -B tools/routing_check.py`, which builds the ignored `.cache/routing-check-env`
 from the tooling and routing requirements, installs the Chromium build of the
 pinned Playwright into it and runs those suites with neither allowed to be
 missing. Its first run downloads that browser; one it cannot install fails the
