@@ -99,7 +99,8 @@ Missing support does not prove an existing statement false. Use supplied context
 for justified corrections; do not add unsupported facts to a new text. Necessary
 context for a standalone deliverable belongs in that deliverable. Facts guaranteed
 to its actual audience need not all be repeated. Keep legitimate placeholders and
-attribution, licence, generation and safety notices.
+attribution, licence, generation and safety notices, not [what a chat tool left](references/editorial-core.md#keep-the-authors-voice-and-the-documents-function)
+for its interface or user.
 
 ## References and delivery
 

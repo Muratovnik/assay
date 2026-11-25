@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery"
+  ],
+  "pairs": [
+    {
+      "ids": [
+        "CHAT01",
+        "CHAT02"
+      ],
+      "distinction": "Vary whether the item carries what a chat tool wrote for its interface or user; the reader's template slots, the garden's own tracking parameters, an author's dated qualification and the required generation notice are in both."
+    }
+  ],
+  "cases": [
+    {
+      "id": "CHAT01",
+      "assess": [
+        "Removes the tool's replies to its user: the opening «Sure! Here's a polished version…» and the closing offer «Let me know if you'd like a shorter version…».",
+        "Removes «【4:0†source】», a citation-token form the method does not name, without inventing a footnote or another source; the hours stay tied to the linked city notice.",
+        "Drops «utm_source=chatgpt.com» from the city link while keeping its destination and «lang=en», and keeps the sign-up link's «utm_source=newsletter&utm_medium=email» unchanged.",
+        "Does not restate «As of my last update…» as a current certainty such as «The city has not announced fines»: removes the sentence or flags the unconfirmed fines status for the coordinator, inventing no fine, date or source.",
+        "Signs with Dana Whitfield instead of «[Your Name]» and keeps «[name of your parks officer]» and «[plot address]» for the reader to fill.",
+        "Keeps the drafting-help notice, the dates, the hours and the drip-irrigation question; returns one final text, with at most a short note on a flagged gap, and does not label the text machine-written."
+      ]
+    },
+    {
+      "id": "CHAT02",
+      "assess": [
+        "Returns the item materially unchanged and says it is ready to send.",
+        "Keeps «[name of your parks officer]» and «[plot address]»; does not fill, remove or flag them as unfilled.",
+        "Keeps both links byte-exact, including the garden's own «utm_source=newsletter&utm_medium=email».",
+        "Keeps «As of 20 May» and the drafting-help notice and does not treat either as something a tool left behind."
+      ]
+    }
+  ]
+}

@@ -78,6 +78,16 @@ to addresses, link targets and identifiers require the relevant scope; they are
 not silent style fixes. A serious visible risk can be flagged without reopening
 an unrelated whole-document audit.
 
+What a chat tool wrote for its interface or its user is not text for the
+document's reader: citation tokens (`citeturn0search0`), a referral parameter
+it added to a link (`utm_source=chatgpt.com`), remarks on its knowledge or
+access ("as of my last update"), its working steps and replies, and slots left
+for the author (`[Your Name]`). An edit clears them and a review reports them; a
+link keeps its destination and loses only that parameter. Resolve a slot, a
+token's source or a claim such a remark qualified only from the material;
+otherwise flag the gap. A placeholder meant for the reader, a required
+generation notice and a quoted example stay.
+
 ## Report only what is useful
 
 For drafting and editing, deliver the finished artifact. For review, identify

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "CHAT01",
+      "prompt": "Copyedit this item for the garden's monthly email before it is sent. Fix only real problems, keep the facts and return the final text.",
+      "context": "Monthly email to the members of a community garden, sent by its coordinator, Dana Whitfield. The watering hours come from the city's notice, which the item links. The sign-up link's tracking parameters are the garden's own, and the garden's policy requires the line about drafting help.",
+      "files": {
+        "item.md": "Sure! Here's a polished version of your newsletter item:\n\n**Watering hours change on 1 June**\n\nFrom 1 June, the city allows watering only before 9:00 and after 18:00.【4:0†source】 The full notice is on the [city's website](https://example.org/parks/watering?lang=en&utm_source=chatgpt.com).\n\nAs of my last update, the city had not announced fines for watering outside these hours.\n\nIf a neighbour asks why the hoses are off at noon, you can send the parks office this note:\n\n> Dear [name of your parks officer], our plot at [plot address] follows the new hours. Could you confirm whether drip irrigation counts as watering?\n\n[Sign up for the work day on 14 June](https://garden.example/workday?utm_source=newsletter&utm_medium=email) and bring your own hose fittings.\n\n[Your Name], garden coordinator\n\nThis item was drafted with help from an AI assistant.\n\nLet me know if you'd like a shorter version for social media!\n"
+      }
+    },
+    {
+      "id": "CHAT02",
+      "prompt": "Copyedit this item for the garden's monthly email before it is sent. Fix only real problems, keep the facts and return the final text.",
+      "context": "Monthly email to the members of a community garden, sent by its coordinator, Dana Whitfield. The watering hours come from the city's notice, which the item links. The sign-up link's tracking parameters are the garden's own, and the garden's policy requires the line about drafting help.",
+      "files": {
+        "item.md": "**Watering hours change on 1 June**\n\nFrom 1 June, the city allows watering only before 9:00 and after 18:00. The full notice is on the [city's website](https://example.org/parks/watering?lang=en).\n\nAs of 20 May, the city had not announced fines for watering outside these hours.\n\nIf a neighbour asks why the hoses are off at noon, you can send the parks office this note:\n\n> Dear [name of your parks officer], our plot at [plot address] follows the new hours. Could you confirm whether drip irrigation counts as watering?\n\n[Sign up for the work day on 14 June](https://garden.example/workday?utm_source=newsletter&utm_medium=email) and bring your own hose fittings.\n\nDana Whitfield, garden coordinator\n\nThis item was drafted with help from an AI assistant.\n"
+      }
+    }
+  ]
+}

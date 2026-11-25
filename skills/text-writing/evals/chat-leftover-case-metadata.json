@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "skill_name": "text-writing",
+  "cases": [
+    {
+      "id": "CHAT01",
+      "group": "CHAT-garden-item",
+      "purpose": "challenge",
+      "source": "Synthetic fixture written 2026-11-25 for the chat-tool leftover class adapted from references/patterns.md of conorbronsdon/avoid-ai-writing at 8678c864383ade43f9866ffebb235b2e1e409fb0 (MIT); not a captured product incident.",
+      "rationale": "Clear what a chat tool left, including a citation-token form the method does not name, without touching the reader's template slots, the owner's tracking parameters or a required notice.",
+      "split": "working",
+      "exposure": "public"
+    },
+    {
+      "id": "CHAT02",
+      "group": "CHAT-garden-item",
+      "purpose": "routine",
+      "source": "Synthetic fixture written 2026-11-25 for the chat-tool leftover class adapted from references/patterns.md of conorbronsdon/avoid-ai-writing at 8678c864383ade43f9866ffebb235b2e1e409fb0 (MIT); not a captured product incident.",
+      "rationale": "The same item without leftovers: legitimate placeholders, the owner's tracking parameters, a dated qualification and a required generation notice must not be flagged.",
+      "split": "working",
+      "exposure": "public"
+    }
+  ]
+}

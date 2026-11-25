@@ -114,3 +114,16 @@ for ordinary prose and correction of a portfolio example's unnecessary caveat.
 The language profiles also retain useful explanatory endings without requiring
 a next action. The study preserves the failed output, subsequent method identities
 and a Chinese control that distinguishes a useful recap from a nearby duplicate.
+
+## What a chat tool leaves in a pasted text — 2026-11-25
+
+The editorial core now names, as one class, what a chat tool wrote for its
+interface or its user, and the `SKILL.md` placeholder sentence routes to it.
+`chat-leftover-cases.json` holds one causal pair. CHAT01 is a newsletter item
+with a tool's replies, a citation token in a form the method does not name, a
+referral parameter on a link, a remark on the model's knowledge and a signature
+slot. CHAT02 is the same item without them. Both keep the reader's template
+slots, the owner's tracking parameters, a dated qualification and a required
+generation notice. The class is adapted from `references/patterns.md` of
+conorbronsdon/avoid-ai-writing at `8678c864383ade43f9866ffebb235b2e1e409fb0`
+(MIT); the fixtures are newly written. No model has run either case.
