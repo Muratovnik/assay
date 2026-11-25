@@ -22,7 +22,8 @@
 Claude Code/Codex 插件提醒需要可通过 `python` 调用的 Python 3.11+，
 Claude Code 的子代理启动检查需要 2.1.292 及以上版本。
 skills CLI 与 `install-links` 不安装钩子；Claude 插件已包含两个配置。
-单个技能保留核心约定，但不包含全部可选方法。`assay-optional-skills`
+受支持的单位是完整集合，它保留方法之间的链接。单独安装的技能处于精简模式：
+保留核心约定，但不包含关联技能的标准，需要关联技能的部分不作保证。`assay-optional-skills`
 是 Assay 的检查元数据，不会自动安装依赖。历史文件检查不证明当前版本的
 加载或行为。参见[交付矩阵](../install.md#installation-surfaces)。
 
@@ -91,8 +92,8 @@ npx skills add Muratovnik/assay
 ```
 
 使用 `-a claude-code` 或 `-a codex` 选择客户端，`-g` 选择全局范围。
-`--skill '*'` 选择完整集合；`--skill <名称>` 只安装一个技能，不会递归安装
-关联方法。
+`--skill '*'` 选择完整集合，即受支持的单位。`--skill <名称>` 以精简模式只安装
+一个技能：其核心可用，但 CLI 不会安装它链接的关联技能，因此缺少这些技能的标准。
 
 根据客户端当前文档核对该 CLI 版本报告的目标路径。发现遗漏时使用受支持的
 项目级安装或下方明确的链接布局，不要猜测并创建额外别名。

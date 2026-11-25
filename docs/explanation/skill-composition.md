@@ -6,6 +6,11 @@ source of permissions. A link graph is not an execution graph.
 
 ## What a single-skill install contains
 
+The supported unit is the collection, installed in one skill root. Installing
+one skill alone, for example with the skills CLI's `--skill <name>`, is a
+reduced mode: the skill's own core works, but nothing that depends on a peer is
+promised there.
+
 Skill-local resources are required. Sibling methods are optional collaborators
 listed in the string-valued frontmatter metadata key `assay-optional-skills`.
 This is an Assay validation convention inside the standard metadata map, not an
@@ -13,8 +18,9 @@ Agent Skills dependency field, client resolver or install command. The rule for
 declaring a peer belongs to the [authoring contract](../../AGENTS.md#writing-a-skill).
 
 A singleton retains the core task, authority and evidence boundary written in its
-own instructions; it does not include the criteria its peers own. For the full
-set of criteria, install the collection in one skill root.
+own instructions; it does not include the criteria its peers own. Where its
+instructions send a decision to a peer, that part of the method is unavailable.
+For the full set of criteria, install the collection.
 
 ## What the source checks establish
 

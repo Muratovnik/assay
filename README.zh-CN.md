@@ -61,8 +61,9 @@
 | Cursor | `npx skills add Muratovnik/assay -a cursor` |
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
-第三方 skills CLI 安装选定的技能，不安装插件钩子或智能体配置。组合使用方法时
-建议安装完整集合（`--skill '*'`）。单个技能保留核心约定，CLI 不会安装关联方法。
+第三方 skills CLI 安装选定的技能，不安装插件钩子或智能体配置。请安装完整集合
+（`--skill '*'`），这是受支持的安装单位。`--skill <名称>` 以精简模式只安装一个
+技能：其核心可用，但 CLI 不会安装它链接的关联技能，因此缺少这些技能的标准。
 检查当前 CLI 显示的目标路径。参见[安装指南](docs/zh-CN/install.md)。
 
 ## 快速开始

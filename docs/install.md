@@ -23,10 +23,11 @@ loader invocation, followed criteria and outcome quality are different claims.
 | Gemini skills installation | Skills | No Assay profile installation | No Assay plugin reminders | Gemini CLI; check its reported skill root and discovery |
 | `install-links` | Linked collection | Selected Codex/Claude adapters | No | Python 3.11+, `requirements-tools.txt`, symlink support; exact filesystem checks are not behavior evidence |
 
-The collection preserves relative peer links. A singleton supplies its bounded
-core, not every specialist criterion in the collection. `metadata.assay-optional-skills`
-records optional collaborators for Assay checks; no client is expected to install
-dependencies from this field. The source gate copies the collection and each
+The supported unit is the collection, which preserves relative peer links. A
+skill installed alone runs in a reduced mode: it supplies its bounded core, not
+the criteria its peers own, and nothing that needs a peer is promised there.
+`metadata.assay-optional-skills` records optional collaborators for Assay
+checks; no client is expected to install dependencies from this field. The source gate copies the collection and each
 singleton into temporary layouts to check Markdown resource boundaries; it does
 not simulate a third-party installer. See [composition](explanation/skill-composition.md).
 
@@ -134,8 +135,9 @@ npx skills add Muratovnik/assay
 ```
 
 Add `-a claude-code` or `-a codex` to target a client and `-g` for global scope.
-Use `--skill '*'` to select the full collection. `--skill <name>` selects a
-bounded standalone method; it does not recursively install linked peers.
+Use `--skill '*'` to select the full collection, the supported unit.
+`--skill <name>` installs one skill in a reduced mode: its core works, but the
+CLI does not install the peers it links to, so their criteria are missing.
 Check the destination shown by the installed CLI version against your client's
 current skill roots. If discovery misses, use a supported project installation
 or the explicit native link layout below; do not create guessed aliases.

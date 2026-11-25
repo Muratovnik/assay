@@ -38,6 +38,11 @@ an improvement supported by comparable task execution.
 - Link to a rule another skill owns instead of restating it. The linking skill
   says when to use that method and what stays with itself; the owner keeps the
   rule, so it changes in one place.
+- The supported unit of installation is the collection. A skill installed
+  alone, for example with the skills CLI's `--skill <name>`, runs in a reduced
+  mode without its peers' criteria, and no guarantee that needs a peer holds
+  there. Each skill still keeps a self-sufficient core: its task, authority and
+  evidence boundary work without any peer.
 - Declare optional peer names in the string-valued frontmatter metadata key
   `assay-optional-skills`. It is Assay validation metadata, not a standard
   dependency installer. A missing optional peer limits the composed outcome;
@@ -117,8 +122,8 @@ Generated client manifests, profile adapters and the skills index are produced b
 so a hand-edited manifest fails rather than drifting quietly.
 
 Text that several skills share is edited once, in `skill-sources/`. A skill
-installs alone and cannot link outside its directory, so `render` writes that
-source into each skill's own file (the table is `SHARED_TEXTS` in
+can be installed alone and cannot link outside its directory, so `render`
+writes that source into each skill's own file (the table is `SHARED_TEXTS` in
 `tools/assay.py`); edit the source, never a copy. Lines between a line
 `<!-- only: skill` and a line `-->` stay in the named skill only; in the source
 they are a comment, so a link there is not link-checked.

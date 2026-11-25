@@ -66,9 +66,10 @@ their own dependencies; loading prose does not install them.
 | Gemini CLI | `gemini skills install https://github.com/Muratovnik/assay.git --consent` |
 
 The third-party skills CLI installs selected skills, not plugin hooks or agent
-profiles. Prefer the full collection (`--skill '*'`) for composed work. A single
-skill has a bounded core and declares optional peers, which the CLI does not
-install. Check the destination reported by your CLI version. See the
+profiles. Install the full collection (`--skill '*'`): it is the supported
+unit. `--skill <name>` installs one skill in a reduced mode: its core works, but
+the CLI does not install the peers it links to, so their criteria are missing.
+Check the destination reported by your CLI version. See the
 [installation and evidence matrix](docs/install.md#installation-surfaces).
 
 ## Quick start
