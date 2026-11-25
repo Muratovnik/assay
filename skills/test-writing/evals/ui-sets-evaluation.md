@@ -1,7 +1,8 @@
 # UI sets and absence checks: rationale and evaluation
 
 Maintainer material for one method change, not runtime instructions or a run
-report. The cases are synthetic and public; none has been run by a model.
+report. The cases are synthetic and public. A paired pilot ran them on
+2026-11-25; its outcome is below.
 
 ## Decision and gap
 
@@ -35,7 +36,7 @@ The vacuous file passed the empty, shown-hidden, always-alert, lost-role and
 row-less probes. The class-selected file failed the restyle. These runs calibrate
 the probes; they say nothing about a model's behaviour.
 
-## Owed paired pilot
+## Paired pilot design
 
 - Arms: `skills/test-writing` at `6242086` against the commit that adds this file.
   Both arms load test-writing explicitly with the same `skills/code-change` bytes,
@@ -61,3 +62,40 @@ the probes; they say nothing about a model's behaviour.
 
 Record tokens, turns and wall time per run. An infrastructure failure is replaced
 once; it is not a result for either arm.
+
+## Pilot outcome (2026-11-25)
+
+- Compared: frozen plugin trees at `9783731` (baseline) and `e16ef87`
+  (candidate). Outside `evals/`, their `skills/test-writing` difference is
+  byte-identical to the planned difference from `6242086`, and the code-change
+  bytes are the same in both arms. Each session loaded test-writing explicitly
+  in its own directory, with no MCP servers, no instruction files and a shell
+  limited to `python -m unittest`.
+- Volume: 16 sessions, two per case per arm, all observed as Sonnet at medium
+  effort; no invalid run, so none was replaced.
+- Departure from the design: the packets were not built with
+  `tools/eval_assets.py prepare`; every session had the whole frozen plugin
+  tree without `skills/*/evals`.
+- Grading: the rubric's verification probes on every saved test file, then the
+  `assess` items blind to the arm, by one grader. W07 has no rubric probes; its
+  hard requirement was its three items and an unchanged `sender.py`.
+- Hard requirement, baseline and candidate: W10 2 and 2 of 2, W11 0 and 0 of 2,
+  W12 2 and 2 of 2, W07 2 and 2 of 2; W10 to W12 4 of 6 in both arms. Every W11
+  test passed with `role="alert"` removed from the error: the valid-address
+  absence check had no control in which the same locator finds the error, and
+  the grader marked the presence-control item not met in all four W11 runs.
+- The reference was read in none of the 16 runs, 0 of the 8 candidate runs.
+  Of the changed text, only the widened reading condition was in the
+  candidate's context, and it caused no read.
+- In 15 of the 16 runs, in both arms, the executor tried to run its own mutants
+  or controls through the shell and was refused; such a self-check might have
+  caught W11.
+- Cost: baseline 63 turns, 212 s, 19,705 output tokens and USD 0.78 at API
+  prices; candidate 62 turns, 211 s, 19,866 and USD 0.77.
+- Verdict: no effect, a difference of none at four of six in both arms. No
+  harm: no W12 or W07 failure in either arm.
+
+The pilot does not test the three points themselves, since no run read them; it
+shows that the reference does not reach a UI test through its reading
+condition. W11 fails in the base method, so it remains the case for a change
+that places the size and presence-control rule where the work reads it.

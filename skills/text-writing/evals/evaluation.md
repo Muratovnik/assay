@@ -126,4 +126,46 @@ slot. CHAT02 is the same item without them. Both keep the reader's template
 slots, the owner's tracking parameters, a dated qualification and a required
 generation notice. The class is adapted from `references/patterns.md` of
 conorbronsdon/avoid-ai-writing at `8678c864383ade43f9866ffebb235b2e1e409fb0`
-(MIT); the fixtures are newly written. No model has run either case.
+(MIT); the fixtures are newly written. A paired pilot ran both cases on
+2026-11-25.
+
+### Pilot outcome (2026-11-25)
+
+- Thresholds fixed before the run: supported if on CHAT01 the candidate meets
+  both criterion 3 (the tool's referral parameter) and criterion 4 (the remark
+  on its knowledge) in more runs than the baseline, with no harm; harm is the
+  candidate filling, removing or flagging the reader's placeholders or changing
+  the item's own tracking link on CHAT02 in more runs than the baseline. No
+  difference shown: the baseline meets both as often or more.
+- Compared: frozen plugin trees at `687d78b` (baseline) and `ac77773`
+  (candidate), differing outside `evals/` only in the editorial-core paragraph,
+  its two rendered copies and the `SKILL.md` placeholder sentence. Each session
+  loaded text-writing explicitly in its own directory, with no shell, no MCP
+  servers and no instruction files.
+- Volume: 12 sessions, three per case per arm, all observed as Sonnet at medium
+  effort; no invalid run.
+- Departure from the preparation above: the packets were not built with
+  `tools/eval_assets.py prepare`; every session had the whole frozen plugin
+  tree without `skills/*/evals`.
+- Grading: the rubric items blind to the arm, by one grader, and string checks
+  on every output, ten for CHAT01 and five for CHAT02.
+- CHAT01, candidate and baseline: criterion 3 met in 3 and 3 of 3, criterion 4
+  in 2 and 0 of 3, so both in 2 against 0. Three of the four partials on
+  criterion 4 stated the unconfirmed fines status as a current fact; the fourth
+  kept a qualifier but did not flag the status. Every string check passed in
+  all six runs.
+- CHAT02: the reader's placeholders, both links, the dated line and the
+  generation notice were kept in 3 and 3 of 3, and every string check passed.
+  Returning the item unchanged: 2 and 1 of 3; each miss changed or added a
+  sentence of the item, unrelated to chat leftovers.
+- Reads: the editorial-core reference was opened in no candidate run and in one
+  baseline run. Of the changed text, only the `SKILL.md` sentence was in the
+  candidate's context.
+- Cost: candidate 12 turns and USD 0.36 at API prices, baseline 14 turns and
+  USD 0.38.
+- Verdict: supported candidate, weakly: the gap rests on one criterion with
+  three runs per arm. No harm.
+
+That the `SKILL.md` sentence, not the paragraph, produced the gap is a
+hypothesis. Review mode, the `citeturn` token form and the technical-writing
+copy were not exercised.

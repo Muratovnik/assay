@@ -1,7 +1,8 @@
 # Preservation pointer: rationale and pilot
 
 Maintainer material for one wording change, not runtime instructions or a run
-report. The cases are synthetic and public; none has been run by a model.
+report. The cases are synthetic and public. A paired pilot ran them on
+2026-11-25; its outcome is below.
 
 ## Decision and gap
 

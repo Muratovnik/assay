@@ -108,3 +108,44 @@ including negative controls. Neither their passing result nor this corpus's
 existence demonstrates that a model applies the method successfully. Report an
 authored corpus, checked utility, captured discovery, exercised behavior and
 comparative support as different evidence states.
+
+## Pilot outcome (2026-11-25): control solutions, cost by calls, run inheritance
+
+- Change: `eval-design.md` and `paired-pilot.md` at `9783731` add per-task
+  control solutions, cost counted call by call and what a run inherits from a
+  client's setup. `SKILL.md` is unchanged.
+- Thresholds fixed before the run: supported if on at least one of SE25-SE27
+  the candidate meets both required items in at least two more of three runs
+  than the baseline, with no regression. A regression is a reject item the
+  candidate hits on a case where the baseline hits none, or on SE08 or SE19
+  fewer required items met or more reject items hit than the baseline. No
+  difference shown: neither.
+- Compared: frozen plugin trees at `4e6051d` (baseline) and `9783731`
+  (candidate), differing outside `evals/` only in the two references. Each
+  session loaded skill-evaluation explicitly in its own directory, with read and
+  search tools only, no shell, no MCP servers and no instruction files.
+- Volume: 22 sessions, SE25-SE27 three runs per arm and SE08 and SE19 one, all
+  observed as Sonnet at medium effort; no invalid run.
+- Departure from the protocol above: the packets were not built with
+  `tools/eval_assets.py prepare`; every session had the whole frozen plugin
+  tree without `skills/*/evals`.
+- Grading: the two `required` and two `reject` items of each case, blind to the
+  arm, by one grader.
+- Both required items met, candidate and baseline: SE25 2 and 2 of 3, SE26 2 and
+  1 of 3, SE27 2 and 2 of 3, SE08 and SE19 1 and 1 of 1. Every miss was a
+  partial. Reject hits: candidate none; baseline two, both in one SE26 run that
+  ranked the two conditions by cost from the supplied totals and assumed its
+  own price ratios.
+- Reads: `eval-design.md` in all six SE25 runs; `paired-pilot.md` in no
+  candidate and one baseline SE26 run, and in two candidate and one baseline
+  SE27 run of three.
+- Cost: candidate 29 turns and USD 0.81 at API prices, baseline 30 turns and
+  USD 0.82.
+- Verdict: no difference shown; the largest gap is one run, on SE26, where the
+  changed paragraph was not read. No regression.
+
+The base method already meets these cases in two of three runs, and where the
+changed text was read the outcome matched the baseline's; three runs per arm
+cannot separate a gap smaller than two. SE25-SE27 are regression material from
+here on, and a later change on these techniques needs a case the base method
+fails.
