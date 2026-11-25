@@ -100,6 +100,9 @@ does not carry this repository's tooling, so `relkit.toml` runs both through
 `requirements-tools.txt`, rebuilds it when that file changes and runs the
 command there: `check --all` in the ignored `.cache/tools-env`, the smoke in the
 release tool's scratch directory, since its Git-free snapshot has no ignored files.
+It builds from the Python that runs it, or from the one `ASSAY_TOOLS_PYTHON`
+names, and takes prebuilt wheels only: a Python the pinned requirements publish
+no wheel for is refused in one line rather than compiled for.
 
 Generated client manifests, profile adapters and the skills index are produced by
 `python -B tools/assay.py render` and verified byte-for-byte by the source check,

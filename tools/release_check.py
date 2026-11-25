@@ -8,6 +8,11 @@ command there. Without arguments it runs `check.py --all` in the ignored
 `.cache/tools-env`; the smoke names its own environment under the release
 tool's scratch directory, because its Git-free snapshot has no ignored files.
 Nothing is installed anywhere else.
+
+The environment is built from the interpreter named by ASSAY_TOOLS_PYTHON, or
+else the one running this script, and takes prebuilt wheels only: a Python the
+pinned requirements publish no wheel for is refused in one line, instead of
+compiling a native extension on a machine that may have no compiler.
 """
 from __future__ import annotations
 
@@ -25,6 +30,9 @@ ENVIRONMENT = ROOT / ".cache" / "tools-env"
 REQUIREMENTS = ROOT / "requirements-tools.txt"
 STAMP = "assay-requirements.sha256"
 CHECK_ALL = ["tools/check.py", "--all"]
+PYTHON_VARIABLE = "ASSAY_TOOLS_PYTHON"
+MINIMUM_PYTHON = (3, 11)
+VERSION_PROBE = "import sys; print('%d.%d.%d' % sys.version_info[:3])"
 
 
 def interpreter(environment: Path) -> Path:
@@ -48,6 +56,41 @@ def linked(path: Path) -> bool:
                               or getattr(path.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
 
 
+def refuse(reason: str) -> SystemExit:
+    return SystemExit(f"release check: {reason}")
+
+
+def base_interpreter() -> tuple[str, str]:
+    """The interpreter that builds the environment, and its version.
+
+    The pinned requirements decide which Pythons they support by the wheels
+    they publish, so a version this script accepts can still be refused later
+    when the wheels are fetched.
+    """
+    python = os.environ.get(PYTHON_VARIABLE) or sys.executable
+    try:
+        probe = subprocess.run([python, "-c", VERSION_PROBE], capture_output=True, text=True, check=False)
+    except OSError as error:
+        raise refuse(f"cannot run {python} named by {PYTHON_VARIABLE}: {error}") from error
+    version = probe.stdout.strip()
+    try:
+        numbers = tuple(int(part) for part in version.split("."))
+    except ValueError:
+        numbers = ()
+    if probe.returncode or len(numbers) != 3:
+        raise refuse(f"cannot read the version of {python}")
+    if numbers[:2] < MINIMUM_PYTHON:
+        raise refuse(f"Python {version} ({python}) is older than {'.'.join(map(str, MINIMUM_PYTHON))}, "
+                     f"which the tooling needs; name another with {PYTHON_VARIABLE}")
+    return python, version
+
+
+def last_error(output: str) -> str:
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    errors = [line for line in lines if line.startswith("ERROR:")]
+    return (errors or lines or ["pip failed without output"])[-1]
+
+
 def provision(environment: Path, digest: str) -> None:
     # The environment is deleted before a rebuild, so neither it nor a parent
     # inside this repository may be a link that would redirect the deletion.
@@ -59,11 +102,18 @@ def provision(environment: Path, digest: str) -> None:
             raise SystemExit(f"release check: refusing a linked tooling environment path: {path}")
         if not inside:
             break
+    python, version = base_interpreter()
     if environment.exists():
         shutil.rmtree(environment)
-    subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
-    subprocess.run([str(interpreter(environment)), "-m", "pip", "install", "--disable-pip-version-check",
-                    "--quiet", "-r", str(REQUIREMENTS)], check=True)
+    subprocess.run([python, "-m", "venv", str(environment)], check=True)
+    installed = subprocess.run([str(interpreter(environment)), "-m", "pip", "install", "--disable-pip-version-check",
+                                "--quiet", "--only-binary", ":all:", "-r", str(REQUIREMENTS)],
+                               capture_output=True, text=True, check=False)
+    if installed.returncode:
+        shutil.rmtree(environment, ignore_errors=True)
+        raise refuse(f"cannot install {REQUIREMENTS.name} as prebuilt wheels for Python {version} ({python}): "
+                     f"{last_error(installed.stdout + installed.stderr)}; "
+                     f"name a Python they support with {PYTHON_VARIABLE}")
     (environment / STAMP).write_text(digest + "\n", "utf-8")
 
 
