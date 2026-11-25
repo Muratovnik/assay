@@ -18,7 +18,15 @@ class EvidenceError(ValueError):
     """Invalid or unavailable evidence, not an invitation to guess a model."""
 
 
-class RetiredConfiguration(EvidenceError):
+class ConfigurationProblem(EvidenceError):
+    """A routing configuration or binding the owner must change; the message names the key and what it accepts.
+
+    The message is shown in a launch refusal, at session start and by the hooks doctor, so it
+    names keys and file names only, never a path or a configured value.
+    """
+
+
+class RetiredConfiguration(ConfigurationProblem):
     """A routing configuration or binding written for a removed contract; the message says what to change."""
 
 

@@ -496,12 +496,13 @@ class ExplicitRouteTests(unittest.TestCase):
 
     def test_an_invalid_setting_is_rejected_and_refuses_configured_delegation(self):
         from route_evidence.pipeline_config import settings
-        with self.assertRaisesRegex(EvidenceError,'invalid_pipeline_explicit_routes'):
+        with self.assertRaisesRegex(EvidenceError,'pipeline.explicit_routes must be "require" or "off"'):
             settings({'pipeline':{'explicit_routes':'sometimes'}})
         output=cli.explicit_routes(self.launch(),'claude',
                                   self.environment({'mode':'evidence-only','explicit_routes':'sometimes'}))
         self.assertEqual('deny',output['hookSpecificOutput']['permissionDecision'])
-        self.assertIn('routing configuration could not be validated',
+        # The refusal names the key and what it accepts, not only that validation failed.
+        self.assertIn('pipeline.explicit_routes must be "require" or "off"',
                       output['hookSpecificOutput']['permissionDecisionReason'])
 
 

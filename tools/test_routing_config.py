@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'hooks'))
 sys.path.insert(0, str(ROOT / 'skills/route-subagents/scripts'))
 from runtime import cli
-from route_evidence.core import EvidenceError, RetiredConfiguration
+from route_evidence.core import ConfigurationProblem, EvidenceError, RetiredConfiguration
 from route_evidence.pipeline_config import settings
 from route_evidence.service import load_config
 import skill_reminder
@@ -207,13 +207,13 @@ class SchemaTests(Fixture):
                          'inventory_file': None}}))
         self.assertEqual(loaded['pipeline']['unrouted_agents'], ['Explore'])
         self.assertEqual(set(loaded['routes']['classes']), {'gather', 'code'})
-        with self.assertRaisesRegex(EvidenceError, 'unknown_pipeline_configuration'):
+        with self.assertRaisesRegex(ConfigurationProblem, 'unknown key novel'):
             load_config(self.config({'schema_version': 5, 'client': 'claude', 'pipeline': {'novel': 1}}))
 
     def test_exempt_agents_are_a_list_of_valid_unique_type_names(self):
         for value in (['Explore', 'Explore'], [{'name': 'Explore'}], ['bad name'],
                       [''], 'Explore', None, ['t%d' % n for n in range(65)]):
-            with self.subTest(value=value), self.assertRaisesRegex(EvidenceError, 'invalid_pipeline_unrouted_agents'):
+            with self.subTest(value=value), self.assertRaisesRegex(ConfigurationProblem, 'pipeline.unrouted_agents must be a list'):
                 settings({'pipeline': {'unrouted_agents': value}})
         listed = settings({'pipeline': {'unrouted_agents': ['Explore', 'plugin:reviewer']}})
         self.assertEqual(listed['unrouted_agents'], ['Explore', 'plugin:reviewer'])
@@ -273,6 +273,78 @@ class SchemaTests(Fixture):
             code = benchmark_router.main(['--cache-dir', str(self.cache), '--config', str(retired), 'status'])
         self.assertEqual(code, 2)
         self.assertIn('remove telemetry', json.loads(output.getvalue())['error'])
+
+
+class InvalidValueTests(Fixture):
+    """An invalid `pipeline` value is named with its key and what it accepts, the same wherever it surfaces."""
+    # (pipeline block, words the message must hold, a configured value it must not repeat)
+    CASES = (
+        ({'explicit_routes': 'sometimes'}, ('pipeline.explicit_routes', '"require" or "off"'), 'sometimes'),
+        ({'mode': 'strict'}, ('pipeline.mode', '"evidence-only"'), 'strict'),
+        ({'inventory_ttl_hours': 0}, ('pipeline.inventory_ttl_hours', 'from 1 to 720'), None),
+        ({'inventory_ttl_hours': '24'}, ('pipeline.inventory_ttl_hours', 'from 1 to 720'), None),
+        ({'unrouted_agents': ['bad name']}, ('pipeline.unrouted_agents', 'at most 64 distinct agent types'), 'bad name'),
+        ({'unrouted_agents': 'Explore'}, ('pipeline.unrouted_agents', 'a list of'), None),
+        ({'inventory_file': 'relative-inventory.json'}, ('pipeline.inventory_file', 'an absolute path or null'),
+         'relative-inventory'),
+        ({'host': {'surface': 'television'}}, ('pipeline.host.surface', 'cli, desktop, ide, sdk, unknown'), 'television'),
+        ({'host': {'agent_scope': 'galaxy'}}, ('pipeline.host.agent_scope', 'user, project, plugin'), 'galaxy'),
+        ({'host': {'os': 'windows'}}, ('pipeline.host', 'only version, surface, provider, agent_scope'), 'windows'),
+        ({'explicit_route': 'off'}, ('unknown key explicit_route', 'accepts only explicit_routes, host'), None),
+        ({'not a plain key!': 1}, ('1 other unknown key;', 'accepts only'), 'not a plain key'),
+    )
+
+    def configured(self, pipeline):
+        return self.config({'schema_version': 5, 'client': 'claude', 'routes': TABLE, 'pipeline': pipeline})
+
+    def assert_named(self, text, words, value):
+        for word in words:
+            self.assertIn(word, text)
+        self.assertNotIn('could not be validated', text)
+        self.assertNotIn('invalid_pipeline', text)
+        self.assertNotIn(str(self.root), text)
+        if value:
+            self.assertNotIn(value, text)
+
+    def test_the_settings_refusal_names_the_key_and_what_it_accepts(self):
+        for pipeline, words, value in self.CASES:
+            with self.subTest(pipeline=pipeline), self.assertRaises(ConfigurationProblem) as caught:
+                settings({'pipeline': pipeline})
+            self.assertNotIsInstance(caught.exception, RetiredConfiguration)
+            self.assert_named(str(caught.exception), words, value)
+
+    def test_the_launch_refusal_the_session_start_and_both_doctors_say_the_same(self):
+        for pipeline, words, value in self.CASES:
+            with self.subTest(pipeline=pipeline):
+                config = self.configured(pipeline)
+                with self.assertRaises(ConfigurationProblem) as caught:
+                    load_config(config)
+                message = str(caught.exception)
+                self.assert_named(message, words, value)
+                decision, reason, _ = self.decide(self.launch(description='code: x', model='sonnet', effort='high'),
+                                                  self.bind(config))
+                self.assertEqual(decision, 'deny')
+                self.assertEqual('Assay: ' + message, reason)
+                session, _ = cli.process({'hook_event_name': 'SessionStart', 'source': 'startup', 'session_id': 's'},
+                                         'claude', {'ASSAY_ROUTING_CONFIG': str(config)})
+                self.assertIn(message, session['hookSpecificOutput']['additionalContext'])
+                errors = io.StringIO()
+                with patch.dict(os.environ, {'ASSAY_ROUTING_CONFIG': str(config)}), \
+                        patch.object(sys, 'stderr', errors), redirect_stdout(io.StringIO()):
+                    self.assertEqual(2, cli.main(['doctor', '--client', 'claude']))
+                self.assertEqual('Assay: ' + message, errors.getvalue().strip())
+                import benchmark_router
+                output = io.StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(2, benchmark_router.main(['--cache-dir', str(self.cache), '--config', str(config),
+                                                               'status']))
+                self.assertEqual(message, json.loads(output.getvalue())['error'])
+
+    def test_a_valid_pipeline_still_loads(self):
+        loaded = load_config(self.configured({'explicit_routes': 'off', 'inventory_ttl_hours': 1.5,
+                                              'host': {'surface': 'ide', 'agent_scope': 'plugin'}}))
+        self.assertEqual('off', loaded['pipeline']['explicit_routes'])
+        self.assertEqual('ide', loaded['pipeline']['host']['surface'])
 
 
 class BindingTests(Fixture):

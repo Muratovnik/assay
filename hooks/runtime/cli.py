@@ -27,7 +27,7 @@ from runtime.events import recognized
 from runtime.predicates import reading_profile
 from runtime import state, routing_binding, skill_gate, sources, branches, midturn, reruns, reports, handback
 from route_evidence.client_capabilities import contract, codex_route_check
-from route_evidence.core import RetiredConfiguration, loads
+from route_evidence.core import ConfigurationProblem, loads
 from route_evidence import route_table
 from route_evidence.pipeline_config import tool_agent
 # host_observations loads where a launch needs it: every tool call starts this process.
@@ -102,7 +102,7 @@ def routing_config(environment):
 
 
 # Shown at session start when the routing configuration cannot be loaded for a reason
-# other than a retired contract, which carries its own message.
+# other than a retired contract or an invalid value, which carry their own message.
 ROUTING_UNUSABLE = "it could not be validated; run the hooks doctor for the cause."
 
 
@@ -123,7 +123,7 @@ def session_routing(event, client, environment):
         config = routing_config(environment)
         return {"routing": config is not None and config.get("routes") is not None
                 and config.get("client") == client}
-    except RetiredConfiguration as exc:
+    except ConfigurationProblem as exc:
         return {"routing": True, "problem": str(exc)}
     except Exception:
         return {"routing": True, "problem": ROUTING_UNUSABLE}
@@ -172,7 +172,7 @@ def explicit_routes(event, client, environment):
         note = route_table.admission(client, event.get("tool_name"), event.get("tool_input"), table,
                                      unrouted=mode["unrouted_agents"])
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}} if note else outside
-    except RetiredConfiguration as exc:
+    except ConfigurationProblem as exc:
         # The message names keys and file names only, never paths or payloads.
         return deny(str(exc))
     except Exception:
@@ -375,7 +375,7 @@ def process(event, client, environment, *, root=ROOT, clock=None):
         # A refused launch never ran, so it leaves no observation.
         if result.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
             observe(event, client, environment, clock=clock)
-    except RetiredConfiguration as exc:
+    except ConfigurationProblem as exc:
         error = "\n".join(part for part in (error, "Assay: " + str(exc)) if part)
     except Exception:
         diagnostic = "Assay: host observations unavailable; hook decision retained. Check the routing binding."
@@ -489,7 +489,7 @@ def main(argv=None, *, stdin=None):
     except RemovedOptions as exc:
         print(str(exc), file=sys.stderr)
         return 1 if args.command == "event" else 2
-    except RetiredConfiguration as exc:
+    except ConfigurationProblem as exc:
         print("Assay: " + str(exc), file=sys.stderr)
         return 1 if args.command == "event" else 2
     except Exception:

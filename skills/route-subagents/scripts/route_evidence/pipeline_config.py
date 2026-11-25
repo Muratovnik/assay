@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .core import EvidenceError, RetiredConfiguration, epoch, is_reparse, read_document
+from .core import ConfigurationProblem, EvidenceError, RetiredConfiguration, epoch, is_reparse, read_document
 
 EFFORT_ORDER = ("low", "medium", "high", "xhigh", "max")
 # The launch check is the only mode left; the key stays so a configuration says
@@ -45,10 +45,25 @@ DEFAULT_INVENTORY_TTL_HOURS = 24
 MAX_INVENTORY_TTL_HOURS = 720
 
 
-def _absolute(value: Any, code: str) -> str | None:
-    if value is not None and (not isinstance(value, str) or not value or not Path(value).is_absolute()):
-        raise EvidenceError(code)
-    return value
+def invalid(key: str, accepted: str) -> ConfigurationProblem:
+    """The refusal of one `pipeline` value: the key and what it accepts, never the value itself."""
+    return ConfigurationProblem(f"routing configuration key pipeline.{key} must be {accepted}")
+
+
+KEY_NAME = re.compile(r"[A-Za-z0-9_.-]{1,40}\Z")
+
+
+def _unknown(keys) -> str:
+    """Unknown keys by name, so a misspelling can be found; a key that is not a plain short name is only counted."""
+    named = sorted(key for key in keys if isinstance(key, str) and KEY_NAME.match(key))
+    other = len(keys) - len(named)
+    parts = (["unknown key" + ("s " if len(named) > 1 else " ") + ", ".join(named)] if named else []) + (
+        [f"{other} other unknown key" + ("s" if other > 1 else "")] if other else [])
+    return " and ".join(parts)
+
+
+UNROUTED_ACCEPTS = ("a list of at most 64 distinct agent types, each a letter or digit followed by up to 127 "
+                    "letters, digits or _ . : -")
 
 
 def _unrouted(value: Any) -> list[str]:
@@ -61,10 +76,10 @@ def _unrouted(value: Any) -> list[str]:
     if isinstance(value, dict):
         raise RetiredConfiguration(UNROUTED_OBJECT_REMOVED)
     if not isinstance(value, list) or len(value) > 64 or len(set(map(str, value))) != len(value):
-        raise EvidenceError("invalid_pipeline_unrouted_agents")
+        raise invalid("unrouted_agents", UNROUTED_ACCEPTS)
     for name in value:
         if not isinstance(name, str) or not AGENT_TYPE.fullmatch(name):
-            raise EvidenceError("invalid_pipeline_unrouted_agents")
+            raise invalid("unrouted_agents", UNROUTED_ACCEPTS)
     return list(value)
 
 
@@ -82,23 +97,28 @@ def settings(config: dict | None = None) -> dict:
     """Normalized launch-check settings; an absent block is the default check."""
     config = config or {}
     raw = config.get("pipeline", {})
-    if not isinstance(raw, dict) or set(raw) - KEYS:
-        raise EvidenceError("unknown_pipeline_configuration")
+    if not isinstance(raw, dict):
+        raise ConfigurationProblem("routing configuration key pipeline must be an object")
+    if set(raw) - KEYS:
+        raise ConfigurationProblem("routing configuration key pipeline has " + _unknown(set(raw) - KEYS)
+                                   + "; it accepts only " + ", ".join(sorted(KEYS)))
     value = {"mode": "evidence-only", "unrouted_agents": [], "inventory_file": None,
              "inventory_ttl_hours": DEFAULT_INVENTORY_TTL_HOURS, "host": None,
              "explicit_routes": "require", **copy.deepcopy(raw)}
     from .client_capabilities import host_settings
     value["host"] = host_settings(value["host"])
     if not isinstance(value["mode"], str) or value["mode"] not in MODES:
-        raise EvidenceError("invalid_pipeline_mode")
+        raise invalid("mode", " or ".join(f'"{mode}"' for mode in sorted(MODES)))
     # A Claude launch without a model and an effort is refused unless the owner
     # turns that off.
     if not isinstance(value["explicit_routes"], str) or value["explicit_routes"] not in EXPLICIT_ROUTES:
-        raise EvidenceError("invalid_pipeline_explicit_routes")
-    _absolute(value["inventory_file"], "pipeline_paths_must_be_absolute")
+        raise invalid("explicit_routes", '"require" or "off"')
+    path = value["inventory_file"]
+    if path is not None and (not isinstance(path, str) or not path or not Path(path).is_absolute()):
+        raise invalid("inventory_file", "an absolute path or null")
     ttl = value["inventory_ttl_hours"]
     if type(ttl) not in (int, float) or not 1 <= ttl <= MAX_INVENTORY_TTL_HOURS:
-        raise EvidenceError("invalid_pipeline_inventory_ttl")
+        raise invalid("inventory_ttl_hours", f"a number of hours from 1 to {MAX_INVENTORY_TTL_HOURS}")
     value["unrouted_agents"] = _unrouted(value["unrouted_agents"])
     return value
 

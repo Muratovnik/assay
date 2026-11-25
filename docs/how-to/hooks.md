@@ -796,7 +796,11 @@ a message that names the rename when the data directory still holds only the old
 `routing-telemetry.json`, or when `ASSAY_ROUTING_TELEMETRY_CONFIG` is set, and
 with a message that lists the keys to remove when the configuration is written for
 an older schema or an object-form `pipeline.unrouted_agents`, which is now a list
-of agent types only. The same configuration refuses recognized launches at run time.
+of agent types only. An invalid `pipeline` value, such as `explicit_routes: "sometimes"`, an
+`inventory_ttl_hours` out of range, a malformed `unrouted_agents` list, a `host` field
+outside its contract or a misspelt key, gets a message naming the key and what it
+accepts, never the value. The same configuration refuses recognized launches at run
+time with the same message, and session start adds it to the routing checklist.
 [Upgrade from 0.28](../../skills/route-subagents/references/route-table.md#upgrade-from-028)
 lists the steps, including the removed hook options, and
 [Upgrade from 0.29](../../skills/route-subagents/references/route-table.md#upgrade-from-029)

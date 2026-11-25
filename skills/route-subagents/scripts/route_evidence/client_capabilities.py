@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 
 from .core import EvidenceError
-from .pipeline_config import EFFORT_ORDER
+from .pipeline_config import EFFORT_ORDER, invalid
 
 CHECKED_AT = "2026-09-29"
 # Claude's subagent precedence and per-call effort were rechecked separately.
@@ -36,22 +36,27 @@ def host_effort_levels(client):
     return HOST_EFFORT_LEVELS.get(client, ())
 
 
+SURFACES = ("cli", "desktop", "ide", "sdk", "unknown")
+AGENT_SCOPES = ("user", "project", "plugin", "additional", "cli", "unknown")
+
+
 def host_settings(raw=None):
-    value = {"version": None, "surface": "unknown", "provider": "unknown", "agent_scope": "unknown"}
+    """The declared `pipeline.host` facts; a value outside the contract is refused naming its key."""
+    value ={"version": None, "surface": "unknown", "provider": "unknown", "agent_scope": "unknown"}
     if raw is None:
         return value
     if not isinstance(raw, dict) or set(raw) - set(value):
-        raise EvidenceError("invalid_client_host_contract")
+        raise invalid("host", "an object with only " + ", ".join(value) + " or null")
     value.update(raw)
     if value["version"] is not None and (not isinstance(value["version"], str) or len(value["version"]) > 80):
-        raise EvidenceError("invalid_client_version")
-    if value["surface"] not in {"cli", "desktop", "ide", "sdk", "unknown"}:
-        raise EvidenceError("invalid_client_surface")
-    if value["agent_scope"] not in {"user", "project", "plugin", "additional", "cli", "unknown"}:
-        raise EvidenceError("invalid_agent_scope")
+        raise invalid("host.version", "a string of at most 80 characters or null")
+    if value["surface"] not in SURFACES:
+        raise invalid("host.surface", "one of " + ", ".join(SURFACES))
+    if value["agent_scope"] not in AGENT_SCOPES:
+        raise invalid("host.agent_scope", "one of " + ", ".join(AGENT_SCOPES))
     provider = value["provider"]
     if not isinstance(provider, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", provider):
-        raise EvidenceError("invalid_client_provider")
+        raise invalid("host.provider", "a lowercase name of up to 64 letters, digits, _ or -, starting with a letter")
     return value
 
 
