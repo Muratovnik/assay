@@ -3,8 +3,9 @@ full-read claim and at the sources of a question to the owner.
 
 Four notes, none a block, all stated as facts:
 
-- After a WebFetch, once per request and agent: the result is an answer a
-  model wrote about the page, not the page's text.
+- After a WebFetch, once per request and agent: the result is usually an answer
+  a model wrote about the page, not the page's text, unless the site returned
+  the page itself, as some documentation sites do.
 - After a WebFetch result that Claude Code says covers only part of a long page,
   once per request, agent and page: the page's length, the part read and the
   address of its Markdown to download and search instead.
@@ -72,9 +73,10 @@ CUT = re.compile(r"\[WebFetch note: this page's text is (\d{1,12}) characters lo
 MAX_CUT_TAIL = 2_000
 MAX_URL = 2_048
 
-FETCH_NOTE = ("Assay source check: a WebFetch result is a model's answer to the fetch prompt about the page, "
-              "not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
-              "come back as a summary of that page. A conclusion that rests on the fetch summary is stated "
+FETCH_NOTE = ("Assay source check: a WebFetch result is usually a model's answer to the fetch prompt about the "
+              "page, not the page's text. Its quotes are short and paraphrased, and a blocked or challenge page can "
+              "come back as a summary of that page. Some documentation sites return the page itself; such a result "
+              "is the page's text and needs no download. A conclusion that rests on the fetch summary is stated "
               "as resting on it. Retrieve the page's text with a shell download, and read it at the part the "
               "conclusion depends on, when that conclusion depends on exact wording, a number, a table or code "
               "the summary may have distorted or dropped, or when the page is long; a narrow fact the summary "
@@ -485,7 +487,8 @@ def contradicted(claims, reads, fetched_urls, shell):
         for url in fetched_urls:
             handle = _handle(url)
             if (url in line or handle in line) and not any(handle in command for command in shell):
-                found.append(f"{url}: opened only through WebFetch, whose result is a model's summary")
+                found.append(f"{url}: opened only through WebFetch, whose result is a model's summary unless "
+                             "the site returned the page itself")
     return list(dict.fromkeys(found))[:MAX_CLAIMS]
 
 

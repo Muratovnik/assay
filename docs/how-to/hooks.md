@@ -319,15 +319,19 @@ paragraph can make a choice.
 
 ### Source checks in Claude Code
 
-A `WebFetch` result is not the page. Claude Code hands the page to a model with the
-fetch prompt and returns that model's answer, with short paraphrased quotes, and a
-blocked or challenge page can come back as a summary of the block. In a measured
+A `WebFetch` result is usually not the page. For most pages Claude Code hands the
+page to a model with the fetch prompt and returns that model's answer, with short
+paraphrased quotes, and a blocked or challenge page can come back as a summary of
+the block. Some documentation sites, such as Claude Code's own, return the page's
+text itself, whatever the prompt asks. In a measured
 run an agent made seven such fetches of one study, got a challenge page, a 403 and
 a 404, and answered from a news article and the abstract; with a shell download
 of the same page it found the table the answer depended on.
 
 After the first `WebFetch` result of a request, the `PostToolUse` hook adds a note
-saying so. A conclusion that rests on the fetch summary is always stated as resting
+saying so; a result that is the page itself is the page's text and needs no
+download. The hook does not tell the two apart, so the note leaves that judgement
+to the agent. A conclusion that rests on the fetch summary is always stated as resting
 on it. The page's text is downloaded with a shell command and read where the
 conclusion depends on it only when that conclusion depends on exact wording, a
 number, a table or code the summary may have distorted or dropped, or when the page
@@ -370,7 +374,9 @@ At `Stop` and `SubagentStop` the hook reads the same transcript tail as the skil
 gate. When a line of the turn says a file or URL was read in full (`in full`,
 `entire`, `end to end`, `целиком`, `полностью` and similar) and names a file
 whose `Read` calls returned only part of it, or a URL opened only through
-`WebFetch`, the turn continues once with feedback naming what was read. The answer
+`WebFetch`, the turn continues once with feedback naming what was read. For a URL
+the feedback says that the claim holds only if the site returned the page itself.
+The answer
 stands, and one line saying what was actually read is enough when nothing else
 changes: unlike the gate's closing words, that line corrects a claim.
 

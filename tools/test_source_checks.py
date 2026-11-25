@@ -87,6 +87,10 @@ class SourceCheckTests(unittest.TestCase):
     def test_the_first_fetch_of_a_request_gets_the_note_and_later_fetches_do_not(self):
         text = self.feedback(self.fetch(), "PostToolUse")
         self.assertIn("not the page's text", text)
+        # Some documentation sites return the page itself, which no download improves on.
+        self.assertIn("a WebFetch result is usually a model's answer", text)
+        self.assertIn("Some documentation sites return the page itself; such a result is the page's text and needs "
+                      "no download.", text)
         # The label is unconditional; the download is asked for only on its stated condition.
         self.assertIn("A conclusion that rests on the fetch summary is stated as resting on it.", text)
         self.assertIn("shell download", text)
@@ -299,6 +303,8 @@ class SourceCheckTests(unittest.TestCase):
         fetch = [tool("WebFetch", {"url": PAGE, "prompt": "Quote"}, "w1"), returned("w1", "A summary of the page")]
         text = self.feedback(self.stop(prompt(), fetch, said("I read PMC12042776 in full; Claude was not significant.")))
         self.assertIn(PAGE + ": opened only through WebFetch", text)
+        # A site that returns the page itself makes the claim true, so the objection leaves that open.
+        self.assertIn("whose result is a model's summary unless the site returned the page itself", text)
         downloaded = [tool("Bash", {"command": f"curl -sL -A Mozilla {PAGE} -o page.html"}, "b1"), returned("b1", "")]
         self.assertEqual({}, self.stop(prompt(), fetch, downloaded, said("I read PMC12042776 in full.")))
 
