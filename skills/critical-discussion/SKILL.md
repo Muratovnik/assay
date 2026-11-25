@@ -45,7 +45,9 @@ holds, do it"), finish the discussion first and then do only what was asked.
    not a claim from memory. "This was written for nothing" requires a found
    replacement, coverage of the supported paths, migration cost and new
    obligations; otherwise it is a hypothesis with what needs checking.
-   "Could be replaced" is not "should be replaced".
+   "Could be replaced" is not "should be replaced". The comparison goes into
+   the answer only when it found a material weakness or the user is choosing
+   between approaches; otherwise it is part of what was checked.
 4. **Material sides, no quotas.** Choose the considerations that matter for
    this kind of artifact and name important ones not yet discussed. Counts of
    objections, alternatives or questions are not a measure of rigor. A small
@@ -89,9 +91,11 @@ Read only what the discussion needs. These are tools, not a checklist to run.
 
 A useful default shape is: **understood the need as / what was examined /
 main points, most consequential first / alternatives including doing nothing
-and existing solutions / verdict, its confidence and what would change it /
-the decisive question, if any**. Adapt it to the conversation; a one-line
-question deserves a short answer.
+and existing solutions, only when a material weakness was found or the user is
+choosing between approaches / verdict, its confidence and what would change it
+/ the decisive question, if any**. A sound idea gets no alternatives section:
+say it holds and what was checked. Adapt the shape to the conversation; a
+one-line question deserves a short answer.
 
 Keep the recovered need and agreed decisions across turns. Do not reopen an
 agreed decision without new evidence.
