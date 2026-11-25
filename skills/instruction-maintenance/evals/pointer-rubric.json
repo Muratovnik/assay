@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "skill_name": "instruction-maintenance",
+  "dimensions": [
+    "decision_correctness",
+    "evidence_fidelity",
+    "authorized_effects",
+    "final_delivery",
+    "unnecessary_work"
+  ],
+  "cases": [
+    {
+      "id": "PP01",
+      "trace": "Records whether technical-writing/references/preservation.md was read and whether text_check.py preserve ran on the old and new AGENTS.md, and in which mode.",
+      "required": [
+        "Every code span and link destination of the input survives byte-exact: `schemas/ingest/v3/`, `make collector`, `make check`, `tools/lint/run_all.py`, `make check-integration`, `collector/exporters/`, `collector/buffer/`, `tools/release/sign_bundle.py --keep-journal`, `buffer.flush_ms`, `config/defaults.toml`, `docs/operations/secrets.md#variables`, `/var/lib/lantern/spool/`, `docs/runbooks/restore-drill.md#verify-the-copy`.",
+        "Keeps every rule with its qualifiers: change only through their owners; before every commit; the integration condition on `collector/exporters/` or `collector/buffer/`; the only signing command; never uploads; do not delete the journal after signing; between 200 and 5000; never outside that range, even in a test fixture; secrets only from the listed variables; no fallback default; all three conjuncts of the spool rule; drills exactly, and a drill without the checksum step does not count; the three reporting rules and the length rule.",
+        "Either reaches about a third shorter by cutting explanation and history only, or reports the measured size, the gap and the rules that a deeper cut would drop.",
+        "Reports how retention was checked; a word count alone is not verification."
+      ],
+      "reject": [
+        "Shortens, merges or re-spells any listed identifier, for example `tools/release/sign_bundle.py` without `--keep-journal` or a link without its anchor.",
+        "Drops the journal prohibition as if it were rationale, a conjunct of the spool rule, 'only', 'never', 'exactly' or 'even in a test fixture'.",
+        "Claims structural or rule preservation that the delivered file contradicts."
+      ],
+      "verification": [
+        {
+          "operation": "Run `python <technical-writing>/scripts/text_check.py preserve --before <input AGENTS.md> --after <delivered AGENTS.md> --mode rewrite --json`.",
+          "observation": "inline_code and link_destination pass, or every failing region is one the report names as a deliberate removal."
+        },
+        {
+          "operation": "Search the delivered AGENTS.md for each qualifier of the second required item.",
+          "observation": "Each is present and attached to its rule."
+        }
+      ],
+      "assessment_note": "Condition met: a compression. The candidate should send the executor to the structural check; the trap is a prohibition hidden in an explanatory sentence and long identifiers that invite shortening."
+    },
+    {
+      "id": "PP02",
+      "trace": "Records whether preservation.md was read and whether text_check.py preserve ran, with both old files as the before side.",
+      "required": [
+        "Deletes docs/AGENTS.md and puts its rules into the root AGENTS.md under a statement that they apply only to files under `docs/`.",
+        "Keeps `npm run lint:docs`, `npm run lint`, `npm run links -- --offline`, `npm run docs:api`, `npm test`, `npm run build` and `dist/` byte-exact and distinct; the root rules stay unchanged.",
+        "Re-bases each relative destination so it resolves from the root: `docs/assets/README.md`, `CONTRIBUTING.md#screenshots` and `docs/reference/api.md`; `docs/release.md#notes` stays as it is.",
+        "Reports the re-based destinations as deliberate changes and that each target exists."
+      ],
+      "reject": [
+        "Copies `assets/README.md`, `../CONTRIBUTING.md#screenshots` or `reference/api.md` unchanged into the root file, where they no longer resolve.",
+        "Drops the docs-only scope, so the Markdown rules bind the whole repository.",
+        "Folds `npm run lint:docs` into `npm run lint` or drops `-- --offline`."
+      ],
+      "verification": [
+        {
+          "operation": "Resolve every relative link and path code span of the delivered root AGENTS.md against the packet's files.",
+          "observation": "Each resolves to an existing file and anchor heading."
+        },
+        {
+          "operation": "Run the structural check in rewrite mode with the two input files joined as the before side and the delivered AGENTS.md as the after side.",
+          "observation": "link_destination and inline_code fail only on the re-based destinations and on a scope span the merge added, and the report names them; a link_destination pass means the relative links were copied unchanged."
+        }
+      ],
+      "assessment_note": "Condition met: a merge. The reference's link-resolution section is what decides the re-basing; byte equality alone would keep the broken links."
+    },
+    {
+      "id": "PP03",
+      "trace": "Records whether preservation.md was read and whether text_check.py preserve ran with the old AGENTS.md as before and the new AGENTS.md with the skill file as after.",
+      "required": [
+        "Moves the four release steps into skills/release/SKILL.md with `make test`, `make audit`, `tools/bump.py --part minor`, `make dist SIGN=1`, `tools/verify_dist.py dist/harbor-*.tar.gz` and `v<version>` byte-exact and their qualifiers intact: stop on any failure; unless the owner names another part; push the tag only after the owner confirms.",
+        "Keeps 'Only the release owner publishes' in one of the two files.",
+        "Leaves the Always section unchanged and one line in AGENTS.md that names the situation (a release is requested) and the skill file.",
+        "If the rollback sentence moves, its link becomes `../../docs/archive.md#restore`; if it stays, `docs/archive.md#restore` is unchanged."
+      ],
+      "reject": [
+        "Changes a command, flag or glob while moving it.",
+        "Leaves a pointer that names only the file and not when to read it.",
+        "Leaves `docs/archive.md#restore` unchanged inside skills/release/SKILL.md, where it no longer resolves."
+      ],
+      "verification": [
+        {
+          "operation": "Compare the multiset of code spans of the input AGENTS.md with that of the delivered AGENTS.md and skills/release/SKILL.md together, minus the stub's own.",
+          "observation": "They are equal, except the re-based archive link and a path span the pointer line adds."
+        }
+      ],
+      "assessment_note": "Condition met: a move. The trap is a relative link that stops resolving in its new directory."
+    },
+    {
+      "id": "PP04",
+      "trace": "Records whether preservation.md was read or text_check.py preserve ran; neither is expected.",
+      "required": [
+        "Adds one rule that keeps 'only', the exact command `tools/logs.py prune --older-than 30d` and 'never on a host that is in an incident'.",
+        "Leaves the rest of AGENTS.md byte-identical."
+      ],
+      "reject": [
+        "Runs the structural check, reads the preservation reference or reports a rule inventory for this addition.",
+        "Rewrites the existing rules."
+      ],
+      "verification": [
+        {
+          "operation": "Diff the delivered AGENTS.md against the input.",
+          "observation": "Only added lines differ."
+        }
+      ],
+      "assessment_note": "Should not fire: an addition removes nothing, so the check can only pass and costs a step."
+    },
+    {
+      "id": "PP05",
+      "trace": "Records whether preservation.md was read or text_check.py preserve ran; neither is expected.",
+      "required": [
+        "Replaces both `scripts/sync.sh` with `tools/sync.sh`, keeping `--dry-run`, `--apply` and 'never run `--apply` while a backup is running'.",
+        "Leaves the rest of AGENTS.md byte-identical."
+      ],
+      "reject": [
+        "Runs the structural check, reads the preservation reference or reports a rule inventory for this correction.",
+        "Changes the mirror rule or the flags."
+      ],
+      "verification": [
+        {
+          "operation": "Diff the delivered AGENTS.md against the input.",
+          "observation": "Only the two path spans differ."
+        }
+      ],
+      "assessment_note": "Should not fire: a single local correction whose old and new text are both in view."
+    }
+  ]
+}

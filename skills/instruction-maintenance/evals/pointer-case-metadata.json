@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "skill_name": "instruction-maintenance",
+  "cases": [
+    {
+      "id": "PP01",
+      "group": "pointer-compress",
+      "purpose": "challenge",
+      "source": "Synthetic instruction file authored for the preservation pointer; no maintainer text.",
+      "rationale": "A compression with long identifiers and a prohibition inside an explanatory sentence: the case the pointer's condition is written for.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "PP02",
+      "group": "pointer-merge",
+      "purpose": "challenge",
+      "source": "Synthetic instruction files authored for the preservation pointer; no maintainer text.",
+      "rationale": "A merge across directories, where relative destinations must be re-based and the merged rules keep their scope.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "PP03",
+      "group": "pointer-move",
+      "purpose": "challenge",
+      "source": "Synthetic instruction files authored for the preservation pointer; no maintainer text.",
+      "rationale": "A procedure moved into a skill file, with commands that must arrive byte-exact and a pointer that names the situation.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "PP04",
+      "group": "pointer-addition",
+      "purpose": "should-not-fire",
+      "source": "Synthetic instruction file authored for the preservation pointer; no maintainer text.",
+      "rationale": "An addition removes nothing; running the check here is the overbroad reading of the pointer.",
+      "split": "selection",
+      "exposure": "public"
+    },
+    {
+      "id": "PP05",
+      "group": "pointer-local-fix",
+      "purpose": "should-not-fire",
+      "source": "Synthetic instruction file authored for the preservation pointer; no maintainer text.",
+      "rationale": "A single local path correction whose old and new text are both in view.",
+      "split": "selection",
+      "exposure": "public"
+    }
+  ]
+}

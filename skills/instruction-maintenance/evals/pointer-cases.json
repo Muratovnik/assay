@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "skill_name": "instruction-maintenance",
+  "cases": [
+    {
+      "id": "PP01",
+      "prompt": "AGENTS.md разросся. Сократи его примерно на треть, правила сохрани.",
+      "files": {
+        "AGENTS.md": "# Lantern collector instructions\n\n## Scope\n\nThis repository builds the Lantern telemetry collector. It does not own the\ningest schema (`schemas/ingest/v3/`), the dashboards or the alert routes; those\nlive in their own repositories and change only through their owners. Over the\nyears several people have tried to patch the schema from here, and every one of\nthose patches had to be reverted, which is why this boundary is written down.\n\n## Build and check\n\nBuild with `make collector`. Before every commit run `make check`, which runs\n`tools/lint/run_all.py` and the unit suite. Run `make check-integration` as well\nwhen a change touches `collector/exporters/` or `collector/buffer/`. The\nintegration suite is slow, which is the only reason it is not part of\n`make check`; skipping it for an unrelated change is expected.\n\n`tools/release/sign_bundle.py --keep-journal` is the only command that signs a\nrelease bundle. It never uploads anything: uploading is the release owner's\nstep. The journal it keeps is what the release owner reads to confirm which\nbundle was signed, so do not delete it after signing.\n\n## Configuration\n\nThe flush interval is `buffer.flush_ms` in `config/defaults.toml` and must stay\nbetween 200 and 5000. Never commit a value outside that range, even in a test\nfixture, because the loader clamps it silently and the test then checks a value\nthe collector never uses.\n\nSecrets come only from the environment variables listed in\n[the secrets table](docs/operations/secrets.md#variables). Do not add a\nfallback default for any of them. A fallback once shipped a development token\nto production, and nobody noticed for a week.\n\n## Data safety\n\nNever delete a spool directory under `/var/lib/lantern/spool/` without a\ndrained queue, a verified backup and the on-call engineer's approval.\n\nRestore drills follow\n[the drill runbook](docs/runbooks/restore-drill.md#verify-the-copy) exactly; a\ndrill that skips the checksum step does not count.\n\n## Reporting\n\nLead with the result or the exact blocker. Separate confirmed facts from\nhypotheses. Name every command you ran with its exit code. Long reports are\nharder to review, so keep them as short as the facts allow.\n",
+        "docs/operations/secrets.md": "# Secrets\n\n## Variables\n\n| Variable | Purpose |\n| --- | --- |\n| `LANTERN_TOKEN` | Ingest token |\n",
+        "docs/runbooks/restore-drill.md": "# Restore drill\n\n## Verify the copy\n\nCompare the checksum of every restored segment with the manifest.\n",
+        "Makefile": "collector:\n\tgo build ./collector/...\n\ncheck:\n\tpython tools/lint/run_all.py && go test ./...\n\ncheck-integration:\n\tgo test -tags integration ./...\n"
+      }
+    },
+    {
+      "id": "PP02",
+      "prompt": "Merge docs/AGENTS.md into the root AGENTS.md and delete docs/AGENTS.md. Its rules still apply only to files under docs/.",
+      "files": {
+        "AGENTS.md": "# Atlas instructions\n\nRun `npm run lint` and `npm test` before every commit. Never commit generated\nfiles under `dist/`; rebuild them with `npm run build`.\n\nRelease notes follow [the release guide](docs/release.md#notes).\n",
+        "docs/AGENTS.md": "# Documentation instructions\n\nThese rules apply to files under this directory.\n\nRun `npm run lint:docs` before committing a page; `npm run lint` does not check\nMarkdown. Check links with `npm run links -- --offline`.\n\nEvery page states its audience in its first paragraph. Screenshots live in\n[the assets folder](assets/README.md) and follow\n[the screenshot rules](../CONTRIBUTING.md#screenshots). Never edit\n`reference/api.md` by hand; `npm run docs:api` generates it.\n",
+        "docs/release.md": "# Release\n\n## Notes\n\nGroup the notes by user-visible change.\n",
+        "docs/assets/README.md": "# Assets\n\nPNG only, at most 1600 pixels wide.\n",
+        "docs/reference/api.md": "# API reference\n\nGenerated file.\n",
+        "CONTRIBUTING.md": "# Contributing\n\n## Screenshots\n\nCrop to the window and hide personal data.\n",
+        "package.json": "{\n  \"scripts\": {\n    \"lint\": \"eslint src\",\n    \"lint:docs\": \"markdownlint docs\",\n    \"links\": \"lychee docs\",\n    \"docs:api\": \"node tools/api-docs.js\",\n    \"build\": \"vite build\",\n    \"test\": \"vitest run\"\n  }\n}\n"
+      }
+    },
+    {
+      "id": "PP03",
+      "prompt": "Перенеси порядок выпуска из AGENTS.md в skills/release/SKILL.md, а в AGENTS.md оставь одну строку о том, когда его читать.",
+      "files": {
+        "AGENTS.md": "# Harbor instructions\n\n## Always\n\nNever push to `main` directly; open a pull request. Keep commits small and\ntested with `make test`.\n\n## Release\n\nOnly the release owner publishes. When a release is requested:\n\n1. Run `make test` and `make audit`; stop on any failure.\n2. Bump the version with `tools/bump.py --part minor` unless the owner names\n   another part.\n3. Build with `make dist SIGN=1` and check the archive with\n   `tools/verify_dist.py dist/harbor-*.tar.gz`.\n4. Tag `v<version>` and push the tag only after the owner confirms.\n\nA rollback deletes the tag and restores the previous archive from\n[the archive index](docs/archive.md#restore).\n",
+        "skills/release/SKILL.md": "---\nname: release\ndescription: Publish a Harbor release. Use when the owner asks for a release; skip ordinary commits.\n---\n\n# Release\n",
+        "docs/archive.md": "# Archive\n\n## Restore\n\nCopy the previous archive back from the index.\n"
+      }
+    },
+    {
+      "id": "PP04",
+      "prompt": "Add a rule to AGENTS.md: only `tools/logs.py prune --older-than 30d` may delete logs, and never on a host that is in an incident.",
+      "files": {
+        "AGENTS.md": "# Beacon instructions\n\nRun `make check` before every commit. Logs live under `/var/log/beacon/`;\nread them with `tools/logs.py tail`.\n\nNever restart a host during an incident without the incident lead's approval.\n",
+        "tools/logs.py": "\"\"\"Log helper: tail and prune.\"\"\"\n"
+      }
+    },
+    {
+      "id": "PP05",
+      "prompt": "В AGENTS.md поправь устаревший путь: `scripts/sync.sh` переехал в `tools/sync.sh`.",
+      "files": {
+        "AGENTS.md": "# Mirror instructions\n\nRun `scripts/sync.sh --dry-run` before `scripts/sync.sh --apply`, and never run\n`--apply` while a backup is running.\n\nKeep the mirror list in `config/mirrors.toml` sorted by name.\n",
+        "tools/sync.sh": "#!/bin/sh\n# Syncs the mirrors; --dry-run prints the plan, --apply runs it.\n",
+        "config/mirrors.toml": "[[mirror]]\nname = \"alpha\"\n"
+      }
+    }
+  ]
+}

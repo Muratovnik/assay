@@ -39,10 +39,13 @@ decision.
 2. **Preserve meaning, not wording.** "Only when" is not "when"; permission is
    not obligation. Dropping one conjunct from "never X without A, B and C" makes
    the rule permissive; dropping a trigger makes it overbroad. Keep paths,
-   commands, setting names and anchors byte-exact. The qualifier rules and the
-   structural check for code spans and links belong to technical writing's
-   [preservation](../technical-writing/references/preservation.md); it does not
-   read prose qualifiers, so the inventory still decides.
+   commands, setting names and anchors byte-exact. After compressing, merging or
+   moving text, run the structural check in technical writing's
+   [preservation](../technical-writing/references/preservation.md) on the old
+   and new text in rewrite mode: it lists the code spans and link destinations
+   that changed or went missing. It does not read prose qualifiers, so the
+   inventory still decides. An addition or a single local correction needs no
+   run.
 3. **A size target yields to retention.** When the target cannot be reached
    without losing a rule, do not cut silently. Report the gap and the rules that
    would have to go, or relocate a conditional procedure to a document that is

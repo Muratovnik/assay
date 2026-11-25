@@ -2,8 +2,8 @@
 
 Use when an existing document is being copyedited or rewritten and the question
 is whether the edit stayed inside the area it was allowed to touch. This is a
-structural check, not a judgement about meaning, and it is optional: read the
-document and the edit first.
+structural check, not a judgement about meaning: read the document and the edit
+first. It is optional unless the task or the method you follow asks for it.
 
 ## Contents
 
