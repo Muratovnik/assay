@@ -39,7 +39,9 @@ quoted vendor guidance, and the reasons to doubt either of them.
 
 Ask **once per plan**, listing every task type you are about to staff. Shared
 parts — inventory, sources, warnings — are returned once, and each task type
-gets its own comparisons. Call again for a new class of work, a changed
+gets its own comparisons. In a normal response, a task's `supporting_comparisons`
+or `unmeasured` that repeats an earlier task's exactly reads
+`{"same_as": "<that task type>"}`; `details=true` keeps every copy. Call again for a new class of work, a changed
 inventory, expired evidence, or when compaction dropped the content; a snapshot
 identifier does not replace facts the session can no longer see.
 

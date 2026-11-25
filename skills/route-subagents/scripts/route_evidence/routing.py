@@ -336,6 +336,9 @@ def guidance_block(views, scope, available):
                      "guidance cannot justify advice for candidates outside matched_models.")}
 
 
+SHARED_TASK_BLOCKS = ("supporting_comparisons", "unmeasured")
+
+
 def brief(result: dict) -> dict:
     """Drop raw rows and snapshots. Candidates, gaps and limits are never truncated."""
     result = copy.deepcopy(result)
@@ -354,4 +357,15 @@ def brief(result: dict) -> dict:
     for task in result.get("tasks", []):
         for comparison in task["primary_comparisons"] + task["supporting_comparisons"]:
             comparison.pop("observations", None)
+    # Task types with one supporting source, or one primary gap, would print the same
+    # block again: a later task points at the first task that printed it.
+    printed = {field: [] for field in SHARED_TASK_BLOCKS}
+    for task in result.get("tasks", []):
+        for field in SHARED_TASK_BLOCKS:
+            value = task[field]
+            first = next((name for name, earlier in printed[field] if earlier == value), None) if value else None
+            if first is None:
+                printed[field].append((task["task_type"], value))
+            else:
+                task[field] = {"same_as": first}
     return result

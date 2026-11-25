@@ -141,6 +141,27 @@ class ReviewRegressionTests(unittest.TestCase):
         self.assertEqual(len(summary["tasks"][0]["unmeasured"]), 3)
         self.assertEqual(cohort(summary)["missing_candidates"], cohort(result)["missing_candidates"])
 
+    def test_brief_prints_a_block_two_task_types_share_once(self):
+        # Implementation and investigation share the supporting source, and both miss
+        # economy-b in a primary table; terminal shares neither.
+        support = view("cursorbench", [row(), row("economy-b", "max", .79, 2)])
+        result = build_context(two_config_request("implementation", "investigation", "terminal"),
+                               [view(), frontier_pair(), support, view("swe-atlas-qna")])
+        summary = brief(result)
+        implementation, investigation, terminal = summary["tasks"]
+        printed = [{k: v for k, v in c.items() if k != "observations"}
+                   for c in result["tasks"][0]["supporting_comparisons"]]
+        self.assertEqual(implementation["supporting_comparisons"], printed)
+        self.assertEqual(implementation["unmeasured"], [{"model": "economy-b", "effort": "max"}])
+        self.assertEqual(investigation["supporting_comparisons"], {"same_as": "implementation"})
+        self.assertEqual(investigation["unmeasured"], {"same_as": "implementation"})
+        self.assertEqual([c["source_id"] for c in investigation["primary_comparisons"]], ["swe-atlas-qna"])
+        # A block that differs, or an empty one, is printed where it stands.
+        self.assertEqual(terminal["supporting_comparisons"], [])
+        self.assertEqual(len(terminal["unmeasured"]), 2)
+        # The full context keeps every task's own copy.
+        self.assertEqual(result["tasks"][1]["unmeasured"], [{"model": "economy-b", "effort": "max"}])
+
     def test_inputs_are_not_mutated(self):
         snapshot = data()
         before = copy.deepcopy(snapshot)
