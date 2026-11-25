@@ -151,4 +151,9 @@ release note or tracked file.
 Never push unless explicitly asked. Before a live install or an upgrade, capture
 the existing target bytes and link destinations outside the managed roots: an
 upgrade removes with the old revision and installs with the new one, and rollback
-restores that external snapshot.
+restores that external snapshot. Copy an installed tree that came from a
+revision of this repository, such as a plugin cache, by that revision's file
+list with `python -B tools/manifest_copy.py --revision <tag or commit> --source
+<tree> --output <new directory>`, never the whole directory: a cache can hold a
+nested `.git`, and one that points at a checkout holds its ignored evidence and
+earlier snapshots. The copy records every path it leaves out.
