@@ -2,8 +2,8 @@
 
 Maintainer material for one change to the per-request skill check, not runtime
 instructions or a run report. It records what an earlier measurement showed,
-the candidate and the plan of the paired run that will test it. The run has not
-started.
+the candidate and the plan of the paired run that tested it. Its outcome closes
+the document.
 
 ## Decision and gap
 
@@ -161,3 +161,48 @@ grade the answers, so a loaded skill that still answers from memory counts as
 loaded. One control does not measure the over-firing rate on other prompts. P1
 informed the candidate, so its pass is tuning evidence; P2 is the only reserved
 case.
+
+## Run outcome
+
+The run took place on 2026-11-26 with Claude Code 2.1.332 as designed above:
+18 sessions in the fixed order, all complete, none cut or replaced.
+
+- Configuration: the user's configuration of the earlier measurement, with one
+  built-in plugin that the newer client adds. No cost limit reached the client.
+  The settings, the installed Assay entry and the host's installed hooks and
+  services were unchanged from before the first session to after the last.
+- Proof of the arm passed in all 18 runs. Init listed one `assay` plugin, at its
+  arm's tree, and every plugin of the earlier measurement. The context held
+  exactly one skill check, carrying its arm's cue. The tree's digest was
+  unchanged, and the transcript had no budget attachment.
+- Model: Opus 5.5 at low effort on the main thread of every session, read from
+  init, usage and transcript. No other model ran.
+- Cost: $3.39 in total from the run's own reports, $0.16 to $0.25 per session.
+
+Every session answered in one turn and called no tool. No session loaded or
+named a skill, made a web call or met an Assay note.
+
+| Prompt | Arm | Complete pairs | L | L after a note | Named in the opening | W | P3 clean |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| P1 | baseline | 3 | 0 | 0 | 0 | 0 | — |
+| P1 | candidate | 3 | 0 | 0 | 0 | 0 | — |
+| P2 | baseline | 3 | 0 | 0 | 0 | 0 | — |
+| P2 | candidate | 3 | 0 | 0 | 0 | 0 | — |
+| P3 | baseline | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
+| P3 | candidate | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
+
+Named in thinking could not be counted. The client wrote all 17 thinking blocks
+of the run without their text, keeping only a signature, so that count is
+unknown rather than zero.
+
+Not graded, for context only: all six P1 answers say they rest on the model's
+own knowledge, and five of them add that the documentation was not checked. No
+answer mentions a budget. The P2 answers carry no such note.
+
+Verdict, by the rules above: **no effect**. Over complete pairs, all 3 P3 pairs
+and all 6 must-fire pairs, candidate L is 0 against a baseline of 0. The cue is
+rejected for this model and effort, and the candidate is not merged. The next
+suspect is that the check leaves the decision optional; another paraphrase of
+the cue is not the next step. Without a visible cost limit the baseline still
+answered from memory in every must-fire run, so for these prompts the limit
+does not explain the earlier result.
