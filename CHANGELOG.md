@@ -7,6 +7,28 @@ Sections and entry format follow
 [`conventional-changelog-angular`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular);
 every entry links to the commit that introduced it.
 
+## [0.51.1](https://github.com/Muratovnik/assay/compare/v0.51.0...v0.51.1) (2026-11-26)
+
+Three skills each tighten one instruction: `critical-discussion` leaves the
+alternatives out of the answer when an idea holds, `instruction-maintenance` runs
+the preservation check after it compresses, merges or moves text, and
+`test-writing` states its two checks for collected elements in the skill file.
+Two statements in the 0.51.0 notes were wrong when published: the paired pilot
+of the `test-writing` change had already run, and showed no effect, and the
+`skill-evaluation` change had a comparable run, which showed no difference and no
+regression. Both results are recorded in the skills' evaluation notes.
+
+### Bug Fixes
+
+* **critical-discussion:** the answer gives alternatives, doing nothing and existing solutions included, only when the discussion found a material weakness or the user is choosing between approaches; a sound idea gets no alternatives section, only that it holds and what was checked. Before, the default answer shape always had that section, and on a sound idea every answer that followed it offered doing nothing as an option, and some called the idea doubtful. On a sound-idea case the section appeared in 2 of 6 answers with the change against 6 of 6 without it; neither text met the case's whole rubric, so the support is partial ([cd0d4c2](https://github.com/Muratovnik/assay/commit/cd0d4c27e0822ab95693bfb51b9e46689a1032b4))
+* **instruction-maintenance:** after compressing, merging or moving instruction text, the skill runs technical writing's structural preservation check on the old and new text in rewrite mode, which lists the code spans and link destinations that changed or went missing; an addition or a single local correction needs no run. The preservation reference says that the check is optional unless the task or the method being followed asks for it. In a paired pilot the changed text led to reading the reference or running the check in 6 of 9 runs against 0 of 9, and in none of 6 control runs; both texts kept the instructions' meaning in every run, so no gain in preserved meaning is shown ([975d47b](https://github.com/Muratovnik/assay/commit/975d47b07b8ad9cdce3e0f939ebda15f42babaef))
+* **test-writing:** the skill file itself says to pair a check that an element is absent with a control in which the same locator finds it present, and to assert a collected set's size against the fixture before asserting that all or none of it match, or its minimum or maximum. In 0.51.0 these rules were only in the boundary-choices reference, which no run of the pilot opened. In a repeat run every test written with the changed text failed when the element's role was removed, and every test written without it still passed; the set-size half showed no difference, since both texts asserted the size ([1712507](https://github.com/Muratovnik/assay/commit/1712507b593463d406f79c03da16bcb04513d43f))
+
+### Documentation
+
+* **release:** `AGENTS.md` says to check each statement a release entry makes about the state of the work, such as `not yet`, `has not run` or `pending`, against the current records before the release commit, since the commits the entry is written from describe the state at their own time ([57c3c1d](https://github.com/Muratovnik/assay/commit/57c3c1df54e3477cad82a41193effcee88963a7b))
+* **skill-evaluation:** the paired-pilot reference says that a tool can call a model of its own, as a web search does, and that its usage is attributed to the tool's calls before it is treated as an unnamed model. A cost limit passed to the client is shown to the subject, which can name it as its reason to skip a check, so the limit is enforced from the cost each run reports, or held equal across conditions and reported as visible. When the user's real configuration is the subject, the user's hooks record each run in the user's own memory and tracking services: the runs carry one identifier those services store, their sessions are listed, and they are removed with the user's permission when the runs end ([7680f41](https://github.com/Muratovnik/assay/commit/7680f417b456c2f19b24440000e323c1d3ff069a))
+
 ## [0.51.0](https://github.com/Muratovnik/assay/compare/v0.50.0...v0.51.0) (2026-11-25)
 
 The Claude Code hooks refuse the first question to the owner in a request once,
