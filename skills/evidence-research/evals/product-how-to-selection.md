@@ -63,7 +63,7 @@ Volume: 18 subject sessions on Opus 5.5 at low effort, named by every launch,
 and no judge. Starting the run needs the owner's agreement to this pair and
 volume.
 
-- Arms: baseline `7680f41`, the revision this branch starts from, whose skill
+- Arms: baseline `7680f41`, the revision the candidate branch started from, whose skill
   check equals 0.51.0's; candidate `3a4221f`, which changes the cue. Freeze each
   from `git archive` of its commit without `skills/*/evals`, and give the trees
   neutral names of equal length. Before the run, the diff of the two trees is
@@ -168,7 +168,9 @@ The run took place on 2026-11-26 with Claude Code 2.1.332 as designed above:
 18 sessions in the fixed order, all complete, none cut or replaced.
 
 - Configuration: the user's configuration of the earlier measurement, with one
-  built-in plugin that the newer client adds. No cost limit reached the client.
+  built-in plugin that the newer client adds and 33 tool servers instead of 10,
+  20 of them awaiting authorisation; both arms had the same set. No cost limit
+  reached the client.
   The settings, the installed Assay entry and the host's installed hooks and
   services were unchanged from before the first session to after the last.
 - Proof of the arm passed in all 18 runs. Init listed one `assay` plugin, at its
@@ -201,7 +203,9 @@ answer mentions a budget. The P2 answers carry no such note.
 
 Verdict, by the rules above: **no effect**. Over complete pairs, all 3 P3 pairs
 and all 6 must-fire pairs, candidate L is 0 against a baseline of 0. The cue is
-rejected for this model and effort, and the candidate is not merged. The next
+rejected for this model and effort, and the candidate is not merged: `3a4221f`
+stays off the main line, and the Candidate section above describes its change.
+The next
 suspect is that the check leaves the decision optional; another paraphrase of
 the cue is not the next step. Without a visible cost limit the baseline still
 answered from memory in every must-fire run, so for these prompts the limit
