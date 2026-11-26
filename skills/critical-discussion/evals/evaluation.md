@@ -243,7 +243,7 @@ behaviour on another model, effort or sound-idea case.
 
 ## Discovery by client
 
-Claude Code, 2026-11-25: D01-D14 three times each, 51 sessions at Sonnet low in
+Claude Code, 2026-11-25: D01-D14 three times each, 42 sessions at Sonnet low in
 a real user configuration (38 skills listed, the Skill and Read tools, one
 turn), observing the skill loaded in the first response. The method was loaded
 in 21 of 21 should-select runs, 15 of 15 Russian and 6 of 6 English, and in
