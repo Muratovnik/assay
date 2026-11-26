@@ -240,3 +240,23 @@ indicative. Both counts are at the ceiling, 6 of 6 with the skill and 3 of 3
 without, so the run cannot show whether the skill strengthens the habit, and
 it does not show whether a rule in the skill could suppress it, or the
 behaviour on another model, effort or sound-idea case.
+
+## Discovery by client
+
+Claude Code, 2026-11-25: D01-D14 three times each, 51 sessions at Sonnet low in
+a real user configuration (38 skills listed, the Skill and Read tools, one
+turn), observing the skill loaded in the first response. The method was loaded
+in 21 of 21 should-select runs, 15 of 15 Russian and 6 of 6 English, and in
+none of the 21 near-miss runs; D08 went to implementation-planning 3 of 3. One
+model and effort, first turn only; D12-D14 were written with the description
+they test, so they are selection cases, not held-out ones.
+
+Codex, 2026-11-26: one run of D08 on codex-cli 0.172.0 with gpt-6.2-sol at low
+effort, in a real user configuration with the collection installed as a plugin.
+The session read implementation-planning's `SKILL.md` and not this method's, a
+correct near miss. That one turn took 137,371 input tokens, 101,760 of them
+cached, over four model requests, and the other 13 cases were not run for that
+cost. The collection's plugin hooks did not reach the `codex exec` session, so
+the run tested the client's skill list alone. Selection of the method in Codex
+is not measured on any should-select case, and this evaluation stops there: a
+Codex claim needs a new run.
